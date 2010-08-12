@@ -329,10 +329,10 @@ public:
    * PHP source info functions.
    */
   void recordSourceInfo(const std::string &file, int line, LocationPtr loc);
-  void recordClassSource(const std::string &clsname,
-                         const std::string &filename);
-  void recordFunctionSource(const std::string &funcname,
-                            const std::string &filename);
+  void recordClassSource(const std::string &clsname, LocationPtr loc,
+                         const std::string filename);
+  void recordFunctionSource(const std::string &funcname, LocationPtr loc,
+                            const std::string filename);
 
   /**
    * Literal string to String precomputation
@@ -444,8 +444,8 @@ private:
                           int clusterCount);
 
   std::map<std::string, std::map<int, LocationPtr> > m_sourceInfos;
-  std::map<std::string, std::set<std::string> > m_clsNameMap;
-  std::map<std::string, std::set<std::string> > m_funcNameMap;
+  std::map<std::string, std::set<std::pair<std::string, int> > > m_clsNameMap;
+  std::map<std::string, std::set<std::pair<std::string, int> > > m_funcNameMap;
 
   std::map<std::string, int> m_stringLiterals;
 

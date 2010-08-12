@@ -175,7 +175,7 @@ DefineFunction(
       array(
         'name'   => "whence",
         'type'   => Int64,
-        'value'  => "SEEK_SET",
+        'value'  => "k_SEEK_SET",
         'desc'   => "whence values are: SEEK_SET - Set position equal to offset bytes. SEEK_CUR - Set position to current location plus offset. SEEK_END - Set position to end-of-file plus offset.",
       ),
     ),

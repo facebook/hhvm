@@ -57,8 +57,8 @@ public:
   /**
    * Which file contains this class/function's declaration.
    */
-  const char *getClassDeclaringFile(const char *name);
-  const char *getFunctionDeclaringFile(const char *name);
+  const char *getClassDeclaringFile(const char *name, int *line = NULL);
+  const char *getFunctionDeclaringFile(const char *name, int *line = NULL);
 
   static void SetHook(SourceInfoHook *hook) { s_hook = hook; }
 
@@ -68,13 +68,13 @@ private:
   int m_source_root_len;
 
   struct LocationInfo {
-    std::string file;
+    const char *file;
     int line;
   };
 
   typedef hphp_const_char_map<LocationInfo *> LocationMap;
   typedef hphp_const_char_map<std::vector<const char *> > NameMap;
-  typedef hphp_const_char_imap<std::vector<const char *> > INameMap;
+  typedef hphp_const_char_imap<std::vector<LocationInfo *> > INameMap;
 
   // "file:line" in C++ code => (file, line) in PHP code
   LocationMap m_cpp2php;
@@ -97,8 +97,10 @@ private:
 class SourceInfoHook {
 public:
   virtual ~SourceInfoHook() {}
-  virtual const char *getClassDeclaringFile(const char *name) = 0;
-  virtual const char *getFunctionDeclaringFile(const char *name) = 0;
+  virtual const char *getClassDeclaringFile(const char *name,
+                                            int *line = NULL) = 0;
+  virtual const char *getFunctionDeclaringFile(const char *name,
+                                               int *line = NULL) = 0;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

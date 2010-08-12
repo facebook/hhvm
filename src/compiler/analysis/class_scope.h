@@ -91,7 +91,7 @@ public:
   ClassScope(AnalysisResultPtr ar,
              const std::string &name, const std::string &parent,
              const std::vector<std::string> &bases,
-             const std::vector<FunctionScopePtr> &methods);
+             const FunctionScopePtrVec &methods);
 
   bool classNameCtor() const {
     return getAttribute(classNameConstructor);
@@ -358,6 +358,9 @@ protected:
   void findJumpTableMethods(CodeGenerator &cg, AnalysisResultPtr ar,
                             bool staticOnly, std::vector<const char *> &funcs);
 private:
+  // need to maintain declaration order for ClassInfo map
+  FunctionScopePtrVec m_functionsVec;
+
   FileScopeWeakPtr m_file;
   KindOf m_kindOf;
   std::string m_parent;

@@ -546,17 +546,21 @@ public:
   EvalSourceInfoHook() {
     SourceInfo::SetHook(this);
   }
-  virtual const char *getClassDeclaringFile(const char *name) {
+  virtual const char *getClassDeclaringFile(const char *name,
+                                            int *line = NULL) {
     const ClassStatement *f = RequestEvalState::findClass(name);
     if (f) {
+      if (line) *line = f->loc()->line1;
       return f->loc()->file;
     } else {
       return NULL;
     }
   }
-  virtual const char *getFunctionDeclaringFile(const char *name) {
+  virtual const char *getFunctionDeclaringFile(const char *name,
+                                               int *line = NULL) {
     const FunctionStatement *f = RequestEvalState::findUserFunction(name);
     if (f) {
+      if (line) *line = f->loc()->line1;
       return f->loc()->file;
     } else {
       return NULL;

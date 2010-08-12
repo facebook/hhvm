@@ -63,6 +63,8 @@ public:
   FunctionScope(bool method, const std::string &name, bool reference);
   void setParamCounts(AnalysisResultPtr ar, int minParam, int maxParam);
   void setParamName(int index, const std::string &name);
+  void setParamDefault(int index, const std::string &value,
+                       const std::string &text);
   void setRefParam(int index);
   void addModifier(int mod);
 
@@ -391,6 +393,7 @@ private:
   TypePtrVec m_paramTypes;
   TypePtrVec m_paramTypeSpecs;
   std::vector<std::string> m_paramDefaults;
+  std::vector<std::string> m_paramDefaultTexts;
   bool m_refReturn; // whether it's "function &get_reference()"
   std::vector<bool> m_refs;
   TypePtr m_returnType;

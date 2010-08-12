@@ -502,6 +502,7 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
     c->valueLen = sv.size();
     c->valueText = buf;
     info.m_constants[c->name] = c;
+    info.m_constantsVec.push_back(c);
   }
 
   for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();

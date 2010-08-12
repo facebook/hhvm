@@ -92,4 +92,11 @@ clean clobber:
 	  $(patsubst %.geninc, ../system/%.inc, $@)
 
 geninc-all: $(patsubst %.idl.php, %.geninc, $(IDL_PHPS))
+	@php idl.php inc ../../facebook/extensions/string/string.idl.php \
+		../../facebook/extensions/string/string.inc
+	@php idl.php inc ../../facebook/extensions/utils/utils.idl.php \
+		../../facebook/extensions/utils/utils.inc
+	@php idl.php inc ../runtime/ext/sep/mhash/mhash.idl.php \
+		../runtime/ext/sep/mhash/mhash.inc
+	@php idl.php inc ../system/helper.idl.php ../system/helper.inc
 

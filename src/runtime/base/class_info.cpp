@@ -298,17 +298,17 @@ void ClassInfo::GetClassSymbolNames(CArrRef names, bool interface,
         }
       }
       if (clsProperties) {
-        const ClassInfo::PropertyMap &properties = cls->getProperties();
-        for (ClassInfo::PropertyMap::const_iterator iter = properties.begin();
+        const ClassInfo::PropertyVec &properties = cls->getPropertiesVec();
+        for (ClassInfo::PropertyVec::const_iterator iter = properties.begin();
              iter != properties.end(); ++iter) {
-          clsProperties->push_back(clsname + "::$" + iter->first);
+          clsProperties->push_back(clsname + "::$" + (*iter)->name);
         }
       }
       if (clsConstants) {
-        const ClassInfo::ConstantMap &constants = cls->getConstants();
-        for (ClassInfo::ConstantMap::const_iterator iter = constants.begin();
+        const ClassInfo::ConstantVec &constants = cls->getConstantsVec();
+        for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
              iter != constants.end(); ++iter) {
-          clsConstants->push_back(clsname + "::" + iter->second->name);
+          clsConstants->push_back(clsname + "::" + (*iter)->name);
         }
       }
     }
@@ -629,6 +629,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       parameter->type = *p++;
       ASSERT(Util::toLower(parameter->type) == parameter->type);
       parameter->value = *p++;
+      parameter->valueText = *p++;
 
       method->parameters.push_back(parameter);
     }
@@ -699,6 +700,7 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
 
     ASSERT(m_constants.find(constant->name) == m_constants.end());
     m_constants[constant->name] = constant;
+    m_constantsVec.push_back(constant);
   }
   p++;
 }

@@ -798,7 +798,7 @@ DefineFunction(
       array(
         'name'   => "paramtype",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Provides a data type hint for drivers that have alternate quoting styles.",
       ),
     ),
@@ -894,13 +894,13 @@ DefineFunction(
       array(
         'name'   => "how",
         'type'   => Int64,
-        'value'  => "q_pdo_FETCH_BOTH",
+        'value'  => "q_PDO_FETCH_BOTH",
         'desc'   => "Controls how the next row will be returned to the caller. This value must be one of the PDO::FETCH_* constants, defaulting to PDO::FETCH_BOTH.\nPDO::FETCH_ASSOC: returns an array indexed by column name as returned in your result set\nPDO::FETCH_BOTH (default): returns an array indexed by both column name and 0-indexed column number as returned in your result set\nPDO::FETCH_BOUND: returns TRUE and assigns the values of the columns in your result set to the PHP variables to which they were bound with the PDOStatement::bindColumn() method\nPDO::FETCH_CLASS: returns a new instance of the requested class, mapping the columns of the result set to named properties in the class. If fetch_style includes PDO::FETCH_CLASSTYPE (e.g. PDO::FETCH_CLASS | PDO::FETCH_CLASSTYPE) then the name of the class is determined from a value of the first column.\nPDO::FETCH_INTO: updates an existing instance of the requested class, mapping the columns of the result set to named properties in the class\nPDO::FETCH_LAZY: combines PDO::FETCH_BOTH and PDO::FETCH_OBJ, creating the object variable names as they are accessed\nPDO::FETCH_NUM: returns an array indexed by column number as returned in your result set, starting at column 0\nPDO::FETCH_OBJ: returns an anonymous object with property names that correspond to the column names returned in your result set",
       ),
       array(
         'name'   => "orientation",
         'type'   => Int64,
-        'value'  => "q_pdo_FETCH_ORI_NEXT",
+        'value'  => "q_PDO_FETCH_ORI_NEXT",
         'desc'   => "For a PDOStatement object representing a scrollable cursor, this value determines which row will be returned to the caller. This value must be one of the PDO::FETCH_ORI_* constants, defaulting to PDO::FETCH_ORI_NEXT. To request a scrollable cursor for your PDOStatement object, you must set the PDO::ATTR_CURSOR attribute to PDO::CURSOR_SCROLL when you prepare the SQL statement with PDO::prepare().",
       ),
       array(
@@ -965,7 +965,7 @@ DefineFunction(
       array(
         'name'   => "how",
         'type'   => Int64,
-        'value'  => "q_pdo_FETCH_BOTH",
+        'value'  => "q_PDO_FETCH_BOTH",
         'desc'   => "Controls the contents of the returned array as documented in PDOStatement::fetch().\nTo return an array consisting of all values of a single column from the result set, specify PDO::FETCH_COLUMN. You can specify which column you want with the column-index parameter.\nTo fetch only the unique values of a single column from the result set, bitwise-OR PDO::FETCH_COLUMN with PDO::FETCH_UNIQUE.\nTo return an associative array grouped by the values of a specified column, bitwise-OR PDO::FETCH_COLUMN with PDO::FETCH_GROUP.",
       ),
       array(
@@ -1005,7 +1005,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Explicit data type for the parameter using the PDO::PARAM_* constants.",
       ),
     ),
@@ -1033,7 +1033,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Explicit data type for the parameter using the PDO::PARAM_* constants. To return an INOUT parameter from a stored procedure, use the bitwise OR operator to set the PDO::PARAM_INPUT_OUTPUT bits for the data_type parameter.",
       ),
       array(
@@ -1072,7 +1072,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Data type of the parameter, specified by the PDO::PARAM_* constants.",
       ),
       array(

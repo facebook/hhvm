@@ -383,21 +383,26 @@ DefineFunction(
   array(
     'name'   => "clock_getres",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Gets resolution of system clock. \"man 3 clock_getres\" for more details.",
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise",
     ),
     'args'   => array(
       array(
         'name'   => "clk_id",
         'type'   => Int32,
+        'desc'   => "Which clock to check.",
       ),
       array(
         'name'   => "sec",
         'type'   => Variant | Reference,
+        'desc'   => "Return value in seconds.",
       ),
       array(
         'name'   => "nsec",
         'type'   => Variant | Reference,
+        'desc'   => "Return value in nano-seconds.",
       ),
     ),
   ));
@@ -406,21 +411,26 @@ DefineFunction(
   array(
     'name'   => "clock_gettime",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Gets time of a system clock. \"man 3 clock_gettime\" for more details.",
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise",
     ),
     'args'   => array(
       array(
         'name'   => "clk_id",
         'type'   => Int32,
+        'desc'   => "Which clock.",
       ),
       array(
         'name'   => "sec",
         'type'   => Variant | Reference,
+        'desc'   => "Return value in seconds.",
       ),
       array(
         'name'   => "nsec",
         'type'   => Variant | Reference,
+        'desc'   => "Return value in nano-seconds.",
       ),
     ),
   ));
@@ -429,21 +439,26 @@ DefineFunction(
   array(
     'name'   => "clock_settime",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Sets time of a system clock. \"man 3 clock_settime\" for more details.",
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise",
     ),
     'args'   => array(
       array(
         'name'   => "clk_id",
         'type'   => Int32,
+        'desc'   => "Which clock.",
       ),
       array(
         'name'   => "sec",
         'type'   => Int64,
+        'desc'   => "Value to set in seconds.",
       ),
       array(
         'name'   => "nsec",
         'type'   => Int64,
+        'desc'   => "Value to set in nano-seconds.",
       ),
     ),
   ));

@@ -1,5 +1,7 @@
 <?php
 
+@require_once '../system/globals/constants.php';
+
 ///////////////////////////////////////////////////////////////////////////////
 // types
 
@@ -261,7 +263,15 @@ function DefineFunction($func) {
           throw new Exception('default value has to be non-empty string for '.
                               $func['name'].'(..'.$arg['name'].'..)');
         }
-        $arg['default'] = $arg['value'];
+        if (preg_match('/^q_([A-Za-z]+)_(\w+)$/', $arg['value'], $m)) {
+          $class = strtolower($m[1]);
+          $constant = $m[2];
+          $arg['default'] = "q_${class}_${constant}";
+        } else {
+          $arg['default'] = $arg['value'];
+        }
+        $arg['defaultSerialized'] = get_serialized_default($arg['value']);
+        $arg['defaultText'] = get_default_text($arg['value']);
       }
       if (idx($arg, 'type') & Reference) {
         $arg['ref'] = true;
@@ -352,6 +362,54 @@ function fprintType($f, $type) {
   }
 }
 
+function get_serialized_default($s) {
+  // These values are special and cannot be returned by
+  // ReflectionParameter::getDefaultValue().
+  if ($s == 'TimeStamp::Current()' ||
+      preg_match('/^k_SQLITE3_/', $s)) {
+    return "\x01";
+  }
+
+  if (preg_match('/^".*"$/', $s) ||
+      preg_match('/^[\-0-9.]+$/', $s) ||
+      preg_match('/^0x[0-9a-fA-F]+$/', $s) ||
+      preg_match('/^(true|false|null)$/', $s)
+     ) {
+    return serialize(eval("return $s;"));
+  }
+  if (preg_match('/^null_(string|array|object|variant)$/', $s)) {
+    return serialize(null);
+  }
+  if (preg_match('/^k_\w+( ?\| ?k_\w+)*$/', $s, $m)) {
+    $s = preg_replace('/k_/', '', $s);
+    return serialize(eval("return $s;"));
+  }
+  if (preg_match('/^q_([A-Za-z]+)_(\w+)$/', $s, $m)) {
+    $class = $m[1];
+    $constant = $m[2];
+    return serialize(eval("return $class::$constant;"));
+  }
+  if ($s == 'RAND_MAX') {
+    return serialize(getrandmax());
+  }
+  throw new Exception("Unable to serialize default value: [$s]");
+}
+
+function get_default_text($s) {
+  if (preg_match('/^null_(string|array|object|variant)$/', $s)) {
+    return 'null';
+  }
+  if (preg_match('/^k_\w+( ?\| ?k_\w+)*$/', $s, $m)) {
+    return preg_replace('/k_/', '', $s);
+  }
+  if (preg_match('/^q_([A-Za-z]+)_(\w+)$/', $s, $m)) {
+    $class = $m[1];
+    $constant = $m[2];
+    return "$class::$constant";
+  }
+  return $s;
+}
+
 function generateFuncCPPInclude($func, $f, $newline = true) {
   fprintf($f, '"%s", ', $func['name']);
   fprintType($f, $func['return']);
@@ -362,9 +420,10 @@ function generateFuncCPPInclude($func, $f, $newline = true) {
     fprintType($f, $arg['type']);
     fprintf($f, ', ');
     if (isset($arg['default'])) {
-      fprintf($f, '"%s", ', escape_cpp($arg['default']));
+      fprintf($f, '"%s", ', escape_cpp($arg['defaultSerialized']));
+      fprintf($f, '"%s", ', escape_cpp($arg['defaultText']));
     } else {
-      fprintf($f, 'NULL, ');
+      fprintf($f, 'NULL, NULL, ');
     }
     fprintf($f, 'S(%d), ', idx($arg, 'ref') ? 1 : 0);
   }
@@ -908,9 +967,14 @@ function get_function_doc_comments($func, $clsname) {
       }
       $text .= format_doc_arg($arg['name'], idx($arg, 'type'), $desc);
     }
+  }
+  $ret = ($func['return'] !== null || !empty($func['ret_desc']));
+  if ($func['args'] && $ret) {
     $text .= "\n";
   }
-  $text .= format_doc_arg('return', $func['return'], $func['ret_desc']);
+  if ($ret) {
+    $text .= format_doc_arg('return', $func['return'], $func['ret_desc']);
+  }
 
   return format_doc_comment($text);
 }

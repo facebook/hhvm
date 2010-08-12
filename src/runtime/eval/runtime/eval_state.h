@@ -87,23 +87,28 @@ private:
  public:
   ~ClassInfoEvaled();
   virtual const char *getParentClass() const { return m_parentClass; }
-  const InterfaceMap &getInterfaces() const { return m_interfaces;}
+
+  // implementing ClassInfo
+  const InterfaceMap &getInterfaces()    const { return m_interfaces;}
   const InterfaceVec &getInterfacesVec() const { return m_interfacesVec;}
-  const MethodMap &getMethods() const { return m_methods;}
-  const MethodVec &getMethodsVec() const { return m_methodsVec;}
-  const PropertyMap &getProperties() const { return m_properties;}
-  const PropertyVec &getPropertiesVec() const { return m_propertiesVec;}
-  const ConstantMap &getConstants() const { return m_constants;}
+  const MethodMap    &getMethods()       const { return m_methods;}
+  const MethodVec    &getMethodsVec()    const { return m_methodsVec;}
+  const PropertyMap  &getProperties()    const { return m_properties;}
+  const PropertyVec  &getPropertiesVec() const { return m_propertiesVec;}
+  const ConstantMap  &getConstants()     const { return m_constants;}
+  const ConstantVec  &getConstantsVec()  const { return m_constantsVec;}
+
  private:
   friend class ClassStatement;
   const char* m_parentClass;
-  InterfaceMap m_interfaces; // all interfaces
+  InterfaceMap m_interfaces;    // all interfaces
   InterfaceVec m_interfacesVec; // all interfaces
-  MethodMap    m_methods;    // all methods
-  MethodVec    m_methodsVec; // in source order
-  PropertyMap  m_properties; // all properties
+  MethodMap    m_methods;       // all methods
+  MethodVec    m_methodsVec;    // in source order
+  PropertyMap  m_properties;    // all properties
   PropertyVec  m_propertiesVec; // in source order
-  ConstantMap  m_constants;  // all constants
+  ConstantMap  m_constants;     // all constants
+  ConstantVec  m_constantsVec;  // in source order
 };
 
 class RequestEvalState {

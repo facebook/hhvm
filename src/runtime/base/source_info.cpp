@@ -80,28 +80,36 @@ void SourceInfo::getDeclaredClasses(const char *filename,
   }
 }
 
-const char *SourceInfo::getClassDeclaringFile(const char *name) {
+const char *SourceInfo::getClassDeclaringFile(const char *name,
+                                              int *line /* = NULL */) {
   if (!m_loaded) load();
   if (s_hook) {
-    const char *file = s_hook->getClassDeclaringFile(name);
+    const char *file = s_hook->getClassDeclaringFile(name, line);
     if (file) return file;
   }
   INameMap::const_iterator iter = m_cls2file.find(name);
   if (iter != m_cls2file.end()) {
-    return iter->second[0];
+    if (line) {
+      *line = iter->second[0]->line;
+    }
+    return iter->second[0]->file;
   }
   return NULL;
 }
 
-const char *SourceInfo::getFunctionDeclaringFile(const char *name) {
+const char *SourceInfo::getFunctionDeclaringFile(const char *name,
+                                                 int *line /* = NULL */) {
   if (!m_loaded) load();
   if (s_hook) {
-    const char *file = s_hook->getFunctionDeclaringFile(name);
+    const char *file = s_hook->getFunctionDeclaringFile(name, line);
     if (file) return file;
   }
   INameMap::const_iterator iter = m_func2file.find(name);
   if (iter != m_func2file.end()) {
-    return iter->second[0];
+    if (line) {
+      *line = iter->second[0]->line;
+    }
+    return iter->second[0]->file;
   }
   return NULL;
 }
@@ -127,7 +135,13 @@ void SourceInfo::loadImpl(INameMap &forward, NameMap &backward, const char **p){
   while (*p) {
     const char *name = *p++;
     const char *file = *p++;
-    forward[name].push_back(file);
+    int line = (int)(long)(*p++);
+
+    LocationInfo *loc = new LocationInfo();
+    loc->file = file;
+    loc->line = line;
+
+    forward[name].push_back(loc);
     backward[file].push_back(name);
   }
 }

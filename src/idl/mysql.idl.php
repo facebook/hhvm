@@ -91,11 +91,13 @@ DefineFunction(
       array(
         'name'   => "connect_timeout_ms",
         'type'   => Int32,
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for connection.",
         'value'  => "-1",
       ),
       array(
         'name'   => "query_timeout_ms",
         'type'   => Int32,
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
         'value'  => "-1",
       ),
     ),
@@ -137,11 +139,13 @@ DefineFunction(
       array(
         'name'   => "connect_timeout_ms",
         'type'   => Int32,
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for connection.",
         'value'  => "-1",
       ),
       array(
         'name'   => "query_timeout_ms",
         'type'   => Int32,
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
         'value'  => "-1",
       ),
     ),
@@ -621,6 +625,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_set_timeout",
+    'desc'   => "Sets query timeout for a connection.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
@@ -628,12 +633,14 @@ DefineFunction(
     'args'   => array(
       array(
         'name'   => "query_timeout_ms",
+        'desc'   => "How many milli-seconds to wait for an SQL query.",
         'type'   => Int32,
         'value'  => "-1",
       ),
       array(
         'name'   => "link_identifier",
         'type'   => Variant,
+        'desc'   => "Which connection to set to. If absent, default or current connection will be applied to.",
         'value'  => "null",
       ),
     ),

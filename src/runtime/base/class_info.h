@@ -79,8 +79,9 @@ public:
   struct ParameterInfo {
     Attribute attribute;
     const char *name;
-    const char *type;  // hinted type
-    const char *value; // serialized default value
+    const char *type;      // hinted type
+    const char *value;     // serialized default value
+    const char *valueText; // original PHP code
   };
 
   class MethodInfo {
@@ -108,15 +109,16 @@ public:
     bool isVisible(const ClassInfo *context) const;
   };
 
-  typedef hphp_const_char_imap<ClassInfo*> ClassMap;
-  typedef hphp_const_char_iset InterfaceMap;
-  typedef std::vector<const char *> InterfaceVec;
-  typedef std::vector<const char *> ClassVec;
-  typedef hphp_const_char_imap<MethodInfo*> MethodMap;
-  typedef std::vector<MethodInfo*> MethodVec;
+  typedef hphp_const_char_imap<ClassInfo*>    ClassMap;
+  typedef std::vector<const char *>           ClassVec;
+  typedef hphp_const_char_iset                InterfaceMap;
+  typedef std::vector<const char *>           InterfaceVec;
+  typedef hphp_const_char_imap<MethodInfo*>   MethodMap;
+  typedef std::vector<MethodInfo*>            MethodVec;
   typedef hphp_const_char_map<PropertyInfo *> PropertyMap;
-  typedef std::vector<PropertyInfo *> PropertyVec;
-  typedef hphp_const_char_map<ConstantInfo*> ConstantMap;
+  typedef std::vector<PropertyInfo *>         PropertyVec;
+  typedef hphp_const_char_map<ConstantInfo*>  ConstantMap;
+  typedef std::vector<ConstantInfo*>          ConstantVec;
 
 public:
   /**
@@ -270,6 +272,7 @@ public:
    * Constant functions.
    */
   virtual const ConstantMap &getConstants() const = 0;
+  virtual const ConstantVec &getConstantsVec() const = 0;
   ConstantInfo *getConstantInfo(const char *name) const;
   bool hasConstant(const char *name) const;
 
@@ -314,16 +317,18 @@ public:
   const PropertyMap &getProperties() const { return m_properties;}
   const PropertyVec &getPropertiesVec() const { return m_propertiesVec;}
   const ConstantMap &getConstants() const { return m_constants;}
+  const ConstantVec &getConstantsVec() const { return m_constantsVec;}
 
 private:
-  const char * m_parent;     // parent class name
-  InterfaceMap m_interfaces; // all interfaces
-  InterfaceVec m_interfacesVec; // all interfaces
-  MethodMap    m_methods;    // all methods
-  MethodVec    m_methodsVec; // in source order
-  PropertyMap  m_properties; // all properties
-  PropertyVec  m_propertiesVec; // in source order
-  ConstantMap  m_constants;  // all constants
+  const char * m_parent;        // parent class name
+  InterfaceMap m_interfaces;    // all interfaces
+  InterfaceVec m_interfacesVec; // all interfaces in declaration order
+  MethodMap    m_methods;       // all methods
+  MethodVec    m_methodsVec;    // all methods in declaration order
+  PropertyMap  m_properties;    // all properties
+  PropertyVec  m_propertiesVec; // all properties in declaration order
+  ConstantMap  m_constants;     // all constants
+  ConstantVec  m_constantsVec;  // all constants in declaration order
 };
 
 /**
@@ -341,21 +346,31 @@ public:
   virtual bool isClassInfoRedeclared() const { return true; }
   const char *getName() const { return current()->getName();}
   const char *getParentClass() const { return current()->getParentClass();}
+
   const InterfaceMap &getInterfaces() const {
     return current()->getInterfaces();
   }
   const InterfaceVec &getInterfacesVec() const {
     return current()->getInterfacesVec();
   }
-  const MethodMap &getMethods() const { return current()->getMethods();}
-  const MethodVec &getMethodsVec() const { return current()->getMethodsVec();}
+  const MethodMap &getMethods() const {
+    return current()->getMethods();
+  }
+  const MethodVec &getMethodsVec() const {
+    return current()->getMethodsVec();
+  }
   const PropertyMap &getProperties() const  {
     return current()->getProperties();
   }
   const PropertyVec &getPropertiesVec() const  {
     return current()->getPropertiesVec();
   }
-  const ConstantMap &getConstants() const { return current()->getConstants();}
+  const ConstantMap &getConstants() const {
+    return current()->getConstants();
+  }
+  const ConstantVec &getConstantsVec() const {
+    return current()->getConstantsVec();
+  }
 
 private:
   std::vector<ClassInfo*> m_redeclaredClasses;

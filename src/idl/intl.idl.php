@@ -956,7 +956,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_normalizer_FORM_C",
+        'value'  => "q_Normalizer_FORM_C",
         'desc'   => "One of the normalization forms.",
       ),
     ),
@@ -979,7 +979,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_normalizer_FORM_C",
+        'value'  => "q_Normalizer_FORM_C",
       ),
     ),
   ));

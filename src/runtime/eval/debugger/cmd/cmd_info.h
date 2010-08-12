@@ -53,7 +53,7 @@ private:
   Array  m_info;
   DebuggerClient::LiveListsPtr m_acLiveLists;
 
-  String GetParams(CArrRef params, bool detailed = false);
+  String GetParams(CArrRef params, bool varg, bool detailed = false);
   String GetModifier(CArrRef info, const char *name);
 
   String FindSubSymbol(CArrRef symbols, const std::string &symbol);

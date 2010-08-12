@@ -279,17 +279,21 @@ DefineFunction(
   array(
     'name'   => "hphp_log",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Write a message to a file and keep it open afterwards, so we can continue to write to it efficiently as a log file.",
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(
         'name'   => "filename",
         'type'   => String,
+        'desc'   => "Which file to write to.",
       ),
       array(
         'name'   => "message",
         'type'   => String,
+        'desc'   => "Message to write to the log.",
       ),
     ),
   ));
@@ -298,6 +302,7 @@ DefineFunction(
   array(
     'name'   => "hphp_crash_log",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Adds an entry to a log file that's written when server crashes. This is useful for diagnose why server crashed. For example, logged-on user's ID.",
     'return' => array(
       'type'   => null,
     ),
@@ -305,10 +310,12 @@ DefineFunction(
       array(
         'name'   => "name",
         'type'   => String,
+        'desc'   => "Name of the value.",
       ),
       array(
         'name'   => "value",
         'type'   => String,
+        'desc'   => "Value to write to log.",
       ),
     ),
   ));
@@ -317,6 +324,7 @@ DefineFunction(
   array(
     'name'   => "hphp_stats",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Tallies a number for server stats.",
     'return' => array(
       'type'   => null,
     ),
@@ -324,10 +332,12 @@ DefineFunction(
       array(
         'name'   => "name",
         'type'   => String,
+        'desc'   => "Name of the entry. This name can then be used with admin commands to retrieve stats while server is running.",
       ),
       array(
         'name'   => "value",
         'type'   => Int64,
+        'desc'   => "An integer to add up.",
       ),
     ),
   ));
@@ -336,13 +346,16 @@ DefineFunction(
   array(
     'name'   => "hphp_get_stats",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Checks current value of a server stats.",
     'return' => array(
       'type'   => Int64,
+      'desc'   => "Currently accumulated count.",
     ),
     'args'   => array(
       array(
         'name'   => "name",
         'type'   => String,
+        'desc'   => "Name of the entry.",
       ),
     ),
   ));
@@ -351,13 +364,16 @@ DefineFunction(
   array(
     'name'   => "hphp_output_global_state",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Dumps all variables in global state, including global variables, static variables, class statics and others.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "An array of global state.",
     ),
     'args'   => array(
       array(
         'name'   => "serialize",
         'type'   => Boolean,
+        'desc'   => "Specifies what format to use, whether to serialize into a string.",
         'value'  => "true",
       ),
     ),

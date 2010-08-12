@@ -1397,13 +1397,31 @@ void AnalysisResult::recordSourceInfo(const std::string &file, int line,
 }
 
 void AnalysisResult::recordClassSource(const std::string &clsname,
-                                       const std::string &filename) {
-  m_clsNameMap[clsname].insert(filename);
+                                       LocationPtr loc,
+                                       const std::string filename) {
+  string file; int line;
+  if (loc) {
+    file = loc->file;
+    line = loc->line0;
+  } else {
+    file = filename;
+    line = 0;
+  }
+  m_clsNameMap[clsname].insert(pair<string, int>(file, line));
 }
 
 void AnalysisResult::recordFunctionSource(const std::string &funcname,
-                                          const std::string &filename) {
-  m_funcNameMap[funcname].insert(filename);
+                                          LocationPtr loc,
+                                          const std::string filename) {
+  string file; int line;
+  if (loc) {
+    file = loc->file;
+    line = loc->line0;
+  } else {
+    file = filename;
+    line = 0;
+  }
+  m_funcNameMap[funcname].insert(pair<string, int>(file, line));
 }
 
 void AnalysisResult::outputCPPSourceInfos() {
@@ -1448,26 +1466,30 @@ void AnalysisResult::outputCPPNameMaps() {
 
   cg.namespaceBegin();
 
-  cg.printSection("Class -> File");
+  cg.printSection("Class -> File Line");
   cg_indentBegin("const char *g_source_cls2file[] = {\n");
-  for (map<string, set<string> >::const_iterator
+  for (map<string, set<pair<string, int> > >::const_iterator
          iter = m_clsNameMap.begin(); iter != m_clsNameMap.end(); ++iter) {
-    for (set<string>::const_iterator iterInner = iter->second.begin();
+    for (set<pair<string, int> >::const_iterator iterInner =
+           iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\",\n", iter->first.c_str(), iterInner->c_str());
+      cg_printf("\"%s\", \"%s\", \"%d\", \n", iter->first.c_str(),
+                iterInner->first.c_str(), iterInner->second);
     }
   }
   cg_printf("NULL\n");
   cg_indentEnd("};\n");
 
 
-  cg.printSection("Function -> File");
+  cg.printSection("Function -> File Line");
   cg_indentBegin("const char *g_source_func2file[] = {\n");
-  for (map<string, set<string> >::const_iterator
+  for (map<string, set<pair<string, int> > >::const_iterator
          iter = m_funcNameMap.begin(); iter != m_funcNameMap.end(); ++iter) {
-    for (set<string>::const_iterator iterInner = iter->second.begin();
+    for (set<pair<string, int> >::const_iterator iterInner =
+           iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\",\n", iter->first.c_str(), iterInner->c_str());
+      cg_printf("\"%s\", \"%s\", \"%d\",\n", iter->first.c_str(),
+                iterInner->first.c_str(), iterInner->second);
     }
   }
   cg_printf("NULL\n");

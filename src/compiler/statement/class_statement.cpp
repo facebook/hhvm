@@ -85,7 +85,7 @@ void ClassStatement::onParse(AnalysisResultPtr ar) {
     m_ignored = true;
     return;
   }
-  ar->recordClassSource(m_name, ar->getFileScope()->getName());
+  ar->recordClassSource(m_name, m_loc, ar->getFileScope()->getName());
 
   if (m_stmt) {
     ar->pushScope(classScope);

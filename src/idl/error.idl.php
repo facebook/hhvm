@@ -203,6 +203,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_set_error_page",
+    'desc'   => "Displays fatal errors with this PHP document. When 500 fatal error is about to display, it will invoke this PHP page with all global states right at when the error happens. This is useful for gracefully displaying something helpful information to end users when a fatal error has happened. Otherwise, a blank page will be displayed by default.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => null,
@@ -211,6 +212,7 @@ DefineFunction(
       array(
         'name'   => "page",
         'type'   => String,
+        'desc'   => "Relative path of the PHP document.",
       ),
     ),
   ));
@@ -218,6 +220,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_throw_fatal_error",
+    'desc'   => "Raises a fatal error.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => null,
@@ -226,6 +229,7 @@ DefineFunction(
       array(
         'name'   => "error_msg",
         'type'   => String,
+        'desc'   => "The error message for the fatal.",
       ),
     ),
   ));
@@ -234,6 +238,7 @@ DefineFunction(
   array(
     'name'   => "hphp_clear_unflushed",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Clears any output contents that have not been flushed to networked. This is useful when handling a fatal error. Before displaying a customized PHP page, one may call this function to clear previously written content, so to replay what will be displayed.",
     'return' => array(
       'type'   => null,
     ),

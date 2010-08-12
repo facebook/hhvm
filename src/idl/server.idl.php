@@ -52,23 +52,28 @@ CPP
 DefineFunction(
   array(
     'name'   => "dangling_server_proxy_old_request",
+    'desc'   => "When I'm running a newer version of the server software and I'm getting an HTTP request that's from old version of a web page, proxy it to a local instance that is still running or dangling just for handling old version of requests. Please read server documentation for more details.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "dangling_server_proxy_new_request",
+    'desc'   => "When I'm still running an old version of the server software and I'm getting an HTTP request that's newer, proxy it to a specified host that already has the new version of the software running. Please read server documentation for more details.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "host",
         'type'   => String,
+        'desc'   => "The machine to proxy to.",
       ),
     ),
   ));
@@ -76,32 +81,39 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pagelet_server_is_enabled",
+    'desc'   => "Whether pagelet server is enabled or not. Please read server documentation for what a pagelet server is.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if it's enabled, FALSE otherwise.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "pagelet_server_task_start",
+    'desc'   => "Processes a pagelet server request.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Resource,
+      'desc'   => "An object that can be used with pagelet_server_task_status() or pagelet_server_task_result().",
     ),
     'args'   => array(
       array(
         'name'   => "url",
         'type'   => String,
+        'desc'   => "The URL we're running this pagelet with.",
       ),
       array(
         'name'   => "headers",
         'type'   => StringMap,
+        'desc'   => "HTTP headers to send to the pagelet.",
         'value'  => "null_array",
       ),
       array(
         'name'   => "post_data",
         'type'   => String,
+        'desc'   => "POST data to send.",
         'value'  => "null_string",
       ),
     ),
@@ -110,14 +122,17 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pagelet_server_task_status",
+    'desc'   => "Checks finish status of a pagelet task.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if done, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "task",
         'type'   => Resource,
+        'desc'   => "The pagelet task handle returned from pagelet_server_task_start().",
       ),
     ),
   ));
@@ -125,22 +140,27 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pagelet_server_task_result",
+    'desc'   => "Block and wait until pagelet task finishes.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => String,
+      'desc'   => "HTTP response from the pagelet.",
     ),
     'args'   => array(
       array(
         'name'   => "task",
         'type'   => Resource,
+        'desc'   => "The pagelet task handle returned from pagelet_server_task_start().",
       ),
       array(
         'name'   => "headers",
         'type'   => Variant | Reference,
+        'desc'   => "HTTP response headers.",
       ),
       array(
         'name'   => "code",
         'type'   => Variant | Reference,
+        'desc'   => "HTTP response code.",
       ),
     ),
   ));
@@ -148,26 +168,32 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xbox_send_message",
+    'desc'   => "Sends an xbox message and waits for response. Please read server documentation for what an xbox is.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "msg",
         'type'   => String,
+        'desc'   => "The message.",
       ),
       array(
         'name'   => "ret",
         'type'   => Variant | Reference,
+        'desc'   => "The response.",
       ),
       array(
         'name'   => "timeout_ms",
         'type'   => Int64,
+        'desc'   => "How many milli-seconds to wait.",
       ),
       array(
         'name'   => "host",
         'type'   => String,
+        'desc'   => "Which machine to send to.",
         'value'  => "\"localhost\"",
       ),
     ),
@@ -176,18 +202,22 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xbox_post_message",
+    'desc'   => "Posts an xbox message without waiting. Please read server documentation for more details.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "msg",
         'type'   => String,
+        'desc'   => "The response.",
       ),
       array(
         'name'   => "host",
         'type'   => String,
+        'desc'   => "Which machine to post to.",
         'value'  => "\"localhost\"",
       ),
     ),
@@ -196,14 +226,17 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xbox_task_start",
+    'desc'   => "Starts a local xbox task.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Resource,
+      'desc'   => "A task handle xbox_task_status() and xbox_task_result() can use.",
     ),
     'args'   => array(
       array(
         'name'   => "message",
         'type'   => String,
+        'desc'   => "A message to send to xbox's message processing function.",
       ),
     ),
   ));
@@ -211,14 +244,17 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xbox_task_status",
+    'desc'   => "Checks an xbox task's status.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if finished, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "task",
         'type'   => Resource,
+        'desc'   => "The xbox task object created by xbox_task_start().",
       ),
     ),
   ));
@@ -226,22 +262,27 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xbox_task_result",
+    'desc'   => "Block and wait for xbox task's result.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Int64,
+      'desc'   => "Response code following HTTP's responses. For example, 200 for success and 500 for server error.",
     ),
     'args'   => array(
       array(
         'name'   => "task",
         'type'   => Resource,
+        'desc'   => "The xbox task object created by xbox_task_start().",
       ),
       array(
         'name'   => "timeout_ms",
         'type'   => Int64,
+        'desc'   => "How many milli-seconds to wait.",
       ),
       array(
         'name'   => "ret",
         'type'   => Variant | Reference,
+        'desc'   => "xbox message processing function's return value.",
       ),
     ),
   ));

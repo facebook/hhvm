@@ -52,6 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "hphp_service_thread_started",
+    'desc'   => "A function to call to tell system a service thread has completed its startup.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => null,
@@ -61,15 +62,18 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_thread_is_warmup_enabled",
+    'desc'   => "Whether current thread is warmed up with some PHP document.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if warmed up already, FALSE otherwise.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "hphp_thread_set_warmup_enabled",
+    'desc'   => "Enables warmup document.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => null,
@@ -79,9 +83,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_get_thread_id",
+    'desc'   => "Gets current thread's ID.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Int64,
+      'desc'   => "The pthread_self() return.",
     ),
   ));
 

@@ -133,7 +133,7 @@ void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     m_stmt->analyzeProgram(ar);
     ar->popScope();
   }
-  ar->recordClassSource(m_name, ar->getFileScope()->getName());
+  ar->recordClassSource(m_name, m_loc, ar->getFileScope()->getName());
 
   checkVolatile(ar);
 

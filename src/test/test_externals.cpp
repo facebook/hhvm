@@ -107,7 +107,7 @@ const char *g_class_map[] = {
 
 const char *g_source_root = "";
 const char *g_source_info[] = { NULL};
-const char *g_source_cls2file[] = { "test", "test_file", NULL};
+const char *g_source_cls2file[] = { "test", "test_file", 0, NULL};
 const char *g_source_func2file[] = { NULL};
 const char *g_paramrtti_map[] = { NULL};
 

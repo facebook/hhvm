@@ -65,7 +65,7 @@ void FunctionStatement::onParse(AnalysisResultPtr ar) {
     m_ignored = true;
     return;
   }
-  ar->recordFunctionSource(m_name, fileScope->getName());
+  ar->recordFunctionSource(m_name, m_loc, fileScope->getName());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

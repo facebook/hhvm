@@ -1240,7 +1240,7 @@ DefineFunction(
       array(
         'name'   => "offset",
         'type'   => Variant,
-        'value'  => "0LL",
+        'value'  => "0",
         'desc'   => "May be specified to begin searching an arbitrary number of characters into the string . Negative values will stop searching at an arbitrary point prior to the end of the string .",
       ),
       array(

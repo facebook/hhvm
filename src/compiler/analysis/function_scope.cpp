@@ -158,6 +158,7 @@ void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
     m_paramTypes.resize(m_maxParam);
     m_paramTypeSpecs.resize(m_maxParam);
     m_paramDefaults.resize(m_maxParam);
+    m_paramDefaultTexts.resize(m_maxParam);
     m_refs.resize(m_maxParam);
 
     if (m_stmt) {
@@ -481,6 +482,13 @@ const std::string &FunctionScope::getParamName(int index) const {
 void FunctionScope::setParamName(int index, const std::string &name) {
   ASSERT(index >= 0 && index < (int)m_paramNames.size());
   m_paramNames[index] = name;
+}
+
+void FunctionScope::setParamDefault(int index, const std::string &value,
+                                    const std::string &text) {
+  ASSERT(index >= 0 && index < (int)m_paramNames.size());
+  m_paramDefaults[index] = value;
+  m_paramDefaultTexts[index] = text;
 }
 
 void FunctionScope::addModifier(int mod) {
@@ -1261,6 +1269,16 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (isFinal()) attribute |= ClassInfo::IsFinal;
   if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
 
+  if (isVariableArgument()) {
+    attribute |= ClassInfo::VariableArguments;
+  }
+  if (isReferenceVariableArgument()) {
+    attribute |= ClassInfo::RefVariableArguments;
+  }
+  if (isMixedVariableArgument()) {
+    attribute |= ClassInfo::MixedVariableArguments;
+  }
+
   attribute |= m_attributeClassInfo;
 
   // Use the original cased name, for reflection to work correctly.
@@ -1295,18 +1313,34 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         assert(param);
         ExpressionPtr def = param->defaultValue();
+        string sdef = def->getText();
+        char *esdef = string_cplus_escape(sdef.data(), sdef.size());
         if (!def->isScalar() || !def->getScalarValue(defArg)) {
-          defArg = "1";
+          /**
+           * Special value runtime/ext/ext_reflection.cpp can check and throw.
+           * If we want to avoid seeing this so to make getDefaultValue()
+           * work better for reflections, we will have to implement
+           * getScalarValue() to greater extent under compiler/expressions.
+           */
+          cg_printf("\"\x01\", \"%s\",\n", esdef);
+        } else {
+          String str = f_serialize(defArg);
+          char *s = string_cplus_escape(str.data(), str.size());
+          cg_printf("\"%s\", \"%s\",\n", s, esdef);
+          free(s);
         }
+        free(esdef);
       } else {
-        defArg = "1";
+        char *def = string_cplus_escape(m_paramDefaults[i].data(),
+                                        m_paramDefaults[i].size());
+        char *defText = string_cplus_escape(m_paramDefaultTexts[i].data(),
+                                            m_paramDefaultTexts[i].size());
+        cg_printf("\"%s\", \"%s\",\n", def, defText);
+        free(def);
+        free(defText);
       }
-      String str = f_serialize(defArg);
-      char *s = string_cplus_escape(str.data(), str.size());
-      cg_printf("\"%s\",\n", s);
-      free(s);
     } else {
-      cg_printf("\"\",\n");
+      cg_printf("\"\", \"\",\n");
     }
   }
   cg_printf("NULL,\n");

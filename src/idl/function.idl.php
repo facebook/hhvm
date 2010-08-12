@@ -153,18 +153,22 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "call_user_func_array_async",
+    'desc'   => "Same as call_user_func_array(), but returns an object immediately without waiting for the function to finish. The object can be used with end_user_func_async() to eventually retrieve function's return, if needed.",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Object,
+      'desc'   => "An object end_user_func_async() uses for final waiting of function's return.",
     ),
     'args'   => array(
       array(
         'name'   => "function",
         'type'   => Variant,
+        'desc'   => "Function's name, same as in call_user_func_array().",
       ),
       array(
         'name'   => "params",
         'type'   => VariantVec,
+        'desc'   => "Parameters, same as in call_user_func_array().",
       ),
     ),
   ));
@@ -172,14 +176,17 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "call_user_func_async",
+    'desc'   => "Same as call_user_func(), but returns an object immediately without waiting for the function to finish. The object can be used with end_user_func_async() to eventually retrieve function's return, if needed.",
     'flags'  =>  MixedVariableArguments | HipHopSpecific,
     'return' => array(
       'type'   => Object,
+      'desc'   => "An object end_user_func_async() uses for final waiting of function's return.",
     ),
     'args'   => array(
       array(
         'name'   => "function",
         'type'   => Variant,
+        'desc'   => "Function's name, same as in call_user_func_array().",
       ),
     ),
   ));
@@ -187,23 +194,28 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "end_user_func_async",
+    'desc'   => "Block until function returns. Used with call_user_func_async() or call_user_func_array_async().",
     'flags'  =>  HipHopSpecific,
     'return' => array(
       'type'   => Variant,
+      'desc'   => "Function's return value.",
     ),
     'args'   => array(
       array(
         'name'   => "handle",
         'type'   => Object,
+        'desc'   => "The object returned from call_user_func_async() or call_user_func_array_async().",
       ),
       array(
         'name'   => "default_strategy",
         'type'   => Int32,
+        'desc'   => "GLOBAL_STATE_ constants to specify how to treat global states. Please read documentation for more details.",
         'value'  => "k_GLOBAL_STATE_IGNORE",
       ),
       array(
         'name'   => "additional_strategies",
         'type'   => Variant,
+        'desc'   => "Extra strategy for individual variables. Please read documentation for more details.",
         'value'  => "null",
       ),
     ),
@@ -311,6 +323,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "register_postsend_function",
+    'desc'   => "Registers functions to call after HTTP response is completely sent to browser.",
     'flags'  =>  VariableArguments | HipHopSpecific,
     'return' => array(
       'type'   => null,
@@ -319,6 +332,7 @@ DefineFunction(
       array(
         'name'   => "function",
         'type'   => Variant,
+        'desc'   => "The callback to register.",
       ),
     ),
   ));
@@ -344,6 +358,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "register_cleanup_function",
+    'desc'   => "Registers functions to call at very end of a web page to clean up and free system resources.",
     'flags'  =>  VariableArguments | HipHopSpecific,
     'return' => array(
       'type'   => null,
@@ -352,6 +367,7 @@ DefineFunction(
       array(
         'name'   => "function",
         'type'   => Variant,
+        'desc'   => "The callback to register.",
       ),
     ),
   ));

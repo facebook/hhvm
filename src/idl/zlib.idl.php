@@ -453,7 +453,7 @@ DefineFunction(
       array(
         'name'   => "whence",
         'type'   => Int64,
-        'value'  => "SEEK_SET",
+        'value'  => "k_SEEK_SET",
         'desc'   => "whence values are: SEEK_SET - Set position equal to offset bytes. SEEK_CUR - Set position to current location plus offset.\nIf whence is not specified, it is assumed to be SEEK_SET.",
       ),
     ),

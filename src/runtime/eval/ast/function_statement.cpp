@@ -130,6 +130,7 @@ void Parameter::getInfo(ClassInfo::ParameterInfo &info,
   info.name = m_name->getStatic().c_str();
   info.type = m_type.c_str();
   info.value = NULL;
+  info.valueText = NULL; // would be great to have the original PHP code
   if (m_defVal) {
     Variant v;
     try {
@@ -331,7 +332,10 @@ void FunctionStatement::dump() const {
 }
 
 void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
-  info.attribute = m_ref ? ClassInfo::IsReference : ClassInfo::IsNothing;
+  int attr = m_ref ? ClassInfo::IsReference : ClassInfo::IsNothing;
+  if (m_hasCallToGetArgs) attr |= ClassInfo::VariableArguments;
+  info.attribute = (ClassInfo::Attribute)attr;
+
   info.name = m_name.c_str();
   if (!m_docComment.empty()) {
     info.docComment = m_docComment.c_str();

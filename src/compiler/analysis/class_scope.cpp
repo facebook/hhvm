@@ -60,7 +60,7 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
 ClassScope::ClassScope(AnalysisResultPtr ar,
                        const std::string &name, const std::string &parent,
                        const std::vector<std::string> &bases,
-                       const std::vector<FunctionScopePtr> &methods)
+                       const FunctionScopePtrVec &methods)
   : BlockScope(name, "", StatementPtr(), BlockScope::ClassScope),
     m_kindOf(KindOfObjectClass), m_parent(parent), m_bases(bases),
     m_attribute(0), m_dynamic(false), m_redeclaring(-1), m_volatile(false),
@@ -539,24 +539,8 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("NULL,\n");
 
   // methods
-  std::map<int, FunctionScopePtrVec> sortedMethods; // by source line number
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
-         m_functions.begin(); iter != m_functions.end(); ++iter) {
-    FunctionScopePtr func = iter->second.back();
-    int index = 0;
-    if (func->getStmt()) {
-      LocationPtr loc = func->getStmt()->getLocation();
-      if (loc) {
-        index = loc->line1 * 1000 + loc->char1;
-      }
-    }
-    sortedMethods[index].push_back(func);
-  }
-  for (std::map<int, FunctionScopePtrVec>::const_iterator iter =
-         sortedMethods.begin(); iter != sortedMethods.end(); ++iter) {
-    for (unsigned int i = 0; i < iter->second.size(); i++) {
-      iter->second[i]->outputCPPClassMap(cg, ar);
-    }
+  for (unsigned int i = 0; i < m_functionsVec.size(); i++) {
+    m_functionsVec[i]->outputCPPClassMap(cg, ar);
   }
   cg_printf("NULL,\n");
 
@@ -1202,6 +1186,7 @@ bool ClassScope::addFunction(AnalysisResultPtr ar,
     funcScope->setRedeclaring(funcs.size());
   }
   funcs.push_back(funcScope);
+  m_functionsVec.push_back(funcScope);
   return true;
 }
 

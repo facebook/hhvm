@@ -175,7 +175,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     while (*p) ifaces.push_back(*p++);
     p++;
     // Parse methods
-    vector<FunctionScopePtr> methods;
+    FunctionScopePtrVec methods;
     while (*p) {
       FunctionScopePtr fs = ParseExtFunction(ar, p);
       if (sep) {
@@ -254,6 +254,7 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
     /* name */ arg++;
     ParseType(arg);
     const char *argDefault = *arg++;
+    /* const char *argDefaultText = */ arg++;
     /* bool argReference = */ arg++;
     if (argDefault && minParam < 0) {
       minParam = maxParam;
@@ -272,12 +273,14 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   const char *paramName = NULL;
   while ((paramName = *p++ /* argName */)) {
     TypePtr argType = ParseType(p);
-    /* const char *argDefault = */ p++;
+    const char *argDefault = *p++;
+    const char *argDefaultText = *p++;
     bool argReference = *p++;
 
     f->setParamName(index, paramName);
     if (argReference) f->setRefParam(index);
     f->setParamType(ar, index, argType);
+    if (argDefault) f->setParamDefault(index, argDefault, argDefaultText);
 
     index++;
   }
@@ -429,7 +432,7 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
     // parse globals/variables.php and globals/constants.php
     NoSuperGlobals = true;
     s_variables = LoadGlobalSymbols("symbols.php")->getVariables();
-    const std::vector<FileScopePtr> &fileScopes =
+    const FileScopePtrVec &fileScopes =
       LoadGlobalSymbols("constants.php")->getAllFilesVector();
     if (!fileScopes.empty()) {
       s_constants = fileScopes[0]->getConstants();

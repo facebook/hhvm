@@ -52,17 +52,22 @@ CPP
 DefineFunction(
   array(
     'name'   => "hphpd_install_user_command",
+    'flags'  =>  HipHopSpecific,
+    'desc'   => "Expands HipHop debugger with a user extended command.",
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if the command name was not used before, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "cmd",
         'type'   => String,
+        'desc'   => "The command name to register.",
       ),
       array(
         'name'   => "clsname",
         'type'   => String,
+        'desc'   => "The debugger command class that has its implementation.",
       ),
     ),
   ));
@@ -70,8 +75,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphpd_get_user_commands",
+    'flags'  =>  HipHopSpecific,
+    'desc'   => "Gets a list of user extended commands.",
     'return' => array(
       'type'   => StringMap,
+      'desc'   => "A map of commands and their PHP classes.",
     ),
   ));
 
@@ -115,7 +123,8 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "DebuggerProxy",
-    'desc'   => "",
+    'desc'   => "A debugger proxy runs on server or remote side, performing different actions upon receiving commands and instructions from a debugger client. When debugging a local script, there is still a debugger proxy, so to simplify the debugger interfaces, even though the debugger proxy will run locally.",
+    'flags'  =>  HipHopSpecific,
     'footer' => <<<EOT
 
  public:
@@ -127,6 +136,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'desc'   => "Constructor of DebuggerProxy.",
     'return' => array(
       'type'   => null,
     ),
@@ -134,22 +144,27 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "islocal",
+    'name'   => "isLocal",
+    'desc'   => "Whether this proxy is running locally for debugging a local script, or running remotely on a server.",
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if locally, FALSE if remote.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "send",
+    'desc'   => "Sends a command back to DebuggerClient.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "TRUE if successful, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "cmd",
         'type'   => 'DebuggerCommand',
+        'desc'   => "The command to send to client.",
       ),
     ),
   ));
@@ -157,8 +172,10 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'desc'   => "Destructor of DebuggerProxy.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "Always returns null.",
     ),
   ));
 
@@ -170,7 +187,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DebuggerClient",
-    'desc'   => "",
+    'desc'   => "A debugger client takes input from end user. Depending on which command, it may either perform an action locally, or send it to debugger proxy to perform an action on server side. This class provides common tasks related to a debugging session.",
+    'flags'  =>  HipHopSpecific,
     'footer' => <<<EOT
 
  public:
@@ -242,6 +260,7 @@ DefineConstant(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'desc'   => "Constructor of DebuggerClient.",
     'return' => array(
       'type'   => null,
     ),
@@ -250,6 +269,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "quit",
+    'desc'   => "Quits the client.",
     'return' => array(
       'type'   => null,
     ),
@@ -258,6 +278,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "print",
+    'desc'   => "Prints some text without any color.",
     'flags'  =>  VariableArguments,
     'return' => array(
       'type'   => null,
@@ -266,6 +287,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
+        'desc'   => "Format string in printf() style.",
       ),
     ),
   ));
@@ -274,6 +296,7 @@ DefineFunction(
   array(
     'name'   => "help",
     'flags'  =>  VariableArguments,
+    'desc'   => "Prints some text in help color.",
     'return' => array(
       'type'   => null,
     ),
@@ -281,6 +304,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
+        'desc'   => "Format string in printf() style.",
       ),
     ),
   ));
@@ -289,6 +313,7 @@ DefineFunction(
   array(
     'name'   => "info",
     'flags'  =>  VariableArguments,
+    'desc'   => "Prints some text in information color.",
     'return' => array(
       'type'   => null,
     ),
@@ -296,6 +321,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
+        'desc'   => "Format string in printf() style.",
       ),
     ),
   ));
@@ -304,6 +330,7 @@ DefineFunction(
   array(
     'name'   => "output",
     'flags'  =>  VariableArguments,
+    'desc'   => "Prints some text in script output color.",
     'return' => array(
       'type'   => null,
     ),
@@ -311,6 +338,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
+        'desc'   => "Format string in printf() style.",
       ),
     ),
   ));
@@ -319,6 +347,7 @@ DefineFunction(
   array(
     'name'   => "error",
     'flags'  =>  VariableArguments,
+    'desc'   => "Prints some text in error color.",
     'return' => array(
       'type'   => null,
     ),
@@ -326,6 +355,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
+        'desc'   => "Format string in printf() style.",
       ),
     ),
   ));
@@ -333,6 +363,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "code",
+    'desc'   => "Pretty print PHP source code.",
     'return' => array(
       'type'   => null,
     ),
@@ -340,10 +371,12 @@ DefineFunction(
       array(
         'name'   => "source",
         'type'   => String,
+        'desc'   => "PHP source code to print.",
       ),
       array(
         'name'   => "start_line_no",
         'type'   => Int32,
+        'desc'   => "Starting line number. 0 for no line no.",
         'value'  => "0",
       ),
     ),
@@ -353,13 +386,16 @@ DefineFunction(
   array(
     'name'   => "ask",
     'flags'  =>  VariableArguments,
+    'desc'   => "Ask end user a question.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "Single letter response from end user.",
     ),
     'args'   => array(
       array(
         'name'   => "format",
         'type'   => String,
+        'desc'   => "Format string in printf() style.",
       ),
     ),
   ));
@@ -367,20 +403,24 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "wrap",
+    'desc'   => "Wraps some text to fit screen width.",
     'return' => array(
       'type'   => String,
+      'desc'   => "Formatted string.",
     ),
     'args'   => array(
       array(
         'name'   => "str",
         'type'   => String,
+        'desc'   => "String to wrap.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "helptitle",
+    'name'   => "helpTitle",
+    'desc'   => "Displays a title for a help topic.",
     'return' => array(
       'type'   => null,
     ),
@@ -388,14 +428,16 @@ DefineFunction(
       array(
         'name'   => "str",
         'type'   => String,
+        'desc'   => "Title text.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "helpcmds",
+    'name'   => "helpCmds",
     'flags'  =>  VariableArguments,
+    'desc'   => "Displays a list of commands in help format. Each command has a name and a short description, and specify more commands in pairs. For example, \$client->helpCmds('cmd1', 'desc1', 'cmd2', 'desc2').",
     'return' => array(
       'type'   => null,
     ),
@@ -403,17 +445,20 @@ DefineFunction(
       array(
         'name'   => "cmd",
         'type'   => String,
+        'desc'   => "Command name.",
       ),
       array(
         'name'   => "desc",
         'type'   => String,
+        'desc'   => "Command description.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "helpbody",
+    'name'   => "helpBody",
+    'desc'   => "Displays help contents. A help body is a help section with one empty line before and one empty line after.",
     'return' => array(
       'type'   => null,
     ),
@@ -421,13 +466,15 @@ DefineFunction(
       array(
         'name'   => "str",
         'type'   => String,
+        'desc'   => "The help text.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "helpsection",
+    'name'   => "helpSection",
+    'desc'   => "Displays a section of help text.",
     'return' => array(
       'type'   => null,
     ),
@@ -435,6 +482,7 @@ DefineFunction(
       array(
         'name'   => "str",
         'type'   => String,
+        'desc'   => "One section of help text.",
       ),
     ),
   ));
@@ -442,6 +490,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "tutorial",
+    'desc'   => "Tutorials are help texts displayed according to user's preference. In auto mode (vs. always on or always off modes), one tutorial text is only displayed just once to end user.",
     'return' => array(
       'type'   => null,
     ),
@@ -449,76 +498,93 @@ DefineFunction(
       array(
         'name'   => "str",
         'type'   => String,
+        'desc'   => "Help texts guiding end user for learning how to use debugger.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "getcode",
+    'name'   => "getCode",
+    'desc'   => "PHP code snippet user just typed in manually.",
     'return' => array(
       'type'   => String,
+      'desc'   => "The PHP source code.",
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "getcommand",
+    'name'   => "getCommand",
+    'desc'   => "Debugger command end user typed.",
     'return' => array(
       'type'   => String,
+      'desc'   => "The command text.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "arg",
+    'desc'   => "Tests if an argument matches a pre-defined keyword. As long as it matches the keyword partially and case-insensitively, it is considered as a match. For example, \$client->arg(2, 'foo') will return TRUE if user inputs 'f' or 'fo' or 'Fo' for the 2nd argument.",
     'return' => array(
       'type'   => Boolean,
+      'desc'   => "TRUE if matched. FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "index",
         'type'   => Int32,
+        'desc'   => "Argument index.",
       ),
       array(
         'name'   => "str",
         'type'   => String,
+        'desc'   => "The string to compare with.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "argcount",
+    'name'   => "argCount",
+    'desc'   => "Count of total arguments.",
     'return' => array(
       'type'   => Int32,
+      'desc'   => "The count, not including user command itself.",
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "argvalue",
+    'name'   => "argValue",
+    'desc'   => "Gets value of an argument.",
     'return' => array(
       'type'   => String,
+      'desc'   => "String value of an argument.",
     ),
     'args'   => array(
       array(
         'name'   => "index",
         'type'   => Int32,
+        'desc'   => "Argument index.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "argrest",
+    'name'   => "argRest",
+    'desc'   => "Gets remaining arguments all together as a single string.",
     'return' => array(
       'type'   => String,
+      'desc'   => "The string that has all argument at and after certain index.",
     ),
     'args'   => array(
       array(
         'name'   => "index",
         'type'   => Int32,
+        'desc'   => "The starting index to include arguments.",
       ),
     ),
   ));
@@ -534,13 +600,16 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "send",
+    'desc'   => "Sends a debugger command to debugger proxy.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "TRUE if successful, FALSE otherwise.",
     ),
     'args'   => array(
       array(
         'name'   => "cmd",
         'type'   => 'DebuggerCommand',
+        'desc'   => "The command to send.",
       ),
     ),
   ));
@@ -548,44 +617,54 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xend",
+    'desc'   => "Exchanges command with proxy: sends a command to debugger and expects and receives a command from debugger.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "The received command, and it is always the same type as what it sends, so the same command class can handle processing at both sending and receiving sides.",
     ),
     'args'   => array(
       array(
         'name'   => "cmd",
         'type'   => 'DebuggerCommand',
+        'desc'   => "The command to send.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "getcurrentlocation",
+    'name'   => "getCurrentLocation",
+    'desc'   => "Gets current source location.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "An array in a format of array('file' => {source file name}, 'line' => {line number}, 'namespace' => {namespace code is in}, 'class' => {class code is in}, 'function' => {function code is in}, 'text' => {human readable description of current source location}).",
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "getstacktrace",
+    'name'   => "getStackTrace",
+    'desc'   => "Gets current stacktrace.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "An array of stacktrace frames.",
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "getframe",
+    'name'   => "getFrame",
+    'desc'   => "Returns current frame index.",
     'return' => array(
       'type'   => Int32,
+      'desc'   => "An index indicating which frame end user has moved to for inspection.",
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "printframe",
+    'name'   => "printFrame",
+    'desc'   => "Prints a stacktrace frame.",
     'return' => array(
       'type'   => null,
     ),
@@ -593,13 +672,15 @@ DefineFunction(
       array(
         'name'   => "index",
         'type'   => Int32,
+        'desc'   => "Which frame to print.",
       ),
     ),
   ));
 
 DefineFunction(
   array(
-    'name'   => "addcompletion",
+    'name'   => "addCompletion",
+    'desc'   => "Adds string(s) to auto-completion. This function is only effective inside DebuggerClient::onAutoComplete().",
     'return' => array(
       'type'   => null,
     ),
@@ -607,6 +688,7 @@ DefineFunction(
       array(
         'name'   => "list",
         'type'   => Variant,
+        'desc'   => "A single string, an AUTO_COMPLETE_ constant or an array of strings.",
       ),
     ),
   ));
@@ -614,11 +696,12 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'desc'   => "Destructor of DebugerClient.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "Always returns null.",
     ),
   ));
 
 EndClass(
 );
-

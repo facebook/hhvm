@@ -109,8 +109,18 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
         param.set("nullable", true);
       }
       if (p->value && *p->value) {
+        const char *defText = p->valueText;
+        if (defText == NULL) defText = "";
+
         ASSERT(p->attribute & ClassInfo::IsOptional);
-        param.set("default", f_unserialize(p->value));
+        if (*p->value == '\x01') {
+          Object v((NEW(c_stdclass)())->create());
+          v.o_lval("msg") = String("unable to eval ") + defText;
+          param.set("default", v);
+        } else {
+          param.set("default", f_unserialize(p->value));
+        }
+        param.set("defaultText", defText);
       } else {
         ASSERT((p->attribute & ClassInfo::IsOptional) == 0);
       }
@@ -171,8 +181,8 @@ Array f_hphp_get_class_info(CVarRef name) {
   // interfaces
   {
     Array arr = Array::Create();
-    const ClassInfo::InterfaceMap &interfaces = cls->getInterfaces();
-    for (ClassInfo::InterfaceMap::const_iterator iter = interfaces.begin();
+    const ClassInfo::InterfaceVec &interfaces = cls->getInterfacesVec();
+    for (ClassInfo::InterfaceVec::const_iterator iter = interfaces.begin();
          iter != interfaces.end(); ++iter) {
       arr.set(*iter, 1);
     }
@@ -209,12 +219,13 @@ Array f_hphp_get_class_info(CVarRef name) {
   // properties
   {
     Array arr = Array::Create();
-    const ClassInfo::PropertyMap &properties = cls->getProperties();
-    for (ClassInfo::PropertyMap::const_iterator iter = properties.begin();
+    const ClassInfo::PropertyVec &properties = cls->getPropertiesVec();
+    for (ClassInfo::PropertyVec::const_iterator iter = properties.begin();
          iter != properties.end(); ++iter) {
+      ClassInfo::PropertyInfo *prop = *iter;
       Array info = Array::Create();
-      set_property_info(info, iter->second, cls);
-      arr.set(iter->first, info);
+      set_property_info(info, prop, cls);
+      arr.set(prop->name, info);
     }
     ret.set("properties", arr);
   }
@@ -222,30 +233,31 @@ Array f_hphp_get_class_info(CVarRef name) {
   // constants
   {
     Array arr = Array::Create();
-    const ClassInfo::ConstantMap &constants = cls->getConstants();
-    for (ClassInfo::ConstantMap::const_iterator iter = constants.begin();
+    const ClassInfo::ConstantVec &constants = cls->getConstantsVec();
+    for (ClassInfo::ConstantVec::const_iterator iter = constants.begin();
          iter != constants.end(); ++iter) {
-      if (iter->second->valueText && *iter->second->valueText) {
-        arr.set(iter->second->name, iter->second->value);
+      ClassInfo::ConstantInfo *info = *iter;
+      if (info->valueText && *info->valueText) {
+        arr.set(info->name, info->value);
       } else {
-        arr.set(iter->second->name,
-                get_class_constant(className.data(), iter->second->name));
+        arr.set(info->name, get_class_constant(className.data(), info->name));
       }
     }
     ret.set("constants", arr);
   }
 
   { // source info
+    int line = 0;
     const char *file =
-      SourceInfo::TheSourceInfo.getClassDeclaringFile(className.data());
+      SourceInfo::TheSourceInfo.getClassDeclaringFile(className.data(), &line);
     if (!file) file = "";
     if (file[0] != '/') {
       ret.set("file", String(RuntimeOption::SourceRoot + file));
     } else {
       ret.set("file", file);
     }
-    ret.set("line1", 0);
-    ret.set("line2", 0);
+    ret.set("line1", line);
+    ret.set("line2", line);
     const char *dc = cls->getDocComment();
     if (dc) {
       ret.set("doc", dc);
@@ -268,21 +280,26 @@ Array f_hphp_get_function_info(CStrRef name) {
   ret.set("name",       info->name);
   ret.set("internal",   (bool)(info->attribute & ClassInfo::IsSystem));
   ret.set("hphp",       (bool)(info->attribute & ClassInfo::HipHopSpecific));
+  ret.set("varg",       (bool)(info->attribute &
+                               (ClassInfo::VariableArguments |
+                                ClassInfo::RefVariableArguments |
+                                ClassInfo::MixedVariableArguments)));
   ret.set("closure",    "");
 
   // setting parameters and static variables
   set_function_info(ret, info, NULL);
 
+  int line = 0;
   const char *file =
-    SourceInfo::TheSourceInfo.getFunctionDeclaringFile(name.data());
+    SourceInfo::TheSourceInfo.getFunctionDeclaringFile(name.data(), &line);
   if (!file) file = "";
   if (file[0] != '/') {
     ret.set("file", String(RuntimeOption::SourceRoot + file));
   } else {
     ret.set("file", file);
   }
-  ret.set("line1", 0);
-  ret.set("line2", 0);
+  ret.set("line1", line);
+  ret.set("line2", line);
   const char *dc = info->docComment;
   if (dc) {
     ret.set("doc", dc);

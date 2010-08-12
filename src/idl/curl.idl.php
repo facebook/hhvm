@@ -98,7 +98,7 @@ DefineFunction(
       array(
         'name'   => "uversion",
         'type'   => Int32,
-        'value'  => "CURLVERSION_NOW",
+        'value'  => "k_CURLVERSION_NOW",
       ),
     ),
   ));
@@ -400,6 +400,7 @@ DefineFunction(
   array(
     'name'   => "evhttp_set_cache",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Specifies how many persistent connections to maintain for an HTTP server.",
     'return' => array(
       'type'   => null,
     ),
@@ -407,14 +408,17 @@ DefineFunction(
       array(
         'name'   => "address",
         'type'   => String,
+        'desc'   => "Domain name for an HTTP server. Connections to this server, regardless of what server objects to fetch (specified by a URL), will be cached as persistent connections for re-use.",
       ),
       array(
         'name'   => "max_conn",
         'type'   => Int32,
+        'desc'   => "Maximum number of connections to keep.",
       ),
       array(
         'name'   => "port",
         'type'   => Int32,
+        'desc'   => "Port number of the HTTP server.",
         'value'  => "80",
       ),
     ),
@@ -424,22 +428,27 @@ DefineFunction(
   array(
     'name'   => "evhttp_get",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Synchronously HTTP GET a URL with libevent evhttp library.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "HTTP response. FALSE if any failure.",
     ),
     'args'   => array(
       array(
         'name'   => "url",
         'type'   => String,
+        'desc'   => "The URL to fetch.",
       ),
       array(
         'name'   => "headers",
         'type'   => StringVec,
+        'desc'   => "HTTP headers.",
         'value'  => "null_array",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
+        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
       ),
     ),
@@ -449,26 +458,32 @@ DefineFunction(
   array(
     'name'   => "evhttp_post",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Synchronously HTTP POST a URL with libevent evhttp library.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "HTTP response. FALSE if any failure.",
     ),
     'args'   => array(
       array(
         'name'   => "url",
         'type'   => String,
+        'desc'   => "The URL to post to.",
       ),
       array(
         'name'   => "data",
         'type'   => String,
+        'desc'   => "POST data.",
       ),
       array(
         'name'   => "headers",
         'type'   => StringVec,
+        'desc'   => "HTTP headers.",
         'value'  => "null_array",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
+        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
       ),
     ),
@@ -478,22 +493,27 @@ DefineFunction(
   array(
     'name'   => "evhttp_async_get",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Asynchronously HTTP GET a URL with libevent evhttp library. This is a non-blocking call, without waiting for HTTP server to respond.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "An object evhttp_recv() can use to eventually retrieve HTTP response. FALSE if there was any failure.",
     ),
     'args'   => array(
       array(
         'name'   => "url",
         'type'   => String,
+        'desc'   => "The URL to fetch.",
       ),
       array(
         'name'   => "headers",
         'type'   => StringVec,
+        'desc'   => "HTTP headers.",
         'value'  => "null_array",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
+        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
       ),
     ),
@@ -503,26 +523,32 @@ DefineFunction(
   array(
     'name'   => "evhttp_async_post",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Asynchronously HTTP POST a URL with libevent evhttp library. This is a non-blocking call, without waiting for HTTP server to respond.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "An object evhttp_recv() can use to eventually retrieve HTTP response. FALSE if there was any failure.",
     ),
     'args'   => array(
       array(
         'name'   => "url",
         'type'   => String,
+        'desc'   => "The URL to post to.",
       ),
       array(
         'name'   => "data",
         'type'   => String,
+        'desc'   => "POST data.",
       ),
       array(
         'name'   => "headers",
         'type'   => StringVec,
+        'desc'   => "HTTP headers.",
         'value'  => "null_array",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
+        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
       ),
     ),
@@ -532,13 +558,16 @@ DefineFunction(
   array(
     'name'   => "evhttp_recv",
     'flags'  =>  HipHopSpecific,
+    'desc'   => "Block and wait until HTTP response is ready.",
     'return' => array(
       'type'   => Variant,
+      'desc'   => "HTTP response. FALSE if any failure.",
     ),
     'args'   => array(
       array(
         'name'   => "handle",
         'type'   => Object,
+        'desc'   => "The object created by calling evhttp_async_get() or evhttp_async_post().",
       ),
     ),
   ));

@@ -61,10 +61,19 @@ testing and some alternative PHP implementation.
 - fb_call_user_func_safe
 - fb_call_user_func_safe_return
 
+- fb_serialize
+- fb_unserialize
 - fb_thrift_serialize
 - fb_thrift_unserialize
+- fb_renamed_functions
 - fb_rename_function
+- fb_get_code_coverage
 - fb_utf8ize
+- fb_const_fetch
+
+- fb_get_taint
+- fb_set_taint
+- fb_unset_taint
 
 - xhprof_enable
 - xhprof_disable

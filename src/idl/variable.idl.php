@@ -581,7 +581,7 @@ DefineFunction(
       array(
         'name'   => "extract_type",
         'type'   => Int32,
-        'value'  => "EXTR_OVERWRITE",
+        'value'  => "k_EXTR_OVERWRITE",
         'desc'   => "The way invalid/numeric keys and collisions are treated is determined by the extract_type. It can be one of the following values: EXTR_OVERWRITE If there is a collision, overwrite the existing variable.",
       ),
       array(

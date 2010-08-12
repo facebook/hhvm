@@ -230,18 +230,11 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
 
 void CmdInfo::PrintHeader(StringBuffer &sb, CArrRef info,
                           const char *type) {
-  if (info["internal"].toBoolean()) {
-    if (info["hphp"].toBoolean()) {
-      sb.printf("// HipHop builtin %s\n", type);
-    } else {
-      sb.printf("// PHP builtin %s: http://php.net/manual/en/%s.%s.php\n",
-                type, type, StringUtil::ToLower(info["name"]).data());
-    }
-  } else {
+  if (!info["internal"].toBoolean()) {
     String file = info["file"].toString();
     int line = info["line1"].toInt32();
     if (file.empty() && line == 0) {
-      sb.printf("// user %s (source unknown)\n", type);
+      sb.printf("// (source unknown)\n", type);
     } else if (line == 0) {
       sb.printf("// defined in %s\n", file.data());
     } else {
@@ -252,7 +245,8 @@ void CmdInfo::PrintHeader(StringBuffer &sb, CArrRef info,
   PrintDocComments(sb, info);
 }
 
-String CmdInfo::GetParams(CArrRef params, bool detailed /* = false */) {
+String CmdInfo::GetParams(CArrRef params, bool varg,
+                          bool detailed /* = false */) {
   StringBuffer args;
   for (ArrayIter iter(params); iter; ++iter) {
     if (!args.empty()) {
@@ -270,12 +264,27 @@ String CmdInfo::GetParams(CArrRef params, bool detailed /* = false */) {
     args.append(arg["name"].toString());
     if (arg.exists("default")) {
       args.append(" = ");
-      if (detailed) {
+      Variant defValue = arg["default"];
+      String defText = arg["defaultText"];
+      if (!defText.empty()) {
+        args.append(defText);
+      } else if (defValue.isObject()) {
+        // ClassInfo was not able to serialize the value, so ext_reflection
+        // prepared a stdClass error object. We should fall back to display
+        // the original PHP text, if there.
+        args.append(defValue.o_get("msg").toString());
+      } else if (detailed) {
         args.append(DebuggerClient::FormatVariable(arg["default"], -1));
       } else {
         args.append(DebuggerClient::FormatVariable(arg["default"]));
       }
     }
+  }
+  if (varg) {
+    if (!args.empty()) {
+      args.append(", ");
+    }
+    args.append("...");
   }
   return args.detach();
 }
@@ -343,7 +352,7 @@ bool CmdInfo::TryMethod(StringBuffer &sb, CArrRef info,
               GetModifier(func, "abstract").data(),
               func["ref"].toBoolean() ? "&" : "",
               func["name"].toString().data(),
-              GetParams(func["params"]).data(), true);
+              GetParams(func["params"], func["varg"], true).data());
     return true;
   }
   return false;
@@ -356,7 +365,7 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
     sb.printf("function %s%s(%s);\n",
               info["ref"].toBoolean() ? "&" : "",
               info["name"].toString().data(),
-              GetParams(info["params"]).data());
+              GetParams(info["params"], info["varg"]).data());
     return;
   }
 
@@ -433,7 +442,7 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                 GetModifier(func, "abstract").data(),
                 func["ref"].toBoolean() ? "&" : "",
                 func["name"].toString().data(),
-                GetParams(func["params"]).data());
+                GetParams(func["params"], func["varg"]).data());
     }
   }
 

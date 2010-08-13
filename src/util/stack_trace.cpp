@@ -28,6 +28,7 @@
 #include <fcntl.h>
 #include <util/light_process.h>
 #include <util/compatibility.h>
+#include <util/hash.h>
 
 using namespace std;
 using namespace boost;
@@ -463,12 +464,16 @@ typedef __gnu_cxx::hash_map<std::string, bfd_cache_ptr, string_hash> bfdMap;
 static Mutex s_bfdMutex;
 static bfdMap s_bfds;
 
+static const int maxFilenames = 100;
+static bfd_cache_ptr bfdSlots[maxFilenames];
+
 static bfd_cache_ptr get_bfd_cache(const char *filename) {
   bfdMap::const_iterator iter = s_bfds.find(filename);
+//hash_string(filename);
   if (iter != s_bfds.end()) {
     return iter->second;
   }
-  bfd_cache_ptr p(new bfd_cache());
+  bfd_cache_ptr p(new bfd_cache()); // FIXME
   bfd *abfd = bfd_openr(filename, NULL);
   if (abfd) {
     p->abfd = abfd;
@@ -483,7 +488,7 @@ static bfd_cache_ptr get_bfd_cache(const char *filename) {
   } else {
     p.reset();
   }
-  s_bfds[filename] = p;
+  s_bfds[filename] = p;//  ****
   return p;
 }
 
@@ -491,8 +496,11 @@ bool StackTraceBase::Addr2line(const char *filename, const char *address,
                            Frame *frame, void *adata) {
   Lock lock(s_bfdMutex);
   addr2line_data *data = reinterpret_cast<addr2line_data*>(adata);
+  //bfd_cache p;
+  //get_bfd_cache(filename, &p);
   bfd_cache_ptr p = get_bfd_cache(filename);
   if (!p) return false;
+
 
   data->filename = NULL;
   data->functionname = NULL;

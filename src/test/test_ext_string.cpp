@@ -740,6 +740,10 @@ bool TestExtString::test_stripos() {
 
 bool TestExtString::test_strrpos() {
   VS(f_strrpos("abcdef abcdef", "a"), 7);
+  VS(f_strrpos("0123456789a123456789b123456789c", "7", -5), 17);
+  VS(f_strrpos("0123456789a123456789b123456789c", "7", 20), 27);
+  VS(f_strrpos("0123456789a123456789b123456789c", "7", 28), false);
+
   return Count(true);
 }
 

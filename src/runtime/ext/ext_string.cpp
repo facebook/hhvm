@@ -378,8 +378,7 @@ Variant f_stripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
   return false;
 }
 
-Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset /* = -1 */) {
-  if (offset < 0) offset += haystack.size();
+Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
   int pos;
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset);
@@ -390,8 +389,7 @@ Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset /* = -1 */) {
   return false;
 }
 
-Variant f_strripos(CStrRef haystack, CVarRef needle, int offset /* = -1 */) {
-  if (offset < 0) offset += haystack.size();
+Variant f_strripos(CStrRef haystack, CVarRef needle, int offset /* = 0 */) {
   int pos;
   if (needle.isString()) {
     pos = haystack.rfind(needle.toString(), offset, false);

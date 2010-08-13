@@ -530,7 +530,6 @@ int string_rfind(const char *input, int len, char ch, int pos,
                  bool case_sensitive) {
   ASSERT(input);
 
-  if (pos < 0) pos = len - 1;
   if (len > 0 && pos < len) {
     if (!case_sensitive) {
       ch = tolower(ch);
@@ -540,11 +539,21 @@ int string_rfind(const char *input, int len, char ch, int pos,
       return ret;
     }
 
-    int l = 1;
+    int l = 0;
+    bool stop_at_offset = (pos >= 0);
+
     if (!string_substr_check(len, pos, l)) {
       return -1;
     }
-    for (int i = pos; i >= 0; i--) {
+
+    int start = len - 1, stop = 0;
+    if (stop_at_offset) {
+      stop = pos;
+    } else {
+      start = pos;
+    }
+
+    for (int i = start; i > stop; i--) {
       if (input[i] == ch) {
         return i;
       }
@@ -592,7 +601,6 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
     return -1;
   }
 
-  if (pos < 0) pos = len;
   if (len && pos < len) {
     if (!case_sensitive) {
       char *lowered_s = string_to_lower(s, s_len);
@@ -603,12 +611,20 @@ int string_rfind(const char *input, int len, const char *s, int s_len,
       return ret;
     }
 
-    int l = 1;
+    int l = 0;
+    bool stop_at_offset = (pos >= 0);
     if (!string_substr_check(len, pos, l)) {
       return -1;
     }
-    int i_max = len - s_len;
-    for (int i = (pos > i_max ? i_max : pos) ; i >= 0; i--) {
+
+    int start = len, stop = 0;
+    if (stop_at_offset) {
+      stop = pos;
+    } else {
+      start = pos;
+    }
+
+    for (int i = start - 1; i >= stop; i--) {
       if (input[i] == s[0] && memcmp(input+i, s, s_len) == 0) {
         return i;
       }

@@ -1844,7 +1844,7 @@ DefineFunction(
       array(
         'name'   => "offset",
         'type'   => Int32,
-        'value'  => "-1",
+        'value'  => "0",
         'desc'   => "May be specified to begin searching an arbitrary number of characters into the string. Negative values will stop searching at an arbitrary point prior to the end of the string.",
       ),
     ),
@@ -1873,7 +1873,7 @@ DefineFunction(
       array(
         'name'   => "offset",
         'type'   => Int32,
-        'value'  => "-1",
+        'value'  => "0",
         'desc'   => "The offset parameter may be specified to begin searching an arbitrary number of characters into the string.\nNegative offset values will start the search at offset characters from the start of the string.",
       ),
     ),

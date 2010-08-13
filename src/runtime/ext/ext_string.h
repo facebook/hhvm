@@ -308,8 +308,8 @@ inline Variant f_strchr(CStrRef haystack, CVarRef needle) {
 
 Variant f_strpos(CStrRef haystack, CVarRef needle, int offset = 0);
 Variant f_stripos(CStrRef haystack, CVarRef needle, int offset = 0);
-Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset = -1);
-Variant f_strripos(CStrRef haystack, CVarRef needle, int offset = -1);
+Variant f_strrpos(CStrRef haystack, CVarRef needle, int offset = 0);
+Variant f_strripos(CStrRef haystack, CVarRef needle, int offset = 0);
 
 Variant f_substr_count(CStrRef haystack, CStrRef needle, int offset = 0,
                        int length = 0x7FFFFFFF);

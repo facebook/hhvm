@@ -415,12 +415,12 @@ inline Variant x_stripos(CStrRef haystack, CVarRef needle, int offset = 0) {
   return f_stripos(haystack, needle, offset);
 }
 
-inline Variant x_strrpos(CStrRef haystack, CVarRef needle, int offset = -1) {
+inline Variant x_strrpos(CStrRef haystack, CVarRef needle, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(strrpos);
   return f_strrpos(haystack, needle, offset);
 }
 
-inline Variant x_strripos(CStrRef haystack, CVarRef needle, int offset = -1) {
+inline Variant x_strripos(CStrRef haystack, CVarRef needle, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(strripos);
   return f_strripos(haystack, needle, offset);
 }

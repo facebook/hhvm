@@ -38,8 +38,7 @@ inline void f_ob_flush() {
 }
 inline bool f_ob_end_clean() {
   g_context->obClean();
-  g_context->obEnd();
-  return true;
+  return g_context->obEnd();
 }
 inline bool f_ob_end_flush() {
   bool ret = g_context->obFlush();

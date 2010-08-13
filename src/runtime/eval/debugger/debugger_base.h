@@ -123,7 +123,7 @@ DECLARE_BOOST_TYPES(Macro);
 class Macro {
 public:
   std::string m_name;
-  std::vector<std::string> m_cmds;
+  StringVec m_cmds;
 
   unsigned int m_index; // currently playing position
 

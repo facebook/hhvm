@@ -31,7 +31,7 @@ public:
    */
   static void StartServer();
   static void StartClient(const std::string &host, int port,
-                          const std::string &extension);
+                          const std::string &extension, const StringVec &cmds);
   static void OnServerShutdown();
   static void Stop();
 

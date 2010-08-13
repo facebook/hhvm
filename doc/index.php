@@ -12,6 +12,10 @@ $topics =
         'Server Status' => 'server.status',
         'Server Statistics' => 'server.stats',
       ),
+      'Debugger' => array(
+        'All Commands' => 'debugger.cmds',
+        'Command A-Z' => 'debugger.refs',
+      ),
       'HTTP Server' => array(
         'Rewrite Rules' => 'server.rewrite_rules',
       ),
@@ -67,7 +71,11 @@ echo '<table cellpadding=0 cellspacing=0 border=0>';
 echo '<tr><td valign=top width=200>';
 echo format_index($file);
 echo '</td><td valign=top bgcolor=white width=640>';
-echo format_document($doc);
+if (preg_match('/^debugger\./', $file)) {
+  echo format_debugger_doc($doc);
+} else {
+  echo format_document($doc);
+}
 echo '</td></tr></table>';
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,4 +152,14 @@ function format_document($doc) {
   $doc .= '<p>&nbsp;<table width="100%"><tr><td class="footer" align=right>'.
     'Facebook &copy; 2009</td></tr></table>';
   return $doc;
+}
+
+function format_debugger_doc($doc) {
+  $doc = preg_replace('/</', '&lt;', $doc);
+  $doc = preg_replace('/ *(?:\xe2\x94\x80|\-){5,}(.*) '.
+                      '(?:\xe2\x94\x80|\-){5,}/',
+                      '<h3>$1</h3>', $doc);
+  $doc = preg_replace("/('\[.*?')/", '<b>$1</b>', $doc);
+  $doc = preg_replace("/(\{.*?\})/", '<i>$1</i>', $doc);
+  return format_document($doc);
 }

@@ -74,6 +74,7 @@ struct ProgramOptions {
   string debug_host;
   int    debug_port;
   string debug_extension;
+  StringVec debug_cmds;
   string user;
   string file;
   int    count;
@@ -560,6 +561,8 @@ static int execute_program_impl(int argc, char **argv) {
      "connect to debugger server at specified port")
     ("debug-extension", value<string>(&po.debug_extension),
      "PHP file that extends y command")
+    ("debug-cmd", value<StringVec >(&po.debug_cmds)->composing(),
+     "executes this debugger command and returns its output in stdout")
     ("user,u", value<string>(&po.user),
      "run server under this user account")
     ("file,f", value<string>(&po.file),
@@ -656,7 +659,7 @@ static int execute_program_impl(int argc, char **argv) {
     if (po.mode == "debug") {
       RuntimeOption::EnableDebugger = true;
       Eval::Debugger::StartClient(po.debug_host, po.debug_port,
-                                  po.debug_extension);
+                                  po.debug_extension, po.debug_cmds);
 
       string file = po.file;
       StringVecPtr client_args; bool restarting = false;

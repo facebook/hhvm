@@ -37,6 +37,7 @@ public:
   static const char *HistoryFileName;
 
   static bool UseColor;
+  static bool NoPrompt;
   static const char *HelpColor;
   static const char *InfoColor;
   static const char *OutputColor;
@@ -49,7 +50,8 @@ public:
    * Starts/stops a debugger client.
    */
   static SmartPtr<Socket> Start(const std::string &host, int port,
-                                const std::string &extension);
+                                const std::string &extension,
+                                const StringVec &cmds);
   static void Stop();
 
   /**
@@ -97,7 +99,7 @@ public:
   /**
    * Thread functions.
    */
-  void start(const std::string &extension);
+  void start(const std::string &extension, const StringVec &cmds);
   void stop();
   void run();
 
@@ -256,6 +258,7 @@ private:
   std::set<std::string> m_tutorialVisited;
 
   std::string m_extension;
+  StringVec m_quickCmds;
   AsyncFunc<DebuggerClient> m_mainThread;
   bool m_stopped;
 

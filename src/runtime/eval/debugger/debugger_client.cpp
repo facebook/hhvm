@@ -105,6 +105,7 @@ const char *DebuggerClient::ConfigFileName = ".hphpd.hdf";
 const char *DebuggerClient::HistoryFileName = ".hphpd.history";
 
 bool DebuggerClient::UseColor = true;
+bool DebuggerClient::NoPrompt = false;
 
 const char *DebuggerClient::HelpColor     = NULL;
 const char *DebuggerClient::InfoColor     = NULL;
@@ -126,13 +127,14 @@ const char *DebuggerClient::DefaultCodeColors[] = {
 };
 
 SmartPtr<Socket> DebuggerClient::Start(const std::string &host, int port,
-                                       const std::string &extension) {
+                                       const std::string &extension,
+                                       const StringVec &cmds) {
   SmartPtr<Socket> ret = s_debugger_client.connectLocal();
   if (!host.empty()) {
     s_debugger_client.connectRemote(host, port);
   }
   Debugger::SetTextColors();
-  s_debugger_client.start(extension);
+  s_debugger_client.start(extension, cmds);
   return ret;
 }
 
@@ -312,6 +314,9 @@ void DebuggerClient::connectRemote(const std::string &host, int port) {
 }
 
 std::string DebuggerClient::getPrompt() {
+  if (NoPrompt) {
+    return "";
+  }
   if (m_inputState == TakingCode) {
     string prompt = " ";
     for (unsigned int i = 2; i < m_machine->m_name.size() + 2; i++) {
@@ -323,8 +328,10 @@ std::string DebuggerClient::getPrompt() {
   return m_machine->m_name + "> ";
 }
 
-void DebuggerClient::start(const std::string &extension) {
+void DebuggerClient::start(const std::string &extension,
+                           const StringVec &cmds) {
   m_extension = extension;
+  m_quickCmds = cmds;
   m_mainThread.start();
 }
 
@@ -337,6 +344,16 @@ void DebuggerClient::run() {
   ReadlineHelper helper;
   loadConfig();
   playMacro("startup");
+
+  if (!m_quickCmds.empty()) {
+    m_macroPlaying = MacroPtr(new Macro());
+    m_macroPlaying->m_cmds = m_quickCmds;
+    m_macroPlaying->m_cmds.push_back("q");
+    m_macroPlaying->m_index = 0;
+
+    UseColor = false;
+    NoPrompt = true;
+  }
 
   hphp_session_init();
   ExecutionContext *context = hphp_context_init();
@@ -516,8 +533,10 @@ void DebuggerClient::updateLiveLists() {
 void DebuggerClient::runImpl() {
   const char *func = "DebuggerClient::runImpl()";
 
-  info("Welcome to HipHop Debugger!");
-  info("Type \"help\" or \"?\" for a complete list of commands.\n");
+  if (!NoPrompt) {
+    info("Welcome to HipHop Debugger!");
+    info("Type \"help\" or \"?\" for a complete list of commands.\n");
+  }
 
   try {
     while (!m_stopped) {
@@ -570,7 +589,7 @@ bool DebuggerClient::console() {
         return false;
       }
       deleter = String(line, AttachString);
-    } else {
+    } else if (!NoPrompt) {
       print("%s%s", getPrompt().c_str(), line);
     }
     if (*line) {
@@ -587,7 +606,7 @@ bool DebuggerClient::console() {
           record(line);
           m_prevCmd = m_command;
           if (!process()) {
-            error("command not found");
+            error("command [" + m_command + "]not found");
             m_command.clear();
           }
         } catch (DebuggerClientExitException &e) {
@@ -780,9 +799,9 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
     for (int n = 0; n < lines1.size() || n < lines2.size(); n++) {
       sb.append("    ");
       if (n) sb.append("  ");
-      sb.append(StringUtil::Pad(lines1[n], leftMax - 4));
+      sb.append(StringUtil::Pad(lines1[n], leftMax));
       if (n == 0) sb.append("  ");
-      sb.append("   ");
+      sb.append("  ");
       sb.append(lines2[n].toString());
       sb.append("\n");
     }

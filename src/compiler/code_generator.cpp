@@ -225,8 +225,7 @@ const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {
            "get_system_globals()" : "get_global_variables()";
   }
   if (m_output == CodeGenerator::SystemCPP) return "get_system_globals()";
-  if (ar->getScope()->getVariables()->needGlobalPointer()) return "g";
-  return "get_global_variables()";
+  return "g";
 }
 
 std::string CodeGenerator::formatLabel(const std::string &name) {

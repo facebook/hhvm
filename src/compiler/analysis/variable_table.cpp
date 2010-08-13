@@ -185,12 +185,12 @@ bool VariableTable::needLocalCopy(const string &name) const {
 }
 
 bool VariableTable::needGlobalPointer() const {
-  return !m_global.empty() ||
+  return !isPseudoMainTable() && (!m_global.empty() ||
     !m_static.empty() ||
     getAttribute(ContainsDynamicVariable) ||
     getAttribute(ContainsExtract) ||
     getAttribute(ContainsUnset) ||
-    getAttribute(NeedGlobalPointer);
+    getAttribute(NeedGlobalPointer));
 }
 
 bool VariableTable::isInherited(const string &name) const {
@@ -974,8 +974,11 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     cg_indentBegin("GlobalVariables *get_global_variables() {\n");
     cg_printf("return g_variables.get();\n");
     cg_indentEnd("}\n");
-    cg_printf("void init_global_variables() "
-              "{ GlobalVariables::initialize();}\n");
+    cg_printf("void init_global_variables() {\n"
+              "  ThreadInfo::s_threadInfo->m_globals =\n"
+              "    get_global_variables();\n"
+              "  GlobalVariables::initialize();\n"
+              "}\n");
     cg_indentBegin("void free_global_variables() {\n");
     cg_printf("g_variables.reset();\n");
     cg_printf("g_array_wrapper.reset();\n");
@@ -1022,7 +1025,7 @@ void VariableTable::outputCPPGlobalVariablesGetImpl(CodeGenerator &cg,
                                                     AnalysisResultPtr ar) {
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETIMPL");
   cg_indentBegin("Variant &GlobalVariables::getImpl(CStrRef s) {\n");
-  cg.printDeclareGlobals();
+  cg_printf("GlobalVariables *g __attribute__((__unused__)) = this;\n");
   if (!outputCPPJumpTable(cg, ar, NULL, true, true, EitherStatic,
                           JumpReturnString)) {
     m_emptyJumpTables.insert(JumpTableGlobalGetImpl);
@@ -1036,7 +1039,7 @@ void VariableTable::outputCPPGlobalVariablesExists(CodeGenerator &cg,
                                                    AnalysisResultPtr ar) {
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_EXISTS");
   cg_indentBegin("bool GlobalVariables::exists(CStrRef s) const {\n");
-  cg.printDeclareGlobals();
+  cg_printf("const GlobalVariables *g __attribute__((__unused__)) = this;\n");
   if (!outputCPPJumpTable(cg, ar, NULL, true, false,
                           EitherStatic, JumpInitializedString)) {
     m_emptyJumpTables.insert(JumpTableGlobalExists);
@@ -1053,7 +1056,7 @@ void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
   cg_indentBegin("ssize_t GlobalVariables::getIndex(const char* s, "
                  "int64 hash) const {\n");
-  cg.printDeclareGlobals();
+  cg_printf("const GlobalVariables *g __attribute__((__unused__)) = this;\n");
   if (!outputCPPJumpTable(cg, ar, NULL, false, true, EitherStatic, JumpIndex)) {
     m_emptyJumpTables.insert(JumpTableGlobalGetIndex);
   }
@@ -1069,7 +1072,7 @@ void VariableTable::outputCPPGlobalVariablesMethods(CodeGenerator &cg,
 
   cg_indentBegin("CVarRef GlobalVariables::getRefByIdx(ssize_t idx, "
                  "Variant &k) {\n");
-  cg.printDeclareGlobals();
+  cg_printf("GlobalVariables *g __attribute__((__unused__)) = this;\n");
   cg_indentBegin("static const char *names[] = {\n");
   for (int i = 0; i < maxIdx; i++) {
     const string &name = m_symbols[i];
@@ -1112,17 +1115,14 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
 
 void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool inPseudoMain = isPseudoMainTable();
-  if (inPseudoMain || needGlobalPointer()) {
-    cg.printDeclareGlobals();
-  }
   if (inPseudoMain) {
     if (m_allVariants) {
       cg_printf("LVariableTable *gVariables __attribute__((__unused__)) = "
-                "get_variable_table();\n");
+                "(LVariableTable *)g;\n");
     } else {
       ASSERT(false);
       cg_printf("RVariableTable *gVariables __attribute__((__unused__)) = "
-                "get_variable_table();\n");
+                "(RVariableTable *)g;\n");
     }
   }
 

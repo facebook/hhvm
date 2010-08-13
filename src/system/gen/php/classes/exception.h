@@ -41,7 +41,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant pm_php$classes$exception_php(bool incOnce = false, LVariableTable* variables = NULL);
+Variant pm_php$classes$exception_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 Object co_unexpectedvalueexception(CArrRef params, bool init = true);
 Object co_overflowexception(CArrRef params, bool init = true);
 Object co_outofboundsexception(CArrRef params, bool init = true);

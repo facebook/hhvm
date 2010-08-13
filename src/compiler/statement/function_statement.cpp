@@ -231,21 +231,15 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     {
       funcScope->outputCPPParamsDecl(cg, ar, m_params, false);
       cg_indentBegin(") {\n");
+      const char *sys =
+        (cg.getOutput() == CodeGenerator::SystemCPP ? "_BUILTIN" : "");
       if (pseudoMain) {
-        cg_indentBegin("{\n");
-        cg.printDeclareGlobals();
-        cg_printf("bool &alreadyRun = g->run_%s%s;\n",
-                  Option::PseudoMainPrefix,
+        cg_printf("PSEUDOMAIN_INJECTION%s(%s, %s%s);\n",
+                  sys, origFuncName.c_str(), Option::PseudoMainPrefix,
                   funcScope->getFileScope()->pseudoMainName().c_str());
-        cg_printf("if (alreadyRun) { if (incOnce) return true;}\n");
-        cg_printf("else alreadyRun = true;\n");
-        cg_printf("if (!variables) variables = g;\n");
-        cg_indentEnd("}\n");
-        cg_printf("PSEUDOMAIN_INJECTION(%s);\n",
-                  origFuncName.c_str());
       } else {
         if (m_stmt->hasBody()) {
-          cg_printf("FUNCTION_INJECTION(%s);\n", origFuncName.c_str());
+          cg_printf("FUNCTION_INJECTION%s(%s);\n", sys, origFuncName.c_str());
         }
         outputCPPArgInjections(cg, ar, origFuncName.c_str(), ClassScopePtr(),
                                funcScope);

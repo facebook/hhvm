@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include <runtime/base/types.h>
+#include <runtime/base/hphp_system.h>
 #include <runtime/base/memory/smart_allocator.h>
 
 using namespace std;

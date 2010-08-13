@@ -1061,17 +1061,9 @@ void c_pear_error::t_tostring() {
 Object co_pear_error(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_pear_error)())->dynCreate(params, init));
 }
-Variant pm_php$classes$pear_error_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */) {
-  {
-    DECLARE_SYSTEM_GLOBALS(g);
-    bool &alreadyRun = g->run_pm_php$classes$pear_error_php;
-    if (alreadyRun) { if (incOnce) return true;}
-    else alreadyRun = true;
-    if (!variables) variables = g;
-  }
-  PSEUDOMAIN_INJECTION(run_init::classes/pear_error.php);
-  DECLARE_SYSTEM_GLOBALS(g);
-  LVariableTable *gVariables __attribute__((__unused__)) = get_variable_table();
+Variant pm_php$classes$pear_error_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/pear_error.php, pm_php$classes$pear_error_php);
+  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
 } /* function */
 

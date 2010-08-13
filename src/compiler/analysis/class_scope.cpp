@@ -1234,7 +1234,7 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
     string origName = func->getOriginalName();
     if (useFastMethodCall) {
       const MethodSlot* ms = ar->getMethodSlot(name);
-      cg_indentBegin("if (methodIndex.m_overloadIndex == 0x%x) { \n",
+      cg_indentBegin("if (methodIndex.m_overloadIndex == 0x%x) {\n",
                      ms->getOverloadIndex());
     } else  {
       int index = -1;

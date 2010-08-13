@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant pm_php$classes$stdclass_php(bool incOnce = false, LVariableTable* variables = NULL);
+Variant pm_php$classes$stdclass_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 Object co_stdclass(CArrRef params, bool init = true);
 Object co___php_incomplete_class(CArrRef params, bool init = true);
 

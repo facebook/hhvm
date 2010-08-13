@@ -28,7 +28,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant pm_php$classes$splobjectstorage_php(bool incOnce = false, LVariableTable* variables = NULL);
+Variant pm_php$classes$splobjectstorage_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 Object co_splobjectstorage(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////

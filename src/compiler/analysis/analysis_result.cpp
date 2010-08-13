@@ -2053,8 +2053,10 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       vector<const char*> entries;
       BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
         entries.push_back(f->getName().c_str());
-        cg_printf("Variant %s%s(bool incOnce = false, LVariableTable* variables"
-                  " = NULL);\n", Option::PseudoMainPrefix,
+        cg_printf("Variant %s%s(bool incOnce = false, "
+                  "LVariableTable* variables = NULL, "
+                  "Globals *globals = get_globals());\n",
+                  Option::PseudoMainPrefix,
                   Option::MangleFilename(f->getName(), true).c_str());
       }
 

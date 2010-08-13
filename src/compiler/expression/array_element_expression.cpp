@@ -337,7 +337,7 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       string name = variables->getGlobalVariableName(cg, ar, m_globalName);
       cg_printf("g->%s", name.c_str());
     } else {
-      cg_printf("get_variable_table()->get(");
+      cg_printf("((LVariableTable *)g)->get(");
       m_offset->outputCPP(cg, ar);
       cg_printf(")");
     }
@@ -441,7 +441,7 @@ void ArrayElementExpression::outputCPPExistTest(CodeGenerator &cg,
       string name = variables->getGlobalVariableName(cg, ar, m_globalName);
       cg_printf("g->%s", name.c_str());
     } else {
-      cg_printf("get_variable_table()->get(");
+      cg_printf("((LVariableTable *)g)->get(");
       m_offset->outputCPP(cg, ar);
       cg_printf(")");
     }

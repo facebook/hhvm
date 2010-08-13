@@ -29,7 +29,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant pm_php$classes$splfile_php(bool incOnce = false, LVariableTable* variables = NULL);
+Variant pm_php$classes$splfile_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 Object co_splfileobject(CArrRef params, bool init = true);
 Object co_splfileinfo(CArrRef params, bool init = true);
 

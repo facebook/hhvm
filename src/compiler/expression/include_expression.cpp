@@ -193,10 +193,10 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
   if (!getCurrentInclude(ar).empty()) {
     FileScopePtr fs = ar->findFileScope(getCurrentInclude(ar), false);
     if (fs) {
-      cg_printf("%s%s(%s, %s)", Option::PseudoMainPrefix,
+      cg_printf("%s%s(%s, %s, %s)", Option::PseudoMainPrefix,
                 fs->pseudoMainName().c_str(),
                 once ? "true" : "false",
-                vars);
+                vars, cg.getGlobals(ar));
       if (linemap) cg_printf(")");
       return;
     }

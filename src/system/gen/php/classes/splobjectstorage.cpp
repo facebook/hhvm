@@ -893,7 +893,6 @@ void c_splobjectstorage::t_attach(CVarRef v_obj) {
 /* SRC: classes/splobjectstorage.php line 140 */
 void c_splobjectstorage::t_detach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::detach);
-  DECLARE_SYSTEM_GLOBALS(g);
   Primitive v_idx = 0;
   Variant v_object;
 
@@ -923,17 +922,9 @@ void c_splobjectstorage::t_detach(CVarRef v_obj) {
 Object co_splobjectstorage(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_splobjectstorage)())->dynCreate(params, init));
 }
-Variant pm_php$classes$splobjectstorage_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */) {
-  {
-    DECLARE_SYSTEM_GLOBALS(g);
-    bool &alreadyRun = g->run_pm_php$classes$splobjectstorage_php;
-    if (alreadyRun) { if (incOnce) return true;}
-    else alreadyRun = true;
-    if (!variables) variables = g;
-  }
-  PSEUDOMAIN_INJECTION(run_init::classes/splobjectstorage.php);
-  DECLARE_SYSTEM_GLOBALS(g);
-  LVariableTable *gVariables __attribute__((__unused__)) = get_variable_table();
+Variant pm_php$classes$splobjectstorage_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/splobjectstorage.php, pm_php$classes$splobjectstorage_php);
+  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
 } /* function */
 

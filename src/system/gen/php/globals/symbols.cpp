@@ -24,17 +24,9 @@ namespace HPHP {
 
 /* preface starts */
 /* preface finishes */
-Variant pm_php$globals$symbols_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */) {
-  {
-    DECLARE_SYSTEM_GLOBALS(g);
-    bool &alreadyRun = g->run_pm_php$globals$symbols_php;
-    if (alreadyRun) { if (incOnce) return true;}
-    else alreadyRun = true;
-    if (!variables) variables = g;
-  }
-  PSEUDOMAIN_INJECTION(run_init::globals/symbols.php);
-  DECLARE_SYSTEM_GLOBALS(g);
-  LVariableTable *gVariables __attribute__((__unused__)) = get_variable_table();
+Variant pm_php$globals$symbols_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+  PSEUDOMAIN_INJECTION_BUILTIN(run_init::globals/symbols.php, pm_php$globals$symbols_php);
+  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   Variant &v_argc __attribute__((__unused__)) = g->gv_argc;
   Variant &v_argv __attribute__((__unused__)) = g->gv_argv;
   Variant &v__SERVER __attribute__((__unused__)) = g->gv__SERVER;

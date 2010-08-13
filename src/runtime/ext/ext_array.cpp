@@ -413,7 +413,7 @@ static void compact(T *variables, Array &ret, CVarRef var) {
 
 Array compact(RVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv /* = null_array */) {
-  FUNCTION_INJECTION(compact);
+  FUNCTION_INJECTION_BUILTIN(compact);
   Array ret = Array::Create();
   compact(variables, ret, varname);
   compact(variables, ret, _argv);
@@ -422,7 +422,7 @@ Array compact(RVariableTable *variables, int _argc, CVarRef varname,
 
 Array compact(LVariableTable *variables, int _argc, CVarRef varname,
               CArrRef _argv /* = null_array */) {
-  FUNCTION_INJECTION(compact);
+  FUNCTION_INJECTION_BUILTIN(compact);
   Array ret = Array::Create();
   compact(variables, ret, varname);
   compact(variables, ret, _argv);

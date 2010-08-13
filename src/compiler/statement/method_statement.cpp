@@ -565,9 +565,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       if (m_name == "__lval" || m_name == "__offsetget_lval") {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
-        cg_printf("Variant &v = %s->__lvalProxy;\n",
-                  cg.getOutput() == CodeGenerator::SystemCPP ?
-                  "get_system_globals()" : "get_global_variables()");
+        cg_printf("Variant &v = %s->__lvalProxy;\n", cg.getGlobals(ar));
         string lowered = Util::toLower(m_originalName);
         cg_printf("v = %s%s(%s%s);\n",
                   Option::MethodPrefix, lowered.c_str(),

@@ -181,6 +181,7 @@ public:
 class FrameInjection;
 class ObjectAllocatorBase;
 class Profiler;
+class GlobalVariables;
 
 // implemented in runtime/base/thread_info
 class ThreadInfo {
@@ -196,6 +197,8 @@ public:
 
   // This pointer is set by ProfilerFactory
   Profiler *m_profiler;
+
+  GlobalVariables *m_globals;
 
   ThreadInfo();
 

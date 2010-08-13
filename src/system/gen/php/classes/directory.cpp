@@ -566,17 +566,9 @@ Variant c_directory::t_close() {
 Object co_directory(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_directory)())->dynCreate(params, init));
 }
-Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */) {
-  {
-    DECLARE_SYSTEM_GLOBALS(g);
-    bool &alreadyRun = g->run_pm_php$classes$directory_php;
-    if (alreadyRun) { if (incOnce) return true;}
-    else alreadyRun = true;
-    if (!variables) variables = g;
-  }
-  PSEUDOMAIN_INJECTION(run_init::classes/directory.php);
-  DECLARE_SYSTEM_GLOBALS(g);
-  LVariableTable *gVariables __attribute__((__unused__)) = get_variable_table();
+Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
+  PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directory.php, pm_php$classes$directory_php);
+  LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
   return true;
 } /* function */
 

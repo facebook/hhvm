@@ -430,7 +430,9 @@ std::string DebuggerProxy::MakePHPReturn(const std::string &php) {
 }
 
 Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output) {
-  PSEUDOMAIN_INJECTION(_); // using "_" as filename
+  DECLARE_THREAD_INFO
+  // using "_" as filename
+  FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain)
   Variant ret;
   try {
     g_context->obStart("");

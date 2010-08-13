@@ -27,7 +27,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant pm_php$classes$directory_php(bool incOnce = false, LVariableTable* variables = NULL);
+Variant pm_php$classes$directory_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 Object co_directory(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////

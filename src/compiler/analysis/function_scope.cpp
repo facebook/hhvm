@@ -626,10 +626,12 @@ void FunctionScope::outputCPPParamsDecl(CodeGenerator &cg,
     }
   } else if (m_pseudoMain) {
     if (showDefault) {
-      cg_printf("bool incOnce = false, LVariableTable* variables = NULL");
+      cg_printf("bool incOnce = false, LVariableTable* variables = NULL, "
+                "Globals *globals = get_globals()");
     } else {
       cg_printf("bool incOnce /* = false */, "
-                "LVariableTable* variables /* = NULL */");
+                "LVariableTable* variables /* = NULL */, "
+                "Globals *globals /* = get_globals() */");
     }
   } else if (params) {
     ar->setInExpression(true);

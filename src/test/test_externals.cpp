@@ -299,7 +299,10 @@ GlobalVariables *get_global_variables() { return g_variables.get();}
 LVariableTable *get_variable_table() { return g_variables.get(); }
 Globals *get_globals() { return g_variables.get(); }
 SystemGlobals *get_system_globals() { return g_variables.get(); }
-void init_global_variables() { GlobalVariables::initialize();}
+void init_global_variables() {
+  ThreadInfo::s_threadInfo->m_globals = get_global_variables();
+  GlobalVariables::initialize();
+}
 void free_global_variables() { g_variables.reset();}
 
 Variant invoke_file(CStrRef path, bool once /* = false */,

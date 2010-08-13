@@ -43,7 +43,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variables = NULL);
+Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
 Object co_arrayiterator(CArrRef params, bool init = true);
 Object co_appenditerator(CArrRef params, bool init = true);
 Object co_recursivedirectoryiterator(CArrRef params, bool init = true);

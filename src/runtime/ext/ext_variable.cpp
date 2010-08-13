@@ -132,7 +132,7 @@ int f_extract(CArrRef var_array, int extract_type /* = EXTR_OVERWRITE */,
 int extract(LVariableTable *variables, CArrRef var_array,
             int extract_type /* = EXTR_OVERWRITE */,
             String prefix /* = "" */) {
-  FUNCTION_INJECTION(extract);
+  FUNCTION_INJECTION_BUILTIN(extract);
 
   bool reference = extract_type & EXTR_REFS;
   extract_type &= ~EXTR_REFS;

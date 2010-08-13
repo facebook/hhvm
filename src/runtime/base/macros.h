@@ -434,6 +434,22 @@ do { \
 #define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, c, #n, this);
 #define LINE(n, e) (fi.setLine(n), e)
 
+// Get global variables from thread info.
+#define DECLARE_GLOBAL_VARIABLES_INJECTION(g)       \
+  GlobalVariables *g __attribute__((__unused__)) =  \
+    info->m_globals;
+#define DECLARE_SYSTEM_GLOBALS_INJECTION(g)         \
+  SystemGlobals *g __attribute__((__unused__)) =    \
+    (SystemGlobals *)info->m_globals;
+
+#define CHECK_ONCE(n)                             \
+  {                                               \
+    bool &alreadyRun = g->run_ ## n;              \
+    if (alreadyRun) { if (incOnce) return true; } \
+    else alreadyRun = true;                       \
+    if (!variables) variables = g;                \
+  }
+
 // code injected into beginning of every function/method
 #define FUNCTION_INJECTION(n)                   \
   DECLARE_THREAD_INFO                           \
@@ -441,6 +457,7 @@ do { \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
   FRAME_INJECTION(empty_string, n)              \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)         \
 
 #define STATIC_METHOD_INJECTION(c, n)           \
   DECLARE_THREAD_INFO                           \
@@ -448,6 +465,7 @@ do { \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
   FRAME_INJECTION(s_class_name, n)              \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)         \
 
 #define INSTANCE_METHOD_INJECTION(c, n)         \
   DECLARE_THREAD_INFO                           \
@@ -455,12 +473,15 @@ do { \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION(n)                      \
   FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)         \
 
-#define PSEUDOMAIN_INJECTION(n)                 \
-  DECLARE_THREAD_INFO                           \
-  RECURSION_INJECTION                           \
-  REQUEST_TIMEOUT_INJECTION                     \
-  HOTPROFILER_INJECTION(n)                      \
+#define PSEUDOMAIN_INJECTION(n, esc)               \
+  GlobalVariables *g = (GlobalVariables *)globals; \
+  CHECK_ONCE(esc)                                  \
+  DECLARE_THREAD_INFO                              \
+  RECURSION_INJECTION                              \
+  REQUEST_TIMEOUT_INJECTION                        \
+  HOTPROFILER_INJECTION(n)                         \
   FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::PseudoMain) \
 
 // code injected into every builtin function/method
@@ -470,6 +491,7 @@ do { \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::BuiltinFunction) \
+  DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
 
 #define STATIC_METHOD_INJECTION_BUILTIN(c, n)   \
   DECLARE_THREAD_INFO                           \
@@ -477,6 +499,7 @@ do { \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION(s_class_name, n)              \
+  DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
 
 #define INSTANCE_METHOD_INJECTION_BUILTIN(c, n) \
   if (!o_id) throw_instance_method_fatal(#n);   \
@@ -485,6 +508,16 @@ do { \
   REQUEST_TIMEOUT_INJECTION                     \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
+  DECLARE_SYSTEM_GLOBALS_INJECTION(g)           \
+
+#define PSEUDOMAIN_INJECTION_BUILTIN(n, esc)    \
+  SystemGlobals *g = (SystemGlobals *)globals;  \
+  CHECK_ONCE(esc)                               \
+  DECLARE_THREAD_INFO                           \
+  RECURSION_INJECTION                           \
+  REQUEST_TIMEOUT_INJECTION                     \
+  HOTPROFILER_INJECTION(n)                      \
+  FRAME_INJECTION_FLAGS(empty_string, n, FrameInjection::PseudoMain) \
 
 #define INTERCEPT_INJECTION_ALWAYS(name, func, args, rr)                \
   static char intercepted = -1;                                         \

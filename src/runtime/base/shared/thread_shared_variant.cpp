@@ -26,10 +26,10 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
-                                         bool inner /* = false */)
-  : m_owner(true) {
+                                         bool inner /* = false */) {
   ASSERT(!serialized || source.isString());
 
+  setOwner();
   m_ref = 1;
 
   switch (source.getType()) {
@@ -78,8 +78,8 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         // only need to call hasInternalReference() on the toplevel array
         PointerSet seen;
         if (arr->hasInternalReference(seen)) {
-          m_serializedArray = true;
-          m_shouldCache = true;
+          setSerializedArray();
+          setShouldCache();
           String s = apc_serialize(source);
           m_data.str = new StringData(s.data(), s.size(), CopyString);
           break;
@@ -87,13 +87,13 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
       }
 
       size_t size = arr->size();
-      m_isVector = arr->isVectorData();
-      if (m_isVector) {
+      if (arr->isVectorData()) {
+        setIsVector();
         m_data.vec = new VectorData(size);
         uint i = 0;
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
           ThreadSharedVariant* val = createAnother(it.second(), false, true);
-          if (val->shouldCache()) m_shouldCache = true;
+          if (val->shouldCache()) setShouldCache();
           m_data.vec->vals[i] = val;
         }
       } else {
@@ -102,7 +102,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
           ThreadSharedVariant* key = createAnother(it.first(), false);
           ThreadSharedVariant* val = createAnother(it.second(), false, true);
-          if (val->shouldCache()) m_shouldCache = true;
+          if (val->shouldCache()) setShouldCache();
           m_data.map->add(key, val);
         }
       }
@@ -111,7 +111,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
   default:
     {
       m_type = KindOfObject;
-      m_shouldCache = true;
+      setShouldCache();
       String s = apc_serialize(source);
       m_data.str = new StringData(s.data(), s.size(), CopyString);
       break;
@@ -120,7 +120,7 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
 }
 
 Variant ThreadSharedVariant::toLocal() {
-  ASSERT(m_owner);
+  ASSERT(getOwner());
   switch (m_type) {
   case KindOfBoolean:
     {
@@ -141,7 +141,7 @@ Variant ThreadSharedVariant::toLocal() {
     }
   case KindOfArray:
     {
-      if (m_serializedArray) {
+      if (getSerializedArray()) {
         return apc_unserialize(String(m_data.str->data(), m_data.str->size(),
                                       AttachLiteral));
       }
@@ -180,7 +180,7 @@ void ThreadSharedVariant::dump(std::string &out) {
     out += stringData();
     break;
   case KindOfArray:
-    if (m_serializedArray) {
+    if (getSerializedArray()) {
       out += "array: ";
       out += m_data.str->data();
     } else {
@@ -199,21 +199,21 @@ ThreadSharedVariant::~ThreadSharedVariant() {
   switch (m_type) {
   case KindOfString:
   case KindOfObject:
-    if (m_owner) {
+    if (getOwner()) {
       m_data.str->destruct();
     }
     break;
   case KindOfArray:
     {
-      if (m_serializedArray) {
-        if (m_owner) {
+      if (getSerializedArray()) {
+        if (getOwner()) {
           m_data.str->destruct();
         }
         break;
       }
 
-      ASSERT(m_owner);
-      if (m_isVector) delete m_data.vec;
+      ASSERT(getOwner());
+      if (getIsVector()) delete m_data.vec;
       else delete m_data.map;
     }
     break;
@@ -236,7 +236,7 @@ size_t ThreadSharedVariant::stringLength() const {
 
 size_t ThreadSharedVariant::arrSize() const {
   ASSERT(is(KindOfArray));
-  if (m_isVector) return m_data.vec->size;
+  if (getIsVector()) return m_data.vec->size;
   return m_data.map->size();
 }
 
@@ -248,7 +248,7 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
   case KindOfInt32:
   case KindOfInt64: {
     int64 num = key.getNumData();
-    if (m_isVector) {
+    if (getIsVector()) {
       if (num < 0 || (size_t) num >= m_data.vec->size) return -1;
       return num;
     }
@@ -256,12 +256,12 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
   }
   case KindOfStaticString:
   case KindOfString: {
-    if (m_isVector) return -1;
+    if (getIsVector()) return -1;
     StringData *sd = key.getStringData();
     return m_data.map->indexOf(sd);
   }
   case LiteralString: {
-    if (m_isVector) return -1;
+    if (getIsVector()) return -1;
     StringData sd(key.getLiteralString(), AttachLiteral);
     return m_data.map->indexOf(&sd);
   }
@@ -275,7 +275,7 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
 SharedVariant* ThreadSharedVariant::get(CVarRef key) {
   int idx = getIndex(key);
   if (idx != -1) {
-    if (m_isVector) return m_data.vec->vals[idx];
+    if (getIsVector()) return m_data.vec->vals[idx];
     return m_data.map->getValIndex(idx);
   }
   return NULL;
@@ -292,9 +292,9 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
                                     bool keepRef /* = false */) {
   ASSERT(is(KindOfArray));
   uint count = arrSize();
-  ArrayInit ai(count, m_isVector, keepRef);
+  ArrayInit ai(count, getIsVector(), keepRef);
   for (uint i = 0; i < count; i++) {
-    if (m_isVector) {
+    if (getIsVector()) {
       ai.set(i, (int64)i, sharedMap.getValue(i), -1, true);
     } else {
       ai.set(i, m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
@@ -347,13 +347,13 @@ void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
     break;
   default:
     ASSERT(is(KindOfArray));
-    if (m_serializedArray) {
+    if (getSerializedArray()) {
       stats->dataSize = m_data.str->size();
       stats->dataTotalSize = sizeof(ThreadSharedVariant) + sizeof(StringData) +
                              stats->dataSize;
       break;
     }
-    if (m_isVector) {
+    if (getIsVector()) {
       stats->dataTotalSize = sizeof(ThreadSharedVariant) + sizeof(VectorData);
       stats->dataTotalSize += sizeof(ThreadSharedVariant*) * m_data.vec->size;
       for (size_t i = 0; i < m_data.vec->size; i++) {

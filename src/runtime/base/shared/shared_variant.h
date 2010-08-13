@@ -37,7 +37,7 @@ class SharedVariant
 #endif
 {
 public:
-  SharedVariant() : m_ref(1), m_shouldCache(false), m_serializedArray(false) {}
+  SharedVariant() : m_ref(1), m_flags(0) {}
   virtual ~SharedVariant() {}
 
   bool is(DataType d) const {
@@ -80,13 +80,22 @@ public:
 
   // whether it is an object, or an array that recursively contains an object
   // or an array with circular reference
-  bool shouldCache() { return m_shouldCache; }
+  bool shouldCache() { return getShouldCache(); }
 
  protected:
+  const static uint16 SerializedArray = (1<<15);
+  const static uint16 ShouldCache = (1<<14);
   int m_ref;
-  bool m_shouldCache;
-  bool m_serializedArray;
-  DataType m_type;
+  uint16 m_flags;
+  uint8 m_type;
+
+  bool getSerializedArray() const { return (bool)(m_flags & SerializedArray);}
+  void setSerializedArray() { m_flags |= SerializedArray;}
+  void clearSerializedArray() { m_flags &= ~SerializedArray;}
+
+  bool getShouldCache() const { return (bool)(m_flags & ShouldCache);}
+  void setShouldCache() { m_flags |= ShouldCache;}
+  void clearShouldCache() { m_flags &= ~ShouldCache;}
 
   // only for countReachable() return NULL if it is vector and key is not
   // SharedVariant

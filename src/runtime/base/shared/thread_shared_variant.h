@@ -72,7 +72,7 @@ public:
 
   virtual Variant getKey(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    if (m_isVector) {
+    if (getIsVector()) {
       ASSERT(pos < (ssize_t) m_data.vec->size);
       return pos;
     }
@@ -80,7 +80,7 @@ public:
   }
   virtual SharedVariant* getValue(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    if (m_isVector) {
+    if (getIsVector()) {
       ASSERT(pos < (ssize_t) m_data.vec->size);
       return m_data.vec->vals[pos];
     }
@@ -103,11 +103,14 @@ protected:
 
   virtual SharedVariant* getKeySV(ssize_t pos) const {
     ASSERT(is(KindOfArray));
-    if (m_isVector) return NULL;
+    if (getIsVector()) return NULL;
     else return m_data.map->getKeyIndex(pos);
   }
 
 private:
+  const static uint16 IsVector = (1<<13);
+  const static uint16 Owner = (1<<12);
+
   class VectorData {
   public:
     size_t size;
@@ -133,8 +136,13 @@ private:
     VectorData* vec;
   } m_data;
 
-  bool m_isVector;
-  bool m_owner;
+  bool getIsVector() const { return (bool)(m_flags & IsVector);}
+  void setIsVector() { m_flags |= IsVector;}
+  void clearIsVector() { m_flags &= ~IsVector;}
+
+  bool getOwner() const { return (bool)(m_flags & Owner);}
+  void setOwner() { m_flags |= Owner;}
+  void clearOwner() { m_flags &= ~Owner;}
 };
 
 class ThreadSharedVariantLockedRefs : public ThreadSharedVariant {

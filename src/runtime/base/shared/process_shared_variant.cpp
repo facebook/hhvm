@@ -81,8 +81,8 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
       ArrayData *arr = source.getArrayData();
       PointerSet seen;
       if (arr->hasInternalReference(seen)) {
-        m_serializedArray = true;
-        m_shouldCache = true;
+        setSerializedArray();
+        setShouldCache();
         String s = f_serialize(source);
         m_data.str = putPtr(SharedMemoryManager::GetSegment()
                             ->construct<SharedMemoryString>
@@ -119,7 +119,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
           ->construct<ProcessSharedVariant>
           (boost::interprocess::anonymous_instance)
           (it->second(), getLock());
-        if (val->shouldCache()) m_shouldCache = true;
+        if (val->shouldCache()) setShouldCache();
         (*map)[key] = i++;
         keys->push_back(putPtr(key));
         vals->push_back(putPtr(val));
@@ -129,7 +129,7 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
   default:
     {
       m_type = KindOfObject;
-      m_shouldCache = true;
+      setShouldCache();
       String s = f_serialize(source);
       m_data.str = putPtr(SharedMemoryManager::GetSegment()
                           ->construct<SharedMemoryString>
@@ -161,7 +161,7 @@ Variant ProcessSharedVariant::toLocal() {
     }
   case KindOfArray:
     {
-      if (m_serializedArray) {
+      if (getSerializedArray()) {
         return f_unserialize(String(m_data.str->data(), m_data.str->size(),
                                     AttachLiteral));
       }
@@ -200,7 +200,7 @@ void ProcessSharedVariant::dump(std::string &out) {
     out += stringData();
     break;
   case KindOfArray:
-    if (m_serializedArray) {
+    if (getSerializedArray()) {
       out += "array: ";
       out += getString()->c_str();
     } else {
@@ -228,7 +228,7 @@ ProcessSharedVariant::~ProcessSharedVariant() {
     break;
   case KindOfArray:
     {
-      if (m_serializedArray) {
+      if (getSerializedArray()) {
         if (getLock()) {
           SharedMemoryManager::GetSegment()->destroy_ptr(getString());
         }

@@ -57,7 +57,7 @@ static const char *prefix[] = {
   "smc:3:t:",
   "smc:3:pv:",
   "smc:3:v:",
-  "XC_",
+  "XBOXC_",
   "XBOX_CACHE_",
 };
 
@@ -75,7 +75,7 @@ static const char *prefix_replace[] = {
   "smc:3:t:{A}",
   "smc:3:pv:{A}",
   "smc:3:v:{A}",
-  "XC_{A}",
+  "XBOXC_{A}",
   "XBOX_CACHE_{A}",
 };
 static const int prefix_count = 15;

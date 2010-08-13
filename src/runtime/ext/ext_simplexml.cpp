@@ -887,7 +887,26 @@ void c_simplexmlelement::t_offsetset(CVarRef index, CVarRef newvalue) {
     raise_error("unable to replace a SimpleXMLElement node");
     return;
   }
-  m_attributes.set(index, newvalue);
+  String name = index.toString();
+  if (name.empty()) {
+    raise_error("cannot create unnamed attribute");
+    return;
+  }
+
+  String sv = newvalue.toString();
+  if (m_attributes.toArray().exists(name)) {
+    t_offsetunset(index);
+  }
+
+  if (m_node == NULL || m_is_text) {
+    raise_error("cannot create attribute on this node");
+    return;
+  }
+  xmlNodePtr newnode = (xmlNodePtr)xmlNewProp(m_node, (xmlChar *)name.data(),
+                                              (xmlChar*)sv.data());
+  if (newnode) {
+    m_attributes.set(name, sv);
+  }
 }
 
 void c_simplexmlelement::t_offsetunset(CVarRef index) {
@@ -896,7 +915,24 @@ void c_simplexmlelement::t_offsetunset(CVarRef index) {
     raise_error("unable to remove a SimpleXMLElement node");
     return;
   }
-  m_attributes.remove(index);
+
+  String name = index.toString();
+  if (name.empty()) {
+    raise_error("cannot remove unnamed attribute");
+    return;
+  }
+
+  if (m_attributes.toArray().exists(name) && m_node) {
+    for (xmlAttrPtr attr = m_node->properties; attr; attr = attr->next) {
+      if (String((char*)attr->name, xmlStrlen(attr->name), AttachLiteral) ==
+          name) {
+        xmlUnlinkNode((xmlNodePtr)attr);
+        break;
+      }
+    }
+  }
+
+  m_attributes.remove(name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

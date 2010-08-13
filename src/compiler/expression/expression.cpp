@@ -607,6 +607,8 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
   ar->wrapExpressionBegin(cg);
   if (constRef) {
+    // make LINE macro separate to not interfere with persistance of expression.
+    if (outputLineMap(cg, ar, true)) cg_printf("0);\n");
     cg_printf("const ");
   }
 

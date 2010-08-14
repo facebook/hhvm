@@ -24,6 +24,7 @@ namespace HPHP {
 
 #define LITSTR_INIT(str)    (true ? (str) : ("" str "")), (sizeof(str)-1)
 #define LITSTR(index, str)  (literalStrings[index])
+#define NAMSTR(nam, str)    (nam)
 
 #define GET_THIS()         fi.getThis()
 #define GET_THIS_ARROW()   fi.getThisForArrow()->
@@ -265,6 +266,14 @@ do { \
       (hash == code && s.length() == len &&                             \
       memcmp(s1, s2, len) == 0)) return isInitialized(name);            \
 } while (0)
+#define HASH_INITIALIZED_NAMSTR(code, str, name, len)                   \
+do { \
+  const char *s1 = s.data();                                            \
+  const char *s2 = str.data();                                          \
+  if ((s1 == s2) ||                                                     \
+      (hash == code && s.length() == len &&                             \
+      memcmp(s1, s2, len) == 0)) return isInitialized(name);            \
+} while (0)
 #define HASH_RETURN(code, name, str)                                    \
   if (hash == code && strcmp(s, str) == 0) return name
 #define HASH_RETURN_STRING(code, name, str, len)                        \
@@ -274,6 +283,14 @@ do { \
 do { \
   const char *s1 = s.data();                                            \
   const char *s2 = literalStrings[index].data();                        \
+  if ((s1 == s2) ||                                                     \
+      (hash == code && s.length() == len &&                             \
+      memcmp(s1, s2, len) == 0)) return name;                           \
+} while (0)
+#define HASH_RETURN_NAMSTR(code, str, name, len)                        \
+do { \
+  const char *s1 = s.data();                                            \
+  const char *s2 = str.data();                                          \
   if ((s1 == s2) ||                                                     \
       (hash == code && s.length() == len &&                             \
       memcmp(s1, s2, len) == 0)) return name;                           \

@@ -961,7 +961,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   if (!system) {
     cg_printf("\n");
     cg_indentBegin("void init_static_variables() { \n");
-    if (Option::PrecomputeLiteralStrings && ar->getLiteralStringCount() > 0) {
+    if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
       cg_printf("LiteralStringInitializer::initialize();\n");
     }
     cg_printf("ScalarArrays::initialize();\n");
@@ -1743,10 +1743,18 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf("                 \"%s\");\n", cg.escapeLabel(name).c_str());
       break;
     case VariableTable::JumpInitializedString: {
-      int stringId = cg.checkLiteralString(name, ar);
+      int index = -1;
+      int stringId = cg.checkLiteralString(name, index, ar);
       if (stringId >= 0) {
-        cg_printf("HASH_INITIALIZED_LITSTR(0x%016llXLL, %d, %s,\n",
-                  hash_string(name), stringId, varName.c_str());
+        if (index == -1) {
+          cg_printf("HASH_INITIALIZED_LITSTR(0x%016llXLL, %d, %s,\n",
+                    hash_string(name), stringId, varName.c_str());
+        } else {
+          assert(index >= 0);
+          string lisnam = ar->getLiteralStringName(stringId, index);
+          cg_printf("HASH_INITIALIZED_NAMSTR(0x%016llXLL, %s, %s,\n",
+                    hash_string(name), lisnam.c_str(), varName.c_str());
+        }
         cg_printf("                   %d);\n", strlen(name));
       } else {
         cg_printf("HASH_INITIALIZED_STRING(0x%016llXLL, %s,\n",
@@ -1766,10 +1774,18 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       }
       break;
     case VariableTable::JumpReturnString: {
-      int stringId = cg.checkLiteralString(name, ar);
+      int index = -1;
+      int stringId = cg.checkLiteralString(name, index, ar);
       if (stringId >= 0) {
-        cg_printf("HASH_RETURN_LITSTR%s(0x%016llXLL, %d, %s,\n",
-            priv, hash_string(name), stringId, varName.c_str());
+        if (index == -1) {
+          cg_printf("HASH_RETURN_LITSTR%s(0x%016llXLL, %d, %s,\n",
+              priv, hash_string(name), stringId, varName.c_str());
+        } else {
+          assert(index >= 0);
+          string lisnam = ar->getLiteralStringName(stringId, index);
+          cg_printf("HASH_RETURN_NAMSTR%s(0x%016llXLL, %s, %s,\n",
+              priv, hash_string(name), lisnam.c_str(), varName.c_str());
+        }
         cg_printf("                   %d);\n", strlen(name));
       } else {
         cg_printf("HASH_RETURN_STRING%s(0x%016llXLL, %s,\n",

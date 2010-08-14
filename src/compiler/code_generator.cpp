@@ -413,28 +413,41 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
   return false;
 }
 
-int CodeGenerator::checkLiteralString(const std::string &str,
+int CodeGenerator::checkLiteralString(const std::string &str, int &index,
                                       AnalysisResultPtr ar) {
   if (Option::PrecomputeLiteralStrings &&
       getOutput() != CodeGenerator::SystemCPP &&
       getContext() != CodeGenerator::CppConstantsDecl &&
       getContext() != CodeGenerator::CppClassConstantsImpl) {
-    int stringId = ar->getLiteralStringId(str);
+    int stringId = ar->getLiteralStringId(str, index);
     if (stringId >= 0) return stringId;
   }
+  index = -1;
   return -1;
 }
 
 void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
-                                bool staticWrapper /* = false */) {
-  int stringId = checkLiteralString(str, ar);
+                                bool stringWrapper /* = true */,
+                                bool check /* = true */) {
+  int index = -1;
+  int stringId = check ? checkLiteralString(str, index, ar) : -1;
   bool isBinary = false;
   string escaped = escapeLabel(str, &isBinary);
   if (stringId >= 0) {
-    printf("LITSTR(%d, \"%s\")", stringId, escaped.c_str());
+    if (index == -1) {
+      printf("LITSTR(%d, \"%s\")", stringId, escaped.c_str());
+    } else {
+      assert(index >= 0);
+      string lisnam = ar->getLiteralStringName(stringId, index);
+      printf("NAMSTR(%s, \"%s\")", lisnam.c_str(), escaped.c_str());
+    }
   } else if (isBinary) {
-    if (staticWrapper) printf("Static");
-    printf("String(\"%s\", %d, AttachLiteral)", escaped.c_str(), str.length());
+    if (stringWrapper) {
+      printf("String(\"%s\", %d, AttachLiteral)",
+             escaped.c_str(), str.length());
+    } else {
+      printf("\"%s\", %d", escaped.c_str(), str.length());
+    }
   } else {
     printf("\"%s\"", escaped.c_str());
   }

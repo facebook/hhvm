@@ -137,6 +137,7 @@ int Option::ScalarArrayFileCount = 1;
 int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
+bool Option::UseNamedLiteralString = true;
 int Option::LiteralStringFileCount = 50;
 bool Option::AnalyzePerfectVirtuals = true;
 

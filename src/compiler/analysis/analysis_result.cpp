@@ -1182,7 +1182,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     }
     CodeGenerator cg(&f, output, &filename);
     outputCPPClusterImpl(cg, iter->second);
-    f.close();
 
     // for each file, generate one header and a list of class headers
     BOOST_FOREACH(FileScopePtr fs, iter->second) {
@@ -1227,7 +1226,9 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     outputCPPGlobalVariablesMethods(2);
     outputCPPGlobalVariablesMethods(3);
     outputCPPGlobalVariablesMethods(4);
-    if (Option::PrecomputeLiteralStrings && m_stringLiterals.size() > 0) {
+    if (Option::UseNamedLiteralString) {
+      outputCPPNamedLiteralStrings();
+    } else if (Option::PrecomputeLiteralStrings) {
       outputCPPLiteralStringPrecomputation();
     }
     outputCPPGlobalState();
@@ -1277,6 +1278,9 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+    if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+      cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
+    }
     cg_printf("\n");
   }
 
@@ -1376,6 +1380,9 @@ void AnalysisResult::outputCPPClassMapFile() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+  if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
+  }
   cg_printf("\n");
   cg_printf("using namespace std;\n");
 
@@ -2690,6 +2697,9 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+  if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
+  }
   if (part == 1) {
     getVariables()->outputCPPGlobalVariablesDtorIncludes(cg, ar);
   }
@@ -3046,7 +3056,7 @@ void AnalysisResult::outputCPPMain() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if (Option::PrecomputeLiteralStrings && m_stringLiterals.size() > 0) {
+  if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }
 
@@ -3423,15 +3433,38 @@ void AnalysisResult::outputSwigFFIStubs() {
 /**
  * Literal string to String precomputation
  */
-int AnalysisResult::getLiteralStringId(const std::string &s) {
-  map<string, int>::const_iterator it =
-    m_stringLiterals.find(s);
-  if (it != m_stringLiterals.end()) {
-    return it->second;
+string AnalysisResult::getLiteralStringName(int hash, int index) {
+  assert(index >= 0);
+  string name("s_ss");
+  name += boost::str(boost::format("%08x") % hash);
+  if (index > 0) name += ("_" + lexical_cast<string>(index));
+  return name;
+}
+
+int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
+  if (!Option::UseNamedLiteralString) {
+    index = -1;
+    map<string, int>::const_iterator it =
+      m_stringLiterals.find(s);
+    if (it != m_stringLiterals.end()) {
+      return it->second;
+    }
+    int ct = m_stringLiterals.size();
+    m_stringLiterals[s] = ct;
+    return ct;
   }
-  int ct = m_stringLiterals.size();
-  m_stringLiterals[s] = ct;
-  return ct;
+  int hash = hash_string(s.data(), s.size());
+  if (hash < 0) hash = -hash;
+  vector<string> &strings = m_namedStringLiterals[hash];
+  unsigned int i = 0;
+  for (; i < strings.size(); i++) {
+    if (strings[i] == s) break;
+  }
+  if (i == strings.size()) {
+    strings.push_back(s);
+  }
+  index = i;
+  return hash;
 }
 
 string AnalysisResult::getFuncId(ClassScopePtr cls, FunctionScopePtr func) {
@@ -3505,7 +3538,6 @@ void AnalysisResult::cloneRTTIFuncs(const char *RTTIDirectory) {
 
 void AnalysisResult::outputCPPLiteralStringPrecomputation() {
 
-  ASSERT(m_stringLiterals.size() > 0);
   AnalysisResultPtr self = shared_from_this();
   int bucketSize = m_stringLiterals.size() / Option::LiteralStringFileCount;
   if (bucketSize < 500) bucketSize = 500;
@@ -3513,7 +3545,9 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
   if (bucketCount * bucketSize != m_stringLiterals.size()) {
     bucketCount++;
   }
-  if (Option::LiteralStringCompression) bucketCount = 1;
+  if (Option::LiteralStringCompression || m_stringLiterals.size() == 0) {
+    bucketCount = 1;
+  }
 
   {
     string filename = m_outputPath + "/" + Option::SystemFilePrefix +
@@ -3534,7 +3568,7 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     for (uint i = 0; i < bucketCount; i++) {
       cg_printf("init_%d();\n", i);
     }
-    if (Option::ScalarArrayCompression) {
+    if (Option::ScalarArrayCompression && m_stringLiterals.size() > 0) {
       cg_printf("StringDataSet &set = StaticString::TheStaticStringSet();\n");
       cg_indentBegin("for (int i = 0; i < %d; i++) {\n",
                      m_stringLiterals.size());
@@ -3566,7 +3600,7 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     int sdataLen = 0;
     int ldataLen = 0;
     if (i == 0) {
-      if (Option::LiteralStringCompression) {
+      if (Option::LiteralStringCompression && m_stringLiterals.size() > 0) {
         string zsdata;
         string zldata;
         getLiteralStringCompressed(zsdata, zldata);
@@ -3582,7 +3616,7 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     }
 
     cg_indentBegin("void LiteralStringInitializer::init_%d() {\n", i);
-    if (Option::LiteralStringCompression) {
+    if (Option::LiteralStringCompression && m_stringLiterals.size() > 0) {
       cg_printf("StringUtil::InitLiteralStrings"
                 "(%s, %d, ls_csdata, %d, ls_cldata, %d);\n",
                 lsname, m_stringLiterals.size(), sdataLen, ldataLen);
@@ -3597,6 +3631,56 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
     cg.namespaceEnd();
     f.close();
   }
+}
+
+
+void AnalysisResult::outputCPPNamedLiteralStrings() {
+  AnalysisResultPtr ar = shared_from_this();
+  string filename = m_outputPath + "/" + Option::SystemFilePrefix +
+    "literal_strings.h";
+  ofstream f(filename.c_str());
+  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+
+  cg_printf("\n");
+  cg_printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
+  cg_printf("#define __GENERATED_sys_literal_strings_h__\n");
+  cg_printInclude("<runtime/base/hphp.h>");
+  cg_printf("\n");
+  cg.namespaceBegin();
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedStringLiterals[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getLiteralStringName(hash, i);
+      cg_printf("extern StaticString %s;\n", name.c_str());
+    }
+  }
+  cg.namespaceEnd();
+  cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
+  f.close();
+
+  filename = m_outputPath + "/" + Option::SystemFilePrefix +
+    "literal_strings.no.cpp";
+  f.open(filename.c_str());
+  cg_printf("\n");
+  cg_printInclude("\"literal_strings.h\"");
+  cg_printf("\n");
+  cg.namespaceBegin();
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedStringLiterals[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getLiteralStringName(hash, i);
+      cg_printf("StaticString %s(", name.c_str());
+      cg_printString(strings[i], ar, false, false);
+      cg_printf(");\n");
+    }
+  }
+  cg.namespaceEnd();
 }
 
 void AnalysisResult::outputCPPSepExtensionMake() {

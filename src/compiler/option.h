@@ -136,6 +136,7 @@ public:
    */
   static bool SeparateCompilation;
   static bool SeparateCompLib;
+  static bool UseNamedLiteralString;
 
   /**
    * CodeGenerator options for PHP.

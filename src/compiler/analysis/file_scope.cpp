@@ -471,6 +471,9 @@ void FileScope::outputCPPForwardDeclHeader(CodeGenerator &cg,
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+    if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+      cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
+    }
   } else if (cg.getOutput() == CodeGenerator::SystemCPP) {
     cg_printInclude("<runtime/base/hphp_system.h>");
   }
@@ -486,6 +489,9 @@ void FileScope::outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
+    if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+      cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
+    }
   } else if (cg.getOutput() == CodeGenerator::SystemCPP) {
     cg_printInclude("<runtime/base/hphp_system.h>");
   }

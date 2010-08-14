@@ -1237,7 +1237,8 @@ outputCPPMethodInvokeTable(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_indentBegin("if (methodIndex.m_overloadIndex == 0x%x) { \n",
                      ms->getOverloadIndex());
     } else  {
-      if (cg.checkLiteralString(origName, ar) >= 0) {
+      int index = -1;
+      if (cg.checkLiteralString(origName, index, ar) >= 0) {
         cg_indentBegin("HASH_GUARD_LITSTR(0x%016llXLL, ", hash_string_i(name));
         cg_printString(origName, ar);
         cg_printf(") {\n");

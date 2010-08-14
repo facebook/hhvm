@@ -337,7 +337,8 @@ public:
   /**
    * Literal string to String precomputation
    */
-  int getLiteralStringId(const std::string &s);
+  std::string getLiteralStringName(int hash, int index);
+  int getLiteralStringId(const std::string &s, int &index);
   void getLiteralStringCompressed(std::string &zsdata, std::string &zldata);
 
   /**
@@ -362,8 +363,6 @@ public:
    * Generate default implementation for separable extension classes.
    */
   void outputCPPSepExtensionImpl(const std::string &filename);
-
-  int getLiteralStringCount() { return m_stringLiterals.size(); }
 
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
@@ -448,6 +447,7 @@ private:
   std::map<std::string, std::set<std::pair<std::string, int> > > m_funcNameMap;
 
   std::map<std::string, int> m_stringLiterals;
+  std::map<int, std::vector<std::string> > m_namedStringLiterals;
 
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
@@ -500,6 +500,7 @@ private:
   void outputCPPSystem();
   void outputCPPGlobalImplementations(CodeGenerator &cg);
   void outputCPPClusterImpl(CodeGenerator &cg, const FileScopePtrVec &files);
+
   void outputCPPClassDeclaredFlagsLookup(CodeGenerator &cg);
 
   void outputCPPUtilDecl(CodeGenerator::Output output);
@@ -538,6 +539,7 @@ private:
   void outputHexBuffer(CodeGenerator &cg, const char *name,
                        const char *buf, int len);
   void outputCPPLiteralStringPrecomputation();
+  void outputCPPNamedLiteralStrings();
   void outputCPPSepExtensionMake();
   void outputCPPSepExtensionIncludes(CodeGenerator &cg);
 

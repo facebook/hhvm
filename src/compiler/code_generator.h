@@ -195,9 +195,10 @@ public:
   bool translatePredefined() { return m_translatePredefined; }
   void translatePredefined(bool flag) { m_translatePredefined = flag; }
 
-  int checkLiteralString(const std::string &str, AnalysisResultPtr ar);
+  int checkLiteralString(const std::string &str, int &index,
+                         AnalysisResultPtr ar);
   void printString(const std::string &str, AnalysisResultPtr ar,
-                   bool staticWrapper = false);
+                   bool stringWrapper = true, bool check = true);
 
 private:
   std::string m_filename;

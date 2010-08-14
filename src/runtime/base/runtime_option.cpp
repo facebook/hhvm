@@ -27,6 +27,7 @@
 #include <runtime/base/server/access_log.h>
 #include <runtime/base/util/extended_logger.h>
 #include <runtime/base/fiber_async_func.h>
+#include <runtime/base/util/simple_counter.h>
 
 using namespace std;
 
@@ -778,6 +779,14 @@ void RuntimeOption::Load(Hdf &config) {
     }
     LocalMemcache = debug["LocalMemcache"].getBool();
     MemcacheReadOnly = debug["MemcacheReadOnly"].getBool();
+
+    {
+      Hdf simpleCounter = debug["SimpleCounter"];
+      SimpleCounter::SampleStackCount =
+        simpleCounter["SampleStackCount"].getInt32(0);
+      SimpleCounter::SampleStackDepth =
+        simpleCounter["SampleStackDepth"].getInt32(5);
+    }
   }
   {
     Hdf stats = config["Stats"];

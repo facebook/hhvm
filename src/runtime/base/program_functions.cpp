@@ -33,9 +33,10 @@
 #include <util/process.h>
 #include <util/capability.h>
 #include <util/timer.h>
+#include <util/stack_trace.h>
+#include <util/light_process.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/rtti_info.h>
-#include <util/light_process.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/ext/extension.h>
 #include <runtime/ext/ext_fb.h>
@@ -46,6 +47,7 @@
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/base/fiber_async_func.h>
+#include <runtime/base/util/simple_counter.h>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/positional_options.hpp>
@@ -795,6 +797,11 @@ void hphp_session_init() {
     free_global_variables(); // just to be safe
     init_global_variables();
   }
+
+#ifdef ENABLE_SIMPLE_COUNTER
+  SimpleCounter::Enabled = true;
+  StackTrace::Enabled = true;
+#endif
 }
 
 bool hphp_is_warmup_enabled() {

@@ -42,6 +42,7 @@
 #include <runtime/base/dynamic_object_data.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/util/string_buffer.h>
+#include <runtime/base/util/simple_counter.h>
 
 
 namespace HPHP {

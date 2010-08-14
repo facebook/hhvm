@@ -56,7 +56,9 @@ testing and some alternative PHP implementation.
 - call_user_func_array_async
 - call_user_func_async
 - end_user_func_async
-
+- call_user_func_array_rpc
+- call_user_func_rpc
+- call_user_func_serialized
 - fb_call_user_func_array_safe
 - fb_call_user_func_safe
 - fb_call_user_func_safe_return
@@ -65,6 +67,9 @@ testing and some alternative PHP implementation.
 - fb_unserialize
 - fb_thrift_serialize
 - fb_thrift_unserialize
+- fb_intercept
+- fb_stubout_intercept_handler
+- fb_rpc_intercept_handler
 - fb_renamed_functions
 - fb_rename_function
 - fb_get_code_coverage

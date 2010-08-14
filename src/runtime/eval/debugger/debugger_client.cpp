@@ -55,11 +55,8 @@ static char **debugger_completion(const char *text, int start, int end) {
 }
 
 static void debugger_signal_handler(int sig) {
-  signal(sig, SIG_DFL);
-
   rl_free_line_state();
   rl_cleanup_after_signal();
-
   s_debugger_client.onSignal(sig);
 }
 
@@ -129,12 +126,9 @@ const char *DebuggerClient::DefaultCodeColors[] = {
 SmartPtr<Socket> DebuggerClient::Start(const std::string &host, int port,
                                        const std::string &extension,
                                        const StringVec &cmds) {
-  SmartPtr<Socket> ret = s_debugger_client.connectLocal();
-  if (!host.empty()) {
-    s_debugger_client.connectRemote(host, port);
-  }
   Debugger::SetTextColors();
-  s_debugger_client.start(extension, cmds);
+  SmartPtr<Socket> ret = s_debugger_client.connectLocal();
+  s_debugger_client.start(host, port, extension, cmds);
   return ret;
 }
 
@@ -239,9 +233,17 @@ void DebuggerClient::reset() {
   m_stacktrace.reset();
   m_acItems.clear();
   m_acLiveLists.reset();
+  m_machines.clear();
+  m_machine.reset();
 }
 
-void DebuggerClient::connect(const std::string &host, int port) {
+void DebuggerClient::connect(const std::string &host, int port, bool rpc) {
+  if (rpc) {
+    disconnect();
+    m_rpcHost = "rpc:" + host;
+    return;
+  }
+
   ASSERT(!m_machines.empty());
   ASSERT(m_machines[0]->m_name == LocalPrompt);
   for (unsigned int i = 1; i < m_machines.size(); i++) {
@@ -261,6 +263,7 @@ void DebuggerClient::disconnect() {
 }
 
 void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
+  m_rpcHost.clear();
   if (m_machine != machine) {
     m_machine = machine;
     m_sandboxes.clear();
@@ -317,19 +320,35 @@ std::string DebuggerClient::getPrompt() {
   if (NoPrompt) {
     return "";
   }
+  string *name = &m_machine->m_name;
+  if (!m_rpcHost.empty()) {
+    name = &m_rpcHost;
+  }
   if (m_inputState == TakingCode) {
     string prompt = " ";
-    for (unsigned int i = 2; i < m_machine->m_name.size() + 2; i++) {
+    for (unsigned int i = 2; i < name->size() + 2; i++) {
       prompt += '.';
     }
     prompt += ' ';
     return prompt;
   }
-  return m_machine->m_name + "> ";
+  return *name + "> ";
 }
 
-void DebuggerClient::start(const std::string &extension,
+void DebuggerClient::start(const std::string &host, int port,
+                           const std::string &extension,
                            const StringVec &cmds) {
+  loadConfig();
+
+  if (!NoPrompt) {
+    info("Welcome to HipHop Debugger!");
+    info("Type \"help\" or \"?\" for a complete list of commands.\n");
+  }
+
+  if (!host.empty()) {
+    connectRemote(host, port);
+  }
+
   m_extension = extension;
   m_quickCmds = cmds;
   m_mainThread.start();
@@ -342,7 +361,6 @@ void DebuggerClient::stop() {
 
 void DebuggerClient::run() {
   ReadlineHelper helper;
-  loadConfig();
   playMacro("startup");
 
   if (!m_quickCmds.empty()) {
@@ -533,11 +551,6 @@ void DebuggerClient::updateLiveLists() {
 void DebuggerClient::runImpl() {
   const char *func = "DebuggerClient::runImpl()";
 
-  if (!NoPrompt) {
-    info("Welcome to HipHop Debugger!");
-    info("Type \"help\" or \"?\" for a complete list of commands.\n");
-  }
-
   try {
     while (!m_stopped) {
       DebuggerCommandPtr cmd;
@@ -606,7 +619,7 @@ bool DebuggerClient::console() {
           record(line);
           m_prevCmd = m_command;
           if (!process()) {
-            error("command [" + m_command + "]not found");
+            error("command \"" + m_command + "\" not found");
             m_command.clear();
           }
         } catch (DebuggerClientExitException &e) {
@@ -693,27 +706,28 @@ void DebuggerClient::print(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   Logger::VSNPrintf(msg, fmt, ap); va_end(ap);
-  msg += "\n";
   print(msg);
 }
 
 void DebuggerClient::print(const std::string &s) {
   fwrite(s.data(), 1, s.length(), stdout);
+  fwrite("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
 void DebuggerClient::print(CStrRef msg) {
   fwrite(msg.data(), 1, msg.length(), stdout);
+  fwrite("\n", 1, 1, stdout);
   fflush(stdout);
 }
 
 #define IMPLEMENT_COLOR_OUTPUT(name, where, color)                      \
   void DebuggerClient::name(CStrRef msg) {                              \
-    if (UseColor) {                                                     \
+    if (UseColor && color) {                                            \
       fwrite(color, 1, strlen(color), where);                           \
     }                                                                   \
     fwrite(msg.data(), 1, msg.length(), where);                         \
-    if (UseColor) {                                                     \
+    if (UseColor && color) {                                            \
       fwrite(ANSI_COLOR_END, 1, strlen(ANSI_COLOR_END), where);         \
     }                                                                   \
     fwrite("\n", 1, 1, where);                                          \
@@ -1170,6 +1184,9 @@ void DebuggerClient::swapHelp() {
 }
 
 void DebuggerClient::quit() {
+  for (unsigned int i = 0; i < m_machines.size(); i++) {
+    m_machines[i]->m_thrift.close();
+  }
   throw DebuggerClientExitException();
 }
 

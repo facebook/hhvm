@@ -30,9 +30,12 @@ bool f_is_callable(CVarRef v, bool syntax = false,
 Variant f_call_user_func(int _argc, CVarRef function, CArrRef _argv = null_array);
 Object f_call_user_func_array_async(CVarRef function, CArrRef params);
 Object f_call_user_func_async(int _argc, CVarRef function, CArrRef _argv = null_array);
+Variant f_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = null);
+String f_call_user_func_serialized(CStrRef input);
+Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef params);
+Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef _argv = null_array);
 Variant f_forward_static_call_array(CVarRef function, CArrRef params);
 Variant f_forward_static_call(int _argc, CVarRef function, CArrRef _argv = null_array);
-Variant f_end_user_func_async(CObjRef handle, int default_strategy = k_GLOBAL_STATE_IGNORE, CVarRef additional_strategies = null);
 String f_create_function(CStrRef args, CStrRef code);
 
 ///////////////////////////////////////////////////////////////////////////////

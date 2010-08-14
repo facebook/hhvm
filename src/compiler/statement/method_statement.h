@@ -83,6 +83,9 @@ protected:
   std::string m_docComment;
 
   FunctionScopePtr onParseImpl(AnalysisResultPtr ar);
+  void outputCPPArgInjections(CodeGenerator &cg, AnalysisResultPtr ar,
+                              const char *name, ClassScopePtr cls,
+                              FunctionScopePtr funcScope);
   void outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar);
   void addParamRTTI(AnalysisResultPtr ar);
 

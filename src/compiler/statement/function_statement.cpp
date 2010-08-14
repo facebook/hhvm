@@ -247,21 +247,8 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         if (m_stmt->hasBody()) {
           cg_printf("FUNCTION_INJECTION(%s);\n", origFuncName.c_str());
         }
-        if (Option::GenRTTIProfileData && m_params) {
-          for (int i = 0; i < m_params->getCount(); i++) {
-            ParameterExpressionPtr param =
-              dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-            if (param->hasRTTI()) {
-              const string &paramName = param->getName();
-              int id = ar->getParamRTTIEntryId(ClassScopePtr(),
-                                               funcScope, paramName);
-              if (id != -1) {
-                cg_printf("RTTI_INJECTION(%s%s, %d);\n",
-                          Option::VariablePrefix, paramName.c_str(), id);
-              }
-            }
-          }
-        }
+        outputCPPArgInjections(cg, ar, origFuncName.c_str(), ClassScopePtr(),
+                               funcScope);
       }
       funcScope->outputCPP(cg, ar);
       cg.setContext(CodeGenerator::NoContext); // no inner functions/classes

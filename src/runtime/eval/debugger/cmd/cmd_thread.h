@@ -44,7 +44,7 @@ private:
   String m_out;
   DThreadInfoPtrVec m_threads;
 
-  void processList(DebuggerClient *client);
+  void processList(DebuggerClient *client, bool output = true);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

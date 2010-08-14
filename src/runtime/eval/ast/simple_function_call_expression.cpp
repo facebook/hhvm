@@ -36,17 +36,10 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   SET_LINE;
   String name(m_name->get(env));
   bool renamed = false;
-  {
-    // so hacky, gotta do this properly by overriding rename_function.
-    StringIMap<String> &funcs = get_renamed_functions();
-    StringIMap<String>::const_iterator iter = funcs.find(name);
-    if (iter != funcs.end()) {
-      name = iter->second;
-      renamed = true;
-    }
-  }
+  name = get_renamed_function(name, &renamed);
+
   // fast path for interpreted fn
-  const Function *fs = RequestEvalState::findFunction(name.c_str());
+  const Function *fs = RequestEvalState::findFunction(name.data());
   if (fs) {
     return ref(fs->directInvoke(env, this));
   } else {

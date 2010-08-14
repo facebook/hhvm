@@ -44,8 +44,9 @@ public:
 
 private:
   StringVec m_sandboxes;
+  Array m_rpcConfig;
 
-  bool processList(DebuggerClient *client);
+  bool processList(DebuggerClient *client, bool output = true);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

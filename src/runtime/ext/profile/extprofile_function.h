@@ -65,6 +65,21 @@ inline Variant x_end_user_func_async(CObjRef handle, int default_strategy = k_GL
   return f_end_user_func_async(handle, default_strategy, additional_strategies);
 }
 
+inline String x_call_user_func_serialized(CStrRef input) {
+  FUNCTION_INJECTION_BUILTIN(call_user_func_serialized);
+  return f_call_user_func_serialized(input);
+}
+
+inline Variant x_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef params) {
+  FUNCTION_INJECTION_BUILTIN(call_user_func_array_rpc);
+  return f_call_user_func_array_rpc(host, port, auth, timeout, function, params);
+}
+
+inline Variant x_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth, int timeout, CVarRef function, CArrRef _argv = null_array) {
+  FUNCTION_INJECTION_BUILTIN(call_user_func_rpc);
+  return f_call_user_func_rpc(_argc, host, port, auth, timeout, function, _argv);
+}
+
 inline Variant x_forward_static_call_array(CVarRef function, CArrRef params) {
   FUNCTION_INJECTION_BUILTIN(forward_static_call_array);
   return f_forward_static_call_array(function, params);

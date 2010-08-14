@@ -40,7 +40,7 @@ void DSandboxInfo::set(const std::string &id) {
   m_path.clear();
   if (!id.empty()) {
     vector<string> tokens;
-    Util::split('\n', id.c_str(), tokens);
+    Util::split('\t', id.c_str(), tokens);
     if (tokens.size() == 3) {
       m_user = tokens[0];
       m_name = tokens[1];

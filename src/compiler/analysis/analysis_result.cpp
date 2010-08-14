@@ -1865,14 +1865,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
       if (!Option::DynamicInvokeFunctions.empty() ||
           Option::EnableEval == Option::FullEval) {
-        cg_printf("StringIMap<String> &funcs = "
-                  "get_renamed_functions();\n");
-        cg_printf("StringIMap<String>::const_iterator iter ="
-                  " funcs.find(s);\n");
-        cg_indentBegin("if (iter != funcs.end()) {\n");
-        cg_printf("s = iter->second.c_str();\n");
-        cg_printf("hash = -1;\n");
-        cg_indentEnd("}\n");
+        cg_printf("const char *ss = get_renamed_function(s);\n");
+        cg_printf("if (ss != s) { s = ss; hash = -1;};\n");
       }
       // Eval invoke hook
       if (!system && Option::EnableEval == Option::FullEval) {

@@ -83,10 +83,11 @@ bool CmdThread::help(DebuggerClient *client) {
   return true;
 }
 
-void CmdThread::processList(DebuggerClient *client) {
+void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
   m_body = "list";
   CmdThreadPtr res = client->xend<CmdThread>(this);
   client->updateThreads(res->m_threads);
+  if (!output) return;
 
   for (int i = 0; i < (int)res->m_threads.size(); i++) {
     DThreadInfoPtr thread = res->m_threads[i];
@@ -145,10 +146,14 @@ bool CmdThread::onClient(DebuggerClient *client) {
     int num = atoi(snum.c_str());
     DThreadInfoPtr thread = client->getThread(num);
     if (!thread) {
-      client->error("\"%s\" is not a valid thread index. Choose one from "
-                    "this list:", snum.c_str());
-      processList(client);
-      return true;
+      processList(client, false);
+      thread = client->getThread(num);
+      if (!thread) {
+        client->error("\"%s\" is not a valid thread index. Choose one from "
+                      "this list:", snum.c_str());
+        processList(client);
+        return true;
+      }
     }
 
     if (thread->m_id == client->getCurrentThreadId()) {

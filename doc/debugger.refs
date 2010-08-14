@@ -299,10 +299,14 @@ Hit return to display more lines of code after current display.
 
     ────────────────────────── Machine Command ──────────────────────────
 
-    [m]achine            debugging remote server
+    [m]achine            debugging remote server natively
       [c]onnect {host}   
-    [m]achine            debugging remote server
+    [m]achine            debugging remote server natively
       [c]onnect          
+      {host}:{port}      
+    [m]achine [r]pc      debugging remote server with RPC
+      {host}             
+    [m]achine [r]pc      debugging remote server with RPC
       {host}:{port}      
     [m]achine            debugging local script
       [d]isconnect       
@@ -329,6 +333,17 @@ attach to it.
 
 When your sandbox is not available, please hit it at least once from
 your browser. Then run '[m]achine [l]ist' command again.
+
+If a HipHop server has RPC port open, one can also debug the server in a
+very special RPC mode. In this mode, one can type in PHP scripts to run,
+but all functions will be executed on server through RPC. Because states
+are still maintained locally and only functions are executed remotely,
+it may not work with functions or scripts that depend on global
+variables or low-level raw resource pointers. As a simple rule,
+stateless functions will work just fine, even with objects and method
+calls. Currently, all built-in functions are still executed locally. We
+may move some of them to remote server, if they rely on machine specific
+information.
 
 
     ──────────────────────────── Next Command ────────────────────────────

@@ -16,6 +16,8 @@
 
 #include <runtime/base/util/php_thrift_buffer.h>
 #include <runtime/base/array/array_init.h>
+#include <runtime/base/externals.h>
+#include <runtime/base/builtin_functions.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,6 +29,11 @@ String PhpThriftBuffer::readImpl() {
 
 void PhpThriftBuffer::flushImpl(CStrRef data) {
   m_xout->o_invoke_mil("write", CREATE_VECTOR1(data), -1);
+}
+
+void PhpThriftBuffer::throwError(const char *msg, int code) {
+  throw create_object("TProtocolException",
+                      CREATE_VECTOR2(String(msg, CopyString), code));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

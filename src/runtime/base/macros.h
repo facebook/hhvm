@@ -469,6 +469,20 @@ do { \
   HOTPROFILER_INJECTION_BUILTIN(n)              \
   FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
 
+#define INTERCEPT_INJECTION_ALWAYS(name, func, args, rr)                \
+  static char intercepted = -1;                                         \
+  if (intercepted) {                                                    \
+    Variant r, h = get_intercept_handler(name, &intercepted);           \
+    if (!h.isNull() && handle_intercept(h, func, args, r)) return rr;   \
+  }                                                                     \
+
+#ifdef ENABLE_INTERCEPT
+#define INTERCEPT_INJECTION(func, args, rr)       \
+  INTERCEPT_INJECTION_ALWAYS(func, func, args, rr)
+#else
+#define INTERCEPT_INJECTION(func, args, rr)
+#endif
+
 #ifdef ENABLE_LATE_STATIC_BINDING
 
 #define STATIC_CLASS_NAME_CALL(s, exp)                             \

@@ -131,8 +131,8 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
       } else {
         needDelete = read_all_post_data(transport, data, size);
         if (strncasecmp(contentType.c_str(),
-                    DEFAULT_POST_CONTENT_TYPE,
-                    sizeof(DEFAULT_POST_CONTENT_TYPE)-1) == 0) {
+                        DEFAULT_POST_CONTENT_TYPE,
+                        sizeof(DEFAULT_POST_CONTENT_TYPE)-1) == 0) {
           DecodeParameters(g->gv__POST, (const char*)data, size, true);
         }
       }

@@ -23,6 +23,7 @@
 #include <runtime/base/string_offset.h>
 #include <runtime/base/object_offset.h>
 #include <runtime/base/frame_injection.h>
+#include <runtime/base/intercept.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
 #include <util/case_insensitive.h>
@@ -688,14 +689,6 @@ Variant require(CStrRef file, bool once = false,
 Variant include_impl_invoke(CStrRef file, bool once = false,
                             LVariableTable* variables = NULL,
                             const char *currentDir = "");
-
-/**
- * For function interception or stubout support.
- */
-void check_renamed_functions(CArrRef names);
-bool check_renamed_function(CStrRef name);
-StringIMap<String> &get_renamed_functions();
-StringISet &get_unmapped_functions();
 
 inline void assignCallTemp(Variant& temp, CVarRef val) {
   temp.unset();

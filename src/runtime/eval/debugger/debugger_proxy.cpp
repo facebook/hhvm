@@ -32,12 +32,16 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
-    : m_local(local), m_threadMode(Normal), m_thread(0), m_interrupt(NULL),
-      m_signalThread(this, &DebuggerProxy::pollSignal), m_signum(0) {
+    : m_stopped(false), m_local(local), m_threadMode(Normal), m_thread(0),
+      m_interrupt(NULL), m_signalThread(this, &DebuggerProxy::pollSignal),
+      m_signum(0) {
   m_thrift.create(socket);
 }
 
 DebuggerProxy::~DebuggerProxy() {
+  m_stopped = true;
+  m_signalThread.waitForEnd();
+
   if (m_dummySandbox) {
     m_dummySandbox->stop();
   }
@@ -48,6 +52,10 @@ void DebuggerProxy::startDummySandbox() {
     (new DummySandbox(this, RuntimeOption::DebuggerDefaultSandboxPath,
                       RuntimeOption::DebuggerStartupDocument));
   m_dummySandbox->start();
+}
+
+void DebuggerProxy::startSignalThread() {
+  m_signalThread.start();
 }
 
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
@@ -173,7 +181,7 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
 }
 
 void DebuggerProxy::pollSignal() {
-  while (true) {
+  while (!m_stopped) {
     sleep(1);
 
     // after 1 second that no active thread picks up the signal, we send it
@@ -202,8 +210,6 @@ void DebuggerProxy::pollSignal() {
 
     m_signum = sig->getSignal();
   }
-
-  Debugger::RemoveProxy(shared_from_this());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -279,6 +285,9 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
   }
+  if (cmd.shouldExitInterrupt()) {
+    return;
+  }
 
   while (true) {
     DebuggerCommandPtr res;
@@ -306,12 +315,13 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
         }
         return;
       }
-    }
-    if (!res || res->is(DebuggerCommand::KindOfQuit) || !res->onServer(this)) {
-      Debugger::RemoveProxy(shared_from_this());
-      if (res && res->is(DebuggerCommand::KindOfQuit)) {
+      if (res->is(DebuggerCommand::KindOfQuit)) {
+        Debugger::RemoveProxy(shared_from_this());
         throw DebuggerClientExitException();
       }
+    }
+    if (!res || !res->onServer(this)) {
+      Debugger::RemoveProxy(shared_from_this());
       return;
     }
   }

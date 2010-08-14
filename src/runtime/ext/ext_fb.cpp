@@ -25,6 +25,7 @@
 #include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/array/zend_array.h>
+#include <runtime/base/intercept.h>
 
 using namespace std;
 
@@ -721,6 +722,36 @@ bool f_fb_utf8ize(Variant input) {
   return true;
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+bool f_fb_intercept(CStrRef name, CVarRef handler,
+                    CVarRef data /* = null_variant */) {
+  return register_intercept(name, handler, data);
+}
+
+Variant f_fb_stubout_intercept_handler(CStrRef name, CVarRef obj,
+                                       CArrRef params, CVarRef data,
+                                       Variant done) {
+  if (obj.isNull()) {
+    return f_call_user_func_array(data, params);
+  }
+  return f_call_user_func_array(CREATE_VECTOR2(obj, data), params);
+}
+
+Variant f_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params,
+                                   CVarRef data, Variant done) {
+  String host = data["host"].toString();
+  int port = data["port"].toInt32();
+  String auth = data["auth"].toString();
+  int timeout = data["timeout"].toInt32();
+
+  if (obj.isNull()) {
+    return f_call_user_func_array_rpc(host, port, auth, timeout, name, params);
+  }
+  return f_call_user_func_array_rpc(host, port, auth, timeout,
+                                    CREATE_VECTOR2(obj, name), params);
+}
+
 void f_fb_renamed_functions(CArrRef names) {
   check_renamed_functions(names);
 }
@@ -756,34 +787,7 @@ bool f_fb_rename_function(CStrRef orig_func_name, CStrRef new_func_name) {
     return false;
   }
 
-  StringIMap<String> &funcs = get_renamed_functions();
-  StringISet &ufuncs = get_unmapped_functions();
-
-  String new_val(orig_func_name);
-  {
-    StringIMap<String>::iterator iter = funcs.find(new_func_name);
-    if (iter != funcs.end()) {
-      funcs.erase(iter);
-    }
-
-    // resolve to real name
-    iter = funcs.find(new_val);
-    if (iter != funcs.end()) {
-      new_val = iter->second;
-    }
-    funcs[new_func_name] = new_val;
-  }
-  {
-    StringISet::iterator iter = ufuncs.find(new_func_name);
-    if (iter != ufuncs.end()) {
-      ufuncs.erase(iter);
-    }
-
-    iter = ufuncs.find(new_val);
-    if (iter == ufuncs.end()) {
-      ufuncs.insert(orig_func_name);
-    }
-  }
+  rename_function(orig_func_name, new_func_name);
   return true;
 }
 

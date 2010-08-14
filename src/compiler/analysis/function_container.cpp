@@ -266,7 +266,8 @@ void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
     }
   }
   if (system) {
-    cg_printf("return invoke_failed(s, Array(), -1, fatal);\n");
+    cg_printf("return invoke_failed(s, eval_get_params(env, caller),"
+              " -1, fatal);\n");
   } else {
     cg_printf("return invoke_from_eval_builtin(s, env, caller, hash, "
               "fatal);\n");

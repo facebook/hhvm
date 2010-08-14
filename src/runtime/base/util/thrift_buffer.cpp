@@ -15,8 +15,6 @@
 */
 
 #include <runtime/base/util/thrift_buffer.h>
-#include <runtime/base/array/array_init.h>
-#include <runtime/base/externals.h>
 #include <runtime/base/builtin_functions.h>
 
 #define INVALID_DATA 1
@@ -92,10 +90,7 @@ void ThriftBuffer::read(char *data, int len) {
   while (true) {
     String ret = readImpl();
     if (ret.empty()) {
-      Object e = create_object("TProtocolException",
-                               CREATE_VECTOR2("unable to read enough bytes",
-                                              INVALID_DATA));
-      throw e;
+      throwError("unable to read enough bytes",INVALID_DATA);
     }
 
     const char *rdata = ret.data();
@@ -178,25 +173,17 @@ void ThriftBuffer::skip(int8 type) {
 
   char errbuf[128];
   sprintf(errbuf, "Unknown field type: %d", (int)type);
-  Object e = create_object("TProtocolException",
-                           CREATE_VECTOR2(String(errbuf, CopyString),
-                                          INVALID_DATA));
-  throw e;
+  throwError(errbuf, INVALID_DATA);
 }
 
 void ThriftBuffer::throwOutOfMemory() {
-  Object e = create_object("TProtocolException",
-                           CREATE_VECTOR1("out of memory"));
-  throw e;
+  throwError("out of memory", 0);
 }
 
 void ThriftBuffer::throwInvalidStringSize(int size) {
   char errbuf[128];
   sprintf(errbuf, "Negative string size: %d", (int)size);
-  Object e = create_object("TProtocolException",
-                           CREATE_VECTOR2(String(errbuf, CopyString),
-                                          INVALID_DATA));
-  throw e;
+  throwError(errbuf, INVALID_DATA);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

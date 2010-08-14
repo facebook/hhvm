@@ -46,6 +46,7 @@ public:
 protected:
   virtual String readImpl();
   virtual void flushImpl(CStrRef data);
+  virtual void throwError(const char *msg, int code);
 
 private:
   char m_buffer[BUFFER_SIZE + 1];

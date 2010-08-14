@@ -55,6 +55,8 @@ public:
   void getThreads(DThreadInfoPtrVec &threads);
 
   void startDummySandbox();
+  void startSignalThread();
+
   void switchSandbox(const std::string &id);
   bool switchThread(DThreadInfoPtr thread);
   void switchThreadMode(ThreadMode mode, int64 threadId = 0);
@@ -66,6 +68,8 @@ public:
   void pollSignal(); // for signal polling thread
 
 private:
+  bool m_stopped;
+
   bool m_local;
   DebuggerThriftBuffer m_thrift;
   DSandboxInfo m_sandbox;

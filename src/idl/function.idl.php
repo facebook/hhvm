@@ -165,7 +165,7 @@ DefineFunction(
       array(
         'name'   => "function",
         'type'   => Variant,
-        'desc'   => "Function's name, same as in call_user_func_array().",
+        'desc'   => "The function to be called, same as in call_user_func_array().",
       ),
       array(
         'name'   => "params",
@@ -188,7 +188,7 @@ DefineFunction(
       array(
         'name'   => "function",
         'type'   => Variant,
-        'desc'   => "Function's name, same as in call_user_func_array().",
+        'desc'   => "The function to be called, same as in call_user_func_array().",
       ),
     ),
   ));
@@ -219,6 +219,105 @@ DefineFunction(
         'type'   => Variant,
         'value'  => "null",
         'desc'   => "Extra strategy for individual variables. Please read documentation for more details.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "call_user_func_serialized",
+    'desc'   => "Invoke a function with serialized function and parameters by calling serialize(array(\"func\" => \$func, \"params\" => \$params)), and returns function return in serialized format of array(\"ret\" => \$ret, \"exception\" => \$exception). Useful for over-network invocation.",
+    'flags'  =>  HipHopSpecific,
+    'return' => array(
+      'type'   => String,
+      'desc'   => "Serialized return.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "input",
+        'type'   => String,
+        'desc'   => "Serialized callback and parameters.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "call_user_func_array_rpc",
+    'desc'   => "Same as call_user_func_array(), but executes on a remote HipHop RPC server",
+    'flags'  =>  HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the function result, or FALSE on error.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "host",
+        'type'   => String,
+        'desc'   => "Remote RPC server's address.",
+      ),
+      array(
+        'name'   => "port",
+        'type'   => Int32,
+        'desc'   => "Remote RPC server's port.",
+      ),
+      array(
+        'name'   => "auth",
+        'type'   => String,
+        'desc'   => "Remote RPC server's authentication password.",
+      ),
+      array(
+        'name'   => "timeout",
+        'type'   => Int32,
+        'desc'   => "How many seconds to wait for response.",
+      ),
+      array(
+        'name'   => "function",
+        'type'   => Variant,
+        'desc'   => "The function to be called, same as in call_user_func_array().",
+      ),
+      array(
+        'name'   => "params",
+        'type'   => VariantVec,
+        'desc'   => "Parameters, same as in call_user_func_array().",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "call_user_func_rpc",
+    'desc'   => "Same as call_user_func(), but executes on a remote HipHop RPC server",
+    'flags'  =>  MixedVariableArguments | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the function result, or FALSE on error.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "host",
+        'type'   => String,
+        'desc'   => "Remote RPC server's address.",
+      ),
+      array(
+        'name'   => "port",
+        'type'   => Int32,
+        'desc'   => "Remote RPC server's port.",
+      ),
+      array(
+        'name'   => "auth",
+        'type'   => String,
+        'desc'   => "Remote RPC server's authentication password.",
+      ),
+      array(
+        'name'   => "timeout",
+        'type'   => Int32,
+        'desc'   => "How many seconds to wait for response.",
+      ),
+      array(
+        'name'   => "function",
+        'type'   => Variant,
+        'desc'   => "The function to be called, same as in call_user_func_array().",
       ),
     ),
   ));

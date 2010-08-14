@@ -33,7 +33,7 @@ public:
                InterruptSite *site)
       : DebuggerCommand(KindOfInterrupt),
         m_interrupt(interrupt), m_program(program ? program : ""),
-        m_site(site), m_pendingJump(false) {}
+        m_threadId(0), m_site(site), m_pendingJump(false) {}
 
   InterruptType getInterruptType() const {
     return (InterruptType)m_interrupt;

@@ -57,6 +57,14 @@ inline void eval_get_pseudomain_variables(Array &arr) {}
 inline void eval_get_redeclared_functions(Array &arr) {}
 inline void eval_get_redeclared_classes(Array &arr) {}
 
+// for invoke_failed() to get parameters from invoke_from_eval_builtin()
+namespace Eval {
+class VariableEnvironment;
+class FunctionCallExpression;
+Array eval_get_params(VariableEnvironment &env,
+                      const FunctionCallExpression *caller);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

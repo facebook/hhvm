@@ -210,6 +210,7 @@ void Debugger::addProxy(SmartPtr<Socket> socket, bool local) {
   if (!local) {
     proxy->startDummySandbox();
   }
+  proxy->startSignalThread();
 }
 
 void Debugger::removeProxy(DebuggerProxyPtr proxy) {

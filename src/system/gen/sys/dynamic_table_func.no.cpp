@@ -7120,6 +7120,22 @@ Variant i_magickaffinetransformimage(CArrRef params) {
     return (f_magickaffinetransformimage(arg0, arg1));
   }
 }
+Variant i_fb_stubout_intercept_handler(CArrRef params) {
+  FUNCTION_INJECTION(fb_stubout_intercept_handler);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 5) return throw_wrong_arguments("fb_stubout_intercept_handler", count, 5, 5, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+    return (f_fb_stubout_intercept_handler(arg0, arg1, arg2, arg3, ref(arg4)));
+  }
+}
 Variant i_ob_get_status(CArrRef params) {
   FUNCTION_INJECTION(ob_get_status);
   int count __attribute__((__unused__)) = params.size();
@@ -11082,6 +11098,36 @@ Variant i_drawrender(CArrRef params) {
     return (f_drawrender(arg0));
   }
 }
+Variant i_fb_rpc_intercept_handler(CArrRef params) {
+  FUNCTION_INJECTION(fb_rpc_intercept_handler);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 5) return throw_wrong_arguments("fb_rpc_intercept_handler", count, 5, 5, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
+    return (f_fb_rpc_intercept_handler(arg0, arg1, arg2, arg3, ref(arg4)));
+  }
+}
+Variant i_fb_intercept(CArrRef params) {
+  FUNCTION_INJECTION(fb_intercept);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("fb_intercept", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count <= 2) return (f_fb_intercept(arg0, arg1));
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    return (f_fb_intercept(arg0, arg1, arg2));
+  }
+}
 Variant i_magickgetversionnumber(CArrRef params) {
   FUNCTION_INJECTION(magickgetversionnumber);
   int count __attribute__((__unused__)) = params.size();
@@ -13817,6 +13863,17 @@ Variant i_pixelsetiteratorrow(CArrRef params) {
     return (f_pixelsetiteratorrow(arg0, arg1));
   }
 }
+Variant i_call_user_func_serialized(CArrRef params) {
+  FUNCTION_INJECTION(call_user_func_serialized);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("call_user_func_serialized", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_call_user_func_serialized(arg0));
+  }
+}
 Variant i_hphp_splfileinfo_iswritable(CArrRef params) {
   FUNCTION_INJECTION(hphp_splfileinfo_iswritable);
   int count __attribute__((__unused__)) = params.size();
@@ -15429,6 +15486,22 @@ Variant i_mcrypt_enc_is_block_algorithm(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     return (f_mcrypt_enc_is_block_algorithm(arg0));
+  }
+}
+Variant i_call_user_func_array_rpc(CArrRef params) {
+  FUNCTION_INJECTION(call_user_func_array_rpc);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 6) return throw_wrong_arguments("call_user_func_array_rpc", count, 6, 6, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    return (f_call_user_func_array_rpc(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
 Variant i_fb_serialize(CArrRef params) {
@@ -19820,6 +19893,22 @@ Variant i_imagerectangle(CArrRef params) {
     CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
     CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
     return (f_imagerectangle(arg0, arg1, arg2, arg3, arg4, arg5));
+  }
+}
+Variant i_call_user_func_rpc(CArrRef params) {
+  FUNCTION_INJECTION(call_user_func_rpc);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 5) return throw_missing_arguments("call_user_func_rpc", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    if (count <= 5) return (f_call_user_func_rpc(count, arg0, arg1, arg2, arg3, arg4));
+    return (f_call_user_func_rpc(count,arg0, arg1, arg2, arg3, arg4, params.slice(5, count - 5, false)));
   }
 }
 Variant i_pixelgetalphaquantum(CArrRef params) {
@@ -25102,6 +25191,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 556:
       HASH_INVOKE(0x4129FFBF3548E22CLL, mb_strpos);
       break;
+    case 558:
+      HASH_INVOKE(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler);
+      break;
     case 560:
       HASH_INVOKE(0x036A5935D9936230LL, hphp_splfileinfo_openfile);
       break;
@@ -25527,6 +25619,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x791E946E04F50388LL, magicksetresourcelimit);
       break;
     case 907:
+      HASH_INVOKE(0x32354CC291ECF38BLL, fb_intercept);
       HASH_INVOKE(0x73A3F87C0A56238BLL, stat);
       break;
     case 908:
@@ -25651,6 +25744,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 979:
       HASH_INVOKE(0x734FD402E190E3D3LL, evhttp_async_get);
       HASH_INVOKE(0x0A8D4FAF266973D3LL, bcpow);
+      break;
+    case 980:
+      HASH_INVOKE(0x0FF21F9BE4CCC3D4LL, call_user_func_rpc);
       break;
     case 983:
       HASH_INVOKE(0x382B5B1EF00153D7LL, imagecreatefrompng);
@@ -28323,6 +28419,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3146:
       HASH_INVOKE(0x3C23768CFB492C4ALL, gzinflate);
       break;
+    case 3147:
+      HASH_INVOKE(0x120E7B01366DFC4BLL, call_user_func_serialized);
+      break;
     case 3150:
       HASH_INVOKE(0x5DAC1C64D8F08C4ELL, openssl_pkey_get_private);
       break;
@@ -29165,6 +29264,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3770:
       HASH_INVOKE(0x1F5B2728DE875EBALL, magicksetimage);
       break;
+    case 3773:
+      HASH_INVOKE(0x31A30B274AD2DEBDLL, call_user_func_array_rpc);
+      break;
     case 3776:
       HASH_INVOKE(0x2475D7045D9DEEC0LL, magicksetimagecompression);
       HASH_INVOKE(0x495316E596537EC0LL, imagefttext);
@@ -29209,6 +29311,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3808:
       HASH_INVOKE(0x7A1C6E429399CEE0LL, iconv_set_encoding);
+      break;
+    case 3809:
+      HASH_INVOKE(0x528BA9796BD0FEE1LL, fb_rpc_intercept_handler);
       break;
     case 3811:
       HASH_INVOKE(0x1F4AACF075E9CEE3LL, memcache_get_server_status);
@@ -41426,6 +41531,38 @@ Variant ei_magickaffinetransformimage(Eval::VariableEnvironment &env, const Eval
   }
   return (x_magickaffinetransformimage(a0, a1));
 }
+Variant ei_fb_stubout_intercept_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 5) return throw_wrong_arguments("fb_stubout_intercept_handler", count, 5, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = ref((*it)->refval(env));
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_stubout_intercept_handler(a0, a1, a2, a3, ref(a4)));
+}
 Variant ei_ob_get_status(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48144,6 +48281,63 @@ Variant ei_drawrender(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   }
   return (x_drawrender(a0));
 }
+Variant ei_fb_rpc_intercept_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 5) return throw_wrong_arguments("fb_rpc_intercept_handler", count, 5, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = ref((*it)->refval(env));
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_rpc_intercept_handler(a0, a1, a2, a3, ref(a4)));
+}
+Variant ei_fb_intercept(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("fb_intercept", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_fb_intercept(a0, a1));
+  else return (x_fb_intercept(a0, a1, a2));
+}
 Variant ei_magickgetversionnumber(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -52725,6 +52919,22 @@ Variant ei_pixelsetiteratorrow(Eval::VariableEnvironment &env, const Eval::Funct
   }
   return (x_pixelsetiteratorrow(a0, a1));
 }
+Variant ei_call_user_func_serialized(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("call_user_func_serialized", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_call_user_func_serialized(a0));
+}
 Variant ei_hphp_splfileinfo_iswritable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55442,6 +55652,42 @@ Variant ei_mcrypt_enc_is_block_algorithm(Eval::VariableEnvironment &env, const E
     (*it)->eval(env);
   }
   return (x_mcrypt_enc_is_block_algorithm(a0));
+}
+Variant ei_call_user_func_array_rpc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  Variant a5;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 6) return throw_wrong_arguments("call_user_func_array_rpc", count, 6, 6, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a5 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_call_user_func_array_rpc(a0, a1, a2, a3, a4, a5));
 }
 Variant ei_fb_serialize(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -62875,6 +63121,40 @@ Variant ei_imagerectangle(Eval::VariableEnvironment &env, const Eval::FunctionCa
     (*it)->eval(env);
   }
   return (x_imagerectangle(a0, a1, a2, a3, a4, a5));
+}
+Variant ei_call_user_func_rpc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 5) return throw_missing_arguments("call_user_func_rpc", count+1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  Array vargs;
+  for (; it != params.end(); ++it) {
+    vargs.append(ref((*it)->refval(env, false)));
+  }
+  if (count <= 5) return (x_call_user_func_rpc(count, a0, a1, a2, a3, a4));
+  return (x_call_user_func_rpc(count, a0, a1, a2, a3, a4,vargs));
 }
 Variant ei_pixelgetalphaquantum(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -71348,6 +71628,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 556:
       HASH_INVOKE_FROM_EVAL(0x4129FFBF3548E22CLL, mb_strpos);
       break;
+    case 558:
+      HASH_INVOKE_FROM_EVAL(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler);
+      break;
     case 560:
       HASH_INVOKE_FROM_EVAL(0x036A5935D9936230LL, hphp_splfileinfo_openfile);
       break;
@@ -71773,6 +72056,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x791E946E04F50388LL, magicksetresourcelimit);
       break;
     case 907:
+      HASH_INVOKE_FROM_EVAL(0x32354CC291ECF38BLL, fb_intercept);
       HASH_INVOKE_FROM_EVAL(0x73A3F87C0A56238BLL, stat);
       break;
     case 908:
@@ -71897,6 +72181,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 979:
       HASH_INVOKE_FROM_EVAL(0x734FD402E190E3D3LL, evhttp_async_get);
       HASH_INVOKE_FROM_EVAL(0x0A8D4FAF266973D3LL, bcpow);
+      break;
+    case 980:
+      HASH_INVOKE_FROM_EVAL(0x0FF21F9BE4CCC3D4LL, call_user_func_rpc);
       break;
     case 983:
       HASH_INVOKE_FROM_EVAL(0x382B5B1EF00153D7LL, imagecreatefrompng);
@@ -74569,6 +74856,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3146:
       HASH_INVOKE_FROM_EVAL(0x3C23768CFB492C4ALL, gzinflate);
       break;
+    case 3147:
+      HASH_INVOKE_FROM_EVAL(0x120E7B01366DFC4BLL, call_user_func_serialized);
+      break;
     case 3150:
       HASH_INVOKE_FROM_EVAL(0x5DAC1C64D8F08C4ELL, openssl_pkey_get_private);
       break;
@@ -75411,6 +75701,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3770:
       HASH_INVOKE_FROM_EVAL(0x1F5B2728DE875EBALL, magicksetimage);
       break;
+    case 3773:
+      HASH_INVOKE_FROM_EVAL(0x31A30B274AD2DEBDLL, call_user_func_array_rpc);
+      break;
     case 3776:
       HASH_INVOKE_FROM_EVAL(0x2475D7045D9DEEC0LL, magicksetimagecompression);
       HASH_INVOKE_FROM_EVAL(0x495316E596537EC0LL, imagefttext);
@@ -75455,6 +75748,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3808:
       HASH_INVOKE_FROM_EVAL(0x7A1C6E429399CEE0LL, iconv_set_encoding);
+      break;
+    case 3809:
+      HASH_INVOKE_FROM_EVAL(0x528BA9796BD0FEE1LL, fb_rpc_intercept_handler);
       break;
     case 3811:
       HASH_INVOKE_FROM_EVAL(0x1F4AACF075E9CEE3LL, memcache_get_server_status);
@@ -75836,7 +76132,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     default:
       break;
   }
-  return invoke_failed(s, Array(), -1, fatal);
+  return invoke_failed(s, eval_get_params(env, caller), -1, fatal);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

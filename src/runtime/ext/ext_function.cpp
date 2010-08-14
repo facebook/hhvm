@@ -16,12 +16,16 @@
 */
 
 #include <runtime/ext/ext_function.h>
+#include <runtime/ext/ext_json.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/fiber_async_func.h>
+#include <runtime/base/util/libevent_http_client.h>
+#include <runtime/base/server/http_protocol.h>
 #include <util/exception.h>
 #include <util/util.h>
 
 using namespace std;
+using namespace boost;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -123,6 +127,75 @@ Variant f_end_user_func_async(CObjRef handle,
   return FiberAsyncFunc::Result(handle,
                                 (FiberAsyncFunc::Strategy)default_strategy,
                                 additional_strategies);
+}
+
+String f_call_user_func_serialized(CStrRef input) {
+  Variant out;
+  try {
+    Variant in = f_unserialize(input);
+    out.set("ret", f_call_user_func_array(in["func"], in["args"]));
+  } catch (Object &e) {
+    out.set("exception", e);
+  }
+  return f_serialize(out);
+}
+
+Variant f_call_user_func_array_rpc(CStrRef host, int port, CStrRef auth,
+                                   int timeout, CVarRef function,
+                                   CArrRef params) {
+  return f_call_user_func_rpc(0, host, port, auth, timeout, function, params);
+}
+
+Variant f_call_user_func_rpc(int _argc, CStrRef host, int port, CStrRef auth,
+                             int timeout, CVarRef function,
+                             CArrRef _argv /* = null_array */) {
+  string url = "http://";
+  url += host.data();
+  url += ":";
+  url += lexical_cast<string>(port);
+  url += "/call_user_func_serialized?auth=";
+  url += auth.data();
+
+  Array blob = CREATE_MAP2("func", function, "args", _argv);
+  String message = f_serialize(blob);
+
+  string hostStr(host.data());
+  vector<string> headers;
+  LibEventHttpClientPtr http = LibEventHttpClient::Get(hostStr, port);
+  if (!http->send(url, headers, timeout < 0 ? 0 : timeout, false,
+                  message.data(), message.size())) {
+    raise_warning("Unable to send RPC request");
+    return false;
+  }
+
+  int code = http->getCode();
+  if (code <= 0) {
+    raise_warning("Server timed out or unable to find specified URL: %s",
+                  url.c_str());
+    return false;
+  }
+
+  int len = 0;
+  char *response = http->recv(len);
+  String sresponse(response, len, AttachString);
+  if (code != 200) {
+    raise_warning("Internal server error: %d %s", code,
+                  HttpProtocol::GetReasonString(code));
+    return false;
+  }
+
+  // This double decoding can be avoided by modifying RPC server to directly
+  // take PHP serialization format.
+  Variant res = f_unserialize(f_json_decode(sresponse));
+  if (!res.isArray()) {
+    raise_warning("Internal protocol error");
+    return false;
+  }
+
+  if (res.toArray().exists("exception")) {
+    throw res["exception"];
+  }
+  return res["ret"];
 }
 
 Variant f_forward_static_call_array(CVarRef function, CArrRef params) {

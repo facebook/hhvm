@@ -24,12 +24,12 @@
 #include <runtime/eval/ast/scalar_expression.h>
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/ast/array_expression.h>
-
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/ast/function_call_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/strict_mode.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/intercept.h>
 
 namespace HPHP {
 namespace Eval {
@@ -156,9 +156,11 @@ void Parameter::dropDefault() {
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
-    m_lname(Util::toLower(m_name)), m_docComment(doc) {
+    m_lname(Util::toLower(m_name)), m_maybeIntercepted(-1), m_docComment(doc) {
 }
-FunctionStatement::~FunctionStatement() {}
+FunctionStatement::~FunctionStatement() {
+  unregister_intercept_flag(&m_maybeIntercepted);
+}
 
 void FunctionStatement::init(bool ref, const vector<ParameterPtr> params,
                              StatementListStatementPtr body,
@@ -207,9 +209,7 @@ Variant FunctionStatement::invoke(CArrRef params) const {
   if (m_ref) {
     return ref(invokeImpl(env, params));
   }
-
-  Variant r = invokeImpl(env, params);
-  return r;
+  return invokeImpl(env, params);
 }
 
 void FunctionStatement::directBind(VariableEnvironment &env,
@@ -251,13 +251,26 @@ void FunctionStatement::directBind(VariableEnvironment &env,
 }
 
 Variant FunctionStatement::evalBody(VariableEnvironment &env) const {
+  Variant &ret = env.getRet();
+
+  if (m_maybeIntercepted) {
+    Variant handler = get_intercept_handler(fullName(), &m_maybeIntercepted);
+    if (!handler.isNull() &&
+        handle_intercept(handler, fullName(), env.getParams(), ret)) {
+      if (m_ref) {
+        ret.setContagious();
+      }
+      return ret;
+    }
+  }
+
   if (m_body) {
     m_body->eval(env);
     if (env.isReturning()) {
       if (m_ref) {
-        env.getRet().setContagious();
+        ret.setContagious();
       }
-      return env.getRet();
+      return ret;
     } else if (env.isBreaking()) {
       throw FatalErrorException("Cannot break/continue out of function");
     }

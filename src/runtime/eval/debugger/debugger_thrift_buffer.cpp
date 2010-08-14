@@ -30,5 +30,9 @@ void DebuggerThriftBuffer::flushImpl(CStrRef data) {
   m_socket->write(data);
 }
 
+void DebuggerThriftBuffer::throwError(const char *msg, int code) {
+  throw Exception("Protocol Error (%d): %s", code, msg);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -19,12 +19,11 @@
 #include <runtime/base/variable_serializer.h>
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/execution_context.h>
 #include <runtime/ext/ext_process.h>
 #include <util/logger.h>
 #include <util/util.h>
 #include <util/process.h>
-#include <runtime/base/execution_context.h>
-#include <runtime/base/util/request_local.h>
 
 #include <limits>
 
@@ -37,66 +36,6 @@ namespace HPHP {
 static StaticString s_offsetExists("offsetExists");
 static StaticString s_class_exists("class_exists");
 static StaticString s___autoload("__autoload");
-
-///////////////////////////////////////////////////////////////////////////////
-// fb_rename_function()
-
-class RenameManager : public RequestEventHandler {
-public:
-  RenameManager() : use_allowed_functions(false) {
-  }
-
-  void clear() {
-    // Note: ExecutionContext::onRequestShutdown() is called before
-    // MemoryManager::rollback(), so it is safe to store smart-allocated
-    // StringData objects here.
-    use_allowed_functions = false;
-    allowed_functions.clear();
-    renamed_functions.clear();
-    unmapped_functions.clear();
-  }
-
-  virtual void requestInit() {
-    clear();
-  }
-
-  virtual void requestShutdown() {
-    clear();
-  }
-
-  bool use_allowed_functions;
-  StringISet allowed_functions;
-  StringIMap<String> renamed_functions;
-  StringISet unmapped_functions;
-};
-IMPLEMENT_STATIC_REQUEST_LOCAL(RenameManager, s_rename_manager);
-
-void check_renamed_functions(CArrRef names) {
-  s_rename_manager->use_allowed_functions = true;
-  StringISet &allowed = s_rename_manager->allowed_functions;
-  for (ArrayIter iter(names); iter; ++iter) {
-    String name = iter.second().toString();
-    if (!name.empty()) {
-      allowed.insert(name);
-    }
-  }
-}
-
-bool check_renamed_function(CStrRef name) {
-  if (s_rename_manager->use_allowed_functions) {
-    StringISet &allowed = s_rename_manager->allowed_functions;
-    return allowed.find(name) != allowed.end();
-  }
-  return true;
-}
-
-StringIMap<String> &get_renamed_functions() {
-  return s_rename_manager->renamed_functions;
-}
-
-StringISet &get_unmapped_functions() {
-  return s_rename_manager->unmapped_functions;
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -201,6 +140,8 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
 
 Variant invoke_failed(const char *func, CArrRef params, int64 hash,
                       bool fatal /* = true */) {
+  INTERCEPT_INJECTION_ALWAYS("?", func, params, ref(r));
+
   if (fatal) {
     throw InvalidFunctionCallException(func);
   } else {
@@ -241,7 +182,7 @@ void RequestInjection::checkSurprise(ThreadInfo *info) {
 
   p.surprised = false;
 
-  do_timedout = p.timedout;
+  do_timedout = p.timedout && !p.debugger;
   do_memExceeded = p.memExceeded;
   do_signaled = p.signaled;
 
@@ -747,17 +688,7 @@ Variant require(CStrRef file, bool once /* = false */,
 // class Limits
 
 bool function_exists(CStrRef function_name) {
-  String name = function_name;
-
-  StringISet &unmap = get_unmapped_functions();
-  if (unmap.find(function_name) != unmap.end()) {
-    return false;
-  }
-  StringIMap<String> &remap = get_renamed_functions();
-  StringIMap<String>::iterator it = remap.find(function_name);
-  if (it != remap.end()) {
-    name = it->second;
-  }
+  String name = get_renamed_function(function_name);
   const ClassInfo::MethodInfo *info = ClassInfo::FindFunction(name);
   if (info) {
     if (info->attribute & ClassInfo::IsSystem) return true;

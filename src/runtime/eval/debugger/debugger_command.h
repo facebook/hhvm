@@ -77,7 +77,7 @@ public:
                       const char *caller);
 
 public:
-  DebuggerCommand(Type type) : m_type(type) {}
+  DebuggerCommand(Type type) : m_type(type), m_exitInterrupt(false) {}
 
   bool is(Type type) const { return m_type == type;}
   Type getType() const { return m_type;}
@@ -92,10 +92,18 @@ public:
   virtual void sendImpl(DebuggerThriftBuffer &thrift);
   virtual void recvImpl(DebuggerThriftBuffer &thrift);
 
+  /**
+   * A server command processing can set m_exitInterrupt to true to break
+   * message loop in DebuggerProxy::processInterrupt().
+   */
+  virtual bool shouldExitInterrupt() { return m_exitInterrupt;}
+
 protected:
   Type m_type;
   std::string m_class; // for CmdExtended
   std::string m_body;
+
+  bool m_exitInterrupt; // server side breaking out of message loop
 };
 
 ///////////////////////////////////////////////////////////////////////////////

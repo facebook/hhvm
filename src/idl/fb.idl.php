@@ -205,6 +205,111 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "fb_intercept",
+    'flags'  =>  HipHopSpecific,
+    'desc'   => "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler(\$name, \$obj, \$params, \$data, &\$done)\", where \$name is orginal function's name, \$obj is $\this for an instance method call or null for static method call or function calls, and \$params are original call's parameters. \$data is what's passed to fb_intercept() and set \$done to false to indicate function should continue its execution with old function as if interception did not happen. By default \$done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "TRUE if successful, FALSE otherwise",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "The function or class method name to intercept. Use \"class::method\" for method name. If empty, all functions will be intercepted by the specified handler and registered individual handlers will be replaced. To make sure individual handlers not affected by such a call, call fb_intercept() with individual names afterwards.",
+      ),
+      array(
+        'name'   => "handler",
+        'type'   => Variant,
+        'desc'   => "Callback to handle the interception. Use null, false or empty string to unregister a previously registered handler. If name is empty, all previously registered handlers, including those that are set by individual function names, will be removed.",
+      ),
+      array(
+        'name'   => "data",
+        'type'   => Variant,
+        'value'  => 'null_variant',
+        'desc'   => "Extra data to pass to the handler when intercepting",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_stubout_intercept_handler",
+    'flags'  =>  HipHopSpecific,
+    'desc'   => "As an interception handler, invokes a different function instead. Useful for stubbing out a function in unit testing. To use this handler, call fb_intercept('old_func', 'fb_stubout_intercept_handler', 'new_func') and this will call new_func() every time when old_func() is called and return new_func()'s return as old_func() call's return.",
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "What to return on behalf of original function.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "Which function function or class method that is being intercepted.",
+      ),
+      array(
+        'name'   => "obj",
+        'type'   => Variant,
+        'desc'   => "Which class object this method was calling on.",
+      ),
+      array(
+        'name'   => "params",
+        'type'   => VariantVec,
+        'desc'   => "The parameters original function took.",
+      ),
+      array(
+        'name'   => "data",
+        'type'   => Variant,
+        'desc'   => "The callback to redirect to.",
+      ),
+      array(
+        'name'   => "done",
+        'type'   => Variant | Reference,
+        'desc'   => "Will always set to TRUE.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "fb_rpc_intercept_handler",
+    'flags'  =>  HipHopSpecific,
+    'desc'   => "As an interception handler, invokes a function remotely on an RPC server instead of locally.",
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "What to return on behalf of original function.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "name",
+        'type'   => String,
+        'desc'   => "Which function function or class method that is being intercepted.",
+      ),
+      array(
+        'name'   => "obj",
+        'type'   => Variant,
+        'desc'   => "Which class object this method was calling on.",
+      ),
+      array(
+        'name'   => "params",
+        'type'   => VariantVec,
+        'desc'   => "The parameters original function took.",
+      ),
+      array(
+        'name'   => "data",
+        'type'   => Variant,
+        'desc'   => "Information for RPC request in a format of array('host' => address, 'port' => port, 'auth' => password, 'timeout' => seconds).",
+      ),
+      array(
+        'name'   => "done",
+        'type'   => Variant | Reference,
+        'desc'   => "Will always set to TRUE.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "fb_renamed_functions",
     'desc'   => "Specifies a list of functions that are allowed to rename by calling fb_rename_function().",
     'flags'  =>  HasDocComment | HipHopSpecific,

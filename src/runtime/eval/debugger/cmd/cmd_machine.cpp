@@ -16,6 +16,9 @@
 
 #include <runtime/eval/debugger/cmd/cmd_machine.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/intercept.h>
+#include <runtime/base/array/array_init.h>
+#include <runtime/base/util/libevent_http_client.h>
 #include <util/process.h>
 
 using namespace std;
@@ -26,17 +29,19 @@ namespace HPHP { namespace Eval {
 void CmdMachine::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_sandboxes);
+  thrift.write(m_rpcConfig);
 }
 
 void CmdMachine::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_sandboxes);
+  thrift.read(m_rpcConfig);
 }
 
 void CmdMachine::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     static const char *keywords[] =
-      { "disconnect", "connect", "list", "attach", NULL };
+      { "disconnect", "connect", "rpc", "list", "attach", NULL };
     client->addCompletion(keywords);
   }
 }
@@ -44,8 +49,10 @@ void CmdMachine::list(DebuggerClient *client) {
 bool CmdMachine::help(DebuggerClient *client) {
   client->helpTitle("Machine Command");
   client->helpCmds(
-    "[m]achine [c]onnect {host}",         "debugging remote server",
-    "[m]achine [c]onnect {host}:{port}",  "debugging remote server",
+    "[m]achine [c]onnect {host}",         "debugging remote server natively",
+    "[m]achine [c]onnect {host}:{port}",  "debugging remote server natively",
+    "[m]achine [r]pc {host}",             "debugging remote server with RPC",
+    "[m]achine [r]pc {host}:{port}",      "debugging remote server with RPC",
     "[m]achine [d]isconnect",             "debugging local script",
     "[m]achine [l]ist",                   "list all sandboxes",
     "[m]achine [a]ttach {index}",         "attach to a sandbox",
@@ -70,14 +77,29 @@ bool CmdMachine::help(DebuggerClient *client) {
     "sandbox and attach to it.\n"
     "\n"
     "When your sandbox is not available, please hit it at least once "
-    "from your browser. Then run '[m]achine [l]ist' command again."
+    "from your browser. Then run '[m]achine [l]ist' command again.\n"
+    "\n"
+    "If a HipHop server has RPC port open, one can also debug the server in "
+    "a very special RPC mode. In this mode, one can type in PHP scripts to "
+    "run, but all functions will be executed on server through RPC. Because "
+    "states are still maintained locally and only functions are executed "
+    "remotely, it may not work with functions or scripts that depend on "
+    "global variables or low-level raw resource pointers. As a simple rule, "
+    "stateless functions will work just fine, even with objects and method "
+    "calls. Currently, all built-in functions are still executed locally. "
+    "We may move some of them to remote server, if they rely on machine "
+    "specific information."
   );
   return true;
 }
 
-bool CmdMachine::processList(DebuggerClient *client) {
+bool CmdMachine::processList(DebuggerClient *client,
+                             bool output /* = true */) {
   m_body = "list";
   CmdMachinePtr res = client->xend<CmdMachine>(this);
+  client->updateSandboxes(res->m_sandboxes);
+  if (!output) return true;
+
   if (res->m_sandboxes.empty()) {
     client->info("(no sandbox was found)");
     client->tutorial(
@@ -95,7 +117,7 @@ bool CmdMachine::processList(DebuggerClient *client) {
       "again."
     );
   }
-  client->updateSandboxes(res->m_sandboxes);
+
   return true;
 }
 
@@ -133,7 +155,8 @@ bool CmdMachine::onClient(DebuggerClient *client) {
   if (DebuggerCommand::onClient(client)) return true;
   if (client->argCount() == 0) return help(client);
 
-  if (client->arg(1, "connect")) {
+  bool rpc = client->arg(1, "rpc");
+  if (rpc || client->arg(1, "connect")) {
     if (client->argCount() != 2) {
       return help(client);
     }
@@ -148,7 +171,19 @@ bool CmdMachine::onClient(DebuggerClient *client) {
       port = atoi(host.substr(pos + 1).c_str());
       host = host.substr(0, pos);
     }
-    client->connect(host, port);
+
+    // connect to local first
+    client->connect(host, port, rpc);
+
+    // then set intercept for that thread
+    CmdMachine cmd;
+    cmd.m_body = "rpc";
+    cmd.m_rpcConfig = CREATE_MAP4
+      ("host", String(host),
+       "port", port ? port : RuntimeOption::DebuggerDefaultRpcPort,
+       "auth", String(RuntimeOption::DebuggerDefaultRpcAuth),
+       "timeout", RuntimeOption::DebuggerDefaultRpcTimeout);
+    client->send(&cmd);
     return true;
   }
 
@@ -176,10 +211,14 @@ bool CmdMachine::onClient(DebuggerClient *client) {
     int num = atoi(snum.c_str());
     string id = client->getSandbox(num);
     if (id.empty()) {
-      client->error("\"%s\" is not a valid sandbox index. Choose one from "
-                    "this list:", snum.c_str());
-      processList(client);
-      return true;
+      processList(client, false);
+      id = client->getSandbox(num);
+      if (id.empty()) {
+        client->error("\"%s\" is not a valid sandbox index. Choose one from "
+                      "this list:", snum.c_str());
+        processList(client);
+        return true;
+      }
     }
     DSandboxInfo sandbox(id);
     return AttachSandbox(client, sandbox);
@@ -189,12 +228,21 @@ bool CmdMachine::onClient(DebuggerClient *client) {
 }
 
 bool CmdMachine::onServer(DebuggerProxy *proxy) {
+  if (m_body == "rpc") {
+    String host = m_rpcConfig["host"].toString();
+    int port = m_rpcConfig["port"].toInt32();
+    LibEventHttpClient::SetCache(host.data(), port, 1);
+
+    register_intercept("", "fb_rpc_intercept_handler", m_rpcConfig);
+    return true;
+  }
   if (m_body == "list") {
     Debugger::GetRegisteredSandboxes(m_sandboxes);
     return proxy->send(this);
   }
   if (m_body == "attach" && !m_sandboxes.empty()) {
     proxy->switchSandbox(m_sandboxes[0]);
+    m_exitInterrupt = true;
     return true;
   }
   return false;

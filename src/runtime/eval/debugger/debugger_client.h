@@ -99,7 +99,8 @@ public:
   /**
    * Thread functions.
    */
-  void start(const std::string &extension, const StringVec &cmds);
+  void start(const std::string &host, int port,
+             const std::string &extension, const StringVec &cmds);
   void stop();
   void run();
 
@@ -173,7 +174,7 @@ public:
   /**
    * Machine functions.
    */
-  void connect(const std::string &host, int port);
+  void connect(const std::string &host, int port, bool rpc);
   void disconnect();
 
   /**
@@ -288,6 +289,7 @@ private:
 
   DMachineInfoPtrVec m_machines; // all connected ones
   DMachineInfoPtr m_machine;     // current
+  std::string m_rpcHost;         // current RPC host
 
   StringVec m_sandboxes;
   DThreadInfoPtrVec m_threads;

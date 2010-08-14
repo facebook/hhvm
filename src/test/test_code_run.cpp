@@ -417,6 +417,8 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestDynamicVariables);
   RUN_TEST(TestDynamicProperties);
   RUN_TEST(TestDynamicFunctions);
+  RUN_TEST(TestRenameFunction);
+  //RUN_TEST(TestIntercept); // requires ENABLE_INTERCEPT
   RUN_TEST(TestDynamicMethods);
   RUN_TEST(TestVolatile);
   RUN_TEST(TestHereDoc);
@@ -4830,6 +4832,10 @@ bool TestCodeRun::TestDynamicFunctions() {
       "$goo(foo());"
       "bar(foo());");
 
+  return true;
+}
+
+bool TestCodeRun::TestRenameFunction() {
   Option::DynamicInvokeFunctions.insert("test1");
   Option::DynamicInvokeFunctions.insert("test2");
   MVCR("<?php "
@@ -4867,6 +4873,45 @@ bool TestCodeRun::TestDynamicFunctions() {
 
         "bool(true)\n");
   Option::DynamicInvokeFunctions.clear();
+  return true;
+}
+
+bool TestCodeRun::TestIntercept() {
+  MVCRO("<?php "
+        "$a = 10; $b = 20;"
+        "function &foo(&$n, $p) { global $a; $n = 123; $p += 1; "
+        "  var_dump('foo');"
+        "return $a;}"
+        "function &bar(&$n, $p) { global $b; $n = 456; $p += 2; "
+        "  var_dump('bar');"
+        "return $b;}"
+        "fb_intercept('foo', 'fb_stubout_intercept_handler', 'bar');"
+        "$n = 0; $d = 3; $c = &foo($n, $d); var_dump($c, $d); $c = 30;"
+        //"var_dump($a, $b, $n);"
+        ,
+        "string(3) \"bar\"\nint(20)\nint(3)\n"
+        //"int(10)\nint(30)\nint(456)\n"
+       );
+
+  MVCRO("<?php "
+        "$a = 10; $b = 20;"
+        "class A {"
+        "function &foo(&$n, $p) { global $a; $n = 123; $p += 1; "
+        "  var_dump('foo');"
+        "return $a;}"
+        "}"
+        "class B {"
+        "function &bar(&$n, $p) { global $b; $n = 456; $p += 2; "
+        "  var_dump('bar');"
+        "return $b;}"
+        "}"
+        "fb_intercept('A::foo', 'fb_stubout_intercept_handler', 'B::bar');"
+        "$n = 0; $d = 3; $c = &A::foo($n, $d); var_dump($c, $d); $c = 30;"
+        //"var_dump($a, $b, $n);"
+        ,
+        "string(3) \"bar\"\nint(20)\nint(3)\n"
+        //"int(10)\nint(30)\nint(456)\n"
+       );
 
   return true;
 }

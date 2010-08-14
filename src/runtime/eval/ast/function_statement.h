@@ -93,6 +93,7 @@ protected:
 
   StatementListStatementPtr m_body;
   bool m_hasCallToGetArgs;
+  mutable char m_maybeIntercepted;
 
   std::string m_docComment;
 

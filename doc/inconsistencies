@@ -114,7 +114,11 @@ Can return classes in different order from PHP's.
 If an uninitialized variable is being used before it's assigned with a value,
 and this variable is inferred as integers, it will be 0, instead of null.
 
-(3) XMLWriter
+(3) call_user_func() and call_user_func_array()
+
+PHP doesn't respect pass-by-reference parameters and return value. HipHop does.
+
+(4) XMLWriter
 
 In PHP, XMLWriter class and its functions returned different types of objects,
 

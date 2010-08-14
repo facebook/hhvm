@@ -248,6 +248,7 @@ public:
 protected:
   virtual String readImpl() = 0;
   virtual void flushImpl(CStrRef data) = 0;
+  virtual void throwError(const char *msg, int code) = 0;
 
   int   m_size;
 

@@ -169,6 +169,8 @@ class TestCodeRun : public TestBase {
   bool TestFiber();
   bool TestAPC();
   bool TestInlining();
+  bool TestRenameFunction();
+  bool TestIntercept();
 
   // PHP 5.3
   bool TestVariableClassName();

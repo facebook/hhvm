@@ -45,6 +45,21 @@ inline Variant x_fb_unserialize(CVarRef thing, Variant success, Variant errcode 
   return f_fb_unserialize(thing, ref(success), ref(errcode));
 }
 
+inline bool x_fb_intercept(CStrRef name, CVarRef handler, CVarRef data = null_variant) {
+  FUNCTION_INJECTION_BUILTIN(fb_intercept);
+  return f_fb_intercept(name, handler, data);
+}
+
+inline Variant x_fb_stubout_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, Variant done) {
+  FUNCTION_INJECTION_BUILTIN(fb_stubout_intercept_handler);
+  return f_fb_stubout_intercept_handler(name, obj, params, data, ref(done));
+}
+
+inline Variant x_fb_rpc_intercept_handler(CStrRef name, CVarRef obj, CArrRef params, CVarRef data, Variant done) {
+  FUNCTION_INJECTION_BUILTIN(fb_rpc_intercept_handler);
+  return f_fb_rpc_intercept_handler(name, obj, params, data, ref(done));
+}
+
 inline void x_fb_renamed_functions(CArrRef names) {
   FUNCTION_INJECTION_BUILTIN(fb_renamed_functions);
   f_fb_renamed_functions(names);

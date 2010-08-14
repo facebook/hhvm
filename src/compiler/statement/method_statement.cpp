@@ -560,21 +560,8 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                     scope->getOriginalName().c_str(), origFuncName.c_str());
         }
       }
-      if (Option::GenRTTIProfileData && m_params) {
-        for (int i = 0; i < m_params->getCount(); i++) {
-          ParameterExpressionPtr param =
-            dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-          if (param->hasRTTI()) {
-            const string &paramName = param->getName();
-            int id = ar->getParamRTTIEntryId(ar->getClassScope(), funcScope,
-                                             paramName);
-            if (id != -1) {
-              cg_printf("RTTI_INJECTION(%s%s, %d);\n",
-                        Option::VariablePrefix, paramName.c_str(), id);
-            }
-          }
-        }
-      }
+      outputCPPArgInjections(cg, ar, origFuncName.c_str(), ar->getClassScope(),
+                             funcScope);
       if (m_name == "__lval" || m_name == "__offsetget_lval") {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
@@ -609,6 +596,47 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   ar->popScope();
+}
+
+void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
+                                             AnalysisResultPtr ar,
+                                             const char *name,
+                                             ClassScopePtr cls,
+                                             FunctionScopePtr funcScope) {
+  if (cg.getOutput() != CodeGenerator::SystemCPP) {
+    if (m_params) {
+      cg_printf("INTERCEPT_INJECTION(\"%s\", (Array(ArrayInit(%d, true)",
+                name, m_params->getCount());
+      string params;
+      for (int i = 0; i < m_params->getCount(); i++) {
+        ParameterExpressionPtr param =
+          dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+        const string &paramName = param->getName();
+        cg_printf(".set%s(%d, %s%s)", param->isRef() ? "Ref" : "",
+                  i, Option::VariablePrefix, paramName.c_str());
+      }
+      cg_printf(".create())), %s);\n",
+                funcScope->isRefReturn() ? "ref(r)" : "r");
+    } else {
+      cg_printf("INTERCEPT_INJECTION(\"%s\", null_array, %s);\n",
+                name, funcScope->isRefReturn() ? "ref(r)" : "r");
+    }
+  }
+
+  if (Option::GenRTTIProfileData && m_params) {
+    for (int i = 0; i < m_params->getCount(); i++) {
+      ParameterExpressionPtr param =
+        dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+      if (param->hasRTTI()) {
+        const string &paramName = param->getName();
+        int id = ar->getParamRTTIEntryId(cls, funcScope, paramName);
+        if (id != -1) {
+          cg_printf("RTTI_INJECTION(%s%s, %d);\n",
+                    Option::VariablePrefix, paramName.c_str(), id);
+        }
+      }
+    }
+  }
 }
 
 void MethodStatement::outputCPPStmt(CodeGenerator &cg, AnalysisResultPtr ar) {

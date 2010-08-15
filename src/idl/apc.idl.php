@@ -52,7 +52,8 @@ CPP
 DefineFunction(
   array(
     'name'   => "apc_add",
-    'desc'   => "Caches a variable in the data store, only if it's not already stored. Note: Unlike many other mechanisms in PHP, variables stored using apc_add() will persist between requests (until the value is removed from the cache).",
+    'desc'   => "Caches a variable in the data store, only if it's not already stored. Unlike many other mechanisms in PHP, variables stored using apc_add() will persist between requests (until the value is removed from the cache).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -85,7 +86,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apc_store",
-    'desc'   => "Cache a variable in the data store. Note: Unlike many other mechanisms in PHP, variables stored using apc_store() will persist between requests (until the value is removed from the cache).",
+    'desc'   => "Cache a variable in the data store. Unlike many other mechanisms in PHP, variables stored using apc_store() will persist between requests (until the value is removed from the cache).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -119,6 +121,7 @@ DefineFunction(
   array(
     'name'   => "apc_fetch",
     'desc'   => "Fetchs a stored variable from the cache.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The stored variable or array of variables on success; FALSE on failure",
@@ -147,6 +150,7 @@ DefineFunction(
   array(
     'name'   => "apc_delete",
     'desc'   => "Removes a stored variable from the cache.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -169,6 +173,7 @@ DefineFunction(
   array(
     'name'   => "apc_compile_file",
     'desc'   => "Stores a file in the bytecode cache, bypassing all filters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -196,16 +201,17 @@ DefineFunction(
   array(
     'name'   => "apc_cache_info",
     'desc'   => "Retrieves cached information and meta-data from APC's data store.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Array of cached data (and meta-data) or FALSE on failure Note: apc_cache_info() will raise a warning if it is unable to retrieve APC cache data. This typically occurs when APC is not enabled.",
+      'desc'   => "Array of cached data (and meta-data) or FALSE on failure apc_cache_info() will raise a warning if it is unable to retrieve APC cache data. This typically occurs when APC is not enabled.",
     ),
     'args'   => array(
       array(
         'name'   => "cache_id",
         'type'   => Int64,
         'value'  => "0",
-        'desc'   => "If cache_type is \"user\", information about the user cache will be returned.\nIf cache_type is \"filehits\", information about which files have been served from the bytecode cache for the current request will be returned. This feature must be enabled at compile time using --enable-filehits.\nIf an invalid or no cache_type is specified, information about the system cache (cached files) will be returned.",
+        'desc'   => "If cache_type is \"user\", information about the user cache will be returned.\n\nIf cache_type is \"filehits\", information about which files have been served from the bytecode cache for the current request will be returned. This feature must be enabled at compile time using --enable-filehits .\n\nIf an invalid or no cache_type is specified, information about the system cache (cached files) will be returned.",
       ),
       array(
         'name'   => "limited",
@@ -220,6 +226,7 @@ DefineFunction(
   array(
     'name'   => "apc_clear_cache",
     'desc'   => "Clears the user/system cache.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -237,7 +244,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apc_define_constants",
-    'desc'   => "define() is notoriously slow. Since the main benefit of APC is to increase the performance of scripts/applications, this mechanism is provided to streamline the process of mass constant definition. However, this function does not perform as well as anticipated.\nFor a better-performing solution, try the » hidef extension from PECL. Note: To remove a set of stored constants (without clearing the entire cache), an empty array may be passed as the constants parameter, effectively clearing the stored value(s).",
+    'desc'   => "define() is notoriously slow. Since the main benefit of APC is to increase the performance of scripts/applications, this mechanism is provided to streamline the process of mass constant definition. However, this function does not perform as well as anticipated.\n\nFor a better-performing solution, try the » hidef extension from PECL. To remove a set of stored constants (without clearing the entire cache), an empty array may be passed as the constants parameter, effectively clearing the stored value(s).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -271,6 +279,7 @@ DefineFunction(
   array(
     'name'   => "apc_load_constants",
     'desc'   => "Loads a set of constants from the cache.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -299,6 +308,7 @@ DefineFunction(
   array(
     'name'   => "apc_sma_info",
     'desc'   => "Retrieves APC's Shared Memory Allocation information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Array of Shared Memory Allocation data; FALSE on failure.",
@@ -316,6 +326,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apc_filehits",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
     ),
@@ -325,15 +336,16 @@ DefineFunction(
   array(
     'name'   => "apc_delete_file",
     'desc'   => "Deletes the given files from the opcode cache.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns TRUE on success or FALSE on failure. Or if keys is an array , then an empty array is returned on success, or an array of failed files is returned.",
+      'desc'   => "Returns TRUE on success or FALSE on failure. Or if keys is an array, then an empty array is returned on success, or an array of failed files is returned.",
     ),
     'args'   => array(
       array(
         'name'   => "keys",
         'type'   => Variant,
-        'desc'   => "The files to be deleted. Accepts a string , array of strings, or an APCIterator object .",
+        'desc'   => "The files to be deleted. Accepts a string, array of strings, or an APCIterator object.",
       ),
       array(
         'name'   => "cache_id",
@@ -347,6 +359,7 @@ DefineFunction(
   array(
     'name'   => "apc_inc",
     'desc'   => "Increases a stored number.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the current value of key's value on success, or FALSE on failure",
@@ -381,6 +394,7 @@ DefineFunction(
   array(
     'name'   => "apc_dec",
     'desc'   => "Decreases a stored integer value.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the current value of key's value on success, or FALSE on failure",
@@ -415,6 +429,7 @@ DefineFunction(
   array(
     'name'   => "apc_cas",
     'desc'   => "apc_cas WarningThis function is currently not documented; only its argument list is available.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -444,6 +459,7 @@ DefineFunction(
   array(
     'name'   => "apc_bin_dump",
     'desc'   => "Returns a binary dump of the given files and user variables from the APC cache. A NULL for files or user_vars signals a dump of every entry, whereas array() will dump nothing.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a binary dump of the given files and user variables from the APC cache, FALSE if APC is not enabled, or NULL if an unknown error is encountered.",
@@ -468,6 +484,7 @@ DefineFunction(
   array(
     'name'   => "apc_bin_load",
     'desc'   => "Loads the given binary dump into the APC file/user cache.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the binary dump data was loaded with success, otherwise FALSE is returned. FALSE is returned if APC is not enabled, or if the data is not a valid APC binary dump (e.g., unexpected size).",
@@ -496,6 +513,7 @@ DefineFunction(
   array(
     'name'   => "apc_bin_dumpfile",
     'desc'   => "Outputs a binary dump of the given files and user variables from the APC cache to the named file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The number of bytes written to the file, otherwise FALSE if APC is not enabled, filename is an invalid file name, filename can't be opened, the file dump can't be completed (e.g., the hard drive is out of disk space), or an unknown error was encountered.",
@@ -535,6 +553,7 @@ DefineFunction(
   array(
     'name'   => "apc_bin_loadfile",
     'desc'   => "Loads a binary dump from a file into the APC file/user cache.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success, otherwise FALSE Reasons it may return FALSE include APC is not enabled, filename is an invalid file name or empty, filename can't be opened, the file dump can't be completed, or if the data is not a valid APC binary dump (e.g., unexpected size).",

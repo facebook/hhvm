@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 93 */
+/* SRC: classes/exception.php line 175 */
 class c_badmethodcallexception : public c_badfunctioncallexception {
   BEGIN_CLASS_MAP(BadMethodCallException)
     PARENT_CLASS(BadFunctionCallException)

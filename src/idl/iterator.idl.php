@@ -52,7 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "hphp_recursiveiteratoriterator___construct",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -79,7 +79,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursiveiteratoriterator_getinneriterator",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -94,7 +94,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursiveiteratoriterator_current",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -109,7 +109,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursiveiteratoriterator_key",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -124,7 +124,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursiveiteratoriterator_next",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -139,7 +139,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursiveiteratoriterator_rewind",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -154,7 +154,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursiveiteratoriterator_valid",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -169,7 +169,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator___construct",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -188,7 +188,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator_key",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -203,7 +203,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator_next",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -218,7 +218,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator_rewind",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -233,7 +233,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator_seek",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -252,7 +252,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator_current",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -267,7 +267,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator___tostring",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -282,7 +282,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator_valid",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -297,7 +297,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_directoryiterator_isdot",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -312,7 +312,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator___construct",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -335,7 +335,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_key",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -350,7 +350,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_next",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -365,7 +365,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_rewind",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -380,7 +380,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_seek",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -399,7 +399,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_current",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -414,7 +414,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator___tostring",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -429,7 +429,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_valid",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -444,7 +444,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_haschildren",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -459,7 +459,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_getchildren",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -474,7 +474,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_getsubpath",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -489,7 +489,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_recursivedirectoryiterator_getsubpathname",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),

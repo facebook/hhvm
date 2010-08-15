@@ -112,8 +112,8 @@ DefineConstant(
 DefineFunction(
   array(
     'name'   => "fb_thrift_serialize",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Same as fb_serialize(). Please use fb_serialize() with better naming. This function has nothing to do with Facebook's open sourced Thrift package.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Serialized data.",
@@ -130,8 +130,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_thrift_unserialize",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Same as fb_unserialize(). Please use fb_unserialize() with better naming. This function has nothing to do with Facebook's open sourced Thrift package.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Unserialized data.",
@@ -150,8 +150,8 @@ DefineFunction(
       array(
         'name'   => "errcode",
         'type'   => Variant | Reference,
-        'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
         'value'  => "null_variant",
+        'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
       ),
     ),
   ));
@@ -159,8 +159,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_serialize",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Seriailize data into a compact format that can be unserialized by fb_unserialize().",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Serialized data.",
@@ -177,8 +177,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_unserialize",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Unserialize a previously fb_thrift_serialize()-ed data.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Unserialized data.",
@@ -197,8 +197,8 @@ DefineFunction(
       array(
         'name'   => "errcode",
         'type'   => Variant | Reference,
-        'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
         'value'  => "null_variant",
+        'desc'   => "One of those FB_UNSERIALIZE_ constants to describe what the decoding error was, if it failed.",
       ),
     ),
   ));
@@ -206,8 +206,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_renamed_functions",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Specifies a list of functions that are allowed to rename by calling fb_rename_function().",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -223,8 +223,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_rename_function",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Rename a function, so that a function can be called with the new name.\n\nWhen writing unit tests, one may want to stub out a function. To do so, call fb_rename_function('func_to_stub_out', 'somename') then fb_rename_function('new_func_to_replace_with', 'func_to_stub_out'). This way, when calling func_to_stub_out(), it will actually execute new_func_to_replace_with().",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise.",
@@ -246,8 +246,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_utf8ize",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Sanitize a string to make sure it's legal UTF-8 by stripping off any characters that are not properly encoded.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Sanitized string.",
@@ -264,11 +264,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_call_user_func_safe",
-    'flags'  =>  VariableArguments | HipHopSpecific | HasOptFunction,
-    'desc'   => <<<EOT
-This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.
-EOT
-,
+    'desc'   => "This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction,
     'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => VariantVec,
@@ -286,13 +283,8 @@ EOT
 DefineFunction(
   array(
     'name'   => "fb_call_user_func_safe_return",
-    'desc'   => <<<EOT
-This function invokes \$function with the arguments specified in its parameter
-list. If the function is not defined, \$default_rval is returned. Note that
-the default return value comes BEFORE the arguments to the function.
-EOT
-,
-    'flags'  =>  VariableArguments | HipHopSpecific | HasOptFunction,
+    'desc'   => "This function invokes \$function with the arguments specified in its parameter\nlist. If the function is not defined, \$default_rval is returned. Note that\nthe default return value comes BEFORE the arguments to the function.",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments | HasOptFunction,
     'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -315,11 +307,8 @@ EOT
 DefineFunction(
   array(
     'name'   => "fb_call_user_func_array_safe",
-    'flags'  =>  HipHopSpecific | HasOptFunction,
-    'desc'   => <<<EOT
-This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.
-EOT
-,
+    'desc'   => "This function invokes \$function with the arguments specified in its parameter list. It returns an array of two elements, the first being a boolean specifying whether or not the function was invoked, the latter being the return value, or null if it was not invoked. The function may be any PHP callable, either a string function name, an array of object instance and method, or array of classname and static class method.",
+    'flags'  =>  HasDocComment | HipHopSpecific | HasOptFunction,
     'opt'    => "hphp_opt_fb_call_user_func",
     'return' => array(
       'type'   => VariantVec,
@@ -342,19 +331,17 @@ EOT
 DefineFunction(
   array(
     'name'   => "fb_get_code_coverage",
-    'flags'  =>  HipHopSpecific,
-    'desc '  => "Checks which line of source code has been executed how many times.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
-      'desc '  => "Returns code coverage profiles.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "xhprof_enable",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Starts xhprof profiling. For details on how to use this function, please refer to http://mirror.facebook.net/facebook/xhprof/doc.html.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -367,8 +354,8 @@ DefineFunction(
       array(
         'name'   => "args",
         'type'   => StringVec,
-        'desc'   => "Extra argument to reserve for future use.",
         'value'  => "null_array",
+        'desc'   => "Extra argument to reserve for future use.",
       ),
     ),
   ));
@@ -376,8 +363,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xhprof_disable",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Ends and reports xhprof profiling result. For details on how to use this function, please refer to http://mirror.facebook.net/facebook/xhprof/doc.html.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Profile result.",
@@ -387,8 +374,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xhprof_sample_enable",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Starts sampling based xhprof profiling. For details on how to use this function, please refer to http://mirror.facebook.net/facebook/xhprof/doc.html.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -397,8 +384,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xhprof_sample_disable",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Ends sampling based xhprof profiling. For details on how to use this function, please refer to http://mirror.facebook.net/facebook/xhprof/doc.html.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -407,8 +394,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_load_local_databases",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Load a map from database IDs (32-bit integers) to database connection information for fb_crossall_query(), which only takes database IDs.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -424,8 +411,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_parallel_query",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Runs MySQL queries in parallel. Internally it will spawn threads, each of which executes one or more queries sequentially.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....)).",
@@ -439,38 +426,38 @@ DefineFunction(
       array(
         'name'   => "max_thread",
         'type'   => Int32,
-        'desc'   => "Maximum number of threads to run.",
         'value'  => "50",
+        'desc'   => "Maximum number of threads to run.",
       ),
       array(
         'name'   => "combine_result",
         'type'   => Boolean,
-        'desc'   => "Whether to merge dataset into just one, without maps of database IDs. If TRUE, result set would be array(..., 'result' => {dataset}, ...) directly.",
         'value'  => "true",
+        'desc'   => "Whether to merge dataset into just one, without maps of database IDs. If TRUE, result set would be array(..., 'result' => {dataset}, ...) directly.",
       ),
       array(
         'name'   => "retry_query_on_fail",
         'type'   => Boolean,
-        'desc'   => "Whether or not retry query once when it fails. This may be useful if database connection is temporarily lost during queries and re-executing a SELECT or other idempotent queries are acceptable.",
         'value'  => "true",
+        'desc'   => "Whether or not retry query once when it fails. This may be useful if database connection is temporarily lost during queries and re-executing a SELECT or other idempotent queries are acceptable.",
       ),
       array(
         'name'   => "connect_timeout",
         'type'   => Int32,
-        'desc'   => "Connection timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
         'value'  => "-1",
+        'desc'   => "Connection timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
       ),
       array(
         'name'   => "read_timeout",
         'type'   => Int32,
-        'desc'   => "Query timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
         'value'  => "-1",
+        'desc'   => "Query timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
       ),
       array(
         'name'   => "timeout_in_ms",
         'type'   => Boolean,
-        'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
         'value'  => "false",
+        'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
   ));
@@ -478,8 +465,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_crossall_query",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Runs a MySQL query against all databases in the map loaded by fb_load_local_databases(). Internally it will spawn threads, each of which executes the same query against one or more databases sequentially.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....)).",
@@ -493,32 +480,32 @@ DefineFunction(
       array(
         'name'   => "max_thread",
         'type'   => Int32,
-        'desc'   => "Maximum number of threads to run.",
         'value'  => "50",
+        'desc'   => "Maximum number of threads to run.",
       ),
       array(
         'name'   => "retry_query_on_fail",
         'type'   => Boolean,
-        'desc'   => "Whether or not retry query once when it fails. This may be useful if database connection is temporarily lost during queries and re-executing a SELECT or other idempotent queries are acceptable.",
         'value'  => "true",
+        'desc'   => "Whether or not retry query once when it fails. This may be useful if database connection is temporarily lost during queries and re-executing a SELECT or other idempotent queries are acceptable.",
       ),
       array(
         'name'   => "connect_timeout",
         'type'   => Int32,
-        'desc'   => "Connection timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
         'value'  => "-1",
+        'desc'   => "Connection timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
       ),
       array(
         'name'   => "read_timeout",
         'type'   => Int32,
-        'desc'   => "Query timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
         'value'  => "-1",
+        'desc'   => "Query timeout. If timeout_in_ms is TRUE, it is in seconds. Otherwise, it is in milli-seconds.",
       ),
       array(
         'name'   => "timeout_in_ms",
         'type'   => Boolean,
-        'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
         'value'  => "false",
+        'desc'   => "Whether connect_timeout or read_timeout are in seconds or milli-seconds.",
       ),
     ),
   ));
@@ -526,8 +513,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_set_taint",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Taints a string with a flag or a bit. This bit is contagious in string operations, being carried over to new strings that are copied or composed from this string. This may be used for checking dirty or clean status of end user's input for different purposes.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -548,8 +535,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_unset_taint",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Untaints a string by clearing off the bit that was set or carried over.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -570,8 +557,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_get_taint",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Checks to see if a bit is set.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int32,
       'desc'   => "All bits that were tainted.",
@@ -588,8 +575,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_const_fetch",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Fetches a constant string from a special store that's compiled into the executable. This is faster than apc_fetch(), which needs locking between different threads. This store is immutable and loaded once with strings that are never changed. Therefore, no locking is needed when accessed by different threads.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The value that was stored.",

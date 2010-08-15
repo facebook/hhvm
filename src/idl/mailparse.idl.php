@@ -53,37 +53,38 @@ DefineFunction(
   array(
     'name'   => "mail",
     'desc'   => "Sends an email.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE if the mail was successfully accepted for delivery, FALSE otherwise.\nIt is important to note that just because the mail was accepted for delivery, it does NOT mean the mail will actually reach the intended destination.",
+      'desc'   => "Returns TRUE if the mail was successfully accepted for delivery, FALSE otherwise.\n\nIt is important to note that just because the mail was accepted for delivery, it does NOT mean the mail will actually reach the intended destination.",
     ),
     'args'   => array(
       array(
         'name'   => "to",
         'type'   => String,
-        'desc'   => "Receiver, or receivers of the mail.\nThe formatting of this string must comply with » RFC 2822. Some examples are: user@example.com user@example.com, anotheruser@example.com User <user@example.com> User <user@example.com>, Another User <anotheruser@example.com>",
+        'desc'   => "Receiver, or receivers of the mail.\n\nThe formatting of this string must comply with » RFC 2822. Some examples are: user@example.com user@example.com, anotheruser@example.com User <user@example.com> User <user@example.com>, Another User <anotheruser@example.com>",
       ),
       array(
         'name'   => "subject",
         'type'   => String,
-        'desc'   => "Subject of the email to be sent. Caution\nSubject must satisfy » RFC 2047.",
+        'desc'   => "Subject of the email to be sent. Caution\n\nSubject must satisfy » RFC 2047.",
       ),
       array(
         'name'   => "message",
         'type'   => String,
-        'desc'   => "Message to be sent.\nEach line should be separated with a LF (\\n). Lines should not be larger than 70 characters. Caution\n(Windows only) When PHP is talking to a SMTP server directly, if a full stop is found on the start of a line, it is removed. To counter-act this, replace these occurrences with a double dot.",
+        'desc'   => "Message to be sent.\n\nEach line should be separated with a LF (\\n). Lines should not be larger than 70 characters. Caution\n\n(Windows only) When PHP is talking to a SMTP server directly, if a full stop is found on the start of a line, it is removed. To counter-act this, replace these occurrences with a double dot.",
       ),
       array(
         'name'   => "additional_headers",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "String to be inserted at the end of the email header.\nThis is typically used to add extra headers (From, Cc, and Bcc). Multiple extra headers should be separated with a CRLF (\\r\\n). Note: When sending mail, the mail must contain a From header. This can be set with the additional_headers parameter, or a default can be set in php.ini. Failing to do this will result in an error message similar to Warning: mail(): \"sendmail_from\" not set in php.ini or custom \"From:\" header missing. The From header sets also Return-Path under Windows. Note: If messages are not received, try using a LF (\\n) only. Some poor quality Unix mail transfer agents replace LF by CRLF automatically (which leads to doubling CR if CRLF is used). This should be a last resort, as it does not comply with » RFC 2822.",
+        'desc'   => "String to be inserted at the end of the email header.\n\nThis is typically used to add extra headers (From, Cc, and Bcc). Multiple extra headers should be separated with a CRLF (\\r\\n).\n\nWhen sending mail, the mail must contain a From header. This can be set with the additional_headers parameter, or a default can be set in php.ini.\n\nFailing to do this will result in an error message similar to Warning: mail(): \"sendmail_from\" not set in php.ini or custom \"From:\" header missing. The From header sets also Return-Path under Windows.\n\nIf messages are not received, try using a LF (\\n) only. Some poor quality Unix mail transfer agents replace LF by CRLF automatically (which leads to doubling CR if CRLF is used). This should be a last resort, as it does not comply with » RFC 2822.",
       ),
       array(
         'name'   => "additional_parameters",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The additional_parameters parameter can be used to pass additional flags as command line options to the program configured to be used when sending mail, as defined by the sendmail_path configuration setting. For example, this can be used to set the envelope sender address when using sendmail with the -f sendmail option.\nThe user that the webserver runs as should be added as a trusted user to the sendmail configuration to prevent a 'X-Warning' header from being added to the message when the envelope sender (-f) is set using this method. For sendmail users, this file is /etc/mail/trusted-users.",
+        'desc'   => "The additional_parameters parameter can be used to pass additional flags as command line options to the program configured to be used when sending mail, as defined by the sendmail_path configuration setting. For example, this can be used to set the envelope sender address when using sendmail with the -f sendmail option.\n\nThe user that the webserver runs as should be added as a trusted user to the sendmail configuration to prevent a 'X-Warning' header from being added to the message when the envelope sender (-f) is set using this method. For sendmail users, this file is /etc/mail/trusted-users.",
       ),
     ),
   ));
@@ -91,6 +92,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ezmlm_hash",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "The hash value of addr.",
@@ -108,6 +110,7 @@ DefineFunction(
   array(
     'name'   => "mailparse_msg_create",
     'desc'   => "Create a MIME mail resource.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
       'desc'   => "Returns a handle that can be used to parse a message.",
@@ -118,6 +121,7 @@ DefineFunction(
   array(
     'name'   => "mailparse_msg_free",
     'desc'   => "Frees a MIME resource.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -135,6 +139,7 @@ DefineFunction(
   array(
     'name'   => "mailparse_msg_parse_file",
     'desc'   => "Parses a file. This is the optimal way of parsing a mail file that you have on disk.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a MIME resource representing the structure, or FALSE on error.",
@@ -151,7 +156,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mailparse_msg_parse",
-    'desc'   => "Incrementally parse data into the supplied mime mail resource.\nThis function allow you to stream portions of a file at a time, rather than read and parse the whole thing.",
+    'desc'   => "Incrementally parse data into the supplied mime mail resource.\n\nThis function allow you to stream portions of a file at a time, rather than read and parse the whole thing.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -172,10 +178,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mailparse_msg_extract_part_file",
-    'desc'   => "Extracts/decodes a message section from the supplied filename.\nThe contents of the section will be decoded according to their transfer encoding - base64, quoted-printable and uuencoded text are supported.",
+    'desc'   => "Extracts/decodes a message section from the supplied filename.\n\nThe contents of the section will be decoded according to their transfer encoding - base64, quoted-printable and uuencoded text are supported.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "If callbackfunc is not NULL returns TRUE on success.\nIf callbackfunc is set to NULL, returns the extracted section as a string.\nReturns FALSE on error.",
+      'desc'   => "If callbackfunc is not NULL returns TRUE on success.\n\nIf callbackfunc is set to NULL, returns the extracted section as a string.\n\nReturns FALSE on error.",
     ),
     'args'   => array(
       array(
@@ -192,7 +199,7 @@ DefineFunction(
         'name'   => "callbackfunc",
         'type'   => Variant,
         'value'  => "\"\"",
-        'desc'   => "If set, this must be either a valid callback that will be passed the extracted section, or NULL to make this function return the extracted section.\nIf not specified, the contents will be sent to \"stdout\".",
+        'desc'   => "If set, this must be either a valid callback that will be passed the extracted section, or NULL to make this function return the extracted section.\n\nIf not specified, the contents will be sent to \"stdout\".",
       ),
     ),
   ));
@@ -200,6 +207,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mailparse_msg_extract_whole_part_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -224,6 +232,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mailparse_msg_extract_part",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -249,6 +258,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mailparse_msg_get_part_data",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -263,6 +273,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mailparse_msg_get_part",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -281,6 +292,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mailparse_msg_get_structure",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -296,6 +308,7 @@ DefineFunction(
   array(
     'name'   => "mailparse_rfc822_parse_addresses",
     'desc'   => "Parses a » RFC 822 compliant recipient list, such as that found in the To: header.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an array of associative arrays with the following keys for each recipient: display The recipient name, for display purpose. If this part is not set for a recipient, this key will hold the same value as address. address The email address is_group TRUE if the recipient is a newsgroup, FALSE otherwise.",
@@ -304,7 +317,7 @@ DefineFunction(
       array(
         'name'   => "addresses",
         'type'   => String,
-        'desc'   => "A string containing addresses, like in: Wez Furlong <wez@example.com>, doe@example.com Note: This string must not include the header name.",
+        'desc'   => "A string containing addresses, like in: Wez Furlong <wez@example.com>, doe@example.com\n\nThis string must not include the header name.",
       ),
     ),
   ));
@@ -313,6 +326,7 @@ DefineFunction(
   array(
     'name'   => "mailparse_stream_encode",
     'desc'   => "Streams data from the source file pointer, apply encoding and write to the destination file pointer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -340,6 +354,7 @@ DefineFunction(
   array(
     'name'   => "mailparse_uudecode_all",
     'desc'   => "Scans the data from the given file pointer and extract each embedded uuencoded file into a temporary file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array of associative arrays listing filename information. filename Path to the temporary file name created origfilename The original filename, for uuencoded parts only The first filename entry is the message body. The next entries are the decoded uuencoded files.",
@@ -357,6 +372,7 @@ DefineFunction(
   array(
     'name'   => "mailparse_determine_best_xfer_encoding",
     'desc'   => "Figures out the best way of encoding the content read from the given file pointer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns one of the character encodings supported by the mbstring module.",

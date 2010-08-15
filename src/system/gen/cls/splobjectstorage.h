@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/splobjectstorage.php line 3 */
+/* SRC: classes/splobjectstorage.php line 12 */
 class c_splobjectstorage : public ExtObjectData {
   BEGIN_CLASS_MAP(SplObjectStorage)
     PARENT_CLASS(Countable)

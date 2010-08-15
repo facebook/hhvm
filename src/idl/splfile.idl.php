@@ -52,7 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo___construct",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -71,7 +71,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getatime",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -86,7 +86,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getbasename",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -105,7 +105,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getctime",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -120,7 +120,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getfileinfo",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -139,7 +139,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getfilename",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -154,7 +154,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getgroup",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -169,7 +169,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getinode",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -184,7 +184,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getlinktarget",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -199,7 +199,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getmtime",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -214,7 +214,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getowner",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -229,7 +229,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getpath",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -244,7 +244,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getpathinfo",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -263,7 +263,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getpathname",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -278,7 +278,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getperms",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -293,7 +293,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getrealpath",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -308,7 +308,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_getsize",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -323,7 +323,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_gettype",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -338,7 +338,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_isdir",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -353,7 +353,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_isexecutable",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -368,7 +368,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_isfile",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -383,7 +383,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_islink",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -398,7 +398,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_isreadable",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -413,7 +413,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_iswritable",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -428,7 +428,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_openfile",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -455,7 +455,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_setfileclass",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -474,7 +474,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo_setinfoclass",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -493,7 +493,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileinfo___tostring",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -508,7 +508,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject___construct",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
     ),
@@ -539,7 +539,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_current",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -554,7 +554,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_eof",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -569,7 +569,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fflush",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -584,7 +584,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fgetc",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -599,7 +599,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fgetcsv",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -626,7 +626,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fgets",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -641,7 +641,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fgetss",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),
@@ -660,7 +660,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_flock",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -679,7 +679,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fpassthru",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -694,7 +694,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fscanf",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -721,7 +721,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fseek",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -744,7 +744,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fstat",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -759,7 +759,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_ftell",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -774,7 +774,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_ftruncate",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -793,7 +793,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_fwrite",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -816,7 +816,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_getcvscontrol",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -831,7 +831,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_getflags",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -846,7 +846,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_getmaxlinelen",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -861,7 +861,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_key",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
     ),
@@ -876,7 +876,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_next",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -891,7 +891,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_rewind",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -906,7 +906,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_valid",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -921,7 +921,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_seek",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -940,7 +940,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_setcsvcontrol",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -967,7 +967,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_setflags",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -986,7 +986,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphp_splfileobject_setmaxlinelen",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),

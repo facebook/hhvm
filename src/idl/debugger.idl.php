@@ -52,8 +52,8 @@ CPP
 DefineFunction(
   array(
     'name'   => "hphpd_install_user_command",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Expands HipHop debugger with a user extended command.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if the command name was not used before, FALSE otherwise.",
@@ -75,8 +75,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hphpd_get_user_commands",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Gets a list of user extended commands.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => StringMap,
       'desc'   => "A map of commands and their PHP classes.",
@@ -123,8 +123,8 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "DebuggerProxy",
-    'desc'   => "A debugger proxy runs on server or remote side, performing different actions upon receiving commands and instructions from a debugger client. When debugging a local script, there is still a debugger proxy, so to simplify the debugger interfaces, even though the debugger proxy will run locally.",
-    'flags'  =>  HipHopSpecific,
+    'desc'   => "",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'footer' => <<<EOT
 
  public:
@@ -137,6 +137,7 @@ DefineFunction(
   array(
     'name'   => "__construct",
     'desc'   => "Constructor of DebuggerProxy.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -146,6 +147,7 @@ DefineFunction(
   array(
     'name'   => "isLocal",
     'desc'   => "Whether this proxy is running locally for debugging a local script, or running remotely on a server.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if locally, FALSE if remote.",
@@ -156,6 +158,7 @@ DefineFunction(
   array(
     'name'   => "send",
     'desc'   => "Sends a command back to DebuggerClient.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "TRUE if successful, FALSE otherwise.",
@@ -173,6 +176,7 @@ DefineFunction(
   array(
     'name'   => "__destruct",
     'desc'   => "Destructor of DebuggerProxy.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Always returns null.",
@@ -187,8 +191,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DebuggerClient",
-    'desc'   => "A debugger client takes input from end user. Depending on which command, it may either perform an action locally, or send it to debugger proxy to perform an action on server side. This class provides common tasks related to a debugging session.",
-    'flags'  =>  HipHopSpecific,
+    'desc'   => "",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'footer' => <<<EOT
 
  public:
@@ -261,6 +265,7 @@ DefineFunction(
   array(
     'name'   => "__construct",
     'desc'   => "Constructor of DebuggerClient.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -270,6 +275,7 @@ DefineFunction(
   array(
     'name'   => "quit",
     'desc'   => "Quits the client.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -279,7 +285,7 @@ DefineFunction(
   array(
     'name'   => "print",
     'desc'   => "Prints some text without any color.",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -295,8 +301,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "help",
-    'flags'  =>  VariableArguments,
     'desc'   => "Prints some text in help color.",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -312,8 +318,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "info",
-    'flags'  =>  VariableArguments,
     'desc'   => "Prints some text in information color.",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -329,8 +335,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "output",
-    'flags'  =>  VariableArguments,
     'desc'   => "Prints some text in script output color.",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -346,8 +352,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "error",
-    'flags'  =>  VariableArguments,
     'desc'   => "Prints some text in error color.",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -364,6 +370,7 @@ DefineFunction(
   array(
     'name'   => "code",
     'desc'   => "Pretty print PHP source code.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -376,8 +383,8 @@ DefineFunction(
       array(
         'name'   => "start_line_no",
         'type'   => Int32,
-        'desc'   => "Starting line number. 0 for no line no.",
         'value'  => "0",
+        'desc'   => "Starting line number. 0 for no line no.",
       ),
     ),
   ));
@@ -385,8 +392,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ask",
-    'flags'  =>  VariableArguments,
     'desc'   => "Ask end user a question.",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Single letter response from end user.",
@@ -404,6 +411,7 @@ DefineFunction(
   array(
     'name'   => "wrap",
     'desc'   => "Wraps some text to fit screen width.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
       'desc'   => "Formatted string.",
@@ -421,6 +429,7 @@ DefineFunction(
   array(
     'name'   => "helpTitle",
     'desc'   => "Displays a title for a help topic.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -436,8 +445,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "helpCmds",
-    'flags'  =>  VariableArguments,
     'desc'   => "Displays a list of commands in help format. Each command has a name and a short description, and specify more commands in pairs. For example, \$client->helpCmds('cmd1', 'desc1', 'cmd2', 'desc2').",
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -459,6 +468,7 @@ DefineFunction(
   array(
     'name'   => "helpBody",
     'desc'   => "Displays help contents. A help body is a help section with one empty line before and one empty line after.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -475,6 +485,7 @@ DefineFunction(
   array(
     'name'   => "helpSection",
     'desc'   => "Displays a section of help text.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -491,6 +502,7 @@ DefineFunction(
   array(
     'name'   => "tutorial",
     'desc'   => "Tutorials are help texts displayed according to user's preference. In auto mode (vs. always on or always off modes), one tutorial text is only displayed just once to end user.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -507,6 +519,7 @@ DefineFunction(
   array(
     'name'   => "getCode",
     'desc'   => "PHP code snippet user just typed in manually.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
       'desc'   => "The PHP source code.",
@@ -517,6 +530,7 @@ DefineFunction(
   array(
     'name'   => "getCommand",
     'desc'   => "Debugger command end user typed.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
       'desc'   => "The command text.",
@@ -527,6 +541,7 @@ DefineFunction(
   array(
     'name'   => "arg",
     'desc'   => "Tests if an argument matches a pre-defined keyword. As long as it matches the keyword partially and case-insensitively, it is considered as a match. For example, \$client->arg(2, 'foo') will return TRUE if user inputs 'f' or 'fo' or 'Fo' for the 2nd argument.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if matched. FALSE otherwise.",
@@ -549,6 +564,7 @@ DefineFunction(
   array(
     'name'   => "argCount",
     'desc'   => "Count of total arguments.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int32,
       'desc'   => "The count, not including user command itself.",
@@ -559,6 +575,7 @@ DefineFunction(
   array(
     'name'   => "argValue",
     'desc'   => "Gets value of an argument.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
       'desc'   => "String value of an argument.",
@@ -576,6 +593,7 @@ DefineFunction(
   array(
     'name'   => "argRest",
     'desc'   => "Gets remaining arguments all together as a single string.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
       'desc'   => "The string that has all argument at and after certain index.",
@@ -592,6 +610,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "args",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => StringVec,
     ),
@@ -601,6 +620,7 @@ DefineFunction(
   array(
     'name'   => "send",
     'desc'   => "Sends a debugger command to debugger proxy.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "TRUE if successful, FALSE otherwise.",
@@ -618,6 +638,7 @@ DefineFunction(
   array(
     'name'   => "xend",
     'desc'   => "Exchanges command with proxy: sends a command to debugger and expects and receives a command from debugger.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The received command, and it is always the same type as what it sends, so the same command class can handle processing at both sending and receiving sides.",
@@ -635,6 +656,7 @@ DefineFunction(
   array(
     'name'   => "getCurrentLocation",
     'desc'   => "Gets current source location.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array in a format of array('file' => {source file name}, 'line' => {line number}, 'namespace' => {namespace code is in}, 'class' => {class code is in}, 'function' => {function code is in}, 'text' => {human readable description of current source location}).",
@@ -645,6 +667,7 @@ DefineFunction(
   array(
     'name'   => "getStackTrace",
     'desc'   => "Gets current stacktrace.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array of stacktrace frames.",
@@ -655,6 +678,7 @@ DefineFunction(
   array(
     'name'   => "getFrame",
     'desc'   => "Returns current frame index.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int32,
       'desc'   => "An index indicating which frame end user has moved to for inspection.",
@@ -665,6 +689,7 @@ DefineFunction(
   array(
     'name'   => "printFrame",
     'desc'   => "Prints a stacktrace frame.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -681,6 +706,7 @@ DefineFunction(
   array(
     'name'   => "addCompletion",
     'desc'   => "Adds string(s) to auto-completion. This function is only effective inside DebuggerClient::onAutoComplete().",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -697,6 +723,7 @@ DefineFunction(
   array(
     'name'   => "__destruct",
     'desc'   => "Destructor of DebugerClient.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Always returns null.",
@@ -705,3 +732,4 @@ DefineFunction(
 
 EndClass(
 );
+

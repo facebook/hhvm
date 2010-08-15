@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "spl_classes",
     'desc'   => "This function returns an array with the current available SPL classes.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringMap,
       'desc'   => "Returns an array containing the currently available SPL classes.",
@@ -63,6 +64,7 @@ DefineFunction(
   array(
     'name'   => "spl_object_hash",
     'desc'   => "This function returns a unique identifier for the object. This id can be used as a hash key for storing objects or for identifying an object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "A string that is unique for each currently existing object and is always the same for each object.",
@@ -80,6 +82,7 @@ DefineFunction(
   array(
     'name'   => "class_implements",
     'desc'   => "This function returns an array with the names of the interfaces that the given class and its parents implement.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array on success, or FALSE on error.",
@@ -103,6 +106,7 @@ DefineFunction(
   array(
     'name'   => "class_parents",
     'desc'   => "This function returns an array with the name of the parent classes of the given class.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array on success, or FALSE on error.",
@@ -126,6 +130,7 @@ DefineFunction(
   array(
     'name'   => "iterator_apply",
     'desc'   => "Calls a function for every element in an iterator.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the iteration count.",
@@ -139,7 +144,7 @@ DefineFunction(
       array(
         'name'   => "func",
         'type'   => Variant,
-        'desc'   => "The callback function to call on every element. Note: The function must return TRUE in order to continue iterating over the iterator.",
+        'desc'   => "The callback function to call on every element. The function must return TRUE in order to continue iterating over the iterator.",
       ),
       array(
         'name'   => "params",
@@ -154,6 +159,7 @@ DefineFunction(
   array(
     'name'   => "iterator_count",
     'desc'   => "Count the elements in an iterator.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The number of elements in iterator.",
@@ -171,6 +177,7 @@ DefineFunction(
   array(
     'name'   => "iterator_to_array",
     'desc'   => "Copy the elements of an iterator into an array.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array containing the elements of the iterator.",

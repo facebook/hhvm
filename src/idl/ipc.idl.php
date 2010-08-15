@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "ftok",
     'desc'   => "The function converts the pathname of an existing accessible file and a project identifier into an integer for use with for example shmop_open() and other System V IPC keys.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "On success the return value will be the created key value, otherwise -1 is returned.",
@@ -75,6 +76,7 @@ DefineFunction(
   array(
     'name'   => "msg_get_queue",
     'desc'   => "msg_get_queue() returns an id that can be used to access the System V message queue with the given key. The first call creates the message queue with the optional perms. A second call to msg_get_queue() for the same key will return a different message queue identifier, but both identifiers access the same underlying message queue.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a resource handle that can be used to access the System V message queue.",
@@ -98,9 +100,10 @@ DefineFunction(
   array(
     'name'   => "msg_send",
     'desc'   => "msg_send() sends a message of type msgtype (which MUST be greater than 0) to the message queue specified by queue.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure.\nUpon successful completion the message queue data structure is updated as follows: msg_lspid is set to the process-ID of the calling process, msg_qnum is incremented by 1 and msg_stime is set to the current time.",
+      'desc'   => "Returns TRUE on success or FALSE on failure.\n\nUpon successful completion the message queue data structure is updated as follows: msg_lspid is set to the process-ID of the calling process, msg_qnum is incremented by 1 and msg_stime is set to the current time.",
     ),
     'args'   => array(
       array(
@@ -139,9 +142,10 @@ DefineFunction(
   array(
     'name'   => "msg_receive",
     'desc'   => "msg_receive() will receive the first message from the specified queue of the type specified by desiredmsgtype.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure.\nUpon successful completion the message queue data structure is updated as follows: msg_lrpid is set to the process-ID of the calling process, msg_qnum is decremented by 1 and msg_rtime is set to the current time.",
+      'desc'   => "Returns TRUE on success or FALSE on failure.\n\nUpon successful completion the message queue data structure is updated as follows: msg_lrpid is set to the process-ID of the calling process, msg_qnum is decremented by 1 and msg_rtime is set to the current time.",
     ),
     'args'   => array(
       array(
@@ -172,7 +176,7 @@ DefineFunction(
         'name'   => "unserialize",
         'type'   => Boolean,
         'value'  => "true",
-        'desc'   => "If set to TRUE, the message is treated as though it was serialized using the same mechanism as the session module. The message will be unserialized and then returned to your script. This allows you to easily receive arrays or complex object structures from other PHP scripts, or if you are using the WDDX serializer, from any WDDX compatible source.\nIf unserialize is FALSE, the message will be returned as a binary-safe string.",
+        'desc'   => "If set to TRUE, the message is treated as though it was serialized using the same mechanism as the session module. The message will be unserialized and then returned to your script. This allows you to easily receive arrays or complex object structures from other PHP scripts, or if you are using the WDDX serializer, from any WDDX compatible source.\n\nIf unserialize is FALSE, the message will be returned as a binary-safe string.",
       ),
       array(
         'name'   => "flags",
@@ -193,6 +197,7 @@ DefineFunction(
   array(
     'name'   => "msg_remove_queue",
     'desc'   => "msg_remove_queue() destroys the message queue specified by the queue. Only use this function when all processes have finished working with the message queue and you need to release the system resources held by it.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -209,7 +214,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "msg_set_queue",
-    'desc'   => "msg_set_queue() allows you to change the values of the msg_perm.uid, msg_perm.gid, msg_perm.mode and msg_qbytes fields of the underlying message queue data structure.\nChanging the data structure will require that PHP be running as the same user that created the queue, owns the queue (as determined by the existing msg_perm.xxx fields), or be running with root privileges. root privileges are required to raise the msg_qbytes values above the system defined limit.",
+    'desc'   => "msg_set_queue() allows you to change the values of the msg_perm.uid, msg_perm.gid, msg_perm.mode and msg_qbytes fields of the underlying message queue data structure.\n\nChanging the data structure will require that PHP be running as the same user that created the queue, owns the queue (as determined by the existing msg_perm.xxx fields), or be running with root privileges. root privileges are required to raise the msg_qbytes values above the system defined limit.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -232,6 +238,7 @@ DefineFunction(
   array(
     'name'   => "msg_stat_queue",
     'desc'   => "msg_stat_queue() returns the message queue meta data for the message queue specified by the queue. This is useful, for example, to determine which process sent the message that was just received.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64Map,
       'desc'   => "The return value is an array whose keys and values have the following meanings: Array structure for msg_stat_queue msg_perm.uid The uid of the owner of the queue. msg_perm.gid The gid of the owner of the queue. msg_perm.mode The file access mode of the queue. msg_stime The time that the last message was sent to the queue. msg_rtime The time that the last message was received from the queue. msg_ctime The time that the queue was last changed. msg_qnum The number of messages waiting to be read from the queue. msg_qbytes The maximum number of bytes allowed in one message queue. On Linux, this value may be read and modified via /proc/sys/kernel/msgmnb. msg_lspid The pid of the process that sent the last message to the queue. msg_lrpid The pid of the process that received the last message from the queue.",
@@ -248,7 +255,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sem_acquire",
-    'desc'   => "sem_acquire() blocks (if necessary) until the semaphore can be acquired. A process attempting to acquire a semaphore which it has already acquired will block forever if acquiring the semaphore would cause its maximum number of semaphore to be exceeded.\nAfter processing a request, any semaphores acquired by the process but not explicitly released will be released automatically and a warning will be generated.",
+    'desc'   => "sem_acquire() blocks (if necessary) until the semaphore can be acquired. A process attempting to acquire a semaphore which it has already acquired will block forever if acquiring the semaphore would cause its maximum number of semaphore to be exceeded.\n\nAfter processing a request, any semaphores acquired by the process but not explicitly released will be released automatically and a warning will be generated.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -265,7 +273,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sem_get",
-    'desc'   => "sem_get() returns an id that can be used to access the System V semaphore with the given key.\nA second call to sem_get() for the same key will return a different semaphore identifier, but both identifiers access the same underlying semaphore.",
+    'desc'   => "sem_get() returns an id that can be used to access the System V semaphore with the given key.\n\nA second call to sem_get() for the same key will return a different semaphore identifier, but both identifiers access the same underlying semaphore.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a positive semaphore identifier on success, or FALSE on error.",
@@ -299,7 +308,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sem_release",
-    'desc'   => "sem_release() releases the semaphore if it is currently acquired by the calling process, otherwise a warning is generated.\nAfter releasing the semaphore, sem_acquire() may be called to re-acquire it.",
+    'desc'   => "sem_release() releases the semaphore if it is currently acquired by the calling process, otherwise a warning is generated.\n\nAfter releasing the semaphore, sem_acquire() may be called to re-acquire it.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -316,7 +326,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sem_remove",
-    'desc'   => "sem_remove() removes the given semaphore.\nAfter removing the semaphore, it is no more accessible.",
+    'desc'   => "sem_remove() removes the given semaphore.\n\nAfter removing the semaphore, it is no more accessible.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -333,7 +344,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "shm_attach",
-    'desc'   => "shm_attach() returns an id that can be used to access the System V shared memory with the given key, the first call creates the shared memory segment with memsize and the optional perm-bits perm.\nA second call to shm_attach() for the same key will return a different shared memory identifier, but both identifiers access the same underlying shared memory. memsize and perm will be ignored.",
+    'desc'   => "shm_attach() returns an id that can be used to access the System V shared memory with the given key, the first call creates the shared memory segment with memsize and the optional perm-bits perm.\n\nA second call to shm_attach() for the same key will return a different shared memory identifier, but both identifiers access the same underlying shared memory. memsize and perm will be ignored.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a shared memory segment identifier.",
@@ -363,6 +375,7 @@ DefineFunction(
   array(
     'name'   => "shm_detach",
     'desc'   => "shm_detach() disconnects from the shared memory given by the shm_identifier created by shm_attach(). Remember, that shared memory still exist in the Unix system and the data is still present.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "shm_detach() always returns TRUE.",
@@ -380,6 +393,7 @@ DefineFunction(
   array(
     'name'   => "shm_remove",
     'desc'   => "shm_remove() removes the shared memory shm_identifier. All data will be destroyed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -397,6 +411,7 @@ DefineFunction(
   array(
     'name'   => "shm_get_var",
     'desc'   => "shm_get_var() returns the variable with a given variable_key, in the given shared memory segment. The variable is still present in the shared memory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the variable with the given key.",
@@ -418,7 +433,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "shm_put_var",
-    'desc'   => "shm_put_var() inserts or updates the variable with the given variable_key.\nWarnings (E_WARNING level) will be issued if shm_identifier is not a valid SysV shared memory index or if there was not enough shared memory remaining to complete your request.",
+    'desc'   => "shm_put_var() inserts or updates the variable with the given variable_key.\n\nWarnings (E_WARNING level) will be issued if shm_identifier is not a valid SysV shared memory index or if there was not enough shared memory remaining to complete your request.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -446,6 +462,7 @@ DefineFunction(
   array(
     'name'   => "shm_remove_var",
     'desc'   => "Removes a variable with a given variable_key and frees the occupied memory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",

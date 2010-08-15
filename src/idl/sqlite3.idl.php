@@ -156,6 +156,7 @@ BeginClass(
   array(
     'name'   => "sqlite3",
     'desc'   => "A class that interfaces SQLite 3 databases.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: void validate() const;
@@ -175,6 +176,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -184,6 +186,7 @@ DefineFunction(
   array(
     'name'   => "open",
     'desc'   => "Opens an SQLite 3 Database. If the build includes encryption, then it will attempt to use the key.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "Returns TRUE on success, FALSE on failure to open the database.",
@@ -198,7 +201,7 @@ DefineFunction(
         'name'   => "flags",
         'type'   => Int64,
         'value'  => "k_SQLITE3_OPEN_READWRITE|k_SQLITE3_OPEN_CREATE",
-        'desc'   => "Optional flags used to determine how to open the SQLite database. By default, open uses SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE.\nSQLITE3_OPEN_READONLY: Open the database for reading only.\nSQLITE3_OPEN_READWRITE: Open the database for reading and writing.\nSQLITE3_OPEN_CREATE: Create the database if it does not exist.",
+        'desc'   => "Optional flags used to determine how to open the SQLite database. By default, open uses SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE.\n\nSQLITE3_OPEN_READONLY: Open the database for reading only.\n\nSQLITE3_OPEN_READWRITE: Open the database for reading and writing.\n\nSQLITE3_OPEN_CREATE: Create the database if it does not exist.",
       ),
       array(
         'name'   => "encryption_key",
@@ -213,6 +216,7 @@ DefineFunction(
   array(
     'name'   => "close",
     'desc'   => "Closes the database connection.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success, FALSE on failure.",
@@ -223,6 +227,7 @@ DefineFunction(
   array(
     'name'   => "exec",
     'desc'   => "Executes a result-less query against a given database.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the query succeeded, FALSE on failure.",
@@ -240,6 +245,7 @@ DefineFunction(
   array(
     'name'   => "version",
     'desc'   => "Returns the SQLite3 library version as a string constant and as a number.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an associative array with the keys \"versionString\" and \"versionNumber\".",
@@ -250,6 +256,7 @@ DefineFunction(
   array(
     'name'   => "lastinsertrowid",
     'desc'   => "Returns the row ID of the most recent INSERT into the database.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the row ID of the most recent INSERT into the database",
@@ -260,6 +267,7 @@ DefineFunction(
   array(
     'name'   => "lasterrorcode",
     'desc'   => "Returns the numeric result code of the most recent failed SQLite request.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns an integer value representing the numeric result code of the most recent failed SQLite request.",
@@ -270,6 +278,7 @@ DefineFunction(
   array(
     'name'   => "lasterrormsg",
     'desc'   => "Returns English text describing the most recent failed SQLite request.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns an English string describing the most recent failed SQLite request.",
@@ -280,6 +289,7 @@ DefineFunction(
   array(
     'name'   => "loadextension",
     'desc'   => "Attempts to load an SQLite extension library.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the extension is successfully loaded, FALSE on failure.",
@@ -297,6 +307,7 @@ DefineFunction(
   array(
     'name'   => "changes",
     'desc'   => "Returns the number of database rows that were changed (or inserted or deleted) by the most recent SQL statement.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns an integer value corresponding to the number of database rows changed (or inserted or deleted) by the most recent SQL statement.",
@@ -307,6 +318,7 @@ DefineFunction(
   array(
     'name'   => "escapestring",
     'desc'   => "Returns a string that has been properly escaped for safe inclusion in an SQL statement.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a properly escaped string that may be used safely in an SQL statement.",
@@ -324,6 +336,7 @@ DefineFunction(
   array(
     'name'   => "prepare",
     'desc'   => "Prepares an SQL statement for execution and returns an SQLite3Stmt object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an SQLite3Stmt object on success or FALSE on failure.",
@@ -341,6 +354,7 @@ DefineFunction(
   array(
     'name'   => "query",
     'desc'   => "Executes an SQL query, returning an SQLite3Result object if the query returns results.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an SQLite3Result object if the query returns results. Otherwise, returns TRUE if the query succeeded, FALSE on failure.",
@@ -358,6 +372,7 @@ DefineFunction(
   array(
     'name'   => "querysingle",
     'desc'   => "Executes a query and returns a single result.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the value of the first column of results or an array of the entire first row (if entire_row is TRUE), otherwise FALSE on failure.",
@@ -381,6 +396,7 @@ DefineFunction(
   array(
     'name'   => "createfunction",
     'desc'   => "Registers a PHP function or user-defined function for use as an SQL scalar function for use within SQL statements.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE upon successful creation of the function, FALSE on failure.",
@@ -409,6 +425,7 @@ DefineFunction(
   array(
     'name'   => "createaggregate",
     'desc'   => "Registers a PHP function or user-defined function for use as an SQL aggregate function for use within SQL statements.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE upon successful creation of the aggregate, FALSE on failure.",
@@ -441,6 +458,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openblob",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -468,6 +486,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -482,6 +501,7 @@ BeginClass(
   array(
     'name'   => "sqlite3stmt",
     'desc'   => "A class that handles prepared statements for the SQLite 3 extension.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: void validate() const;
@@ -501,6 +521,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -520,6 +541,7 @@ DefineFunction(
   array(
     'name'   => "paramcount",
     'desc'   => "Returns the number of parameters within the prepared statement.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the number of parameters within the prepared statement.",
@@ -530,6 +552,7 @@ DefineFunction(
   array(
     'name'   => "close",
     'desc'   => "Closes the prepared statement.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE",
@@ -540,6 +563,7 @@ DefineFunction(
   array(
     'name'   => "reset",
     'desc'   => "Resets the prepared statement to its state prior to execution. All bindings remain intact after reset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the statement is successfully reset, FALSE on failure.",
@@ -550,6 +574,7 @@ DefineFunction(
   array(
     'name'   => "clear",
     'desc'   => "Clears all current bound parameters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on successful clearing of bound parameters, FALSE on failure.",
@@ -560,6 +585,7 @@ DefineFunction(
   array(
     'name'   => "bindparam",
     'desc'   => "Binds a parameter to a statement variable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the parameter is bound to the statement variable, FALSE on failure.",
@@ -579,7 +605,7 @@ DefineFunction(
         'name'   => "type",
         'type'   => Int64,
         'value'  => "k_SQLITE3_TEXT",
-        'desc'   => "The data type of the parameter to bind.\nSQLITE3_INTEGER: The value is a signed integer, stored in 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude of the value.\nSQLITE3_FLOAT: The value is a floating point value, stored as an 8-byte IEEE floating point number.\nSQLITE3_TEXT: The value is a text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16-LE).\nSQLITE3_BLOB: The value is a blob of data, stored exactly as it was input.\nSQLITE3_NULL: The value is a NULL value.",
+        'desc'   => "The data type of the parameter to bind.\n\nSQLITE3_INTEGER: The value is a signed integer, stored in 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude of the value.\n\nSQLITE3_FLOAT: The value is a floating point value, stored as an 8-byte IEEE floating point number.\n\nSQLITE3_TEXT: The value is a text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16-LE).\n\nSQLITE3_BLOB: The value is a blob of data, stored exactly as it was input.\n\nSQLITE3_NULL: The value is a NULL value.",
       ),
     ),
   ));
@@ -588,6 +614,7 @@ DefineFunction(
   array(
     'name'   => "bindvalue",
     'desc'   => "Binds the value of a parameter to a statement variable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the value is bound to the statement variable, FALSE on failure.",
@@ -607,7 +634,7 @@ DefineFunction(
         'name'   => "type",
         'type'   => Int64,
         'value'  => "k_SQLITE3_TEXT",
-        'desc'   => "The data type of the value to bind.\nSQLITE3_INTEGER: The value is a signed integer, stored in 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude of the value.\nSQLITE3_FLOAT: The value is a floating point value, stored as an 8-byte IEEE floating point number.\nSQLITE3_TEXT: The value is a text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16-LE).\nSQLITE3_BLOB: The value is a blob of data, stored exactly as it was input.\nSQLITE3_NULL: The value is a NULL value.",
+        'desc'   => "The data type of the value to bind.\n\nSQLITE3_INTEGER: The value is a signed integer, stored in 1, 2, 3, 4, 6, or 8 bytes depending on the magnitude of the value.\n\nSQLITE3_FLOAT: The value is a floating point value, stored as an 8-byte IEEE floating point number.\n\nSQLITE3_TEXT: The value is a text string, stored using the database encoding (UTF-8, UTF-16BE or UTF-16-LE).\n\nSQLITE3_BLOB: The value is a blob of data, stored exactly as it was input.\n\nSQLITE3_NULL: The value is a NULL value.",
       ),
     ),
   ));
@@ -616,6 +643,7 @@ DefineFunction(
   array(
     'name'   => "execute",
     'desc'   => "Executes a prepared statement and returns a result set object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an SQLite3Result object on successful execution of the prepared statement, FALSE on failure.",
@@ -625,6 +653,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -639,6 +668,7 @@ BeginClass(
   array(
     'name'   => "sqlite3result",
     'desc'   => "A class that handles result sets for the SQLite 3 extension.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: void validate() const;
@@ -650,6 +680,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -659,6 +690,7 @@ DefineFunction(
   array(
     'name'   => "numcolumns",
     'desc'   => "Returns the number of columns in the result set.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the number of columns in the result set.",
@@ -669,6 +701,7 @@ DefineFunction(
   array(
     'name'   => "columnname",
     'desc'   => "Returns the name of the column specified by the column_number.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the string name of the column identified by column_number.",
@@ -686,6 +719,7 @@ DefineFunction(
   array(
     'name'   => "columntype",
     'desc'   => "Returns the type of the column identified by column_number.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the data type index of the column identified by column_number (one of SQLITE3_INTEGER, SQLITE3_FLOAT, SQLITE3_TEXT, SQLITE3_BLOB, or SQLITE3_NULL).",
@@ -703,6 +737,7 @@ DefineFunction(
   array(
     'name'   => "fetcharray",
     'desc'   => "Fetches a result row as an associative or numerically indexed array or both. By default, fetches as both.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a result row as an associatively or numerically indexed array or both.",
@@ -712,7 +747,7 @@ DefineFunction(
         'name'   => "mode",
         'type'   => Int64,
         'value'  => "k_SQLITE3_BOTH",
-        'desc'   => "Controls how the next row will be returned to the caller. This value must be one of either SQLITE3_ASSOC, SQLITE3_NUM, or SQLITE3_BOTH.\nSQLITE3_ASSOC: returns an array indexed by column name as returned in the corresponding result set\nSQLITE3_NUM: returns an array indexed by column number as returned in the corresponding result set, starting at column 0\nSQLITE3_BOTH: returns an array indexed by both column name and number as returned in the corresponding result set, starting at column 0",
+        'desc'   => "Controls how the next row will be returned to the caller. This value must be one of either SQLITE3_ASSOC, SQLITE3_NUM, or SQLITE3_BOTH.\n\nSQLITE3_ASSOC: returns an array indexed by column name as returned in the corresponding result set\n\nSQLITE3_NUM: returns an array indexed by column number as returned in the corresponding result set, starting at column 0\n\nSQLITE3_BOTH: returns an array indexed by both column name and number as returned in the corresponding result set, starting at column 0",
       ),
     ),
   ));
@@ -720,6 +755,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "reset",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -729,6 +765,7 @@ DefineFunction(
   array(
     'name'   => "finalize",
     'desc'   => "Closes the result set.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE.",
@@ -738,6 +775,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

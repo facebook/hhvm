@@ -53,7 +53,7 @@ DefineFunction(
   array(
     'name'   => "hphp_get_extension_info",
     'desc'   => "Internally used for getting extension's information.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -69,7 +69,7 @@ DefineFunction(
   array(
     'name'   => "hphp_get_class_info",
     'desc'   => "Internally used by ReflectionClass for getting a class's information.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -85,7 +85,7 @@ DefineFunction(
   array(
     'name'   => "hphp_get_function_info",
     'desc'   => "Internally used by ReflectionFuncion for getting a function's information.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -101,7 +101,7 @@ DefineFunction(
   array(
     'name'   => "hphp_invoke",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -121,7 +121,7 @@ DefineFunction(
   array(
     'name'   => "hphp_invoke_method",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -149,7 +149,7 @@ DefineFunction(
   array(
     'name'   => "hphp_instanceof",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -169,7 +169,7 @@ DefineFunction(
   array(
     'name'   => "hphp_create_object",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Object,
     ),
@@ -189,7 +189,7 @@ DefineFunction(
   array(
     'name'   => "hphp_get_property",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -213,7 +213,7 @@ DefineFunction(
   array(
     'name'   => "hphp_set_property",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -241,7 +241,7 @@ DefineFunction(
   array(
     'name'   => "hphp_get_static_property",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
     ),
@@ -261,7 +261,7 @@ DefineFunction(
   array(
     'name'   => "hphp_set_static_property",
     'desc'   => "Used by FFI interface for other languages to call into PHP.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -285,7 +285,7 @@ DefineFunction(
   array(
     'name'   => "hphp_get_original_class_name",
     'desc'   => "Internally used by ReflectionClass for getting a class's declared name.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
     ),

@@ -28,7 +28,7 @@ namespace HPHP {
 
 /* preface starts */
 /* preface finishes */
-/* SRC: classes/iterator.php line 69 */
+/* SRC: classes/iterator.php line 326 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_arrayiterator
 Variant c_arrayiterator::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -1701,7 +1701,7 @@ void c_arrayiterator::init() {
   m_arr = null;
   m_flags = null;
 }
-/* SRC: classes/iterator.php line 73 */
+/* SRC: classes/iterator.php line 330 */
 void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::__construct);
@@ -1710,7 +1710,7 @@ void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /
   m_flags = v_flags;
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/iterator.php line 78 */
+/* SRC: classes/iterator.php line 346 */
 void c_arrayiterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::append);
   {
@@ -1718,7 +1718,7 @@ void c_arrayiterator::t_append(CVarRef v_value) {
     m_arr.append((tmp1));
   }
 } /* function */
-/* SRC: classes/iterator.php line 82 */
+/* SRC: classes/iterator.php line 359 */
 bool c_arrayiterator::t_asort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::asort);
   {
@@ -1727,32 +1727,32 @@ bool c_arrayiterator::t_asort() {
     return x_asort(ref(tmp1_lv), toInt32(m_flags));
   }
 } /* function */
-/* SRC: classes/iterator.php line 86 */
+/* SRC: classes/iterator.php line 373 */
 int c_arrayiterator::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::count);
   return x_count(m_arr);
 } /* function */
-/* SRC: classes/iterator.php line 90 */
+/* SRC: classes/iterator.php line 385 */
 Variant c_arrayiterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::current);
   return x_current(ref(lval(m_arr)));
 } /* function */
-/* SRC: classes/iterator.php line 94 */
+/* SRC: classes/iterator.php line 399 */
 Variant c_arrayiterator::t_getarraycopy() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getArrayCopy);
   return m_arr;
 } /* function */
-/* SRC: classes/iterator.php line 98 */
+/* SRC: classes/iterator.php line 412 */
 Variant c_arrayiterator::t_getflags() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getFlags);
   return m_flags;
 } /* function */
-/* SRC: classes/iterator.php line 102 */
+/* SRC: classes/iterator.php line 424 */
 Variant c_arrayiterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::key);
   return x_key(ref(lval(m_arr)));
 } /* function */
-/* SRC: classes/iterator.php line 106 */
+/* SRC: classes/iterator.php line 437 */
 bool c_arrayiterator::t_ksort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::ksort);
   {
@@ -1761,39 +1761,39 @@ bool c_arrayiterator::t_ksort() {
     return x_ksort(ref(tmp1_lv), toInt32(m_flags));
   }
 } /* function */
-/* SRC: classes/iterator.php line 110 */
+/* SRC: classes/iterator.php line 451 */
 Variant c_arrayiterator::t_natcasesort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natcasesort);
   return x_natcasesort(ref(lval(m_arr)));
 } /* function */
-/* SRC: classes/iterator.php line 114 */
+/* SRC: classes/iterator.php line 465 */
 Variant c_arrayiterator::t_natsort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natsort);
   return x_natsort(ref(lval(m_arr)));
 } /* function */
-/* SRC: classes/iterator.php line 118 */
+/* SRC: classes/iterator.php line 477 */
 Variant c_arrayiterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::next);
   return x_next(ref(lval(m_arr)));
 } /* function */
-/* SRC: classes/iterator.php line 122 */
+/* SRC: classes/iterator.php line 492 */
 bool c_arrayiterator::t_offsetexists(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetExists);
   return isset(m_arr, v_index);
 } /* function */
-/* SRC: classes/iterator.php line 126 */
+/* SRC: classes/iterator.php line 507 */
 Variant c_arrayiterator::t_offsetget(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   return m_arr.rvalAt(v_index, -1, true);
 } /* function */
-/* SRC: classes/iterator.php line 126 */
+/* SRC: classes/iterator.php line 507 */
 Variant &c_arrayiterator::___offsetget_lval(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   Variant &v = get_system_globals()->__lvalProxy;
   v = t_offsetget(v_index);
   return v;
 } /* function */
-/* SRC: classes/iterator.php line 130 */
+/* SRC: classes/iterator.php line 523 */
 Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetSet);
   {
@@ -1802,19 +1802,19 @@ Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   }
   return null;
 } /* function */
-/* SRC: classes/iterator.php line 134 */
+/* SRC: classes/iterator.php line 538 */
 Variant c_arrayiterator::t_offsetunset(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetUnset);
   DECLARE_SYSTEM_GLOBALS(g);
   lval(m_arr).weakRemove(v_index);
   return null;
 } /* function */
-/* SRC: classes/iterator.php line 138 */
+/* SRC: classes/iterator.php line 550 */
 Variant c_arrayiterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::rewind);
   return x_reset(ref(lval(m_arr)));
 } /* function */
-/* SRC: classes/iterator.php line 142 */
+/* SRC: classes/iterator.php line 563 */
 void c_arrayiterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::seek);
   int64 v_i = 0;
@@ -1834,12 +1834,12 @@ void c_arrayiterator::t_seek(CVarRef v_position) {
     }
   }
 } /* function */
-/* SRC: classes/iterator.php line 151 */
+/* SRC: classes/iterator.php line 586 */
 void c_arrayiterator::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::setFlags);
   m_flags = v_flags;
 } /* function */
-/* SRC: classes/iterator.php line 155 */
+/* SRC: classes/iterator.php line 603 */
 bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uasort);
   {
@@ -1848,17 +1848,17 @@ bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
     return x_uasort(ref(tmp1_lv), v_cmp_function);
   }
 } /* function */
-/* SRC: classes/iterator.php line 159 */
+/* SRC: classes/iterator.php line 620 */
 bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uksort);
   return toBoolean(invoke("uksort", Array(ArrayInit(1, true).setRef(0, v_cmp_function).create()), 0x4842AF70A71BE6C4LL));
 } /* function */
-/* SRC: classes/iterator.php line 163 */
+/* SRC: classes/iterator.php line 632 */
 bool c_arrayiterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
   return !same(x_current(ref(lval(m_arr))), false);
 } /* function */
-/* SRC: classes/iterator.php line 283 */
+/* SRC: classes/iterator.php line 923 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_appenditerator
 Variant c_appenditerator::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -2663,7 +2663,7 @@ struct ObjectStaticCallbacks cw_appenditerator = {
 void c_appenditerator::init() {
   m_iterators = null;
 }
-/* SRC: classes/iterator.php line 286 */
+/* SRC: classes/iterator.php line 926 */
 void c_appenditerator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -2673,19 +2673,19 @@ void c_appenditerator::t___construct() {
   }
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/iterator.php line 290 */
+/* SRC: classes/iterator.php line 941 */
 void c_appenditerator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
   if(!v_it.instanceof("iterator"))
     throw_unexpected_argument_type(0,"append","iterator",v_it);
   m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* append */ MethodIndex(5, 1) /* append */ ,  "append", 0x4DEE4A472DC69EC2LL, 1, v_it);
 } /* function */
-/* SRC: classes/iterator.php line 294 */
+/* SRC: classes/iterator.php line 955 */
 Variant c_appenditerator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   return wrap_variant(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* current */ MethodIndex(7, 1) /* current */ ,  "current", 0x5B3A4A72846B21DCLL, 0));
 } /* function */
-/* SRC: classes/iterator.php line 298 */
+/* SRC: classes/iterator.php line 969 */
 void c_appenditerator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
@@ -2695,22 +2695,22 @@ void c_appenditerator::t_rewind() {
     }
   }
 } /* function */
-/* SRC: classes/iterator.php line 305 */
+/* SRC: classes/iterator.php line 985 */
 bool c_appenditerator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
 } /* function */
-/* SRC: classes/iterator.php line 309 */
+/* SRC: classes/iterator.php line 998 */
 Variant c_appenditerator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* current */ MethodIndex(7, 1) /* current */ ,  "current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null)));
 } /* function */
-/* SRC: classes/iterator.php line 318 */
+/* SRC: classes/iterator.php line 1016 */
 Variant c_appenditerator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* key */ MethodIndex(2, 1) /* key */ ,  "key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null)));
 } /* function */
-/* SRC: classes/iterator.php line 322 */
+/* SRC: classes/iterator.php line 1030 */
 void c_appenditerator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::next);
   if (!(toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)))) {
@@ -2741,7 +2741,7 @@ void c_appenditerator::t_next() {
     }
   }
 } /* function */
-/* SRC: classes/iterator.php line 340 */
+/* SRC: classes/iterator.php line 1048 */
 Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
@@ -2752,7 +2752,7 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
     return x_call_user_func_array(tmp2, toArray(v_params));
   }
 } /* function */
-/* SRC: classes/iterator.php line 210 */
+/* SRC: classes/iterator.php line 755 */
 const int64 q_recursivedirectoryiterator_CURRENT_AS_SELF = 0LL;
 const int64 q_recursivedirectoryiterator_CURRENT_AS_FILEINFO = 16LL;
 const int64 q_recursivedirectoryiterator_CURRENT_AS_PATHNAME = 32LL;
@@ -5241,7 +5241,7 @@ struct ObjectStaticCallbacks cw_recursivedirectoryiterator = {
 void c_recursivedirectoryiterator::init() {
   c_directoryiterator::init();
 }
-/* SRC: classes/iterator.php line 219 */
+/* SRC: classes/iterator.php line 764 */
 void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
@@ -5256,62 +5256,62 @@ void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags
   }
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/iterator.php line 227 */
+/* SRC: classes/iterator.php line 772 */
 Variant c_recursivedirectoryiterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::current);
   return x_hphp_recursivedirectoryiterator_current(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 231 */
+/* SRC: classes/iterator.php line 784 */
 Variant c_recursivedirectoryiterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::key);
   return x_hphp_recursivedirectoryiterator_key(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 235 */
+/* SRC: classes/iterator.php line 796 */
 Variant c_recursivedirectoryiterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::next);
   return (x_hphp_recursivedirectoryiterator_next(GET_THIS()), null);
 } /* function */
-/* SRC: classes/iterator.php line 239 */
+/* SRC: classes/iterator.php line 808 */
 Variant c_recursivedirectoryiterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::rewind);
   return (x_hphp_recursivedirectoryiterator_rewind(GET_THIS()), null);
 } /* function */
-/* SRC: classes/iterator.php line 243 */
+/* SRC: classes/iterator.php line 812 */
 Variant c_recursivedirectoryiterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::seek);
   return (invoke("hphp_recursivedirectoryiterator_seek", Array(ArrayInit(1, true).setRef(0, GET_THIS()).create()), 0x09A98E99D51E8C2BLL), null);
 } /* function */
-/* SRC: classes/iterator.php line 247 */
+/* SRC: classes/iterator.php line 816 */
 String c_recursivedirectoryiterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__toString);
   return x_hphp_recursivedirectoryiterator___tostring(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 251 */
+/* SRC: classes/iterator.php line 820 */
 bool c_recursivedirectoryiterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::valid);
   return x_hphp_recursivedirectoryiterator_valid(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 255 */
+/* SRC: classes/iterator.php line 833 */
 bool c_recursivedirectoryiterator::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::hasChildren);
   return x_hphp_recursivedirectoryiterator_haschildren(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 259 */
+/* SRC: classes/iterator.php line 846 */
 Object c_recursivedirectoryiterator::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getChildren);
   return x_hphp_recursivedirectoryiterator_getchildren(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 263 */
+/* SRC: classes/iterator.php line 860 */
 String c_recursivedirectoryiterator::t_getsubpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPath);
   return x_hphp_recursivedirectoryiterator_getsubpath(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 267 */
+/* SRC: classes/iterator.php line 874 */
 String c_recursivedirectoryiterator::t_getsubpathname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPathname);
   return x_hphp_recursivedirectoryiterator_getsubpathname(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 168 */
+/* SRC: classes/iterator.php line 645 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directoryiterator
 Variant c_directoryiterator::os_getInit(const char *s, int64 hash) {
   return c_splfileinfo::os_getInit(s, hash);
@@ -7531,7 +7531,7 @@ struct ObjectStaticCallbacks cw_directoryiterator = {
 void c_directoryiterator::init() {
   c_splfileinfo::init();
 }
-/* SRC: classes/iterator.php line 170 */
+/* SRC: classes/iterator.php line 647 */
 void c_directoryiterator::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -7545,47 +7545,47 @@ void c_directoryiterator::t___construct(Variant v_path) {
   }
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/iterator.php line 177 */
+/* SRC: classes/iterator.php line 662 */
 Variant c_directoryiterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::current);
   return x_hphp_directoryiterator_current(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 181 */
+/* SRC: classes/iterator.php line 674 */
 Variant c_directoryiterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::key);
   return x_hphp_directoryiterator_key(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 185 */
+/* SRC: classes/iterator.php line 686 */
 Variant c_directoryiterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::next);
   return (x_hphp_directoryiterator_next(GET_THIS()), null);
 } /* function */
-/* SRC: classes/iterator.php line 189 */
+/* SRC: classes/iterator.php line 698 */
 Variant c_directoryiterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::rewind);
   return (x_hphp_directoryiterator_rewind(GET_THIS()), null);
 } /* function */
-/* SRC: classes/iterator.php line 193 */
+/* SRC: classes/iterator.php line 712 */
 Variant c_directoryiterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::seek);
   return (x_hphp_directoryiterator_seek(GET_THIS(), toInt64(v_position)), null);
 } /* function */
-/* SRC: classes/iterator.php line 197 */
+/* SRC: classes/iterator.php line 716 */
 String c_directoryiterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__toString);
   return x_hphp_directoryiterator___tostring(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 201 */
+/* SRC: classes/iterator.php line 729 */
 bool c_directoryiterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::valid);
   return x_hphp_directoryiterator_valid(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 205 */
+/* SRC: classes/iterator.php line 742 */
 bool c_directoryiterator::t_isdot() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::isDot);
   return x_hphp_directoryiterator_isdot(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 28 */
+/* SRC: classes/iterator.php line 164 */
 const int64 q_recursiveiteratoriterator_LEAVES_ONLY = 0LL;
 const int64 q_recursiveiteratoriterator_SELF_FIRST = 1LL;
 const int64 q_recursiveiteratoriterator_CHILD_FIRST = 2LL;
@@ -8267,7 +8267,7 @@ struct ObjectStaticCallbacks cw_recursiveiteratoriterator = {
 };
 void c_recursiveiteratoriterator::init() {
 }
-/* SRC: classes/iterator.php line 34 */
+/* SRC: classes/iterator.php line 170 */
 void c_recursiveiteratoriterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
 ) {
@@ -8276,37 +8276,37 @@ void c_recursiveiteratoriterator::t___construct(Variant v_iterator, Variant v_mo
   x_hphp_recursiveiteratoriterator___construct(GET_THIS(), toObject(v_iterator), toInt64(v_mode), toInt64(v_flags));
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/iterator.php line 39 */
+/* SRC: classes/iterator.php line 186 */
 Object c_recursiveiteratoriterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::getInnerIterator);
   return x_hphp_recursiveiteratoriterator_getinneriterator(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 42 */
+/* SRC: classes/iterator.php line 197 */
 Variant c_recursiveiteratoriterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::current);
   return x_hphp_recursiveiteratoriterator_current(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 45 */
+/* SRC: classes/iterator.php line 208 */
 Variant c_recursiveiteratoriterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::key);
   return x_hphp_recursiveiteratoriterator_key(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 48 */
+/* SRC: classes/iterator.php line 219 */
 Variant c_recursiveiteratoriterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::next);
   return (x_hphp_recursiveiteratoriterator_next(GET_THIS()), null);
 } /* function */
-/* SRC: classes/iterator.php line 51 */
+/* SRC: classes/iterator.php line 230 */
 Variant c_recursiveiteratoriterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::rewind);
   return (x_hphp_recursiveiteratoriterator_rewind(GET_THIS()), null);
 } /* function */
-/* SRC: classes/iterator.php line 54 */
+/* SRC: classes/iterator.php line 242 */
 bool c_recursiveiteratoriterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::valid);
   return x_hphp_recursiveiteratoriterator_valid(GET_THIS());
 } /* function */
-/* SRC: classes/iterator.php line 272 */
+/* SRC: classes/iterator.php line 888 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator
 Variant c_filteriterator::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);

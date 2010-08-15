@@ -55,6 +55,7 @@ DefineFunction(
   array(
     'name'   => "curl_init",
     'desc'   => "Initializes a new session and return a cURL handle for use with the curl_setopt(), curl_exec(), and curl_close() functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a cURL handle on success, FALSE on errors.",
@@ -73,6 +74,7 @@ DefineFunction(
   array(
     'name'   => "curl_copy_handle",
     'desc'   => "Copies a cURL handle keeping the same preferences.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a new cURL handle.",
@@ -90,6 +92,7 @@ DefineFunction(
   array(
     'name'   => "curl_version",
     'desc'   => "Returns information about the cURL version.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an associative array with the following elements: Indice Value description version_number cURL 24 bit version number version cURL version number, as a string ssl_version_number OpenSSL 24 bit version number ssl_version OpenSSL version number, as a string libz_version zlib version number, as a string host Information about the host where cURL was built age   features A bitmask of the CURL_VERSION_XXX constants protocols An array of protocols names supported by cURL",
@@ -107,6 +110,7 @@ DefineFunction(
   array(
     'name'   => "curl_setopt",
     'desc'   => "Sets an option on the given cURL session handle.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -131,6 +135,7 @@ DefineFunction(
   array(
     'name'   => "curl_setopt_array",
     'desc'   => "Sets multiple options for a cURL session. This function is useful for setting a large amount of cURL options without repetitively calling curl_setopt().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if all options were successfully set. If an option could not be successfully set, FALSE is immediately returned, ignoring any future options in the options array.",
@@ -152,7 +157,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "curl_exec",
-    'desc'   => "Execute the given cURL session.\nThis function should be called after initializing a cURL session and all the options for the session are set.",
+    'desc'   => "Execute the given cURL session.\n\nThis function should be called after initializing a cURL session and all the options for the session are set.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure. However, if the CURLOPT_RETURNTRANSFER option is set, it will return the result on success, FALSE on failure.",
@@ -170,6 +176,7 @@ DefineFunction(
   array(
     'name'   => "curl_getinfo",
     'desc'   => "Gets information about the last transfer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If opt is given, returns its value as a string. Otherwise, returns an associative array with the following elements (which correspond to opt): \"url\" \"content_type\" \"http_code\" \"header_size\" \"request_size\" \"filetime\" \"ssl_verify_result\" \"redirect_count\" \"total_time\" \"namelookup_time\" \"connect_time\" \"pretransfer_time\" \"size_upload\" \"size_download\" \"speed_download\" \"speed_upload\" \"download_content_length\" \"upload_content_length\" \"starttransfer_time\" \"redirect_time\"",
@@ -193,6 +200,7 @@ DefineFunction(
   array(
     'name'   => "curl_errno",
     'desc'   => "Returns the error number for the last cURL operation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the error number or 0 (zero) if no error occurred.",
@@ -210,6 +218,7 @@ DefineFunction(
   array(
     'name'   => "curl_error",
     'desc'   => "Returns a clear text error message for the last cURL operation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the error message or '' (the empty string) if no error occurred.",
@@ -227,6 +236,7 @@ DefineFunction(
   array(
     'name'   => "curl_close",
     'desc'   => "Closes a cURL session and frees all resources. The cURL handle, ch, is also deleted.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -244,6 +254,7 @@ DefineFunction(
   array(
     'name'   => "curl_multi_init",
     'desc'   => "Allows the processing of multiple cURL handles in parallel.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
       'desc'   => "Returns a cURL multi handle resource on success, FALSE on failure.",
@@ -254,6 +265,7 @@ DefineFunction(
   array(
     'name'   => "curl_multi_add_handle",
     'desc'   => "Adds the ch handle to the multi handle mh",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns 0 on success, or one of the CURLM_XXX errors code.",
@@ -276,6 +288,7 @@ DefineFunction(
   array(
     'name'   => "curl_multi_remove_handle",
     'desc'   => "Removes a given ch handle from the given mh handle. When the ch handle has been removed, it is again perfectly legal to run curl_exec() on this handle. Removing a handle while being used, will effectively halt all transfers in progress.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "On success, returns a cURL handle, FALSE on failure.",
@@ -298,9 +311,10 @@ DefineFunction(
   array(
     'name'   => "curl_multi_exec",
     'desc'   => "Processes each of the handles in the stack. This method can be called whether or not a handle needs to read or write data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "A cURL code defined in the cURL Predefined Constants. Note: This only returns errors regarding the whole multi stack. There might still have occurred problems on individual transfers even when this function returns CURLM_OK.",
+      'desc'   => "A cURL code defined in the cURL Predefined Constants.\n\nThis only returns errors regarding the whole multi stack. There might still have occurred problems on individual transfers even when this function returns CURLM_OK.",
     ),
     'args'   => array(
       array(
@@ -320,6 +334,7 @@ DefineFunction(
   array(
     'name'   => "curl_multi_select",
     'desc'   => "Blocks until there is activity on any of the curl_multi connections.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "On success, returns the number of descriptors contained in, the descriptor sets. On failure, this function will return -1 on a select failure or timeout (from the underlying select system call).",
@@ -343,6 +358,7 @@ DefineFunction(
   array(
     'name'   => "curl_multi_getcontent",
     'desc'   => "If CURLOPT_RETURNTRANSFER is an option that is set for a specific handle, then this function will return the content of that cURL handle in the form of a string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return the content of a cURL handle if CURLOPT_RETURNTRANSFER is set.",
@@ -359,10 +375,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "curl_multi_info_read",
-    'desc'   => "Ask the multi handle if there are any messages or information from the individual transfers. Messages may include information such as an error code from the transfer or just the fact that a transfer is completed.\nRepeated calls to this function will return a new result each time, until a FALSE is returned as a signal that there is no more to get at this point. The integer pointed to with msgs_in_queue will contain the number of remaining messages after this function was called. Warning\nThe data the returned resource points to will not survive calling curl_multi_remove_handle().",
+    'desc'   => "Ask the multi handle if there are any messages or information from the individual transfers. Messages may include information such as an error code from the transfer or just the fact that a transfer is completed.\n\nRepeated calls to this function will return a new result each time, until a FALSE is returned as a signal that there is no more to get at this point. The integer pointed to with msgs_in_queue will contain the number of remaining messages after this function was called. Warning\n\nThe data the returned resource points to will not survive calling curl_multi_remove_handle().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "On success, returns an associative array for the message, FALSE on failure.\nContents of the returned array Key: Value: msg The CURLMSG_DONE constant. Other return values are currently not available. result One of the CURLE_* constants. If everything is OK, the CURLE_OK will be the result. handle Resource of type curl indicates the handle which it concerns.",
+      'desc'   => "On success, returns an associative array for the message, FALSE on failure.\n\nContents of the returned array Key: Value: msg The CURLMSG_DONE constant. Other return values are currently not available. result One of the CURLE_* constants. If everything is OK, the CURLE_OK will be the result. handle Resource of type curl indicates the handle which it concerns.",
     ),
     'args'   => array(
       array(
@@ -383,6 +400,7 @@ DefineFunction(
   array(
     'name'   => "curl_multi_close",
     'desc'   => "Closes a set of cURL handles.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -399,8 +417,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "evhttp_set_cache",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Specifies how many persistent connections to maintain for an HTTP server.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => null,
     ),
@@ -418,8 +436,8 @@ DefineFunction(
       array(
         'name'   => "port",
         'type'   => Int32,
-        'desc'   => "Port number of the HTTP server.",
         'value'  => "80",
+        'desc'   => "Port number of the HTTP server.",
       ),
     ),
   ));
@@ -427,8 +445,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "evhttp_get",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Synchronously HTTP GET a URL with libevent evhttp library.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "HTTP response. FALSE if any failure.",
@@ -442,14 +460,14 @@ DefineFunction(
       array(
         'name'   => "headers",
         'type'   => StringVec,
-        'desc'   => "HTTP headers.",
         'value'  => "null_array",
+        'desc'   => "HTTP headers.",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
-        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
+        'desc'   => "How many seconds to wait for response.",
       ),
     ),
   ));
@@ -457,8 +475,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "evhttp_post",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Synchronously HTTP POST a URL with libevent evhttp library.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "HTTP response. FALSE if any failure.",
@@ -477,14 +495,14 @@ DefineFunction(
       array(
         'name'   => "headers",
         'type'   => StringVec,
-        'desc'   => "HTTP headers.",
         'value'  => "null_array",
+        'desc'   => "HTTP headers.",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
-        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
+        'desc'   => "How many seconds to wait for response.",
       ),
     ),
   ));
@@ -492,8 +510,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "evhttp_async_get",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Asynchronously HTTP GET a URL with libevent evhttp library. This is a non-blocking call, without waiting for HTTP server to respond.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An object evhttp_recv() can use to eventually retrieve HTTP response. FALSE if there was any failure.",
@@ -507,14 +525,14 @@ DefineFunction(
       array(
         'name'   => "headers",
         'type'   => StringVec,
-        'desc'   => "HTTP headers.",
         'value'  => "null_array",
+        'desc'   => "HTTP headers.",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
-        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
+        'desc'   => "How many seconds to wait for response.",
       ),
     ),
   ));
@@ -522,8 +540,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "evhttp_async_post",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Asynchronously HTTP POST a URL with libevent evhttp library. This is a non-blocking call, without waiting for HTTP server to respond.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An object evhttp_recv() can use to eventually retrieve HTTP response. FALSE if there was any failure.",
@@ -542,14 +560,14 @@ DefineFunction(
       array(
         'name'   => "headers",
         'type'   => StringVec,
-        'desc'   => "HTTP headers.",
         'value'  => "null_array",
+        'desc'   => "HTTP headers.",
       ),
       array(
         'name'   => "timeout",
         'type'   => Int32,
-        'desc'   => "How many seconds to wait for response.",
         'value'  => "5",
+        'desc'   => "How many seconds to wait for response.",
       ),
     ),
   ));
@@ -557,8 +575,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "evhttp_recv",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Block and wait until HTTP response is ready.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "HTTP response. FALSE if any failure.",

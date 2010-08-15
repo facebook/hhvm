@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "assert_options",
     'desc'   => "Set the various assert() control options or just query their current settings.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the original setting of any option or FALSE on errors.",
@@ -75,7 +76,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "assert",
-    'desc'   => "assert() will check the given assertion and take appropriate action if its result is FALSE.\nIf the assertion is given as a string it will be evaluated as PHP code by assert(). The advantages of a string assertion are less overhead when assertion checking is off and messages containing the assertion expression when an assertion fails. This means that if you pass a boolean condition as assertion this condition will not show up as parameter to the assertion function which you may have defined with the assert_options() function, the condition is converted to a string before calling that handler function, and the boolean FALSE is converted as the empty string.\nAssertions should be used as a debugging feature only. You may use them for sanity-checks that test for conditions that should always be TRUE and that indicate some programming errors if not or to check for the presence of certain features like extension functions or certain system limits and features.\nAssertions should not be used for normal runtime operations like input parameter checks. As a rule of thumb your code should always be able to work correctly if assertion checking is not activated.\nThe behavior of assert() may be configured by assert_options() or by .ini-settings described in that functions manual page.\nThe assert_options() function and/or ASSERT_CALLBACK configuration directive allow a callback function to be set to handle failed assertions.\nassert() callbacks are particularly useful for building automated test suites because they allow you to easily capture the code passed to the assertion, along with information on where the assertion was made. While this information can be captured via other methods, using assertions makes it much faster and easier!\nThe callback function should accept three arguments. The first argument will contain the file the assertion failed in. The second argument will contain the line the assertion failed on and the third argument will contain the expression that failed (if any - literal values such as 1 or \"two\" will not be passed via this argument)",
+    'desc'   => "assert() will check the given assertion and take appropriate action if its result is FALSE.\n\nIf the assertion is given as a string it will be evaluated as PHP code by assert(). The advantages of a string assertion are less overhead when assertion checking is off and messages containing the assertion expression when an assertion fails. This means that if you pass a boolean condition as assertion this condition will not show up as parameter to the assertion function which you may have defined with the assert_options() function, the condition is converted to a string before calling that handler function, and the boolean FALSE is converted as the empty string.\n\nAssertions should be used as a debugging feature only. You may use them for sanity-checks that test for conditions that should always be TRUE and that indicate some programming errors if not or to check for the presence of certain features like extension functions or certain system limits and features.\n\nAssertions should not be used for normal runtime operations like input parameter checks. As a rule of thumb your code should always be able to work correctly if assertion checking is not activated.\n\nThe behavior of assert() may be configured by assert_options() or by .ini-settings described in that functions manual page.\n\nThe assert_options() function and/or ASSERT_CALLBACK configuration directive allow a callback function to be set to handle failed assertions.\n\nassert() callbacks are particularly useful for building automated test suites because they allow you to easily capture the code passed to the assertion, along with information on where the assertion was made. While this information can be captured via other methods, using assertions makes it much faster and easier!\n\nThe callback function should accept three arguments. The first argument will contain the file the assertion failed in. The second argument will contain the line the assertion failed on and the third argument will contain the expression that failed (if any - literal values such as 1 or \"two\" will not be passed via this argument)",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "FALSE if the assertion is false, TRUE otherwise.",
@@ -92,7 +94,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dl",
-    'desc'   => "Loads the PHP extension given by the parameter library.\nUse extension_loaded() to test whether a given extension is already available or not. This works on both built-in extensions and dynamically loaded ones (either through php.ini or dl()). Warning This function has been removed from some SAPI's in PHP 5.3.",
+    'desc'   => "Loads the PHP extension given by the parameter library.\n\nUse extension_loaded() to test whether a given extension is already available or not. This works on both built-in extensions and dynamically loaded ones (either through php.ini or dl()). Warning This function has been removed from some SAPI's in PHP 5.3.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns TRUE on success or FALSE on failure. If the functionality of loading modules is not available or has been disabled (either by setting enable_dl off or by enabling safe mode in php.ini) an E_ERROR is emitted and execution is stopped. If dl() fails because the specified library couldn't be loaded, in addition to FALSE an E_WARNING message is emitted.",
@@ -101,7 +104,7 @@ DefineFunction(
       array(
         'name'   => "library",
         'type'   => String,
-        'desc'   => "This parameter is only the filename of the extension to load which also depends on your platform. For example, the sockets extension (if compiled as a shared module, not the default!) would be called sockets.so on Unix platforms whereas it is called php_sockets.dll on the Windows platform.\nThe directory where the extension is loaded from depends on your platform:\nWindows - If not explicitly set in the php.ini, the extension is loaded from C:\\php4\\extensions\\ (PHP4) or C:\\php5\\ (PHP5) by default.\nUnix - If not explicitly set in the php.ini, the default extension directory depends on whether PHP has been built with --enable-debug or not whether PHP has been built with (experimental) ZTS (Zend Thread Safety) support or not the current internal ZEND_MODULE_API_NO (Zend internal module API number, which is basically the date on which a major module API change happened, e.g. 20010901) Taking into account the above, the directory then defaults to <install-dir>/lib/php/extensions/ <debug-or-not>-<zts-or-not>-ZEND_MODULE_API_NO, e.g. /usr/local/php/lib/php/extensions/debug-non-zts-20010901 or /usr/local/php/lib/php/extensions/no-debug-zts-20010901.",
+        'desc'   => "This parameter is only the filename of the extension to load which also depends on your platform. For example, the sockets extension (if compiled as a shared module, not the default!) would be called sockets.so on Unix platforms whereas it is called php_sockets.dll on the Windows platform.\n\nThe directory where the extension is loaded from depends on your platform:\n\nWindows - If not explicitly set in the php.ini, the extension is loaded from C:\\php4\\extensions\\ (PHP4) or C:\\php5\\ (PHP5) by default.\n\nUnix - If not explicitly set in the php.ini, the default extension directory depends on whether PHP has been built with --enable-debug or not whether PHP has been built with (experimental) ZTS (Zend Thread Safety) support or not the current internal ZEND_MODULE_API_NO (Zend internal module API number, which is basically the date on which a major module API change happened, e.g. 20010901) Taking into account the above, the directory then defaults to <install-dir>/lib/php/extensions/ <debug-or-not>-<zts-or-not>-ZEND_MODULE_API_NO, e.g. /usr/local/php/lib/php/extensions/debug-non-zts-20010901 or /usr/local/php/lib/php/extensions/no-debug-zts-20010901.",
       ),
     ),
   ));
@@ -110,6 +113,7 @@ DefineFunction(
   array(
     'name'   => "extension_loaded",
     'desc'   => "Finds out whether the extension is loaded.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the extension identified by name is loaded, FALSE otherwise.",
@@ -118,7 +122,7 @@ DefineFunction(
       array(
         'name'   => "name",
         'type'   => String,
-        'desc'   => "The extension name.\nYou can see the names of various extensions by using phpinfo() or if you're using the CGI or CLI version of PHP you can use the -m switch to list all available extensions: \$ php -m [PHP Modules] xml tokenizer standard sockets session posix pcre overload mysql mbstring ctype [Zend Modules]",
+        'desc'   => "The extension name.\n\nYou can see the names of various extensions by using phpinfo() or if you're using the CGI or CLI version of PHP you can use the -m switch to list all available extensions: \$ php -m [PHP Modules] xml tokenizer standard sockets session posix pcre overload mysql mbstring ctype [Zend Modules]",
       ),
     ),
   ));
@@ -127,6 +131,7 @@ DefineFunction(
   array(
     'name'   => "get_loaded_extensions",
     'desc'   => "This function returns the names of all the modules compiled and loaded in the PHP interpreter.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an indexed array of all the modules names.",
@@ -145,6 +150,7 @@ DefineFunction(
   array(
     'name'   => "get_extension_funcs",
     'desc'   => "This function returns the names of all the functions defined in the module indicated by module_name.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an array with all the functions, or FALSE if module_name is not a valid extension.",
@@ -153,7 +159,7 @@ DefineFunction(
       array(
         'name'   => "module_name",
         'type'   => String,
-        'desc'   => "The module name. Note: This parameter must be in lowercase.",
+        'desc'   => "The module name.\n\nThis parameter must be in lowercase.",
       ),
     ),
   ));
@@ -161,7 +167,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "get_cfg_var",
-    'desc'   => "Gets the value of a PHP configuration option.\nThis function will not return configuration information set when the PHP was compiled, or read from an Apache configuration file.\nTo check whether the system is using a configuration file, try retrieving the value of the cfg_file_path configuration setting. If this is available, a configuration file is being used.",
+    'desc'   => "Gets the value of a PHP configuration option.\n\nThis function will not return configuration information set when the PHP was compiled, or read from an Apache configuration file.\n\nTo check whether the system is using a configuration file, try retrieving the value of the cfg_file_path configuration setting. If this is available, a configuration file is being used.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the current value of the PHP configuration variable specified by option, or FALSE if an error occurs.",
@@ -178,6 +185,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "get_current_user",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the username as a string.",
@@ -188,6 +196,7 @@ DefineFunction(
   array(
     'name'   => "get_defined_constants",
     'desc'   => "Returns the names and values of all the constants currently defined. This includes those created by extensions as well as those created with the define() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -196,7 +205,7 @@ DefineFunction(
         'name'   => "categorize",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "Causing this function to return a multi-dimensional array with categories in the keys of the first dimension and constants and their values in the second dimension.\n\nThe above example will output something similar to: Array ( [Core] => Array ( [E_ERROR] => 1 [E_WARNING] => 2 [E_PARSE] => 4 [E_NOTICE] => 8 [E_CORE_ERROR] => 16 [E_CORE_WARNING] => 32 [E_COMPILE_ERROR] => 64 [E_COMPILE_WARNING] => 128 [E_USER_ERROR] => 256 [E_USER_WARNING] => 512 [E_USER_NOTICE] => 1024 [E_ALL] => 2047 [TRUE] => 1 ) [pcre] => Array ( [PREG_PATTERN_ORDER] => 1 [PREG_SET_ORDER] => 2 [PREG_OFFSET_CAPTURE] => 256 [PREG_SPLIT_NO_EMPTY] => 1 [PREG_SPLIT_DELIM_CAPTURE] => 2 [PREG_SPLIT_OFFSET_CAPTURE] => 4 [PREG_GREP_INVERT] => 1 ) [user] => Array ( [MY_CONSTANT] => 1 ) )",
+        'desc'   => "Causing this function to return a multi-dimensional array with categories in the keys of the first dimension and constants and their values in the second dimension.\n\n\n\nThe above example will output something similar to: Array ( [Core] => Array ( [E_ERROR] => 1 [E_WARNING] => 2 [E_PARSE] => 4 [E_NOTICE] => 8 [E_CORE_ERROR] => 16 [E_CORE_WARNING] => 32 [E_COMPILE_ERROR] => 64 [E_COMPILE_WARNING] => 128 [E_USER_ERROR] => 256 [E_USER_WARNING] => 512 [E_USER_NOTICE] => 1024 [E_ALL] => 2047 [TRUE] => 1 ) [pcre] => Array ( [PREG_PATTERN_ORDER] => 1 [PREG_SET_ORDER] => 2 [PREG_OFFSET_CAPTURE] => 256 [PREG_SPLIT_NO_EMPTY] => 1 [PREG_SPLIT_DELIM_CAPTURE] => 2 [PREG_SPLIT_OFFSET_CAPTURE] => 4 [PREG_GREP_INVERT] => 1 ) [user] => Array ( [MY_CONSTANT] => 1 ) )",
       ),
     ),
   ));
@@ -204,6 +213,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "get_include_path",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the path, as a string.",
@@ -213,6 +223,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "restore_include_path",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -223,6 +234,7 @@ DefineFunction(
   array(
     'name'   => "set_include_path",
     'desc'   => "Sets the include_path configuration option for the duration of the script.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the old include_path on success or FALSE on failure.",
@@ -240,16 +252,18 @@ DefineFunction(
   array(
     'name'   => "get_included_files",
     'desc'   => "Gets the names of all files that have been included using include(), include_once(), require() or require_once().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
-      'desc'   => "Returns an array of the names of all files.\nThe script originally called is considered an \"included file,\" so it will be listed together with the files referenced by include() and family.\nFiles that are included or required multiple times only show up once in the returned array.",
+      'desc'   => "Returns an array of the names of all files.\n\nThe script originally called is considered an \"included file,\" so it will be listed together with the files referenced by include() and family.\n\nFiles that are included or required multiple times only show up once in the returned array.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "get_magic_quotes_gpc",
-    'desc'   => "Returns the current configuration setting of magic_quotes_gpc\nKeep in mind that attempting to set magic_quotes_gpc at runtime will not work.\nFor more information about magic_quotes, see this security section.",
+    'desc'   => "Returns the current configuration setting of magic_quotes_gpc\n\nKeep in mind that attempting to set magic_quotes_gpc at runtime will not work.\n\nFor more information about magic_quotes, see this security section.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns 0 if magic_quotes_gpc is off, 1 otherwise.",
@@ -259,6 +273,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "get_magic_quotes_runtime",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns 0 if magic_quotes_runtime is off, 1 otherwise.",
@@ -268,6 +283,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "get_required_files",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
     ),
@@ -276,7 +292,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getenv",
-    'desc'   => "Gets the value of an environment variable.\nYou can see a list of all the environmental variables by using phpinfo(). You can find out what many of them mean by taking a look at the » CGI specification, specifically the » page on environmental variables.",
+    'desc'   => "Gets the value of an environment variable.\n\nYou can see a list of all the environmental variables by using phpinfo(). You can find out what many of them mean by taking a look at the » CGI specification, specifically the » page on environmental variables.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the value of the environment variable varname, or FALSE on an error.",
@@ -293,7 +310,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getlastmod",
-    'desc'   => "Gets the time of the last modification of the current page.\nIf you're interested in getting the last modification time of a different file, consider using filemtime().",
+    'desc'   => "Gets the time of the last modification of the current page.\n\nIf you're interested in getting the last modification time of a different file, consider using filemtime().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the time of the last modification of the current page. The value returned is a Unix timestamp, suitable for feeding to date(). Returns FALSE on error.",
@@ -303,6 +321,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getmygid",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the group ID of the current script, or FALSE on error.",
@@ -313,6 +332,7 @@ DefineFunction(
   array(
     'name'   => "getmyinode",
     'desc'   => "Gets the inode of the current script.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the current script's inode as an integer, or FALSE on error.",
@@ -323,6 +343,7 @@ DefineFunction(
   array(
     'name'   => "getmypid",
     'desc'   => "Gets the current PHP process ID.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the current PHP process ID, or FALSE on error.",
@@ -332,6 +353,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getmyuid",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the user ID of the current script, or FALSE on error.",
@@ -341,10 +363,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getopt",
-    'desc'   => "Parses options passed to the script.\nThe options parameter may contain the following elements: Individual characters (do not accept values) Characters followed by a colon (parameter requires value) Characters followed by two colons (optional value) Option values are the first argument after the string. It does not matter if a value has leading white space or not. Note: Optional values do not accept \" \" (space) as a separator. Note: The format for the options and longopts is almost the same, the only difference is that longopts takes an array of options (where each element is the option) where as options takes a string (where each character is the option).",
+    'desc'   => "Parses options passed to the script.\nThe options parameter may contain the following elements: Individual characters (do not accept values) Characters followed by a colon (parameter requires value) Characters followed by two colons (optional value) Option values are the first argument after the string. It does not matter if a value has leading white space or not. Optional values do not accept \" \" (space) as a separator.\n\nThe format for the options and longopts is almost the same, the only difference is that longopts takes an array of options (where each element is the option) where as options takes a string (where each character is the option).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
-      'desc'   => "This function will return an array of option / argument pairs or FALSE on failure. Note: The parsing of options will end at the first non-option found, anything that follows is discarded.",
+      'desc'   => "This function will return an array of option / argument pairs or FALSE on failure.\n\nThe parsing of options will end at the first non-option found, anything that follows is discarded.",
     ),
     'args'   => array(
       array(
@@ -356,7 +379,7 @@ DefineFunction(
         'name'   => "longopts",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "An array of options. Each element in this array will be used as option strings and matched against options passed to the script starting with two hyphens (--). For example, an longopts element \"opt\" recognizes an option --opt. Note: Prior to PHP5.3.0 this parameter was only available on few systems",
+        'desc'   => "An array of options. Each element in this array will be used as option strings and matched against options passed to the script starting with two hyphens (--). For example, an longopts element \"opt\" recognizes an option --opt. Prior to PHP5.3.0 this parameter was only available on few systems",
       ),
     ),
   ));
@@ -365,6 +388,7 @@ DefineFunction(
   array(
     'name'   => "getrusage",
     'desc'   => "This is an interface to getrusage(2). It gets data returned from the system call.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an associative array containing the data returned from the system call. All entries are accessible by using their documented field names.",
@@ -382,8 +406,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clock_getres",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Gets resolution of system clock. \"man 3 clock_getres\" for more details.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise",
@@ -410,8 +434,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clock_gettime",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Gets time of a system clock. \"man 3 clock_gettime\" for more details.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise",
@@ -438,8 +462,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clock_settime",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "Sets time of a system clock. \"man 3 clock_settime\" for more details.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise",
@@ -466,6 +490,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ini_alter",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -485,9 +510,10 @@ DefineFunction(
   array(
     'name'   => "ini_get_all",
     'desc'   => "Returns all the registered configuration options.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
-      'desc'   => "Returns an associative array with directive name as the array key.\nWhen details is TRUE (default) the array will contain global_value (set in php.ini), local_value (perhaps set with ini_set() or .htaccess), and access (the access level).\nWhen details is FALSE the value will be the current value of the option.\nSee the manual section for information on what access levels mean. Note: It's possible for a directive to have multiple access levels, which is why access shows the appropriate bitmask values.",
+      'desc'   => "Returns an associative array with directive name as the array key.\n\nWhen details is TRUE (default) the array will contain global_value (set in php.ini), local_value (perhaps set with ini_set() or .htaccess), and access (the access level).\n\nWhen details is FALSE the value will be the current value of the option.\n\nSee the manual section for information on what access levels mean.\n\nIt's possible for a directive to have multiple access levels, which is why access shows the appropriate bitmask values.",
     ),
     'args'   => array(
       array(
@@ -503,6 +529,7 @@ DefineFunction(
   array(
     'name'   => "ini_get",
     'desc'   => "Returns the value of the configuration option on success.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the value of the configuration option as a string on success, or an empty string on failure or for null values.",
@@ -520,6 +547,7 @@ DefineFunction(
   array(
     'name'   => "ini_restore",
     'desc'   => "Restores a given configuration option to its original value.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -537,6 +565,7 @@ DefineFunction(
   array(
     'name'   => "ini_set",
     'desc'   => "Sets the value of the given configuration option. The configuration option will keep this new value during the script's execution, and will be restored at the script's ending.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the old value on success, FALSE on failure.",
@@ -559,6 +588,7 @@ DefineFunction(
   array(
     'name'   => "memory_get_peak_usage",
     'desc'   => "Returns the peak of memory, in bytes, that's been allocated to your PHP script.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the memory peak in bytes.",
@@ -577,6 +607,7 @@ DefineFunction(
   array(
     'name'   => "memory_get_usage",
     'desc'   => "Returns the amount of memory, in bytes, that's currently being allocated to your PHP script.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the memory amount in bytes.",
@@ -594,7 +625,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "php_ini_scanned_files",
-    'desc'   => "php_ini_scanned_files() returns a comma-separated list of configuration files parsed after php.ini. These files are found in a directory defined by the --with-config-file-scan-dir option which is set during compilation.\nThe returned configuration files also include the path as declared in the --with-config-file-scan-dir option.",
+    'desc'   => "php_ini_scanned_files() returns a comma-separated list of configuration files parsed after php.ini. These files are found in a directory defined by the --with-config-file-scan-dir option which is set during compilation.\n\nThe returned configuration files also include the path as declared in the --with-config-file-scan-dir option.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a comma-separated string of .ini files on success. Each comma is followed by a newline. If the directive --with-config-file-scan-dir wasn't set, FALSE is returned. If it was set and the directory was empty, an empty string is returned. If a file is unrecognizable, the file will still make it into the returned string but a PHP error will also result. This PHP error will be seen both at compile time and while using php_ini_scanned_files().",
@@ -605,6 +637,7 @@ DefineFunction(
   array(
     'name'   => "php_logo_guid",
     'desc'   => "This function returns the ID which can be used to display the PHP logo using the built-in image. Logo is displayed only if expose_php is On.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns PHPE9568F34-D428-11d2-A769-00AA001ACF42.",
@@ -614,16 +647,18 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "php_sapi_name",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "Returns the interface type, as a lowercase string.\nAlthough not exhaustive, the possible return values include aolserver, apache, apache2filter, apache2handler, caudium, cgi (until PHP 5.3), cgi-fcgi, cli, continuity, embed, isapi, litespeed, milter, nsapi, phttpd, pi3web, roxen, thttpd, tux, and webjames.",
+      'desc'   => "Returns the interface type, as a lowercase string.\n\nAlthough not exhaustive, the possible return values include aolserver, apache, apache2filter, apache2handler, caudium, cgi (until PHP 5.3), cgi-fcgi, cli, continuity, embed, isapi, litespeed, milter, nsapi, phttpd, pi3web, roxen, thttpd, tux, and webjames.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "php_uname",
-    'desc'   => "php_uname() returns a description of the operating system PHP is running on. This is the same string you see at the very top of the phpinfo() output. For the name of just the operating system, consider using the PHP_OS constant, but keep in mind this constant will contain the operating system PHP was built on.\nOn some older UNIX platforms, it may not be able to determine the current OS information in which case it will revert to displaying the OS PHP was built on. This will only happen if your uname() library call either doesn't exist or doesn't work.",
+    'desc'   => "php_uname() returns a description of the operating system PHP is running on. This is the same string you see at the very top of the phpinfo() output. For the name of just the operating system, consider using the PHP_OS constant, but keep in mind this constant will contain the operating system PHP was built on.\n\nOn some older UNIX platforms, it may not be able to determine the current OS information in which case it will revert to displaying the OS PHP was built on. This will only happen if your uname() library call either doesn't exist or doesn't work.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the description, as a string.",
@@ -642,6 +677,7 @@ DefineFunction(
   array(
     'name'   => "phpcredits",
     'desc'   => "This function prints out the credits listing the PHP developers, modules, etc. It generates the appropriate HTML codes to insert the information in a page.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -651,7 +687,7 @@ DefineFunction(
         'name'   => "flag",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "To generate a custom credits page, you may want to use the flag parameter.\nPre-defined phpcredits() flags name description CREDITS_ALL All the credits, equivalent to using: CREDITS_DOCS + CREDITS_GENERAL + CREDITS_GROUP + CREDITS_MODULES + CREDITS_FULLPAGE. It generates a complete stand-alone HTML page with the appropriate tags. CREDITS_DOCS The credits for the documentation team CREDITS_FULLPAGE Usually used in combination with the other flags. Indicates that a complete stand-alone HTML page needs to be printed including the information indicated by the other flags. CREDITS_GENERAL General credits: Language design and concept, PHP authors and SAPI module. CREDITS_GROUP A list of the core developers CREDITS_MODULES A list of the extension modules for PHP, and their authors CREDITS_SAPI A list of the server API modules for PHP, and their authors",
+        'desc'   => "To generate a custom credits page, you may want to use the flag parameter.\n\nPre-defined phpcredits() flags name description CREDITS_ALL All the credits, equivalent to using: CREDITS_DOCS + CREDITS_GENERAL + CREDITS_GROUP + CREDITS_MODULES + CREDITS_FULLPAGE. It generates a complete stand-alone HTML page with the appropriate tags. CREDITS_DOCS The credits for the documentation team CREDITS_FULLPAGE Usually used in combination with the other flags. Indicates that a complete stand-alone HTML page needs to be printed including the information indicated by the other flags. CREDITS_GENERAL General credits: Language design and concept, PHP authors and SAPI module. CREDITS_GROUP A list of the core developers CREDITS_MODULES A list of the extension modules for PHP, and their authors CREDITS_SAPI A list of the server API modules for PHP, and their authors",
       ),
     ),
   ));
@@ -659,7 +695,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "phpinfo",
-    'desc'   => "Outputs a large amount of information about the current state of PHP. This includes information about PHP compilation options and extensions, the PHP version, server information and environment (if compiled as a module), the PHP environment, OS version information, paths, master and local values of configuration options, HTTP headers, and the PHP License.\nBecause every system is setup differently, phpinfo() is commonly used to check configuration settings and for available predefined variables on a given system.\nphpinfo() is also a valuable debugging tool as it contains all EGPCS (Environment, GET, POST, Cookie, Server) data.",
+    'desc'   => "Outputs a large amount of information about the current state of PHP. This includes information about PHP compilation options and extensions, the PHP version, server information and environment (if compiled as a module), the PHP environment, OS version information, paths, master and local values of configuration options, HTTP headers, and the PHP License.\n\nBecause every system is setup differently, phpinfo() is commonly used to check configuration settings and for available predefined variables on a given system.\n\nphpinfo() is also a valuable debugging tool as it contains all EGPCS (Environment, GET, POST, Cookie, Server) data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -669,7 +706,7 @@ DefineFunction(
         'name'   => "what",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "The output may be customized by passing one or more of the following constants bitwise values summed together in the optional what parameter. One can also combine the respective constants or bitwise values together with the or operator.\nphpinfo() options Name (constant) Value Description INFO_GENERAL 1 The configuration line, php.ini location, build date, Web Server, System and more. INFO_CREDITS 2 PHP Credits. See also phpcredits(). INFO_CONFIGURATION 4 Current Local and Master values for PHP directives. See also ini_get(). INFO_MODULES 8 Loaded modules and their respective settings. See also get_loaded_extensions(). INFO_ENVIRONMENT 16 Environment Variable information that's also available in \$_ENV. INFO_VARIABLES 32 Shows all predefined variables from EGPCS (Environment, GET, POST, Cookie, Server). INFO_LICENSE 64 PHP License information. See also the » license FAQ. INFO_ALL -1 Shows all of the above.",
+        'desc'   => "The output may be customized by passing one or more of the following constants bitwise values summed together in the optional what parameter. One can also combine the respective constants or bitwise values together with the or operator.\n\nphpinfo() options Name (constant) Value Description INFO_GENERAL 1 The configuration line, php.ini location, build date, Web Server, System and more. INFO_CREDITS 2 PHP Credits. See also phpcredits(). INFO_CONFIGURATION 4 Current Local and Master values for PHP directives. See also ini_get(). INFO_MODULES 8 Loaded modules and their respective settings. See also get_loaded_extensions(). INFO_ENVIRONMENT 16 Environment Variable information that's also available in \$_ENV. INFO_VARIABLES 32 Shows all predefined variables from EGPCS (Environment, GET, POST, Cookie, Server). INFO_LICENSE 64 PHP License information. See also the » license FAQ. INFO_ALL -1 Shows all of the above.",
       ),
     ),
   ));
@@ -678,6 +715,7 @@ DefineFunction(
   array(
     'name'   => "phpversion",
     'desc'   => "Returns a string containing the version of the currently running PHP parser or extension.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "If the optional extension parameter is specified, phpversion() returns the version of that extension, or FALSE if there is no version information associated or the extension isn't enabled.",
@@ -695,7 +733,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "putenv",
-    'desc'   => "Adds setting to the server environment. The environment variable will only exist for the duration of the current request. At the end of the request the environment is restored to its original state.\nSetting certain environment variables may be a potential security breach. The safe_mode_allowed_env_vars directive contains a comma-delimited list of prefixes. In Safe Mode, the user may only alter environment variables whose names begin with the prefixes supplied by this directive. By default, users will only be able to set environment variables that begin with PHP_ (e.g. PHP_FOO=BAR). Note: if this directive is empty, PHP will let the user modify ANY environment variable!\nThe safe_mode_protected_env_vars directive contains a comma-delimited list of environment variables, that the end user won't be able to change using putenv(). These variables will be protected even if safe_mode_allowed_env_vars is set to allow to change them.",
+    'desc'   => "Adds setting to the server environment. The environment variable will only exist for the duration of the current request. At the end of the request the environment is restored to its original state.\n\nSetting certain environment variables may be a potential security breach. The safe_mode_allowed_env_vars directive contains a comma-delimited list of prefixes. In Safe Mode, the user may only alter environment variables whose names begin with the prefixes supplied by this directive. By default, users will only be able to set environment variables that begin with PHP_ (e.g. PHP_FOO=BAR). Note: if this directive is empty, PHP will let the user modify ANY environment variable!\n\nThe safe_mode_protected_env_vars directive contains a comma-delimited list of environment variables, that the end user won't be able to change using putenv(). These variables will be protected even if safe_mode_allowed_env_vars is set to allow to change them.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -713,6 +752,7 @@ DefineFunction(
   array(
     'name'   => "set_magic_quotes_runtime",
     'desc'   => "Set the current active configuration setting of magic_quotes_runtime. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -729,7 +769,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "set_time_limit",
-    'desc'   => "Set the number of seconds a script is allowed to run. If this is reached, the script returns a fatal error. The default limit is 30 seconds or, if it exists, the max_execution_time value defined in the php.ini.\nWhen called, set_time_limit() restarts the timeout counter from zero. In other words, if the timeout is the default 30 seconds, and 25 seconds into script execution a call such as set_time_limit(20) is made, the script will run for a total of 45 seconds before timing out.",
+    'desc'   => "Set the number of seconds a script is allowed to run. If this is reached, the script returns a fatal error. The default limit is 30 seconds or, if it exists, the max_execution_time value defined in the php.ini.\n\nWhen called, set_time_limit() restarts the timeout counter from zero. In other words, if the timeout is the default 30 seconds, and 25 seconds into script execution a call such as set_time_limit(20) is made, the script will run for a total of 45 seconds before timing out.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -747,6 +788,7 @@ DefineFunction(
   array(
     'name'   => "sys_get_temp_dir",
     'desc'   => "Returns the path of the directory PHP stores temporary files in by default.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the path of the temporary directory.",
@@ -756,10 +798,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "version_compare",
-    'desc'   => "version_compare() compares two \"PHP-standardized\" version number strings. This is useful if you would like to write programs working only on some versions of PHP.\nThe function first replaces _, - and + with a dot . in the version strings and also inserts dots . before and after any non number so that for example '4.3.2RC1' becomes '4.3.2.RC.1'. Then it splits the results like if you were using explode('.', \$ver). Then it compares the parts starting from left to right. If a part contains special version strings these are handled in the following order: any string not found in this list < dev < alpha = a < beta = b < RC = rc < # < pl = p. This way not only versions with different levels like '4.1' and '4.1.2' can be compared but also any PHP specific version containing development state.",
+    'desc'   => "version_compare() compares two \"PHP-standardized\" version number strings. This is useful if you would like to write programs working only on some versions of PHP.\n\nThe function first replaces _, - and + with a dot . in the version strings and also inserts dots . before and after any non number so that for example '4.3.2RC1' becomes '4.3.2.RC.1'. Then it splits the results like if you were using explode('.', \$ver). Then it compares the parts starting from left to right. If a part contains special version strings these are handled in the following order: any string not found in this list < dev < alpha = a < beta = b < RC = rc < # < pl = p. This way not only versions with different levels like '4.1' and '4.1.2' can be compared but also any PHP specific version containing development state.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "By default, version_compare() returns -1 if the first version is lower than the second, 0 if they are equal, and 1 if the second is lower.\nWhen using the optional operator argument, the function will return TRUE if the relationship is the one specified by the operator, FALSE otherwise.",
+      'desc'   => "By default, version_compare() returns -1 if the first version is lower than the second, 0 if they are equal, and 1 if the second is lower.\n\nWhen using the optional operator argument, the function will return TRUE if the relationship is the one specified by the operator, FALSE otherwise.",
     ),
     'args'   => array(
       array(
@@ -776,7 +819,7 @@ DefineFunction(
         'name'   => "sop",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "If you specify the third optional operator argument, you can test for a particular relationship. The possible operators are: <, lt, <=, le, >, gt, >=, ge, ==, =, eq, !=, <>, ne respectively.\nThis parameter is case-sensitive, so values should be lowercase.",
+        'desc'   => "If you specify the third optional operator argument, you can test for a particular relationship. The possible operators are: <, lt, <=, le, >, gt, >=, ge, ==, =, eq, !=, <>, ne respectively.\n\nThis parameter is case-sensitive, so values should be lowercase.",
       ),
     ),
   ));
@@ -785,6 +828,7 @@ DefineFunction(
   array(
     'name'   => "zend_logo_guid",
     'desc'   => "This function returns the ID which can be used to display the Zend logo using the built-in image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns PHPE9568F35-D428-11d2-A769-00AA001ACF42.",
@@ -795,6 +839,7 @@ DefineFunction(
   array(
     'name'   => "zend_thread_id",
     'desc'   => "This function returns a unique identifier for the current thread.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the thread id as an integer.",
@@ -805,6 +850,7 @@ DefineFunction(
   array(
     'name'   => "zend_version",
     'desc'   => "Returns a string containing the version of the currently running Zend Engine.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the Zend Engine version number, as a string.",

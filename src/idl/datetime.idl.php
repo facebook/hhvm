@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "checkdate",
     'desc'   => "Checks the validity of the date formed by the arguments. A date is considered valid if each parameter is properly defined.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the date given is valid; otherwise returns FALSE.",
@@ -79,6 +80,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_create",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
     ),
@@ -99,6 +101,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_date_set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -125,17 +128,19 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_default_timezone_get",
-    'desc'   => "In order of preference, this function returns the default timezone by:\nReading the timezone set using the date_default_timezone_set() function (if any)\nReading the TZ environment variable (if non empty) (Prior to PHP 5.3.0)\nReading the value of the date.timezone ini option (if set)\nQuerying the host operating system (if supported and allowed by the OS)\nIf none of the above succeed, date_default_timezone_get will return a default timezone of UTC.",
+    'desc'   => "In order of preference, this function returns the default timezone by:\n\nReading the timezone set using the date_default_timezone_set() function (if any)\n\nReading the TZ environment variable (if non empty) (Prior to PHP 5.3.0)\n\nReading the value of the date.timezone ini option (if set)\n\nQuerying the host operating system (if supported and allowed by the OS)\n\nIf none of the above succeed, date_default_timezone_get() will return a default timezone of UTC.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "Returns a string .",
+      'desc'   => "Returns a string.",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "date_default_timezone_set",
-    'desc'   => "date_default_timezone_set() sets the default timezone used by all date/time functions. Note: Since PHP 5.1.0 (when the date/time functions were rewritten), every call to a date/time function will generate a E_NOTICE if the timezone isn't valid, and/or a E_WARNING message if using the system settings or the TZ environment variable.\nInstead of using this function to set the default timezone in your script, you can also use the INI setting date.timezone to set the default timezone.",
+    'desc'   => "date_default_timezone_set() sets the default timezone used by all date/time functions.\n\nSince PHP 5.1.0 (when the date/time functions were rewritten), every call to a date/time function will generate a E_NOTICE if the timezone isn't valid, and/or a E_WARNING message if using the system settings or the TZ environment variable.\n\nInstead of using this function to set the default timezone in your script, you can also use the INI setting date.timezone to set the default timezone.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "This function returns FALSE if the timezone_identifier isn't valid, or TRUE otherwise.",
@@ -152,6 +157,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_format",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -170,6 +176,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_isodate_set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -197,6 +204,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_modify",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -215,6 +223,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_offset_get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -229,6 +238,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_parse",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns array with information about the parsed date on success or FALSE on failure.",
@@ -245,6 +255,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_sun_info",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns array on success or FALSE on failure.",
@@ -272,6 +283,7 @@ DefineFunction(
   array(
     'name'   => "date_sunrise",
     'desc'   => "date_sunrise() returns the sunrise time for a given day (specified as a timestamp) and location.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the sunrise time in a specified format on success or FALSE on failure.",
@@ -319,6 +331,7 @@ DefineFunction(
   array(
     'name'   => "date_sunset",
     'desc'   => "date_sunset() returns the sunset time for a given day (specified as a timestamp) and location.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the sunset time in a specified format on success or FALSE on failure.",
@@ -365,6 +378,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_time_set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -392,6 +406,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_timezone_get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -406,6 +421,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "date_timezone_set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -425,6 +441,7 @@ DefineFunction(
   array(
     'name'   => "date",
     'desc'   => "Returns a string formatted according to the given format string using the given integer timestamp or the current time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a formatted date string. If a non-numeric value is used for timestamp, FALSE is returned and an E_WARNING level error is emitted.",
@@ -446,6 +463,7 @@ DefineFunction(
   array(
     'name'   => "getdate",
     'desc'   => "Returns an associative array containing the date information of the timestamp, or the current local time if no timestamp is given.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -463,9 +481,10 @@ DefineFunction(
   array(
     'name'   => "gettimeofday",
     'desc'   => "This is an interface to gettimeofday(2). It returns an associative array containing the data returned from the system call.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "By default an array is returned. If return_float is set, then a float is returned.\nArray keys: \"sec\" - seconds since the Unix Epoch \"usec\" - microseconds \"minuteswest\" - minutes west of Greenwich \"dsttime\" - type of dst correction",
+      'desc'   => "By default an array is returned. If return_float is set, then a float is returned.\n\nArray keys: \"sec\" - seconds since the Unix Epoch \"usec\" - microseconds \"minuteswest\" - minutes west of Greenwich \"dsttime\" - type of dst correction",
     ),
     'args'   => array(
       array(
@@ -481,6 +500,7 @@ DefineFunction(
   array(
     'name'   => "gmdate",
     'desc'   => "Identical to the date() function except that the time returned is Greenwich Mean Time (GMT).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a formatted date string. If a non-numeric value is used for timestamp, FALSE is returned and an E_WARNING level error is emitted.",
@@ -489,7 +509,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
-        'desc'   => "The format of the outputted date string . See the formatting options for the date() function.",
+        'desc'   => "The format of the outputted date string. See the formatting options for the date() function.",
       ),
       array(
         'name'   => "timestamp",
@@ -503,7 +523,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gmmktime",
-    'desc'   => "Identical to mktime() except the passed parameters represents a GMT date. gmmktime() internally uses mktime() so only times valid in derived local time can be used.\nLike mktime(), arguments may be left out in order from right to left, with any omitted arguments being set to the current corresponding GMT value.",
+    'desc'   => "Identical to mktime() except the passed parameters represents a GMT date. gmmktime() internally uses mktime() so only times valid in derived local time can be used.\n\nLike mktime(), arguments may be left out in order from right to left, with any omitted arguments being set to the current corresponding GMT value.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a integer Unix timestamp.",
@@ -552,6 +573,7 @@ DefineFunction(
   array(
     'name'   => "gmstrftime",
     'desc'   => "Behaves the same as strftime() except that the time returned is Greenwich Mean Time (GMT). For example, when run in Eastern Standard Time (GMT -0500), the first line below prints \"Dec 31 1998 20:00:00\", while the second prints \"Jan 01 1999 01:00:00\".",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a string formatted according to the given format string using the given timestamp or the current local time if no timestamp is given. Month and weekday names and other language dependent strings respect the current locale set with setlocale().",
@@ -574,10 +596,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "idate",
-    'desc'   => "Returns a number formatted according to the given format string using the given integer timestamp or the current local time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time().\nUnlike the function date(), idate() accepts just one char in the format parameter.",
+    'desc'   => "Returns a number formatted according to the given format string using the given integer timestamp or the current local time if no timestamp is given. In other words, timestamp is optional and defaults to the value of time().\n\nUnlike the function date(), idate() accepts just one char in the format parameter.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an integer .\nAs idate() always returns an integer and as they can't start with a \"0\", idate() may return fewer digits than you would expect. See the example below.",
+      'desc'   => "Returns an integer.\n\nAs idate() always returns an integer and as they can't start with a \"0\", idate() may return fewer digits than you would expect. See the example below.",
     ),
     'args'   => array(
       array(
@@ -598,6 +621,7 @@ DefineFunction(
   array(
     'name'   => "localtime",
     'desc'   => "The localtime() function returns an array identical to that of the structure returned by the C function call.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -612,7 +636,7 @@ DefineFunction(
         'name'   => "is_associative",
         'type'   => Boolean,
         'value'  => "false",
-        'desc'   => "If set to FALSE or not supplied then the array is returned as a regular, numerically indexed array. If the argument is set to TRUE then localtime() returns an associative array containing all the different elements of the structure returned by the C function call to localtime. The names of the different keys of the associative array are as follows:\n\"tm_sec\" - seconds \"tm_min\" - minutes \"tm_hour\" - hour \"tm_mday\" - day of the month Months are from 0 (Jan) to 11 (Dec) and days of the week are from 0 (Sun) to 6 (Sat). \"tm_mon\" - month of the year, starting with 0 for January \"tm_year\" - Years since 1900 \"tm_wday\" - Day of the week \"tm_yday\" - Day of the year \"tm_isdst\" - Is daylight savings time in effect",
+        'desc'   => "If set to FALSE or not supplied then the array is returned as a regular, numerically indexed array. If the argument is set to TRUE then localtime() returns an associative array containing all the different elements of the structure returned by the C function call to localtime. The names of the different keys of the associative array are as follows:\n\n\"tm_sec\" - seconds \"tm_min\" - minutes \"tm_hour\" - hour \"tm_mday\" - day of the month Months are from 0 (Jan) to 11 (Dec) and days of the week are from 0 (Sun) to 6 (Sat). \"tm_mon\" - month of the year, starting with 0 for January \"tm_year\" - Years since 1900 \"tm_wday\" - Day of the week \"tm_yday\" - Day of the year \"tm_isdst\" - Is daylight savings time in effect",
       ),
     ),
   ));
@@ -621,6 +645,7 @@ DefineFunction(
   array(
     'name'   => "microtime",
     'desc'   => "microtime() returns the current Unix timestamp with microseconds. This function is only available on operating systems that support the gettimeofday() system call.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -629,7 +654,7 @@ DefineFunction(
         'name'   => "get_as_float",
         'type'   => Boolean,
         'value'  => "false",
-        'desc'   => "When called without the optional argument, this function returns the string \"msec sec\" where sec is the current time measured in the number of seconds since the Unix Epoch (0:00:00 January 1, 1970 GMT), and msec is the microseconds part. Both portions of the string are returned in units of seconds.\nIf the optional get_as_float is set to TRUE then a float (in seconds) is returned.",
+        'desc'   => "When called without the optional argument, this function returns the string \"msec sec\" where sec is the current time measured in the number of seconds since the Unix Epoch (0:00:00 January 1, 1970 GMT), and msec is the microseconds part. Both portions of the string are returned in units of seconds.\n\nIf the optional get_as_float is set to TRUE then a float (in seconds) is returned.",
       ),
     ),
   ));
@@ -637,7 +662,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mktime",
-    'desc'   => "Returns the Unix timestamp corresponding to the arguments given. This timestamp is a long integer containing the number of seconds between the Unix Epoch (January 1 1970 00:00:00 GMT) and the time specified.\nArguments may be left out in order from right to left; any arguments thus omitted will be set to the current value according to the local date and time.",
+    'desc'   => "Returns the Unix timestamp corresponding to the arguments given. This timestamp is a long integer containing the number of seconds between the Unix Epoch (January 1 1970 00:00:00 GMT) and the time specified.\n\nArguments may be left out in order from right to left; any arguments thus omitted will be set to the current value according to the local date and time.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "mktime() returns the Unix timestamp of the arguments given. If the arguments are invalid, the function returns FALSE (before PHP 5.1 it returned -1).",
@@ -685,7 +711,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strftime",
-    'desc'   => "Format the time and/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at » MSDN.",
+    'desc'   => "Format the time and/or date according to locale settings. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().\n\nNot all conversion specifiers may be supported by your C library, in which case they will not be supported by PHP's strftime(). Additionally, not all platforms support negative timestamps, so your date range may be limited to no earlier than the Unix epoch. This means that %e, %T, %R and, %D (and possibly others) - as well as dates prior to Jan 1, 1970 - will not work on Windows, some Linux distributions, and a few other operating systems. For Windows systems, a complete overview of supported conversion specifiers can be found at » MSDN.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string formatted according format using the given timestamp or the current local time if no timestamp is given. Month and weekday names and other language-dependent strings respect the current locale set with setlocale().",
@@ -706,10 +733,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strptime",
-    'desc'   => "strptime() returns an array with the date parsed, or FALSE on error.\nMonth and weekday names and other language dependent strings respect the current locale set with setlocale() (LC_TIME).",
+    'desc'   => "strptime() returns an array with the date parsed, or FALSE on error.\n\nMonth and weekday names and other language dependent strings respect the current locale set with setlocale() (LC_TIME).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an array or FALSE on failure.\nThe following parameters are returned in the array parameters Description \"tm_sec\" Seconds after the minute (0-61) \"tm_min\" Minutes after the hour (0-59) \"tm_hour\" Hour since midnight (0-23) \"tm_mday\" Day of the month (1-31) \"tm_mon\" Months since January (0-11) \"tm_year\" Years since 1900 \"tm_wday\" Days since Sunday (0-6) \"tm_yday\" Days since January 1 (0-365) \"unparsed\" the date part which was not recognized using the specified format",
+      'desc'   => "Returns an array or FALSE on failure.\n\nThe following parameters are returned in the array parameters Description \"tm_sec\" Seconds after the minute (0-61) \"tm_min\" Minutes after the hour (0-59) \"tm_hour\" Hour since midnight (0-23) \"tm_mday\" Day of the month (1-31) \"tm_mon\" Months since January (0-11) \"tm_year\" Years since 1900 \"tm_wday\" Days since Sunday (0-6) \"tm_yday\" Days since January 1 (0-365) \"unparsed\" the date part which was not recognized using the specified format",
     ),
     'args'   => array(
       array(
@@ -720,7 +748,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
-        'desc'   => "The format used in date (e.g. the same as used in strftime()).\nFor more information about the format options, read the strftime() page.",
+        'desc'   => "The format used in date (e.g. the same as used in strftime()).\n\nFor more information about the format options, read the strftime() page.",
       ),
     ),
   ));
@@ -728,6 +756,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strtotime",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a timestamp on success, FALSE otherwise. Previous to PHP 5.1.0, this function would return -1 on failure.",
@@ -751,6 +780,7 @@ DefineFunction(
   array(
     'name'   => "time",
     'desc'   => "Returns the current time measured in the number of seconds since the Unix Epoch (January 1 1970 00:00:00 GMT).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -759,6 +789,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "timezone_abbreviations_list",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
     ),
@@ -767,6 +798,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "timezone_identifiers_list",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
     ),
@@ -775,6 +807,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "timezone_name_from_abbr",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns time zone name on success or FALSE on failure.",
@@ -803,6 +836,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "timezone_name_get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -817,6 +851,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "timezone_offset_get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -835,6 +870,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "timezone_open",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
     ),
@@ -849,6 +885,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "timezone_transitions_get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -901,6 +938,7 @@ BeginClass(
   array(
     'name'   => "DateTime",
     'desc'   => "Representation of date and time.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  private:
@@ -978,6 +1016,7 @@ DefineConstant(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -999,6 +1038,7 @@ DefineFunction(
   array(
     'name'   => "format",
     'desc'   => "Procedural style string date_format ( DateTime \$object , string \$format ) Returns date formatted according to given format.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the formatted date string on success or FALSE on failure.",
@@ -1016,6 +1056,7 @@ DefineFunction(
   array(
     'name'   => "getoffset",
     'desc'   => "Procedural style int date_offset_get ( DateTime \$object ) Returns the timezone offset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the timezone offset in seconds from UTC on success or FALSE on failure.",
@@ -1026,6 +1067,7 @@ DefineFunction(
   array(
     'name'   => "gettimezone",
     'desc'   => "Procedural style DateTimeZone date_timezone_get ( DateTime \$object ) Return time zone relative to given DateTime.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a DateTimeZone object on success or FALSE on failure.",
@@ -1036,6 +1078,7 @@ DefineFunction(
   array(
     'name'   => "modify",
     'desc'   => "Procedural style DateTime date_modify ( DateTime \$object , string \$modify ) Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns the modified DateTime object or FALSE on failure.",
@@ -1053,6 +1096,7 @@ DefineFunction(
   array(
     'name'   => "setdate",
     'desc'   => "Procedural style DateTime date_date_set ( DateTime \$object , int \$year , int \$month , int \$day ) Resets the current date of the DateTime object to a different date.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns the modified DateTime object or FALSE on failure.",
@@ -1080,6 +1124,7 @@ DefineFunction(
   array(
     'name'   => "setisodate",
     'desc'   => "Procedural style DateTime date_isodate_set ( DateTime \$object , int \$year , int \$week [, int \$day = 1 ] ) Set a date according to the ISO 8601 standard - using weeks and day offsets rather than specific dates.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns the modified DateTime object or FALSE on failure.",
@@ -1108,6 +1153,7 @@ DefineFunction(
   array(
     'name'   => "settime",
     'desc'   => "Procedural style DateTime date_time_set ( DateTime \$object , int \$hour , int \$minute [, int \$second = 0 ] ) Resets the current time of the DateTime object to a different time.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns the modified DateTime object or FALSE on failure.",
@@ -1136,6 +1182,7 @@ DefineFunction(
   array(
     'name'   => "settimezone",
     'desc'   => "Procedural style DateTime date_timezone_set ( DateTime \$object , DateTimeZone \$timezone )",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns the modified DateTime object or FALSE on failure.",
@@ -1152,6 +1199,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1166,6 +1214,7 @@ BeginClass(
   array(
     'name'   => "DateTimeZone",
     'desc'   => "Representation of time zone.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  private:
@@ -1261,6 +1310,7 @@ DefineConstant(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1276,6 +1326,7 @@ DefineFunction(
   array(
     'name'   => "getname",
     'desc'   => "Procedural style string timezone_name_get ( void ) Returns the name of the timezone.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "One of timezones.",
@@ -1286,6 +1337,7 @@ DefineFunction(
   array(
     'name'   => "getoffset",
     'desc'   => "Procedural style int timezone_offset_get ( DateTimeZone \$object , DateTime \$datetime ) This function returns the offset to GMT for the date/time specified in the datetime parameter. The GMT offset is calculated with the timezone information contained in the DateTimeZone object being used.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns time zone offset in seconds on success or FALSE on failure.",
@@ -1303,6 +1355,7 @@ DefineFunction(
   array(
     'name'   => "gettransitions",
     'desc'   => "Procedural style array timezone_transitions_get ( DateTimeZone \$object [, int \$timestamp_begin [, int \$timestamp_end ]] )",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns numerically indexed array containing associative array with all transitions on success or FALSE on failure.",
@@ -1313,7 +1366,7 @@ DefineFunction(
   array(
     'name'   => "listabbreviations",
     'desc'   => "Procedural style array timezone_abbreviations_list ( void )",
-    'flags'  =>  IsStatic,
+    'flags'  =>  IsStatic | HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns array on success or FALSE on failure.",
@@ -1324,7 +1377,7 @@ DefineFunction(
   array(
     'name'   => "listidentifiers",
     'desc'   => "Procedural style array timezone_identifiers_list ([ int \$what = DateTimeZone::ALL [, string \$country = NULL ]] )",
-    'flags'  =>  IsStatic,
+    'flags'  =>  IsStatic | HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns array on success or FALSE on failure.",
@@ -1334,6 +1387,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

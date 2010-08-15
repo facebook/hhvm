@@ -87,6 +87,8 @@ remove:
 clean clobber:
 	$(V)rm -f *~ $(patsubst %.idl.php, %, $(IDL_PHPS)) $(patsubst %.idl.php, ext_%.h, $(IDL_PHPS)) $(patsubst %.idl.php, ext_%.cpp, $(IDL_PHPS)) $(patsubst %.idl.php, %.inc, $(IDL_PHPS)) $(patsubst %.idl.php, test_ext_%.h, $(IDL_PHPS)) $(patsubst %.idl.php, test_ext_%.cpp, $(IDL_PHPS))
 
+# re-generating .inc files
+
 %.geninc:
 	@php idl.php inc $(patsubst %.geninc, %.idl.php, $@) \
 	  $(patsubst %.geninc, ../system/%.inc, $@)
@@ -100,3 +102,19 @@ geninc-all: $(patsubst %.idl.php, %.geninc, $(IDL_PHPS))
 		../runtime/ext/sep/mhash/mhash.inc
 	@php idl.php inc ../system/helper.idl.php ../system/helper.inc
 
+# re-generating .idl files
+
+%.gendoc:
+	@php schema.php $(patsubst %.gendoc, %.idl.php, $@) 1 > $@.php
+	@mv -f $@.php $(patsubst %.gendoc, %.idl.php, $@)
+
+gendoc-all: $(patsubst %.idl.php, %.gendoc, $(IDL_PHPS))
+
+# re-generating doc comments for system classes
+
+SYS_PHPS = $(wildcard  ../system/classes/*.php)
+
+%.sysdoc:
+	@php sysdoc.php $(patsubst %.sysdoc, %, $@)
+
+sysdoc-all: $(patsubst %, %.sysdoc, $(SYS_PHPS))

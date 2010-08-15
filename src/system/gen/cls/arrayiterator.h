@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 69 */
+/* SRC: classes/iterator.php line 326 */
 class c_arrayiterator : public ExtObjectData {
   BEGIN_CLASS_MAP(ArrayIterator)
     PARENT_CLASS(ArrayAccess)

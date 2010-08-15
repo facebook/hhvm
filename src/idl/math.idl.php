@@ -52,6 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "pi",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The value of pi as float.",
@@ -61,8 +62,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "min",
-    'desc'   => "If the first and only parameter is an array, min() returns the lowest value in that array. If at least two parameters are provided, min() returns the smallest of these values. Note: PHP will evaluate a non-numeric string as 0 if compared to integer , but still return the string if it's seen as the numerically lowest value. If multiple arguments evaluate to 0, min() will return the lowest alphanumerical string value if any strings are given, else a numeric 0 is returned.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "If the first and only parameter is an array, min() returns the lowest value in that array. If at least two parameters are provided, min() returns the smallest of these values.\n\nPHP will evaluate a non-numeric string as 0 if compared to integer, but still return the string if it's seen as the numerically lowest value. If multiple arguments evaluate to 0, min() will return the lowest alphanumerical string value if any strings are given, else a numeric 0 is returned.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "min() returns the numerically lowest of the parameter values.",
@@ -79,11 +80,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "max",
-    'desc'   => "If the first and only parameter is an array, max() returns the highest value in that array. If at least two parameters are provided, max() returns the biggest of these values. Note: PHP will evaluate a non-numeric string as 0 if compared to integer , but still return the string if it's seen as the numerically highest value. If multiple arguments evaluate to 0, max() will return a numeric 0 if given, else the alphabetical highest string value will be returned.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "If the first and only parameter is an array, max() returns the highest value in that array. If at least two parameters are provided, max() returns the biggest of these values.\n\nPHP will evaluate a non-numeric string as 0 if compared to integer, but still return the string if it's seen as the numerically highest value. If multiple arguments evaluate to 0, max() will return a numeric 0 if given, else the alphabetical highest string value will be returned.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "max() returns the numerically highest of the parameter values. If multiple values can be considered of the same size, the one that is listed first will be returned.\nWhen max() is given multiple array s, the longest array is returned. If all the arrays have the same length, max() will use lexicographic ordering to find the return value.\nWhen given a string it will be cast as an integer when comparing.",
+      'desc'   => "max() returns the numerically highest of the parameter values. If multiple values can be considered of the same size, the one that is listed first will be returned.\n\nWhen max() is given multiple arrays, the longest array is returned. If all the arrays have the same length, max() will use lexicographic ordering to find the return value.\n\nWhen given a string it will be cast as an integer when comparing.",
     ),
     'args'   => array(
       array(
@@ -98,9 +99,10 @@ DefineFunction(
   array(
     'name'   => "abs",
     'desc'   => "Returns the absolute value of number.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The absolute value of number. If the argument number is of type float , the return type is also float , otherwise it is integer (as float usually has a bigger value range than integer ).",
+      'desc'   => "The absolute value of number. If the argument number is of type float, the return type is also float, otherwise it is integer (as float usually has a bigger value range than integer).",
     ),
     'args'   => array(
       array(
@@ -115,6 +117,7 @@ DefineFunction(
   array(
     'name'   => "is_finite",
     'desc'   => "Checks whether val is a legal finite on this platform.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if val is a legal finite number within the allowed range for a PHP float on this platform, else FALSE.",
@@ -132,6 +135,7 @@ DefineFunction(
   array(
     'name'   => "is_infinite",
     'desc'   => "Returns TRUE if val is infinite (positive or negative), like the result of log(0) or any value too big to fit into a float on this platform.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if val is infinite, else FALSE.",
@@ -149,6 +153,7 @@ DefineFunction(
   array(
     'name'   => "is_nan",
     'desc'   => "Checks whether val is 'not a number', like the result of acos(1.01).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if val is 'not a number', else FALSE.",
@@ -165,9 +170,10 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ceil",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
-      'desc'   => "value rounded up to the next highest integer. The return value of ceil() is still of type float as the value range of float is usually bigger than that of integer .",
+      'desc'   => "value rounded up to the next highest integer. The return value of ceil() is still of type float as the value range of float is usually bigger than that of integer.",
     ),
     'args'   => array(
       array(
@@ -181,9 +187,10 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "floor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
-      'desc'   => "value rounded to the next lowest integer. The return value of floor() is still of type float because the value range of float is usually bigger than that of integer .",
+      'desc'   => "value rounded to the next lowest integer. The return value of floor() is still of type float because the value range of float is usually bigger than that of integer.",
     ),
     'args'   => array(
       array(
@@ -197,7 +204,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "round",
-    'desc'   => "Returns the rounded value of val to specified precision (number of digits after the decimal point). precision can also be negative or zero (default).\nNote: PHP doesn't handle strings like \"12,300.2\" correctly by default. See converting from strings.",
+    'desc'   => "Returns the rounded value of val to specified precision (number of digits after the decimal point). precision can also be negative or zero (default).\n\nPHP doesn't handle strings like \"12,300.2\" correctly by default. See converting from strings.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The rounded value",
@@ -221,6 +229,7 @@ DefineFunction(
   array(
     'name'   => "deg2rad",
     'desc'   => "This function converts number from degrees to the radian equivalent.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The radian equivalent of number",
@@ -238,6 +247,7 @@ DefineFunction(
   array(
     'name'   => "rad2deg",
     'desc'   => "This function converts number from radian to degrees.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The equivalent of number in degrees",
@@ -255,6 +265,7 @@ DefineFunction(
   array(
     'name'   => "decbin",
     'desc'   => "Returns a string containing a binary representation of the given number argument.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Binary string representation of number",
@@ -272,6 +283,7 @@ DefineFunction(
   array(
     'name'   => "dechex",
     'desc'   => "Returns a string containing a hexadecimal representation of the given number argument. The largest number that can be converted is 4294967295 in decimal resulting to \"ffffffff\".",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Hexadecimal string representation of number",
@@ -289,6 +301,7 @@ DefineFunction(
   array(
     'name'   => "decoct",
     'desc'   => "Returns a string containing an octal representation of the given number argument. The largest number that can be converted is 4294967295 in decimal resulting to \"37777777777\".",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Octal string representation of number",
@@ -305,7 +318,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "bindec",
-    'desc'   => "Returns the decimal equivalent of the binary number represented by the binary_string argument.\nbindec() converts a binary number to an integer or, if needed for size reasons, float .\nbindec() interprets all binary_string values as unsigned integers. This is because bindec() sees the most significant bit as another order of magnitude rather than as the sign bit.\nWarning\nThe parameter must be a string. Using other data types will produce unexpected results.",
+    'desc'   => "Returns the decimal equivalent of the binary number represented by the binary_string argument.\n\nbindec() converts a binary number to an integer or, if needed for size reasons, float.\n\nbindec() interprets all binary_string values as unsigned integers. This is because bindec() sees the most significant bit as another order of magnitude rather than as the sign bit.\nWarning\n\nThe parameter must be a string. Using other data types will produce unexpected results.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The decimal value of binary_string",
@@ -322,7 +336,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hexdec",
-    'desc'   => "Returns the decimal equivalent of the hexadecimal number represented by the hex_string argument. hexdec() converts a hexadecimal string to a decimal number.\nhexdec() will ignore any non-hexadecimal characters it encounters.",
+    'desc'   => "Returns the decimal equivalent of the hexadecimal number represented by the hex_string argument. hexdec() converts a hexadecimal string to a decimal number.\n\nhexdec() will ignore any non-hexadecimal characters it encounters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The decimal representation of hex_string",
@@ -340,6 +355,7 @@ DefineFunction(
   array(
     'name'   => "octdec",
     'desc'   => "Returns the decimal equivalent of the octal number represented by the octal_string argument.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The decimal representation of octal_string",
@@ -357,6 +373,7 @@ DefineFunction(
   array(
     'name'   => "base_convert",
     'desc'   => "Returns a string containing number represented in base tobase. The base in which number is given is specified in frombase. Both frombase and tobase have to be between 2 and 36, inclusive. Digits in numbers with a base higher than 10 will be represented with the letters a-z, with a meaning 10, b meaning 11 and z meaning 35. Warning base_convert() may lose precision on large numbers due to properties related to the internal \"double\" or \"float\" type used. Please see the Floating point numbers section in the manual for more specific information and limitations.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "number converted to base tobase",
@@ -383,10 +400,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pow",
-    'desc'   => "Returns base raised to the power of exp. Warning\nIn PHP 4.0.6 and earlier pow() always returned a float , and did not issue warnings.",
+    'desc'   => "Returns base raised to the power of exp. Warning\n\nIn PHP 4.0.6 and earlier pow() always returned a float, and did not issue warnings.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Numeric,
-      'desc'   => "base raised to the power of exp. If the result can be represented as integer it will be returned as type integer , else it will be returned as type float . If the power cannot be computed FALSE will be returned instead.",
+      'desc'   => "base raised to the power of exp. If the result can be represented as integer it will be returned as type integer, else it will be returned as type float. If the power cannot be computed FALSE will be returned instead.",
     ),
     'args'   => array(
       array(
@@ -405,7 +423,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "exp",
-    'desc'   => "Returns e raised to the power of arg. Note: 'e' is the base of the natural system of logarithms, or approximately 2.718282.",
+    'desc'   => "Returns e raised to the power of arg.\n\n'e' is the base of the natural system of logarithms, or approximately 2.718282.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "'e' raised to the power of arg",
@@ -423,6 +442,7 @@ DefineFunction(
   array(
     'name'   => "expm1",
     'desc'   => "expm1() returns the equivalent to 'exp(arg) - 1' computed in a way that is accurate even if the value of arg is near zero, a case where 'exp (arg) - 1' would be inaccurate due to subtraction of two numbers that are nearly equal.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "'e' to the power of arg minus one",
@@ -440,6 +460,7 @@ DefineFunction(
   array(
     'name'   => "log10",
     'desc'   => "Returns the base-10 logarithm of arg.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The base-10 logarithm of arg",
@@ -457,6 +478,7 @@ DefineFunction(
   array(
     'name'   => "log1p",
     'desc'   => "log1p() returns log(1 + number) computed in a way that is accurate even when the value of number is close to zero. log() might only return log(1) in this case due to lack of precision.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "log(1 + number)",
@@ -474,6 +496,7 @@ DefineFunction(
   array(
     'name'   => "log",
     'desc'   => "If the optional base parameter is specified, log() returns logbase arg, otherwise log() returns the natural logarithm of arg.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The logarithm of arg to base, if given, or the natural logarithm.",
@@ -497,6 +520,7 @@ DefineFunction(
   array(
     'name'   => "cos",
     'desc'   => "cos() returns the cosine of the arg parameter. The arg parameter is in radians.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The cosine of arg",
@@ -514,6 +538,7 @@ DefineFunction(
   array(
     'name'   => "cosh",
     'desc'   => "Returns the hyperbolic cosine of arg, defined as (exp(arg) + exp(-arg))/2.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The hyperbolic cosine of arg",
@@ -531,6 +556,7 @@ DefineFunction(
   array(
     'name'   => "sin",
     'desc'   => "sin() returns the sine of the arg parameter. The arg parameter is in radians.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The sine of arg",
@@ -548,6 +574,7 @@ DefineFunction(
   array(
     'name'   => "sinh",
     'desc'   => "Returns the hyperbolic sine of arg, defined as (exp(arg) - exp(-arg))/2.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The hyperbolic sine of arg",
@@ -565,6 +592,7 @@ DefineFunction(
   array(
     'name'   => "tan",
     'desc'   => "tan() returns the tangent of the arg parameter. The arg parameter is in radians.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The tangent of arg",
@@ -582,6 +610,7 @@ DefineFunction(
   array(
     'name'   => "tanh",
     'desc'   => "Returns the hyperbolic tangent of arg, defined as sinh(arg)/cosh(arg).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The hyperbolic tangent of arg",
@@ -599,6 +628,7 @@ DefineFunction(
   array(
     'name'   => "acos",
     'desc'   => "Returns the arc cosine of arg in radians. acos() is the complementary function of cos(), which means that a==cos(acos(a)) for every value of a that is within acos()' range.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The arc cosine of arg in radians.",
@@ -616,6 +646,7 @@ DefineFunction(
   array(
     'name'   => "acosh",
     'desc'   => "Returns the inverse hyperbolic cosine of arg, i.e. the value whose hyperbolic cosine is arg.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The inverse hyperbolic cosine of arg",
@@ -633,6 +664,7 @@ DefineFunction(
   array(
     'name'   => "asin",
     'desc'   => "Returns the arc sine of arg in radians. asin() is the complementary function of sin(), which means that a==sin(asin(a)) for every value of a that is within asin()'s range.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The arc sine of arg in radians",
@@ -650,6 +682,7 @@ DefineFunction(
   array(
     'name'   => "asinh",
     'desc'   => "Returns the inverse hyperbolic sine of arg, i.e. the value whose hyperbolic sine is arg.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The inverse hyperbolic sine of arg",
@@ -667,6 +700,7 @@ DefineFunction(
   array(
     'name'   => "atan",
     'desc'   => "Returns the arc tangent of arg in radians. atan() is the complementary function of tan(), which means that a==tan(atan(a)) for every value of a that is within atan()'s range.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The arc tangent of arg in radians.",
@@ -684,6 +718,7 @@ DefineFunction(
   array(
     'name'   => "atanh",
     'desc'   => "Returns the inverse hyperbolic tangent of arg, i.e. the value whose hyperbolic tangent is arg.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "Inverse hyperbolic tangent of arg",
@@ -700,6 +735,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "atan2",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The arc tangent of y/x in radians.",
@@ -722,9 +758,10 @@ DefineFunction(
   array(
     'name'   => "hypot",
     'desc'   => "hypot() returns the length of the hypotenuse of a right-angle triangle with sides of length x and y, or the distance of the point (x, y) from the origin. This is equivalent to sqrt(x*x + y*y).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
-      'desc'   => "Calculated length of the hypotenuse is_finite hexdec Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Calculated length of the hypotenuse is_finite hexdec Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -744,6 +781,7 @@ DefineFunction(
   array(
     'name'   => "fmod",
     'desc'   => "Returns the floating point remainder of dividing the dividend (x) by the divisor (y). The reminder (r) is defined as: x = i * y + r, for some integer i. If y is non-zero, r has the same sign as x and a magnitude less than the magnitude of y.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The floating point remainder of x/y",
@@ -766,6 +804,7 @@ DefineFunction(
   array(
     'name'   => "sqrt",
     'desc'   => "Returns the square root of arg.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "The square root of arg or the special value NAN for negative numbers.",
@@ -782,6 +821,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getrandmax",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "The largest possible random value returned by rand()",
@@ -791,7 +831,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "srand",
-    'desc'   => "Seeds the random number generator with seed or with a random value if no seed is given. Note: As of PHP 4.2.0, there is no need to seed the random number generator with srand() or mt_srand() as this is now done automatically.",
+    'desc'   => "Seeds the random number generator with seed or with a random value if no seed is given. As of PHP 4.2.0, there is no need to seed the random number generator with srand() or mt_srand() as this is now done automatically.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -809,6 +850,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "rand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "A pseudo random value between min (or 0) and max (or getrandmax(), inclusive).",
@@ -832,6 +874,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mt_getrandmax",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the maximum random value returned by mt_rand()",
@@ -841,7 +884,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mt_srand",
-    'desc'   => "Seeds the random number generator with seed or with a random value if no seed is given. Note: As of PHP 4.2.0, there is no need to seed the random number generator with srand() or mt_srand() as this is now done automatically.",
+    'desc'   => "Seeds the random number generator with seed or with a random value if no seed is given. As of PHP 4.2.0, there is no need to seed the random number generator with srand() or mt_srand() as this is now done automatically.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -859,6 +903,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mt_rand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "A random integer value between min (or 0) and max (or mt_getrandmax(), inclusive)",
@@ -883,6 +928,7 @@ DefineFunction(
   array(
     'name'   => "lcg_value",
     'desc'   => "lcg_value() returns a pseudo random number in the range of (0, 1). The function combines two CGs with periods of 2^31 - 85 and 2^31 - 249. The period of this function is equal to the product of both primes.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
       'desc'   => "A pseudo random float value in the range of (0, 1)",

@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 94 */
+/* SRC: classes/exception.php line 184 */
 class c_domainexception : public c_logicexception {
   BEGIN_CLASS_MAP(DomainException)
     PARENT_CLASS(Exception)

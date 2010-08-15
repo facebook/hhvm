@@ -52,6 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "hash",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string containing the calculated message digest as lowercase hexits unless raw_output is set to true in which case the raw binary representation of the message digest is returned.",
@@ -79,6 +80,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_algos",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns a numerically indexed array containing the list of supported hashing algorithms.",
@@ -88,6 +90,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_init",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a Hashing Context resource for use with hash_update(), hash_update_stream(), hash_update_file(), and hash_final().",
@@ -116,6 +119,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string containing the calculated message digest as lowercase hexits unless raw_output is set to true in which case the raw binary representation of the message digest is returned.",
@@ -143,6 +147,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_final",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a string containing the calculated message digest as lowercase hexits unless raw_output is set to true in which case the raw binary representation of the message digest is returned.",
@@ -165,6 +170,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_hmac_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string containing the calculated message digest as lowercase hexits unless raw_output is set to true in which case the raw binary representation of the message digest is returned.",
@@ -197,6 +203,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_hmac",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string containing the calculated message digest as lowercase hexits unless raw_output is set to true in which case the raw binary representation of the message digest is returned.",
@@ -229,6 +236,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_update_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -256,6 +264,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_update_stream",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Actual number of bytes added to the hashing context from handle.",
@@ -283,6 +292,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hash_update",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE.",

@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "xml_parser_create",
     'desc'   => "xml_parser_create() creates a new XML parser and returns a resource handle referencing it to be used by the other XML functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
       'desc'   => "Returns a resource handle for the new XML parser.",
@@ -71,9 +72,10 @@ DefineFunction(
   array(
     'name'   => "xml_parser_free",
     'desc'   => "Frees the given XML parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it frees the parser and returns TRUE. xml_parser_get_option xml_parser_create Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it frees the parser and returns TRUE. xml_parser_get_option xml_parser_create Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -88,9 +90,10 @@ DefineFunction(
   array(
     'name'   => "xml_parse",
     'desc'   => "xml_parse() parses an XML document. The handlers for the configured events are called as many times as necessary.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
-      'desc'   => "Returns 1 on success or 0 on failure.\nFor unsuccessful parses, error information can be retrieved with xml_get_error_code(), xml_error_string(), xml_get_current_line_number(), xml_get_current_column_number() and xml_get_current_byte_index(). Note: Entity errors are reported at the end of the data thus only if is_final is set and TRUE. xml_parser_create_ns xml_parse_into_struct Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns 1 on success or 0 on failure.\n\nFor unsuccessful parses, error information can be retrieved with xml_get_error_code(), xml_error_string(), xml_get_current_line_number(), xml_get_current_column_number() and xml_get_current_byte_index().\n\nEntity errors are reported at the end of the data thus only if is_final is set and TRUE. xml_parser_create_ns xml_parse_into_struct Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -116,6 +119,7 @@ DefineFunction(
   array(
     'name'   => "xml_parse_into_struct",
     'desc'   => "This function parses an XML file into 2 parallel array structures, one (index) containing pointers to the location of the appropriate values in the values array. These last two parameters must be passed by reference.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "xml_parse_into_struct() returns 0 for failure and 1 for success. This is not the same as FALSE and TRUE, be careful with operators such as ===.",
@@ -145,6 +149,7 @@ DefineFunction(
   array(
     'name'   => "xml_parser_create_ns",
     'desc'   => "xml_parser_create_ns() creates a new XML parser with XML namespace support and returns a resource handle referencing it to be used by the other XML functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
       'desc'   => "Returns a resource handle for the new XML parser.",
@@ -169,6 +174,7 @@ DefineFunction(
   array(
     'name'   => "xml_parser_get_option",
     'desc'   => "Gets an option value from an XML parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser or if option isn't valid (generates also a E_WARNING). Else the option's value is returned.",
@@ -191,9 +197,10 @@ DefineFunction(
   array(
     'name'   => "xml_parser_set_option",
     'desc'   => "Sets an option in an XML parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or if the option could not be set. Else the option is set and TRUE is returned. xml_set_character_data_handler xml_parser_get_option Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or if the option could not be set. Else the option is set and TRUE is returned. xml_set_character_data_handler xml_parser_get_option Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -204,7 +211,7 @@ DefineFunction(
       array(
         'name'   => "option",
         'type'   => Int32,
-        'desc'   => "Which option to set. See below.\nThe following options are available: XML parser options Option constant Data type Description XML_OPTION_CASE_FOLDING integer Controls whether case-folding is enabled for this XML parser. Enabled by default. XML_OPTION_SKIP_TAGSTART integer Specify how many characters should be skipped in the beginning of a tag name. XML_OPTION_SKIP_WHITE integer Whether to skip values consisting of whitespace characters. XML_OPTION_TARGET_ENCODING string Sets which target encoding to use in this XML parser.By default, it is set to the same as the source encoding used by xml_parser_create(). Supported target encodings are ISO-8859-1, US-ASCII and UTF-8.",
+        'desc'   => "Which option to set. See below.\n\nThe following options are available: XML parser options Option constant Data type Description XML_OPTION_CASE_FOLDING integer Controls whether case-folding is enabled for this XML parser. Enabled by default. XML_OPTION_SKIP_TAGSTART integer Specify how many characters should be skipped in the beginning of a tag name. XML_OPTION_SKIP_WHITE integer Whether to skip values consisting of whitespace characters. XML_OPTION_TARGET_ENCODING string Sets which target encoding to use in this XML parser.By default, it is set to the same as the source encoding used by xml_parser_create(). Supported target encodings are ISO-8859-1, US-ASCII and UTF-8.",
       ),
       array(
         'name'   => "value",
@@ -218,9 +225,10 @@ DefineFunction(
   array(
     'name'   => "xml_set_character_data_handler",
     'desc'   => "Sets the character data handler function for the XML parser parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. xml_set_default_handler xml_parser_set_option Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure. xml_set_default_handler xml_parser_set_option Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -230,7 +238,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept two parameters: handler ( resource \$parser , string \$data ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept two parameters: handler ( resource \$parser , string \$data ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -239,6 +247,7 @@ DefineFunction(
   array(
     'name'   => "xml_set_default_handler",
     'desc'   => "Sets the default handler function for the XML parser parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -251,7 +260,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept two parameters: handler ( resource \$parser , string \$data ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept two parameters: handler ( resource \$parser , string \$data ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -260,9 +269,10 @@ DefineFunction(
   array(
     'name'   => "xml_set_element_handler",
     'desc'   => "Sets the element handler functions for the XML parser. start_element_handler and end_element_handler are strings containing the names of functions that must exist when xml_parse() is called for parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. xml_set_end_namespace_decl_handler xml_set_default_handler Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure. xml_set_end_namespace_decl_handler xml_set_default_handler Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -285,7 +295,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xml_set_processing_instruction_handler",
-    'desc'   => "Sets the processing instruction (PI) handler function for the XML parser parser.\nA processing instruction has the following format: target data?> You can put PHP code into such a tag, but be aware of one limitation: in an XML PI, the PI end tag (?>) can not be quoted, so this character sequence should not appear in the PHP code you embed with PIs in XML documents.If it does, the rest of the PHP code, as well as the \"real\" PI end tag, will be treated as character data.",
+    'desc'   => "Sets the processing instruction (PI) handler function for the XML parser parser.\n\nA processing instruction has the following format: target data?> You can put PHP code into such a tag, but be aware of one limitation: in an XML PI, the PI end tag (?>) can not be quoted, so this character sequence should not appear in the PHP code you embed with PIs in XML documents.If it does, the rest of the PHP code, as well as the \"real\" PI end tag, will be treated as character data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -298,7 +309,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept three parameters: handler ( resource \$parser , string \$target , string \$data ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept three parameters: handler ( resource \$parser , string \$target , string \$data ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -307,6 +318,7 @@ DefineFunction(
   array(
     'name'   => "xml_set_start_namespace_decl_handler",
     'desc'   => "Set a handler to be called when a namespace is declared. Namespace declarations occur inside start tags. But the namespace declaration start handler is called before the start tag handler for each namespace declared in that start tag.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -320,7 +332,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept four parameters, and should return an integer value. If the value returned from the handler is FALSE (which it will be if no value is returned), the XML parser will stop parsing and xml_get_error_code() will return XML_ERROR_EXTERNAL_ENTITY_HANDLING. handler ( resource \$parser , string \$user_data , string \$prefix , string \$uri ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept four parameters, and should return an integer value. If the value returned from the handler is FALSE (which it will be if no value is returned), the XML parser will stop parsing and xml_get_error_code() will return XML_ERROR_EXTERNAL_ENTITY_HANDLING. handler ( resource \$parser , string \$user_data , string \$prefix , string \$uri ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -329,6 +341,7 @@ DefineFunction(
   array(
     'name'   => "xml_set_end_namespace_decl_handler",
     'desc'   => "Set a handler to be called when leaving the scope of a namespace declaration. This will be called, for each namespace declaration, after the handler for the end tag of the element in which the namespace was declared.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -342,7 +355,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept three parameters, and should return an integer value. If the value returned from the handler is FALSE (which it will be if no value is returned), the XML parser will stop parsing and xml_get_error_code() will return XML_ERROR_EXTERNAL_ENTITY_HANDLING. handler ( resource \$parser , string \$user_data , string \$prefix ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept three parameters, and should return an integer value. If the value returned from the handler is FALSE (which it will be if no value is returned), the XML parser will stop parsing and xml_get_error_code() will return XML_ERROR_EXTERNAL_ENTITY_HANDLING. handler ( resource \$parser , string \$user_data , string \$prefix ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -350,7 +363,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xml_set_unparsed_entity_decl_handler",
-    'desc'   => "Sets the unparsed entity declaration handler function for the XML parser parser.\nThe handler will be called if the XML parser encounters an external entity declaration with an NDATA declaration, like the following:\n\nSee » section 4.2.2 of the XML 1.0 spec for the definition of notation declared external entities.",
+    'desc'   => "Sets the unparsed entity declaration handler function for the XML parser parser.\n\nThe handler will be called if the XML parser encounters an external entity declaration with an NDATA declaration, like the following:\n\n\n\nSee » section 4.2.2 of the XML 1.0 spec for the definition of notation declared external entities.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -363,7 +377,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept six parameters: handler ( resource \$parser , string \$entity_name , string \$base , string \$system_id , string \$public_id , string \$notation_name ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept six parameters: handler ( resource \$parser , string \$entity_name , string \$base , string \$system_id , string \$public_id , string \$notation_name ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -372,6 +386,7 @@ DefineFunction(
   array(
     'name'   => "xml_set_external_entity_ref_handler",
     'desc'   => "Sets the external entity reference handler function for the XML parser parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -384,7 +399,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept five parameters, and should return an integer value.If the value returned from the handler is FALSE (which it will be if no value is returned), the XML parser will stop parsing and xml_get_error_code() will return XML_ERROR_EXTERNAL_ENTITY_HANDLING. handler ( resource \$parser , string \$open_entity_names , string \$base , string \$system_id , string \$public_id ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept five parameters, and should return an integer value.If the value returned from the handler is FALSE (which it will be if no value is returned), the XML parser will stop parsing and xml_get_error_code() will return XML_ERROR_EXTERNAL_ENTITY_HANDLING. handler ( resource \$parser , string \$open_entity_names , string \$base , string \$system_id , string \$public_id ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -392,7 +407,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xml_set_notation_decl_handler",
-    'desc'   => "Sets the notation declaration handler function for the XML parser parser.\nA notation declaration is part of the document's DTD and has the following format:\nSee » section 4.7 of the XML 1.0 spec for the definition of notation declarations.",
+    'desc'   => "Sets the notation declaration handler function for the XML parser parser.\n\nA notation declaration is part of the document's DTD and has the following format:\n\nSee » section 4.7 of the XML 1.0 spec for the definition of notation declarations.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -405,7 +421,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\nThe function named by handler must accept five parameters: handler ( resource \$parser , string \$notation_name , string \$base , string \$system_id , string \$public_id ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
+        'desc'   => "handler is a string containing the name of a function that must exist when xml_parse() is called for parser.\n\nThe function named by handler must accept five parameters: handler ( resource \$parser , string \$notation_name , string \$base , string \$system_id , string \$public_id ) parser The first parameter, parser, is a reference to the XML parser calling the handler.",
       ),
     ),
   ));
@@ -414,6 +430,7 @@ DefineFunction(
   array(
     'name'   => "xml_set_object",
     'desc'   => "This function allows to use parser inside object. All callback functions could be set with xml_set_element_handler() etc and assumed to be methods of object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -434,6 +451,7 @@ DefineFunction(
   array(
     'name'   => "xml_get_current_byte_index",
     'desc'   => "Gets the current byte index of the given XML parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns which byte index the parser is currently at in its data buffer (starting at 0).",
@@ -451,6 +469,7 @@ DefineFunction(
   array(
     'name'   => "xml_get_current_column_number",
     'desc'   => "Gets the current column number of the given XML parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns which column on the current line (as given by xml_get_current_line_number()) the parser is currently at.",
@@ -468,6 +487,7 @@ DefineFunction(
   array(
     'name'   => "xml_get_current_line_number",
     'desc'   => "Gets the current line number for the given XML parser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns which line the parser is currently at in its data buffer.",
@@ -485,6 +505,7 @@ DefineFunction(
   array(
     'name'   => "xml_get_error_code",
     'desc'   => "Gets the XML parser error code.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it returns one of the error codes listed in the error codes section.",
@@ -502,6 +523,7 @@ DefineFunction(
   array(
     'name'   => "xml_error_string",
     'desc'   => "Gets the XML parser error string associated with the given code.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a string with a textual description of the error code, or FALSE if no description was found.",
@@ -519,6 +541,7 @@ DefineFunction(
   array(
     'name'   => "utf8_decode",
     'desc'   => "This function decodes data, assumed to be UTF-8 encoded, to ISO-8859-1.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the ISO-8859-1 translation of data.",
@@ -536,9 +559,10 @@ DefineFunction(
   array(
     'name'   => "utf8_encode",
     'desc'   => "This function encodes the string data to UTF-8, and returns the encoded version. UTF-8 is a standard mechanism used by Unicode for encoding wide character values into a byte stream. UTF-8 is transparent to plain ASCII characters, is self-synchronized (meaning it is possible for a program to figure out where in the bytestream characters start) and can be used with normal string comparison functions for sorting and such. PHP encodes UTF-8 characters in up to four bytes, like this: UTF-8 encoding bytes bits representation 1 7 0bbbbbbb 2 11 110bbbbb 10bbbbbb 3 16 1110bbbb 10bbbbbb 10bbbbbb 4 21 11110bbb 10bbbbbb 10bbbbbb 10bbbbbb Each b represents a bit that can be used to store character data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "Returns the UTF-8 translation of data. xml_error_string utf8_decode Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns the UTF-8 translation of data. xml_error_string utf8_decode Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(

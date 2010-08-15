@@ -53,9 +53,10 @@ DefineFunction(
   array(
     'name'   => "get_declared_classes",
     'desc'   => "Gets the declared classes.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
-      'desc'   => "Returns an array of the names of the declared classes in the current script. Note: Note that depending on what extensions you have compiled or loaded into PHP, additional classes could be present. This means that you will not be able to define your own classes using these names. There is a list of predefined classes in the Predefined Classes section of the appendices.",
+      'desc'   => "Returns an array of the names of the declared classes in the current script.\n\nNote that depending on what extensions you have compiled or loaded into PHP, additional classes could be present. This means that you will not be able to define your own classes using these names. There is a list of predefined classes in the Predefined Classes section of the appendices.",
     ),
   ));
 
@@ -63,6 +64,7 @@ DefineFunction(
   array(
     'name'   => "get_declared_interfaces",
     'desc'   => "Gets the declared interfaces.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an array of the names of the declared interfaces in the current script.",
@@ -73,6 +75,7 @@ DefineFunction(
   array(
     'name'   => "class_exists",
     'desc'   => "This function checks whether or not the given class has been defined.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if class_name is a defined class, FALSE otherwise.",
@@ -96,6 +99,7 @@ DefineFunction(
   array(
     'name'   => "interface_exists",
     'desc'   => "Checks if the given interface has been defined.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the interface given by interface_name has been defined, FALSE otherwise.",
@@ -119,6 +123,7 @@ DefineFunction(
   array(
     'name'   => "get_class_methods",
     'desc'   => "Gets the class methods names.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an array of method names defined for the class specified by class_name. In case of an error, it returns NULL.",
@@ -136,6 +141,7 @@ DefineFunction(
   array(
     'name'   => "get_class_vars",
     'desc'   => "Get the default properties of the given class.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an associative array of declared properties visible from the current scope, with their default value. The resulting array elements are in the form of varname => value.",
@@ -153,6 +159,7 @@ DefineFunction(
   array(
     'name'   => "get_class",
     'desc'   => "Gets the name of the class of the given object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the name of the class of which object is an instance. Returns FALSE if object is not an object.",
@@ -171,9 +178,10 @@ DefineFunction(
   array(
     'name'   => "get_parent_class",
     'desc'   => "Retrieves the parent class name for object or class.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the name of the parent class of the class of which object is an instance or the name. Note: If the object does not have a parent FALSE will be returned.\nIf called without parameter outside object, this function returns FALSE.",
+      'desc'   => "Returns the name of the parent class of the class of which object is an instance or the name.\n\nIf the object does not have a parent FALSE will be returned.\n\nIf called without parameter outside object, this function returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -189,6 +197,7 @@ DefineFunction(
   array(
     'name'   => "is_a",
     'desc'   => "Checks if the given object is of this class or has this class as one of its parents.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the object is of this class or has this class as one of its parents, FALSE otherwise.",
@@ -211,6 +220,7 @@ DefineFunction(
   array(
     'name'   => "is_subclass_of",
     'desc'   => "Checks if the given object has the class class_name as one of its parents.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "This function returns TRUE if the object object, belongs to a class which is a subclass of class_name, FALSE otherwise.",
@@ -233,6 +243,7 @@ DefineFunction(
   array(
     'name'   => "method_exists",
     'desc'   => "Checks if the class method exists in the given object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the method given by method_name has been defined for the given object, FALSE otherwise.",
@@ -254,7 +265,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "property_exists",
-    'desc'   => "This function checks if the given property exists in the specified class. Note: As opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.",
+    'desc'   => "This function checks if the given property exists in the specified class.\n\nAs opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the property exists, FALSE if it doesn't exist or NULL in case of an error.",
@@ -277,6 +289,7 @@ DefineFunction(
   array(
     'name'   => "get_object_vars",
     'desc'   => "Gets the accessible non-static properties of the given object according to scope.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an associative array of defined object accessible non-static properties for the specified object in scope. If a property have not been assigned a value, it will be returned with a NULL value.",
@@ -293,6 +306,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "call_user_method_array",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -318,7 +332,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "call_user_method",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
     ),

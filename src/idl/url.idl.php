@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "base64_decode",
     'desc'   => "Decodes a base64 encoded data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the original data or FALSE on failure. The returned data may be binary.",
@@ -75,7 +76,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "base64_encode",
-    'desc'   => "Encodes the given data with base64.\nThis encoding is designed to make binary data survive transport through transport layers that are not 8-bit clean, such as mail bodies.\nBase64-encoded data takes about 33% more space than the original data.",
+    'desc'   => "Encodes the given data with base64.\n\nThis encoding is designed to make binary data survive transport through transport layers that are not 8-bit clean, such as mail bodies.\n\nBase64-encoded data takes about 33% more space than the original data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The encoded data, as a string.",
@@ -93,6 +95,7 @@ DefineFunction(
   array(
     'name'   => "get_headers",
     'desc'   => "get_headers() returns an array with the headers sent by the server in response to a HTTP request.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an indexed or associative array with the headers, or FALSE on failure.",
@@ -116,15 +119,16 @@ DefineFunction(
   array(
     'name'   => "get_meta_tags",
     'desc'   => "Opens filename and parses it line by line for <meta> tags in the file. The parsing stops at </head>.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
-      'desc'   => "Returns an array with all the parsed meta tags.\nThe value of the name property becomes the key, the value of the content property becomes the value of the returned array, so you can easily use standard array functions to traverse it or access single values. Special characters in the value of the name property are substituted with '_', the rest is converted to lower case. If two meta tags have the same name, only the last one is returned.",
+      'desc'   => "Returns an array with all the parsed meta tags.\n\nThe value of the name property becomes the key, the value of the content property becomes the value of the returned array, so you can easily use standard array functions to traverse it or access single values. Special characters in the value of the name property are substituted with '_', the rest is converted to lower case. If two meta tags have the same name, only the last one is returned.",
     ),
     'args'   => array(
       array(
         'name'   => "filename",
         'type'   => String,
-        'desc'   => "The path to the HTML file, as a string. This can be a local file or an URL.\nExample #1 What get_meta_tags() parses\n(pay attention to line endings - PHP uses a native function to parse the input, so a Mac file won't work on Unix).",
+        'desc'   => "The path to the HTML file, as a string. This can be a local file or an URL.\n\nExample #1 What get_meta_tags() parses\n\n(pay attention to line endings - PHP uses a native function to parse the input, so a Mac file won't work on Unix).",
       ),
       array(
         'name'   => "use_include_path",
@@ -139,6 +143,7 @@ DefineFunction(
   array(
     'name'   => "http_build_query",
     'desc'   => "Generates a URL-encoded query string from the associative (or indexed) array provided.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a URL-encoded string.",
@@ -147,13 +152,13 @@ DefineFunction(
       array(
         'name'   => "formdata",
         'type'   => Variant,
-        'desc'   => "May be an array or object containing properties.\nThe array form may be a simple one-dimensional structure, or an array of arrays (who in turn may contain other arrays).",
+        'desc'   => "May be an array or object containing properties.\n\nThe array form may be a simple one-dimensional structure, or an array of arrays (who in turn may contain other arrays).",
       ),
       array(
         'name'   => "numeric_prefix",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "If numeric indices are used in the base array and this parameter is provided, it will be prepended to the numeric index for elements in the base array only.\nThis is meant to allow for legal variable names when the data is decoded by PHP or another CGI application later on.",
+        'desc'   => "If numeric indices are used in the base array and this parameter is provided, it will be prepended to the numeric index for elements in the base array only.\n\nThis is meant to allow for legal variable names when the data is decoded by PHP or another CGI application later on.",
       ),
       array(
         'name'   => "arg_separator",
@@ -167,10 +172,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "parse_url",
-    'desc'   => "This function parses a URL and returns an associative array containing any of the various components of the URL that are present.\nThis function is not meant to validate the given URL, it only breaks it up into the above listed parts. Partial URLs are also accepted, parse_url() tries its best to parse them correctly.",
+    'desc'   => "This function parses a URL and returns an associative array containing any of the various components of the URL that are present.\n\nThis function is not meant to validate the given URL, it only breaks it up into the above listed parts. Partial URLs are also accepted, parse_url() tries its best to parse them correctly.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "On seriously malformed URLs, parse_url() may return FALSE and emit a E_WARNING. Otherwise an associative array is returned, whose components may be (at least one): scheme - e.g. http host port user pass path query - after the question mark ? fragment - after the hashmark #\nIf the component parameter is specified a string is returned instead of an array .",
+      'desc'   => "On seriously malformed URLs, parse_url() may return FALSE and emit a E_WARNING. Otherwise an associative array is returned, whose components may be (at least one): scheme - e.g. http host port user pass path query - after the question mark ? fragment - after the hashmark #\n\nIf the component parameter is specified a string is returned instead of an array.",
     ),
     'args'   => array(
       array(
@@ -182,7 +188,7 @@ DefineFunction(
         'name'   => "component",
         'type'   => Int32,
         'value'  => "-1",
-        'desc'   => "Specify one of PHP_URL_SCHEME, PHP_URL_HOST, PHP_URL_PORT, PHP_URL_USER, PHP_URL_PASS, PHP_URL_PATH, PHP_URL_QUERY or PHP_URL_FRAGMENT to retrieve just a specific URL component as a string .",
+        'desc'   => "Specify one of PHP_URL_SCHEME, PHP_URL_HOST, PHP_URL_PORT, PHP_URL_USER, PHP_URL_PASS, PHP_URL_PATH, PHP_URL_QUERY or PHP_URL_FRAGMENT to retrieve just a specific URL component as a string.",
       ),
     ),
   ));
@@ -191,6 +197,7 @@ DefineFunction(
   array(
     'name'   => "rawurldecode",
     'desc'   => "Returns a string in which the sequences with percent (%) signs followed by two hex digits have been replaced with literal characters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the decoded URL, as a string.",
@@ -208,6 +215,7 @@ DefineFunction(
   array(
     'name'   => "rawurlencode",
     'desc'   => "Encodes the given string according to » RFC 1738.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a string in which all non-alphanumeric characters except -_. have been replaced with a percent (%) sign followed by two hex digits. This is the encoding described in » RFC 1738 for protecting literal characters from being interpreted as special URL delimiters, and for protecting URLs from being mangled by transmission media with character conversions (like some email systems).",
@@ -225,6 +233,7 @@ DefineFunction(
   array(
     'name'   => "urldecode",
     'desc'   => "Decodes any %## encoding in the given string. Plus symbols ('+') are decoded to a space character.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the decoded string.",
@@ -242,6 +251,7 @@ DefineFunction(
   array(
     'name'   => "urlencode",
     'desc'   => "This function is convenient when encoding a string to be used in a query part of a URL, as a convenient way to pass variables to the next page.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a string in which all non-alphanumeric characters except -_. have been replaced with a percent (%) sign followed by two hex digits and spaces encoded as plus (+) signs. It is encoded the same way that the posted data from a WWW form is encoded, that is the same way as in application/x-www-form-urlencoded media type. This differs from the » RFC 1738 encoding (see rawurlencode()) in that for historical reasons, spaces are encoded as plus (+) signs.",

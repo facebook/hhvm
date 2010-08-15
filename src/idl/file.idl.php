@@ -71,6 +71,7 @@ DefineFunction(
   array(
     'name'   => "fopen",
     'desc'   => "fopen() binds a named resource, specified by filename, to a stream.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a file pointer resource on success, or FALSE on error.",
@@ -101,9 +102,10 @@ DefineFunction(
   array(
     'name'   => "popen",
     'desc'   => "Opens a pipe to a process executed by forking the command given by command.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a file pointer identical to that returned by fopen(), except that it is unidirectional (may only be used for reading or writing) and must be closed with pclose(). This pointer may be used with fgets(), fgetss(), and fwrite().\nIf an error occurs, returns FALSE.",
+      'desc'   => "Returns a file pointer identical to that returned by fopen(), except that it is unidirectional (may only be used for reading or writing) and must be closed with pclose(). This pointer may be used with fgets(), fgetss(), and fwrite().\n\nIf an error occurs, returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -123,6 +125,7 @@ DefineFunction(
   array(
     'name'   => "fclose",
     'desc'   => "The file pointed to by handle is closed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -140,6 +143,7 @@ DefineFunction(
   array(
     'name'   => "pclose",
     'desc'   => "Closes a file pointer to a pipe opened by popen().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the termination status of the process that was run.",
@@ -157,6 +161,7 @@ DefineFunction(
   array(
     'name'   => "fseek",
     'desc'   => "Sets the file position indicator for the file referenced by handle. The new position, measured in bytes from the beginning of the file, is obtained by adding offset to the position specified by whence.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Upon success, returns 0; otherwise, returns -1. Note that seeking past EOF is not considered an error.",
@@ -170,7 +175,7 @@ DefineFunction(
       array(
         'name'   => "offset",
         'type'   => Int64,
-        'desc'   => "The offset.\nTo move to a position before the end-of-file, you need to pass a negative value in offset and set whence to SEEK_END.",
+        'desc'   => "The offset.\n\nTo move to a position before the end-of-file, you need to pass a negative value in offset and set whence to SEEK_END.",
       ),
       array(
         'name'   => "whence",
@@ -184,7 +189,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "rewind",
-    'desc'   => "Sets the file position indicator for handle to the beginning of the file stream. Note: If you have opened the file in append (\"a\" or \"a+\") mode, any data you write to the file will always be appended, regardless of the file position.",
+    'desc'   => "Sets the file position indicator for handle to the beginning of the file stream.\n\nIf you have opened the file in append (\"a\" or \"a+\") mode, any data you write to the file will always be appended, regardless of the file position.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -202,9 +208,10 @@ DefineFunction(
   array(
     'name'   => "ftell",
     'desc'   => "Returns the position of the file pointer referenced by handle.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the position of the file pointer referenced by handle as an integer; i.e., its offset into the file stream.\nIf an error occurs, returns FALSE.",
+      'desc'   => "Returns the position of the file pointer referenced by handle as an integer; i.e., its offset into the file stream.\n\nIf an error occurs, returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -219,6 +226,7 @@ DefineFunction(
   array(
     'name'   => "feof",
     'desc'   => "Tests for end-of-file on a file pointer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the file pointer is at EOF or an error occurs (including socket timeout); otherwise returns FALSE.",
@@ -236,6 +244,7 @@ DefineFunction(
   array(
     'name'   => "fstat",
     'desc'   => "Gathers the statistics of the file opened by the file pointer handle. This function is similar to the stat() function except that it operates on an open file pointer instead of a filename.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array with the statistics of the file; the format of the array is described in detail on the stat() manual page.",
@@ -253,6 +262,7 @@ DefineFunction(
   array(
     'name'   => "fread",
     'desc'   => "fread() reads up to length bytes from the file pointer referenced by handle. Reading stops as soon as one of the following conditions is met: length bytes have been read EOF (end of file) is reached a packet becomes available (for network streams) 8192 bytes have been read (after opening userspace stream)",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the read string or FALSE on failure.",
@@ -275,6 +285,7 @@ DefineFunction(
   array(
     'name'   => "fgetc",
     'desc'   => "Gets a character from the given file pointer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string containing a single character read from the file pointed to by handle. Returns FALSE on EOF. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
@@ -292,9 +303,10 @@ DefineFunction(
   array(
     'name'   => "fgets",
     'desc'   => "Gets a line from file pointer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a string of up to length - 1 bytes read from the file pointed to by handle.\nIf an error occurs, returns FALSE.",
+      'desc'   => "Returns a string of up to length - 1 bytes read from the file pointed to by handle.\n\nIf an error occurs, returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -306,7 +318,7 @@ DefineFunction(
         'name'   => "length",
         'type'   => Int64,
         'value'  => "1024",
-        'desc'   => "Reading ends when length - 1 bytes have been read, on a newline (which is included in the return value), or on EOF (whichever comes first). If no length is specified, it will keep reading from the stream until it reaches the end of the line. Note: Until PHP 4.3.0, omitting it would assume 1024 as the line length. If the majority of the lines in the file are all larger than 8KB, it is more resource efficient for your script to specify the maximum line length.",
+        'desc'   => "Reading ends when length - 1 bytes have been read, on a newline (which is included in the return value), or on EOF (whichever comes first). If no length is specified, it will keep reading from the stream until it reaches the end of the line.\n\nUntil PHP 4.3.0, omitting it would assume 1024 as the line length. If the majority of the lines in the file are all larger than 8KB, it is more resource efficient for your script to specify the maximum line length.",
       ),
     ),
   ));
@@ -315,9 +327,10 @@ DefineFunction(
   array(
     'name'   => "fgetss",
     'desc'   => "Identical to fgets(), except that fgetss() attempts to strip any NUL bytes, HTML and PHP tags from the text it reads.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a string of up to length - 1 bytes read from the file pointed to by handle, with all HTML and PHP code stripped.\nIf an error occurs, returns FALSE.",
+      'desc'   => "Returns a string of up to length - 1 bytes read from the file pointed to by handle, with all HTML and PHP code stripped.\n\nIf an error occurs, returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -343,8 +356,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fscanf",
-    'desc'   => "The function fscanf() is similar to sscanf(), but it takes its input from a file associated with handle and interprets the input according to the specified format, which is described in the documentation for sprintf().\nAny whitespace in the format string matches any whitespace in the input stream. This means that even a tab \\t in the format string can match a single space character in the input stream.\nEach call to fscanf() reads one line from the file.",
-    'flags'  =>  RefVariableArguments,
+    'desc'   => "The function fscanf() is similar to sscanf(), but it takes its input from a file associated with handle and interprets the input according to the specified format, which is described in the documentation for sprintf().\n\nAny whitespace in the format string matches any whitespace in the input stream. This means that even a tab \\t in the format string can match a single space character in the input stream.\n\nEach call to fscanf() reads one line from the file.",
+    'flags'  =>  HasDocComment | RefVariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If only two parameters were passed to this function, the values parsed will be returned as an array. Otherwise, if optional parameters are passed, the function will return the number of assigned values. The optional parameters must be passed by reference.",
@@ -366,7 +379,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fpassthru",
-    'desc'   => "Reads to EOF on the given file pointer from the current position and writes the results to the output buffer.\nYou may need to call rewind() to reset the file pointer to the beginning of the file if you have already written data to the file.\nIf you just want to dump the contents of a file to the output buffer, without first modifying it or seeking to a particular offset, you may want to use the readfile(), which saves you the fopen() call.",
+    'desc'   => "Reads to EOF on the given file pointer from the current position and writes the results to the output buffer.\n\nYou may need to call rewind() to reset the file pointer to the beginning of the file if you have already written data to the file.\n\nIf you just want to dump the contents of a file to the output buffer, without first modifying it or seeking to a particular offset, you may want to use the readfile(), which saves you the fopen() call.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If an error occurs, fpassthru() returns FALSE. Otherwise, fpassthru() returns the number of characters read from handle and passed through to the output.",
@@ -383,6 +397,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fwrite",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "fwrite() returns the number of bytes written, or FALSE on error.",
@@ -402,7 +417,7 @@ DefineFunction(
         'name'   => "length",
         'type'   => Int64,
         'value'  => "0",
-        'desc'   => "If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.\nNote that if the length argument is given, then the magic_quotes_runtime configuration option will be ignored and no slashes will be stripped from string.",
+        'desc'   => "If the length argument is given, writing will stop after length bytes have been written or the end of string is reached, whichever comes first.\n\nNote that if the length argument is given, then the magic_quotes_runtime configuration option will be ignored and no slashes will be stripped from string.",
       ),
     ),
   ));
@@ -410,6 +425,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fputs",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -434,7 +450,7 @@ DefineFunction(
   array(
     'name'   => "fprintf",
     'desc'   => "Write a string produced according to format to the stream resource specified by handle.",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the string written.",
@@ -456,7 +472,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "vfprintf",
-    'desc'   => "Write a string produced according to format to the stream resource specified by handle.\nOperates as fprintf() but accepts an array of arguments, rather than a variable number of arguments.",
+    'desc'   => "Write a string produced according to format to the stream resource specified by handle.\n\nOperates as fprintf() but accepts an array of arguments, rather than a variable number of arguments.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the outputted string.",
@@ -482,6 +499,7 @@ DefineFunction(
   array(
     'name'   => "fflush",
     'desc'   => "This function forces a write of all buffered output to the resource pointed to by the file handle.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -499,6 +517,7 @@ DefineFunction(
   array(
     'name'   => "ftruncate",
     'desc'   => "Takes the filepointer, handle, and truncates the file to length, size.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -507,12 +526,12 @@ DefineFunction(
       array(
         'name'   => "handle",
         'type'   => Resource,
-        'desc'   => "The file pointer. Note: The handle must be open for writing.",
+        'desc'   => "The file pointer.\n\nThe handle must be open for writing.",
       ),
       array(
         'name'   => "size",
         'type'   => Int64,
-        'desc'   => "The size to truncate to. Note: If size is larger than the file it is extended with null bytes. If size is smaller than the extra data will be lost.",
+        'desc'   => "The size to truncate to.\n\nIf size is larger than the file it is extended with null bytes.\n\nIf size is smaller than the extra data will be lost.",
       ),
     ),
   ));
@@ -520,7 +539,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "flock",
-    'desc'   => "flock() allows you to perform a simple reader/writer model which can be used on virtually every platform (including most Unix derivatives and even Windows).\nOn versions of PHP before 5.3.2, the lock is released also by fclose() (which is also called automatically when script finished).\nPHP supports a portable way of locking complete files in an advisory way (which means all accessing programs have to use the same way of locking or it will not work). By default, this function will block until the requested lock is acquired; this may be controlled (on non-Windows platforms) with the LOCK_NB option documented below.",
+    'desc'   => "flock() allows you to perform a simple reader/writer model which can be used on virtually every platform (including most Unix derivatives and even Windows).\n\nOn versions of PHP before 5.3.2, the lock is released also by fclose() (which is also called automatically when script finished).\n\nPHP supports a portable way of locking complete files in an advisory way (which means all accessing programs have to use the same way of locking or it will not work). By default, this function will block until the requested lock is acquired; this may be controlled (on non-Windows platforms) with the LOCK_NB option documented below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -534,7 +554,7 @@ DefineFunction(
       array(
         'name'   => "operation",
         'type'   => Int32,
-        'desc'   => "operation is one of the following: LOCK_SH to acquire a shared lock (reader). LOCK_EX to acquire an exclusive lock (writer). LOCK_UN to release a lock (shared or exclusive).\nIt is also possible to add LOCK_NB as a bitmask to one of the above operations if you don't want flock() to block while locking. (not supported on Windows)",
+        'desc'   => "operation is one of the following: LOCK_SH to acquire a shared lock (reader). LOCK_EX to acquire an exclusive lock (writer). LOCK_UN to release a lock (shared or exclusive).\n\nIt is also possible to add LOCK_NB as a bitmask to one of the above operations if you don't want flock() to block while locking. (not supported on Windows)",
       ),
       array(
         'name'   => "wouldblock",
@@ -549,6 +569,7 @@ DefineFunction(
   array(
     'name'   => "fputcsv",
     'desc'   => "fputcsv() formats a line (passed as a fields array) as CSV and write it (terminated by a newline) to the specified file handle.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the written string or FALSE on failure.",
@@ -583,9 +604,10 @@ DefineFunction(
   array(
     'name'   => "fgetcsv",
     'desc'   => "Similar to fgets() except that fgetcsv() parses the line it reads for fields in CSV format and returns an array containing the fields read.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an indexed array containing the fields read. Note: A blank line in a CSV file will be returned as an array comprising a single null field, and will not be treated as an error. Note: If PHP is not properly recognizing the line endings when reading files either on or created by a Macintosh computer, enabling the auto_detect_line_endings run-time configuration option may help resolve the problem.\nfgetcsv() returns NULL if an invalid handle is supplied or FALSE on other errors, including end of file.",
+      'desc'   => "Returns an indexed array containing the fields read.\n\nA blank line in a CSV file will be returned as an array comprising a single null field, and will not be treated as an error. If PHP is not properly recognizing the line endings when reading files either on or created by a Macintosh computer, enabling the auto_detect_line_endings run-time configuration option may help resolve the problem.\n\nfgetcsv() returns NULL if an invalid handle is supplied or FALSE on other errors, including end of file.",
     ),
     'args'   => array(
       array(
@@ -617,7 +639,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "file_get_contents",
-    'desc'   => "This function is similar to file(), except that file_get_contents() returns the file in a string , starting at the specified offset up to maxlen bytes. On failure, file_get_contents() will return FALSE.\nfile_get_contents() is the preferred way to read the contents of a file into a string. It will use memory mapping techniques if supported by your OS to enhance performance. Note: If you're opening a URI with special characters, such as spaces, you need to encode the URI with urlencode(). Note: The default value of maxlen is not actually -1; rather, it is an internal PHP value which means to copy the entire stream until end-of-file is reached. The only way to specify this default value is to leave it out of the parameter list.",
+    'desc'   => "This function is similar to file(), except that file_get_contents() returns the file in a string, starting at the specified offset up to maxlen bytes. On failure, file_get_contents() will return FALSE.\n\nfile_get_contents() is the preferred way to read the contents of a file into a string. It will use memory mapping techniques if supported by your OS to enhance performance.\n\nIf you're opening a URI with special characters, such as spaces, you need to encode the URI with urlencode().\n\nThe default value of maxlen is not actually -1; rather, it is an internal PHP value which means to copy the entire stream until end-of-file is reached. The only way to specify this default value is to leave it out of the parameter list.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The function returns the read data or FALSE on failure.",
@@ -632,7 +655,7 @@ DefineFunction(
         'name'   => "use_include_path",
         'type'   => Boolean,
         'value'  => "false",
-        'desc'   => "Note: As of PHP 5 the FILE_USE_INCLUDE_PATH can be used to trigger include path search.",
+        'desc'   => "As of PHP 5 the FILE_USE_INCLUDE_PATH can be used to trigger include path search.",
       ),
       array(
         'name'   => "context",
@@ -658,7 +681,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "file_put_contents",
-    'desc'   => "This function is identical to calling fopen(), fwrite() and fclose() successively to write data to a file.\nIf filename does not exist, the file is created. Otherwise, the existing file is overwritten, unless the FILE_APPEND flags is set.",
+    'desc'   => "This function is identical to calling fopen(), fwrite() and fclose() successively to write data to a file.\n\nIf filename does not exist, the file is created. Otherwise, the existing file is overwritten, unless the FILE_APPEND flags is set.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The function returns the number of bytes that were written to the file, or FALSE on failure.",
@@ -672,13 +696,13 @@ DefineFunction(
       array(
         'name'   => "data",
         'type'   => Variant,
-        'desc'   => "The data to write. Can be either a string , an array or a stream resource.\nIf data is a stream resource, the remaining buffer of that stream will be copied to the specified file. This is similar with using stream_copy_to_stream().\nYou can also specify the data parameter as a single dimension array. This is equivalent to file_put_contents(\$filename, implode('', \$array)).",
+        'desc'   => "The data to write. Can be either a string, an array or a stream resource.\n\nIf data is a stream resource, the remaining buffer of that stream will be copied to the specified file. This is similar with using stream_copy_to_stream().\n\nYou can also specify the data parameter as a single dimension array. This is equivalent to file_put_contents(\$filename, implode('', \$array)).",
       ),
       array(
         'name'   => "flags",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "The value of flags can be any combination of the following flags (with some restrictions), joined with the binary OR (|) operator.\nAvailable flags Flag Description FILE_USE_INCLUDE_PATH Search for filename in the include directory. See include_path for more information. FILE_APPEND If file filename already exists, append the data to the file instead of overwriting it. Mutually exclusive with LOCK_EX since appends are atomic and thus there is no reason to lock. LOCK_EX Acquire an exclusive lock on the file while proceeding to the writing. Mutually exclusive with FILE_APPEND.",
+        'desc'   => "The value of flags can be any combination of the following flags (with some restrictions), joined with the binary OR (|) operator.\n\nAvailable flags Flag Description FILE_USE_INCLUDE_PATH Search for filename in the include directory. See include_path for more information. FILE_APPEND If file filename already exists, append the data to the file instead of overwriting it. Mutually exclusive with LOCK_EX since appends are atomic and thus there is no reason to lock. LOCK_EX Acquire an exclusive lock on the file while proceeding to the writing. Mutually exclusive with FILE_APPEND.",
       ),
       array(
         'name'   => "context",
@@ -692,10 +716,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "file",
-    'desc'   => "Reads an entire file into an array. Note: You can use file_get_contents() to return the contents of a file as a string.",
+    'desc'   => "Reads an entire file into an array.\n\nYou can use file_get_contents() to return the contents of a file as a string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the file in an array. Each element of the array corresponds to a line in the file, with the newline still attached. Upon failure, file() returns FALSE. Note: Each line in the resulting array will include the line ending, unless FILE_IGNORE_NEW_LINES is used, so you still need to use rtrim() if you do not want the line ending present. Note: If PHP is not properly recognizing the line endings when reading files either on or created by a Macintosh computer, enabling the auto_detect_line_endings run-time configuration option may help resolve the problem.",
+      'desc'   => "Returns the file in an array. Each element of the array corresponds to a line in the file, with the newline still attached. Upon failure, file() returns FALSE.\n\nEach line in the resulting array will include the line ending, unless FILE_IGNORE_NEW_LINES is used, so you still need to use rtrim() if you do not want the line ending present. If PHP is not properly recognizing the line endings when reading files either on or created by a Macintosh computer, enabling the auto_detect_line_endings run-time configuration option may help resolve the problem.",
     ),
     'args'   => array(
       array(
@@ -722,6 +747,7 @@ DefineFunction(
   array(
     'name'   => "readfile",
     'desc'   => "Reads a file and writes it to the output buffer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of bytes read from the file. If an error occurs, FALSE is returned and unless the function was called as @readfile(), an error message is printed.",
@@ -742,7 +768,7 @@ DefineFunction(
         'name'   => "context",
         'type'   => Resource,
         'value'  => "null_object",
-        'desc'   => "A context stream resource .",
+        'desc'   => "A context stream resource.",
       ),
     ),
   ));
@@ -750,10 +776,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "move_uploaded_file",
-    'desc'   => "This function checks to ensure that the file designated by filename is a valid upload file (meaning that it was uploaded via PHP's HTTP POST upload mechanism). If the file is valid, it will be moved to the filename given by destination.\nThis sort of check is especially important if there is any chance that anything done with uploaded files could reveal their contents to the user, or even to other users on the same system.",
+    'desc'   => "This function checks to ensure that the file designated by filename is a valid upload file (meaning that it was uploaded via PHP's HTTP POST upload mechanism). If the file is valid, it will be moved to the filename given by destination.\n\nThis sort of check is especially important if there is any chance that anything done with uploaded files could reveal their contents to the user, or even to other users on the same system.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "If filename is not a valid upload file, then no action will occur, and move_uploaded_file() will return FALSE.\nIf filename is a valid upload file, but cannot be moved for some reason, no action will occur, and move_uploaded_file() will return FALSE. Additionally, a warning will be issued.",
+      'desc'   => "If filename is not a valid upload file, then no action will occur, and move_uploaded_file() will return FALSE.\n\nIf filename is a valid upload file, but cannot be moved for some reason, no action will occur, and move_uploaded_file() will return FALSE. Additionally, a warning will be issued.",
     ),
     'args'   => array(
       array(
@@ -772,7 +799,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "parse_ini_file",
-    'desc'   => "parse_ini_file() loads in the ini file specified in filename, and returns the settings in it in an associative array.\nThe structure of the ini file is the same as the php.ini's.",
+    'desc'   => "parse_ini_file() loads in the ini file specified in filename, and returns the settings in it in an associative array.\n\nThe structure of the ini file is the same as the php.ini's.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The settings are returned as an associative array on success, and FALSE on failure.",
@@ -801,7 +829,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "parse_ini_string",
-    'desc'   => "parse_ini_string() returns the settings in string ini in an associative array.\nThe structure of the ini string is the same as the php.ini's.",
+    'desc'   => "parse_ini_string() returns the settings in string ini in an associative array.\n\nThe structure of the ini string is the same as the php.ini's.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The settings are returned as an associative array on success, and FALSE on failure.",
@@ -830,6 +859,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "parse_hdf_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -844,6 +874,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "parse_hdf_string",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -858,6 +889,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "write_hdf_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -876,6 +908,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "write_hdf_string",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -891,6 +924,7 @@ DefineFunction(
   array(
     'name'   => "md5_file",
     'desc'   => "Calculates the MD5 hash of the file specified by the filename parameter using the » RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash. The hash is a 32-character hexadecimal number.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string on success, FALSE otherwise.",
@@ -913,6 +947,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sha1_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string on success, FALSE otherwise.",
@@ -936,6 +971,7 @@ DefineFunction(
   array(
     'name'   => "chmod",
     'desc'   => "Attempts to change the mode of the specified file to that given in mode.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -949,7 +985,7 @@ DefineFunction(
       array(
         'name'   => "mode",
         'type'   => Int64,
-        'desc'   => "Note that mode is not automatically assumed to be an octal value, so strings (such as \"g+w\") will not work properly. To ensure the expected operation, you need to prefix mode with a zero (0):\n\n\nThe mode parameter consists of three octal number components specifying access restrictions for the owner, the user group in which the owner is in, and to everybody else in this order. One component can be computed by adding up the needed permissions for that target user base. Number 1 means that you grant execute rights, number 2 means that you make the file writeable, number 4 means that you make the file readable. Add up these numbers to specify needed rights. You can also read more about modes on Unix systems with 'man 1 chmod' and 'man 2 chmod'.",
+        'desc'   => "Note that mode is not automatically assumed to be an octal value, so strings (such as \"g+w\") will not work properly. To ensure the expected operation, you need to prefix mode with a zero (0):\n\n\n\n\n\nThe mode parameter consists of three octal number components specifying access restrictions for the owner, the user group in which the owner is in, and to everybody else in this order. One component can be computed by adding up the needed permissions for that target user base. Number 1 means that you grant execute rights, number 2 means that you make the file writeable, number 4 means that you make the file readable. Add up these numbers to specify needed rights. You can also read more about modes on Unix systems with 'man 1 chmod' and 'man 2 chmod'.",
       ),
     ),
   ));
@@ -958,6 +994,7 @@ DefineFunction(
   array(
     'name'   => "chown",
     'desc'   => "Attempts to change the owner of the file filename to user user. Only the superuser may change the owner of a file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -979,7 +1016,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "lchown",
-    'desc'   => "Attempts to change the owner of the symlink filename to user user.\nOnly the superuser may change the owner of a symlink.",
+    'desc'   => "Attempts to change the owner of the symlink filename to user user.\n\nOnly the superuser may change the owner of a symlink.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1001,7 +1039,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "chgrp",
-    'desc'   => "Attempts to change the group of the file filename to group.\nOnly the superuser may change the group of a file arbitrarily; other users may change the group of a file to any group of which that user is a member.",
+    'desc'   => "Attempts to change the group of the file filename to group.\n\nOnly the superuser may change the group of a file arbitrarily; other users may change the group of a file to any group of which that user is a member.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1023,7 +1062,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "lchgrp",
-    'desc'   => "Attempts to change the group of the symlink filename to group.\nOnly the superuser may change the group of a symlink arbitrarily; other users may change the group of a symlink to any group of which that user is a member.",
+    'desc'   => "Attempts to change the group of the symlink filename to group.\n\nOnly the superuser may change the group of a symlink arbitrarily; other users may change the group of a symlink to any group of which that user is a member.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1045,7 +1085,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "touch",
-    'desc'   => "Attempts to set the access and modification times of the file named in the filename parameter to the value given in time. Note that the access time is always modified, regardless of the number of parameters.\nIf the file does not exist, it will be created.",
+    'desc'   => "Attempts to set the access and modification times of the file named in the filename parameter to the value given in time. Note that the access time is always modified, regardless of the number of parameters.\n\nIf the file does not exist, it will be created.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1074,7 +1115,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "copy",
-    'desc'   => "Makes a copy of the file source to dest.\nIf you wish to move a file, use the rename() function.",
+    'desc'   => "Makes a copy of the file source to dest.\n\nIf you wish to move a file, use the rename() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1088,7 +1130,7 @@ DefineFunction(
       array(
         'name'   => "dest",
         'type'   => String,
-        'desc'   => "The destination path. If dest is a URL, the copy operation may fail if the wrapper does not support overwriting of existing files. Warning\nIf the destination file already exists, it will be overwritten.",
+        'desc'   => "The destination path. If dest is a URL, the copy operation may fail if the wrapper does not support overwriting of existing files. Warning\n\nIf the destination file already exists, it will be overwritten.",
       ),
       array(
         'name'   => "context",
@@ -1103,6 +1145,7 @@ DefineFunction(
   array(
     'name'   => "rename",
     'desc'   => "Attempts to rename oldname to newname.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1111,7 +1154,7 @@ DefineFunction(
       array(
         'name'   => "oldname",
         'type'   => String,
-        'desc'   => "Note: The old name. The wrapper used in oldname must match the wrapper used in newname.",
+        'desc'   => "The old name. The wrapper used in oldname must match the wrapper used in newname.",
       ),
       array(
         'name'   => "newname",
@@ -1122,7 +1165,7 @@ DefineFunction(
         'name'   => "context",
         'type'   => Resource,
         'value'  => "null_object",
-        'desc'   => "Note: Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
+        'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
   ));
@@ -1131,6 +1174,7 @@ DefineFunction(
   array(
     'name'   => "umask",
     'desc'   => "umask() sets PHP's umask to mask & 0777 and returns the old umask. When PHP is being used as a server module, the umask is restored when each request is finished.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "umask() without arguments simply returns the current umask otherwise the old umask is returned.",
@@ -1149,6 +1193,7 @@ DefineFunction(
   array(
     'name'   => "unlink",
     'desc'   => "Deletes filename. Similar to the Unix C unlink() function. A E_WARNING level error will be generated on failure.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1163,7 +1208,7 @@ DefineFunction(
         'name'   => "context",
         'type'   => Resource,
         'value'  => "null_object",
-        'desc'   => "Note: Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
+        'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
   ));
@@ -1172,6 +1217,7 @@ DefineFunction(
   array(
     'name'   => "link",
     'desc'   => "link() creates a hard link.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1194,6 +1240,7 @@ DefineFunction(
   array(
     'name'   => "symlink",
     'desc'   => "symlink() creates a symbolic link to the existing target with the specified name link.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1216,6 +1263,7 @@ DefineFunction(
   array(
     'name'   => "basename",
     'desc'   => "Given a string containing a path to a file, this function will return the base name of the file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the base name of the given path.",
@@ -1224,7 +1272,7 @@ DefineFunction(
       array(
         'name'   => "path",
         'type'   => String,
-        'desc'   => "A path.\nOn Windows, both slash (/) and backslash (\\) are used as directory separator character. In other environments, it is the forward slash (/).",
+        'desc'   => "A path.\n\nOn Windows, both slash (/) and backslash (\\) are used as directory separator character. In other environments, it is the forward slash (/).",
       ),
       array(
         'name'   => "suffix",
@@ -1239,6 +1287,7 @@ DefineFunction(
   array(
     'name'   => "fnmatch",
     'desc'   => "fnmatch() checks if the passed string would match the given shell wildcard pattern.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if there is a match, FALSE otherwise.",
@@ -1252,7 +1301,7 @@ DefineFunction(
       array(
         'name'   => "filename",
         'type'   => String,
-        'desc'   => "The tested string. This function is especially useful for filenames, but may also be used on regular strings.\nThe average user may be used to shell patterns or at least in their simplest form to '?' and '*' wildcards so using fnmatch() instead of preg_match() for frontend search expression input may be way more convenient for non-programming users.",
+        'desc'   => "The tested string. This function is especially useful for filenames, but may also be used on regular strings.\n\nThe average user may be used to shell patterns or at least in their simplest form to '?' and '*' wildcards so using fnmatch() instead of preg_match() for frontend search expression input may be way more convenient for non-programming users.",
       ),
       array(
         'name'   => "flags",
@@ -1267,9 +1316,10 @@ DefineFunction(
   array(
     'name'   => "glob",
     'desc'   => "The glob() function searches for all the pathnames matching pattern according to the rules used by the libc glob() function, which is similar to the rules used by common shells.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an array containing the matched files/directories, an empty array if no file matched or FALSE on error. Note: On some systems it is impossible to distinguish between empty match and an error.",
+      'desc'   => "Returns an array containing the matched files/directories, an empty array if no file matched or FALSE on error.\n\nOn some systems it is impossible to distinguish between empty match and an error.",
     ),
     'args'   => array(
       array(
@@ -1290,6 +1340,7 @@ DefineFunction(
   array(
     'name'   => "tempnam",
     'desc'   => "Creates a file with a unique filename, with access permission set to 0600, in the specified directory. If the directory does not exist, tempnam() may generate a file in the system's temporary directory, and return the name of that.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the new temporary filename, or FALSE on failure.",
@@ -1303,7 +1354,7 @@ DefineFunction(
       array(
         'name'   => "prefix",
         'type'   => String,
-        'desc'   => "The prefix of the generated temporary filename. Note: Windows uses only the first three characters of prefix.",
+        'desc'   => "The prefix of the generated temporary filename. Windows uses only the first three characters of prefix.",
       ),
     ),
   ));
@@ -1311,7 +1362,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "tmpfile",
-    'desc'   => "Creates a temporary file with a unique name in read-write (w+) mode and returns a file handle .\nThe file is automatically removed when closed (using fclose()), or when the script ends.\nFor details, consult your system documentation on the tmpfile(3) function, as well as the stdio.h header file.",
+    'desc'   => "Creates a temporary file with a unique name in read-write (w+) mode and returns a file handle .\n\nThe file is automatically removed when closed (using fclose()), or when the script ends.\n\nFor details, consult your system documentation on the tmpfile(3) function, as well as the stdio.h header file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a file handle, similar to the one returned by fopen(), for the new file or FALSE on failure.",
@@ -1322,6 +1374,7 @@ DefineFunction(
   array(
     'name'   => "fileperms",
     'desc'   => "Gets permissions for the given file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the permissions on the file, or FALSE on failure.",
@@ -1339,6 +1392,7 @@ DefineFunction(
   array(
     'name'   => "fileinode",
     'desc'   => "Gets the file inode.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the inode number of the file, or FALSE on failure.",
@@ -1356,9 +1410,10 @@ DefineFunction(
   array(
     'name'   => "filesize",
     'desc'   => "Gets the size for the given file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the size of the file in bytes, or FALSE (and generates an error of level E_WARNING) in case of an error. Note: Because PHP's integer type is signed and many platforms use 32bit integers, filesize() may return unexpected results for files which are larger than 2GB. For files between 2GB and 4GB in size this can usually be overcome by using sprintf(\"%u\", filesize(\$file)).",
+      'desc'   => "Returns the size of the file in bytes, or FALSE (and generates an error of level E_WARNING) in case of an error. Because PHP's integer type is signed and many platforms use 32bit integers, filesize() may return unexpected results for files which are larger than 2GB. For files between 2GB and 4GB in size this can usually be overcome by using sprintf(\"%u\", filesize(\$file)).",
     ),
     'args'   => array(
       array(
@@ -1373,6 +1428,7 @@ DefineFunction(
   array(
     'name'   => "fileowner",
     'desc'   => "Gets the file owner.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the user ID of the owner of the file, or FALSE on failure. The user ID is returned in numerical format, use posix_getpwuid() to resolve it to a username.",
@@ -1390,6 +1446,7 @@ DefineFunction(
   array(
     'name'   => "filegroup",
     'desc'   => "Gets the file group. The group ID is returned in numerical format, use posix_getgrgid() to resolve it to a group name.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the group ID of the file, or FALSE in case of an error. The group ID is returned in numerical format, use posix_getgrgid() to resolve it to a group name. Upon failure, FALSE is returned.",
@@ -1406,6 +1463,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fileatime",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the time the file was last accessed, or FALSE on failure. The time is returned as a Unix timestamp.",
@@ -1423,6 +1481,7 @@ DefineFunction(
   array(
     'name'   => "filemtime",
     'desc'   => "This function returns the time when the data blocks of a file were being written to, that is, the time when the content of the file was changed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the time the file was last modified, or FALSE on failure. The time is returned as a Unix timestamp, which is suitable for the date() function.",
@@ -1440,6 +1499,7 @@ DefineFunction(
   array(
     'name'   => "filectime",
     'desc'   => "Gets the inode change time of a file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the time the file was last changed, or FALSE on failure. The time is returned as a Unix timestamp.",
@@ -1457,9 +1517,10 @@ DefineFunction(
   array(
     'name'   => "filetype",
     'desc'   => "Returns the type of the given file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the type of the file. Possible values are fifo, char, dir, block, link, file, socket and unknown.\nReturns FALSE if an error occurs. filetype() will also produce an E_NOTICE message if the stat call fails or if the file type is unknown.",
+      'desc'   => "Returns the type of the file. Possible values are fifo, char, dir, block, link, file, socket and unknown.\n\nReturns FALSE if an error occurs. filetype() will also produce an E_NOTICE message if the stat call fails or if the file type is unknown.",
     ),
     'args'   => array(
       array(
@@ -1473,7 +1534,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "linkinfo",
-    'desc'   => "Gets information about a link.\nThis function is used to verify if a link (pointed to by path) really exists (using the same method as the S_ISLNK macro defined in stat.h).",
+    'desc'   => "Gets information about a link.\n\nThis function is used to verify if a link (pointed to by path) really exists (using the same method as the S_ISLNK macro defined in stat.h).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "linkinfo() returns the st_dev field of the Unix C stat structure returned by the lstat system call. Returns 0 or FALSE in case of error.",
@@ -1490,7 +1552,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "is_writable",
-    'desc'   => "Returns TRUE if the filename exists and is writable. The filename argument may be a directory name allowing you to check if a directory is writable.\nKeep in mind that PHP may be accessing the file as the user id that the web server runs as (often 'nobody'). Safe mode limitations are not taken into account.",
+    'desc'   => "Returns TRUE if the filename exists and is writable. The filename argument may be a directory name allowing you to check if a directory is writable.\n\nKeep in mind that PHP may be accessing the file as the user id that the web server runs as (often 'nobody'). Safe mode limitations are not taken into account.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the filename exists and is writable.",
@@ -1507,6 +1570,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "is_writeable",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1522,6 +1586,7 @@ DefineFunction(
   array(
     'name'   => "is_readable",
     'desc'   => "Tells whether a file exists and is readable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the file or directory specified by filename exists and is readable, FALSE otherwise.",
@@ -1539,6 +1604,7 @@ DefineFunction(
   array(
     'name'   => "is_executable",
     'desc'   => "Tells whether the filename is executable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the filename exists and is executable, or FALSE on error.",
@@ -1556,6 +1622,7 @@ DefineFunction(
   array(
     'name'   => "is_file",
     'desc'   => "Tells whether the given file is a regular file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the filename exists and is a regular file, FALSE otherwise.",
@@ -1573,6 +1640,7 @@ DefineFunction(
   array(
     'name'   => "is_dir",
     'desc'   => "Tells whether the given filename is a directory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the filename exists and is a directory, FALSE otherwise.",
@@ -1590,6 +1658,7 @@ DefineFunction(
   array(
     'name'   => "is_link",
     'desc'   => "Tells whether the given file is a symbolic link.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the filename exists and is a symbolic link, FALSE otherwise.",
@@ -1606,7 +1675,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "is_uploaded_file",
-    'desc'   => "Returns TRUE if the file named by filename was uploaded via HTTP POST. This is useful to help ensure that a malicious user hasn't tried to trick the script into working on files upon which it should not be working--for instance, /etc/passwd.\nThis sort of check is especially important if there is any chance that anything done with uploaded files could reveal their contents to the user, or even to other users on the same system.\nFor proper working, the function is_uploaded_file() needs an argument like \$_FILES['userfile']['tmp_name'], - the name of the uploaded file on the clients machine \$_FILES['userfile']['name'] does not work.",
+    'desc'   => "Returns TRUE if the file named by filename was uploaded via HTTP POST. This is useful to help ensure that a malicious user hasn't tried to trick the script into working on files upon which it should not be working--for instance, /etc/passwd.\n\nThis sort of check is especially important if there is any chance that anything done with uploaded files could reveal their contents to the user, or even to other users on the same system.\n\nFor proper working, the function is_uploaded_file() needs an argument like \$_FILES['userfile']['tmp_name'], - the name of the uploaded file on the clients machine \$_FILES['userfile']['name'] does not work.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1624,15 +1694,16 @@ DefineFunction(
   array(
     'name'   => "file_exists",
     'desc'   => "Checks whether a file or directory exists.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE if the file or directory specified by filename exists; FALSE otherwise. Note: This function will return FALSE for symlinks pointing to non-existing files. Warning\nThis function returns FALSE for files inaccessible due to safe mode restrictions. However these files still can be included if they are located in safe_mode_include_dir. Note: The check is done using the real UID/GID instead of the effective one.",
+      'desc'   => "Returns TRUE if the file or directory specified by filename exists; FALSE otherwise.\n\nThis function will return FALSE for symlinks pointing to non-existing files. Warning\n\nThis function returns FALSE for files inaccessible due to safe mode restrictions. However these files still can be included if they are located in safe_mode_include_dir.\n\nThe check is done using the real UID/GID instead of the effective one.",
     ),
     'args'   => array(
       array(
         'name'   => "filename",
         'type'   => String,
-        'desc'   => "Path to the file or directory.\nOn windows, use //computername/share/filename or \\\\computername\\share\\filename to check files on network shares.",
+        'desc'   => "Path to the file or directory.\n\nOn windows, use //computername/share/filename or \\\\computername\\share\\filename to check files on network shares.",
       ),
     ),
   ));
@@ -1640,10 +1711,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stat",
-    'desc'   => "Gathers the statistics of the file named by filename. If filename is a symbolic link, statistics are from the file itself, not the symlink.\nlstat() is identical to stat() except it would instead be based off the symlinks status.",
+    'desc'   => "Gathers the statistics of the file named by filename. If filename is a symbolic link, statistics are from the file itself, not the symlink.\n\nlstat() is identical to stat() except it would instead be based off the symlinks status.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "stat() and fstat() result format Numeric Associative (since PHP 4.0.6) Description 0 dev device number 1 ino inode number * 2 mode inode protection mode 3 nlink number of links 4 uid userid of owner * 5 gid groupid of owner * 6 rdev device type, if inode device 7 size size in bytes 8 atime time of last access (Unix timestamp) 9 mtime time of last modification (Unix timestamp) 10 ctime time of last inode change (Unix timestamp) 11 blksize blocksize of filesystem IO ** 12 blocks number of 512-byte blocks allocated ** * On Windows this will always be 0.\n** Only valid on systems supporting the st_blksize type - other systems (e.g. Windows) return -1.\nIn case of error, stat() returns FALSE.",
+      'desc'   => "stat() and fstat() result format Numeric Associative (since PHP 4.0.6) Description 0 dev device number 1 ino inode number * 2 mode inode protection mode 3 nlink number of links 4 uid userid of owner * 5 gid groupid of owner * 6 rdev device type, if inode device 7 size size in bytes 8 atime time of last access (Unix timestamp) 9 mtime time of last modification (Unix timestamp) 10 ctime time of last inode change (Unix timestamp) 11 blksize blocksize of filesystem IO ** 12 blocks number of 512-byte blocks allocated ** * On Windows this will always be 0.\n\n** Only valid on systems supporting the st_blksize type - other systems (e.g. Windows) return -1.\n\nIn case of error, stat() returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -1658,6 +1730,7 @@ DefineFunction(
   array(
     'name'   => "lstat",
     'desc'   => "Gathers the statistics of the file or symbolic link named by filename.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "See the manual page for stat() for information on the structure of the array that lstat() returns. This function is identical to the stat() function except that if the filename parameter is a symbolic link, the status of the symbolic link is returned, not the status of the file pointed to by the symbolic link.",
@@ -1674,7 +1747,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clearstatcache",
-    'desc'   => "When you use stat(), lstat(), or any of the other functions listed in the affected functions list (below), PHP caches the information those functions return in order to provide faster performance. However, in certain cases, you may want to clear the cached information. For instance, if the same file is being checked multiple times within a single script, and that file is in danger of being removed or changed during that script's operation, you may elect to clear the status cache. In these cases, you can use the clearstatcache() function to clear the information that PHP caches about a file.\nYou should also note that PHP doesn't cache information about non-existent files. So, if you call file_exists() on a file that doesn't exist, it will return FALSE until you create the file. If you create the file, it will return TRUE even if you then delete the file. However unlink() clears the cache automatically. Note: This function caches information about specific filenames, so you only need to call clearstatcache() if you are performing multiple operations on the same filename and require the information about that particular file to not be cached.\nAffected functions include stat(), lstat(), file_exists(), is_writable(), is_readable(), is_executable(), is_file(), is_dir(), is_link(), filectime(), fileatime(), filemtime(), fileinode(), filegroup(), fileowner(), filesize(), filetype(), and fileperms().",
+    'desc'   => "When you use stat(), lstat(), or any of the other functions listed in the affected functions list (below), PHP caches the information those functions return in order to provide faster performance. However, in certain cases, you may want to clear the cached information. For instance, if the same file is being checked multiple times within a single script, and that file is in danger of being removed or changed during that script's operation, you may elect to clear the status cache. In these cases, you can use the clearstatcache() function to clear the information that PHP caches about a file.\n\nYou should also note that PHP doesn't cache information about non-existent files. So, if you call file_exists() on a file that doesn't exist, it will return FALSE until you create the file. If you create the file, it will return TRUE even if you then delete the file. However unlink() clears the cache automatically.\n\nThis function caches information about specific filenames, so you only need to call clearstatcache() if you are performing multiple operations on the same filename and require the information about that particular file to not be cached.\n\nAffected functions include stat(), lstat(), file_exists(), is_writable(), is_readable(), is_executable(), is_file(), is_dir(), is_link(), filectime(), fileatime(), filemtime(), fileinode(), filegroup(), fileowner(), filesize(), filetype(), and fileperms().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -1685,6 +1759,7 @@ DefineFunction(
   array(
     'name'   => "readlink",
     'desc'   => "readlink() does the same as the readlink C function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the contents of the symbolic link path or FALSE on error.",
@@ -1702,9 +1777,10 @@ DefineFunction(
   array(
     'name'   => "realpath",
     'desc'   => "realpath() expands all symbolic links and resolves references to '/./', '/../' and extra '/' characters in the input path and return the canonicalized absolute pathname.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the canonicalized absolute pathname on success. The resulting path will have no symbolic link, '/./' or '/../' components.\nrealpath() returns FALSE on failure, e.g. if the file does not exist. Note: The running script must have executable permissions on all directories in the hierarchy, otherwise realpath() will return FALSE.",
+      'desc'   => "Returns the canonicalized absolute pathname on success. The resulting path will have no symbolic link, '/./' or '/../' components.\n\nrealpath() returns FALSE on failure, e.g. if the file does not exist.\n\nThe running script must have executable permissions on all directories in the hierarchy, otherwise realpath() will return FALSE.",
     ),
     'args'   => array(
       array(
@@ -1719,9 +1795,10 @@ DefineFunction(
   array(
     'name'   => "pathinfo",
     'desc'   => "pathinfo() returns an associative array containing information about path.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The following associative array elements are returned: dirname, basename, extension (if any), and filename.\nIf options is used, this function will return a string if not all elements are requested.",
+      'desc'   => "The following associative array elements are returned: dirname, basename, extension (if any), and filename.\n\nIf options is used, this function will return a string if not all elements are requested.",
     ),
     'args'   => array(
       array(
@@ -1742,6 +1819,7 @@ DefineFunction(
   array(
     'name'   => "disk_free_space",
     'desc'   => "Given a string containing a directory, this function will return the number of bytes available on the corresponding filesystem or disk partition.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of available bytes as a float or FALSE on failure.",
@@ -1750,7 +1828,7 @@ DefineFunction(
       array(
         'name'   => "directory",
         'type'   => String,
-        'desc'   => "A directory of the filesystem or disk partition. Note: Given a file name instead of a directory, the behaviour of the function is unspecified and may differ between operating systems and PHP versions.",
+        'desc'   => "A directory of the filesystem or disk partition.\n\nGiven a file name instead of a directory, the behaviour of the function is unspecified and may differ between operating systems and PHP versions.",
       ),
     ),
   ));
@@ -1758,6 +1836,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "diskfreespace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1773,6 +1852,7 @@ DefineFunction(
   array(
     'name'   => "disk_total_space",
     'desc'   => "Given a string containing a directory, this function will return the total number of bytes on the corresponding filesystem or disk partition.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the total number of bytes as a float or FALSE on failure.",
@@ -1790,6 +1870,7 @@ DefineFunction(
   array(
     'name'   => "mkdir",
     'desc'   => "Attempts to create the directory specified by pathname.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1804,7 +1885,7 @@ DefineFunction(
         'name'   => "mode",
         'type'   => Int64,
         'value'  => "0777",
-        'desc'   => "The mode is 0777 by default, which means the widest possible access. For more information on modes, read the details on the chmod() page. Note: mode is ignored on Windows.\nNote that you probably want to specify the mode as an octal number, which means it should have a leading zero. The mode is also modified by the current umask, which you can change using umask().",
+        'desc'   => "The mode is 0777 by default, which means the widest possible access. For more information on modes, read the details on the chmod() page.\n\nmode is ignored on Windows.\n\nNote that you probably want to specify the mode as an octal number, which means it should have a leading zero. The mode is also modified by the current umask, which you can change using umask().",
       ),
       array(
         'name'   => "recursive",
@@ -1816,7 +1897,7 @@ DefineFunction(
         'name'   => "context",
         'type'   => Resource,
         'value'  => "null_object",
-        'desc'   => "Note: Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
+        'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
   ));
@@ -1825,6 +1906,7 @@ DefineFunction(
   array(
     'name'   => "rmdir",
     'desc'   => "Attempts to remove the directory named by dirname. The directory must be empty, and the relevant permissions must permit this. A E_WARNING level error will be generated on failure.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1839,7 +1921,7 @@ DefineFunction(
         'name'   => "context",
         'type'   => Resource,
         'value'  => "null_object",
-        'desc'   => "Note: Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
+        'desc'   => "Context support was added with PHP 5.0.0. For a description of contexts, refer to Stream Functions.",
       ),
     ),
   ));
@@ -1848,6 +1930,7 @@ DefineFunction(
   array(
     'name'   => "dirname",
     'desc'   => "Given a string containing a path to a file, this function will return the name of the directory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the name of the directory. If there are no slashes in path, a dot ('.') is returned, indicating the current directory. Otherwise, the returned string is path with any trailing /component removed.",
@@ -1856,7 +1939,7 @@ DefineFunction(
       array(
         'name'   => "path",
         'type'   => String,
-        'desc'   => "A path.\nOn Windows, both slash (/) and backslash (\\) are used as directory separator character. In other environments, it is the forward slash (/).",
+        'desc'   => "A path.\n\nOn Windows, both slash (/) and backslash (\\) are used as directory separator character. In other environments, it is the forward slash (/).",
       ),
     ),
   ));
@@ -1865,9 +1948,10 @@ DefineFunction(
   array(
     'name'   => "getcwd",
     'desc'   => "Gets the current working directory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the current working directory on success, or FALSE on failure.\nOn some Unix variants, getcwd() will return FALSE if any one of the parent directories does not have the readable or search mode set, even if the current directory does. See chmod() for more information on modes and permissions.",
+      'desc'   => "Returns the current working directory on success, or FALSE on failure.\n\nOn some Unix variants, getcwd() will return FALSE if any one of the parent directories does not have the readable or search mode set, even if the current directory does. See chmod() for more information on modes and permissions.",
     ),
   ));
 
@@ -1875,6 +1959,7 @@ DefineFunction(
   array(
     'name'   => "chdir",
     'desc'   => "Changes PHP's current directory to directory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1891,7 +1976,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "chroot",
-    'desc'   => "Changes the root directory of the current process to directory.\nThis function is only available if your system supports it and you're using the CLI, CGI or Embed SAPI. Also, this function requires root privileges.",
+    'desc'   => "Changes the root directory of the current process to directory.\n\nThis function is only available if your system supports it and you're using the CLI, CGI or Embed SAPI. Also, this function requires root privileges.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1908,6 +1994,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dir",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1923,9 +2010,10 @@ DefineFunction(
   array(
     'name'   => "opendir",
     'desc'   => "Opens up a directory handle to be used in subsequent closedir(), readdir(), and rewinddir() calls.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a directory handle resource on success, or FALSE on failure.\nIf path is not a valid directory or the directory can not be opened due to permission restrictions or filesystem errors, opendir() returns FALSE and generates a PHP error of level E_WARNING. You can suppress the error output of opendir() by prepending '@' to the front of the function name.",
+      'desc'   => "Returns a directory handle resource on success, or FALSE on failure.\n\nIf path is not a valid directory or the directory can not be opened due to permission restrictions or filesystem errors, opendir() returns FALSE and generates a PHP error of level E_WARNING. You can suppress the error output of opendir() by prepending '@' to the front of the function name.",
     ),
     'args'   => array(
       array(
@@ -1946,6 +2034,7 @@ DefineFunction(
   array(
     'name'   => "readdir",
     'desc'   => "Returns the filename of the next file from the directory. The filenames are returned in the order in which they are stored by the filesystem.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the filename on success or FALSE on failure. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
@@ -1963,6 +2052,7 @@ DefineFunction(
   array(
     'name'   => "rewinddir",
     'desc'   => "Resets the directory stream indicated by dir_handle to the beginning of the directory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1978,6 +2068,7 @@ DefineFunction(
   array(
     'name'   => "scandir",
     'desc'   => "Returns an array of files and directories from the directory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array of filenames on success, or FALSE on failure. If directory is not a directory, then boolean FALSE is returned, and an error of level E_WARNING is generated.",
@@ -2007,6 +2098,7 @@ DefineFunction(
   array(
     'name'   => "closedir",
     'desc'   => "Closes the directory stream indicated by dir_handle. The stream must have previously been opened by opendir().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),

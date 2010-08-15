@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* preface starts */
 /* preface finishes */
-/* SRC: classes/splfile.php line 120 */
+/* SRC: classes/splfile.php line 383 */
 const int64 q_splfileobject_DROP_NEW_LINE = 1LL;
 const int64 q_splfileobject_READ_AHEAD = 2LL;
 const int64 q_splfileobject_SKIP_EMPTY = 6LL;
@@ -3730,7 +3730,7 @@ struct ObjectStaticCallbacks cw_splfileobject = {
 void c_splfileobject::init() {
   c_splfileinfo::init();
 }
-/* SRC: classes/splfile.php line 128 */
+/* SRC: classes/splfile.php line 391 */
 void c_splfileobject::t___construct(Variant v_filename, Variant v_open_mode //  = "r"
 , Variant v_use_include_path //  = false
 , Variant v_context //  = null
@@ -3742,27 +3742,27 @@ void c_splfileobject::t___construct(Variant v_filename, Variant v_open_mode //  
   x_hphp_splfileobject___construct(GET_THIS(), toString(v_file_name), toString(v_open_mode), toBoolean(v_use_include_path), v_context);
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/splfile.php line 135 */
+/* SRC: classes/splfile.php line 409 */
 Variant c_splfileobject::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::current);
   return x_hphp_splfileobject_current(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 139 */
+/* SRC: classes/splfile.php line 421 */
 bool c_splfileobject::t_eof() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::eof);
   return x_hphp_splfileobject_eof(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 143 */
+/* SRC: classes/splfile.php line 433 */
 bool c_splfileobject::t_fflush() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fflush);
   return x_hphp_splfileobject_fflush(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 147 */
+/* SRC: classes/splfile.php line 451 */
 String c_splfileobject::t_fgetc() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetc);
   return x_hphp_splfileobject_fgetc(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 151 */
+/* SRC: classes/splfile.php line 481 */
 Variant c_splfileobject::t_fgetcsv(CVarRef v_delimiter //  = ","
 , CVarRef v_enclosure //  = "\""
 , CVarRef v_escape //  = "\\"
@@ -3770,102 +3770,102 @@ Variant c_splfileobject::t_fgetcsv(CVarRef v_delimiter //  = ","
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetcsv);
   return x_hphp_splfileobject_fgetcsv(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
 } /* function */
-/* SRC: classes/splfile.php line 157 */
+/* SRC: classes/splfile.php line 496 */
 String c_splfileobject::t_fgets() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgets);
   return x_hphp_splfileobject_fgets(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 161 */
+/* SRC: classes/splfile.php line 516 */
 String c_splfileobject::t_fgetss(CVarRef v_allowable_tags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetss);
   return x_hphp_splfileobject_fgetss(GET_THIS(), toString(v_allowable_tags));
 } /* function */
-/* SRC: classes/splfile.php line 165 */
+/* SRC: classes/splfile.php line 536 */
 bool c_splfileobject::t_flock(CVarRef v_operation, Variant v_wouldblock) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::flock);
   return x_hphp_splfileobject_flock(GET_THIS(), ref(v_wouldblock));
 } /* function */
-/* SRC: classes/splfile.php line 169 */
+/* SRC: classes/splfile.php line 554 */
 int64 c_splfileobject::t_fpassthru() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fpassthru);
   return x_hphp_splfileobject_fpassthru(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 173 */
+/* SRC: classes/splfile.php line 578 */
 Variant c_splfileobject::t_fscanf(CVarRef v_format) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fscanf);
   return invoke("hphp_splfileobject_fscanf", Array(ArrayInit(1, true).setRef(0, toInt64(GET_THIS())).create()), 0x6DB71D850799D76ELL);
 } /* function */
-/* SRC: classes/splfile.php line 177 */
+/* SRC: classes/splfile.php line 604 */
 int64 c_splfileobject::t_fseek(CVarRef v_offset, CVarRef v_whence) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fseek);
   return x_hphp_splfileobject_fseek(GET_THIS(), toInt64(v_offset), toInt64(v_whence));
 } /* function */
-/* SRC: classes/splfile.php line 181 */
+/* SRC: classes/splfile.php line 618 */
 Variant c_splfileobject::t_fstat() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fstat);
   return x_hphp_splfileobject_fstat(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 185 */
+/* SRC: classes/splfile.php line 632 */
 int64 c_splfileobject::t_ftell() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::ftell);
   return x_hphp_splfileobject_ftell(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 189 */
+/* SRC: classes/splfile.php line 652 */
 bool c_splfileobject::t_ftruncate(CVarRef v_size) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::ftruncate);
   return x_hphp_splfileobject_ftruncate(GET_THIS(), toInt64(v_size));
 } /* function */
-/* SRC: classes/splfile.php line 193 */
+/* SRC: classes/splfile.php line 670 */
 int64 c_splfileobject::t_fwrite(CVarRef v_str, CVarRef v_length) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fwrite);
   return x_hphp_splfileobject_fwrite(GET_THIS(), toString(v_str), toInt64(v_length));
 } /* function */
-/* SRC: classes/splfile.php line 197 */
+/* SRC: classes/splfile.php line 682 */
 Variant c_splfileobject::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getChildren);
   return null;
 } /* function */
-/* SRC: classes/splfile.php line 201 */
+/* SRC: classes/splfile.php line 696 */
 Variant c_splfileobject::t_getcsvcontrol() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getCsvControl);
   return x_hphp_splfileobject_getcvscontrol(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 205 */
+/* SRC: classes/splfile.php line 708 */
 int64 c_splfileobject::t_getflags() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getFlags);
   return x_hphp_splfileobject_getflags(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 209 */
+/* SRC: classes/splfile.php line 722 */
 int64 c_splfileobject::t_getmaxlinelen() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getMaxLineLen);
   return x_hphp_splfileobject_getmaxlinelen(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 213 */
+/* SRC: classes/splfile.php line 735 */
 bool c_splfileobject::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::hasChildren);
   return false;
 } /* function */
-/* SRC: classes/splfile.php line 217 */
+/* SRC: classes/splfile.php line 751 */
 int64 c_splfileobject::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::key);
   return x_hphp_splfileobject_key(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 221 */
+/* SRC: classes/splfile.php line 763 */
 Variant c_splfileobject::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::next);
   return (x_hphp_splfileobject_next(GET_THIS()), null);
 } /* function */
-/* SRC: classes/splfile.php line 225 */
+/* SRC: classes/splfile.php line 775 */
 Variant c_splfileobject::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::rewind);
   return (x_hphp_splfileobject_rewind(GET_THIS()), null);
 } /* function */
-/* SRC: classes/splfile.php line 229 */
+/* SRC: classes/splfile.php line 789 */
 Variant c_splfileobject::t_seek(CVarRef v_line_pos) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::seek);
   return (x_hphp_splfileobject_seek(GET_THIS(), toInt64(v_line_pos)), null);
 } /* function */
-/* SRC: classes/splfile.php line 233 */
+/* SRC: classes/splfile.php line 806 */
 Variant c_splfileobject::t_setcsvcontrol(CVarRef v_delimiter //  = ","
 , CVarRef v_enclosure //  = "\""
 , CVarRef v_escape //  = "\\"
@@ -3873,22 +3873,22 @@ Variant c_splfileobject::t_setcsvcontrol(CVarRef v_delimiter //  = ","
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setCsvControl);
   return (x_hphp_splfileobject_setcsvcontrol(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape)), null);
 } /* function */
-/* SRC: classes/splfile.php line 239 */
+/* SRC: classes/splfile.php line 823 */
 Variant c_splfileobject::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setFlags);
   return (x_hphp_splfileobject_setflags(GET_THIS(), toInt64(v_flags)), null);
 } /* function */
-/* SRC: classes/splfile.php line 243 */
+/* SRC: classes/splfile.php line 838 */
 Variant c_splfileobject::t_setmaxlinelen(CVarRef v_max_len) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setMaxLineLen);
   return (x_hphp_splfileobject_setmaxlinelen(GET_THIS(), toInt64(v_max_len)), null);
 } /* function */
-/* SRC: classes/splfile.php line 247 */
+/* SRC: classes/splfile.php line 850 */
 bool c_splfileobject::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::valid);
   return x_hphp_splfileobject_valid(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 3 */
+/* SRC: classes/splfile.php line 11 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileinfo
 Variant c_splfileinfo::os_getInit(const char *s, int64 hash) {
   return c_ObjectData::os_getInit(s, hash);
@@ -5737,137 +5737,137 @@ struct ObjectStaticCallbacks cw_splfileinfo = {
 };
 void c_splfileinfo::init() {
 }
-/* SRC: classes/splfile.php line 5 */
+/* SRC: classes/splfile.php line 13 */
 void c_splfileinfo::t___construct(Variant v_file_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::__construct);
   bool oldInCtor = gasInCtor(true);
   x_hphp_splfileinfo___construct(GET_THIS(), toString(v_file_name));
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/splfile.php line 9 */
+/* SRC: classes/splfile.php line 26 */
 String c_splfileinfo::t_getpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPath);
   return x_hphp_splfileinfo_getpath(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 13 */
+/* SRC: classes/splfile.php line 38 */
 String c_splfileinfo::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getFilename);
   return x_hphp_splfileinfo_getfilename(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 17 */
+/* SRC: classes/splfile.php line 52 */
 Object c_splfileinfo::t_getfileinfo(CVarRef v_class_name //  = ""
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getFileInfo);
   return x_hphp_splfileinfo_getfileinfo(GET_THIS(), toString(v_class_name));
 } /* function */
-/* SRC: classes/splfile.php line 21 */
+/* SRC: classes/splfile.php line 67 */
 String c_splfileinfo::t_getbasename(CVarRef v_suffix //  = ""
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getBasename);
   return x_hphp_splfileinfo_getbasename(GET_THIS(), toString(v_suffix));
 } /* function */
-/* SRC: classes/splfile.php line 25 */
+/* SRC: classes/splfile.php line 79 */
 String c_splfileinfo::t_getpathname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPathname);
   return x_hphp_splfileinfo_getpathname(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 29 */
+/* SRC: classes/splfile.php line 94 */
 Object c_splfileinfo::t_getpathinfo(CVarRef v_class_name //  = ""
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPathInfo);
   return x_hphp_splfileinfo_getpathinfo(GET_THIS(), toString(v_class_name));
 } /* function */
-/* SRC: classes/splfile.php line 33 */
+/* SRC: classes/splfile.php line 106 */
 int64 c_splfileinfo::t_getperms() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPerms);
   return x_hphp_splfileinfo_getperms(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 37 */
+/* SRC: classes/splfile.php line 118 */
 int64 c_splfileinfo::t_getinode() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getInode);
   return x_hphp_splfileinfo_getinode(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 41 */
+/* SRC: classes/splfile.php line 130 */
 int64 c_splfileinfo::t_getsize() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getSize);
   return x_hphp_splfileinfo_getsize(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 45 */
+/* SRC: classes/splfile.php line 142 */
 int64 c_splfileinfo::t_getowner() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getOwner);
   return x_hphp_splfileinfo_getowner(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 49 */
+/* SRC: classes/splfile.php line 154 */
 int64 c_splfileinfo::t_getgroup() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getGroup);
   return x_hphp_splfileinfo_getgroup(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 53 */
+/* SRC: classes/splfile.php line 166 */
 int64 c_splfileinfo::t_getatime() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getATime);
   return x_hphp_splfileinfo_getatime(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 57 */
+/* SRC: classes/splfile.php line 180 */
 int64 c_splfileinfo::t_getmtime() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getMTime);
   return x_hphp_splfileinfo_getmtime(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 61 */
+/* SRC: classes/splfile.php line 193 */
 int64 c_splfileinfo::t_getctime() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getCTime);
   return x_hphp_splfileinfo_getctime(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 65 */
+/* SRC: classes/splfile.php line 206 */
 String c_splfileinfo::t_gettype() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getType);
   return x_hphp_splfileinfo_gettype(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 69 */
+/* SRC: classes/splfile.php line 218 */
 bool c_splfileinfo::t_iswritable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isWritable);
   return x_hphp_splfileinfo_iswritable(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 73 */
+/* SRC: classes/splfile.php line 230 */
 bool c_splfileinfo::t_isreadable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isReadable);
   return x_hphp_splfileinfo_isreadable(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 77 */
+/* SRC: classes/splfile.php line 242 */
 bool c_splfileinfo::t_isexecutable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isExecutable);
   return x_hphp_splfileinfo_isexecutable(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 81 */
+/* SRC: classes/splfile.php line 256 */
 bool c_splfileinfo::t_isfile() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isFile);
   return x_hphp_splfileinfo_isfile(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 85 */
+/* SRC: classes/splfile.php line 268 */
 bool c_splfileinfo::t_isdir() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isDir);
   return x_hphp_splfileinfo_isdir(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 89 */
+/* SRC: classes/splfile.php line 281 */
 bool c_splfileinfo::t_islink() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isLink);
   return x_hphp_splfileinfo_islink(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 93 */
+/* SRC: classes/splfile.php line 296 */
 String c_splfileinfo::t_getlinktarget() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getLinkTarget);
   return x_hphp_splfileinfo_getlinktarget(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 97 */
+/* SRC: classes/splfile.php line 309 */
 Variant c_splfileinfo::t_getrealpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getRealPath);
   return x_hphp_splfileinfo_getrealpath(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 101 */
+/* SRC: classes/splfile.php line 313 */
 String c_splfileinfo::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::__toString);
   return x_hphp_splfileinfo___tostring(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 105 */
+/* SRC: classes/splfile.php line 337 */
 Object c_splfileinfo::t_openfile(CVarRef v_mode //  = "r"
 , CVarRef v_use_include_path //  = false
 , CVarRef v_context //  = null_variant
@@ -5875,13 +5875,13 @@ Object c_splfileinfo::t_openfile(CVarRef v_mode //  = "r"
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::openFile);
   return x_hphp_splfileinfo_openfile(GET_THIS(), toString(v_mode), toBoolean(v_use_include_path), v_context);
 } /* function */
-/* SRC: classes/splfile.php line 111 */
+/* SRC: classes/splfile.php line 355 */
 Variant c_splfileinfo::t_setfileclass(CVarRef v_class_name //  = "SplFileObject"
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setFileClass);
   return (x_hphp_splfileinfo_setfileclass(GET_THIS(), toString(v_class_name)), null);
 } /* function */
-/* SRC: classes/splfile.php line 115 */
+/* SRC: classes/splfile.php line 371 */
 Variant c_splfileinfo::t_setinfoclass(CVarRef v_class_name //  = "SplFileInfo"
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setInfoClass);

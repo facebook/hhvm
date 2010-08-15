@@ -52,6 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "dom_document_create_element",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -75,6 +76,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_document_fragment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -89,6 +91,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_text_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -107,6 +110,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_comment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -125,6 +129,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_cdatasection",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -143,6 +148,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_processing_instruction",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -166,6 +172,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -184,6 +191,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_entity_reference",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -202,6 +210,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_get_elements_by_tag_name",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -220,6 +229,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_import_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -243,6 +253,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_element_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -270,6 +281,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_create_attribute_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -292,6 +304,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_get_elements_by_tag_name_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -314,6 +327,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_get_element_by_id",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -332,6 +346,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_normalize_document",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -347,6 +362,7 @@ DefineFunction(
   array(
     'name'   => "dom_document_save",
     'desc'   => "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of bytes written or FALSE if an error occurred.",
@@ -374,6 +390,7 @@ DefineFunction(
   array(
     'name'   => "dom_document_savexml",
     'desc'   => "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the XML, or FALSE if an error occurred.",
@@ -401,7 +418,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_validate",
-    'desc'   => "Validates the document based on its DTD.\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
+    'desc'   => "Validates the document based on its DTD.\n\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure. If the document have no DTD attached, this method will return FALSE.",
@@ -417,7 +435,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_xinclude",
-    'desc'   => "This method substitutes » XIncludes in a DOMDocument object. Note: Due to libxml2 automatically resolving entities, this method will produce unexpected results if the included XML file have an attached DTD.",
+    'desc'   => "This method substitutes » XIncludes in a DOMDocument object.\n\nDue to libxml2 automatically resolving entities, this method will produce unexpected results if the included XML file have an attached DTD.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of XIncludes in the document, -1 if some processing failed, or FALSE if there were no substitutions.",
@@ -439,6 +458,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_save_html",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -453,6 +473,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_save_html_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -471,6 +492,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_schema_validate_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -489,6 +511,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_schema_validate_xml",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -507,6 +530,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_relaxng_validate_file",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -525,6 +549,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_document_relaxng_validate_xml",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -543,6 +568,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_insert_before",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -566,6 +592,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_replace_child",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -588,6 +615,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_remove_child",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -606,6 +634,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_append_child",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -624,6 +653,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_has_child_nodes",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -638,6 +668,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_clone_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -658,6 +689,7 @@ DefineFunction(
   array(
     'name'   => "dom_node_normalize",
     'desc'   => "Normalizes the node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -673,6 +705,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_is_supported",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -695,6 +728,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_has_attributes",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -709,6 +743,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_is_same_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -727,6 +762,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_lookup_prefix",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -745,6 +781,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_is_default_namespace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -763,6 +800,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_node_lookup_namespace_uri",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -781,7 +819,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_nodelist_item",
-    'desc'   => "Retrieves a node specified by index within the DOMNodeList object. Tip\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
+    'desc'   => "Retrieves a node specified by index within the DOMNodeList object. Tip\n\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The node at the indexth position in the DOMNodeList, or NULL if that is not a valid index.",
@@ -802,6 +841,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_namednodemap_get_named_item",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -821,6 +861,7 @@ DefineFunction(
   array(
     'name'   => "dom_namednodemap_item",
     'desc'   => "Retrieves a node specified by index within the DOMNamedNodeMap object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The node at the indexth position in the map, or NULL if that is not a valid index (greater than or equal to the number of nodes in this map).",
@@ -841,6 +882,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_namednodemap_get_named_item_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -863,6 +905,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_characterdata_substring_data",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -885,6 +928,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_characterdata_append_data",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -903,6 +947,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_characterdata_insert_data",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -925,6 +970,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_characterdata_delete_data",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -947,6 +993,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_characterdata_replace_data",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -973,6 +1020,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_attr_is_id",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -987,6 +1035,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_get_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1005,6 +1054,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_set_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1027,6 +1077,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_remove_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1045,6 +1096,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_get_attribute_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1063,6 +1115,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_set_attribute_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1081,6 +1134,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_remove_attribute_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1099,6 +1153,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_get_elements_by_tag_name",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1117,6 +1172,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_get_attribute_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1139,6 +1195,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_set_attribute_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1165,6 +1222,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_remove_attribute_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1187,6 +1245,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_get_attribute_node_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1209,6 +1268,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_set_attribute_node_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1227,6 +1287,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_get_elements_by_tag_name_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1249,6 +1310,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_has_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1267,6 +1329,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_has_attribute_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1289,6 +1352,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_set_id_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1311,6 +1375,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_set_id_attribute_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1337,6 +1402,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_element_set_id_attribute_node",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1359,6 +1425,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_text_split_text",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1377,6 +1444,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_text_is_whitespace_in_element_content",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1391,6 +1459,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_xpath_register_ns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1414,6 +1483,7 @@ DefineFunction(
   array(
     'name'   => "dom_xpath_query",
     'desc'   => "Executes the given XPath expression.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a DOMNodeList containing all nodes matching the given XPath expression. Any expression which do not return nodes will return an empty DOMNodeList.",
@@ -1441,6 +1511,7 @@ DefineFunction(
   array(
     'name'   => "dom_xpath_evaluate",
     'desc'   => "Executes the given XPath expression and returns a typed result if possible.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a typed result if possible or a DOMNodeList containing all nodes matching the given XPath expression.",
@@ -1467,6 +1538,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dom_xpath_register_php_functions",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1523,8 +1595,8 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "DOMNode",
-    'bases'  => array('Sweepable'),
     'desc'   => "",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
 public:
@@ -1537,6 +1609,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1545,7 +1618,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "appendchild",
-    'desc'   => "This functions appends a child to an existing list of children or creates a new list of children. The child can be created with e.g. DOMDocument::createElement, DOMDocument::createTextNode etc. or simply by using any other node.",
+    'desc'   => "This functions appends a child to an existing list of children or creates a new list of children. The child can be created with e.g. DOMDocument::createElement(), DOMDocument::createTextNode() etc. or simply by using any other node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The node added.",
@@ -1563,9 +1637,10 @@ DefineFunction(
   array(
     'name'   => "clonenode",
     'desc'   => "Creates a copy of the node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The cloned node. DOMNode::getLineNo DOMNode::appendChild Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "The cloned node. DOMNode::getLineNo DOMNode::appendChild Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -1581,6 +1656,7 @@ DefineFunction(
   array(
     'name'   => "getlineno",
     'desc'   => "Gets line number for where the node is defined.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Always returns the line number where the node was defined in.",
@@ -1591,6 +1667,7 @@ DefineFunction(
   array(
     'name'   => "hasattributes",
     'desc'   => "This method checks if the node has attributes. The tested node have to be an XML_ELEMENT_NODE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1601,6 +1678,7 @@ DefineFunction(
   array(
     'name'   => "haschildnodes",
     'desc'   => "This function checks if the node has children.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1611,6 +1689,7 @@ DefineFunction(
   array(
     'name'   => "insertbefore",
     'desc'   => "This function inserts a new node right before the reference node. If you plan to do further modifications on the appended child you must use the returned node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The inserted node.",
@@ -1634,6 +1713,7 @@ DefineFunction(
   array(
     'name'   => "isdefaultnamespace",
     'desc'   => "Tells whether namespaceURI is the default namespace.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Return TRUE if namespaceURI is the default namespace, FALSE otherwise.",
@@ -1651,6 +1731,7 @@ DefineFunction(
   array(
     'name'   => "issamenode",
     'desc'   => "This function indicates if two nodes are the same node. The comparison is not based on content",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1668,6 +1749,7 @@ DefineFunction(
   array(
     'name'   => "issupported",
     'desc'   => "Checks if the asked feature is supported for the specified version.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1676,7 +1758,7 @@ DefineFunction(
       array(
         'name'   => "feature",
         'type'   => String,
-        'desc'   => "The feature to test. See the example of DOMImplementation::hasFeature for a list of features.",
+        'desc'   => "The feature to test. See the example of DOMImplementation::hasFeature() for a list of features.",
       ),
       array(
         'name'   => "version",
@@ -1690,6 +1772,7 @@ DefineFunction(
   array(
     'name'   => "lookupnamespaceuri",
     'desc'   => "Gets the namespace URI of the node based on the prefix.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The namespace URI of the node.",
@@ -1707,6 +1790,7 @@ DefineFunction(
   array(
     'name'   => "lookupprefix",
     'desc'   => "Gets the namespace prefix of the node based on the namespace URI.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The prefix of the namespace.",
@@ -1724,6 +1808,7 @@ DefineFunction(
   array(
     'name'   => "normalize",
     'desc'   => "Normalizes the node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -1734,6 +1819,7 @@ DefineFunction(
   array(
     'name'   => "removechild",
     'desc'   => "This functions removes a child from a list of children.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If the child could be removed the functions returns the old child.",
@@ -1751,6 +1837,7 @@ DefineFunction(
   array(
     'name'   => "replacechild",
     'desc'   => "This function replaces the child oldnode with the passed new node. If the new node is already a child it will not be added a second time. If the replacement succeeds the old node is returned.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The old node or FALSE if an error occur.",
@@ -1772,6 +1859,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "c14n",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1802,6 +1890,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "c14nfile",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1836,6 +1925,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getnodepath",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1844,6 +1934,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1858,6 +1949,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1876,6 +1968,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1891,11 +1984,13 @@ BeginClass(
     'name'   => "DOMAttr",
     'parent' => "DOMNode",
     'desc'   => "DOMAttr represents an attribute in the DOMElement object.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1915,7 +2010,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "isid",
-    'desc'   => "This function checks if the attribute is a defined ID.\nAccording to the DOM standard this requires a DTD which defines the attribute ID to be of type ID. You need to validate your document with DOMDocument::validate or DOMDocument::validateOnParse before using this function.",
+    'desc'   => "This function checks if the attribute is a defined ID.\n\nAccording to the DOM standard this requires a DTD which defines the attribute ID to be of type ID. You need to validate your document with DOMDocument::validate or DOMDocument::validateOnParse before using this function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1925,6 +2021,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1939,6 +2036,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1957,6 +2055,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1972,11 +2071,13 @@ BeginClass(
     'name'   => "DOMCharacterData",
     'parent' => "DOMNode",
     'desc'   => "Represents nodes with character data. No nodes directly correspond to this class, but other nodes do inherit from it.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1986,6 +2087,7 @@ DefineFunction(
   array(
     'name'   => "appenddata",
     'desc'   => "Append the string data to the end of the character data of the node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "No value is returned.",
@@ -2003,6 +2105,7 @@ DefineFunction(
   array(
     'name'   => "deletedata",
     'desc'   => "Deletes count characters starting from position offset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "No value is returned.",
@@ -2025,6 +2128,7 @@ DefineFunction(
   array(
     'name'   => "insertdata",
     'desc'   => "Inserts string data at position offset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "No value is returned.",
@@ -2047,6 +2151,7 @@ DefineFunction(
   array(
     'name'   => "replacedata",
     'desc'   => "Replace count characters starting from position offset with data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "No value is returned.",
@@ -2074,6 +2179,7 @@ DefineFunction(
   array(
     'name'   => "substringdata",
     'desc'   => "Returns the specified substring.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The specified substring. If the sum of offset and count exceeds the length, then all 16-bit units to the end of the data are returned.",
@@ -2095,6 +2201,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2109,6 +2216,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2127,6 +2235,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2142,11 +2251,13 @@ BeginClass(
     'name'   => "DOMComment",
     'parent' => "DOMCharacterData",
     'desc'   => "Represents comment nodes, characters delimited by <!-- and -->.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2162,6 +2273,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2177,11 +2289,13 @@ BeginClass(
     'name'   => "DOMText",
     'parent' => "DOMCharacterData",
     'desc'   => "The DOMText class inherits from DOMCharacterData and represents the textual content of a DOMElement or DOMAttr.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2198,6 +2312,7 @@ DefineFunction(
   array(
     'name'   => "iswhitespaceinelementcontent",
     'desc'   => "Indicates whether this text node contains whitespace. The text node is determined to contain whitespace in element content during the load of the document.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2207,7 +2322,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "splittext",
-    'desc'   => "Breaks this node into two nodes at the specified offset, keeping both in the tree as siblings.\nAfter being split, this node will contain all the content up to the offset. If the original node had a parent node, the new node is inserted as the next sibling of the original node. When the offset is equal to the length of this node, the new node has no data.",
+    'desc'   => "Breaks this node into two nodes at the specified offset, keeping both in the tree as siblings.\n\nAfter being split, this node will contain all the content up to the offset. If the original node had a parent node, the new node is inserted as the next sibling of the original node. When the offset is equal to the length of this node, the new node has no data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new node of the same type, which contains all the content at and after the offset.",
@@ -2224,6 +2340,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2238,6 +2355,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2256,6 +2374,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2271,11 +2390,13 @@ BeginClass(
     'name'   => "DOMCdataSection",
     'parent' => "DOMText",
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2290,6 +2411,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2305,6 +2427,7 @@ BeginClass(
     'name'   => "DOMDocument",
     'parent' => "DOMNode",
     'desc'   => "Represents an entire HTML or XML document; serves as the root of the document tree.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
 public:
@@ -2325,6 +2448,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2346,6 +2470,7 @@ DefineFunction(
   array(
     'name'   => "createattribute",
     'desc'   => "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMAttr or FALSE if an error occured.",
@@ -2363,6 +2488,7 @@ DefineFunction(
   array(
     'name'   => "createattributens",
     'desc'   => "This function creates a new instance of class DOMAttr. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMAttr or FALSE if an error occured.",
@@ -2385,6 +2511,7 @@ DefineFunction(
   array(
     'name'   => "createcdatasection",
     'desc'   => "This function creates a new instance of class DOMCDATASection. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMCDATASection or FALSE if an error occured.",
@@ -2402,6 +2529,7 @@ DefineFunction(
   array(
     'name'   => "createcomment",
     'desc'   => "This function creates a new instance of class DOMComment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMComment or FALSE if an error occured.",
@@ -2419,6 +2547,7 @@ DefineFunction(
   array(
     'name'   => "createdocumentfragment",
     'desc'   => "This function creates a new instance of class DOMDocumentFragment. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMDocumentFragment or FALSE if an error occured.",
@@ -2429,6 +2558,7 @@ DefineFunction(
   array(
     'name'   => "createelement",
     'desc'   => "This function creates a new instance of class DOMElement. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a new instance of class DOMElement or FALSE if an error occured.",
@@ -2452,6 +2582,7 @@ DefineFunction(
   array(
     'name'   => "createelementns",
     'desc'   => "This function creates a new element node with an associated namespace. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMElement or FALSE if an error occured.",
@@ -2480,6 +2611,7 @@ DefineFunction(
   array(
     'name'   => "createentityreference",
     'desc'   => "This function creates a new instance of class DOMEntityReference. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMEntityReference or FALSE if an error occured.",
@@ -2497,6 +2629,7 @@ DefineFunction(
   array(
     'name'   => "createprocessinginstruction",
     'desc'   => "This function creates a new instance of class DOMProcessingInstruction. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMProcessingInstruction or FALSE if an error occured.",
@@ -2520,6 +2653,7 @@ DefineFunction(
   array(
     'name'   => "createtextnode",
     'desc'   => "This function creates a new instance of class DOMText. This node will not show up in the document unless it is inserted with (e.g.) DOMNode->appendChild().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMText or FALSE if an error occured.",
@@ -2536,7 +2670,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getelementbyid",
-    'desc'   => "This function is similar to DOMDocument::getElementsByTagName but searches for an element with a given id.\nFor this function to work, you will need either to set some ID attributes with DOMElement::setIdAttribute or a DTD which defines an attribute to be of type ID. In the later case, you will need to validate your document with DOMDocument::validate or DOMDocument->validateOnParse before using this function.",
+    'desc'   => "This function is similar to DOMDocument::getElementsByTagName but searches for an element with a given id.\n\nFor this function to work, you will need either to set some ID attributes with DOMElement::setIdAttribute or a DTD which defines an attribute to be of type ID. In the later case, you will need to validate your document with DOMDocument::validate or DOMDocument->validateOnParse before using this function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the DOMElement or NULL if the element is not found.",
@@ -2554,6 +2689,7 @@ DefineFunction(
   array(
     'name'   => "getelementsbytagname",
     'desc'   => "This function returns a new instance of class DOMNodeList containing the elements with a given tag name.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A new DOMNodeList object containing all the matched elements.",
@@ -2571,6 +2707,7 @@ DefineFunction(
   array(
     'name'   => "getelementsbytagnamens",
     'desc'   => "Returns a DOMNodeList of all elements with a given local name and a namespace URI.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A new DOMNodeList object containing all the matched elements.",
@@ -2593,6 +2730,7 @@ DefineFunction(
   array(
     'name'   => "importnode",
     'desc'   => "This function returns a copy of the node to import and associates it with the current document.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The copied node or FALSE, if it cannot be copied.",
@@ -2607,7 +2745,7 @@ DefineFunction(
         'name'   => "deep",
         'type'   => Boolean,
         'value'  => "false",
-        'desc'   => "If set to TRUE, this method will recursively import the subtree under the importedNode. Note: To copy the nodes attributes deep needs to be set to TRUE",
+        'desc'   => "If set to TRUE, this method will recursively import the subtree under the importedNode.\n\nTo copy the nodes attributes deep needs to be set to TRUE",
       ),
     ),
   ));
@@ -2616,6 +2754,7 @@ DefineFunction(
   array(
     'name'   => "load",
     'desc'   => "Loads an XML document from a file. Warning Unix style paths with forward slashes can cause significant performance degradation on Windows systems; be sure to call realpath() in such a case.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning.",
@@ -2639,6 +2778,7 @@ DefineFunction(
   array(
     'name'   => "loadhtml",
     'desc'   => "The function parses the HTML contained in the string source. Unlike loading XML, HTML does not have to be well-formed to load. This function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning.",
@@ -2655,7 +2795,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "loadhtmlfile",
-    'desc'   => "The function parses the HTML document in the file named filename. Unlike loading XML, HTML does not have to be well-formed to load.\nThough not recommended, this function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading. However, doing so will result an in E_STRICT error being generated.",
+    'desc'   => "The function parses the HTML document in the file named filename. Unlike loading XML, HTML does not have to be well-formed to load.\n\nThough not recommended, this function may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading. However, doing so will result an in E_STRICT error being generated.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning.",
@@ -2672,7 +2813,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "loadxml",
-    'desc'   => "Loads an XML document from a string.\nThis method may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
+    'desc'   => "Loads an XML document from a string.\n\nThis method may also be called statically to load and create a DOMDocument object. The static invocation may be used when no DOMDocument properties need to be set prior to loading.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure. If called statically, returns a DOMDocument and issues E_STRICT warning.",
@@ -2696,6 +2838,7 @@ DefineFunction(
   array(
     'name'   => "normalizedocument",
     'desc'   => "This method acts as if you saved and then loaded the document, putting the document in a \"normal\" form.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -2705,7 +2848,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "registernodeclass",
-    'desc'   => "This method allows you to register your own extended DOM class to be used afterward by the PHP DOM extension.\nThis method is not part of the DOM standard.",
+    'desc'   => "This method allows you to register your own extended DOM class to be used afterward by the PHP DOM extension.\n\nThis method is not part of the DOM standard.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2728,6 +2872,7 @@ DefineFunction(
   array(
     'name'   => "relaxngvalidate",
     'desc'   => "Performs » relaxNG validation on the document based on the given RNG schema.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2745,6 +2890,7 @@ DefineFunction(
   array(
     'name'   => "relaxngvalidatesource",
     'desc'   => "Performs » relaxNG validation on the document based on the given RNG source.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2762,6 +2908,7 @@ DefineFunction(
   array(
     'name'   => "save",
     'desc'   => "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of bytes written or FALSE if an error occurred.",
@@ -2785,6 +2932,7 @@ DefineFunction(
   array(
     'name'   => "savehtml",
     'desc'   => "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the HTML, or FALSE if an error occurred.",
@@ -2795,6 +2943,7 @@ DefineFunction(
   array(
     'name'   => "savehtmlfile",
     'desc'   => "Creates an HTML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of bytes written or FALSE if an error occurred.",
@@ -2812,6 +2961,7 @@ DefineFunction(
   array(
     'name'   => "savexml",
     'desc'   => "Creates an XML document from the DOM representation. This function is usually called after building a new dom document from scratch as in the example below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the XML, or FALSE if an error occurred.",
@@ -2836,6 +2986,7 @@ DefineFunction(
   array(
     'name'   => "schemavalidate",
     'desc'   => "Validates a document based on the given schema file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2853,6 +3004,7 @@ DefineFunction(
   array(
     'name'   => "schemavalidatesource",
     'desc'   => "Validates a document based on a schema defined in the given string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2869,7 +3021,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "validate",
-    'desc'   => "Validates the document based on its DTD.\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
+    'desc'   => "Validates the document based on its DTD.\n\nYou can also use the validateOnParse property of DOMDocument to make a DTD validation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure. If the document have no DTD attached, this method will return FALSE.",
@@ -2879,7 +3032,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xinclude",
-    'desc'   => "This method substitutes » XIncludes in a DOMDocument object. Note: Due to libxml2 automatically resolving entities, this method will produce unexpected results if the included XML file have an attached DTD.",
+    'desc'   => "This method substitutes » XIncludes in a DOMDocument object.\n\nDue to libxml2 automatically resolving entities, this method will produce unexpected results if the included XML file have an attached DTD.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of XIncludes in the document, -1 if some processing failed, or FALSE if there were no substitutions.",
@@ -2897,6 +3051,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2911,6 +3066,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2929,6 +3085,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2944,11 +3101,13 @@ BeginClass(
     'name'   => "DOMDocumentFragment",
     'parent' => "DOMNode",
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2957,7 +3116,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "appendxml",
-    'desc'   => "Appends raw XML data to a DOMDocumentFragment.\nThis method is not part of the DOM standard. It was created as a simpler approach for appending an XML DocumentFragment in a DOMDocument.\nIf you want to stick to the standards, you will have to create a temporary DOMDocument with a dummy root and then loop through the child nodes of the root of your XML data to append them.",
+    'desc'   => "Appends raw XML data to a DOMDocumentFragment.\n\nThis method is not part of the DOM standard. It was created as a simpler approach for appending an XML DocumentFragment in a DOMDocument.\n\nIf you want to stick to the standards, you will have to create a temporary DOMDocument with a dummy root and then loop through the child nodes of the root of your XML data to append them.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2974,6 +3134,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -2989,11 +3150,13 @@ BeginClass(
     'name'   => "DOMDocumentType",
     'parent' => "DOMNode",
     'desc'   => "Each DOMDocument has a doctype attribute whose value is either NULL or a DOMDocumentType object.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3002,6 +3165,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3016,6 +3180,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3034,6 +3199,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3049,11 +3215,13 @@ BeginClass(
     'name'   => "DOMElement",
     'parent' => "DOMNode",
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3079,6 +3247,7 @@ DefineFunction(
   array(
     'name'   => "getattribute",
     'desc'   => "Gets the value of the attribute with name name for the current node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The value of the attribute, or an empty string if no attribute with the given name is found.",
@@ -3096,6 +3265,7 @@ DefineFunction(
   array(
     'name'   => "getattributenode",
     'desc'   => "Returns the attribute node with name name for the current element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The attribute node.",
@@ -3113,6 +3283,7 @@ DefineFunction(
   array(
     'name'   => "getattributenodens",
     'desc'   => "Returns the attribute node in namespace namespaceURI with local name localName for the current node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "The attribute node.",
@@ -3135,6 +3306,7 @@ DefineFunction(
   array(
     'name'   => "getattributens",
     'desc'   => "Gets the value of the attribute in namespace namespaceURI with local name localName for the current node.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The value of the attribute, or an empty string if no attribute with the given localName and namespaceURI is found.",
@@ -3157,6 +3329,7 @@ DefineFunction(
   array(
     'name'   => "getelementsbytagname",
     'desc'   => "This function returns a new instance of the class DOMNodeList of all descendant elements with a given tag name, in the order in which they are encountered in a preorder traversal of this element tree.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "This function returns a new instance of the class DOMNodeList of all matched elements.",
@@ -3174,6 +3347,7 @@ DefineFunction(
   array(
     'name'   => "getelementsbytagnamens",
     'desc'   => "This function fetch all the descendant elements with a given localName and namespaceURI.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "This function returns a new instance of the class DOMNodeList of all matched elements in the order in which they are encountered in a preorder traversal of this element tree.",
@@ -3196,6 +3370,7 @@ DefineFunction(
   array(
     'name'   => "hasattribute",
     'desc'   => "Indicates whether attribute named name exists as a member of the element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3213,6 +3388,7 @@ DefineFunction(
   array(
     'name'   => "hasattributens",
     'desc'   => "Indicates whether attribute in namespace namespaceURI named localName exists as a member of the element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3235,6 +3411,7 @@ DefineFunction(
   array(
     'name'   => "removeattribute",
     'desc'   => "Removes attribute named name from the element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3252,6 +3429,7 @@ DefineFunction(
   array(
     'name'   => "removeattributenode",
     'desc'   => "Removes attribute oldnode from the element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3269,6 +3447,7 @@ DefineFunction(
   array(
     'name'   => "removeattributens",
     'desc'   => "Removes attribute is namespace namespaceURI named localName from the element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3291,6 +3470,7 @@ DefineFunction(
   array(
     'name'   => "setattribute",
     'desc'   => "Sets an attribute with name name to the given value. If the attribute does not exist, it will be created.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The new DOMAttr or FALSE if an error occured.",
@@ -3313,6 +3493,7 @@ DefineFunction(
   array(
     'name'   => "setattributenode",
     'desc'   => "Adds new attribute node attr to element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns old node if the attribute has been replaced or NULL.",
@@ -3330,6 +3511,7 @@ DefineFunction(
   array(
     'name'   => "setattributenodens",
     'desc'   => "Adds new attribute node attr to element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the old node if the attribute has been replaced.",
@@ -3347,6 +3529,7 @@ DefineFunction(
   array(
     'name'   => "setattributens",
     'desc'   => "Sets an attribute with namespace namespaceURI and name name to the given value. If the attribute does not exist, it will be created.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -3374,6 +3557,7 @@ DefineFunction(
   array(
     'name'   => "setidattribute",
     'desc'   => "Declares the attribute name to be of type ID.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -3396,6 +3580,7 @@ DefineFunction(
   array(
     'name'   => "setidattributenode",
     'desc'   => "Declares the attribute specified by attr to be of type ID.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -3418,6 +3603,7 @@ DefineFunction(
   array(
     'name'   => "setidattributens",
     'desc'   => "Declares the attribute specified by localName and namespaceURI to be of type ID.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -3444,6 +3630,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3458,6 +3645,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3476,6 +3664,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3491,11 +3680,13 @@ BeginClass(
     'name'   => "DOMEntity",
     'parent' => "DOMNode",
     'desc'   => "This interface represents a known entity, either parsed or unparsed, in an XML document.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3504,6 +3695,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3518,6 +3710,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3536,6 +3729,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3551,11 +3745,13 @@ BeginClass(
     'name'   => "DOMEntityReference",
     'parent' => "DOMNode",
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3570,6 +3766,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3585,11 +3782,13 @@ BeginClass(
     'name'   => "DOMNotation",
     'parent' => "DOMNode",
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3598,6 +3797,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3612,6 +3812,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3630,6 +3831,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3645,11 +3847,13 @@ BeginClass(
     'name'   => "DOMProcessingInstruction",
     'parent' => "DOMNode",
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3669,6 +3873,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3683,6 +3888,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3701,6 +3907,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3714,9 +3921,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMNodeIterator",
-    'ifaces' => array('Iterator'),
-    'bases'  => array('Sweepable'),
     'desc'   => "",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
 public:
@@ -3733,6 +3939,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3741,6 +3948,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "current",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3749,6 +3957,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "key",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3757,6 +3966,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "next",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3765,6 +3975,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "rewind",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3773,6 +3984,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "valid",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3781,6 +3993,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3794,14 +4007,14 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMNamedNodeMap",
-    'ifaces' => array('IteratorAggregate'),
-    'bases'  => array('dom_iterable'),
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3811,6 +4024,7 @@ DefineFunction(
   array(
     'name'   => "getnameditem",
     'desc'   => "Retrieves a node specified by its nodeName.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A node (of any type) with the specified nodeName, or NULL if no node is found.",
@@ -3828,6 +4042,7 @@ DefineFunction(
   array(
     'name'   => "getnameditemns",
     'desc'   => "Retrieves a node specified by localName and namespaceURI.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A node (of any type) with the specified local name and namespace URI, or NULL if no node is found.",
@@ -3850,6 +4065,7 @@ DefineFunction(
   array(
     'name'   => "item",
     'desc'   => "Retrieves a node specified by index within the DOMNamedNodeMap object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The node at the indexth position in the map, or NULL if that is not a valid index (greater than or equal to the number of nodes in this map).",
@@ -3866,6 +4082,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3880,6 +4097,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3898,6 +4116,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getiterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3906,6 +4125,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3919,14 +4139,14 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMNodeList",
-    'ifaces' => array('IteratorAggregate'),
-    'bases'  => array('dom_iterable'),
     'desc'   => "",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -3935,7 +4155,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "item",
-    'desc'   => "Retrieves a node specified by index within the DOMNodeList object. Tip\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
+    'desc'   => "Retrieves a node specified by index within the DOMNodeList object. Tip\n\nIf you need to know the number of nodes in the collection, use the length property of the DOMNodeList object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The node at the indexth position in the DOMNodeList, or NULL if that is not a valid index.",
@@ -3952,6 +4173,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3966,6 +4188,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3984,6 +4207,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getiterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3992,6 +4216,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -4006,12 +4231,14 @@ BeginClass(
   array(
     'name'   => "DOMException",
     'parent' => "Exception",
-    'desc'   => "DOM operations raise exceptions under particular circumstances, i.e., when an operation is impossible to perform for logical reasons.\nSee also Exceptions.",
+    'desc'   => "DOM operations raise exceptions under particular circumstances, i.e., when an operation is impossible to perform for logical reasons.\n\nSee also Exceptions.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -4032,6 +4259,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -4046,11 +4274,13 @@ BeginClass(
   array(
     'name'   => "DOMImplementation",
     'desc'   => "The DOMImplementation interface provides a number of methods for performing operations that are independent of any particular instance of the document object model.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -4060,6 +4290,7 @@ DefineFunction(
   array(
     'name'   => "createdocument",
     'desc'   => "Creates a DOMDocument object of the specified type with its document element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A new DOMDocument object. If namespaceURI, qualifiedName, and doctype are null, the returned DOMDocument is empty with no document element",
@@ -4090,6 +4321,7 @@ DefineFunction(
   array(
     'name'   => "createdocumenttype",
     'desc'   => "Creates an empty DOMDocumentType object. Entity declarations and notations are not made available. Entity reference expansions and default attribute additions do not occur.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A new DOMDocumentType node with its ownerDocument set to NULL.",
@@ -4119,7 +4351,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hasfeature",
-    'desc'   => "Test if the DOM implementation implements a specific feature.\nYou can find a list of all features in the » Conformance section of the DOM specification.",
+    'desc'   => "Test if the DOM implementation implements a specific feature.\n\nYou can find a list of all features in the » Conformance section of the DOM specification.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -4141,6 +4374,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -4154,8 +4388,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DOMXPath",
-    'bases'  => array('Sweepable'),
     'desc'   => "Supports XPath 1.0",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  public:
@@ -4171,6 +4405,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -4186,6 +4421,7 @@ DefineFunction(
   array(
     'name'   => "evaluate",
     'desc'   => "Executes the given XPath expression and returns a typed result if possible.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a typed result if possible or a DOMNodeList containing all nodes matching the given XPath expression.",
@@ -4209,6 +4445,7 @@ DefineFunction(
   array(
     'name'   => "query",
     'desc'   => "Executes the given XPath expression.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a DOMNodeList containing all nodes matching the given XPath expression. Any expression which do not return nodes will return an empty DOMNodeList.",
@@ -4232,9 +4469,10 @@ DefineFunction(
   array(
     'name'   => "registernamespace",
     'desc'   => "Registers the namespaceURI and prefix with the DOMXPath object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. DOMXPath::registerPhpFunctions DOMXPath::query Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure. DOMXPath::registerPhpFunctions DOMXPath::query Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -4254,6 +4492,7 @@ DefineFunction(
   array(
     'name'   => "registerphpfunctions",
     'desc'   => "This method enables the ability to use PHP functions within XPath expressions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -4263,7 +4502,7 @@ DefineFunction(
         'name'   => "funcs",
         'type'   => Variant,
         'value'  => "null",
-        'desc'   => "Use this parameter to only allow certain functions to be called from XPath.\nThis parameter can be either a string (a function name) or an array of function names.",
+        'desc'   => "Use this parameter to only allow certain functions to be called from XPath.\n\nThis parameter can be either a string (a function name) or an array of function names.",
       ),
     ),
   ));
@@ -4271,6 +4510,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -4285,6 +4525,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -4303,6 +4544,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

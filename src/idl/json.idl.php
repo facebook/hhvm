@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "json_encode",
     'desc'   => "Returns a string containing the JSON representation of value.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a JSON encoded string on success.",
@@ -61,7 +62,7 @@ DefineFunction(
       array(
         'name'   => "value",
         'type'   => Variant,
-        'desc'   => "The value being encoded. Can be any type except a resource .\nThis function only works with UTF-8 encoded data.",
+        'desc'   => "The value being encoded. Can be any type except a resource.\n\nThis function only works with UTF-8 encoded data.",
       ),
       array(
         'name'   => "loose",
@@ -76,6 +77,7 @@ DefineFunction(
   array(
     'name'   => "json_decode",
     'desc'   => "Takes a JSON encoded string and converts it into a PHP variable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the value encoded in json in appropriate PHP type. Values true, false and null (case-insensitive) are returned as TRUE, FALSE and NULL respectively. NULL is returned if the json cannot be decoded or if the encoded data is deeper than the recursion limit.",
@@ -90,7 +92,7 @@ DefineFunction(
         'name'   => "assoc",
         'type'   => Boolean,
         'value'  => "false",
-        'desc'   => "When TRUE, returned object s will be converted into associative array s.",
+        'desc'   => "When TRUE, returned objects will be converted into associative arrays.",
       ),
       array(
         'name'   => "loose",

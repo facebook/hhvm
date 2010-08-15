@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "mb_list_encodings",
     'desc'   => "Returns an array containing all supported encodings.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns a numerically indexed array.",
@@ -62,6 +63,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_list_encodings_alias_names",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -77,6 +79,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_list_mime_names",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -93,6 +96,7 @@ DefineFunction(
   array(
     'name'   => "mb_check_encoding",
     'desc'   => "Checks if the specified byte stream is valid for the specified encoding. It is useful to prevent so-called \"Invalid Encoding Attack\".",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -116,7 +120,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_convert_case",
-    'desc'   => "Performs case folding on a string , converted in the way specified by mode.",
+    'desc'   => "Performs case folding on a string, converted in the way specified by mode.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A case folded version of string converted in the way specified by mode.",
@@ -145,9 +150,10 @@ DefineFunction(
   array(
     'name'   => "mb_convert_encoding",
     'desc'   => "Converts the character encoding of string str to to_encoding from optionally from_encoding.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The encoded string .",
+      'desc'   => "The encoded string.",
     ),
     'args'   => array(
       array(
@@ -164,7 +170,7 @@ DefineFunction(
         'name'   => "from_encoding",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "Is specified by character code names before conversion. It is either an array , or a comma separated enumerated list. If from_encoding is not specified, the internal encoding will be used.\n\"auto\" may be used, which expands to \"ASCII,JIS,UTF-8,EUC-JP,SJIS\".",
+        'desc'   => "Is specified by character code names before conversion. It is either an array, or a comma separated enumerated list. If from_encoding is not specified, the internal encoding will be used.\n\n\"auto\" may be used, which expands to \"ASCII,JIS,UTF-8,EUC-JP,SJIS\".",
       ),
     ),
   ));
@@ -173,9 +179,10 @@ DefineFunction(
   array(
     'name'   => "mb_convert_kana",
     'desc'   => "Performs a \"han-kaku\" - \"zen-kaku\" conversion for string str. This function is only useful for Japanese.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The converted string .",
+      'desc'   => "The converted string.",
     ),
     'args'   => array(
       array(
@@ -187,7 +194,7 @@ DefineFunction(
         'name'   => "option",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The conversion option.\nSpecify with a combination of following options. Applicable Conversion Options Option Meaning r Convert \"zen-kaku\" alphabets to \"han-kaku\" R Convert \"han-kaku\" alphabets to \"zen-kaku\" n Convert \"zen-kaku\" numbers to \"han-kaku\" N Convert \"han-kaku\" numbers to \"zen-kaku\" a Convert \"zen-kaku\" alphabets and numbers to \"han-kaku\" A Convert \"han-kaku\" alphabets and numbers to \"zen-kaku\" (Characters included in \"a\", \"A\" options are U+0021 - U+007E excluding U+0022, U+0027, U+005C, U+007E) s Convert \"zen-kaku\" space to \"han-kaku\" (U+3000 -> U+0020) S Convert \"han-kaku\" space to \"zen-kaku\" (U+0020 -> U+3000) k Convert \"zen-kaku kata-kana\" to \"han-kaku kata-kana\" K Convert \"han-kaku kata-kana\" to \"zen-kaku kata-kana\" h Convert \"zen-kaku hira-gana\" to \"han-kaku kata-kana\" H Convert \"han-kaku kata-kana\" to \"zen-kaku hira-gana\" c Convert \"zen-kaku kata-kana\" to \"zen-kaku hira-gana\" C Convert \"zen-kaku hira-gana\" to \"zen-kaku kata-kana\" V Collapse voiced sound notation and convert them into a character. Use with \"K\",\"H\"",
+        'desc'   => "The conversion option.\n\nSpecify with a combination of following options. Applicable Conversion Options Option Meaning r Convert \"zen-kaku\" alphabets to \"han-kaku\" R Convert \"han-kaku\" alphabets to \"zen-kaku\" n Convert \"zen-kaku\" numbers to \"han-kaku\" N Convert \"han-kaku\" numbers to \"zen-kaku\" a Convert \"zen-kaku\" alphabets and numbers to \"han-kaku\" A Convert \"han-kaku\" alphabets and numbers to \"zen-kaku\" (Characters included in \"a\", \"A\" options are U+0021 - U+007E excluding U+0022, U+0027, U+005C, U+007E) s Convert \"zen-kaku\" space to \"han-kaku\" (U+3000 -> U+0020) S Convert \"han-kaku\" space to \"zen-kaku\" (U+0020 -> U+3000) k Convert \"zen-kaku kata-kana\" to \"han-kaku kata-kana\" K Convert \"han-kaku kata-kana\" to \"zen-kaku kata-kana\" h Convert \"zen-kaku hira-gana\" to \"han-kaku kata-kana\" H Convert \"han-kaku kata-kana\" to \"zen-kaku hira-gana\" c Convert \"zen-kaku kata-kana\" to \"zen-kaku hira-gana\" C Convert \"zen-kaku hira-gana\" to \"zen-kaku kata-kana\" V Collapse voiced sound notation and convert them into a character. Use with \"K\",\"H\"",
       ),
       array(
         'name'   => "encoding",
@@ -201,8 +208,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_convert_variables",
-    'desc'   => "Converts character encoding of variables vars in encoding from_encoding to encoding to_encoding.\nmb_convert_variables() join strings in Array or Object to detect encoding, since encoding detection tends to fail for short strings. Therefore, it is impossible to mix encoding in single array or object.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Converts character encoding of variables vars in encoding from_encoding to encoding to_encoding.\n\nmb_convert_variables() join strings in Array or Object to detect encoding, since encoding detection tends to fail for short strings. Therefore, it is impossible to mix encoding in single array or object.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The character encoding before conversion for success, or FALSE for failure.",
@@ -216,7 +223,7 @@ DefineFunction(
       array(
         'name'   => "from_encoding",
         'type'   => Variant,
-        'desc'   => "from_encoding is specified as an array or comma separated string , it tries to detect encoding from from-coding. When from_encoding is omitted, detect_order is used.",
+        'desc'   => "from_encoding is specified as an array or comma separated string, it tries to detect encoding from from-coding. When from_encoding is omitted, detect_order is used.",
       ),
       array(
         'name'   => "vars",
@@ -230,6 +237,7 @@ DefineFunction(
   array(
     'name'   => "mb_decode_mimeheader",
     'desc'   => "Decodes encoded-word string str in MIME header.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The decoded string in internal character encoding.",
@@ -247,9 +255,10 @@ DefineFunction(
   array(
     'name'   => "mb_decode_numericentity",
     'desc'   => "Convert numeric string reference of string str in a specified block to character.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The converted string .",
+      'desc'   => "The converted string.",
     ),
     'args'   => array(
       array(
@@ -275,6 +284,7 @@ DefineFunction(
   array(
     'name'   => "mb_detect_encoding",
     'desc'   => "Detects character encoding in string str.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The detected character encoding or FALSE if the encoding cannot be detected from the given string.",
@@ -289,7 +299,7 @@ DefineFunction(
         'name'   => "encoding_list",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "encoding_list is list of character encoding. Encoding order may be specified by array or comma separated list string.\nIf encoding_list is omitted, detect_order is used.",
+        'desc'   => "encoding_list is list of character encoding. Encoding order may be specified by array or comma separated list string.\n\nIf encoding_list is omitted, detect_order is used.",
       ),
       array(
         'name'   => "strict",
@@ -304,6 +314,7 @@ DefineFunction(
   array(
     'name'   => "mb_detect_order",
     'desc'   => "Sets the automatic character encoding detection order to encoding_list.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -313,7 +324,7 @@ DefineFunction(
         'name'   => "encoding_list",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "encoding_list is an array or comma separated list of character encoding. (\"auto\" is expanded to \"ASCII, JIS, UTF-8, EUC-JP, SJIS\")\nIf encoding_list is omitted, it returns the current character encoding detection order as array.\nThis setting affects mb_detect_encoding() and mb_send_mail().\nmbstring currently implements the following encoding detection filters. If there is an invalid byte sequence for the following encodings, encoding detection will fail. UTF-8, UTF-7, ASCII, EUC-JP,SJIS, eucJP-win, SJIS-win, JIS, ISO-2022-JP\nFor ISO-8859-*, mbstring always detects as ISO-8859-*.\nFor UTF-16, UTF-32, UCS2 and UCS4, encoding detection will fail always.\nExample #1 Useless detect order example",
+        'desc'   => "encoding_list is an array or comma separated list of character encoding. (\"auto\" is expanded to \"ASCII, JIS, UTF-8, EUC-JP, SJIS\")\n\nIf encoding_list is omitted, it returns the current character encoding detection order as array.\n\nThis setting affects mb_detect_encoding() and mb_send_mail().\n\nmbstring currently implements the following encoding detection filters. If there is an invalid byte sequence for the following encodings, encoding detection will fail. UTF-8, UTF-7, ASCII, EUC-JP,SJIS, eucJP-win, SJIS-win, JIS, ISO-2022-JP\n\nFor ISO-8859-*, mbstring always detects as ISO-8859-*.\n\nFor UTF-16, UTF-32, UCS2 and UCS4, encoding detection will fail always.\n\nExample #1 Useless detect order example",
       ),
     ),
   ));
@@ -322,6 +333,7 @@ DefineFunction(
   array(
     'name'   => "mb_encode_mimeheader",
     'desc'   => "Encodes a given string str by the MIME header encoding scheme.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A converted version of the string represented in ASCII.",
@@ -363,9 +375,10 @@ DefineFunction(
   array(
     'name'   => "mb_encode_numericentity",
     'desc'   => "Converts specified character codes in string str from HTML numeric character reference to character code.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The converted string .",
+      'desc'   => "The converted string.",
     ),
     'args'   => array(
       array(
@@ -391,6 +404,7 @@ DefineFunction(
   array(
     'name'   => "mb_ereg_match",
     'desc'   => "A regular expression match for a multibyte string",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if string matches the regular expression pattern, FALSE if not.",
@@ -417,6 +431,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_ereg_replace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The resultant string on success, or FALSE on error.",
@@ -425,7 +440,7 @@ DefineFunction(
       array(
         'name'   => "pattern",
         'type'   => Variant,
-        'desc'   => "The regular expression pattern.\nMultibyte characters may be used in pattern.",
+        'desc'   => "The regular expression pattern.\n\nMultibyte characters may be used in pattern.",
       ),
       array(
         'name'   => "replacement",
@@ -449,6 +464,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_ereg_search_getpos",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "mb_ereg_search_getpos() returns the point to start regular expression match for mb_ereg_search(), mb_ereg_search_pos(), mb_ereg_search_regs(). The position is represented by bytes from the head of string.",
@@ -458,6 +474,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_ereg_search_getregs",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array including the sub-string of matched part by last mb_ereg_search(), mb_ereg_search_pos(), mb_ereg_search_regs(). If there are some matches, the first element will have the matched sub-string, the second element will have the first part grouped with brackets, the third element will have the second part grouped with brackets, and so on. It returns FALSE on error;",
@@ -468,6 +485,7 @@ DefineFunction(
   array(
     'name'   => "mb_ereg_search_init",
     'desc'   => "mb_ereg_search_init() sets string and pattern for a multibyte regular expression. These values are used for mb_ereg_search(), mb_ereg_search_pos(), and mb_ereg_search_regs().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -496,7 +514,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_ereg_search_pos",
-    'desc'   => "Returns position and length of a matched part of the multibyte regular expression for a predefined multibyte string\nThe string for match is specified by mb_ereg_search_init(). If it is not specified, the previous one will be used.",
+    'desc'   => "Returns position and length of a matched part of the multibyte regular expression for a predefined multibyte string\n\nThe string for match is specified by mb_ereg_search_init(). If it is not specified, the previous one will be used.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array including the position of a matched part for a multibyte regular expression. The first element of the array will be the beginning of matched part, the second element will be length (bytes) of matched part. It returns FALSE on error.",
@@ -521,6 +540,7 @@ DefineFunction(
   array(
     'name'   => "mb_ereg_search_regs",
     'desc'   => "Returns the matched part of a multibyte regular expression.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "mb_ereg_search_regs() executes the multibyte regular expression match, and if there are some matched part, it returns an array including substring of matched part as first element, the first grouped part with brackets as second element, the second grouped part as third element, and so on. It returns FALSE on error.",
@@ -544,6 +564,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_ereg_search_setpos",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -561,6 +582,7 @@ DefineFunction(
   array(
     'name'   => "mb_ereg_search",
     'desc'   => "Performs a multibyte regular expression match for a predefined multibyte string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "mb_ereg_search() returns TRUE if the multibyte string matches with the regular expression, or FALSE otherwise. The string for matching is set by mb_ereg_search_init(). If pattern is not specified, the previous one is used.",
@@ -584,6 +606,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_ereg",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Executes the regular expression match with multibyte support, and returns 1 if matches are found. If the optional regs parameter was specified, the function returns the byte length of matched part, and the array regs will contain the substring of matched string. The function returns 1 if it matches with the empty string. If no matches are found or an error happens, FALSE will be returned.",
@@ -597,13 +620,13 @@ DefineFunction(
       array(
         'name'   => "str",
         'type'   => String,
-        'desc'   => "The search string .",
+        'desc'   => "The search string.",
       ),
       array(
         'name'   => "regs",
         'type'   => Variant | Reference,
         'value'  => "null",
-        'desc'   => "Contains a substring of the matched string .",
+        'desc'   => "Contains a substring of the matched string.",
       ),
     ),
   ));
@@ -611,6 +634,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_eregi_replace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The resultant string or FALSE on error.",
@@ -629,7 +653,7 @@ DefineFunction(
       array(
         'name'   => "str",
         'type'   => String,
-        'desc'   => "The searched string .",
+        'desc'   => "The searched string.",
       ),
       array(
         'name'   => "option",
@@ -643,6 +667,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_eregi",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Executes the regular expression match with multibyte support, and returns 1 if matches are found. If the optional regs parameter was specified, the function returns the byte length of matched part, and the array regs will contain the substring of matched string. The function returns 1 if it matches with the empty string. If no matches are found or an error happens, FALSE will be returned.",
@@ -662,7 +687,7 @@ DefineFunction(
         'name'   => "regs",
         'type'   => Variant | Reference,
         'value'  => "null",
-        'desc'   => "Contains a substring of the matched string .",
+        'desc'   => "Contains a substring of the matched string.",
       ),
     ),
   ));
@@ -670,6 +695,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_get_info",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array of type information if type is not specified, otherwise a specific type.",
@@ -679,7 +705,7 @@ DefineFunction(
         'name'   => "type",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "If type isn't specified or is specified to \"all\", an array having the elements \"internal_encoding\", \"http_output\", \"http_input\", \"func_overload\", \"mail_charset\", \"mail_header_encoding\", \"mail_body_encoding\" will be returned.\nIf type is specified as \"http_output\", \"http_input\", \"internal_encoding\", \"func_overload\", the specified setting parameter will be returned.",
+        'desc'   => "If type isn't specified or is specified to \"all\", an array having the elements \"internal_encoding\", \"http_output\", \"http_input\", \"func_overload\", \"mail_charset\", \"mail_header_encoding\", \"mail_body_encoding\" will be returned.\n\nIf type is specified as \"http_output\", \"http_input\", \"internal_encoding\", \"func_overload\", the specified setting parameter will be returned.",
       ),
     ),
   ));
@@ -687,6 +713,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_http_input",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The character encoding name, as per the type. If mb_http_input() does not process specified HTTP input, it returns FALSE.",
@@ -696,7 +723,7 @@ DefineFunction(
         'name'   => "type",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "Input string specifies the input type. \"G\" for GET, \"P\" for POST, \"C\" for COOKIE, \"S\" for string, \"L\" for list, and \"I\" for the whole list (will return array ). If type is omitted, it returns the last input type processed.",
+        'desc'   => "Input string specifies the input type. \"G\" for GET, \"P\" for POST, \"C\" for COOKIE, \"S\" for string, \"L\" for list, and \"I\" for the whole list (will return array). If type is omitted, it returns the last input type processed.",
       ),
     ),
   ));
@@ -705,6 +732,7 @@ DefineFunction(
   array(
     'name'   => "mb_http_output",
     'desc'   => "Set/Get the HTTP output character encoding. Output after this function is converted to encoding.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If encoding is omitted, mb_http_output() returns the current HTTP output character encoding. Otherwise, Returns TRUE on success or FALSE on failure.",
@@ -714,7 +742,7 @@ DefineFunction(
         'name'   => "encoding",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "If encoding is set, mb_http_output() sets the HTTP output character encoding to encoding.\nIf encoding is omitted, mb_http_output() returns the current HTTP output character encoding.",
+        'desc'   => "If encoding is set, mb_http_output() sets the HTTP output character encoding to encoding.\n\nIf encoding is omitted, mb_http_output() returns the current HTTP output character encoding.",
       ),
     ),
   ));
@@ -723,6 +751,7 @@ DefineFunction(
   array(
     'name'   => "mb_internal_encoding",
     'desc'   => "Set/Get the internal character encoding",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If encoding is set, then Returns TRUE on success or FALSE on failure. If encoding is omitted, then the current character encoding name is returned.",
@@ -741,16 +770,17 @@ DefineFunction(
   array(
     'name'   => "mb_language",
     'desc'   => "Set/Get the current language.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "If language is set and language is valid, it returns TRUE. Otherwise, it returns FALSE. When language is omitted, it returns the language name as a string . If no language is set previously, it then returns FALSE.",
+      'desc'   => "If language is set and language is valid, it returns TRUE. Otherwise, it returns FALSE. When language is omitted, it returns the language name as a string. If no language is set previously, it then returns FALSE.",
     ),
     'args'   => array(
       array(
         'name'   => "language",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "Used for encoding e-mail messages. Valid languages are \"Japanese\", \"ja\",\"English\",\"en\" and \"uni\" (UTF-8). mb_send_mail() uses this setting to encode e-mail.\nLanguage and its setting is ISO-2022-JP/Base64 for Japanese, UTF-8/Base64 for uni, ISO-8859-1/quoted printable for English.",
+        'desc'   => "Used for encoding e-mail messages. Valid languages are \"Japanese\", \"ja\",\"English\",\"en\" and \"uni\" (UTF-8). mb_send_mail() uses this setting to encode e-mail.\n\nLanguage and its setting is ISO-2022-JP/Base64 for Japanese, UTF-8/Base64 for uni, ISO-8859-1/quoted printable for English.",
       ),
     ),
   ));
@@ -759,9 +789,10 @@ DefineFunction(
   array(
     'name'   => "mb_output_handler",
     'desc'   => "mb_output_handler() is ob_start() callback function. mb_output_handler() converts characters in the output buffer from internal character encoding to HTTP output character encoding.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "The converted string .",
+      'desc'   => "The converted string.",
     ),
     'args'   => array(
       array(
@@ -781,6 +812,7 @@ DefineFunction(
   array(
     'name'   => "mb_parse_str",
     'desc'   => "Parses GET/POST/COOKIE data and sets global variables. Since PHP does not provide raw POST/COOKIE data, it can only be used for GET data for now. It parses URL encoded data, detects encoding, converts coding to internal encoding and set values to the result array or global variables.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -804,6 +836,7 @@ DefineFunction(
   array(
     'name'   => "mb_preferred_mime_name",
     'desc'   => "Get a MIME charset string for a specific encoding.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The MIME charset string for character encoding encoding.",
@@ -820,7 +853,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_regex_encoding",
-    'desc'   => "Returns the current encoding for a multibyte regex as a string .",
+    'desc'   => "Returns the current encoding for a multibyte regex as a string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the character encoding used by multibyte regex functions.",
@@ -838,6 +872,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_regex_set_options",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The previous options. If options is omitted, it returns the string that describes the current options.",
@@ -856,6 +891,7 @@ DefineFunction(
   array(
     'name'   => "mb_send_mail",
     'desc'   => "Sends email. Headers and messages are converted and encoded according to the mb_language() setting. It's a wrapper function for mail(), so see also mail() for details.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -894,9 +930,10 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_split",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The result as an array .",
+      'desc'   => "The result as an array.",
     ),
     'args'   => array(
       array(
@@ -921,7 +958,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_strcut",
-    'desc'   => "mb_strcut() performs equivalent operation as mb_substr() with different method. If start position is multi-byte character's second byte or larger, it starts from first byte of multi-byte character.\nIt subtracts string from str that is shorter than length AND character that is not part of multi-byte string or not being middle of shift sequence.",
+    'desc'   => "mb_strcut() performs equivalent operation as mb_substr() with different method. If start position is multi-byte character's second byte or larger, it starts from first byte of multi-byte character.\n\nIt subtracts string from str that is shorter than length AND character that is not part of multi-byte string or not being middle of shift sequence.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "mb_strcut() returns the portion of str specified by the start and length parameters.",
@@ -956,9 +994,10 @@ DefineFunction(
   array(
     'name'   => "mb_strimwidth",
     'desc'   => "Truncates string str to specified width.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The truncated string . If trimmarker is set, trimmarker is appended to the return value.",
+      'desc'   => "The truncated string. If trimmarker is set, trimmarker is appended to the return value.",
     ),
     'args'   => array(
       array(
@@ -995,6 +1034,7 @@ DefineFunction(
   array(
     'name'   => "mb_stripos",
     'desc'   => "mb_stripos() returns the numeric position of the first occurrence of needle in the haystack string. Unlike mb_strpos(), mb_stripos() is case-insensitive. If needle is not found, it returns FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return the numeric position of the first occurrence of needle in the haystack string, or FALSE if needle is not found.",
@@ -1029,6 +1069,7 @@ DefineFunction(
   array(
     'name'   => "mb_stristr",
     'desc'   => "mb_stristr() finds the first occurrence of needle in haystack and returns the portion of haystack. Unlike mb_strstr(), mb_stristr() is case-insensitive. If needle is not found, it returns FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the portion of haystack, or FALSE if needle is not found.",
@@ -1062,7 +1103,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_strlen",
-    'desc'   => "Gets the length of a string .",
+    'desc'   => "Gets the length of a string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of characters in string str having character encoding encoding. A multi-byte character is counted as 1.",
@@ -1085,10 +1127,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_strpos",
-    'desc'   => "Finds position of the first occurrence of a string in a string .\nPerforms a multi-byte safe strpos() operation based on number of characters. The first character's position is 0, the second character position is 1, and so on.",
+    'desc'   => "Finds position of the first occurrence of a string in a string.\n\nPerforms a multi-byte safe strpos() operation based on number of characters. The first character's position is 0, the second character position is 1, and so on.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the numeric position of the first occurrence of needle in the haystack string . If needle is not found, it returns FALSE.",
+      'desc'   => "Returns the numeric position of the first occurrence of needle in the haystack string. If needle is not found, it returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -1120,6 +1163,7 @@ DefineFunction(
   array(
     'name'   => "mb_strrchr",
     'desc'   => "mb_strrchr() finds the last occurrence of needle in haystack and returns the portion of haystack. If needle is not found, it returns FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the portion of haystack. or FALSE if needle is not found.",
@@ -1154,6 +1198,7 @@ DefineFunction(
   array(
     'name'   => "mb_strrichr",
     'desc'   => "mb_strrichr() finds the last occurrence of needle in haystack and returns the portion of haystack. Unlike mb_strrchr(), mb_strrichr() is case-insensitive. If needle is not found, it returns FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the portion of haystack. or FALSE if needle is not found.",
@@ -1188,6 +1233,7 @@ DefineFunction(
   array(
     'name'   => "mb_strripos",
     'desc'   => "mb_strripos() performs multi-byte safe strripos() operation based on number of characters. needle position is counted from the beginning of haystack. First character's position is 0. Second character position is 1. Unlike mb_strrpos(), mb_strripos() is case-insensitive.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return the numeric position of the last occurrence of needle in the haystack string, or FALSE if needle is not found.",
@@ -1222,9 +1268,10 @@ DefineFunction(
   array(
     'name'   => "mb_strrpos",
     'desc'   => "Performs a multibyte safe strrpos() operation based on the number of characters. needle position is counted from the beginning of haystack. First character's position is 0. Second character position is 1.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the numeric position of the last occurrence of needle in the haystack string . If needle is not found, it returns FALSE.",
+      'desc'   => "Returns the numeric position of the last occurrence of needle in the haystack string. If needle is not found, it returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -1241,7 +1288,7 @@ DefineFunction(
         'name'   => "offset",
         'type'   => Variant,
         'value'  => "0",
-        'desc'   => "May be specified to begin searching an arbitrary number of characters into the string . Negative values will stop searching at an arbitrary point prior to the end of the string .",
+        'desc'   => "May be specified to begin searching an arbitrary number of characters into the string. Negative values will stop searching at an arbitrary point prior to the end of the string.",
       ),
       array(
         'name'   => "encoding",
@@ -1256,6 +1303,7 @@ DefineFunction(
   array(
     'name'   => "mb_strstr",
     'desc'   => "mb_strstr() finds the first occurrence of needle in haystack and returns the portion of haystack. If needle is not found, it returns FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the portion of haystack, or FALSE if needle is not found.",
@@ -1290,6 +1338,7 @@ DefineFunction(
   array(
     'name'   => "mb_strtolower",
     'desc'   => "Returns str with all alphabetic characters converted to lowercase.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "str with all alphabetic characters converted to lowercase.",
@@ -1313,6 +1362,7 @@ DefineFunction(
   array(
     'name'   => "mb_strtoupper",
     'desc'   => "Returns str with all alphabetic characters converted to uppercase.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "str with all alphabetic characters converted to uppercase.",
@@ -1335,7 +1385,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_strwidth",
-    'desc'   => "Returns the width of string str.\nMulti-byte characters are usually twice the width of single byte characters.\nCharacters width Chars Width U+0000 - U+0019 0 U+0020 - U+1FFF 1 U+2000 - U+FF60 2 U+FF61 - U+FF9F 1 U+FFA0 - 2",
+    'desc'   => "Returns the width of string str.\n\nMulti-byte characters are usually twice the width of single byte characters.\n\nCharacters width Chars Width U+0000 - U+0019 0 U+0020 - U+1FFF 1 U+2000 - U+FF60 2 U+FF61 - U+FF9F 1 U+FFA0 - 2",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The width of string str.",
@@ -1358,7 +1409,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_substitute_character",
-    'desc'   => "Specifies a substitution character when input character encoding is invalid or character code does not exist in output character encoding. Invalid characters may be substituted NULL (no output), string or integer value (Unicode character code value).\nThis setting affects mb_convert_encoding(), mb_convert_variables(), mb_output_handler(), and mb_send_mail().",
+    'desc'   => "Specifies a substitution character when input character encoding is invalid or character code does not exist in output character encoding. Invalid characters may be substituted NULL (no output), string or integer value (Unicode character code value).\n\nThis setting affects mb_convert_encoding(), mb_convert_variables(), mb_output_handler(), and mb_send_mail().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If substchar is set, it returns TRUE for success, otherwise returns FALSE. If substchar is not set, it returns the Unicode value, or \"none\" or \"long\".",
@@ -1368,7 +1420,7 @@ DefineFunction(
         'name'   => "substrchar",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "Specify the Unicode value as an integer , or as one of the following string s: \"none\" : no output \"long\" : Output character code value (Example: U+3000, JIS+7E7E) \"entity\" : Output character entity (Example: Ȁ)",
+        'desc'   => "Specify the Unicode value as an integer, or as one of the following strings: \"none\" : no output \"long\" : Output character code value (Example: U+3000, JIS+7E7E) \"entity\" : Output character entity (Example: Ȁ)",
       ),
     ),
   ));
@@ -1376,10 +1428,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mb_substr_count",
-    'desc'   => "Counts the number of times the needle substring occurs in the haystack string .",
+    'desc'   => "Counts the number of times the needle substring occurs in the haystack string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The number of times the needle substring occurs in the haystack string .",
+      'desc'   => "The number of times the needle substring occurs in the haystack string.",
     ),
     'args'   => array(
       array(
@@ -1405,6 +1458,7 @@ DefineFunction(
   array(
     'name'   => "mb_substr",
     'desc'   => "Performs a multi-byte safe substr() operation based on number of characters. Position is counted from the beginning of str. First character's position is 0. Second character position is 1, and so on.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "mb_substr() returns the portion of str specified by the start and length parameters.",
@@ -1424,7 +1478,7 @@ DefineFunction(
         'name'   => "length",
         'type'   => Int32,
         'value'  => "0x7FFFFFFF",
-        'desc'   => "The maximum length of the returned string .",
+        'desc'   => "The maximum length of the returned string.",
       ),
       array(
         'name'   => "encoding",

@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 169 */
+/* SRC: classes/reflection.php line 461 */
 class c_reflectionfunction : public c_reflectionfunctionabstract {
   BEGIN_CLASS_MAP(ReflectionFunction)
     PARENT_CLASS(ReflectionFunctionAbstract)

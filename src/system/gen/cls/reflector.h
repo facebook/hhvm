@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 6 */
+/* SRC: classes/reflection.php line 14 */
 class c_reflector {
   // public: virtual String t___tostring() = 0;
   // public: static virtual void t_export() = 0;

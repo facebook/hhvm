@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "override_function",
     'desc'   => "Overrides built-in functions by replacing them in the symbol table.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -66,7 +67,7 @@ DefineFunction(
       array(
         'name'   => "args",
         'type'   => String,
-        'desc'   => "The function arguments, as a comma separated string.\nUsually you will want to pass this parameter, as well as the function_code parameter, as a single quote delimited string. The reason for using single quoted strings, is to protect the variable names from parsing, otherwise, if you use double quotes there will be a need to escape the variable names, e.g. \\\$your_var.",
+        'desc'   => "The function arguments, as a comma separated string.\n\nUsually you will want to pass this parameter, as well as the function_code parameter, as a single quote delimited string. The reason for using single quoted strings, is to protect the variable names from parsing, otherwise, if you use double quotes there will be a need to escape the variable names, e.g. \\\$your_var.",
       ),
       array(
         'name'   => "code",
@@ -80,6 +81,7 @@ DefineFunction(
   array(
     'name'   => "rename_function",
     'desc'   => "Renames a orig_name to new_name in the global function table. Useful for temporarily overriding built-in functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -101,6 +103,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apd_set_browser_trace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -110,6 +113,7 @@ DefineFunction(
   array(
     'name'   => "apd_set_pprof_trace",
     'desc'   => "Starts debugging to pprof_{process_id} in the dump directory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns path of the destination file.",
@@ -133,6 +137,7 @@ DefineFunction(
   array(
     'name'   => "apd_set_session_trace_socket",
     'desc'   => "Connects to the specified tcp_server (eg. tcplisten) and sends debugging data to the socket.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -156,7 +161,7 @@ DefineFunction(
       array(
         'name'   => "mask",
         'type'   => Int32,
-        'desc'   => "An integer which is formed by adding together the XXX_TRACE constants.\nIt is not recommended to use MEMORY_TRACE. It is very slow and does not appear to be accurate. ASSIGNMENT_TRACE is not implemented yet.\nTo turn on all functional traces (TIMING, FUNCTIONS, ARGS SUMMARY (like strace -c)) use the value 99",
+        'desc'   => "An integer which is formed by adding together the XXX_TRACE constants.\n\nIt is not recommended to use MEMORY_TRACE. It is very slow and does not appear to be accurate. ASSIGNMENT_TRACE is not implemented yet.\n\nTo turn on all functional traces (TIMING, FUNCTIONS, ARGS SUMMARY (like strace -c)) use the value 99",
       ),
     ),
   ));
@@ -164,6 +169,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apd_stop_trace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -173,6 +179,7 @@ DefineFunction(
   array(
     'name'   => "apd_breakpoint",
     'desc'   => "This can be used to stop the running of your script, and await responses on the connected socket. To step the program, just send enter (a blank line), or enter a php command to be executed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -183,6 +190,7 @@ DefineFunction(
   array(
     'name'   => "apd_continue",
     'desc'   => "Usually sent via the socket to restart the interpreter.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -193,6 +201,7 @@ DefineFunction(
   array(
     'name'   => "apd_echo",
     'desc'   => "Usually sent via the socket to request information about the running script.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",

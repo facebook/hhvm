@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "get_defined_functions",
     'desc'   => "Gets an array of all defined functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an multidimensional array containing a list of all defined functions, both built-in (internal) and user-defined. The internal functions will be accessible via \$arr[\"internal\"], and the user defined ones using \$arr[\"user\"] (see example below).",
@@ -63,9 +64,10 @@ DefineFunction(
   array(
     'name'   => "function_exists",
     'desc'   => "Checks the list of defined functions, both built-in (internal) and user-defined, for function_name.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE if function_name exists and is a function, FALSE otherwise. Note: This function will return FALSE for constructs, such as include_once() and echo().",
+      'desc'   => "Returns TRUE if function_name exists and is a function, FALSE otherwise.\n\nThis function will return FALSE for constructs, such as include_once() and echo().",
     ),
     'args'   => array(
       array(
@@ -80,7 +82,7 @@ DefineFunction(
   array(
     'name'   => "is_callable",
     'desc'   => "Verify that the contents of a variable can be called as a function. This can check that a simple variable contains the name of a valid function, or that an array contains a properly encoded object and function name.",
-    'flags'  =>  HasOptFunction,
+    'flags'  =>  HasDocComment | HasOptFunction,
     'opt'    => "hphp_opt_is_callable",
     'return' => array(
       'type'   => Boolean,
@@ -111,7 +113,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_array",
     'desc'   => "Call a user defined function with the parameters in param_arr.",
-    'flags'  =>  HasOptFunction,
+    'flags'  =>  HasDocComment | HasOptFunction,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -135,7 +137,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func",
     'desc'   => "Call a user defined function given by the function parameter.",
-    'flags'  =>  MixedVariableArguments | HasOptFunction,
+    'flags'  =>  HasDocComment | MixedVariableArguments | HasOptFunction,
     'opt'    => "hphp_opt_call_user_func",
     'return' => array(
       'type'   => Variant,
@@ -154,7 +156,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_array_async",
     'desc'   => "Same as call_user_func_array(), but returns an object immediately without waiting for the function to finish. The object can be used with end_user_func_async() to eventually retrieve function's return, if needed.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Object,
       'desc'   => "An object end_user_func_async() uses for final waiting of function's return.",
@@ -177,7 +179,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_async",
     'desc'   => "Same as call_user_func(), but returns an object immediately without waiting for the function to finish. The object can be used with end_user_func_async() to eventually retrieve function's return, if needed.",
-    'flags'  =>  MixedVariableArguments | HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific | MixedVariableArguments,
     'return' => array(
       'type'   => Object,
       'desc'   => "An object end_user_func_async() uses for final waiting of function's return.",
@@ -195,7 +197,7 @@ DefineFunction(
   array(
     'name'   => "end_user_func_async",
     'desc'   => "Block until function returns. Used with call_user_func_async() or call_user_func_array_async().",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Function's return value.",
@@ -209,14 +211,14 @@ DefineFunction(
       array(
         'name'   => "default_strategy",
         'type'   => Int32,
-        'desc'   => "GLOBAL_STATE_ constants to specify how to treat global states. Please read documentation for more details.",
         'value'  => "k_GLOBAL_STATE_IGNORE",
+        'desc'   => "GLOBAL_STATE_ constants to specify how to treat global states. Please read documentation for more details.",
       ),
       array(
         'name'   => "additional_strategies",
         'type'   => Variant,
-        'desc'   => "Extra strategy for individual variables. Please read documentation for more details.",
         'value'  => "null",
+        'desc'   => "Extra strategy for individual variables. Please read documentation for more details.",
       ),
     ),
   ));
@@ -225,6 +227,7 @@ DefineFunction(
   array(
     'name'   => "forward_static_call_array",
     'desc'   => "Calls a user defined function or method given by the function parameter. This function must be called within a method context, it can't be used outside a class. All arguments of the forwarded method are passed as values, and as an array, similarly to call_user_func_array().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",
@@ -233,12 +236,12 @@ DefineFunction(
       array(
         'name'   => "function",
         'type'   => Variant,
-        'desc'   => "The function or method to be called. This parameter may be an array , with the name of the class, and the method, or a string , with a function name.",
+        'desc'   => "The function or method to be called. This parameter may be an array, with the name of the class, and the method, or a string, with a function name.",
       ),
       array(
         'name'   => "params",
         'type'   => VariantVec,
-        'desc'   => "One parameter, gathering all the method parameter in one array. Note: Note that the parameters for forward_static_call_array() are not passed by reference.",
+        'desc'   => "One parameter, gathering all the method parameter in one array.\n\nNote that the parameters for forward_static_call_array() are not passed by reference.",
       ),
     ),
   ));
@@ -247,7 +250,7 @@ DefineFunction(
   array(
     'name'   => "forward_static_call",
     'desc'   => "Calls a user defined function or method given by the function parameter, with the following arguments. This function must be called within a method context, it can't be used outside a class.",
-    'flags'  =>  MixedVariableArguments,
+    'flags'  =>  HasDocComment | MixedVariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",
@@ -265,6 +268,7 @@ DefineFunction(
   array(
     'name'   => "create_function",
     'desc'   => "Creates an anonymous function from the parameters passed, and returns a unique name for it.\nUsually these parameters will be passed as single quote delimited strings. The reason for using single quoted strings, is to protect the variable names from parsing, otherwise, if you use double quotes there will be a need to escape the variable names, e.g. \\\$avar.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a unique function name as a string, or FALSE on error.",
@@ -286,7 +290,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "func_get_arg",
-    'desc'   => "Gets the specified argument from a user-defined function's argument list.\nThis function may be used in conjunction with func_get_args() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+    'desc'   => "Gets the specified argument from a user-defined function's argument list.\n\nThis function may be used in conjunction with func_get_args() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the specified argument, or FALSE on error.",
@@ -303,7 +308,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "func_get_args",
-    'desc'   => "Gets an array of the function's argument list.\nThis function may be used in conjunction with func_get_arg() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+    'desc'   => "Gets an array of the function's argument list.\n\nThis function may be used in conjunction with func_get_arg() and func_num_args() to allow user-defined functions to accept variable-length argument lists.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
       'desc'   => "Returns an array in which each element is a copy of the corresponding member of the current user-defined function's argument list.",
@@ -313,7 +319,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "func_num_args",
-    'desc'   => "Gets the number of arguments passed to the function.\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
+    'desc'   => "Gets the number of arguments passed to the function.\n\nThis function may be used in conjunction with func_get_arg() and func_get_args() to allow user-defined functions to accept variable-length argument lists.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the number of arguments passed into the current user-defined function.",
@@ -324,7 +331,7 @@ DefineFunction(
   array(
     'name'   => "register_postsend_function",
     'desc'   => "Registers functions to call after HTTP response is completely sent to browser.",
-    'flags'  =>  VariableArguments | HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -340,8 +347,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "register_shutdown_function",
-    'desc'   => "Registers the function named by function to be executed when script processing is complete or when exit() is called.\nMultiple calls to register_shutdown_function() can be made, and each will be called in the same order as they were registered. If you call exit() within one registered shutdown function, processing will stop completely and no other registered shutdown functions will be called.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Registers the function named by function to be executed when script processing is complete or when exit() is called.\n\nMultiple calls to register_shutdown_function() can be made, and each will be called in the same order as they were registered. If you call exit() within one registered shutdown function, processing will stop completely and no other registered shutdown functions will be called.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -350,7 +357,7 @@ DefineFunction(
       array(
         'name'   => "function",
         'type'   => Variant,
-        'desc'   => "The shutdown function to register.\nThe shutdown functions are called as the part of the request so that it's possible to send the output from them. There is currently no way to process the data with output buffering functions in the shutdown function.\nShutdown functions are called after closing all opened output buffers thus, for example, its output will not be compressed if zlib.output_compression is enabled.",
+        'desc'   => "The shutdown function to register.\n\nThe shutdown functions are called as the part of the request so that it's possible to send the output from them. There is currently no way to process the data with output buffering functions in the shutdown function.\n\nShutdown functions are called after closing all opened output buffers thus, for example, its output will not be compressed if zlib.output_compression is enabled.",
       ),
     ),
   ));
@@ -359,7 +366,7 @@ DefineFunction(
   array(
     'name'   => "register_cleanup_function",
     'desc'   => "Registers functions to call at very end of a web page to clean up and free system resources.",
-    'flags'  =>  VariableArguments | HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific | VariableArguments,
     'return' => array(
       'type'   => null,
     ),
@@ -375,7 +382,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "register_tick_function",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -392,6 +399,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "unregister_tick_function",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",

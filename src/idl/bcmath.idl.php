@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "bcscale",
     'desc'   => "Sets the default scale parameter for all subsequent bc math functions that do not explicitly specify a scale parameter.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -70,6 +71,7 @@ DefineFunction(
   array(
     'name'   => "bcadd",
     'desc'   => "Sums left_operand and right_operand.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The sum of the two operands, as a string.",
@@ -98,6 +100,7 @@ DefineFunction(
   array(
     'name'   => "bcsub",
     'desc'   => "Subtracts the right_operand from the left_operand.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The result of the subtraction, as a string.",
@@ -126,6 +129,7 @@ DefineFunction(
   array(
     'name'   => "bccomp",
     'desc'   => "Compares the left_operand to the right_operand and returns the result as an integer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns 0 if the two operands are equal, 1 if the left_operand is larger than the right_operand, -1 otherwise.",
@@ -154,6 +158,7 @@ DefineFunction(
   array(
     'name'   => "bcmul",
     'desc'   => "Multiply the left_operand by the right_operand.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the result as a string.",
@@ -182,6 +187,7 @@ DefineFunction(
   array(
     'name'   => "bcdiv",
     'desc'   => "Divides the left_operand by the right_operand.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the result of the division as a string, or NULL if right_operand is 0.",
@@ -210,6 +216,7 @@ DefineFunction(
   array(
     'name'   => "bcmod",
     'desc'   => "Get the modulus of the left_operand using modulus.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the modulus as a string, or NULL if modulus is 0.",
@@ -232,6 +239,7 @@ DefineFunction(
   array(
     'name'   => "bcpow",
     'desc'   => "Raise left_operand to the power right_operand.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the result as a string.",
@@ -260,6 +268,7 @@ DefineFunction(
   array(
     'name'   => "bcpowmod",
     'desc'   => "Use the fast-exponentiation method to raise left_operand to the power right_operand with respect to the modulus modulus.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the result as a string, or NULL if modulus is 0.",
@@ -293,6 +302,7 @@ DefineFunction(
   array(
     'name'   => "bcsqrt",
     'desc'   => "Return the square root of the operand.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the square root as a string, or NULL if operand is negative.",

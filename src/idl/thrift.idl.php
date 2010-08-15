@@ -52,6 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "thrift_protocol_write_binary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -86,6 +87,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "thrift_protocol_read_binary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

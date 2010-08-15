@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/arrayaccess.php line 3 */
+/* SRC: classes/arrayaccess.php line 10 */
 class c_arrayaccess {
   // public: virtual bool t_offsetexists(CVarRef v_index) = 0;
   // public: virtual Variant t_offsetget(Variant v_index) = 0;

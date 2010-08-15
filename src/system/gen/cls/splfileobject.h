@@ -26,7 +26,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/splfile.php line 120 */
+/* SRC: classes/splfile.php line 383 */
 class c_splfileobject : public c_splfileinfo {
   BEGIN_CLASS_MAP(SplFileObject)
     PARENT_CLASS(Iterator)

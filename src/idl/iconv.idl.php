@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "iconv_mime_encode",
     'desc'   => "Composes and returns a string that represents a valid MIME header field, which looks like the following: Subject: =?ISO-8859-1?Q?Pr=FCfung_f=FCr?= Entwerfen von einer MIME kopfzeile In the above example, \"Subject\" is the field name and the portion that begins with \"=?ISO-8859-1?...\" is the field value.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an encoded MIME field on success, or FALSE if an error occurs during the encoding.",
@@ -81,6 +82,7 @@ DefineFunction(
   array(
     'name'   => "iconv_mime_decode",
     'desc'   => "Decodes a MIME header field.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a decoded MIME field on success, or FALSE if an error occurs during the decoding.",
@@ -110,9 +112,10 @@ DefineFunction(
   array(
     'name'   => "iconv_mime_decode_headers",
     'desc'   => "Decodes multiple MIME header fields at once.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an associative array that holds a whole set of MIME header fields specified by encoded_headers on success, or FALSE if an error occurs during the decoding.\nEach key of the return value represents an individual field name and the corresponding element represents a field value. If more than one field of the same name are present, iconv_mime_decode_headers() automatically incorporates them into a numerically indexed array in the order of occurrence.",
+      'desc'   => "Returns an associative array that holds a whole set of MIME header fields specified by encoded_headers on success, or FALSE if an error occurs during the decoding.\n\nEach key of the return value represents an individual field name and the corresponding element represents a field value. If more than one field of the same name are present, iconv_mime_decode_headers() automatically incorporates them into a numerically indexed array in the order of occurrence.",
     ),
     'args'   => array(
       array(
@@ -139,9 +142,10 @@ DefineFunction(
   array(
     'name'   => "iconv_get_encoding",
     'desc'   => "Retrieve internal configuration variables of iconv extension.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the current value of the internal configuration variable if successful or FALSE on failure.\nIf type is omitted or set to \"all\", iconv_get_encoding() returns an array that stores all these variables.",
+      'desc'   => "Returns the current value of the internal configuration variable if successful or FALSE on failure.\n\nIf type is omitted or set to \"all\", iconv_get_encoding() returns an array that stores all these variables.",
     ),
     'args'   => array(
       array(
@@ -157,6 +161,7 @@ DefineFunction(
   array(
     'name'   => "iconv_set_encoding",
     'desc'   => "Changes the value of the internal configuration variable specified by type to charset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -179,6 +184,7 @@ DefineFunction(
   array(
     'name'   => "iconv",
     'desc'   => "Performs a character set conversion on the string str from in_charset to out_charset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the converted string or FALSE on failure.",
@@ -192,7 +198,7 @@ DefineFunction(
       array(
         'name'   => "out_charset",
         'type'   => String,
-        'desc'   => "The output charset.\nIf you append the string //TRANSLIT to out_charset transliteration is activated. This means that when a character can't be represented in the target charset, it can be approximated through one or several similarly looking characters. If you append the string //IGNORE, characters that cannot be represented in the target charset are silently discarded. Otherwise, str is cut from the first illegal character and an E_NOTICE is generated.",
+        'desc'   => "The output charset.\n\nIf you append the string //TRANSLIT to out_charset transliteration is activated. This means that when a character can't be represented in the target charset, it can be approximated through one or several similarly looking characters. If you append the string //IGNORE, characters that cannot be represented in the target charset are silently discarded. Otherwise, str is cut from the first illegal character and an E_NOTICE is generated.",
       ),
       array(
         'name'   => "str",
@@ -206,6 +212,7 @@ DefineFunction(
   array(
     'name'   => "iconv_strlen",
     'desc'   => "In contrast to strlen(), iconv_strlen() counts the occurrences of characters in the given byte sequence str on the basis of the specified character set, the result of which is not necessarily identical to the length of the string in byte.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the character count of str, as an integer.",
@@ -228,10 +235,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "iconv_strpos",
-    'desc'   => "Finds position of first occurrence of a needle within a haystack.\nIn contrast to strpos(), the return value of iconv_strpos() is the number of characters that appear before the needle, rather than the offset in bytes to the position where the needle has been found. The characters are counted on the basis of the specified character set charset.\nIf haystack or needle is not a string, it is converted to a string and applied as the ordinal value of a character.",
+    'desc'   => "Finds position of first occurrence of a needle within a haystack.\n\nIn contrast to strpos(), the return value of iconv_strpos() is the number of characters that appear before the needle, rather than the offset in bytes to the position where the needle has been found. The characters are counted on the basis of the specified character set charset.\nIf haystack or needle is not a string, it is converted to a string and applied as the ordinal value of a character.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the numeric position of the first occurrence of needle in haystack.\nIf needle is not found, iconv_strpos() will return FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
+      'desc'   => "Returns the numeric position of the first occurrence of needle in haystack.\n\nIf needle is not found, iconv_strpos() will return FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
     ),
     'args'   => array(
       array(
@@ -263,9 +271,10 @@ DefineFunction(
   array(
     'name'   => "iconv_strrpos",
     'desc'   => "In contrast to strpos(), the return value of iconv_strrpos() is the number of characters that appear before the needle, rather than the offset in bytes to the position where the needle has been found.\nIf haystack or needle is not a string, it is converted to a string and applied as the ordinal value of a character.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the numeric position of the last occurrence of needle in haystack. The characters are counted on the basis of the specified character set charset.\nIf needle is not found, iconv_strrpos() will return FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
+      'desc'   => "Returns the numeric position of the last occurrence of needle in haystack. The characters are counted on the basis of the specified character set charset.\n\nIf needle is not found, iconv_strrpos() will return FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
     ),
     'args'   => array(
       array(
@@ -291,9 +300,10 @@ DefineFunction(
   array(
     'name'   => "iconv_substr",
     'desc'   => "Cuts a portion of str specified by the offset and length parameters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the portion of str specified by the offset and length parameters.\nIf str is shorter than offset characters long, FALSE will be returned.",
+      'desc'   => "Returns the portion of str specified by the offset and length parameters.\n\nIf str is shorter than offset characters long, FALSE will be returned.",
     ),
     'args'   => array(
       array(
@@ -304,19 +314,19 @@ DefineFunction(
       array(
         'name'   => "offset",
         'type'   => Int32,
-        'desc'   => "If offset is non-negative, iconv_substr() cuts the portion out of str beginning at offset'th character, counting from zero.\nIf offset is negative, iconv_substr() cuts out the portion beginning at the position, offset characters away from the end of str.",
+        'desc'   => "If offset is non-negative, iconv_substr() cuts the portion out of str beginning at offset'th character, counting from zero.\n\nIf offset is negative, iconv_substr() cuts out the portion beginning at the position, offset characters away from the end of str.",
       ),
       array(
         'name'   => "length",
         'type'   => Int32,
         'value'  => "k_PHP_INT_MAX",
-        'desc'   => "If length is given and is positive, the return value will contain at most length characters of the portion that begins at offset (depending on the length of string).\nIf negative length is passed, iconv_substr() cuts the portion out of str from the offset'th character up to the character that is length characters away from the end of the string. In case offset is also negative, the start position is calculated beforehand according to the rule explained above.",
+        'desc'   => "If length is given and is positive, the return value will contain at most length characters of the portion that begins at offset (depending on the length of string).\n\nIf negative length is passed, iconv_substr() cuts the portion out of str from the offset'th character up to the character that is length characters away from the end of the string. In case offset is also negative, the start position is calculated beforehand according to the rule explained above.",
       ),
       array(
         'name'   => "charset",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding.\nNote that offset and length parameters are always deemed to represent offsets that are calculated on the basis of the character set determined by charset, whilst the counterpart substr() always takes these for byte offsets.",
+        'desc'   => "If charset parameter is omitted, string are assumed to be encoded in iconv.internal_encoding.\n\nNote that offset and length parameters are always deemed to represent offsets that are calculated on the basis of the character set determined by charset, whilst the counterpart substr() always takes these for byte offsets.",
       ),
     ),
   ));
@@ -324,7 +334,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ob_iconv_handler",
-    'desc'   => "Converts the string encoded in internal_encoding to output_encoding.\ninternal_encoding and output_encoding should be defined in the php.ini file or in iconv_set_encoding().\nSee ob_start() for information about this handler parameters.",
+    'desc'   => "Converts the string encoded in internal_encoding to output_encoding.\n\ninternal_encoding and output_encoding should be defined in the php.ini file or in iconv_set_encoding().\nSee ob_start() for information about this handler parameters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "See ob_start() for information about this handler return values.",

@@ -53,16 +53,17 @@ DefineFunction(
   array(
     'name'   => "stream_context_create",
     'desc'   => "Creates and returns a stream context with any options supplied in options preset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
-      'desc'   => "A stream context resource .",
+      'desc'   => "A stream context resource.",
     ),
     'args'   => array(
       array(
         'name'   => "options",
         'type'   => VariantMap,
         'value'  => "null_array",
-        'desc'   => "Must be an associative array of associative arrays in the format \$arr['wrapper']['option'] = \$value.\nDefault to an empty array.",
+        'desc'   => "Must be an associative array of associative arrays in the format \$arr['wrapper']['option'] = \$value.\n\nDefault to an empty array.",
       ),
       array(
         'name'   => "params",
@@ -76,16 +77,17 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_context_get_default",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
-      'desc'   => "A stream context resource .",
+      'desc'   => "A stream context resource.",
     ),
     'args'   => array(
       array(
         'name'   => "options",
         'type'   => VariantMap,
         'value'  => "null_array",
-        'desc'   => "options must be an associative array of associative arrays in the format \$arr['wrapper']['option'] = \$value. Note: As of PHP 5.3.0, the stream_context_set_default() function can be used to set the default context.",
+        'desc'   => "options must be an associative array of associative arrays in the format \$arr['wrapper']['option'] = \$value.\n\nAs of PHP 5.3.0, the stream_context_set_default() function can be used to set the default context.",
       ),
     ),
   ));
@@ -93,6 +95,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_context_get_options",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an associative array with the options.",
@@ -109,6 +112,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_context_set_option",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -122,7 +126,7 @@ DefineFunction(
       array(
         'name'   => "wrapper",
         'type'   => Variant,
-        'desc'   => "The options to set for the default context. Note: options must be an associative array of associative arrays in the format \$arr['wrapper']['option'] = \$value. Refer to context options and parameters for a listing of stream options.",
+        'desc'   => "The options to set for the default context.\n\noptions must be an associative array of associative arrays in the format \$arr['wrapper']['option'] = \$value.\n\nRefer to context options and parameters for a listing of stream options.",
       ),
       array(
         'name'   => "option",
@@ -140,6 +144,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_context_set_param",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -159,6 +164,7 @@ DefineFunction(
   array(
     'name'   => "stream_copy_to_stream",
     'desc'   => "Makes a copy of up to maxlength bytes of data from the current position (or from the offset position, if specified) in source to dest. If maxlength is not specified, all remaining content in source will be copied.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the total count of bytes copied.",
@@ -192,6 +198,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_encoding",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -211,6 +218,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_bucket_append",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -229,6 +237,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_bucket_prepend",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -247,6 +256,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_bucket_make_writeable",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -261,6 +271,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_bucket_new",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -280,9 +291,10 @@ DefineFunction(
   array(
     'name'   => "stream_filter_register",
     'desc'   => "stream_filter_register() allows you to implement your own filter on any registered stream used with all the other filesystem functions (such as fopen(), fread() etc.).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure.\nstream_filter_register() will return FALSE if the filtername is already defined.",
+      'desc'   => "Returns TRUE on success or FALSE on failure.\n\nstream_filter_register() will return FALSE if the filtername is already defined.",
     ),
     'args'   => array(
       array(
@@ -293,7 +305,7 @@ DefineFunction(
       array(
         'name'   => "classname",
         'type'   => String,
-        'desc'   => "To implement a filter, you need to define a class as an extension of php_user_filter with a number of member functions as defined below. When performing read/write operations on the stream to which your filter is attached, PHP will pass the data through your filter (and any other filters attached to that stream) so that the data may be modified as desired. You must implement the methods exactly as described below - doing otherwise will lead to undefined behaviour. int filter ( resource \$in , resource \$out , int &\$consumed , bool \$closing )\nThis method is called whenever data is read from or written to the attached stream (such as with fread() or fwrite()). in is a resource pointing to a bucket brigade which contains one or more bucket objects containing data to be filtered. out is a resource pointing to a second bucket brigade into which your modified buckets should be placed. consumed, which must always be declared by reference, should be incremented by the length of the data which your filter reads in and alters. In most cases this means you will increment consumed by \$bucket->datalen for each \$bucket. If the stream is in the process of closing (and therefore this is the last pass through the filterchain), the closing parameter will be set to TRUE. The filter method must return one of three values upon completion. Return Value Meaning PSFS_PASS_ON Filter processed successfully with data available in the out bucket brigade. PSFS_FEED_ME Filter processed successfully, however no data was available to return. More data is required from the stream or prior filter. PSFS_ERR_FATAL (default) The filter experienced an unrecoverable error and cannot continue. bool onCreate ( void ) This method is called during instantiation of the filter class object. If your filter allocates or initializes any other resources (such as a buffer), this is the place to do it. Your implementation of this method should return FALSE on failure, or TRUE on success. When your filter is first instantiated, and yourfilter->onCreate() is called, a number of properties will be available as shown in the table below.\nProperty Contents FilterClass->filtername A string containing the name the filter was instantiated with. Filters may be registered under multiple names or under wildcards. Use this property to determine which name was used. FilterClass->params The contents of the params parameter passed to stream_filter_append() or stream_filter_prepend(). FilterClass->stream The stream resource being filtered. Maybe available only during filter calls when the closing parameter is set to FALSE. void onClose ( void )\nThis method is called upon filter shutdown (typically, this is also during stream shutdown), and is executed after the flush method is called. If any resources were allocated or initialized during onCreate() this would be the time to destroy or dispose of them.",
+        'desc'   => "To implement a filter, you need to define a class as an extension of php_user_filter with a number of member functions as defined below. When performing read/write operations on the stream to which your filter is attached, PHP will pass the data through your filter (and any other filters attached to that stream) so that the data may be modified as desired. You must implement the methods exactly as described below - doing otherwise will lead to undefined behaviour. int filter ( resource \$in , resource \$out , int &\$consumed , bool \$closing )\n\nThis method is called whenever data is read from or written to the attached stream (such as with fread() or fwrite()). in is a resource pointing to a bucket brigade which contains one or more bucket objects containing data to be filtered. out is a resource pointing to a second bucket brigade into which your modified buckets should be placed. consumed, which must always be declared by reference, should be incremented by the length of the data which your filter reads in and alters. In most cases this means you will increment consumed by \$bucket->datalen for each \$bucket. If the stream is in the process of closing (and therefore this is the last pass through the filterchain), the closing parameter will be set to TRUE. The filter() method must return one of three values upon completion. Return Value Meaning PSFS_PASS_ON Filter processed successfully with data available in the out bucket brigade. PSFS_FEED_ME Filter processed successfully, however no data was available to return. More data is required from the stream or prior filter. PSFS_ERR_FATAL (default) The filter experienced an unrecoverable error and cannot continue. bool onCreate ( void ) This method is called during instantiation of the filter class object. If your filter allocates or initializes any other resources (such as a buffer), this is the place to do it. Your implementation of this method should return FALSE on failure, or TRUE on success. When your filter is first instantiated, and yourfilter->onCreate() is called, a number of properties will be available as shown in the table below.\n\nProperty Contents FilterClass->filtername A string containing the name the filter was instantiated with. Filters may be registered under multiple names or under wildcards. Use this property to determine which name was used. FilterClass->params The contents of the params parameter passed to stream_filter_append() or stream_filter_prepend(). FilterClass->stream The stream resource being filtered. Maybe available only during filter() calls when the closing parameter is set to FALSE. void onClose ( void )\n\nThis method is called upon filter shutdown (typically, this is also during stream shutdown), and is executed after the flush method is called. If any resources were allocated or initialized during onCreate() this would be the time to destroy or dispose of them.",
       ),
     ),
   ));
@@ -302,6 +314,7 @@ DefineFunction(
   array(
     'name'   => "stream_filter_remove",
     'desc'   => "Removes a stream filter previously added to a stream with stream_filter_prepend() or stream_filter_append(). Any data remaining in the filter's internal buffer will be flushed through to the next filter before removing it.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -319,6 +332,7 @@ DefineFunction(
   array(
     'name'   => "stream_filter_append",
     'desc'   => "Adds filtername to the list of filters attached to stream.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
       'desc'   => "Returns a resource which can be used to refer to this filter instance during a call to stream_filter_remove().",
@@ -353,6 +367,7 @@ DefineFunction(
   array(
     'name'   => "stream_filter_prepend",
     'desc'   => "Adds filtername to the list of filters attached to stream.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
       'desc'   => "Returns a resource which can be used to refer to this filter instance during a call to stream_filter_remove().",
@@ -387,6 +402,7 @@ DefineFunction(
   array(
     'name'   => "stream_get_contents",
     'desc'   => "Identical to file_get_contents(), except that stream_get_contents() operates on an already open stream resource and returns the remaining contents in a string, up to maxlength bytes and starting at the specified offset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string or FALSE on failure.",
@@ -415,6 +431,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_get_filters",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an indexed array containing the name of all stream filters available.",
@@ -424,10 +441,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_get_line",
-    'desc'   => "Gets a line from the given handle.\nReading ends when length bytes have been read, when the string specified by ending is found (which is not included in the return value), or on EOF (whichever comes first).\nThis function is nearly identical to fgets() except in that it allows end of line delimiters other than the standard \\n, \\r, and \\r\\n, and does not return the delimiter itself.",
+    'desc'   => "Gets a line from the given handle.\n\nReading ends when length bytes have been read, when the string specified by ending is found (which is not included in the return value), or on EOF (whichever comes first).\n\nThis function is nearly identical to fgets() except in that it allows end of line delimiters other than the standard \\n, \\r, and \\r\\n, and does not return the delimiter itself.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a string of up to length bytes read from the file pointed to by handle.\nIf an error occurs, returns FALSE.",
+      'desc'   => "Returns a string of up to length bytes read from the file pointed to by handle.\n\nIf an error occurs, returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -454,9 +472,10 @@ DefineFunction(
   array(
     'name'   => "stream_get_meta_data",
     'desc'   => "Returns information about an existing stream.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The result array contains the following items:\ntimed_out (bool) - TRUE if the stream timed out while waiting for data on the last call to fread() or fgets().\nblocked (bool) - TRUE if the stream is in blocking IO mode. See stream_set_blocking().\neof (bool) - TRUE if the stream has reached end-of-file. Note that for socket streams this member can be TRUE even when unread_bytes is non-zero. To determine if there is more data to be read, use feof() instead of reading this item.\nunread_bytes (int) - the number of bytes currently contained in the PHP's own internal buffer. Note: You shouldn't use this value in a script.\nstream_type (string) - a label describing the underlying implementation of the stream.\nwrapper_type (string) - a label describing the protocol wrapper implementation layered over the stream. See List of Supported Protocols/Wrappers for more information about wrappers.\nwrapper_data (mixed) - wrapper specific data attached to this stream. See List of Supported Protocols/Wrappers for more information about wrappers and their wrapper data.\nfilters (array) - and array containing the names of any filters that have been stacked onto this stream. Documentation on filters can be found in the Filters appendix.\nmode (string) - the type of access required for this stream (see Table 1 of the fopen() reference)\nseekable (bool) - whether the current stream can be seeked.\nuri (string) - the URI/filename associated with this stream.",
+      'desc'   => "The result array contains the following items:\n\ntimed_out (bool) - TRUE if the stream timed out while waiting for data on the last call to fread() or fgets().\n\nblocked (bool) - TRUE if the stream is in blocking IO mode. See stream_set_blocking().\n\neof (bool) - TRUE if the stream has reached end-of-file. Note that for socket streams this member can be TRUE even when unread_bytes is non-zero. To determine if there is more data to be read, use feof() instead of reading this item.\n\nunread_bytes (int) - the number of bytes currently contained in the PHP's own internal buffer. You shouldn't use this value in a script.\n\nstream_type (string) - a label describing the underlying implementation of the stream.\n\nwrapper_type (string) - a label describing the protocol wrapper implementation layered over the stream. See List of Supported Protocols/Wrappers for more information about wrappers.\n\nwrapper_data (mixed) - wrapper specific data attached to this stream. See List of Supported Protocols/Wrappers for more information about wrappers and their wrapper data.\n\nfilters (array) - and array containing the names of any filters that have been stacked onto this stream. Documentation on filters can be found in the Filters appendix.\n\nmode (string) - the type of access required for this stream (see Table 1 of the fopen() reference)\n\nseekable (bool) - whether the current stream can be seeked.\n\nuri (string) - the URI/filename associated with this stream.",
     ),
     'args'   => array(
       array(
@@ -470,6 +489,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_get_transports",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an indexed array of socket transports names.",
@@ -480,6 +500,7 @@ DefineFunction(
   array(
     'name'   => "stream_get_wrappers",
     'desc'   => "Retrieve list of registered streams available on the running system.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an indexed array containing the name of all stream wrappers available on the running system.",
@@ -489,6 +510,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_register_wrapper",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -508,9 +530,10 @@ DefineFunction(
   array(
     'name'   => "stream_wrapper_register",
     'desc'   => "Allows you to implement your own protocol handlers and streams for use with all the other filesystem functions (such as fopen(), fread() etc.).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure.\nstream_wrapper_register() will return FALSE if the protocol already has a handler.",
+      'desc'   => "Returns TRUE on success or FALSE on failure.\n\nstream_wrapper_register() will return FALSE if the protocol already has a handler.",
     ),
     'args'   => array(
       array(
@@ -530,6 +553,7 @@ DefineFunction(
   array(
     'name'   => "stream_wrapper_restore",
     'desc'   => "Restores a built-in wrapper previously unregistered with stream_wrapper_unregister().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -546,6 +570,7 @@ DefineFunction(
   array(
     'name'   => "stream_wrapper_unregister",
     'desc'   => "Allows you to disable an already defined stream wrapper. Once the wrapper has been disabled you may override it with a user-defined wrapper using stream_wrapper_register() or reenable it later on with stream_wrapper_restore().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -562,6 +587,7 @@ DefineFunction(
   array(
     'name'   => "stream_resolve_include_path",
     'desc'   => "Resolve filename against the include path according to the same rules as fopen()/include() does.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "On success, the resolved absolute filename is returned. On failure, FALSE is returned.",
@@ -585,6 +611,7 @@ DefineFunction(
   array(
     'name'   => "stream_select",
     'desc'   => "The stream_select() function accepts arrays of streams and waits for them to change status. Its operation is equivalent to that of the socket_select() function except in that it acts on streams.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "On success stream_select() returns the number of stream resources contained in the modified arrays, which may be zero if the timeout expires before anything interesting happens. On error FALSE is returned and a warning raised (this can happen if the system call is interrupted by an incoming signal).",
@@ -603,12 +630,12 @@ DefineFunction(
       array(
         'name'   => "except",
         'type'   => Variant | Reference,
-        'desc'   => "The streams listed in the except array will be watched for high priority exceptional (\"out-of-band\") data arriving. Note: When stream_select() returns, the arrays read, write and except are modified to indicate which stream resource(s) actually changed status. You do not need to pass every array to stream_select(). You can leave it out and use an empty array or NULL instead. Also do not forget that those arrays are passed by reference and will be modified after stream_select() returns.",
+        'desc'   => "The streams listed in the except array will be watched for high priority exceptional (\"out-of-band\") data arriving.\n\nWhen stream_select() returns, the arrays read, write and except are modified to indicate which stream resource(s) actually changed status. You do not need to pass every array to stream_select(). You can leave it out and use an empty array or NULL instead. Also do not forget that those arrays are passed by reference and will be modified after stream_select() returns.",
       ),
       array(
         'name'   => "vtv_sec",
         'type'   => Variant,
-        'desc'   => "The tv_sec and tv_usec together form the timeout parameter, tv_sec specifies the number of seconds while tv_usec the number of microseconds. The timeout is an upper bound on the amount of time that stream_select() will wait before it returns. If tv_sec and tv_usec are both set to 0, stream_select() will not wait for data - instead it will return immediately, indicating the current status of the streams.\nIf tv_sec is NULL stream_select() can block indefinitely, returning only when an event on one of the watched streams occurs (or if a signal interrupts the system call). Warning\nUsing a timeout value of 0 allows you to instantaneously poll the status of the streams, however, it is NOT a good idea to use a 0 timeout value in a loop as it will cause your script to consume too much CPU time.\nIt is much better to specify a timeout value of a few seconds, although if you need to be checking and running other code concurrently, using a timeout value of at least 200000 microseconds will help reduce the CPU usage of your script.\nRemember that the timeout value is the maximum time that will elapse; stream_select() will return as soon as the requested streams are ready for use.",
+        'desc'   => "The tv_sec and tv_usec together form the timeout parameter, tv_sec specifies the number of seconds while tv_usec the number of microseconds. The timeout is an upper bound on the amount of time that stream_select() will wait before it returns. If tv_sec and tv_usec are both set to 0, stream_select() will not wait for data - instead it will return immediately, indicating the current status of the streams.\n\nIf tv_sec is NULL stream_select() can block indefinitely, returning only when an event on one of the watched streams occurs (or if a signal interrupts the system call). Warning\n\nUsing a timeout value of 0 allows you to instantaneously poll the status of the streams, however, it is NOT a good idea to use a 0 timeout value in a loop as it will cause your script to consume too much CPU time.\n\nIt is much better to specify a timeout value of a few seconds, although if you need to be checking and running other code concurrently, using a timeout value of at least 200000 microseconds will help reduce the CPU usage of your script.\n\nRemember that the timeout value is the maximum time that will elapse; stream_select() will return as soon as the requested streams are ready for use.",
       ),
       array(
         'name'   => "tv_usec",
@@ -622,7 +649,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_set_blocking",
-    'desc'   => "Sets blocking or non-blocking mode on a stream.\nThis function works for any stream that supports non-blocking mode (currently, regular files and socket streams).",
+    'desc'   => "Sets blocking or non-blocking mode on a stream.\n\nThis function works for any stream that supports non-blocking mode (currently, regular files and socket streams).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -644,7 +672,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_set_timeout",
-    'desc'   => "Sets the timeout value on stream, expressed in the sum of seconds and microseconds.\nWhen the stream times out, the 'timed_out' key of the array returned by stream_get_meta_data() is set to TRUE, although no error/warning is generated.",
+    'desc'   => "Sets the timeout value on stream, expressed in the sum of seconds and microseconds.\n\nWhen the stream times out, the 'timed_out' key of the array returned by stream_get_meta_data() is set to TRUE, although no error/warning is generated.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -673,6 +702,7 @@ DefineFunction(
   array(
     'name'   => "stream_set_write_buffer",
     'desc'   => "Sets the buffering for write operations on the given stream to buffer bytes. Output using fwrite() is normally buffered at 8K. This means that if there are two processes wanting to write to the same output stream (a file), each is paused after 8K of data to allow the other to write.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns 0 on success, or EOF if the request cannot be honored.",
@@ -694,6 +724,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "set_file_buffer",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -713,6 +744,7 @@ DefineFunction(
   array(
     'name'   => "stream_socket_accept",
     'desc'   => "Accept a connection on a socket previously created by stream_socket_server().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a stream to the accepted socket connection or FALSE on failure.",
@@ -733,7 +765,7 @@ DefineFunction(
         'name'   => "peername",
         'type'   => Variant | Reference,
         'value'  => "null",
-        'desc'   => "Will be set to the name (address) of the client which connected, if included and available from the selected transport. Note: Can also be determined later using stream_socket_get_name().",
+        'desc'   => "Will be set to the name (address) of the client which connected, if included and available from the selected transport.\n\nCan also be determined later using stream_socket_get_name().",
       ),
     ),
   ));
@@ -741,7 +773,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_socket_server",
-    'desc'   => "Creates a stream or datagram socket on the specified local_socket.\nThis function only creates a socket, to begin accepting connections use stream_socket_accept().",
+    'desc'   => "Creates a stream or datagram socket on the specified local_socket.\n\nThis function only creates a socket, to begin accepting connections use stream_socket_accept().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the created stream, or FALSE on error.",
@@ -750,7 +783,7 @@ DefineFunction(
       array(
         'name'   => "local_socket",
         'type'   => String,
-        'desc'   => "The type of socket created is determined by the transport specified using standard URL formatting: transport://target.\nFor Internet Domain sockets (AF_INET) such as TCP and UDP, the target portion of the remote_socket parameter should consist of a hostname or IP address followed by a colon and a port number. For Unix domain sockets, the target portion should point to the socket file on the filesystem.\nDepending on the environment, Unix domain sockets may not be available. A list of available transports can be retrieved using stream_get_transports(). See List of Supported Socket Transports for a list of bulitin transports.",
+        'desc'   => "The type of socket created is determined by the transport specified using standard URL formatting: transport://target.\n\nFor Internet Domain sockets (AF_INET) such as TCP and UDP, the target portion of the remote_socket parameter should consist of a hostname or IP address followed by a colon and a port number. For Unix domain sockets, the target portion should point to the socket file on the filesystem.\n\nDepending on the environment, Unix domain sockets may not be available. A list of available transports can be retrieved using stream_get_transports(). See List of Supported Socket Transports for a list of bulitin transports.",
       ),
       array(
         'name'   => "errnum",
@@ -768,7 +801,7 @@ DefineFunction(
         'name'   => "flags",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "A bitmask field which may be set to any combination of socket creation flags. Note: For UDP sockets, you must use STREAM_SERVER_BIND as the flags parameter.",
+        'desc'   => "A bitmask field which may be set to any combination of socket creation flags.\n\nFor UDP sockets, you must use STREAM_SERVER_BIND as the flags parameter.",
       ),
       array(
         'name'   => "context",
@@ -781,7 +814,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_socket_client",
-    'desc'   => "Initiates a stream or datagram connection to the destination specified by remote_socket. The type of socket created is determined by the transport specified using standard URL formatting: transport://target. For Internet Domain sockets (AF_INET) such as TCP and UDP, the target portion of the remote_socket parameter should consist of a hostname or IP address followed by a colon and a port number. For Unix domain sockets, the target portion should point to the socket file on the filesystem. Note: The stream will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
+    'desc'   => "Initiates a stream or datagram connection to the destination specified by remote_socket. The type of socket created is determined by the transport specified using standard URL formatting: transport://target. For Internet Domain sockets (AF_INET) such as TCP and UDP, the target portion of the remote_socket parameter should consist of a hostname or IP address followed by a colon and a port number. For Unix domain sockets, the target portion should point to the socket file on the filesystem.\n\nThe stream will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "On success a stream resource is returned which may be used together with the other file functions (such as fgets(), fgetss(), fwrite(), fclose(), and feof()), FALSE on failure.",
@@ -808,7 +842,7 @@ DefineFunction(
         'name'   => "timeout",
         'type'   => Double,
         'value'  => "0.0",
-        'desc'   => "Number of seconds until the connect() system call should timeout. Note: This parameter only applies when not making asynchronous connection attempts. Note: To set a timeout for reading/writing data over the socket, use the stream_set_timeout(), as the timeout only applies while making connecting the socket.",
+        'desc'   => "Number of seconds until the connect() system call should timeout. This parameter only applies when not making asynchronous connection attempts.\n\nTo set a timeout for reading/writing data over the socket, use the stream_set_timeout(), as the timeout only applies while making connecting the socket.",
       ),
       array(
         'name'   => "flags",
@@ -828,6 +862,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_socket_enable_crypto",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success, FALSE if negotiation has failed or 0 if there isn't enough data and you should try again (only for non-blocking sockets).",
@@ -862,6 +897,7 @@ DefineFunction(
   array(
     'name'   => "stream_socket_get_name",
     'desc'   => "Returns the local or remote name of a given socket connection.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The name of the socket.",
@@ -883,7 +919,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stream_socket_pair",
-    'desc'   => "stream_socket_pair() creates a pair of connected, indistinguishable socket streams. This function is commonly used in IPC (Inter-Process Communication).\nNote: Please consult the Streams constant list for further details on each constant.",
+    'desc'   => "stream_socket_pair() creates a pair of connected, indistinguishable socket streams. This function is commonly used in IPC (Inter-Process Communication).\nPlease consult the Streams constant list for further details on each constant.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array with the two socket resources on success, or FALSE on failure.",
@@ -911,6 +948,7 @@ DefineFunction(
   array(
     'name'   => "stream_socket_recvfrom",
     'desc'   => "stream_socket_recvfrom() accepts data from a remote socket up to length bytes.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the read data, as a string",
@@ -945,6 +983,7 @@ DefineFunction(
   array(
     'name'   => "stream_socket_sendto",
     'desc'   => "Sends the specified data through the socket.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a result code, as an integer.",
@@ -970,7 +1009,7 @@ DefineFunction(
         'name'   => "address",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The address specified when the socket stream was created will be used unless an alternate address is specified in address.\nIf specified, it must be in dotted quad (or [ipv6]) format.",
+        'desc'   => "The address specified when the socket stream was created will be used unless an alternate address is specified in address.\n\nIf specified, it must be in dotted quad (or [ipv6]) format.",
       ),
     ),
   ));
@@ -979,6 +1018,7 @@ DefineFunction(
   array(
     'name'   => "stream_socket_shutdown",
     'desc'   => "Shutdowns (partially or not) a full-duplex connection.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",

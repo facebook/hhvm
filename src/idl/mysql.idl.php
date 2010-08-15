@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "mysql_connect",
     'desc'   => "Opens or reuses a connection to a MySQL server.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a MySQL link identifier on success or FALSE on failure.",
@@ -62,7 +63,7 @@ DefineFunction(
         'name'   => "server",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The MySQL server. It can also include a port number. e.g. \"hostname:port\" or a path to a local socket e.g. \":/path/to/socket\" for the localhost.\nIf the PHP directive mysql.default_host is undefined (default), then the default value is 'localhost:3306'. In SQL safe mode, this parameter is ignored and value 'localhost:3306' is always used.",
+        'desc'   => "The MySQL server. It can also include a port number. e.g. \"hostname:port\" or a path to a local socket e.g. \":/path/to/socket\" for the localhost.\n\nIf the PHP directive mysql.default_host is undefined (default), then the default value is 'localhost:3306'. In SQL safe mode, this parameter is ignored and value 'localhost:3306' is always used.",
       ),
       array(
         'name'   => "username",
@@ -91,14 +92,14 @@ DefineFunction(
       array(
         'name'   => "connect_timeout_ms",
         'type'   => Int32,
-        'desc'   => "(HipHop specific) How many milli-seconds to wait for connection.",
         'value'  => "-1",
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for connection.",
       ),
       array(
         'name'   => "query_timeout_ms",
         'type'   => Int32,
-        'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
         'value'  => "-1",
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
       ),
     ),
   ));
@@ -106,7 +107,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_pconnect",
-    'desc'   => "Establishes a persistent connection to a MySQL server.\nmysql_pconnect() acts very much like mysql_connect() with two major differences.\nFirst, when connecting, the function would first try to find a (persistent) link that's already open with the same host, username and password. If one is found, an identifier for it will be returned instead of opening a new connection.\nSecond, the connection to the SQL server will not be closed when the execution of the script ends. Instead, the link will remain open for future use (mysql_close() will not close links established by mysql_pconnect()).\nThis type of link is therefore called 'persistent'.",
+    'desc'   => "Establishes a persistent connection to a MySQL server.\n\nmysql_pconnect() acts very much like mysql_connect() with two major differences.\n\nFirst, when connecting, the function would first try to find a (persistent) link that's already open with the same host, username and password. If one is found, an identifier for it will be returned instead of opening a new connection.\n\nSecond, the connection to the SQL server will not be closed when the execution of the script ends. Instead, the link will remain open for future use (mysql_close() will not close links established by mysql_pconnect()).\n\nThis type of link is therefore called 'persistent'.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a MySQL persistent link identifier on success, or FALSE on failure.",
@@ -116,7 +118,7 @@ DefineFunction(
         'name'   => "server",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The MySQL server. It can also include a port number. e.g. \"hostname:port\" or a path to a local socket e.g. \":/path/to/socket\" for the localhost.\nIf the PHP directive mysql.default_host is undefined (default), then the default value is 'localhost:3306'",
+        'desc'   => "The MySQL server. It can also include a port number. e.g. \"hostname:port\" or a path to a local socket e.g. \":/path/to/socket\" for the localhost.\n\nIf the PHP directive mysql.default_host is undefined (default), then the default value is 'localhost:3306'",
       ),
       array(
         'name'   => "username",
@@ -139,14 +141,14 @@ DefineFunction(
       array(
         'name'   => "connect_timeout_ms",
         'type'   => Int32,
-        'desc'   => "(HipHop specific) How many milli-seconds to wait for connection.",
         'value'  => "-1",
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for connection.",
       ),
       array(
         'name'   => "query_timeout_ms",
         'type'   => Int32,
-        'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
         'value'  => "-1",
+        'desc'   => "(HipHop specific) How many milli-seconds to wait for query.",
       ),
     ),
   ));
@@ -154,6 +156,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_connect_with_db",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -204,6 +207,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_pconnect_with_db",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -250,6 +254,7 @@ DefineFunction(
   array(
     'name'   => "mysql_set_charset",
     'desc'   => "Sets the default character set for the current connection.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -272,7 +277,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_ping",
-    'desc'   => "Checks whether or not the connection to the server is working. If it has gone down, an automatic reconnection is attempted. This function can be used by scripts that remain idle for a long while, to check whether or not the server has closed the connection and reconnect if necessary. Note: Since MySQL 5.0.13, automatic reconnection feature is disabled.",
+    'desc'   => "Checks whether or not the connection to the server is working. If it has gone down, an automatic reconnection is attempted. This function can be used by scripts that remain idle for a long while, to check whether or not the server has closed the connection and reconnect if necessary.\n\nSince MySQL 5.0.13, automatic reconnection feature is disabled.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE if the connection to the server MySQL server is working, otherwise FALSE.",
@@ -290,7 +296,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_escape_string",
-    'desc'   => "This function will escape the unescaped_string, so that it is safe to place it in a mysql_query(). This function is deprecated.\nThis function is identical to mysql_real_escape_string() except that mysql_real_escape_string() takes a connection handler and escapes the string according to the current character set. mysql_escape_string() does not take a connection argument and does not respect the current charset setting. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
+    'desc'   => "This function will escape the unescaped_string, so that it is safe to place it in a mysql_query(). This function is deprecated.\n\nThis function is identical to mysql_real_escape_string() except that mysql_real_escape_string() takes a connection handler and escapes the string according to the current character set. mysql_escape_string() does not take a connection argument and does not respect the current charset setting. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the escaped string.",
@@ -307,7 +314,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_real_escape_string",
-    'desc'   => "Escapes special characters in the unescaped_string, taking into account the current character set of the connection so that it is safe to place it in a mysql_query(). If binary data is to be inserted, this function must be used.\nmysql_real_escape_string() calls MySQL's library function mysql_real_escape_string, which prepends backslashes to the following characters: \\x00, \\n, \\r, \\, ', \" and \\x1a.\nThis function must always (with few exceptions) be used to make data safe before sending a query to MySQL.",
+    'desc'   => "Escapes special characters in the unescaped_string, taking into account the current character set of the connection so that it is safe to place it in a mysql_query(). If binary data is to be inserted, this function must be used.\n\nmysql_real_escape_string() calls MySQL's library function mysql_real_escape_string, which prepends backslashes to the following characters: \\x00, \\n, \\r, \\, ', \" and \\x1a.\n\nThis function must always (with few exceptions) be used to make data safe before sending a query to MySQL.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the escaped string, or FALSE on error.",
@@ -331,6 +339,7 @@ DefineFunction(
   array(
     'name'   => "mysql_client_encoding",
     'desc'   => "Retrieves the character_set variable from MySQL.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the default character set name for the current connection.",
@@ -348,7 +357,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_close",
-    'desc'   => "mysql_close() closes the non-persistent connection to the MySQL server that's associated with the specified link identifier. If link_identifier isn't specified, the last opened link is used.\nUsing mysql_close() isn't usually necessary, as non-persistent open links are automatically closed at the end of the script's execution. See also freeing resources.",
+    'desc'   => "mysql_close() closes the non-persistent connection to the MySQL server that's associated with the specified link identifier. If link_identifier isn't specified, the last opened link is used.\n\nUsing mysql_close() isn't usually necessary, as non-persistent open links are automatically closed at the end of the script's execution. See also freeing resources.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -366,7 +376,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_errno",
-    'desc'   => "Returns the error number from the last MySQL function.\nErrors coming back from the MySQL database backend no longer issue warnings. Instead, use mysql_errno() to retrieve the error code. Note that this function only returns the error code from the most recently executed MySQL function (not including mysql_error() and mysql_errno()), so if you want to use it, make sure you check the value before calling another MySQL function.",
+    'desc'   => "Returns the error number from the last MySQL function.\n\nErrors coming back from the MySQL database backend no longer issue warnings. Instead, use mysql_errno() to retrieve the error code. Note that this function only returns the error code from the most recently executed MySQL function (not including mysql_error() and mysql_errno()), so if you want to use it, make sure you check the value before calling another MySQL function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the error number from the last MySQL function, or 0 (zero) if no error occurred.",
@@ -385,6 +396,7 @@ DefineFunction(
   array(
     'name'   => "mysql_error",
     'desc'   => "Returns the error text from the last MySQL function. Errors coming back from the MySQL database backend no longer issue warnings. Instead, use mysql_error() to retrieve the error text. Note that this function only returns the error text from the most recently executed MySQL function (not including mysql_error() and mysql_errno()), so if you want to use it, make sure you check the value before calling another MySQL function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the error text from the last MySQL function, or '' (empty string) if no error occurred.",
@@ -403,6 +415,7 @@ DefineFunction(
   array(
     'name'   => "mysql_get_client_info",
     'desc'   => "mysql_get_client_info() returns a string that represents the client library version.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The MySQL client version.",
@@ -413,6 +426,7 @@ DefineFunction(
   array(
     'name'   => "mysql_get_host_info",
     'desc'   => "Describes the type of connection in use for the connection, including the server host name.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string describing the type of MySQL connection in use for the connection or FALSE on failure.",
@@ -431,6 +445,7 @@ DefineFunction(
   array(
     'name'   => "mysql_get_proto_info",
     'desc'   => "Retrieves the MySQL protocol.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the MySQL protocol on success or FALSE on failure.",
@@ -449,6 +464,7 @@ DefineFunction(
   array(
     'name'   => "mysql_get_server_info",
     'desc'   => "Retrieves the MySQL server version.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the MySQL server version on success or FALSE on failure.",
@@ -467,6 +483,7 @@ DefineFunction(
   array(
     'name'   => "mysql_info",
     'desc'   => "Returns detailed information about the last query.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns information about the statement on success, or FALSE on failure. See the example below for which statements provide information, and what the returned value may look like. Statements that are not listed will return FALSE.",
@@ -485,6 +502,7 @@ DefineFunction(
   array(
     'name'   => "mysql_insert_id",
     'desc'   => "Retrieves the ID generated for an AUTO_INCREMENT column by the previous query (usually INSERT).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The ID generated for an AUTO_INCREMENT column by the previous query on success, 0 if the previous query does not generate an AUTO_INCREMENT value, or FALSE if no MySQL connection was established.",
@@ -503,6 +521,7 @@ DefineFunction(
   array(
     'name'   => "mysql_stat",
     'desc'   => "mysql_stat() returns the current server status.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string with the status for uptime, threads, queries, open tables, flush tables and queries per second. For a complete list of other status variables, you have to use the SHOW STATUS SQL command. If link_identifier is invalid, NULL is returned.",
@@ -521,6 +540,7 @@ DefineFunction(
   array(
     'name'   => "mysql_thread_id",
     'desc'   => "Retrieves the current thread ID. If the connection is lost, and a reconnect with mysql_ping() is executed, the thread ID will change. This means only retrieve the thread ID when needed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The thread ID on success or FALSE on failure.",
@@ -539,6 +559,7 @@ DefineFunction(
   array(
     'name'   => "mysql_create_db",
     'desc'   => "mysql_create_db() attempts to create a new database on the server associated with the specified link identifier.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -562,6 +583,7 @@ DefineFunction(
   array(
     'name'   => "mysql_select_db",
     'desc'   => "Sets the current active database on the server that's associated with the specified link identifier. Every subsequent call to mysql_query() will be made on the active database.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -585,6 +607,7 @@ DefineFunction(
   array(
     'name'   => "mysql_drop_db",
     'desc'   => "mysql_drop_db() attempts to drop (remove) an entire database from the server associated with the specified link identifier. This function is deprecated, it is preferable to use mysql_query() to issue an sql DROP DATABASE statement instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -608,9 +631,10 @@ DefineFunction(
   array(
     'name'   => "mysql_affected_rows",
     'desc'   => "Get the number of affected rows by the last INSERT, UPDATE, REPLACE or DELETE query associated with link_identifier.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the number of affected rows on success, and -1 if the last query failed.\nIf the last query was a DELETE query with no WHERE clause, all of the records will have been deleted from the table but this function will return zero with MySQL versions prior to 4.1.2.\nWhen using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows() may not actually equal the number of rows matched, only the number of rows that were literally affected by the query.\nThe REPLACE statement first deletes the record with the same primary key and then inserts the new record. This function returns the number of deleted records plus the number of inserted records.",
+      'desc'   => "Returns the number of affected rows on success, and -1 if the last query failed.\n\nIf the last query was a DELETE query with no WHERE clause, all of the records will have been deleted from the table but this function will return zero with MySQL versions prior to 4.1.2.\n\nWhen using UPDATE, MySQL will not update columns where the new value is the same as the old value. This creates the possibility that mysql_affected_rows() may not actually equal the number of rows matched, only the number of rows that were literally affected by the query.\n\nThe REPLACE statement first deletes the record with the same primary key and then inserts the new record. This function returns the number of deleted records plus the number of inserted records.",
     ),
     'args'   => array(
       array(
@@ -626,22 +650,22 @@ DefineFunction(
   array(
     'name'   => "mysql_set_timeout",
     'desc'   => "Sets query timeout for a connection.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
     ),
     'args'   => array(
       array(
         'name'   => "query_timeout_ms",
-        'desc'   => "How many milli-seconds to wait for an SQL query.",
         'type'   => Int32,
         'value'  => "-1",
+        'desc'   => "How many milli-seconds to wait for an SQL query.",
       ),
       array(
         'name'   => "link_identifier",
         'type'   => Variant,
-        'desc'   => "Which connection to set to. If absent, default or current connection will be applied to.",
         'value'  => "null",
+        'desc'   => "Which connection to set to. If absent, default or current connection will be applied to.",
       ),
     ),
   ));
@@ -650,15 +674,16 @@ DefineFunction(
   array(
     'name'   => "mysql_query",
     'desc'   => "mysql_query() sends a unique query (multiple queries are not supported) to the currently active database on the server that's associated with the specified link_identifier.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "For SELECT, SHOW, DESCRIBE, EXPLAIN and other statements returning resultset, mysql_query() returns a resource on success, or FALSE on error.\nFor other type of SQL statements, INSERT, UPDATE, DELETE, DROP, etc, mysql_query() returns TRUE on success or FALSE on error.\nThe returned result resource should be passed to mysql_fetch_array(), and other functions for dealing with result tables, to access the returned data.\nUse mysql_num_rows() to find out how many rows were returned for a SELECT statement or mysql_affected_rows() to find out how many rows were affected by a DELETE, INSERT, REPLACE, or UPDATE statement.\nmysql_query() will also fail and return FALSE if the user does not have permission to access the table(s) referenced by the query.",
+      'desc'   => "For SELECT, SHOW, DESCRIBE, EXPLAIN and other statements returning resultset, mysql_query() returns a resource on success, or FALSE on error.\n\nFor other type of SQL statements, INSERT, UPDATE, DELETE, DROP, etc, mysql_query() returns TRUE on success or FALSE on error.\n\nThe returned result resource should be passed to mysql_fetch_array(), and other functions for dealing with result tables, to access the returned data.\n\nUse mysql_num_rows() to find out how many rows were returned for a SELECT statement or mysql_affected_rows() to find out how many rows were affected by a DELETE, INSERT, REPLACE, or UPDATE statement.\n\nmysql_query() will also fail and return FALSE if the user does not have permission to access the table(s) referenced by the query.",
     ),
     'args'   => array(
       array(
         'name'   => "query",
         'type'   => String,
-        'desc'   => "An SQL query\nThe query string should not end with a semicolon. Data inside the query should be properly escaped.",
+        'desc'   => "An SQL query\n\nThe query string should not end with a semicolon. Data inside the query should be properly escaped.",
       ),
       array(
         'name'   => "link_identifier",
@@ -673,15 +698,16 @@ DefineFunction(
   array(
     'name'   => "mysql_unbuffered_query",
     'desc'   => "mysql_unbuffered_query() sends the SQL query query to MySQL without automatically fetching and buffering the result rows as mysql_query() does. This saves a considerable amount of memory with SQL queries that produce large result sets, and you can start working on the result set immediately after the first row has been retrieved as you don't have to wait until the complete SQL query has been performed. To use mysql_unbuffered_query() while multiple database connections are open, you must specify the optional parameter link_identifier to identify which connection you want to use.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "For SELECT, SHOW, DESCRIBE or EXPLAIN statements, mysql_unbuffered_query() returns a resource on success, or FALSE on error.\nFor other type of SQL statements, UPDATE, DELETE, DROP, etc, mysql_unbuffered_query() returns TRUE on success or FALSE on error.",
+      'desc'   => "For SELECT, SHOW, DESCRIBE or EXPLAIN statements, mysql_unbuffered_query() returns a resource on success, or FALSE on error.\n\nFor other type of SQL statements, UPDATE, DELETE, DROP, etc, mysql_unbuffered_query() returns TRUE on success or FALSE on error.",
     ),
     'args'   => array(
       array(
         'name'   => "query",
         'type'   => String,
-        'desc'   => "The SQL query to execute.\nData inside the query should be properly escaped.",
+        'desc'   => "The SQL query to execute.\n\nData inside the query should be properly escaped.",
       ),
       array(
         'name'   => "link_identifier",
@@ -696,6 +722,7 @@ DefineFunction(
   array(
     'name'   => "mysql_db_query",
     'desc'   => "mysql_db_query() selects a database, and executes a query on it. WarningThis function has been DEPRECATED as of PHP 5.3.0. Relying on this feature is highly discouraged.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a positive MySQL result resource to the query result, or FALSE on error. The function also returns TRUE/FALSE for INSERT/UPDATE/DELETE queries to indicate success/failure.",
@@ -709,7 +736,7 @@ DefineFunction(
       array(
         'name'   => "query",
         'type'   => String,
-        'desc'   => "The MySQL query.\nData inside the query should be properly escaped.",
+        'desc'   => "The MySQL query.\n\nData inside the query should be properly escaped.",
       ),
       array(
         'name'   => "link_identifier",
@@ -724,6 +751,7 @@ DefineFunction(
   array(
     'name'   => "mysql_list_dbs",
     'desc'   => "Returns a result pointer containing the databases available from the current mysql daemon.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a result pointer resource on success, or FALSE on failure. Use the mysql_tablename() function to traverse this result pointer, or any function for result tables, such as mysql_fetch_array().",
@@ -741,10 +769,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_list_tables",
-    'desc'   => "Retrieves a list of table names from a MySQL database.\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW TABLES [FROM db_name] [LIKE 'pattern'] statement instead.",
+    'desc'   => "Retrieves a list of table names from a MySQL database.\n\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW TABLES [FROM db_name] [LIKE 'pattern'] statement instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "A result pointer resource on success or FALSE on failure.\nUse the mysql_tablename() function to traverse this result pointer, or any function for result tables, such as mysql_fetch_array().",
+      'desc'   => "A result pointer resource on success or FALSE on failure.\n\nUse the mysql_tablename() function to traverse this result pointer, or any function for result tables, such as mysql_fetch_array().",
     ),
     'args'   => array(
       array(
@@ -764,10 +793,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_list_fields",
-    'desc'   => "Retrieves information about the given table name.\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW COLUMNS FROM table [LIKE 'name'] statement instead.",
+    'desc'   => "Retrieves information about the given table name.\n\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW COLUMNS FROM table [LIKE 'name'] statement instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "A result pointer resource on success, or FALSE on failure.\nThe returned result can be used with mysql_field_flags(), mysql_field_len(), mysql_field_name() and mysql_field_type().",
+      'desc'   => "A result pointer resource on success, or FALSE on failure.\n\nThe returned result can be used with mysql_field_flags(), mysql_field_len(), mysql_field_name() and mysql_field_type().",
     ),
     'args'   => array(
       array(
@@ -793,6 +823,7 @@ DefineFunction(
   array(
     'name'   => "mysql_list_processes",
     'desc'   => "Retrieves the current MySQL server threads.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A result pointer resource on success or FALSE on failure.",
@@ -811,6 +842,7 @@ DefineFunction(
   array(
     'name'   => "mysql_db_name",
     'desc'   => "Retrieve the database name from a call to mysql_list_dbs().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the database name on success, and FALSE on failure. If FALSE is returned, use mysql_error() to determine the nature of the error.",
@@ -838,10 +870,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_tablename",
-    'desc'   => "Retrieves the table name from a result.\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW TABLES [FROM db_name] [LIKE 'pattern'] statement instead.",
+    'desc'   => "Retrieves the table name from a result.\n\nThis function is deprecated. It is preferable to use mysql_query() to issue an SQL SHOW TABLES [FROM db_name] [LIKE 'pattern'] statement instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The name of the table on success or FALSE on failure.\nUse the mysql_tablename() function to traverse this result pointer, or any function for result tables, such as mysql_fetch_array().",
+      'desc'   => "The name of the table on success or FALSE on failure.\n\nUse the mysql_tablename() function to traverse this result pointer, or any function for result tables, such as mysql_fetch_array().",
     ),
     'args'   => array(
       array(
@@ -861,6 +894,7 @@ DefineFunction(
   array(
     'name'   => "mysql_num_fields",
     'desc'   => "Retrieves the number of fields from a query.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of fields in the result set resource on success or FALSE on failure.",
@@ -878,6 +912,7 @@ DefineFunction(
   array(
     'name'   => "mysql_num_rows",
     'desc'   => "Retrieves the number of rows from a result set. This command is only valid for statements like SELECT or SHOW that return an actual result set. To retrieve the number of rows affected by a INSERT, UPDATE, REPLACE or DELETE query, use mysql_affected_rows().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The number of rows in a result set on success or FALSE on failure.",
@@ -894,10 +929,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_free_result",
-    'desc'   => "mysql_free_result() will free all memory associated with the result identifier result.\nmysql_free_result() only needs to be called if you are concerned about how much memory is being used for queries that return large result sets. All associated result memory is automatically freed at the end of the script's execution.",
+    'desc'   => "mysql_free_result() will free all memory associated with the result identifier result.\n\nmysql_free_result() only needs to be called if you are concerned about how much memory is being used for queries that return large result sets. All associated result memory is automatically freed at the end of the script's execution.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns TRUE on success or FALSE on failure.\nIf a non-resource is used for the result, an error of level E_WARNING will be emitted. It's worth noting that mysql_query() only returns a resource for SELECT, SHOW, EXPLAIN, and DESCRIBE queries.",
+      'desc'   => "Returns TRUE on success or FALSE on failure.\n\nIf a non-resource is used for the result, an error of level E_WARNING will be emitted. It's worth noting that mysql_query() only returns a resource for SELECT, SHOW, EXPLAIN, and DESCRIBE queries.",
     ),
     'args'   => array(
       array(
@@ -911,7 +947,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_data_seek",
-    'desc'   => "mysql_data_seek() moves the internal row pointer of the MySQL result associated with the specified result identifier to point to the specified row number. The next call to a MySQL fetch function, such as mysql_fetch_assoc(), would return that row.\nrow_number starts at 0. The row_number should be a value in the range from 0 to mysql_num_rows() - 1. However if the result set is empty (mysql_num_rows() == 0), a seek to 0 will fail with a E_WARNING and mysql_data_seek() will return FALSE.",
+    'desc'   => "mysql_data_seek() moves the internal row pointer of the MySQL result associated with the specified result identifier to point to the specified row number. The next call to a MySQL fetch function, such as mysql_fetch_assoc(), would return that row.\n\nrow_number starts at 0. The row_number should be a value in the range from 0 to mysql_num_rows() - 1. However if the result set is empty (mysql_num_rows() == 0), a seek to 0 will fail with a E_WARNING and mysql_data_seek() will return FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -934,9 +971,10 @@ DefineFunction(
   array(
     'name'   => "mysql_fetch_row",
     'desc'   => "Returns a numerical array that corresponds to the fetched row and moves the internal data pointer ahead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an numerical array of strings that corresponds to the fetched row, or FALSE if there are no more rows.\nmysql_fetch_row() fetches one row of data from the result associated with the specified result identifier. The row is returned as an array. Each result column is stored in an array offset, starting at offset 0.",
+      'desc'   => "Returns an numerical array of strings that corresponds to the fetched row, or FALSE if there are no more rows.\n\nmysql_fetch_row() fetches one row of data from the result associated with the specified result identifier. The row is returned as an array. Each result column is stored in an array offset, starting at offset 0.",
     ),
     'args'   => array(
       array(
@@ -951,9 +989,10 @@ DefineFunction(
   array(
     'name'   => "mysql_fetch_assoc",
     'desc'   => "Returns an associative array that corresponds to the fetched row and moves the internal data pointer ahead. mysql_fetch_assoc() is equivalent to calling mysql_fetch_array() with MYSQL_ASSOC for the optional second parameter. It only returns an associative array.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.\nIf two or more columns of the result have the same field names, the last column will take precedence. To access the other column(s) of the same name, you either need to access the result with numeric indices by using mysql_fetch_row() or add alias names. See the example at the mysql_fetch_array() description about aliases.",
+      'desc'   => "Returns an associative array of strings that corresponds to the fetched row, or FALSE if there are no more rows.\n\nIf two or more columns of the result have the same field names, the last column will take precedence. To access the other column(s) of the same name, you either need to access the result with numeric indices by using mysql_fetch_row() or add alias names. See the example at the mysql_fetch_array() description about aliases.",
     ),
     'args'   => array(
       array(
@@ -968,9 +1007,10 @@ DefineFunction(
   array(
     'name'   => "mysql_fetch_array",
     'desc'   => "Returns an array that corresponds to the fetched row and moves the internal data pointer ahead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an array of strings that corresponds to the fetched row, or FALSE if there are no more rows. The type of returned array depends on how result_type is defined. By using MYSQL_BOTH (default), you'll get an array with both associative and number indices. Using MYSQL_ASSOC, you only get associative indices (as mysql_fetch_assoc() works), using MYSQL_NUM, you only get number indices (as mysql_fetch_row() works).\nIf two or more columns of the result have the same field names, the last column will take precedence. To access the other column(s) of the same name, you must use the numeric index of the column or make an alias for the column. For aliased columns, you cannot access the contents with the original column name.",
+      'desc'   => "Returns an array of strings that corresponds to the fetched row, or FALSE if there are no more rows. The type of returned array depends on how result_type is defined. By using MYSQL_BOTH (default), you'll get an array with both associative and number indices. Using MYSQL_ASSOC, you only get associative indices (as mysql_fetch_assoc() works), using MYSQL_NUM, you only get number indices (as mysql_fetch_row() works).\n\nIf two or more columns of the result have the same field names, the last column will take precedence. To access the other column(s) of the same name, you must use the numeric index of the column or make an alias for the column. For aliased columns, you cannot access the contents with the original column name.",
     ),
     'args'   => array(
       array(
@@ -990,7 +1030,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_fetch_lengths",
-    'desc'   => "Returns an array that corresponds to the lengths of each field in the last row fetched by MySQL.\nmysql_fetch_lengths() stores the lengths of each result column in the last row returned by mysql_fetch_row(), mysql_fetch_assoc(), mysql_fetch_array(), and mysql_fetch_object() in an array, starting at offset 0.",
+    'desc'   => "Returns an array that corresponds to the lengths of each field in the last row fetched by MySQL.\n\nmysql_fetch_lengths() stores the lengths of each result column in the last row returned by mysql_fetch_row(), mysql_fetch_assoc(), mysql_fetch_array(), and mysql_fetch_object() in an array, starting at offset 0.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array of lengths on success or FALSE on failure.",
@@ -1008,6 +1049,7 @@ DefineFunction(
   array(
     'name'   => "mysql_fetch_object",
     'desc'   => "Returns an object with properties that correspond to the fetched row and moves the internal data pointer ahead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an object with string properties that correspond to the fetched row, or FALSE if there are no more rows.",
@@ -1036,7 +1078,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mysql_result",
-    'desc'   => "Retrieves the contents of one cell from a MySQL result set.\nWhen working on large result sets, you should consider using one of the functions that fetch an entire row (specified below). As these functions return the contents of multiple cells in one function call, they're MUCH quicker than mysql_result(). Also, note that specifying a numeric offset for the field argument is much quicker than specifying a fieldname or tablename.fieldname argument.",
+    'desc'   => "Retrieves the contents of one cell from a MySQL result set.\n\nWhen working on large result sets, you should consider using one of the functions that fetch an entire row (specified below). As these functions return the contents of multiple cells in one function call, they're MUCH quicker than mysql_result(). Also, note that specifying a numeric offset for the field argument is much quicker than specifying a fieldname or tablename.fieldname argument.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The contents of one cell from a MySQL result set on success, or FALSE on failure.",
@@ -1056,7 +1099,7 @@ DefineFunction(
         'name'   => "field",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "The name or offset of the field being retrieved.\nIt can be the field's offset, the field's name, or the field's table dot field name (tablename.fieldname). If the column name has been aliased ('select foo as bar from...'), use the alias instead of the column name. If undefined, the first field is retrieved.",
+        'desc'   => "The name or offset of the field being retrieved.\n\nIt can be the field's offset, the field's name, or the field's table dot field name (tablename.fieldname). If the column name has been aliased ('select foo as bar from...'), use the alias instead of the column name. If undefined, the first field is retrieved.",
       ),
     ),
   ));
@@ -1065,9 +1108,10 @@ DefineFunction(
   array(
     'name'   => "mysql_fetch_field",
     'desc'   => "Returns an object containing field information. This function can be used to obtain information about fields in the provided query result.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an object containing field information. The properties of the object are:\nname - column name table - name of the table the column belongs to def - default value of the column max_length - maximum length of the column not_null - 1 if the column cannot be NULL primary_key - 1 if the column is a primary key unique_key - 1 if the column is a unique key multiple_key - 1 if the column is a non-unique key numeric - 1 if the column is numeric blob - 1 if the column is a BLOB type - the type of the column unsigned - 1 if the column is unsigned zerofill - 1 if the column is zero-filled",
+      'desc'   => "Returns an object containing field information. The properties of the object are:\n\nname - column name table - name of the table the column belongs to def - default value of the column max_length - maximum length of the column not_null - 1 if the column cannot be NULL primary_key - 1 if the column is a primary key unique_key - 1 if the column is a unique key multiple_key - 1 if the column is a non-unique key numeric - 1 if the column is numeric blob - 1 if the column is a BLOB type - the type of the column unsigned - 1 if the column is unsigned zerofill - 1 if the column is zero-filled",
     ),
     'args'   => array(
       array(
@@ -1088,6 +1132,7 @@ DefineFunction(
   array(
     'name'   => "mysql_field_seek",
     'desc'   => "Seeks to the specified field offset. If the next call to mysql_fetch_field() doesn't include a field offset, the field offset specified in mysql_field_seek() will be returned.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1111,6 +1156,7 @@ DefineFunction(
   array(
     'name'   => "mysql_field_name",
     'desc'   => "mysql_field_name() returns the name of the specified field index.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The name of the specified field index on success or FALSE on failure.",
@@ -1134,6 +1180,7 @@ DefineFunction(
   array(
     'name'   => "mysql_field_table",
     'desc'   => "Returns the name of the table that the specified field is in.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The name of the table on success.",
@@ -1157,6 +1204,7 @@ DefineFunction(
   array(
     'name'   => "mysql_field_len",
     'desc'   => "mysql_field_len() returns the length of the specified field.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The length of the specified field index on success or FALSE on failure.",
@@ -1180,6 +1228,7 @@ DefineFunction(
   array(
     'name'   => "mysql_field_type",
     'desc'   => "mysql_field_type() is similar to the mysql_field_name() function. The arguments are identical, but the field type is returned instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The returned field type will be one of \"int\", \"real\", \"string\", \"blob\", and others as detailed in the » MySQL documentation.",
@@ -1203,9 +1252,10 @@ DefineFunction(
   array(
     'name'   => "mysql_field_flags",
     'desc'   => "mysql_field_flags() returns the field flags of the specified field. The flags are reported as a single word per flag separated by a single space, so that you can split the returned value using explode().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a string of flags associated with the result or FALSE on failure.\nThe following flags are reported, if your version of MySQL is current enough to support them: \"not_null\", \"primary_key\", \"unique_key\", \"multiple_key\", \"blob\", \"unsigned\", \"zerofill\", \"binary\", \"enum\", \"auto_increment\" and \"timestamp\".",
+      'desc'   => "Returns a string of flags associated with the result or FALSE on failure.\n\nThe following flags are reported, if your version of MySQL is current enough to support them: \"not_null\", \"primary_key\", \"unique_key\", \"multiple_key\", \"blob\", \"unsigned\", \"zerofill\", \"binary\", \"enum\", \"auto_increment\" and \"timestamp\".",
     ),
     'args'   => array(
       array(

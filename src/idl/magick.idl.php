@@ -52,6 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "magickgetcopyright",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -60,6 +61,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgethomeurl",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -68,6 +70,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetpackagename",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -76,6 +79,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetquantumdepth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -84,6 +88,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetreleasedate",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -92,6 +97,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetresourcelimit",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -106,6 +112,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetversion",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -114,6 +121,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetversionnumber",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -122,6 +130,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetversionstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -130,6 +139,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickqueryconfigureoption",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -144,6 +154,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickqueryconfigureoptions",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
     ),
@@ -158,6 +169,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickqueryfonts",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -172,6 +184,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickqueryformats",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -186,6 +199,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetresourcelimit",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -204,6 +218,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "newdrawingwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -212,6 +227,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "newmagickwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -220,6 +236,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "newpixeliterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -234,6 +251,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "newpixelregioniterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -264,6 +282,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "newpixelwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -279,6 +298,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "newpixelwandarray",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -293,6 +313,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "newpixelwands",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -307,6 +328,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "destroydrawingwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -321,6 +343,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "destroymagickwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -335,6 +358,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "destroypixeliterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -349,6 +373,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "destroypixelwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -363,6 +388,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "destroypixelwandarray",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -377,6 +403,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "destroypixelwands",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -391,6 +418,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "isdrawingwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -405,6 +433,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ismagickwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -419,6 +448,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ispixeliterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -433,6 +463,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ispixelwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -447,6 +478,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "cleardrawingwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -461,6 +493,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clearmagickwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -475,6 +508,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clearpixeliterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -489,6 +523,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clearpixelwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -503,6 +538,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clonedrawingwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -517,6 +553,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clonemagickwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -531,6 +568,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "wandgetexception",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -545,6 +583,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "wandgetexceptionstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -559,6 +598,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "wandgetexceptiontype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -573,6 +613,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "wandhasexception",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -587,6 +628,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawaffine",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -625,6 +667,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawannotation",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -651,6 +694,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawarc",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -689,6 +733,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawbezier",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -707,6 +752,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawcircle",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -737,6 +783,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -763,6 +810,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawcomment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -781,6 +829,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawcomposite",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -819,6 +868,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawellipse",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -857,6 +907,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetclippath",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -871,6 +922,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetcliprule",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -885,6 +937,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetclipunits",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -899,6 +952,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetexception",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -913,6 +967,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetexceptionstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -927,6 +982,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetexceptiontype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -941,6 +997,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfillalpha",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -955,6 +1012,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfillcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -969,6 +1027,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfillopacity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -983,6 +1042,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfillrule",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -997,6 +1057,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfont",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -1011,6 +1072,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfontfamily",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -1025,6 +1087,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfontsize",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -1039,6 +1102,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfontstretch",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1053,6 +1117,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfontstyle",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1067,6 +1132,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetfontweight",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -1081,6 +1147,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetgravity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1095,6 +1162,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokealpha",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -1109,6 +1177,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokeantialias",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1123,6 +1192,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokecolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -1137,6 +1207,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokedasharray",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -1151,6 +1222,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokedashoffset",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -1165,6 +1237,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokelinecap",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1179,6 +1252,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokelinejoin",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1193,6 +1267,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokemiterlimit",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -1207,6 +1282,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokeopacity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -1221,6 +1297,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetstrokewidth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -1235,6 +1312,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgettextalignment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1249,6 +1327,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgettextantialias",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1263,6 +1342,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgettextdecoration",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1277,6 +1357,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgettextencoding",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -1291,6 +1372,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgettextundercolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -1305,6 +1387,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawgetvectorgraphics",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -1319,6 +1402,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawline",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1349,6 +1433,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawmatte",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1375,6 +1460,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathclose",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1389,6 +1475,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetoabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1427,6 +1514,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetoquadraticbezierabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1457,6 +1545,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetoquadraticbezierrelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1487,6 +1576,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetoquadraticbeziersmoothabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1509,6 +1599,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetoquadraticbeziersmoothrelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1531,6 +1622,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetorelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1569,6 +1661,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetosmoothabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1599,6 +1692,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathcurvetosmoothrelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1629,6 +1723,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathellipticarcabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1671,6 +1766,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathellipticarcrelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1713,6 +1809,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathfinish",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1727,6 +1824,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathlinetoabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1749,6 +1847,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathlinetohorizontalabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1767,6 +1866,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathlinetohorizontalrelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1785,6 +1885,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathlinetorelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1807,6 +1908,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathlinetoverticalabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1825,6 +1927,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathlinetoverticalrelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1843,6 +1946,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathmovetoabsolute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1865,6 +1969,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathmovetorelative",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1887,6 +1992,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpathstart",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1901,6 +2007,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpoint",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1923,6 +2030,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpolygon",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1941,6 +2049,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpolyline",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1959,6 +2068,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawrectangle",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1989,6 +2099,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawrender",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2003,6 +2114,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawrotate",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2021,6 +2133,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawroundrectangle",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2059,6 +2172,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawscale",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2081,6 +2195,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetclippath",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2099,6 +2214,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetcliprule",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2117,6 +2233,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetclipunits",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2135,6 +2252,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfillalpha",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2153,6 +2271,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfillcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2171,6 +2290,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfillopacity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2189,6 +2309,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfillpatternurl",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2207,6 +2328,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfillrule",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2225,6 +2347,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfont",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2243,6 +2366,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfontfamily",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2261,6 +2385,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfontsize",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2279,6 +2404,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfontstretch",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2297,6 +2423,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfontstyle",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2315,6 +2442,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetfontweight",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2333,6 +2461,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetgravity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2351,6 +2480,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokealpha",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2369,6 +2499,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokeantialias",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2388,6 +2519,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokecolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2406,6 +2538,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokedasharray",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2425,6 +2558,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokedashoffset",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2443,6 +2577,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokelinecap",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2461,6 +2596,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokelinejoin",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2479,6 +2615,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokemiterlimit",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2497,6 +2634,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokeopacity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2515,6 +2653,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokepatternurl",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2533,6 +2672,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetstrokewidth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2551,6 +2691,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsettextalignment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2569,6 +2710,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsettextantialias",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2588,6 +2730,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsettextdecoration",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2606,6 +2749,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsettextencoding",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2624,6 +2768,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsettextundercolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2642,6 +2787,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetvectorgraphics",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2660,6 +2806,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawsetviewbox",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2690,6 +2837,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawskewx",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2708,6 +2856,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawskewy",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2726,6 +2875,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawtranslate",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2748,6 +2898,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pushdrawingwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2762,6 +2913,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpushclippath",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2780,6 +2932,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpushdefs",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2794,6 +2947,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpushpattern",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2828,6 +2982,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "popdrawingwand",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2842,6 +2997,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpopclippath",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2856,6 +3012,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpopdefs",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2870,6 +3027,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "drawpoppattern",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -2884,6 +3042,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickadaptivethresholdimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2910,6 +3069,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickaddimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2928,6 +3088,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickaddnoiseimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2946,6 +3107,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickaffinetransformimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2964,6 +3126,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickannotateimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -2998,6 +3161,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickappendimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3017,6 +3181,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickaverageimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3031,6 +3196,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickblackthresholdimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3049,6 +3215,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickblurimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3076,6 +3243,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickborderimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3102,6 +3270,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcharcoalimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3124,6 +3293,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickchopimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3154,6 +3324,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickclipimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3168,6 +3339,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickclippathimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3190,6 +3362,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcoalesceimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3204,6 +3377,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcolorfloodfillimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3238,6 +3412,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcolorizeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3260,6 +3435,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcombineimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3278,6 +3454,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcommentimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3296,6 +3473,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcompareimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -3323,6 +3501,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcompositeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3353,6 +3532,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickconstituteimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3387,6 +3567,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcontrastimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3405,6 +3586,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickconvolveimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3428,6 +3610,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcropimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3458,6 +3641,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickcyclecolormapimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3476,6 +3660,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickdeconstructimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3490,6 +3675,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickdescribeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -3504,6 +3690,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickdespeckleimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3518,6 +3705,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickdrawimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3536,6 +3724,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickechoimageblob",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3550,6 +3739,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickechoimagesblob",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3564,6 +3754,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickedgeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3582,6 +3773,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickembossimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3604,6 +3796,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickenhanceimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3618,6 +3811,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickequalizeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3632,6 +3826,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickevaluateimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3659,6 +3854,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickflattenimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3673,6 +3869,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickflipimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3687,6 +3884,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickflopimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3701,6 +3899,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickframeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3735,6 +3934,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickfximage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3758,6 +3958,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgammaimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3781,6 +3982,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgaussianblurimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -3808,6 +4010,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetcharheight",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -3835,6 +4038,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetcharwidth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -3862,6 +4066,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetexception",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -3876,6 +4081,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetexceptionstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -3890,6 +4096,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetexceptiontype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -3904,6 +4111,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetfilename",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -3918,6 +4126,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetformat",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -3932,6 +4141,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3946,6 +4156,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagebackgroundcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -3960,6 +4171,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageblob",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -3974,6 +4186,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageblueprimary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -3988,6 +4201,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagebordercolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -4002,6 +4216,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagechannelmean",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4020,6 +4235,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagecolormapcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -4038,6 +4254,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagecolors",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4052,6 +4269,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagecolorspace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4066,6 +4284,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagecompose",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4080,6 +4299,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagecompression",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4094,6 +4314,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagecompressionquality",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4108,6 +4329,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagedelay",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4122,6 +4344,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagedepth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4141,6 +4364,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagedispose",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4155,6 +4379,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageextrema",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4174,6 +4399,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagefilename",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -4188,6 +4414,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageformat",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -4202,6 +4429,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagegamma",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4216,6 +4444,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagegreenprimary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4230,6 +4459,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageheight",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4244,6 +4474,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagehistogram",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4258,6 +4489,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageindex",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4272,6 +4504,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageinterlacescheme",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4286,6 +4519,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageiterations",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4300,6 +4534,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagemattecolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -4314,6 +4549,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagemimetype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -4328,6 +4564,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagepixels",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4366,6 +4603,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageprofile",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -4384,6 +4622,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageredprimary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4398,6 +4637,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagerenderingintent",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4412,6 +4652,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageresolution",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4426,6 +4667,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagescene",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4440,6 +4682,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagesignature",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -4454,6 +4697,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagesize",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4468,6 +4712,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagetype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4482,6 +4727,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimageunits",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4496,6 +4742,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagevirtualpixelmethod",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4510,6 +4757,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagewhitepoint",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4524,6 +4772,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagewidth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4538,6 +4787,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetimagesblob",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -4552,6 +4802,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetinterlacescheme",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -4566,6 +4817,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetmaxtextadvance",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4593,6 +4845,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetmimetype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -4607,6 +4860,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetnumberimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4621,6 +4875,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetsamplingfactors",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4635,6 +4890,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetsize",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4649,6 +4905,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetstringheight",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4676,6 +4933,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetstringwidth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4703,6 +4961,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgettextascent",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4730,6 +4989,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgettextdescent",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -4757,6 +5017,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickgetwandsize",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -4771,6 +5032,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickhasnextimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4785,6 +5047,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickhaspreviousimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4799,6 +5062,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickimplodeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4817,6 +5081,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicklabelimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4835,6 +5100,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicklevelimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4866,6 +5132,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmagnifyimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4880,6 +5147,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmapimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4902,6 +5170,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmattefloodfillimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4936,6 +5205,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmedianfilterimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4954,6 +5224,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickminifyimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4968,6 +5239,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmodulateimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -4994,6 +5266,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmontageimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -5028,6 +5301,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmorphimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -5046,6 +5320,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmosaicimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -5060,6 +5335,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickmotionblurimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5086,6 +5362,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicknegateimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5110,6 +5387,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicknewimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5137,6 +5415,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicknextimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5151,6 +5430,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicknormalizeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5165,6 +5445,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickoilpaintimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5183,6 +5464,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickpaintopaqueimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5210,6 +5492,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickpainttransparentimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5238,6 +5521,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickpingimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5256,6 +5540,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickposterizeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5278,6 +5563,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickpreviewimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -5296,6 +5582,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickpreviousimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5310,6 +5597,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickprofileimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5333,6 +5621,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickquantizeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5367,6 +5656,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickquantizeimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5401,6 +5691,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickqueryfontmetrics",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -5428,6 +5719,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickradialblurimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5446,6 +5738,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickraiseimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5480,6 +5773,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickreadimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5498,6 +5792,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickreadimageblob",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5516,6 +5811,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickreadimagefile",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5534,6 +5830,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickreadimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5552,6 +5849,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickreducenoiseimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5570,6 +5868,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickremoveimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5584,6 +5883,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickremoveimageprofile",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -5602,6 +5902,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickremoveimageprofiles",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5616,6 +5917,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickresampleimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5646,6 +5948,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickresetiterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -5660,6 +5963,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickresizeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5690,6 +5994,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickrollimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5712,6 +6017,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickrotateimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5734,6 +6040,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksampleimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5756,6 +6063,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickscaleimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5778,6 +6086,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickseparateimagechannel",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5796,6 +6105,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetcompressionquality",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5814,6 +6124,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetfilename",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5833,6 +6144,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetfirstiterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -5847,6 +6159,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetformat",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5865,6 +6178,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5883,6 +6197,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagebackgroundcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5901,6 +6216,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagebias",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5919,6 +6235,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageblueprimary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5941,6 +6258,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagebordercolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5959,6 +6277,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagecolormapcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5981,6 +6300,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagecolorspace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -5999,6 +6319,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagecompose",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6017,6 +6338,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagecompression",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6035,6 +6357,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagecompressionquality",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6053,6 +6376,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagedelay",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6071,6 +6395,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagedepth",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6094,6 +6419,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagedispose",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6112,6 +6438,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagefilename",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6131,6 +6458,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageformat",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6149,6 +6477,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagegamma",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6167,6 +6496,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagegreenprimary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6189,6 +6519,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageindex",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6207,6 +6538,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageinterlacescheme",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6225,6 +6557,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageiterations",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6243,6 +6576,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagemattecolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6261,6 +6595,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageoption",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6287,6 +6622,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagepixels",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6329,6 +6665,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageprofile",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6351,6 +6688,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageredprimary",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6373,6 +6711,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagerenderingintent",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6391,6 +6730,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageresolution",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6413,6 +6753,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagescene",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6431,6 +6772,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagetype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6449,6 +6791,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimageunits",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6467,6 +6810,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagevirtualpixelmethod",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6485,6 +6829,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetimagewhitepoint",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6507,6 +6852,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetinterlacescheme",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6525,6 +6871,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetlastiterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -6539,6 +6886,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetpassphrase",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6557,6 +6905,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetresolution",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6579,6 +6928,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetsamplingfactors",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6601,6 +6951,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetsize",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6623,6 +6974,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksetwandsize",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6645,6 +6997,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksharpenimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6672,6 +7025,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickshaveimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6694,6 +7048,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickshearimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6720,6 +7075,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksolarizeimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6738,6 +7094,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickspliceimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6768,6 +7125,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickspreadimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6786,6 +7144,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicksteganoimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -6808,6 +7167,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickstereoimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6826,6 +7186,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickstripimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6840,6 +7201,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickswirlimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6858,6 +7220,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicktextureimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -6876,6 +7239,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickthresholdimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6899,6 +7263,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicktintimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6921,6 +7286,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicktransformimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
     ),
@@ -6943,6 +7309,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magicktrimimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6961,6 +7328,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickunsharpmaskimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -6996,6 +7364,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickwaveimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -7018,6 +7387,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickwhitethresholdimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -7036,6 +7406,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickwriteimage",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -7054,6 +7425,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickwriteimagefile",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -7072,6 +7444,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickwriteimages",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -7096,6 +7469,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "magickwriteimagesfile",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -7114,6 +7488,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetalpha",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7128,6 +7503,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetalphaquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7142,6 +7518,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetblack",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7156,6 +7533,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetblackquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7170,6 +7548,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetblue",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7184,6 +7563,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetbluequantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7198,6 +7578,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetcolorasstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -7212,6 +7593,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetcolorcount",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7226,6 +7608,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetcyan",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7240,6 +7623,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetcyanquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7254,6 +7638,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetexception",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -7268,6 +7653,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetexceptionstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -7282,6 +7668,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetexceptiontype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -7296,6 +7683,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetgreen",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7310,6 +7698,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetgreenquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7324,6 +7713,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetindex",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7338,6 +7728,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetmagenta",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7352,6 +7743,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetmagentaquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7366,6 +7758,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetopacity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7380,6 +7773,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetopacityquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7394,6 +7788,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetquantumcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -7408,6 +7803,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetred",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7422,6 +7818,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetredquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7436,6 +7833,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetyellow",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7450,6 +7848,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetyellowquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
     ),
@@ -7464,6 +7863,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetalpha",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7482,6 +7882,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetalphaquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7500,6 +7901,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetblack",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7518,6 +7920,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetblackquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7536,6 +7939,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetblue",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7554,6 +7958,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetbluequantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7572,6 +7977,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7590,6 +7996,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetcolorcount",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7608,6 +8015,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetcyan",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7626,6 +8034,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetcyanquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7644,6 +8053,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetgreen",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7662,6 +8072,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetgreenquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7680,6 +8091,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetindex",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7698,6 +8110,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetmagenta",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7716,6 +8129,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetmagentaquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7734,6 +8148,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetopacity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7752,6 +8167,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetopacityquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7770,6 +8186,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetquantumcolor",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7801,6 +8218,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetred",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7819,6 +8237,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetredquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7837,6 +8256,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetyellow",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7855,6 +8275,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetyellowquantum",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7873,6 +8294,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetiteratorexception",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -7887,6 +8309,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetiteratorexceptionstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -7901,6 +8324,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetiteratorexceptiontype",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -7915,6 +8339,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelgetnextiteratorrow",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantVec,
     ),
@@ -7929,6 +8354,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelresetiterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -7943,6 +8369,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsetiteratorrow",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -7961,6 +8388,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pixelsynciterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),

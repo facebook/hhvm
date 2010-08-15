@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "intl_get_error_code",
     'desc'   => "Useful to handle errors occurred in static methods when there's no object to get error code from.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Error code returned by the last API function call.",
@@ -63,6 +64,7 @@ DefineFunction(
   array(
     'name'   => "intl_get_error_message",
     'desc'   => "Get error message from last internationalization function called.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Description of an error occurred in the last API function call.",
@@ -73,6 +75,7 @@ DefineFunction(
   array(
     'name'   => "intl_error_name",
     'desc'   => "Return ICU error code name.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The returned string will be the same as the name of the error code constant.",
@@ -89,6 +92,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "intl_is_failure",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if it the code indicates some failure, and FALSE in case of success or a warning.",
@@ -105,7 +109,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_asort",
-    'desc'   => "Procedural style bool collator_asort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant. Array elements will have sort order according to current locale rules.\nEquivalent to standard PHP asort().",
+    'desc'   => "Procedural style bool collator_asort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant. Array elements will have sort order according to current locale rules.\n\nEquivalent to standard PHP asort().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -124,7 +129,7 @@ DefineFunction(
         'name'   => "sort_flag",
         'type'   => Int64,
         'value'  => "0",
-        'desc'   => "Optional sorting type, one of the following:\nCollator::SORT_REGULAR - compare items normally (don't change types)\nCollator::SORT_NUMERIC - compare items numerically\nCollator::SORT_STRING - compare items as strings\nDefault \$sort_flag value is Collator::SORT_REGULAR. It is also used if an invalid \$sort_flag value has been specified.",
+        'desc'   => "Optional sorting type, one of the following:\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings\n\nDefault \$sort_flag value is Collator::SORT_REGULAR. It is also used if an invalid \$sort_flag value has been specified.",
       ),
     ),
   ));
@@ -133,9 +138,10 @@ DefineFunction(
   array(
     'name'   => "collator_compare",
     'desc'   => "Procedural style int collator_compare ( Collator \$coll , string \$str1 , string \$str2 ) Compare two Unicode strings according to collation rules.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "1 if str1 is greater than str2 ;\n0 if str1 is equal to str2;\n-1 if str1 is less than str2 . On error boolean FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
+      'desc'   => "1 if str1 is greater than str2 ;\n\n0 if str1 is equal to str2;\n\n-1 if str1 is less than str2 . On error boolean FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
     ),
     'args'   => array(
       array(
@@ -160,6 +166,7 @@ DefineFunction(
   array(
     'name'   => "collator_create",
     'desc'   => "Procedural style Collator collator_create ( string \$locale ) The strings will be compared using the options already specified.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return new instance of Collator object, or NULL on error.",
@@ -176,6 +183,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_get_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -194,6 +202,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_get_error_code",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -208,6 +217,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_get_error_message",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -222,6 +232,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_get_locale",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -241,6 +252,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_get_strength",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -255,6 +267,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_set_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -277,6 +290,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_set_strength",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -295,6 +309,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_sort_with_sort_keys",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -313,7 +328,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "collator_sort",
-    'desc'   => "Procedural style bool collator_sort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array according to current locale rules.\nEquivalent to standard PHP sort() .",
+    'desc'   => "Procedural style bool collator_sort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array according to current locale rules.\n\nEquivalent to standard PHP sort() .",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -333,7 +349,7 @@ DefineFunction(
         'name'   => "sort_flag",
         'type'   => Int64,
         'value'  => "0",
-        'desc'   => "Optional sorting type, one of the following:\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\nCollator::SORT_NUMERIC - compare items numerically\nCollator::SORT_STRING - compare items as strings Default sorting type is Collator::SORT_REGULAR.",
+        'desc'   => "Optional sorting type, one of the following:\n\n\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings Default sorting type is Collator::SORT_REGULAR.",
       ),
     ),
   ));
@@ -342,6 +358,7 @@ DefineFunction(
   array(
     'name'   => "idn_to_ascii",
     'desc'   => "This function converts Unicode domain name to IDNA ASCII-compatible format.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Domain name encoded in ASCII-compatible form.",
@@ -364,6 +381,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "idn_to_unicode",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -384,6 +402,7 @@ DefineFunction(
   array(
     'name'   => "idn_to_utf8",
     'desc'   => "This function converts Unicode domain name from IDNA ASCII-compatible format to plain Unicode.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Domain name in Unicode. In PHP5, domain name will be in UTF-8.",
@@ -443,8 +462,8 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "Collator",
-    'bases'  => array('Sweepable'),
     'desc'   => "Provides string comparison capability with support for appropriate locale-sensitive sort orderings.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  private:
@@ -602,6 +621,7 @@ DefineConstant(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -616,7 +636,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "asort",
-    'desc'   => "Procedural style bool collator_asort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant. Array elements will have sort order according to current locale rules.\nEquivalent to standard PHP asort().",
+    'desc'   => "Procedural style bool collator_asort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant. Array elements will have sort order according to current locale rules.\n\nEquivalent to standard PHP asort().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -639,9 +660,10 @@ DefineFunction(
   array(
     'name'   => "compare",
     'desc'   => "Procedural style int collator_compare ( Collator \$coll , string \$str1 , string \$str2 ) Compare two Unicode strings according to collation rules.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "1 if str1 is greater than str2 ;\n0 if str1 is equal to str2;\n-1 if str1 is less than str2 . On error boolean FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
+      'desc'   => "1 if str1 is greater than str2 ;\n\n0 if str1 is equal to str2;\n\n-1 if str1 is less than str2 . On error boolean FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
     ),
     'args'   => array(
       array(
@@ -661,7 +683,7 @@ DefineFunction(
   array(
     'name'   => "create",
     'desc'   => "Procedural style Collator collator_create ( string \$locale ) The strings will be compared using the options already specified.",
-    'flags'  =>  IsStatic,
+    'flags'  =>  IsStatic | HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return new instance of Collator object, or NULL on error.",
@@ -679,6 +701,7 @@ DefineFunction(
   array(
     'name'   => "getattribute",
     'desc'   => "Procedural style int collator_get_attribute ( Collator \$coll , int \$attr ) Get a value of an integer collator attribute.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Attribute value, or boolean FALSE on error.",
@@ -696,6 +719,7 @@ DefineFunction(
   array(
     'name'   => "geterrorcode",
     'desc'   => "Procedural style int collator_get_error_code ( Collator \$coll )",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Error code returned by the last Collator API function call.",
@@ -706,6 +730,7 @@ DefineFunction(
   array(
     'name'   => "geterrormessage",
     'desc'   => "Procedural style string collator_get_error_message ( Collator \$coll ) Retrieves the message for the last error.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Description of an error occurred in the last Collator API function call.",
@@ -716,6 +741,7 @@ DefineFunction(
   array(
     'name'   => "getlocale",
     'desc'   => "Procedural style string collator_get_locale ( Collator \$coll , int \$type ) Get collector locale name.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Real locale name from which the collation data comes. If the collator was instantiated from rules or an error occurred, returns boolean FALSE.",
@@ -734,6 +760,7 @@ DefineFunction(
   array(
     'name'   => "getstrength",
     'desc'   => "Procedural style int collator_get_strength ( Collator \$coll )",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns current collation strength, or boolean FALSE on error.",
@@ -744,6 +771,7 @@ DefineFunction(
   array(
     'name'   => "setattribute",
     'desc'   => "Procedural style bool collator_set_attribute ( Collator \$coll , int \$attr , int \$val )",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -752,7 +780,7 @@ DefineFunction(
       array(
         'name'   => "attr",
         'type'   => Int64,
-        'desc'   => "Collator object .",
+        'desc'   => "Collator object.",
       ),
       array(
         'name'   => "val",
@@ -764,7 +792,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setstrength",
-    'desc'   => "Procedural style bool collator_set_strength ( Collator \$coll , int \$strength ) The � ICU Collation Service supports many levels of comparison (named \"Levels\", but also known as \"Strengths\"). Having these categories enables ICU to sort strings precisely according to local conventions. However, by allowing the levels to be selectively employed, searching for a string in text can be performed with various matching conditions.\n\nPrimary Level: Typically, this is used to denote differences between base characters (for example, \"a\" < \"b\"). It is the strongest difference. For example, dictionaries are divided into different sections by base character. This is also called the level1 strength.\nSecondary Level: Accents in the characters are considered secondary differences (for example, \"as\" < \"às\" < \"at\"). Other differences between letters can also be considered secondary differences, depending on the language. A secondary difference is ignored when there is a primary difference anywhere in the strings. This is also called the level2 strength. Note: Note: In some languages (such as Danish), certain accented letters are considered to be separate base characters. In most languages, however, an accented letter only has a secondary difference from the unaccented version of that letter.\nTertiary Level: Upper and lower case differences in characters are distinguished at the tertiary level (for example, \"ao\" < \"Ao\" < \"aò\"). In addition, a variant of a letter differs from the base form on the tertiary level (such as \"A\" and \" \"). Another example is the difference between large and small Kana. A tertiary difference is ignored when there is a primary or secondary difference anywhere in the strings. This is also called the level3 strength.\nQuaternary Level: When punctuation is ignored (see Ignoring Punctuations ) at level 13, an additional level can be used to distinguish words with and without punctuation (for example, \"ab\" < \"a-b\" < \"aB\"). This difference is ignored when there is a primary, secondary or tertiary difference. This is also known as the level4 strength. The quaternary level should only be used if ignoring punctuation is required or when processing Japanese text (see Hiragana processing).\nIdentical Level: When all other levels are equal, the identical level is used as a tiebreaker. The Unicode code point values of the NFD form of each string are compared at this level, just in case there is no difference at levels 14. For example, Hebrew cantillation marks are only distinguished at this level. This level should be used sparingly, as only code point values differences between two strings is an extremely rare occurrence. Using this level substantially decreases the performance for both incremental comparison and sort key generation (as well as increasing the sort key length). It is also known as level 5 strength.\nFor example, people may choose to ignore accents or ignore accents and case when searching for text. Almost all characters are distinguished by the first three levels, and in most locales the default value is thus Tertiary. However, if Alternate is set to be Shifted, then the Quaternary strength can be used to break ties among whitespace, punctuation, and symbols that would otherwise be ignored. If very fine distinctions among characters are required, then the Identical strength can be used (for example, Identical Strength distinguishes between the Mathematical Bold Small A and the Mathematical Italic Small A.). However, using levels higher than Tertiary the Identical strength result in significantly longer sort keys, and slower string comparison performance for equal strings.",
+    'desc'   => "Procedural style bool collator_set_strength ( Collator \$coll , int \$strength ) The � ICU Collation Service supports many levels of comparison (named \"Levels\", but also known as \"Strengths\"). Having these categories enables ICU to sort strings precisely according to local conventions. However, by allowing the levels to be selectively employed, searching for a string in text can be performed with various matching conditions.\n\n\n\nPrimary Level: Typically, this is used to denote differences between base characters (for example, \"a\" < \"b\"). It is the strongest difference. For example, dictionaries are divided into different sections by base character. This is also called the level1 strength.\n\nSecondary Level: Accents in the characters are considered secondary differences (for example, \"as\" < \"às\" < \"at\"). Other differences between letters can also be considered secondary differences, depending on the language. A secondary difference is ignored when there is a primary difference anywhere in the strings. This is also called the level2 strength.\n\nNote: In some languages (such as Danish), certain accented letters are considered to be separate base characters. In most languages, however, an accented letter only has a secondary difference from the unaccented version of that letter.\n\nTertiary Level: Upper and lower case differences in characters are distinguished at the tertiary level (for example, \"ao\" < \"Ao\" < \"aò\"). In addition, a variant of a letter differs from the base form on the tertiary level (such as \"A\" and \" \"). Another example is the difference between large and small Kana. A tertiary difference is ignored when there is a primary or secondary difference anywhere in the strings. This is also called the level3 strength.\n\nQuaternary Level: When punctuation is ignored (see Ignoring Punctuations ) at level 13, an additional level can be used to distinguish words with and without punctuation (for example, \"ab\" < \"a-b\" < \"aB\"). This difference is ignored when there is a primary, secondary or tertiary difference. This is also known as the level4 strength. The quaternary level should only be used if ignoring punctuation is required or when processing Japanese text (see Hiragana processing).\n\nIdentical Level: When all other levels are equal, the identical level is used as a tiebreaker. The Unicode code point values of the NFD form of each string are compared at this level, just in case there is no difference at levels 14. For example, Hebrew cantillation marks are only distinguished at this level. This level should be used sparingly, as only code point values differences between two strings is an extremely rare occurrence. Using this level substantially decreases the performance for both incremental comparison and sort key generation (as well as increasing the sort key length). It is also known as level 5 strength.\n\nFor example, people may choose to ignore accents or ignore accents and case when searching for text. Almost all characters are distinguished by the first three levels, and in most locales the default value is thus Tertiary. However, if Alternate is set to be Shifted, then the Quaternary strength can be used to break ties among whitespace, punctuation, and symbols that would otherwise be ignored. If very fine distinctions among characters are required, then the Identical strength can be used (for example, Identical Strength distinguishes between the Mathematical Bold Small A and the Mathematical Italic Small A.). However, using levels higher than Tertiary the Identical strength result in significantly longer sort keys, and slower string comparison performance for equal strings.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -782,6 +811,7 @@ DefineFunction(
   array(
     'name'   => "sortwithsortkeys",
     'desc'   => "Procedural style bool collator_sort_with_sort_keys ( Collator \$coll , array &\$arr ) Similar to collator_sort() but uses ICU sorting keys produced by ucol_getSortKey() to gain more speed on large arrays.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -798,7 +828,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sort",
-    'desc'   => "Procedural style bool collator_sort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array according to current locale rules.\nEquivalent to standard PHP sort() .",
+    'desc'   => "Procedural style bool collator_sort ( Collator \$coll , array &\$arr [, int \$sort_flag ] ) This function sorts an array according to current locale rules.\n\nEquivalent to standard PHP sort() .",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -821,6 +852,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -834,7 +866,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "Locale",
-    'desc'   => "A \"Locale\" is an identifier used to get language, culture, or regionally-specific behavior from an API. PHP locales are organized and identified the same way that the CLDR locales used by ICU (and many vendors of Unix-like operating systems, the Mac, Java, and so forth) use. Locales are identified using RFC 4646 language tags (which use hyphen, not underscore) in addition to the more traditional underscore-using identifiers. Unless otherwise noted the functions in this class are tolerant of both formats.\nExamples of identifiers include: en-US (English, United States) zh-Hant-TW (Chinese, Traditional Script, Taiwan) fr-CA, fr-FR (French for Canada and France respectively) The Locale class (and related procedural functions) are used to interact with locale identifiers--to verify that an ID is well-formed, valid, etc. The extensions used by CLDR in UAX #35 (and inherited by ICU) are valid and used wherever they would be in ICU normally. Locales cannot be instantiated as objects. All of the functions/methods provided are static. The null or empty string obtains the \"root\" locale. The \"root\" locale is equivalent to \"en_US_POSIX\" in CLDR. Language tags (and thus locale identifiers) are case insensitive. There exists a canonicalization function to make case match the specification.",
+    'desc'   => "A \"Locale\" is an identifier used to get language, culture, or regionally-specific behavior from an API. PHP locales are organized and identified the same way that the CLDR locales used by ICU (and many vendors of Unix-like operating systems, the Mac, Java, and so forth) use. Locales are identified using RFC 4646 language tags (which use hyphen, not underscore) in addition to the more traditional underscore-using identifiers. Unless otherwise noted the functions in this class are tolerant of both formats.\n\nExamples of identifiers include: en-US (English, United States) zh-Hant-TW (Chinese, Traditional Script, Taiwan) fr-CA, fr-FR (French for Canada and France respectively) The Locale class (and related procedural functions) are used to interact with locale identifiers--to verify that an ID is well-formed, valid, etc. The extensions used by CLDR in UAX #35 (and inherited by ICU) are valid and used wherever they would be in ICU normally. Locales cannot be instantiated as objects. All of the functions/methods provided are static. The null or empty string obtains the \"root\" locale. The \"root\" locale is equivalent to \"en_US_POSIX\" in CLDR. Language tags (and thus locale identifiers) are case insensitive. There exists a canonicalization function to make case match the specification.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineConstant(
@@ -852,6 +885,7 @@ DefineConstant(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -860,6 +894,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -873,8 +908,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "Normalizer",
-    'bases'  => array('Sweepable'),
-    'desc'   => "Normalization is a process that involves transforming characters and sequences of characters into a formally-defined underlying representation. This process is most important when text needs to be compared for sorting and searching, but it is also used when storing text to ensure that the text is stored in a consistent representation.\nThe Unicode Consortium has defined a number of normalization forms reflecting the various needs of applications: Normalization Form D (NFD) - Canonical Decomposition Normalization Form C (NFC) - Canonical Decomposition followed by Canonical Composition Normalization Form KD (NFKD) - Compatibility Decomposition Normalization Form KC (NFKC) - Compatibility Decomposition followed by Canonical Composition The different forms are defined in terms of a set of transformations on the text, transformations that are expressed by both an algorithm and a set of data files.",
+    'desc'   => "Normalization is a process that involves transforming characters and sequences of characters into a formally-defined underlying representation. This process is most important when text needs to be compared for sorting and searching, but it is also used when storing text to ensure that the text is stored in a consistent representation.\n\nThe Unicode Consortium has defined a number of normalization forms reflecting the various needs of applications: Normalization Form D (NFD) - Canonical Decomposition Normalization Form C (NFC) - Canonical Decomposition followed by Canonical Composition Normalization Form KD (NFKD) - Compatibility Decomposition Normalization Form KC (NFKC) - Compatibility Decomposition followed by Canonical Composition The different forms are defined in terms of a set of transformations on the text, transformations that are expressed by both an algorithm and a set of data files.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineConstant(
@@ -934,6 +969,7 @@ DefineConstant(
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -943,7 +979,7 @@ DefineFunction(
   array(
     'name'   => "isnormalized",
     'desc'   => "Procedural style bool normalizer_is_normalized ( string \$input [, string \$form = Normalizer::FORM_C ] ) Checks if the provided string is already in the specified normalization form.",
-    'flags'  =>  IsStatic,
+    'flags'  =>  IsStatic | HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "TRUE if normalized, FALSE otherwise or if there an error",
@@ -956,7 +992,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_Normalizer_FORM_C",
+        'value'  => "q_normalizer_FORM_C",
         'desc'   => "One of the normalization forms.",
       ),
     ),
@@ -966,7 +1002,7 @@ DefineFunction(
   array(
     'name'   => "normalize",
     'desc'   => "Procedural style string normalizer_normalize ( string \$input [, string \$form = Normalizer::FORM_C ] ) Normalizes the input provided and returns the normalized string",
-    'flags'  =>  IsStatic,
+    'flags'  =>  IsStatic | HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "NULL if an error occurred.",
@@ -979,7 +1015,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_Normalizer_FORM_C",
+        'value'  => "q_normalizer_FORM_C",
       ),
     ),
   ));
@@ -987,6 +1023,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

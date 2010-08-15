@@ -53,9 +53,10 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_open_memory",
     'desc'   => "Creates a new XMLWriter using memory for string output.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Object oriented style: Returns TRUE on success or FALSE on failure.\nProcedural style: Returns a new xmlwriter resource for later use with the xmlwriter functions on success, FALSE on error.",
+      'desc'   => "Object oriented style: Returns TRUE on success or FALSE on failure.\n\nProcedural style: Returns a new xmlwriter resource for later use with the xmlwriter functions on success, FALSE on error.",
     ),
   ));
 
@@ -63,9 +64,10 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_open_uri",
     'desc'   => "Creates a new XMLWriter using uri for the output.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
-      'desc'   => "Object oriented style: Returns TRUE on success or FALSE on failure.\nProcedural style: Returns a new xmlwriter resource for later use with the xmlwriter functions on success, FALSE on error.",
+      'desc'   => "Object oriented style: Returns TRUE on success or FALSE on failure.\n\nProcedural style: Returns a new xmlwriter resource for later use with the xmlwriter functions on success, FALSE on error.",
     ),
     'args'   => array(
       array(
@@ -80,6 +82,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_set_indent_string",
     'desc'   => "Sets the string which will be used to indent each element/attribute of the resulting xml.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -102,6 +105,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_set_indent",
     'desc'   => "Toggles indentation on or off.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -124,6 +128,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_document",
     'desc'   => "Starts a document.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -159,6 +164,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_element",
     'desc'   => "Starts an element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -181,6 +187,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_element_ns",
     'desc'   => "Starts a namespaced element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -213,6 +220,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_element_ns",
     'desc'   => "Writes a full namespaced element tag.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -251,6 +259,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_element",
     'desc'   => "Writes a full element tag.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -279,6 +288,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_element",
     'desc'   => "Ends the current element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -296,6 +306,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_full_end_element",
     'desc'   => "End the current xml element. Writes an end tag even if the element is empty.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -313,6 +324,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_attribute_ns",
     'desc'   => "Starts a namespaced attribute.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -345,6 +357,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_attribute",
     'desc'   => "Starts an attribute.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -367,6 +380,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_attribute_ns",
     'desc'   => "Writes a full namespaced attribute.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -404,6 +418,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_attribute",
     'desc'   => "Writes a full attribute.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -431,6 +446,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_attribute",
     'desc'   => "Ends the current attribute.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -448,6 +464,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_cdata",
     'desc'   => "Starts a CDATA.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -465,6 +482,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_cdata",
     'desc'   => "Writes a full CDATA.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -487,6 +505,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_cdata",
     'desc'   => "Ends the current CDATA section.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -504,6 +523,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_comment",
     'desc'   => "Starts a comment.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -521,6 +541,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_comment",
     'desc'   => "Writes a full comment.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -543,6 +564,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_comment",
     'desc'   => "Ends the current comment.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -560,6 +582,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_document",
     'desc'   => "Ends the current document.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -577,6 +600,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_pi",
     'desc'   => "Starts a processing instruction tag.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -599,6 +623,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_pi",
     'desc'   => "Writes a processing instruction.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -626,6 +651,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_pi",
     'desc'   => "Ends the current processing instruction.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -643,6 +669,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_text",
     'desc'   => "Writes a text.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -665,6 +692,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_raw",
     'desc'   => "Writes a raw xml text.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -687,6 +715,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_dtd",
     'desc'   => "Starts a DTD.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -721,6 +750,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_dtd",
     'desc'   => "Writes a full DTD.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -761,6 +791,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_dtd_element",
     'desc'   => "Starts a DTD element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -783,6 +814,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_dtd_element",
     'desc'   => "Writes a full DTD element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -810,6 +842,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_dtd_element",
     'desc'   => "Ends the current DTD element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -827,6 +860,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_dtd_attlist",
     'desc'   => "Starts a DTD attribute list.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -849,6 +883,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_dtd_attlist",
     'desc'   => "Writes a DTD attribute list.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -876,6 +911,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_dtd_attlist",
     'desc'   => "Ends the current DTD attribute list.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -893,6 +929,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_start_dtd_entity",
     'desc'   => "Starts a DTD entity.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -919,6 +956,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_write_dtd_entity",
     'desc'   => "Writes a full DTD entity.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -966,6 +1004,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_dtd_entity",
     'desc'   => "Ends the current DTD entity.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -983,6 +1022,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_end_dtd",
     'desc'   => "Ends the DTD of the document.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1000,6 +1040,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_flush",
     'desc'   => "Flushes the current buffer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If you opened the writer in memory, this function returns the generated XML buffer, Else, if using URI, this function will write the buffer and return the number of written bytes.",
@@ -1023,6 +1064,7 @@ DefineFunction(
   array(
     'name'   => "xmlwriter_output_memory",
     'desc'   => "Returns the current buffer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the current buffer as a string.",
@@ -1083,6 +1125,7 @@ BeginClass(
   array(
     'name'   => "xmlwriter",
     'desc'   => "",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  public:
@@ -1098,6 +1141,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -1106,6 +1150,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openmemory",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1114,6 +1159,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openuri",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1128,6 +1174,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setindentstring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1142,6 +1189,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setindent",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1156,6 +1204,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startdocument",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1181,6 +1230,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startelement",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1195,6 +1245,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startelementns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1217,6 +1268,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writeelementns",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1244,6 +1296,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writeelement",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1263,6 +1316,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "endelement",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1271,6 +1325,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fullendelement",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1279,6 +1334,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startattributens",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1301,6 +1357,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startattribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1315,6 +1372,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writeattributens",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1341,6 +1399,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writeattribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1359,6 +1418,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "endattribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1367,6 +1427,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startcdata",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1375,6 +1436,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writecdata",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1389,6 +1451,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "endcdata",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1397,6 +1460,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startcomment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1405,6 +1469,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writecomment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1419,6 +1484,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "endcomment",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1427,6 +1493,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "enddocument",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1435,6 +1502,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startpi",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1449,6 +1517,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writepi",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1467,6 +1536,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "endpi",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1475,6 +1545,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "text",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1489,6 +1560,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writeraw",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1503,6 +1575,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startdtd",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1527,6 +1600,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writedtd",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1556,6 +1630,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startdtdelement",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1570,6 +1645,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writedtdelement",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1588,6 +1664,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "enddtdelement",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1596,6 +1673,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startdtdattlist",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1610,6 +1688,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writedtdattlist",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1628,6 +1707,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "enddtdattlist",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1636,6 +1716,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "startdtdentity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1654,6 +1735,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "writedtdentity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1692,6 +1774,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "enddtdentity",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1700,6 +1783,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "enddtd",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1708,6 +1792,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "flush",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1723,6 +1808,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "outputmemory",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -1738,6 +1824,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

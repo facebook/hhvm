@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 540 */
+/* SRC: classes/reflection.php line 1277 */
 class c_reflectionobject : public c_reflectionclass {
   BEGIN_CLASS_MAP(ReflectionObject)
     PARENT_CLASS(ReflectionClass)

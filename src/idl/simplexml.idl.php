@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "simplexml_load_string",
     'desc'   => "Takes a well-formed XML string and returns it as an object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an object of class SimpleXMLElement with properties containing the data held within the xml document. On errors, it will return FALSE.",
@@ -92,6 +93,7 @@ DefineFunction(
   array(
     'name'   => "simplexml_load_file",
     'desc'   => "Convert the well-formed XML document in the given file to an object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an object of class SimpleXMLElement with properties containing the data held within the XML document. On errors, it will return FALSE.",
@@ -100,7 +102,7 @@ DefineFunction(
       array(
         'name'   => "filename",
         'type'   => String,
-        'desc'   => "Path to the XML file Note: Libxml 2 unescapes the URI, so if you want to pass e.g. b&c as the URI parameter a, you have to call simplexml_load_file(rawurlencode('http://example.com/?a=' . urlencode('b&c'))). Since PHP 5.1.0 you don't need to do this because PHP will do it for you.",
+        'desc'   => "Path to the XML file\n\nLibxml 2 unescapes the URI, so if you want to pass e.g. b&c as the URI parameter a, you have to call simplexml_load_file(rawurlencode('http://example.com/?a=' . urlencode('b&c'))). Since PHP 5.1.0 you don't need to do this because PHP will do it for you.",
       ),
       array(
         'name'   => "class_name",
@@ -131,6 +133,7 @@ DefineFunction(
   array(
     'name'   => "libxml_get_errors",
     'desc'   => "Retrieve array of errors.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array with LibXMLError objects if there are any errors in the buffer, or an empty array otherwise.",
@@ -141,6 +144,7 @@ DefineFunction(
   array(
     'name'   => "libxml_get_last_error",
     'desc'   => "Retrieve last error from libxml.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a LibXMLError object if there is any error in the buffer, FALSE otherwise.",
@@ -151,6 +155,7 @@ DefineFunction(
   array(
     'name'   => "libxml_clear_errors",
     'desc'   => "libxml_clear_errors() clears the libxml error buffer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -161,6 +166,7 @@ DefineFunction(
   array(
     'name'   => "libxml_use_internal_errors",
     'desc'   => "libxml_use_internal_errors() allows you to disable standard libxml errors and enable user error handling.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "This function returns the previous value of use_errors.",
@@ -179,6 +185,7 @@ DefineFunction(
   array(
     'name'   => "libxml_set_streams_context",
     'desc'   => "Sets the streams context for the next libxml document load or write.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -196,6 +203,7 @@ DefineFunction(
   array(
     'name'   => "libxml_disable_entity_loader",
     'desc'   => "Disable/enable the ability to load external entities.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns the previous value.",
@@ -250,8 +258,8 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "SimpleXMLElement",
-    'ifaces' => array('ArrayAccess', 'IteratorAggregate', 'Countable'),
     'desc'   => "Represents an element in XML document.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  public:
@@ -276,6 +284,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -310,6 +319,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "offsetexists",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -324,6 +334,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "offsetget",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -338,6 +349,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "offsetset",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -356,6 +368,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "offsetunset",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -370,6 +383,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getiterator",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -379,6 +393,7 @@ DefineFunction(
   array(
     'name'   => "count",
     'desc'   => "This method counts the number of children of an element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the number of elements of an element.",
@@ -388,6 +403,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "xpath",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array of SimpleXMLElement objects or FALSE in case of an error.",
@@ -404,6 +420,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "registerxpathnamespace",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -422,6 +439,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "asxml",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -437,6 +455,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getnamespaces",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringMap,
     ),
@@ -452,6 +471,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getdocnamespaces",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringMap,
     ),
@@ -467,6 +487,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "children",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns a SimpleXMLElement element, whether the node has children or not.",
@@ -490,6 +511,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getname",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -498,6 +520,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "attributes",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
     ),
@@ -520,6 +543,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "addchild",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -544,6 +568,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "addattribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -568,6 +593,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__tostring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -576,6 +602,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__get",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -590,6 +617,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__set",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -608,6 +636,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__isset",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -622,6 +651,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__unset",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -636,6 +666,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -650,11 +681,13 @@ BeginClass(
   array(
     'name'   => "LibXMLError",
     'desc'   => "Contains various information about errors thrown by libxml. The error codes are described within the official » xmlError API documentation.",
+    'flags'  =>  HasDocComment,
   ));
 
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -663,6 +696,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -676,9 +710,8 @@ EndClass(
 BeginClass(
   array(
     'name'   => "SimpleXMLElementIterator",
-    'ifaces' => array('Iterator'),
-    'bases'  => array('Sweepable'),
     'desc'   => "",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
 public:
@@ -695,6 +728,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -703,6 +737,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "current",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -711,6 +746,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "key",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -719,6 +755,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "next",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -727,6 +764,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "rewind",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -735,6 +773,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "valid",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -743,6 +782,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

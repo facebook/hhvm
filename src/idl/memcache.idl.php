@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "memcache_connect",
     'desc'   => "Memcache::connect() establishes a connection to the memcached server. The connection, which was opened using Memcache::connect() will be automatically closed at the end of script execution. Also you can close it with Memcache::close(). Also you can use memcache_connect() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -87,6 +88,7 @@ DefineFunction(
   array(
     'name'   => "memcache_pconnect",
     'desc'   => "Memcache::pconnect() is similar to Memcache::connect() with the difference, that the connection it establishes is persistent. This connection is not closed after the end of script execution and by Memcache::close() function. Also you can use memcache_pconnect() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -121,6 +123,7 @@ DefineFunction(
   array(
     'name'   => "memcache_add",
     'desc'   => "Memcache::add() stores variable var with key only if such key doesn't exist at the server yet. Also you can use memcache_add() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure. Returns FALSE if such key already exist. For the rest Memcache::add() behaves similarly to Memcache::set().",
@@ -158,7 +161,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_set",
-    'desc'   => "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib). Note: Remember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
+    'desc'   => "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib).\n\nRemember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -197,6 +201,7 @@ DefineFunction(
   array(
     'name'   => "memcache_replace",
     'desc'   => "Memcache::replace() should be used to replace value of existing item with key. In case if item with such key doesn't exists, Memcache::replace() returns FALSE. For the rest Memcache::replace() behaves similarly to Memcache::set(). Also you can use memcache_replace() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -234,7 +239,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_get",
-    'desc'   => "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
+    'desc'   => "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\n\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the string associated with the key or FALSE on failure or if such key was not found.",
@@ -262,6 +268,7 @@ DefineFunction(
   array(
     'name'   => "memcache_delete",
     'desc'   => "Memcache::delete() deletes item with the key. If parameter timeout is specified, the item will expire after timeout seconds. Also you can use memcache_delete() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -288,7 +295,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_increment",
-    'desc'   => "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist. Note: Do not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
+    'desc'   => "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist.\n\nDo not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns new items value on success or FALSE on failure.",
@@ -315,7 +323,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_decrement",
-    'desc'   => "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted. Note: New item's value will not be less than zero. Note: Do not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
+    'desc'   => "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted.\n\nNew item's value will not be less than zero.\n\nDo not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns item's new value on success or FALSE on failure.",
@@ -343,6 +352,7 @@ DefineFunction(
   array(
     'name'   => "memcache_close",
     'desc'   => "Memcache::close() closes connection to memcached server. This function doesn't close persistent connections, which are closed only during web-server shutdown/restart. Also you can use memcache_close() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -358,7 +368,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_debug",
-    'desc'   => "memcache_debug() turns on debug output if parameter on_off is equal to TRUE and turns off if it's FALSE. Note: memcache_debug() is accessible only if PHP was built with --enable-debug option and always returns TRUE in this case. Otherwise, this function has no effect and always returns FALSE.",
+    'desc'   => "memcache_debug() turns on debug output if parameter on_off is equal to TRUE and turns off if it's FALSE.\n\nmemcache_debug() is accessible only if PHP was built with --enable-debug option and always returns TRUE in this case. Otherwise, this function has no effect and always returns FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if PHP was built with --enable-debug option, otherwise returns FALSE.",
@@ -375,6 +386,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_get_version",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -390,6 +402,7 @@ DefineFunction(
   array(
     'name'   => "memcache_flush",
     'desc'   => "Memcache::flush() immediately invalidates all existing items. Memcache::flush() doesn't actually free any resources, it only marks all the items as expired, so occupied memory will be overwritten by new items. Also you can use memcache_flush() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -410,6 +423,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_setoptimeout",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -428,6 +442,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_get_server_status",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -451,6 +466,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_set_compress_threshold",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -474,6 +490,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_get_stats",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -503,6 +520,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_get_extended_stats",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -532,6 +550,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_set_server_params",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -575,6 +594,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "memcache_add_server",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -671,6 +691,7 @@ BeginClass(
   array(
     'name'   => "Memcache",
     'desc'   => "Represents a connection to a set of memcache servers.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
  private:
@@ -684,6 +705,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -693,6 +715,7 @@ DefineFunction(
   array(
     'name'   => "connect",
     'desc'   => "Memcache::connect() establishes a connection to the memcached server. The connection, which was opened using Memcache::connect() will be automatically closed at the end of script execution. Also you can close it with Memcache::close(). Also you can use memcache_connect() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -727,6 +750,7 @@ DefineFunction(
   array(
     'name'   => "pconnect",
     'desc'   => "Memcache::pconnect() is similar to Memcache::connect() with the difference, that the connection it establishes is persistent. This connection is not closed after the end of script execution and by Memcache::close() function. Also you can use memcache_pconnect() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -761,6 +785,7 @@ DefineFunction(
   array(
     'name'   => "add",
     'desc'   => "Memcache::add() stores variable var with key only if such key doesn't exist at the server yet. Also you can use memcache_add() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure. Returns FALSE if such key already exist. For the rest Memcache::add() behaves similarly to Memcache::set().",
@@ -794,7 +819,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "set",
-    'desc'   => "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib). Note: Remember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
+    'desc'   => "Memcache::set() stores an item var with key on the memcached server. Parameter expire is expiration time in seconds. If it's 0, the item never expires (but memcached server doesn't guarantee this item to be stored all the time, it could be deleted from the cache to make place for other items). You can use MEMCACHE_COMPRESSED constant as flag value if you want to use on-the-fly compression (uses zlib).\n\nRemember that resource variables (i.e. file and connection descriptors) cannot be stored in the cache, because they cannot be adequately represented in serialized state. Also you can use memcache_set() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -829,6 +855,7 @@ DefineFunction(
   array(
     'name'   => "replace",
     'desc'   => "Memcache::replace() should be used to replace value of existing item with key. In case if item with such key doesn't exists, Memcache::replace() returns FALSE. For the rest Memcache::replace() behaves similarly to Memcache::set(). Also you can use memcache_replace() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -862,7 +889,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "get",
-    'desc'   => "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
+    'desc'   => "Memcache::get() returns previously stored data if an item with such key exists on the server at this moment.\n\nYou can pass array of keys to Memcache::get() to get array of values. The result array will contain only found key-value pairs.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the string associated with the key or FALSE on failure or if such key was not found.",
@@ -886,6 +914,7 @@ DefineFunction(
   array(
     'name'   => "delete",
     'desc'   => "Memcache::delete() deletes item with the key. If parameter timeout is specified, the item will expire after timeout seconds. Also you can use memcache_delete() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -908,7 +937,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "increment",
-    'desc'   => "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist. Note: Do not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
+    'desc'   => "Memcache::increment() increments value of an item by the specified value. If item specified by key was not numeric and cannot be converted to a number, it will change its value to value. Memcache::increment() does not create an item if it doesn't already exist.\n\nDo not use Memcache::increment() with items that have been stored compressed because subsequent calls to Memcache::get() will fail. Also you can use memcache_increment() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns new items value on success or FALSE on failure.",
@@ -931,7 +961,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "decrement",
-    'desc'   => "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted. Note: New item's value will not be less than zero. Note: Do not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
+    'desc'   => "Memcache::decrement() decrements value of the item by value. Similarly to Memcache::increment(), current value of the item is being converted to numerical and after that value is substracted.\n\nNew item's value will not be less than zero.\n\nDo not use Memcache::decrement() with item, which was stored compressed, because consequent call to Memcache::get() will fail. Memcache::decrement() does not create an item if it didn't exist. Also you can use memcache_decrement() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns item's new value on success or FALSE on failure.",
@@ -955,6 +986,7 @@ DefineFunction(
   array(
     'name'   => "getversion",
     'desc'   => "Memcache::getVersion() returns a string with server's version number. Also you can use memcache_get_version() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string of server version number or FALSE on failure.",
@@ -965,6 +997,7 @@ DefineFunction(
   array(
     'name'   => "flush",
     'desc'   => "Memcache::flush() immediately invalidates all existing items. Memcache::flush() doesn't actually free any resources, it only marks all the items as expired, so occupied memory will be overwritten by new items. Also you can use memcache_flush() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -981,6 +1014,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setoptimeout",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -996,6 +1030,7 @@ DefineFunction(
   array(
     'name'   => "close",
     'desc'   => "Memcache::close() closes connection to memcached server. This function doesn't close persistent connections, which are closed only during web-server shutdown/restart. Also you can use memcache_close() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1005,7 +1040,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getserverstatus",
-    'desc'   => "Memcache::getServerStatus() returns a the servers online/offline status. You can also use memcache_get_server_status() function. Note: This function has been added to Memcache version 2.1.0.",
+    'desc'   => "Memcache::getServerStatus() returns a the servers online/offline status. You can also use memcache_get_server_status() function.\n\nThis function has been added to Memcache version 2.1.0.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns a the servers status. 0 if server is failed, non-zero otherwise",
@@ -1028,7 +1064,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setcompressthreshold",
-    'desc'   => "Memcache::setCompressThreshold() enables automatic compression of large values. You can also use the memcache_set_compress_threshold() function. Note: This function has been added to Memcache version 2.0.0.",
+    'desc'   => "Memcache::setCompressThreshold() enables automatic compression of large values. You can also use the memcache_set_compress_threshold() function.\n\nThis function has been added to Memcache version 2.0.0.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1052,6 +1089,7 @@ DefineFunction(
   array(
     'name'   => "getstats",
     'desc'   => "Memcache::getStats() returns an associative array with server's statistics. Array keys correspond to stats parameters and values to parameter's values. Also you can use memcache_get_stats() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an associative array of server statistics or FALSE on failure.",
@@ -1081,7 +1119,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getextendedstats",
-    'desc'   => "Memcache::getExtendedStats() returns a two-dimensional associative array with server statistics. Array keys correspond to host:port of server and values contain the individual server statistics. A failed server will have its corresponding entry set to FALSE. You can also use the memcache_get_extended_stats() function. Note: This function has been added to Memcache version 2.0.0.",
+    'desc'   => "Memcache::getExtendedStats() returns a two-dimensional associative array with server statistics. Array keys correspond to host:port of server and values contain the individual server statistics. A failed server will have its corresponding entry set to FALSE. You can also use the memcache_get_extended_stats() function.\n\nThis function has been added to Memcache version 2.0.0.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns a two-dimensional associative array of server statistics or FALSE on failure.",
@@ -1111,7 +1150,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setserverparams",
-    'desc'   => "Memcache::setServerParams() changes server parameters at runtime. You can also use the memcache_set_server_params() function. Note: This function has been added to Memcache version 2.1.0.",
+    'desc'   => "Memcache::setServerParams() changes server parameters at runtime. You can also use the memcache_set_server_params() function.\n\nThis function has been added to Memcache version 2.1.0.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1158,7 +1198,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "addserver",
-    'desc'   => "Memcache::addServer() adds a server to the connection pool. The connection, which was opened using Memcache::addServer() will be automatically closed at the end of script execution, you can also close it manually with Memcache::close(). You can also use the memcache_add_server() function.\nWhen using this method (as opposed to Memcache::connect() and Memcache::pconnect()) the network connection is not established until actually needed. Thus there is no overhead in adding a large number of servers to the pool, even though they might not all be used.\nFailover may occur at any stage in any of the methods, as long as other servers are available the request the user won't notice. Any kind of socket or Memcached server level errors (except out-of-memory) may trigger the failover. Normal client errors such as adding an existing key will not trigger a failover. Note: This function has been added to Memcache version 2.0.0.",
+    'desc'   => "Memcache::addServer() adds a server to the connection pool. The connection, which was opened using Memcache::addServer() will be automatically closed at the end of script execution, you can also close it manually with Memcache::close(). You can also use the memcache_add_server() function.\n\nWhen using this method (as opposed to Memcache::connect() and Memcache::pconnect()) the network connection is not established until actually needed. Thus there is no overhead in adding a large number of servers to the pool, even though they might not all be used.\n\nFailover may occur at any stage in any of the methods, as long as other servers are available the request the user won't notice. Any kind of socket or Memcached server level errors (except out-of-memory) may trigger the failover. Normal client errors such as adding an existing key will not trigger a failover.\n\nThis function has been added to Memcache version 2.0.0.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1197,7 +1238,7 @@ DefineFunction(
         'name'   => "retry_interval",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "Controls how often a failed server will be retried, the default value is 15 seconds. Setting this parameter to -1 disables automatic retry. Neither this nor the persistent parameter has any effect when the extension is loaded dynamically via dl().\nEach failed connection struct has its own timeout and before it has expired the struct will be skipped when selecting backends to serve a request. Once expired the connection will be successfully reconnected or marked as failed for another retry_interval seconds. The typical effect is that each web server child will retry the connection about every retry_interval seconds when serving a page.",
+        'desc'   => "Controls how often a failed server will be retried, the default value is 15 seconds. Setting this parameter to -1 disables automatic retry. Neither this nor the persistent parameter has any effect when the extension is loaded dynamically via dl().\n\nEach failed connection struct has its own timeout and before it has expired the struct will be skipped when selecting backends to serve a request. Once expired the connection will be successfully reconnected or marked as failed for another retry_interval seconds. The typical effect is that each web server child will retry the connection about every retry_interval seconds when serving a page.",
       ),
       array(
         'name'   => "status",
@@ -1222,6 +1263,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

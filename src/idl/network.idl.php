@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "gethostbyaddr",
     'desc'   => "Returns the host name of the Internet host specified by ip_address.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the host name or the unmodified ip_address on failure.",
@@ -70,6 +71,7 @@ DefineFunction(
   array(
     'name'   => "gethostbyname",
     'desc'   => "Returns the IPv4 address of the Internet host specified by hostname.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the IPv4 address or a string containing the unmodified hostname on failure.",
@@ -87,6 +89,7 @@ DefineFunction(
   array(
     'name'   => "gethostbynamel",
     'desc'   => "Returns a list of IPv4 addresses to which the Internet host specified by hostname resolves.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array of IPv4 addresses or FALSE if hostname could not be resolved.",
@@ -104,6 +107,7 @@ DefineFunction(
   array(
     'name'   => "getprotobyname",
     'desc'   => "getprotobyname() returns the protocol number associated with the protocol name as per /etc/protocols.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the protocol number or -1 if the protocol is not found.",
@@ -121,6 +125,7 @@ DefineFunction(
   array(
     'name'   => "getprotobynumber",
     'desc'   => "getprotobynumber() returns the protocol name associated with protocol number as per /etc/protocols.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the protocol name as a string.",
@@ -138,6 +143,7 @@ DefineFunction(
   array(
     'name'   => "getservbyname",
     'desc'   => "getservbyname() returns the Internet port which corresponds to service for the specified protocol as per /etc/services.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the port number, or FALSE if service or protocol is not found.",
@@ -160,6 +166,7 @@ DefineFunction(
   array(
     'name'   => "getservbyport",
     'desc'   => "getservbyport() returns the Internet service associated with port for the specified protocol as per /etc/services.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the Internet service name as a string.",
@@ -181,6 +188,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "inet_ntop",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string representation of the address or FALSE on failure.",
@@ -198,6 +206,7 @@ DefineFunction(
   array(
     'name'   => "inet_pton",
     'desc'   => "This function converts a human readable IPv4 or IPv6 address (if PHP was built with IPv6 support enabled) into an address family appropriate 32bit or 128bit binary structure.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the in_addr representation of the given address",
@@ -214,7 +223,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ip2long",
-    'desc'   => "The function ip2long() generates an IPv4 Internet network address from its Internet standard format (dotted string) representation.\nip2long() will also work with non-complete IP addresses. Read » http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/commtrf2/inet_addr.htm for more info.",
+    'desc'   => "The function ip2long() generates an IPv4 Internet network address from its Internet standard format (dotted string) representation.\n\nip2long() will also work with non-complete IP addresses. Read » http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/libs/commtrf2/inet_addr.htm for more info.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the IPv4 address or FALSE if ip_address is invalid.",
@@ -232,6 +242,7 @@ DefineFunction(
   array(
     'name'   => "long2ip",
     'desc'   => "The function long2ip() generates an Internet address in dotted format (i.e.: aaa.bbb.ccc.ddd) from the proper address representation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the Internet IP address as a string.",
@@ -248,6 +259,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dns_check_record",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -268,6 +280,7 @@ DefineFunction(
   array(
     'name'   => "checkdnsrr",
     'desc'   => "Searches DNS for records of type type corresponding to host.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if any records are found; returns FALSE if no records were found or if an error occurred.",
@@ -291,6 +304,7 @@ DefineFunction(
   array(
     'name'   => "dns_get_record",
     'desc'   => "Fetch DNS Resource Records associated with the given hostname.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -298,13 +312,13 @@ DefineFunction(
       array(
         'name'   => "hostname",
         'type'   => String,
-        'desc'   => "hostname should be a valid DNS hostname such as \"www.example.com\". Reverse lookups can be generated using in-addr.arpa notation, but gethostbyaddr() is more suitable for the majority of reverse lookups. Note: Per DNS standards, email addresses are given in user.host format (for example: hostmaster.example.com as opposed to hostmaster@example.com), be sure to check this value and modify if necessary before using it with a functions such as mail().",
+        'desc'   => "hostname should be a valid DNS hostname such as \"www.example.com\". Reverse lookups can be generated using in-addr.arpa notation, but gethostbyaddr() is more suitable for the majority of reverse lookups.\n\nPer DNS standards, email addresses are given in user.host format (for example: hostmaster.example.com as opposed to hostmaster@example.com), be sure to check this value and modify if necessary before using it with a functions such as mail().",
       ),
       array(
         'name'   => "type",
         'type'   => Int32,
         'value'  => "-1",
-        'desc'   => "By default, dns_get_record() will search for any resource records associated with hostname. To limit the query, specify the optional type parameter. May be any one of the following: DNS_A, DNS_CNAME, DNS_HINFO, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT, DNS_AAAA, DNS_SRV, DNS_NAPTR, DNS_A6, DNS_ALL or DNS_ANY. Note: Because of eccentricities in the performance of libresolv between platforms, DNS_ANY will not always return every record, the slower DNS_ALL will collect all records more reliably.",
+        'desc'   => "By default, dns_get_record() will search for any resource records associated with hostname. To limit the query, specify the optional type parameter. May be any one of the following: DNS_A, DNS_CNAME, DNS_HINFO, DNS_MX, DNS_NS, DNS_PTR, DNS_SOA, DNS_TXT, DNS_AAAA, DNS_SRV, DNS_NAPTR, DNS_A6, DNS_ALL or DNS_ANY.\n\nBecause of eccentricities in the performance of libresolv between platforms, DNS_ANY will not always return every record, the slower DNS_ALL will collect all records more reliably.",
       ),
       array(
         'name'   => "authns",
@@ -324,6 +338,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "dns_get_mx",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -348,6 +363,7 @@ DefineFunction(
   array(
     'name'   => "getmxrr",
     'desc'   => "Searches DNS for MX records corresponding to hostname.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if any records are found; returns FALSE if no records were found or if an error occurred.",
@@ -375,7 +391,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fsockopen",
-    'desc'   => "Initiates a socket connection to the resource specified by hostname.\nPHP supports targets in the Internet and Unix domains as described in List of Supported Socket Transports. A list of supported transports can also be retrieved using stream_get_transports().\nThe socket will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
+    'desc'   => "Initiates a socket connection to the resource specified by hostname.\n\nPHP supports targets in the Internet and Unix domains as described in List of Supported Socket Transports. A list of supported transports can also be retrieved using stream_get_transports().\n\nThe socket will by default be opened in blocking mode. You can switch it to non-blocking mode by using stream_set_blocking().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "fsockopen() returns a file pointer which may be used together with the other file functions (such as fgets(), fgetss(), fwrite(), fclose(), and feof()). If the call fails, it will return FALSE",
@@ -396,7 +413,7 @@ DefineFunction(
         'name'   => "errnum",
         'type'   => Variant | Reference,
         'value'  => "null",
-        'desc'   => "If provided, holds the system level error number that occurred in the system-level connect() call.\nIf the value returned in errno is 0 and the function returned FALSE, it is an indication that the error occurred before the connect() call. This is most likely due to a problem initializing the socket.",
+        'desc'   => "If provided, holds the system level error number that occurred in the system-level connect() call.\n\nIf the value returned in errno is 0 and the function returned FALSE, it is an indication that the error occurred before the connect() call. This is most likely due to a problem initializing the socket.",
       ),
       array(
         'name'   => "errstr",
@@ -408,7 +425,7 @@ DefineFunction(
         'name'   => "timeout",
         'type'   => Double,
         'value'  => "0.0",
-        'desc'   => "The connection timeout, in seconds. Note: If you need to set a timeout for reading/writing data over the socket, use stream_set_timeout(), as the timeout parameter to fsockopen() only applies while connecting the socket.",
+        'desc'   => "The connection timeout, in seconds.\n\nIf you need to set a timeout for reading/writing data over the socket, use stream_set_timeout(), as the timeout parameter to fsockopen() only applies while connecting the socket.",
       ),
     ),
   ));
@@ -417,6 +434,7 @@ DefineFunction(
   array(
     'name'   => "pfsockopen",
     'desc'   => "This function behaves exactly as fsockopen() with the difference that the connection is not closed after the script finishes. It is the persistent version of fsockopen().\nFor parameter information, see the fsockopen() documentation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -451,6 +469,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "socket_get_status",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -465,6 +484,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "socket_set_blocking",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -483,6 +503,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "socket_set_timeout",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -506,7 +527,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "header",
-    'desc'   => "header() is used to send a raw HTTP header. See the » HTTP/1.1 specification for more information on HTTP headers.\nRemember that header() must be called before any actual output is sent, either by normal HTML tags, blank lines in a file, or from PHP. It is a very common error to read code with include(), or require(), functions, or another file access function, and have spaces or empty lines that are output before header() is called. The same problem exists when using a single PHP/HTML file.",
+    'desc'   => "header() is used to send a raw HTTP header. See the » HTTP/1.1 specification for more information on HTTP headers.\n\nRemember that header() must be called before any actual output is sent, either by normal HTML tags, blank lines in a file, or from PHP. It is a very common error to read code with include(), or require(), functions, or another file access function, and have spaces or empty lines that are output before header() is called. The same problem exists when using a single PHP/HTML file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -515,7 +537,7 @@ DefineFunction(
       array(
         'name'   => "str",
         'type'   => String,
-        'desc'   => "The header string.\nThere are two special-case header calls. The first is a header that starts with the string \"HTTP/\" (case is not significant), which will be used to figure out the HTTP status code to send. For example, if you have configured Apache to use a PHP script to handle requests for missing files (using the ErrorDocument directive), you may want to make sure that your script generates the proper status code.\n\n\nThe second special case is the \"Location:\" header. Not only does it send this header back to the browser, but it also returns a REDIRECT (302) status code to the browser unless the 201 or a 3xx status code has already been set.",
+        'desc'   => "The header string.\n\nThere are two special-case header calls. The first is a header that starts with the string \"HTTP/\" (case is not significant), which will be used to figure out the HTTP status code to send. For example, if you have configured Apache to use a PHP script to handle requests for missing files (using the ErrorDocument directive), you may want to make sure that your script generates the proper status code.\n\n\n\n\n\nThe second special case is the \"Location:\" header. Not only does it send this header back to the browser, but it also returns a REDIRECT (302) status code to the browser unless the 201 or a 3xx status code has already been set.",
       ),
       array(
         'name'   => "replace",
@@ -536,6 +558,7 @@ DefineFunction(
   array(
     'name'   => "headers_list",
     'desc'   => "headers_list() will return a list of headers to be sent to the browser / client. To determine whether or not these headers have been sent yet, use headers_sent().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns a numerically indexed array of headers.",
@@ -545,7 +568,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "headers_sent",
-    'desc'   => "Checks if or where headers have been sent.\nYou can't add any more header lines using the header() function once the header block has already been sent. Using this function you can at least prevent getting HTTP header related error messages. Another option is to use Output Buffering.",
+    'desc'   => "Checks if or where headers have been sent.\n\nYou can't add any more header lines using the header() function once the header block has already been sent. Using this function you can at least prevent getting HTTP header related error messages. Another option is to use Output Buffering.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "headers_sent() will return FALSE if no HTTP headers have already been sent or TRUE otherwise.",
@@ -570,6 +594,7 @@ DefineFunction(
   array(
     'name'   => "header_remove",
     'desc'   => "Removes an HTTP header previously set using header().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -579,7 +604,7 @@ DefineFunction(
         'name'   => "name",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The header name to be removed. Note: This parameter is case-insensitive.",
+        'desc'   => "The header name to be removed. This parameter is case-insensitive.",
       ),
     ),
   ));
@@ -587,7 +612,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setcookie",
-    'desc'   => "setcookie() defines a cookie to be sent along with the rest of the HTTP headers. Like other headers, cookies must be sent before any output from your script (this is a protocol restriction). This requires that you place calls to this function prior to any output, including <html> and <head> tags as well as any whitespace.\nOnce the cookies have been set, they can be accessed on the next page load with the \$_COOKIE or \$HTTP_COOKIE_VARS arrays. Note, superglobals such as \$_COOKIE became available in PHP 4.1.0. Cookie values also exist in \$_REQUEST.\nAll the arguments except the name argument are optional. You may also replace an argument with an empty string (\"\") in order to skip that argument. Because the expire argument is integer, it cannot be skipped with an empty string, use a zero (0) instead.\nSee » Netscape cookie specification for specifics on how each setcookie() parameter works",
+    'desc'   => "setcookie() defines a cookie to be sent along with the rest of the HTTP headers. Like other headers, cookies must be sent before any output from your script (this is a protocol restriction). This requires that you place calls to this function prior to any output, including <html> and <head> tags as well as any whitespace.\n\nOnce the cookies have been set, they can be accessed on the next page load with the \$_COOKIE or \$HTTP_COOKIE_VARS arrays. Note, superglobals such as \$_COOKIE became available in PHP 4.1.0. Cookie values also exist in \$_REQUEST.\nAll the arguments except the name argument are optional. You may also replace an argument with an empty string (\"\") in order to skip that argument. Because the expire argument is integer, it cannot be skipped with an empty string, use a zero (0) instead.\n\nSee » Netscape cookie specification for specifics on how each setcookie() parameter works",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "If output exists prior to calling this function, setcookie() will fail and return FALSE. If setcookie() successfully runs, it will return TRUE. This does not indicate whether the user accepted the cookie.",
@@ -608,7 +634,7 @@ DefineFunction(
         'name'   => "expire",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "The time the cookie expires. This is a Unix timestamp so is in number of seconds since the epoch. In other words, you'll most likely set this with the time() function plus the number of seconds before you want it to expire. Or you might use mktime(). time()+60*60*24*30 will set the cookie to expire in 30 days. If set to 0, or omitted, the cookie will expire at the end of the session (when the browser closes).\nNote: You may notice the expire parameter takes on a Unix timestamp, as opposed to the date format Wdy, DD-Mon-YYYY HH:MM:SS GMT, this is because PHP does this conversion internally. expire is compared to the client's time which can differ from server's time.",
+        'desc'   => "The time the cookie expires. This is a Unix timestamp so is in number of seconds since the epoch. In other words, you'll most likely set this with the time() function plus the number of seconds before you want it to expire. Or you might use mktime(). time()+60*60*24*30 will set the cookie to expire in 30 days. If set to 0, or omitted, the cookie will expire at the end of the session (when the browser closes).\n\n\n\nYou may notice the expire parameter takes on a Unix timestamp, as opposed to the date format Wdy, DD-Mon-YYYY HH:MM:SS GMT, this is because PHP does this conversion internally.\n\nexpire is compared to the client's time which can differ from server's time.",
       ),
       array(
         'name'   => "path",
@@ -641,6 +667,7 @@ DefineFunction(
   array(
     'name'   => "setrawcookie",
     'desc'   => "setrawcookie() is exactly the same as setcookie() except that the cookie value will not be automatically urlencoded when sent to the browser.\nFor parameter information, see the setcookie() documentation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -687,6 +714,7 @@ DefineFunction(
   array(
     'name'   => "define_syslog_variables",
     'desc'   => "Initializes all variables used in the syslog functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -695,7 +723,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openlog",
-    'desc'   => "openlog() opens a connection to the system logger for a program.\nThe use of openlog() is optional. It will automatically be called by syslog() if necessary, in which case ident will default to FALSE.",
+    'desc'   => "openlog() opens a connection to the system logger for a program.\n\nThe use of openlog() is optional. It will automatically be called by syslog() if necessary, in which case ident will default to FALSE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -714,7 +743,7 @@ DefineFunction(
       array(
         'name'   => "facility",
         'type'   => Int32,
-        'desc'   => "The facility argument is used to specify what type of program is logging the message. This allows you to specify (in your machine's syslog configuration) how messages coming from different facilities will be handled. openlog() Facilities Constant Description LOG_AUTH security/authorization messages (use LOG_AUTHPRIV instead in systems where that constant is defined) LOG_AUTHPRIV security/authorization messages (private) LOG_CRON clock daemon (cron and at) LOG_DAEMON other system daemons LOG_KERN kernel messages LOG_LOCAL0 ... LOG_LOCAL7 reserved for local use, these are not available in Windows LOG_LPR line printer subsystem LOG_MAIL mail subsystem LOG_NEWS USENET news subsystem LOG_SYSLOG messages generated internally by syslogd LOG_USER generic user-level messages LOG_UUCP UUCP subsystem Note: LOG_USER is the only valid log type under Windows operating systems",
+        'desc'   => "The facility argument is used to specify what type of program is logging the message. This allows you to specify (in your machine's syslog configuration) how messages coming from different facilities will be handled. openlog() Facilities Constant Description LOG_AUTH security/authorization messages (use LOG_AUTHPRIV instead in systems where that constant is defined) LOG_AUTHPRIV security/authorization messages (private) LOG_CRON clock daemon (cron and at) LOG_DAEMON other system daemons LOG_KERN kernel messages LOG_LOCAL0 ... LOG_LOCAL7 reserved for local use, these are not available in Windows LOG_LPR line printer subsystem LOG_MAIL mail subsystem LOG_NEWS USENET news subsystem LOG_SYSLOG messages generated internally by syslogd LOG_USER generic user-level messages LOG_UUCP UUCP subsystem\n\nLOG_USER is the only valid log type under Windows operating systems",
       ),
     ),
   ));
@@ -723,6 +752,7 @@ DefineFunction(
   array(
     'name'   => "closelog",
     'desc'   => "closelog() closes the descriptor being used to write to the system logger. The use of closelog() is optional.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -732,7 +762,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "syslog",
-    'desc'   => "syslog() generates a log message that will be distributed by the system logger.\nFor information on setting up a user defined log handler, see the syslog.conf (5) Unix manual page. More information on the syslog facilities and option can be found in the man pages for syslog (3) on Unix machines.",
+    'desc'   => "syslog() generates a log message that will be distributed by the system logger.\n\nFor information on setting up a user defined log handler, see the syslog.conf (5) Unix manual page. More information on the syslog facilities and option can be found in the man pages for syslog (3) on Unix machines.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "Returns TRUE on success or FALSE on failure.",

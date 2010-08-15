@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_open",
     'desc'   => "This function opens the module of the algorithm and the mode to be used. The name of the algorithm is specified in algorithm, e.g. \"twofish\" or is one of the MCRYPT_ciphername constants. The module is closed by calling mcrypt_module_close().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Normally it returns an encryption descriptor, or FALSE on error.",
@@ -84,6 +85,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_close",
     'desc'   => "Closes the specified encryption handle.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -101,6 +103,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_list_algorithms",
     'desc'   => "Gets the list of all supported algorithms in the lib_dir parameter.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an array with all the supported algorithms.",
@@ -119,6 +122,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_list_modes",
     'desc'   => "Gets the list of all supported modes in the lib_dir parameter.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "Returns an array with all the supported modes.",
@@ -137,6 +141,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_get_algo_block_size",
     'desc'   => "Gets the blocksize of the specified algorithm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the block size of the algorithm specified in bytes.",
@@ -160,6 +165,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_get_algo_key_size",
     'desc'   => "Gets the maximum supported keysize of the opened mode.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "This function returns the maximum supported key size of the algorithm specified in bytes.",
@@ -183,6 +189,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_get_supported_key_sizes",
     'desc'   => "Returns an array with the key sizes supported by the specified algorithm. If it returns an empty array then all key sizes between 1 and mcrypt_module_get_algo_key_size() are supported by the algorithm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64Vec,
       'desc'   => "Returns an array with the key sizes supported by the specified algorithm. If it returns an empty array then all key sizes between 1 and mcrypt_module_get_algo_key_size() are supported by the algorithm.",
@@ -206,6 +213,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_is_block_algorithm_mode",
     'desc'   => "This function returns TRUE if the mode is for use with block algorithms, otherwise it returns FALSE. (e.g. FALSE for stream, and TRUE for cbc, cfb, ofb).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "This function returns TRUE if the mode is for use with block algorithms, otherwise it returns FALSE. (e.g. FALSE for stream, and TRUE for cbc, cfb, ofb).",
@@ -229,6 +237,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_is_block_algorithm",
     'desc'   => "This function returns TRUE if the specified algorithm is a block algorithm, or FALSE is it is a stream algorithm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "This function returns TRUE if the specified algorithm is a block algorithm, or FALSE is it is a stream algorithm.",
@@ -252,6 +261,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_is_block_mode",
     'desc'   => "This function returns TRUE if the mode outputs blocks of bytes or FALSE if it outputs just bytes. (e.g. TRUE for cbc and ecb, and FALSE for cfb and stream).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "This function returns TRUE if the mode outputs blocks of bytes or FALSE if it outputs just bytes. (e.g. TRUE for cbc and ecb, and FALSE for cfb and stream).",
@@ -275,6 +285,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_module_self_test",
     'desc'   => "This function runs the self test on the algorithm specified.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "The function returns TRUE if the self test succeeds, or FALSE when if fails.",
@@ -297,7 +308,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_create_iv",
-    'desc'   => "Create an initialization vector (IV) from a random source.\nThe IV is only meant to give an alternative seed to the encryption routines. This IV does not need to be secret at all, though it can be desirable. You even can send it along with your ciphertext without losing security.",
+    'desc'   => "Create an initialization vector (IV) from a random source.\n\nThe IV is only meant to give an alternative seed to the encryption routines. This IV does not need to be secret at all, though it can be desirable. You even can send it along with your ciphertext without losing security.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the initialization vector, or FALSE on error.",
@@ -321,6 +333,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_encrypt",
     'desc'   => "Encrypts the data and returns it.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the encrypted data, as a string.",
@@ -334,12 +347,12 @@ DefineFunction(
       array(
         'name'   => "key",
         'type'   => String,
-        'desc'   => "The key with which the data will be encrypted. If it's smaller that the required keysize, it is padded with '\\0'. It is better not to use ASCII strings for keys.\nIt is recommended to use the mhash functions to create a key from a string.",
+        'desc'   => "The key with which the data will be encrypted. If it's smaller that the required keysize, it is padded with '\\0'. It is better not to use ASCII strings for keys.\n\nIt is recommended to use the mhash functions to create a key from a string.",
       ),
       array(
         'name'   => "data",
         'type'   => String,
-        'desc'   => "The data that will be encrypted with the given cipher and mode. If the size of the data is not n * blocksize, the data will be padded with '\\0'.\nThe returned crypttext can be larger that the size of the data that is given by data.",
+        'desc'   => "The data that will be encrypted with the given cipher and mode. If the size of the data is not n * blocksize, the data will be padded with '\\0'.\n\nThe returned crypttext can be larger that the size of the data that is given by data.",
       ),
       array(
         'name'   => "mode",
@@ -359,9 +372,10 @@ DefineFunction(
   array(
     'name'   => "mcrypt_decrypt",
     'desc'   => "Decrypts the data and returns the unencrypted data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the decrypted data as a string. mcrypt_ecb mcrypt_create_iv Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns the decrypted data as a string. mcrypt_ecb mcrypt_create_iv Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -396,6 +410,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_cbc",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -427,6 +442,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_cfb",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -458,6 +474,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_ecb",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -489,6 +506,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_ofb",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -520,7 +538,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_get_block_size",
-    'desc'   => "The first prototype is when linked against libmcrypt 2.2.x, the second when linked against libmcrypt 2.4.x or 2.5.x.\nmcrypt_get_block_size() is used to get the size of a block of the specified cipher (in combination with an encryption mode).\nIt is more useful to use the mcrypt_enc_get_block_size() function as this uses the resource returned by mcrypt_module_open().",
+    'desc'   => "The first prototype is when linked against libmcrypt 2.2.x, the second when linked against libmcrypt 2.4.x or 2.5.x.\n\nmcrypt_get_block_size() is used to get the size of a block of the specified cipher (in combination with an encryption mode).\n\nIt is more useful to use the mcrypt_enc_get_block_size() function as this uses the resource returned by mcrypt_module_open().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Gets the block size, as an integer.",
@@ -543,7 +562,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_get_cipher_name",
-    'desc'   => "mcrypt_get_cipher_name() is used to get the name of the specified cipher.\nmcrypt_get_cipher_name() takes the cipher number as an argument (libmcrypt 2.2.x) or takes the cipher name as an argument (libmcrypt 2.4.x or higher) and returns the name of the cipher or FALSE, if the cipher does not exist.",
+    'desc'   => "mcrypt_get_cipher_name() is used to get the name of the specified cipher.\n\nmcrypt_get_cipher_name() takes the cipher number as an argument (libmcrypt 2.2.x) or takes the cipher name as an argument (libmcrypt 2.4.x or higher) and returns the name of the cipher or FALSE, if the cipher does not exist.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "This function returns the name of the cipher or FALSE, if the cipher does not exist.",
@@ -560,7 +580,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_get_iv_size",
-    'desc'   => "Gets the size of the IV belonging to a specific cipher/mode combination.\nIt is more useful to use the mcrypt_enc_get_iv_size() function as this uses the resource returned by mcrypt_module_open().",
+    'desc'   => "Gets the size of the IV belonging to a specific cipher/mode combination.\n\nIt is more useful to use the mcrypt_enc_get_iv_size() function as this uses the resource returned by mcrypt_module_open().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the size of the Initialisation Vector (IV) in bytes. On error the function returns FALSE. If the IV is ignored in the specified cipher/mode combination zero is returned.",
@@ -582,6 +603,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_get_key_size",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -601,6 +623,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_get_algorithms_name",
     'desc'   => "This function returns the name of the algorithm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the name of the opened algorithm as a string.",
@@ -618,6 +641,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_get_block_size",
     'desc'   => "Gets the blocksize of the opened algorithm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the block size of the specified algorithm in bytes.",
@@ -635,6 +659,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_get_iv_size",
     'desc'   => "This function returns the size of the IV of the algorithm specified by the encryption descriptor in bytes. An IV is used in cbc, cfb and ofb modes, and in some algorithms in stream mode.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the size of the IV, or 0 if the IV is ignored in the algorithm.",
@@ -652,6 +677,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_get_key_size",
     'desc'   => "Gets the maximum supported key size of the algorithm in bytes.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the maximum supported key size of the algorithm in bytes.",
@@ -669,6 +695,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_get_modes_name",
     'desc'   => "This function returns the name of the mode.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the name as a string.",
@@ -686,6 +713,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_get_supported_key_sizes",
     'desc'   => "Gets the supported key sizes of the opened algorithm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64Vec,
       'desc'   => "Returns an array with the key sizes supported by the algorithm specified by the encryption descriptor. If it returns an empty array then all key sizes between 1 and mcrypt_enc_get_key_size() are supported by the algorithm.",
@@ -703,6 +731,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_is_block_algorithm_mode",
     'desc'   => "Tells whether the algorithm of the opened mode works on blocks (e.g. FALSE for stream, and TRUE for cbc, cfb, ofb)..",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the mode is for use with block algorithms, otherwise it returns FALSE.",
@@ -720,6 +749,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_is_block_algorithm",
     'desc'   => "Tells whether the algorithm of the opened mode is a block algorithm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the algorithm is a block algorithm or FALSE if it is a stream one.",
@@ -737,6 +767,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_is_block_mode",
     'desc'   => "Tells whether the opened mode outputs blocks (e.g. TRUE for cbc and ecb, and FALSE for cfb and stream).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the mode outputs blocks of bytes or FALSE if it outputs bytes.",
@@ -754,6 +785,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_enc_self_test",
     'desc'   => "This function runs the self test on the algorithm specified by the descriptor td.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "If the self test succeeds it returns FALSE. In case of an error, it returns TRUE.",
@@ -770,7 +802,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_generic",
-    'desc'   => "This function encrypts data. The data is padded with \"\\0\" to make sure the length of the data is n * blocksize. This function returns the encrypted data. Note that the length of the returned string can in fact be longer then the input, due to the padding of the data.\nIf you want to store the encrypted data in a database make sure to store the entire string as returned by mcrypt_generic, or the string will not entirely decrypt properly. If your original string is 10 characters long and the block size is 8 (use mcrypt_enc_get_block_size() to determine the blocksize), you would need at least 16 characters in your database field. Note the string returned by mdecrypt_generic() will be 16 characters as well...use rtrim(\$str, \"\\0\") to remove the padding.\nIf you are for example storing the data in a MySQL database remember that varchar fields automatically have trailing spaces removed during insertion. As encrypted data can end in a space (ASCII 32), the data will be damaged by this removal. Store data in a tinyblob/tinytext (or larger) field instead.",
+    'desc'   => "This function encrypts data. The data is padded with \"\\0\" to make sure the length of the data is n * blocksize. This function returns the encrypted data. Note that the length of the returned string can in fact be longer then the input, due to the padding of the data.\n\nIf you want to store the encrypted data in a database make sure to store the entire string as returned by mcrypt_generic, or the string will not entirely decrypt properly. If your original string is 10 characters long and the block size is 8 (use mcrypt_enc_get_block_size() to determine the blocksize), you would need at least 16 characters in your database field. Note the string returned by mdecrypt_generic() will be 16 characters as well...use rtrim(\$str, \"\\0\") to remove the padding.\n\nIf you are for example storing the data in a MySQL database remember that varchar fields automatically have trailing spaces removed during insertion. As encrypted data can end in a space (ASCII 32), the data will be damaged by this removal. Store data in a tinyblob/tinytext (or larger) field instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the encrypted data.",
@@ -779,7 +812,7 @@ DefineFunction(
       array(
         'name'   => "td",
         'type'   => Resource,
-        'desc'   => "The encryption descriptor.\nThe encryption handle should always be initialized with mcrypt_generic_init() with a key and an IV before calling this function. Where the encryption is done, you should free the encryption buffers by calling mcrypt_generic_deinit(). See mcrypt_module_open() for an example.",
+        'desc'   => "The encryption descriptor.\n\nThe encryption handle should always be initialized with mcrypt_generic_init() with a key and an IV before calling this function. Where the encryption is done, you should free the encryption buffers by calling mcrypt_generic_deinit(). See mcrypt_module_open() for an example.",
       ),
       array(
         'name'   => "data",
@@ -793,6 +826,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_generic_init",
     'desc'   => "You need to call this function before every call to mcrypt_generic() or mdecrypt_generic().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "The function returns a negative value on error, -3 when the key length was incorrect, -4 when there was a memory allocation problem and any other return value is an unknown error. If an error occurs a warning will be displayed accordingly. FALSE is returned if incorrect parameters were passed.",
@@ -820,6 +854,7 @@ DefineFunction(
   array(
     'name'   => "mdecrypt_generic",
     'desc'   => "This function decrypts data. Note that the length of the returned string can in fact be longer then the unencrypted string, due to the padding of the data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -841,6 +876,7 @@ DefineFunction(
   array(
     'name'   => "mcrypt_generic_deinit",
     'desc'   => "This function terminates encryption specified by the encryption descriptor (td). It clears all buffers, but does not close the module. You need to call mcrypt_module_close() yourself. (But PHP does this for you at the end of the script.)",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -857,6 +893,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "mcrypt_generic_end",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),

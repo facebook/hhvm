@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 210 */
+/* SRC: classes/iterator.php line 755 */
 class c_recursivedirectoryiterator : public c_directoryiterator {
   BEGIN_CLASS_MAP(RecursiveDirectoryIterator)
     PARENT_CLASS(DirectoryIterator)

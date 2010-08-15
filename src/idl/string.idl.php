@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "addcslashes",
     'desc'   => "Returns a string with backslashes before characters that are listed in charlist parameter.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the escaped string.",
@@ -66,7 +67,7 @@ DefineFunction(
       array(
         'name'   => "charlist",
         'type'   => String,
-        'desc'   => "A list of characters to be escaped. If charlist contains characters \\n, \\r etc., they are converted in C-like style, while other non-alphanumeric characters with ASCII codes lower than 32 and higher than 126 converted to octal representation.\nWhen you define a sequence of characters in the charlist argument make sure that you know what characters come between the characters that you set as the start and end of the range.\nAlso, if the first character in a range has a higher ASCII value than the second character in the range, no range will be constructed. Only the start, end and period characters will be escaped. Use the ord() function to find the ASCII value for a character.\n\nBe careful if you choose to escape characters 0, a, b, f, n, r, t and v. They will be converted to \\0, \\a, \\b, \\f, \\n, \\r, \\t and \\v. In PHP \\0 (NULL), \\r (carriage return), \\n (newline), \\f (form feed), \\v (vertical tab) and \\t (tab) are predefined escape sequences, while in C all of these are predefined escape sequences.",
+        'desc'   => "A list of characters to be escaped. If charlist contains characters \\n, \\r etc., they are converted in C-like style, while other non-alphanumeric characters with ASCII codes lower than 32 and higher than 126 converted to octal representation.\n\nWhen you define a sequence of characters in the charlist argument make sure that you know what characters come between the characters that you set as the start and end of the range.\n\nAlso, if the first character in a range has a higher ASCII value than the second character in the range, no range will be constructed. Only the start, end and period characters will be escaped. Use the ord() function to find the ASCII value for a character.\n\n\n\nBe careful if you choose to escape characters 0, a, b, f, n, r, t and v. They will be converted to \\0, \\a, \\b, \\f, \\n, \\r, \\t and \\v. In PHP \\0 (NULL), \\r (carriage return), \\n (newline), \\f (form feed), \\v (vertical tab) and \\t (tab) are predefined escape sequences, while in C all of these are predefined escape sequences.",
       ),
     ),
   ));
@@ -75,6 +76,7 @@ DefineFunction(
   array(
     'name'   => "stripcslashes",
     'desc'   => "Returns a string with backslashes stripped off. Recognizes C-like \\n, \\r ..., octal and hexadecimal representation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the unescaped string.",
@@ -91,7 +93,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "addslashes",
-    'desc'   => "Returns a string with backslashes before characters that need to be quoted in database queries etc. These characters are single quote ('), double quote (\"), backslash (\\) and NUL (the NULL byte).\nAn example use of addslashes() is when you're entering data into a database. For example, to insert the name O'reilly into a database, you will need to escape it. It's highly recommended to use DBMS specific escape function (e.g. mysqli_real_escape_string() for MySQL or pg_escape_string() for PostgreSQL), but if the DBMS you're using does't have an escape function and the DBMS uses \\ to escape special chars, you can use this function. This would only be to get the data into the database, the extra \\ will not be inserted. Having the PHP directive magic_quotes_sybase set to on will mean ' is instead escaped with another '.\nThe PHP directive magic_quotes_gpc is on by default, and it essentially runs addslashes() on all GET, POST, and COOKIE data. Do not use addslashes() on strings that have already been escaped with magic_quotes_gpc as you'll then do double escaping. The function get_magic_quotes_gpc() may come in handy for checking this.",
+    'desc'   => "Returns a string with backslashes before characters that need to be quoted in database queries etc. These characters are single quote ('), double quote (\"), backslash (\\) and NUL (the NULL byte).\n\nAn example use of addslashes() is when you're entering data into a database. For example, to insert the name O'reilly into a database, you will need to escape it. It's highly recommended to use DBMS specific escape function (e.g. mysqli_real_escape_string() for MySQL or pg_escape_string() for PostgreSQL), but if the DBMS you're using does't have an escape function and the DBMS uses \\ to escape special chars, you can use this function. This would only be to get the data into the database, the extra \\ will not be inserted. Having the PHP directive magic_quotes_sybase set to on will mean ' is instead escaped with another '.\n\nThe PHP directive magic_quotes_gpc is on by default, and it essentially runs addslashes() on all GET, POST, and COOKIE data. Do not use addslashes() on strings that have already been escaped with magic_quotes_gpc as you'll then do double escaping. The function get_magic_quotes_gpc() may come in handy for checking this.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the escaped string.",
@@ -108,7 +111,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stripslashes",
-    'desc'   => "Un-quotes a quoted string. Note: If magic_quotes_sybase is on, no backslashes are stripped off but two apostrophes are replaced by one instead.\nAn example use of stripslashes() is when the PHP directive magic_quotes_gpc is on (it's on by default), and you aren't inserting this data into a place (such as a database) that requires escaping. For example, if you're simply outputting data straight from an HTML form.",
+    'desc'   => "Un-quotes a quoted string.\n\nIf magic_quotes_sybase is on, no backslashes are stripped off but two apostrophes are replaced by one instead.\n\nAn example use of stripslashes() is when the PHP directive magic_quotes_gpc is on (it's on by default), and you aren't inserting this data into a place (such as a database) that requires escaping. For example, if you're simply outputting data straight from an HTML form.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a string with backslashes stripped off. (\\' becomes ' and so on.) Double backslashes (\\\\) are made into a single backslash (\\).",
@@ -126,6 +130,7 @@ DefineFunction(
   array(
     'name'   => "bin2hex",
     'desc'   => "Returns an ASCII string containing the hexadecimal representation of str. The conversion is done byte-wise with the high-nibble first.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the hexadecimal representation of the given string.",
@@ -143,6 +148,7 @@ DefineFunction(
   array(
     'name'   => "nl2br",
     'desc'   => "Returns string with '<br />' or '<br>' inserted before all newlines.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the altered string.",
@@ -160,6 +166,7 @@ DefineFunction(
   array(
     'name'   => "quotemeta",
     'desc'   => "Returns a version of str with a backslash character (\\) before every character that is among these: . \\ + * ? [ ^ ] ( \$ )",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the string with meta characters quoted.",
@@ -176,6 +183,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "str_shuffle",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the shuffled string.",
@@ -193,6 +201,7 @@ DefineFunction(
   array(
     'name'   => "strrev",
     'desc'   => "Returns string, reversed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the reversed string.",
@@ -209,7 +218,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strtolower",
-    'desc'   => "Returns string with all alphabetic characters converted to lowercase.\nNote that 'alphabetic' is determined by the current locale. This means that in i.e. the default \"C\" locale, characters such as umlaut-A (Ã„) will not be converted.",
+    'desc'   => "Returns string with all alphabetic characters converted to lowercase.\n\nNote that 'alphabetic' is determined by the current locale. This means that in i.e. the default \"C\" locale, characters such as umlaut-A (Ã„) will not be converted.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the lowercased string.",
@@ -226,7 +236,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strtoupper",
-    'desc'   => "Returns string with all alphabetic characters converted to uppercase.\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (Ã¤) will not be converted.",
+    'desc'   => "Returns string with all alphabetic characters converted to uppercase.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (Ã¤) will not be converted.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the uppercased string.",
@@ -243,7 +254,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ucfirst",
-    'desc'   => "Returns a string with the first character of str capitalized, if that character is alphabetic.\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (Ã¤) will not be converted.",
+    'desc'   => "Returns a string with the first character of str capitalized, if that character is alphabetic.\n\nNote that 'alphabetic' is determined by the current locale. For instance, in the default \"C\" locale characters such as umlaut-a (Ã¤) will not be converted.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the resulting string.",
@@ -260,7 +272,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ucwords",
-    'desc'   => "Returns a string with the first character of each word in str capitalized, if that character is alphabetic.\nThe definition of a word is any string of characters that is immediately after a whitespace (These are: space, form-feed, newline, carriage return, horizontal tab, and vertical tab).",
+    'desc'   => "Returns a string with the first character of each word in str capitalized, if that character is alphabetic.\n\nThe definition of a word is any string of characters that is immediately after a whitespace (These are: space, form-feed, newline, carriage return, horizontal tab, and vertical tab).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the modified string.",
@@ -278,6 +291,7 @@ DefineFunction(
   array(
     'name'   => "strip_tags",
     'desc'   => "This function tries to return a string with all NUL bytes, HTML and PHP tags stripped from a given str. It uses the same tag stripping state machine as the fgetss() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the stripped string.",
@@ -292,7 +306,7 @@ DefineFunction(
         'name'   => "allowable_tags",
         'type'   => String,
         'value'  => "\"\"",
-        'desc'   => "You can use the optional second parameter to specify tags which should not be stripped. Note: HTML comments and PHP tags are also stripped. This is hardcoded and can not be changed with allowable_tags.",
+        'desc'   => "You can use the optional second parameter to specify tags which should not be stripped.\n\nHTML comments and PHP tags are also stripped. This is hardcoded and can not be changed with allowable_tags.",
       ),
     ),
   ));
@@ -301,6 +315,7 @@ DefineFunction(
   array(
     'name'   => "trim",
     'desc'   => "This function returns a string with whitespace stripped from the beginning and end of str. Without the second parameter, trim() will strip these characters: \" \" (ASCII 32 (0x20)), an ordinary space. \"\\t\" (ASCII 9 (0x09)), a tab. \"\\n\" (ASCII 10 (0x0A)), a new line (line feed). \"\\r\" (ASCII 13 (0x0D)), a carriage return. \"\\0\" (ASCII 0 (0x00)), the NUL-byte. \"\\x0B\" (ASCII 11 (0x0B)), a vertical tab.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The trimmed string.",
@@ -324,6 +339,7 @@ DefineFunction(
   array(
     'name'   => "ltrim",
     'desc'   => "Strip whitespace (or other characters) from the beginning of a string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "This function returns a string with whitespace stripped from the beginning of str. Without the second parameter, ltrim() will strip these characters: \" \" (ASCII 32 (0x20)), an ordinary space. \"\\t\" (ASCII 9 (0x09)), a tab. \"\\n\" (ASCII 10 (0x0A)), a new line (line feed). \"\\r\" (ASCII 13 (0x0D)), a carriage return. \"\\0\" (ASCII 0 (0x00)), the NUL-byte. \"\\x0B\" (ASCII 11 (0x0B)), a vertical tab.",
@@ -346,7 +362,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "rtrim",
-    'desc'   => "This function returns a string with whitespace stripped from the end of str.\nWithout the second parameter, rtrim() will strip these characters: \" \" (ASCII 32 (0x20)), an ordinary space. \"\\t\" (ASCII 9 (0x09)), a tab. \"\\n\" (ASCII 10 (0x0A)), a new line (line feed). \"\\r\" (ASCII 13 (0x0D)), a carriage return. \"\\0\" (ASCII 0 (0x00)), the NUL-byte. \"\\x0B\" (ASCII 11 (0x0B)), a vertical tab.",
+    'desc'   => "This function returns a string with whitespace stripped from the end of str.\n\nWithout the second parameter, rtrim() will strip these characters: \" \" (ASCII 32 (0x20)), an ordinary space. \"\\t\" (ASCII 9 (0x09)), a tab. \"\\n\" (ASCII 10 (0x0A)), a new line (line feed). \"\\r\" (ASCII 13 (0x0D)), a carriage return. \"\\0\" (ASCII 0 (0x00)), the NUL-byte. \"\\x0B\" (ASCII 11 (0x0B)), a vertical tab.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the modified string.",
@@ -369,6 +386,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "chop",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -389,9 +407,10 @@ DefineFunction(
   array(
     'name'   => "explode",
     'desc'   => "Returns an array of strings, each of which is a substring of string formed by splitting it on boundaries formed by the string delimiter.\nAlthough implode() can, for historical reasons, accept its parameters in either order, explode() cannot. You must ensure that the delimiter argument comes before the string argument.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an array of string s created by splitting the string parameter on boundaries formed by the delimiter.\nIf delimiter is an empty string (\"\"), explode() will return FALSE. If delimiter contains a value that is not contained in string and a negative limit is used, then an empty array will be returned, otherwise an array containing string will be returned.",
+      'desc'   => "Returns an array of strings created by splitting the string parameter on boundaries formed by the delimiter.\n\nIf delimiter is an empty string (\"\"), explode() will return FALSE. If delimiter contains a value that is not contained in string and a negative limit is used, then an empty arraywill be returned, otherwise an array containing string will be returned.",
     ),
     'args'   => array(
       array(
@@ -408,7 +427,7 @@ DefineFunction(
         'name'   => "limit",
         'type'   => Int32,
         'value'  => "0x7FFFFFFF",
-        'desc'   => "If limit is set and positive, the returned array will contain a maximum of limit elements with the last element containing the rest of string.\nIf the limit parameter is negative, all components except the last -limit are returned.\nIf the limit parameter is zero, then this is treated as 1.",
+        'desc'   => "If limit is set and positive, the returned array will contain a maximum of limit elements with the last element containing the rest of string.\n\nIf the limit parameter is negative, all components except the last -limit are returned.\n\nIf the limit parameter is zero, then this is treated as 1.",
       ),
     ),
   ));
@@ -416,7 +435,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "implode",
-    'desc'   => "Join array elements with a glue string. Note: implode() can, for historical reasons, accept its parameters in either order. For consistency with explode(), however, it may be less confusing to use the documented order of arguments.",
+    'desc'   => "Join array elements with a glue string.\n\nimplode() can, for historical reasons, accept its parameters in either order. For consistency with explode(), however, it may be less confusing to use the documented order of arguments.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns a string containing a string representation of all the array elements in the same order, with the glue string between each element.",
@@ -439,6 +459,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "join",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -459,9 +480,10 @@ DefineFunction(
   array(
     'name'   => "str_split",
     'desc'   => "Converts a string to an array.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "If the optional split_length parameter is specified, the returned array will be broken down into chunks with each being split_length in length, otherwise each chunk will be one character in length.\nFALSE is returned if split_length is less than 1. If the split_length length exceeds the length of string, the entire string is returned as the first (and only) array element.",
+      'desc'   => "If the optional split_length parameter is specified, the returned array will be broken down into chunks with each being split_length in length, otherwise each chunk will be one character in length.\n\nFALSE is returned if split_length is less than 1. If the split_length length exceeds the length of string, the entire string is returned as the first (and only) array element.",
     ),
     'args'   => array(
       array(
@@ -482,6 +504,7 @@ DefineFunction(
   array(
     'name'   => "chunk_split",
     'desc'   => "Can be used to split a string into smaller chunks which is useful for e.g. converting base64_encode() output to match RFC 2045 semantics. It inserts end every chunklen characters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the chunked string.",
@@ -510,7 +533,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strtok",
-    'desc'   => "strtok() splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token. That is, if you have a string like \"This is an example string\" you could tokenize this string into its individual words by using the space character as the token.\nNote that only the first call to strtok uses the string argument. Every subsequent call to strtok only needs the token to use, as it keeps track of where it is in the current string. To start over, or to tokenize a new string you simply call strtok with the string argument again to initialize it. Note that you may put multiple tokens in the token parameter. The string will be tokenized when any one of the characters in the argument are found.",
+    'desc'   => "strtok() splits a string (str) into smaller strings (tokens), with each token being delimited by any character from token. That is, if you have a string like \"This is an example string\" you could tokenize this string into its individual words by using the space character as the token.\n\nNote that only the first call to strtok uses the string argument. Every subsequent call to strtok only needs the token to use, as it keeps track of where it is in the current string. To start over, or to tokenize a new string you simply call strtok with the string argument again to initialize it. Note that you may put multiple tokens in the token parameter. The string will be tokenized when any one of the characters in the argument are found.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A string token.",
@@ -533,7 +557,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "str_replace",
-    'desc'   => "This function returns a string or an array with all occurrences of search in subject replaced with the given replace value.\nIf you don't need fancy replacing rules (like regular expressions), you should always use this function instead of ereg_replace() or preg_replace().\nIf search and replace are arrays, then str_replace() takes a value from each array and uses them to do search and replace on subject. If replace has fewer values than search, then an empty string is used for the rest of replacement values. If search is an array and replace is a string, then this replacement string is used for every value of search. The converse would not make sense, though.\nIf search or replace are arrays, their elements are processed first to last.",
+    'desc'   => "This function returns a string or an array with all occurrences of search in subject replaced with the given replace value.\n\nIf you don't need fancy replacing rules (like regular expressions), you should always use this function instead of ereg_replace() or preg_replace().\nIf search and replace are arrays, then str_replace() takes a value from each array and uses them to do search and replace on subject. If replace has fewer values than search, then an empty string is used for the rest of replacement values. If search is an array and replace is a string, then this replacement string is used for every value of search. The converse would not make sense, though.\n\nIf search or replace are arrays, their elements are processed first to last.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "This function returns a string or an array with the replaced values.",
@@ -552,13 +577,13 @@ DefineFunction(
       array(
         'name'   => "subject",
         'type'   => Variant,
-        'desc'   => "The string or array being searched and replaced on, otherwise known as the haystack.\nIf subject is an array, then the search and replace is performed with every entry of subject, and the return value is an array as well.",
+        'desc'   => "The string or array being searched and replaced on, otherwise known as the haystack.\n\nIf subject is an array, then the search and replace is performed with every entry of subject, and the return value is an array as well.",
       ),
       array(
         'name'   => "count",
         'type'   => Variant | Reference,
         'value'  => "null",
-        'desc'   => "Note: If passed, this will hold the number of matched and replaced needles.",
+        'desc'   => "If passed, this will hold the number of matched and replaced needles.",
       ),
     ),
   ));
@@ -567,6 +592,7 @@ DefineFunction(
   array(
     'name'   => "str_ireplace",
     'desc'   => "This function returns a string or an array with all occurrences of search in subject (ignoring case) replaced with the given replace value. If you don't need fancy replacing rules, you should generally use this function instead of preg_replace() with the i modifier.\nIf search and replace are arrays, then str_ireplace() takes a value from each array and uses them to do search and replace on subject. If replace has fewer values than search, then an empty string is used for the rest of replacement values. If search is an array and replace is a string, then this replacement string is used for every value of search.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string or an array of replacements.",
@@ -575,7 +601,7 @@ DefineFunction(
       array(
         'name'   => "search",
         'type'   => Variant,
-        'desc'   => "Note: Every replacement with search array is performed on the result of previous replacement.",
+        'desc'   => "Every replacement with search array is performed on the result of previous replacement.",
       ),
       array(
         'name'   => "replace",
@@ -599,6 +625,7 @@ DefineFunction(
   array(
     'name'   => "substr_replace",
     'desc'   => "substr_replace() replaces a copy of string delimited by the start and (optionally) length parameters with the string given in replacement.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The result string is returned. If string is an array then array is returned.",
@@ -617,7 +644,7 @@ DefineFunction(
       array(
         'name'   => "start",
         'type'   => Variant,
-        'desc'   => "If start is positive, the replacing will begin at the start'th offset into string.\nIf start is negative, the replacing will begin at the start'th character from the end of string.",
+        'desc'   => "If start is positive, the replacing will begin at the start'th offset into string.\n\nIf start is negative, the replacing will begin at the start'th character from the end of string.",
       ),
       array(
         'name'   => "length",
@@ -632,6 +659,7 @@ DefineFunction(
   array(
     'name'   => "substr",
     'desc'   => "Returns the portion of string specified by the start and length parameters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the extracted part of string or FALSE on failure.",
@@ -645,13 +673,13 @@ DefineFunction(
       array(
         'name'   => "start",
         'type'   => Int32,
-        'desc'   => "If start is non-negative, the returned string will start at the start'th position in string, counting from zero. For instance, in the string 'abcdef', the character at position 0 is 'a', the character at position 2 is 'c', and so forth.\nIf start is negative, the returned string will start at the start'th character from the end of string.\nIf string is less than or equal to start characters long, FALSE will be returned.\nExample #1 Using a negative start",
+        'desc'   => "If start is non-negative, the returned string will start at the start'th position in string, counting from zero. For instance, in the string 'abcdef', the character at position 0 is 'a', the character at position 2 is 'c', and so forth.\n\nIf start is negative, the returned string will start at the start'th character from the end of string.\n\nIf string is less than or equal to start characters long, FALSE will be returned.\n\nExample #1 Using a negative start",
       ),
       array(
         'name'   => "length",
         'type'   => Int32,
         'value'  => "0x7FFFFFFF",
-        'desc'   => "If length is given and is positive, the string returned will contain at most length characters beginning from start (depending on the length of string).\nIf length is given and is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes a position beyond this truncation, an empty string will be returned.\nIf length is given and is 0, FALSE or NULL an empty string will be returned.\nIf length is omitted, the substring starting from start() until the end of the string will be returned. Example #2 Using a negative length",
+        'desc'   => "If length is given and is positive, the string returned will contain at most length characters beginning from start (depending on the length of string).\n\nIf length is given and is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes a position beyond this truncation, an empty string will be returned.\n\nIf length is given and is 0, FALSE or NULL an empty string will be returned.\n\nIf length is omitted, the substring starting from start() until the end of the string will be returned. Example #2 Using a negative length",
       ),
     ),
   ));
@@ -660,6 +688,7 @@ DefineFunction(
   array(
     'name'   => "str_pad",
     'desc'   => "This functions returns the input string padded on the left, the right, or both sides to the specified padding length. If the optional argument pad_string is not supplied, the input is padded with spaces, otherwise it is padded with characters from pad_string up to the limit.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the padded string.",
@@ -679,7 +708,7 @@ DefineFunction(
         'name'   => "pad_string",
         'type'   => String,
         'value'  => "\" \"",
-        'desc'   => "Note: The pad_string may be truncated if the required number of padding characters can't be evenly divided by the pad_string's length.",
+        'desc'   => "The pad_string may be truncated if the required number of padding characters can't be evenly divided by the pad_string's length.",
       ),
       array(
         'name'   => "pad_type",
@@ -694,6 +723,7 @@ DefineFunction(
   array(
     'name'   => "str_repeat",
     'desc'   => "Returns input repeated multiplier times.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the repeated string.",
@@ -707,7 +737,7 @@ DefineFunction(
       array(
         'name'   => "multiplier",
         'type'   => Int32,
-        'desc'   => "Number of time the input string should be repeated.\nmultiplier has to be greater than or equal to 0. If the multiplier is set to 0, the function will return an empty string.",
+        'desc'   => "Number of time the input string should be repeated.\n\nmultiplier has to be greater than or equal to 0. If the multiplier is set to 0, the function will return an empty string.",
       ),
     ),
   ));
@@ -716,6 +746,7 @@ DefineFunction(
   array(
     'name'   => "wordwrap",
     'desc'   => "Wraps a string to a given number of characters using a string break character.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the given string wrapped at the specified column.",
@@ -751,6 +782,7 @@ DefineFunction(
   array(
     'name'   => "html_entity_decode",
     'desc'   => "html_entity_decode() is the opposite of htmlentities() in that it converts all HTML entities to their applicable characters from string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the decoded string.",
@@ -771,7 +803,7 @@ DefineFunction(
         'name'   => "charset",
         'type'   => String,
         'value'  => "\"ISO-8859-1\"",
-        'desc'   => "The ISO-8859-1 character set is used as default for the optional third charset. This defines the character set used in conversion.\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Note: Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+        'desc'   => "The ISO-8859-1 character set is used as default for the optional third charset. This defines the character set used in conversion.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
       ),
     ),
   ));
@@ -779,7 +811,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "htmlentities",
-    'desc'   => "This function is identical to htmlspecialchars() in all ways, except with htmlentities(), all characters which have HTML character entity equivalents are translated into these entities.\nIf you're wanting to decode instead (the reverse) you can use html_entity_decode().",
+    'desc'   => "This function is identical to htmlspecialchars() in all ways, except with htmlentities(), all characters which have HTML character entity equivalents are translated into these entities.\n\nIf you're wanting to decode instead (the reverse) you can use html_entity_decode().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the encoded string.",
@@ -800,7 +833,7 @@ DefineFunction(
         'name'   => "charset",
         'type'   => String,
         'value'  => "\"ISO-8859-1\"",
-        'desc'   => "Like htmlspecialchars(), it takes an optional third argument charset which defines character set used in conversion. Presently, the ISO-8859-1 character set is used as the default.\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Note: Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+        'desc'   => "Like htmlspecialchars(), it takes an optional third argument charset which defines character set used in conversion. Presently, the ISO-8859-1 character set is used as the default.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
       ),
       array(
         'name'   => "double_encode",
@@ -814,7 +847,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "htmlspecialchars_decode",
-    'desc'   => "This function is the opposite of htmlspecialchars(). It converts special HTML entities back to characters.\nThe converted entities are: &amp;, &quot; (when ENT_NOQUOTES is not set), &#039; (when ENT_QUOTES is set), &lt; and &gt;.",
+    'desc'   => "This function is the opposite of htmlspecialchars(). It converts special HTML entities back to characters.\n\nThe converted entities are: &amp;, &quot; (when ENT_NOQUOTES is not set), &#039; (when ENT_QUOTES is set), &lt; and &gt;.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the decoded string.",
@@ -837,10 +871,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "htmlspecialchars",
-    'desc'   => "Certain characters have special significance in HTML, and should be represented by HTML entities if they are to preserve their meanings. This function returns a string with some of these conversions made; the translations made are those most useful for everyday web programming. If you require all HTML character entities to be translated, use htmlentities() instead. This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application.\nThe translations performed are: '&' (ampersand) becomes '&amp;' '\"' (double quote) becomes '&quot;' when ENT_NOQUOTES is not set. ''' (single quote) becomes '&#039;' only when ENT_QUOTES is set. '<' (less than) becomes '&lt;' '>' (greater than) becomes '&gt;'",
+    'desc'   => "Certain characters have special significance in HTML, and should be represented by HTML entities if they are to preserve their meanings. This function returns a string with some of these conversions made; the translations made are those most useful for everyday web programming. If you require all HTML character entities to be translated, use htmlentities() instead. This function is useful in preventing user-supplied text from containing HTML markup, such as in a message board or guest book application.\n\nThe translations performed are: '&' (ampersand) becomes '&amp;' '\"' (double quote) becomes '&quot;' when ENT_NOQUOTES is not set. ''' (single quote) becomes '&#039;' only when ENT_QUOTES is set. '<' (less than) becomes '&lt;' '>' (greater than) becomes '&gt;'",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "The converted string .",
+      'desc'   => "The converted string.",
     ),
     'args'   => array(
       array(
@@ -858,7 +893,7 @@ DefineFunction(
         'name'   => "charset",
         'type'   => String,
         'value'  => "\"ISO-8859-1\"",
-        'desc'   => "Defines character set used in conversion. The default character set is ISO-8859-1.\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Note: Any other character sets are not recognized and ISO-8859-1 will be used instead.",
+        'desc'   => "Defines character set used in conversion. The default character set is ISO-8859-1.\n\nFor the purposes of this function, the charsets ISO-8859-1, ISO-8859-15, UTF-8, cp866, cp1251, cp1252, and KOI8-R are effectively equivalent, as the characters affected by htmlspecialchars() occupy the same positions in all of these charsets.\n\nFollowing character sets are supported in PHP 4.3.0 and later. Supported charsets Charset Aliases Description ISO-8859-1 ISO8859-1 Western European, Latin-1 ISO-8859-15 ISO8859-15 Western European, Latin-9. Adds the Euro sign, French and Finnish letters missing in Latin-1(ISO-8859-1). UTF-8   ASCII compatible multi-byte 8-bit Unicode. cp866 ibm866, 866 DOS-specific Cyrillic charset. This charset is supported in 4.3.2. cp1251 Windows-1251, win-1251, 1251 Windows-specific Cyrillic charset. This charset is supported in 4.3.2. cp1252 Windows-1252, 1252 Windows specific charset for Western European. KOI8-R koi8-ru, koi8r Russian. This charset is supported in 4.3.2. BIG5 950 Traditional Chinese, mainly used in Taiwan. GB2312 936 Simplified Chinese, national standard character set. BIG5-HKSCS   Big5 with Hong Kong extensions, Traditional Chinese. Shift_JIS SJIS, 932 Japanese EUC-JP EUCJP Japanese Any other character sets are not recognized and ISO-8859-1 will be used instead.",
       ),
       array(
         'name'   => "double_encode",
@@ -872,7 +907,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "quoted_printable_encode",
-    'desc'   => "Returns a quoted printable string created according to » RFC2045, section 6.7.\nThis function is similar to imap_8bit(), except this one does not require the IMAP module to work.",
+    'desc'   => "Returns a quoted printable string created according to » RFC2045, section 6.7.\n\nThis function is similar to imap_8bit(), except this one does not require the IMAP module to work.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the encoded string.",
@@ -889,7 +925,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "quoted_printable_decode",
-    'desc'   => "This function returns an 8-bit binary string corresponding to the decoded quoted printable string (according to » RFC2045, section 6.7, not » RFC2821, section 4.5.2, so additional periods are not stripped from the beginning of line).\nThis function is similar to imap_qprint(), except this one does not require the IMAP module to work.",
+    'desc'   => "This function returns an 8-bit binary string corresponding to the decoded quoted printable string (according to » RFC2045, section 6.7, not » RFC2821, section 4.5.2, so additional periods are not stripped from the beginning of line).\n\nThis function is similar to imap_qprint(), except this one does not require the IMAP module to work.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the 8-bit binary string.",
@@ -907,6 +944,7 @@ DefineFunction(
   array(
     'name'   => "convert_uudecode",
     'desc'   => "convert_uudecode() decodes a uuencoded string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the decoded data as a string.",
@@ -923,7 +961,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "convert_uuencode",
-    'desc'   => "convert_uuencode() encodes a string using the uuencode algorithm.\nUuencode translates all strings (including binary's ones) into printable characters, making them safe for network transmissions. Uuencoded data is about 35% larger than the original.",
+    'desc'   => "convert_uuencode() encodes a string using the uuencode algorithm.\n\nUuencode translates all strings (including binary's ones) into printable characters, making them safe for network transmissions. Uuencoded data is about 35% larger than the original.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the uuencoded data.",
@@ -940,8 +979,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "str_rot13",
-    'desc'   => "Performs the ROT13 encoding on the str argument and returns the resulting string.\nThe ROT13 encoding simply shifts every letter by 13 places in the alphabet while leaving non-alpha characters untouched. Encoding and decoding are done by the same function, passing an encoded string as argument will return the original version.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Performs the ROT13 encoding on the str argument and returns the resulting string.\n\nThe ROT13 encoding simply shifts every letter by 13 places in the alphabet while leaving non-alpha characters untouched. Encoding and decoding are done by the same function, passing an encoded string as argument will return the original version.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the ROT13 version of the given string.",
@@ -958,8 +997,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "crc32",
-    'desc'   => "Generates the cyclic redundancy checksum polynomial of 32-bit lengths of the str. This is usually used to validate the integrity of data being transmitted.\nBecause PHP's integer type is signed, and many crc32 checksums will result in negative integers, you need to use the \"%u\" formatter of sprintf() or printf() to get the string representation of the unsigned crc32 checksum.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Generates the cyclic redundancy checksum polynomial of 32-bit lengths of the str. This is usually used to validate the integrity of data being transmitted.\n\nBecause PHP's integer type is signed, and many crc32 checksums will result in negative integers, you need to use the \"%u\" formatter of sprintf() or printf() to get the string representation of the unsigned crc32 checksum.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the crc32 checksum of str as an integer.",
@@ -976,7 +1015,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "crypt",
-    'desc'   => "crypt() will return a hashed string using the standard Unix DES-based algorithm or alternative algorithms that may be available on the system.\nSome operating systems support more than one type of hash. In fact, sometimes the standard DES-based algorithm is replaced by an MD5-based algorithm. The hash type is triggered by the salt argument. Prior to 5.3, PHP would determine the available algorithms at install-time based on the system's crypt(). If no salt is provided, PHP will auto-generate either a standard two character (DES) salt, or a twelve character (MD5), depending on the availability of MD5 crypt(). PHP sets a constant named CRYPT_SALT_LENGTH which indicates the longest valid salt allowed by the available hashes.\nThe standard DES-based crypt() returns the salt as the first two characters of the output. It also only uses the first eight characters of str, so longer strings that start with the same eight characters will generate the same result (when the same salt is used). On systems where the crypt() function supports multiple hash types, the following constants are set to 0 or 1 depending on whether the given type is available: CRYPT_STD_DES - Standard DES-based hash with a two character salt from the alphabet \"./0-9A-Za-z\". Using invalid characters in the salt will cause crypt() to fail. CRYPT_EXT_DES - Extended DES-based hash. The \"salt\" is a 9-character string consisting of an underscore followed by 4 bytes of iteration count and 4 bytes of salt. These are encoded as printable characters, 6 bits per character, least significant character first. The values 0 to 63 are encoded as \"./0-9A-Za-z\". Using invalid characters in the salt will cause crypt() to fail. CRYPT_MD5 - MD5 hashing with a twelve character salt starting with \$1\$ CRYPT_BLOWFISH - Blowfish hashing with a salt as follows: \"\$2a\$\", a two digit cost parameter, \"\$\", and 22 base 64 digits from the alphabet \"./0-9A-Za-z\". Using characters outside of this range in the salt will cause crypt() to return a zero-length string. The two digit cost parameter is the base-2 logarithm of the iteration count for the underlying Blowfish-based hashing algorithmeter and must be in range 04-31, values outside this range will cause crypt() to fail. CRYPT_SHA256 - SHA-256 hash with a sixteen character salt prefixed with \$5\$. If the salt string starts with 'rounds=<N>\$', the numeric value of N is used to indicate how many times the hashing loop should be executed, much like the cost parameter on Blowfish. The default number of rounds is 5000, there is a minimum of 1000 and a maximum of 999,999,999. Any selection of N outside this range will be truncated to the nearest limit. CRYPT_SHA512 - SHA-512 hash with a sixteen character salt prefixed with \$6\$. If the salt string starts with 'rounds=<N>\$', the numeric value of N is used to indicate how many times the hashing loop should be executed, much like the cost parameter on Blowfish. The default number of rounds is 5000, there is a minimum of 1000 and a maximum of 999,999,999. Any selection of N outside this range will be truncated to the nearest limit. Note: As of PHP 5.3.0, PHP contains its own implementation and will use that if the system lacks of support for one or more of the algorithms.",
+    'desc'   => "crypt() will return a hashed string using the standard Unix DES-based algorithm or alternative algorithms that may be available on the system.\n\nSome operating systems support more than one type of hash. In fact, sometimes the standard DES-based algorithm is replaced by an MD5-based algorithm. The hash type is triggered by the salt argument. Prior to 5.3, PHP would determine the available algorithms at install-time based on the system's crypt(). If no salt is provided, PHP will auto-generate either a standard two character (DES) salt, or a twelve character (MD5), depending on the availability of MD5 crypt(). PHP sets a constant named CRYPT_SALT_LENGTH which indicates the longest valid salt allowed by the available hashes.\n\nThe standard DES-based crypt() returns the salt as the first two characters of the output. It also only uses the first eight characters of str, so longer strings that start with the same eight characters will generate the same result (when the same salt is used). On systems where the crypt() function supports multiple hash types, the following constants are set to 0 or 1 depending on whether the given type is available: CRYPT_STD_DES - Standard DES-based hash with a two character salt from the alphabet \"./0-9A-Za-z\". Using invalid characters in the salt will cause crypt() to fail. CRYPT_EXT_DES - Extended DES-based hash. The \"salt\" is a 9-character string consisting of an underscore followed by 4 bytes of iteration count and 4 bytes of salt. These are encoded as printable characters, 6 bits per character, least significant character first. The values 0 to 63 are encoded as \"./0-9A-Za-z\". Using invalid characters in the salt will cause crypt() to fail. CRYPT_MD5 - MD5 hashing with a twelve character salt starting with \$1\$ CRYPT_BLOWFISH - Blowfish hashing with a salt as follows: \"\$2a\$\", a two digit cost parameter, \"\$\", and 22 base 64 digits from the alphabet \"./0-9A-Za-z\". Using characters outside of this range in the salt will cause crypt() to return a zero-length string. The two digit cost parameter is the base-2 logarithm of the iteration count for the underlying Blowfish-based hashing algorithmeter and must be in range 04-31, values outside this range will cause crypt() to fail. CRYPT_SHA256 - SHA-256 hash with a sixteen character salt prefixed with \$5\$. If the salt string starts with 'rounds=<N>\$', the numeric value of N is used to indicate how many times the hashing loop should be executed, much like the cost parameter on Blowfish. The default number of rounds is 5000, there is a minimum of 1000 and a maximum of 999,999,999. Any selection of N outside this range will be truncated to the nearest limit. CRYPT_SHA512 - SHA-512 hash with a sixteen character salt prefixed with \$6\$. If the salt string starts with 'rounds=<N>\$', the numeric value of N is used to indicate how many times the hashing loop should be executed, much like the cost parameter on Blowfish. The default number of rounds is 5000, there is a minimum of 1000 and a maximum of 999,999,999. Any selection of N outside this range will be truncated to the nearest limit.\n\nAs of PHP 5.3.0, PHP contains its own implementation and will use that if the system lacks of support for one or more of the algorithms.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the hashed string or a string that is shorter than 13 characters and is guaranteed to differ from the salt on failure.",
@@ -1000,7 +1040,7 @@ DefineFunction(
   array(
     'name'   => "md5",
     'desc'   => "Calculates the MD5 hash of str using the » RSA Data Security, Inc. MD5 Message-Digest Algorithm, and returns that hash.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the hash as a 32-character hexadecimal number.",
@@ -1023,6 +1063,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sha1",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the sha1 hash as a string.",
@@ -1045,10 +1086,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strtr",
-    'desc'   => "This function returns a copy of str, translating all occurrences of each character in from to the corresponding character in to.\nIf from and to are different lengths, the extra characters in the longer of the two are ignored.",
+    'desc'   => "This function returns a copy of str, translating all occurrences of each character in from to the corresponding character in to.\n\nIf from and to are different lengths, the extra characters in the longer of the two are ignored.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the translated string .\nIf replace_pairs contains a key which is an empty string (\"\"), FALSE will be returned.",
+      'desc'   => "Returns the translated string.\n\nIf replace_pairs contains a key which is an empty string (\"\"), FALSE will be returned.",
     ),
     'args'   => array(
       array(
@@ -1074,6 +1116,7 @@ DefineFunction(
   array(
     'name'   => "convert_cyr_string",
     'desc'   => "Converts from one Cyrillic character set to another.\nSupported characters are: k - koi8-r w - windows-1251 i - iso8859-5 a - x-cp866 d - x-cp866 m - x-mac-cyrillic",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the converted string.",
@@ -1100,7 +1143,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "get_html_translation_table",
-    'desc'   => "get_html_translation_table() will return the translation table that is used internally for htmlspecialchars() and htmlentities() with the default charset. Note: Special characters can be encoded in several ways. E.g. \" can be encoded as &quot;, &#34; or &#x22. get_html_translation_table() returns only the most common form for them.",
+    'desc'   => "get_html_translation_table() will return the translation table that is used internally for htmlspecialchars() and htmlentities() with the default charset.\n\nSpecial characters can be encoded in several ways. E.g. \" can be encoded as &quot;, &#34; or &#x22. get_html_translation_table() returns only the most common form for them.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringMap,
       'desc'   => "Returns the translation table as an array.",
@@ -1124,7 +1168,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hebrev",
-    'desc'   => "Converts logical Hebrew text to visual text.\nThe function tries to avoid breaking words.",
+    'desc'   => "Converts logical Hebrew text to visual text.\n\nThe function tries to avoid breaking words.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the visual string.",
@@ -1147,7 +1192,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "hebrevc",
-    'desc'   => "This function is similar to hebrev() with the difference that it converts newlines (\\n) to \"<br>\\n\".\nThe function tries to avoid breaking words.",
+    'desc'   => "This function is similar to hebrev() with the difference that it converts newlines (\\n) to \"<br>\\n\".\n\nThe function tries to avoid breaking words.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the visual string.",
@@ -1170,11 +1216,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setlocale",
-    'desc'   => "Sets locale information.\nNote: On Windows, setlocale(LC_ALL, '') sets the locale names from the system's regional/language settings (accessible via Control Panel).",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Sets locale information.\nOn Windows, setlocale(LC_ALL, '') sets the locale names from the system's regional/language settings (accessible via Control Panel).",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the new current locale, or FALSE if the locale functionality is not implemented on your platform, the specified locale does not exist or the category name is invalid.\nAn invalid category name also causes a warning message. Category/locale names can be found in » RFC 1766 and » ISO 639. Different systems have different naming schemes for locales. Note: The return value of setlocale() depends on the system that PHP is running. It returns exactly what the system setlocale function returns.",
+      'desc'   => "Returns the new current locale, or FALSE if the locale functionality is not implemented on your platform, the specified locale does not exist or the category name is invalid.\n\nAn invalid category name also causes a warning message. Category/locale names can be found in » RFC 1766 and » ISO 639. Different systems have different naming schemes for locales.\n\nThe return value of setlocale() depends on the system that PHP is running. It returns exactly what the system setlocale function returns.",
     ),
     'args'   => array(
       array(
@@ -1185,7 +1231,7 @@ DefineFunction(
       array(
         'name'   => "locale",
         'type'   => Variant,
-        'desc'   => "If locale is NULL or the empty string \"\", the locale names will be set from the values of environment variables with the same names as the above categories, or from \"LANG\".\nIf locale is \"0\", the locale setting is not affected, only the current setting is returned.\nIf locale is an array or followed by additional parameters then each array element or parameter is tried to be set as new locale until success. This is useful if a locale is known under different names on different systems or for providing a fallback for a possibly not available locale.",
+        'desc'   => "If locale is NULL or the empty string \"\", the locale names will be set from the values of environment variables with the same names as the above categories, or from \"LANG\".\n\nIf locale is \"0\", the locale setting is not affected, only the current setting is returned.\n\nIf locale is an array or followed by additional parameters then each array element or parameter is tried to be set as new locale until success. This is useful if a locale is known under different names on different systems or for providing a fallback for a possibly not available locale.",
       ),
     ),
   ));
@@ -1194,6 +1240,7 @@ DefineFunction(
   array(
     'name'   => "localeconv",
     'desc'   => "Returns an associative array containing localized numeric and monetary formatting information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -1203,6 +1250,7 @@ DefineFunction(
   array(
     'name'   => "nl_langinfo",
     'desc'   => "nl_langinfo() is used to access individual elements of the locale categories. Unlike localeconv(), which returns all of the elements, nl_langinfo() allows you to select any specific element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the element as a string, or FALSE if item is not valid.",
@@ -1218,7 +1266,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "echo",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -1235,7 +1283,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "print",
-    'desc'   => "Outputs arg.\nprint() is not actually a real function (it is a language construct) so you are not required to use parentheses with its argument list.",
+    'desc'   => "Outputs arg.\n\nprint() is not actually a real function (it is a language construct) so you are not required to use parentheses with its argument list.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns 1, always.",
@@ -1252,7 +1301,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "printf",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the outputted string.",
@@ -1269,7 +1318,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "vprintf",
-    'desc'   => "Display array values as a formatted string according to format (which is described in the documentation for sprintf()).\nOperates as printf() but accepts an array of arguments, rather than a variable number of arguments.",
+    'desc'   => "Display array values as a formatted string according to format (which is described in the documentation for sprintf()).\n\nOperates as printf() but accepts an array of arguments, rather than a variable number of arguments.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the outputted string.",
@@ -1291,7 +1341,7 @@ DefineFunction(
   array(
     'name'   => "sprintf",
     'desc'   => "Returns a string produced according to the formatting string format.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string produced according to the formatting string format.",
@@ -1308,7 +1358,7 @@ DefineFunction(
   array(
     'name'   => "vsprintf",
     'desc'   => "Operates as sprintf() but accepts an array of arguments, rather than a variable number of arguments.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return array values as a formatted string according to format (which is described in the documentation for sprintf()).",
@@ -1329,8 +1379,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sscanf",
-    'desc'   => "The function sscanf() is the input analog of printf(). sscanf() reads from the string str and interprets it according to the specified format, which is described in the documentation for sprintf().\nAny whitespace in the format string matches any whitespace in the input string. This means that even a tab \\t in the format string can match a single space character in the input string.",
-    'flags'  =>  RefVariableArguments,
+    'desc'   => "The function sscanf() is the input analog of printf(). sscanf() reads from the string str and interprets it according to the specified format, which is described in the documentation for sprintf().\n\nAny whitespace in the format string matches any whitespace in the input string. This means that even a tab \\t in the format string can match a single space character in the input string.",
+    'flags'  =>  HasDocComment | RefVariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If only two parameters were passed to this function, the values parsed will be returned as an array. Otherwise, if optional parameters are passed, the function will return the number of assigned values. The optional parameters must be passed by reference.",
@@ -1352,8 +1402,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "chr",
-    'desc'   => "Returns a one-character string containing the character specified by ascii.\nThis function complements ord().",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Returns a one-character string containing the character specified by ascii.\n\nThis function complements ord().",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the specified character.",
@@ -1370,8 +1420,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ord",
-    'desc'   => "Returns the ASCII value of the first character of string.\nThis function complements chr().",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Returns the ASCII value of the first character of string.\n\nThis function complements chr().",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Returns the ASCII value as an integer.",
@@ -1389,6 +1439,7 @@ DefineFunction(
   array(
     'name'   => "money_format",
     'desc'   => "money_format() returns a formatted version of number. This function wraps the C library function strfmon(), with the difference that this implementation converts only one number at a time.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the formatted string. Characters before and after the formatting string will be returned unchanged. Non-numeric number causes returning NULL and emitting E_WARNING.",
@@ -1397,7 +1448,7 @@ DefineFunction(
       array(
         'name'   => "format",
         'type'   => String,
-        'desc'   => "The format specification consists of the following sequence: % character Flags\nOne or more of the optional flags below can be used: =f\nThe character = followed by a (single byte) character f to be used as the numeric fill character. The default fill character is space.",
+        'desc'   => "The format specification consists of the following sequence: % character Flags\n\nOne or more of the optional flags below can be used: =f\n\nThe character = followed by a (single byte) character f to be used as the numeric fill character. The default fill character is space.",
       ),
       array(
         'name'   => "number",
@@ -1410,7 +1461,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "number_format",
-    'desc'   => "This function accepts either one, two, or four parameters (not three):\nIf only one parameter is given, number will be formatted without decimals, but with a comma (\",\") between every group of thousands.\nIf two parameters are given, number will be formatted with decimals decimals with a dot (\".\") in front, and a comma (\",\") between every group of thousands.\nIf all four parameters are given, number will be formatted with decimals decimals, dec_point instead of a dot (\".\") before the decimals and thousands_sep instead of a comma (\",\") between every group of thousands.",
+    'desc'   => "This function accepts either one, two, or four parameters (not three):\n\nIf only one parameter is given, number will be formatted without decimals, but with a comma (\",\") between every group of thousands.\n\nIf two parameters are given, number will be formatted with decimals decimals with a dot (\".\") in front, and a comma (\",\") between every group of thousands.\n\nIf all four parameters are given, number will be formatted with decimals decimals, dec_point instead of a dot (\".\") before the decimals and thousands_sep instead of a comma (\",\") between every group of thousands.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "A formatted version of number.",
@@ -1437,7 +1489,7 @@ DefineFunction(
         'name'   => "thousands_sep",
         'type'   => String,
         'value'  => "\",\"",
-        'desc'   => "Sets the thousands separator.\nOnly the first character of thousands_sep is used. For example, if you use bar as thousands_sep on the number 1000, number_format() will return 1b000.",
+        'desc'   => "Sets the thousands separator.\n\nOnly the first character of thousands_sep is used. For example, if you use bar as thousands_sep on the number 1000, number_format() will return 1b000.",
       ),
     ),
   ));
@@ -1445,7 +1497,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strcmp",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
@@ -1467,8 +1519,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strncmp",
-    'desc'   => "This function is similar to strcmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.\nNote that this comparison is case sensitive.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "This function is similar to strcmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.\n\nNote that this comparison is case sensitive.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
@@ -1496,7 +1548,7 @@ DefineFunction(
   array(
     'name'   => "strnatcmp",
     'desc'   => "This function implements a comparison algorithm that orders alphanumeric strings in the way a human being would, this is described as a \"natural ordering\". Note that this comparison is case sensitive.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Similar to other string comparison functions, this one returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
@@ -1519,7 +1571,7 @@ DefineFunction(
   array(
     'name'   => "strcasecmp",
     'desc'   => "Binary safe case-insensitive string comparison.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
@@ -1542,7 +1594,7 @@ DefineFunction(
   array(
     'name'   => "strncasecmp",
     'desc'   => "This function is similar to strcasecmp(), with the difference that you can specify the (upper limit of the) number of characters from each string to be used in the comparison.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
@@ -1570,7 +1622,7 @@ DefineFunction(
   array(
     'name'   => "strnatcasecmp",
     'desc'   => "This function implements a comparison algorithm that orders alphanumeric strings in the way a human being would. The behaviour of this function is similar to strnatcmp(), except that the comparison is not case sensitive. For more information see: Martin Pool's » Natural Order String Comparison page.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Similar to other string comparison functions, this one returns < 0 if str1 is less than str2 > 0 if str1 is greater than str2, and 0 if they are equal.",
@@ -1592,8 +1644,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strcoll",
-    'desc'   => "Note that this comparison is case sensitive, and unlike strcmp() this function is not binary safe.\nstrcoll() uses the current locale for doing the comparisons. If the current locale is C or POSIX, this function is equivalent to strcmp().",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Note that this comparison is case sensitive, and unlike strcmp() this function is not binary safe.\n\nstrcoll() uses the current locale for doing the comparisons. If the current locale is C or POSIX, this function is equivalent to strcmp().",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns < 0 if str1 is less than str2; > 0 if str1 is greater than str2, and 0 if they are equal.",
@@ -1616,7 +1668,7 @@ DefineFunction(
   array(
     'name'   => "substr_compare",
     'desc'   => "substr_compare() compares main_str from position offset with str up to length characters.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns < 0 if main_str from position offset is less than str, > 0 if it is greater than str, and 0 if they are equal. If offset is equal to or greater than the length of main_str or length is set and is less than 1, substr_compare() prints a warning and returns FALSE.",
@@ -1655,7 +1707,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strchr",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1675,7 +1727,7 @@ DefineFunction(
   array(
     'name'   => "strrchr",
     'desc'   => "This function returns the portion of haystack which starts at the last occurrence of needle and goes until the end of haystack.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "This function returns the portion of string, or FALSE if needle is not found.",
@@ -1689,7 +1741,7 @@ DefineFunction(
       array(
         'name'   => "needle",
         'type'   => Variant,
-        'desc'   => "If needle contains more than one character, only the first is used. This behavior is different from that of strstr().\nIf needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
+        'desc'   => "If needle contains more than one character, only the first is used. This behavior is different from that of strstr().\n\nIf needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
       ),
     ),
   ));
@@ -1697,8 +1749,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strstr",
-    'desc'   => "Returns part of haystack string from the first occurrence of needle to the end of haystack. Note: This function is case-sensitive. For case-insensitive searches, use stristr(). Note: If you only want to determine if a particular needle occurs within haystack, use the faster and less memory intensive function strpos() instead.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Returns part of haystack string from the first occurrence of needle to the end of haystack.\n\nThis function is case-sensitive. For case-insensitive searches, use stristr().\n\nIf you only want to determine if a particular needle occurs within haystack, use the faster and less memory intensive function strpos() instead.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the portion of string, or FALSE if needle is not found.",
@@ -1721,7 +1773,7 @@ DefineFunction(
   array(
     'name'   => "stristr",
     'desc'   => "Returns all of haystack from the first occurrence of needle to the end.\nneedle and haystack are examined in a case-insensitive manner.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the matched substring. If needle is not found, returns FALSE.",
@@ -1744,7 +1796,7 @@ DefineFunction(
   array(
     'name'   => "strpbrk",
     'desc'   => "strpbrk() searches the haystack string for a char_list.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a string starting from the character found, or FALSE if it is not found.",
@@ -1767,7 +1819,7 @@ DefineFunction(
   array(
     'name'   => "strpos",
     'desc'   => "Returns the numeric position of the first occurrence of needle in the haystack string. Unlike the strrpos() before PHP 5, this function can take a full string as the needle parameter and the entire string will be used.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the position as an integer. If needle is not found, strpos() will return boolean FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
@@ -1795,8 +1847,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "stripos",
-    'desc'   => "Returns the numeric position of the first occurrence of needle in the haystack string .\nUnlike strpos(), stripos() is case-insensitive.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Returns the numeric position of the first occurrence of needle in the haystack string.\n\nUnlike strpos(), stripos() is case-insensitive.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If needle is not found, stripos() will return boolean FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
@@ -1810,7 +1862,7 @@ DefineFunction(
       array(
         'name'   => "needle",
         'type'   => Variant,
-        'desc'   => "Note that the needle may be a string of one or more characters.\nIf needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
+        'desc'   => "Note that the needle may be a string of one or more characters.\n\nIf needle is not a string, it is converted to an integer and applied as the ordinal value of a character.",
       ),
       array(
         'name'   => "offset",
@@ -1825,7 +1877,7 @@ DefineFunction(
   array(
     'name'   => "strrpos",
     'desc'   => "Returns the numeric position of the last occurrence of needle in the haystack string. Note that the needle in this case can only be a single character in PHP 4. If a string is passed as the needle, then only the first character of that string will be used.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the position where the needle exists. Returns FALSE if the needle was not found.",
@@ -1854,10 +1906,10 @@ DefineFunction(
   array(
     'name'   => "strripos",
     'desc'   => "Find position of last occurrence of a case-insensitive string in a string. Unlike strrpos(), strripos() is case-insensitive.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the numerical position of the last occurrence of needle. Also note that string positions start at 0, and not 1.\nIf needle is not found, FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
+      'desc'   => "Returns the numerical position of the last occurrence of needle. Also note that string positions start at 0, and not 1.\n\nIf needle is not found, FALSE is returned. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
     ),
     'args'   => array(
       array(
@@ -1874,7 +1926,7 @@ DefineFunction(
         'name'   => "offset",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "The offset parameter may be specified to begin searching an arbitrary number of characters into the string.\nNegative offset values will start the search at offset characters from the start of the string.",
+        'desc'   => "The offset parameter may be specified to begin searching an arbitrary number of characters into the string.\n\nNegative offset values will start the search at offset characters from the start of the string.",
       ),
     ),
   ));
@@ -1882,11 +1934,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "substr_count",
-    'desc'   => "substr_count() returns the number of times the needle substring occurs in the haystack string. Please note that needle is case sensitive. Note: This function doesn't count overlapped substrings. See the example below!",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "substr_count() returns the number of times the needle substring occurs in the haystack string. Please note that needle is case sensitive.\n\nThis function doesn't count overlapped substrings. See the example below!",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "This functions returns an integer .",
+      'desc'   => "This functions returns an integer.",
     ),
     'args'   => array(
       array(
@@ -1917,8 +1969,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "strspn",
-    'desc'   => "Returns the length of the first group of consecutive characters from mask found in subject.\nIf start and length are omitted, then all of subject will be examined. If they are included, then the effect will be the same as calling strspn(substr(\$subject, \$start, \$length), \$mask) (see substr for more information).\nThe line of code:\nwill assign 2 to \$var, because the string \"42\" is the first segment from subject to consist only of characters contained within \"1234567890\".",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Returns the length of the first group of consecutive characters from mask found in subject.\n\nIf start and length are omitted, then all of subject will be examined. If they are included, then the effect will be the same as calling strspn(substr(\$subject, \$start, \$length), \$mask) (see substr for more information).\n\nThe line of code:\n\nwill assign 2 to \$var, because the string \"42\" is the first segment from subject to consist only of characters contained within \"1234567890\".",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the initial segment of str1 which consists entirely of characters in str2.",
@@ -1938,13 +1990,13 @@ DefineFunction(
         'name'   => "start",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "The position in subject to start searching.\nIf start is given and is non-negative, then strspn() will begin examining subject at the start'th position. For instance, in the string 'abcdef', the character at position 0 is 'a', the character at position 2 is 'c', and so forth.\nIf start is given and is negative, then strspn() will begin examining subject at the start'th position from the end of subject.",
+        'desc'   => "The position in subject to start searching.\n\nIf start is given and is non-negative, then strspn() will begin examining subject at the start'th position. For instance, in the string 'abcdef', the character at position 0 is 'a', the character at position 2 is 'c', and so forth.\n\nIf start is given and is negative, then strspn() will begin examining subject at the start'th position from the end of subject.",
       ),
       array(
         'name'   => "length",
         'type'   => Int32,
         'value'  => "0x7FFFFFFF",
-        'desc'   => "The length of the segment from subject to examine.\nIf length is given and is non-negative, then subject will be examined for length characters after the starting position.\nIf lengthis given and is negative, then subject will be examined from the starting position up to length characters from the end of subject.",
+        'desc'   => "The length of the segment from subject to examine.\n\nIf length is given and is non-negative, then subject will be examined for length characters after the starting position.\n\nIf lengthis given and is negative, then subject will be examined from the starting position up to length characters from the end of subject.",
       ),
     ),
   ));
@@ -1953,7 +2005,7 @@ DefineFunction(
   array(
     'name'   => "strcspn",
     'desc'   => "Returns the length of the initial segment of str1 which does not contain any of the characters in str2.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the segment as an integer.",
@@ -1988,7 +2040,7 @@ DefineFunction(
   array(
     'name'   => "strlen",
     'desc'   => "Returns the length of the given string.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "The length of the string on success, and 0 if the string is empty.",
@@ -2006,7 +2058,7 @@ DefineFunction(
   array(
     'name'   => "count_chars",
     'desc'   => "Counts the number of occurrences of every byte-value (0..255) in string and returns it in various ways.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Depending on mode count_chars() returns one of the following: 0 - an array with the byte-value as key and the frequency of every byte as value. 1 - same as 0 but only byte-values with a frequency greater than zero are listed. 2 - same as 0 but only byte-values with a frequency equal to zero are listed. 3 - a string containing all unique characters is returned. 4 - a string containing all not used characters is returned.",
@@ -2029,8 +2081,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "str_word_count",
-    'desc'   => "Counts the number of words inside string. If the optional format is not specified, then the return value will be an integer representing the number of words found. In the event the format is specified, the return value will be an array, content of which is dependent on the format. The possible value for the format and the resultant outputs are listed below.\nFor the purpose of this function, 'word' is defined as a locale dependent string containing alphabetic characters, which also may contain, but not start with \"'\" and \"-\" characters.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Counts the number of words inside string. If the optional format is not specified, then the return value will be an integer representing the number of words found. In the event the format is specified, the return value will be an array, content of which is dependent on the format. The possible value for the format and the resultant outputs are listed below.\n\nFor the purpose of this function, 'word' is defined as a locale dependent string containing alphabetic characters, which also may contain, but not start with \"'\" and \"-\" characters.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array or an integer, depending on the format chosen.",
@@ -2059,8 +2111,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "levenshtein",
-    'desc'   => "The Levenshtein distance is defined as the minimal number of characters you have to replace, insert or delete to transform str1 into str2. The complexity of the algorithm is O(m*n), where n and m are the length of str1 and str2 (rather good when compared to similar_text(), which is O(max(n,m)**3), but still expensive).\nIn its simplest form the function will take only the two strings as parameter and will calculate just the number of insert, replace and delete operations needed to transform str1 into str2.\nA second variant will take three additional parameters that define the cost of insert, replace and delete operations. This is more general and adaptive than variant one, but not as efficient.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "The Levenshtein distance is defined as the minimal number of characters you have to replace, insert or delete to transform str1 into str2. The complexity of the algorithm is O(m*n), where n and m are the length of str1 and str2 (rather good when compared to similar_text(), which is O(max(n,m)**3), but still expensive).\n\nIn its simplest form the function will take only the two strings as parameter and will calculate just the number of insert, replace and delete operations needed to transform str1 into str2.\n\nA second variant will take three additional parameters that define the cost of insert, replace and delete operations. This is more general and adaptive than variant one, but not as efficient.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
       'desc'   => "This function returns the Levenshtein-Distance between the two argument strings or -1, if one of the argument strings is longer than the limit of 255 characters.",
@@ -2101,6 +2153,7 @@ DefineFunction(
   array(
     'name'   => "similar_text",
     'desc'   => "This calculates the similarity between two strings as described in Oliver [1993]. Note that this implementation does not use a stack as in Oliver's pseudo code, but recursive calls which may or may not speed up the whole process. Note also that the complexity of this algorithm is O(N**3) where N is the length of the longest string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the number of matching chars in both strings.",
@@ -2128,8 +2181,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "soundex",
-    'desc'   => "Calculates the soundex key of str.\nSoundex keys have the property that words pronounced similarly produce the same soundex key, and can thus be used to simplify searches in databases where you know the pronunciation but not the spelling. This soundex function returns a string 4 characters long, starting with a letter.\nThis particular soundex function is one described by Donald Knuth in \"The Art Of Computer Programming, vol. 3: Sorting And Searching\", Addison-Wesley (1973), pp. 391-392.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Calculates the soundex key of str.\n\nSoundex keys have the property that words pronounced similarly produce the same soundex key, and can thus be used to simplify searches in databases where you know the pronunciation but not the spelling. This soundex function returns a string 4 characters long, starting with a letter.\n\nThis particular soundex function is one described by Donald Knuth in \"The Art Of Computer Programming, vol. 3: Sorting And Searching\", Addison-Wesley (1973), pp. 391-392.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the soundex key as a string.",
@@ -2146,8 +2199,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "metaphone",
-    'desc'   => "Calculates the metaphone key of str.\nSimilar to soundex() metaphone creates the same key for similar sounding words. It's more accurate than soundex() as it knows the basic rules of English pronunciation. The metaphone generated keys are of variable length.\nMetaphone was developed by Lawrence Philips <lphilips at verity dot com>. It is described in [\"Practical Algorithms for Programmers\", Binstock & Rex, Addison Wesley, 1995].",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Calculates the metaphone key of str.\n\nSimilar to soundex() metaphone creates the same key for similar sounding words. It's more accurate than soundex() as it knows the basic rules of English pronunciation. The metaphone generated keys are of variable length.\n\nMetaphone was developed by Lawrence Philips <lphilips at verity dot com>. It is described in [\"Practical Algorithms for Programmers\", Binstock & Rex, Addison Wesley, 1995].",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the metaphone key as a string, or FALSE on failure.",
@@ -2170,7 +2223,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "parse_str",
-    'desc'   => "Parses str as if it were the query string passed via a URL and sets variables in the current scope. Note: To get the current QUERY_STRING, you may use the variable \$_SERVER['QUERY_STRING']. Also, you may want to read the section on variables from external sources. Note: The magic_quotes_gpc setting affects the output of this function, as parse_str() uses the same mechanism that PHP uses to populate the \$_GET, \$_POST, etc. variables.",
+    'desc'   => "Parses str as if it were the query string passed via a URL and sets variables in the current scope.\n\nTo get the current QUERY_STRING, you may use the variable \$_SERVER['QUERY_STRING']. Also, you may want to read the section on variables from external sources.\n\nThe magic_quotes_gpc setting affects the output of this function, as parse_str() uses the same mechanism that PHP uses to populate the \$_GET, \$_POST, etc. variables.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",

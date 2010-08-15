@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "apache_child_terminate",
     'desc'   => "apache_child_terminate() will register the Apache process executing the current PHP request for termination once execution of PHP code is completed. It may be used to terminate a process after a script with high memory consumption has been run as memory will usually only be freed internally but not given back to the operating system.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if PHP is running as an Apache 1 module, the Apache version is non-multithreaded, and the child_terminate PHP directive is enabled (disabled by default). If these conditions are not met, FALSE is returned and an error of level E_WARNING is generated.",
@@ -63,6 +64,7 @@ DefineFunction(
   array(
     'name'   => "apache_get_modules",
     'desc'   => "Get a list of loaded Apache modules.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "An array of loaded Apache modules.",
@@ -73,6 +75,7 @@ DefineFunction(
   array(
     'name'   => "apache_get_version",
     'desc'   => "Fetch the Apache version.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the Apache version on success or FALSE on failure.",
@@ -82,7 +85,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apache_getenv",
-    'desc'   => "Get an Apache environment variable as specified by variable.\nThis function requires Apache 2 otherwise it's undefined.",
+    'desc'   => "Get an Apache environment variable as specified by variable.\n\nThis function requires Apache 2 otherwise it's undefined.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The value of the Apache environment variable on success, or FALSE on failure",
@@ -106,9 +110,10 @@ DefineFunction(
   array(
     'name'   => "apache_lookup_uri",
     'desc'   => "This performs a partial request for a URI. It goes just far enough to obtain all the important information about the given resource. This function is only supported when PHP is installed as an Apache module.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "An object of related URI information. The properties of this object are:\nstatus the_request status_line method content_type handler uri filename path_info args boundary no_cache no_local_copy allowed send_bodyct bytes_sent byterange clength unparsed_uri mtime request_time",
+      'desc'   => "An object of related URI information. The properties of this object are:\n\nstatus the_request status_line method content_type handler uri filename path_info args boundary no_cache no_local_copy allowed send_bodyct bytes_sent byterange clength unparsed_uri mtime request_time",
     ),
     'args'   => array(
       array(
@@ -122,7 +127,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apache_note",
-    'desc'   => "This function is a wrapper for Apache's table_get and table_set. It edits the table of notes that exists during a request. The table's purpose is to allow Apache modules to communicate.\nThe main use for apache_note() is to pass information from one module to another within the same request.",
+    'desc'   => "This function is a wrapper for Apache's table_get and table_set. It edits the table of notes that exists during a request. The table's purpose is to allow Apache modules to communicate.\n\nThe main use for apache_note() is to pass information from one module to another within the same request.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If called with one argument, it returns the current value of note note_name. If called with two arguments, it sets the value of note note_name to note_value and returns the previous value of note note_name. If the note cannot be retrieved, FALSE is returned.",
@@ -146,6 +152,7 @@ DefineFunction(
   array(
     'name'   => "apache_request_headers",
     'desc'   => "Fetches all HTTP request headers from the current request. This function is only supported when PHP is installed as an Apache module.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "An associative array of all the HTTP headers in the current request, or FALSE on failure.",
@@ -155,7 +162,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apache_reset_timeout",
-    'desc'   => "apache_reset_timeout() resets the Apache write timer, which defaults to 300 seconds. With set_time_limit(0); ignore_user_abort(true) and periodic apache_reset_timeout() calls, Apache can theoretically run forever.\nThis function requires Apache 1.",
+    'desc'   => "apache_reset_timeout() resets the Apache write timer, which defaults to 300 seconds. With set_time_limit(0); ignore_user_abort(true) and periodic apache_reset_timeout() calls, Apache can theoretically run forever.\n\nThis function requires Apache 1.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -166,6 +174,7 @@ DefineFunction(
   array(
     'name'   => "apache_response_headers",
     'desc'   => "Fetch all HTTP response headers.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "An array of all Apache response headers on success or FALSE on failure.",
@@ -175,7 +184,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apache_setenv",
-    'desc'   => "apache_setenv() sets the value of the Apache environment variable specified by variable. Note: When setting an Apache environment variable, the corresponding \$_SERVER variable is not changed.",
+    'desc'   => "apache_setenv() sets the value of the Apache environment variable specified by variable.\n\nWhen setting an Apache environment variable, the corresponding \$_SERVER variable is not changed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -203,6 +213,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ascii2ebcdic",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -217,6 +228,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ebcdic2ascii",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
     ),
@@ -231,7 +243,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getallheaders",
-    'desc'   => "Fetches all HTTP headers from the current request.\nThis function is an alias for apache_request_headers(). Please read the apache_request_headers() documentation for more information on how this function works. This function is only supported when PHP is installed as an Apache module.",
+    'desc'   => "Fetches all HTTP headers from the current request.\n\nThis function is an alias for apache_request_headers(). Please read the apache_request_headers() documentation for more information on how this function works. This function is only supported when PHP is installed as an Apache module.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "An associative array of all the HTTP headers in the current request, or FALSE on failure.",
@@ -241,7 +254,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "virtual",
-    'desc'   => "virtual() is an Apache-specific function which is similar to <!--#include virtual...--> in mod_include. It performs an Apache sub-request. It is useful for including CGI scripts or .shtml files, or anything else that you would parse through Apache. Note that for a CGI script, the script must generate valid CGI headers. At the minimum that means it must generate a Content-Type header.\nTo run the sub-request, all buffers are terminated and flushed to the browser, pending headers are sent too. This function is only supported when PHP is installed as an Apache module.",
+    'desc'   => "virtual() is an Apache-specific function which is similar to <!--#include virtual...--> in mod_include. It performs an Apache sub-request. It is useful for including CGI scripts or .shtml files, or anything else that you would parse through Apache. Note that for a CGI script, the script must generate valid CGI headers. At the minimum that means it must generate a Content-Type header.\n\nTo run the sub-request, all buffers are terminated and flushed to the browser, pending headers are sent too. This function is only supported when PHP is installed as an Apache module.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Performs the virtual command on success, or returns FALSE on failure.",
@@ -258,6 +272,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apache_get_config",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -266,6 +281,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apache_get_scoreboard",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -274,6 +290,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "apache_get_rewrite_rules",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

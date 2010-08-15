@@ -52,7 +52,8 @@ CPP
 DefineFunction(
   array(
     'name'   => "ctype_alnum",
-    'desc'   => "Checks if all of the characters in the provided string , text, are alphanumeric. In the standard C locale letters are just [A-Za-z].",
+    'desc'   => "Checks if all of the characters in the provided string, text, are alphanumeric. In the standard C locale letters are just [A-Za-z].",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is either a letter or a digit, FALSE otherwise.",
@@ -69,7 +70,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_alpha",
-    'desc'   => "Checks if all of the characters in the provided string , text, are alphabetic. In the standard C locale letters are just [A-Za-z] and ctype_alpha() is equivalent to (ctype_upper(\$text) || ctype_lower(\$text)) if \$text is just a single character, but other languages have letters that are considered neither upper nor lower case.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are alphabetic. In the standard C locale letters are just [A-Za-z] and ctype_alpha() is equivalent to (ctype_upper(\$text) || ctype_lower(\$text)) if \$text is just a single character, but other languages have letters that are considered neither upper nor lower case.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is a letter from the current locale, FALSE otherwise.",
@@ -86,7 +88,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_cntrl",
-    'desc'   => "Checks if all of the characters in the provided string , text, are control characters. Control characters are e.g. line feed, tab, escape.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are control characters. Control characters are e.g. line feed, tab, escape.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is a control character from the current locale, FALSE otherwise.",
@@ -103,7 +106,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_digit",
-    'desc'   => "Checks if all of the characters in the provided string , text, are numerical.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are numerical.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in the string text is a decimal digit, FALSE otherwise.",
@@ -120,7 +124,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_graph",
-    'desc'   => "Checks if all of the characters in the provided string , text, creates visible output.",
+    'desc'   => "Checks if all of the characters in the provided string, text, creates visible output.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is printable and actually creates visible output (no white space), FALSE otherwise.",
@@ -137,7 +142,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_lower",
-    'desc'   => "Checks if all of the characters in the provided string , text, are lowercase letters.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are lowercase letters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is a lowercase letter in the current locale.",
@@ -154,7 +160,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_print",
-    'desc'   => "Checks if all of the characters in the provided string , text, are printable.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are printable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text will actually create output (including blanks). Returns FALSE if text contains control characters or characters that do not have any output or control function at all.",
@@ -171,7 +178,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_punct",
-    'desc'   => "Checks if all of the characters in the provided string , text, are punctuation character.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are punctuation character.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is printable, but neither letter, digit or blank, FALSE otherwise.",
@@ -188,7 +196,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_space",
-    'desc'   => "Checks if all of the characters in the provided string , text, creates whitespace.",
+    'desc'   => "Checks if all of the characters in the provided string, text, creates whitespace.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text creates some sort of white space, FALSE otherwise. Besides the blank character this also includes tab, vertical tab, line feed, carriage return and form feed characters.",
@@ -205,7 +214,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_upper",
-    'desc'   => "Checks if all of the characters in the provided string , text, are uppercase characters.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are uppercase characters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is an uppercase letter in the current locale.",
@@ -222,7 +232,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "ctype_xdigit",
-    'desc'   => "Checks if all of the characters in the provided string , text, are hexadecimal 'digits'.",
+    'desc'   => "Checks if all of the characters in the provided string, text, are hexadecimal 'digits'.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if every character in text is a hexadecimal 'digit', that is a decimal digit or a character from [A-Fa-f] , FALSE otherwise.",

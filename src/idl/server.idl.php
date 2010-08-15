@@ -53,7 +53,7 @@ DefineFunction(
   array(
     'name'   => "dangling_server_proxy_old_request",
     'desc'   => "When I'm running a newer version of the server software and I'm getting an HTTP request that's from old version of a web page, proxy it to a local instance that is still running or dangling just for handling old version of requests. Please read server documentation for more details.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise.",
@@ -64,7 +64,7 @@ DefineFunction(
   array(
     'name'   => "dangling_server_proxy_new_request",
     'desc'   => "When I'm still running an old version of the server software and I'm getting an HTTP request that's newer, proxy it to a specified host that already has the new version of the software running. Please read server documentation for more details.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise.",
@@ -82,7 +82,7 @@ DefineFunction(
   array(
     'name'   => "pagelet_server_is_enabled",
     'desc'   => "Whether pagelet server is enabled or not. Please read server documentation for what a pagelet server is.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if it's enabled, FALSE otherwise.",
@@ -93,7 +93,7 @@ DefineFunction(
   array(
     'name'   => "pagelet_server_task_start",
     'desc'   => "Processes a pagelet server request.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
       'desc'   => "An object that can be used with pagelet_server_task_status() or pagelet_server_task_result().",
@@ -107,14 +107,14 @@ DefineFunction(
       array(
         'name'   => "headers",
         'type'   => StringMap,
-        'desc'   => "HTTP headers to send to the pagelet.",
         'value'  => "null_array",
+        'desc'   => "HTTP headers to send to the pagelet.",
       ),
       array(
         'name'   => "post_data",
         'type'   => String,
-        'desc'   => "POST data to send.",
         'value'  => "null_string",
+        'desc'   => "POST data to send.",
       ),
     ),
   ));
@@ -123,7 +123,7 @@ DefineFunction(
   array(
     'name'   => "pagelet_server_task_status",
     'desc'   => "Checks finish status of a pagelet task.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if done, FALSE otherwise.",
@@ -141,7 +141,7 @@ DefineFunction(
   array(
     'name'   => "pagelet_server_task_result",
     'desc'   => "Block and wait until pagelet task finishes.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
       'desc'   => "HTTP response from the pagelet.",
@@ -169,7 +169,7 @@ DefineFunction(
   array(
     'name'   => "xbox_send_message",
     'desc'   => "Sends an xbox message and waits for response. Please read server documentation for what an xbox is.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise.",
@@ -193,8 +193,8 @@ DefineFunction(
       array(
         'name'   => "host",
         'type'   => String,
-        'desc'   => "Which machine to send to.",
         'value'  => "\"localhost\"",
+        'desc'   => "Which machine to send to.",
       ),
     ),
   ));
@@ -203,7 +203,7 @@ DefineFunction(
   array(
     'name'   => "xbox_post_message",
     'desc'   => "Posts an xbox message without waiting. Please read server documentation for more details.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise.",
@@ -217,8 +217,8 @@ DefineFunction(
       array(
         'name'   => "host",
         'type'   => String,
-        'desc'   => "Which machine to post to.",
         'value'  => "\"localhost\"",
+        'desc'   => "Which machine to post to.",
       ),
     ),
   ));
@@ -227,7 +227,7 @@ DefineFunction(
   array(
     'name'   => "xbox_task_start",
     'desc'   => "Starts a local xbox task.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Resource,
       'desc'   => "A task handle xbox_task_status() and xbox_task_result() can use.",
@@ -245,7 +245,7 @@ DefineFunction(
   array(
     'name'   => "xbox_task_status",
     'desc'   => "Checks an xbox task's status.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if finished, FALSE otherwise.",
@@ -263,7 +263,7 @@ DefineFunction(
   array(
     'name'   => "xbox_task_result",
     'desc'   => "Block and wait for xbox task's result.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Int64,
       'desc'   => "Response code following HTTP's responses. For example, 200 for success and 500 for server error.",

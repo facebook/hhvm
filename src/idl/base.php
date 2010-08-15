@@ -957,7 +957,7 @@ function format_doc_comment($text) {
 }
 
 function get_function_doc_comments($func, $clsname) {
-  $text = format_doc_desc($func, 'function');
+  $text = format_doc_desc($func, empty($clsname) ? 'function' : $clsname);
 
   if ($func['args']) {
     foreach ($func['args'] as $arg) {
@@ -980,5 +980,75 @@ function get_function_doc_comments($func, $clsname) {
 }
 
 function get_class_doc_comments($class) {
-  return format_doc_comment(format_doc_desc($class, ''));
+  return format_doc_comment(format_doc_desc($class, 'class'));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// phpnet
+
+function phpnet_clean($text) {
+  $text = preg_replace('#<div class="example-contents">.*?</div>#s',
+                       '<>', $text);
+  $text = preg_replace('#<p class="para">#', '<>', $text);
+  $text = preg_replace('#<b class="note">Note</b>:#', '', $text);
+  $text = preg_replace('#<.+?>#', '', $text);
+  $text = preg_replace('#[ \t\n]+#s', ' ', $text);
+  $text = preg_replace('# ?<> ?#', "\n\n", $text);
+  $text = preg_replace('/&#039;/', "'", $text);
+  $text = trim(html_entity_decode($text));
+  return $text;
+}
+
+function phpnet_get_function_info($name, $clsname = 'function') {
+  $clsname = preg_replace('#_#', '-', strtolower($clsname));
+  $name = preg_replace('#_#', '-', strtolower($name));
+  $doc = @file_get_contents("http://php.net/manual/en/$clsname.$name.php");
+  if ($doc === false) {
+    return array();
+  }
+
+  $ret = array();
+  if (preg_match('#<div class="refsect1 description">(.*?)'.
+                 '<div class="refsect1 #s', $doc, $m)) {
+    $desc = $m[1];
+    if (preg_match('#<p class="para rdfs-comment">(.*)</div>#s', $desc, $m)) {
+      $ret['desc'] = phpnet_clean($m[1]);
+    }
+  }
+
+  if (preg_match('#<div class="refsect1 parameters">(.*?)'.
+                 '<div class="refsect1 #s', $doc, $m)) {
+    $desc = $m[1];
+    if (preg_match_all('#<dd>(.*?)</dd>#s', $desc, $m)) {
+      foreach ($m[1] as $param) {
+        $ret['params'][] = phpnet_clean($param);
+      }
+    }
+    $desc = preg_replace('#<h3.*</h3>#', '', $desc);
+    $desc = preg_replace('#<dl>.*</dl>#s', '', $desc);
+    $desc = phpnet_clean($desc);
+    if (!empty($desc)) {
+      $ret['desc'] .= "\n$desc";
+    }
+  }
+
+  if (preg_match('#<div class="refsect1 returnvalues">(.*?)'.
+                 '(<div class="refsect1 |<div id="usernotes">)#s', $doc, $m)) {
+    $desc = $m[1];
+    $desc = preg_replace('#<h3.*</h3>#', '', $desc);
+    $ret['ret'] = phpnet_clean($desc);
+  }
+
+  return $ret;
+}
+
+function phpnet_get_class_desc($name) {
+  $name = preg_replace('#_#', '-', strtolower($name));
+  $doc = @file_get_contents("http://php.net/manual/en/class.$name.php");
+  if ($doc !== false &&
+      preg_match('#<h2 class="title">Introduction</h2>(.*?)'.
+                 '<div class="section"#s', $doc, $m)) {
+    return phpnet_clean($m[1]);
+  }
+  return false;
 }

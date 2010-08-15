@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_alarm",
     'desc'   => "Creates a timer that will send a SIGALRM signal to the process after the given number of seconds. Any call to pcntl_alarm() will cancel any previously set alarm.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the time in seconds that any previously scheduled alarm had remaining before it was to be delivered, or 0 if there was no previously scheduled alarm.",
@@ -70,9 +71,10 @@ DefineFunction(
   array(
     'name'   => "pcntl_exec",
     'desc'   => "Executes the program with the given arguments.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
-      'desc'   => "Returns FALSE on error and does not return on success. pcntl_fork pcntl_alarm Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns FALSE on error and does not return on success. pcntl_fork pcntl_alarm Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -99,6 +101,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_fork",
     'desc'   => "The pcntl_fork() function creates a child process that differs from the parent process only in its PID and PPID. Please see your system's fork(2) man page for specific details as to how fork works on your system.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "On success, the PID of the child process is returned in the parent's thread of execution, and a 0 is returned in the child's thread of execution. On failure, a -1 will be returned in the parent's context, no child process will be created, and a PHP error is raised.",
@@ -109,6 +112,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_getpriority",
     'desc'   => "pcntl_getpriority() gets the priority of pid. Because priority levels can differ between system types and kernel versions, please see your system's getpriority(2) man page for specific details.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "pcntl_getpriority() returns the priority of the process or FALSE on error. A lower numerical value causes more favorable scheduling. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
@@ -133,6 +137,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_setpriority",
     'desc'   => "pcntl_setpriority() sets the priority of pid.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -162,6 +167,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_signal",
     'desc'   => "The pcntl_signal() function installs a new signal handler for the signal indicated by signo.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -175,7 +181,7 @@ DefineFunction(
       array(
         'name'   => "handler",
         'type'   => Variant,
-        'desc'   => "The signal handler which may be the name of a user created function, or method, or either of the two global constants SIG_IGN or SIG_DFL. Note: Note that when you set a handler to an object method, that object's reference count is increased which makes it persist until you either change the handler to something else, or your script ends.",
+        'desc'   => "The signal handler which may be the name of a user created function, or method, or either of the two global constants SIG_IGN or SIG_DFL.\n\nNote that when you set a handler to an object method, that object's reference count is increased which makes it persist until you either change the handler to something else, or your script ends.",
       ),
       array(
         'name'   => "restart_syscalls",
@@ -189,7 +195,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pcntl_wait",
-    'desc'   => "The wait function suspends execution of the current process until a child has exited, or until a signal is delivered whose action is to terminate the current process or to call a signal handling function. If a child has already exited by the time of the call (a so-called \"zombie\" process), the function returns immediately. Any system resources used by the child are freed. Please see your system's wait(2) man page for specific details as to how wait works on your system. Note: This function is equivalent to calling pcntl_waitpid() with a -1 pid and no options.",
+    'desc'   => "The wait function suspends execution of the current process until a child has exited, or until a signal is delivered whose action is to terminate the current process or to call a signal handling function. If a child has already exited by the time of the call (a so-called \"zombie\" process), the function returns immediately. Any system resources used by the child are freed. Please see your system's wait(2) man page for specific details as to how wait works on your system.\n\nThis function is equivalent to calling pcntl_waitpid() with a -1 pid and no options.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "pcntl_wait() returns the process ID of the child which exited, -1 on error or zero if WNOHANG was provided as an option (on wait3-available systems) and no child was available.",
@@ -212,7 +219,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pcntl_waitpid",
-    'desc'   => "Suspends execution of the current process until a child as specified by the pid argument has exited, or until a signal is delivered whose action is to terminate the current process or to call a signal handling function.\nIf a child as requested by pid has already exited by the time of the call (a so-called \"zombie\" process), the function returns immediately. Any system resources used by the child are freed. Please see your system's waitpid(2) man page for specific details as to how waitpid works on your system.",
+    'desc'   => "Suspends execution of the current process until a child as specified by the pid argument has exited, or until a signal is delivered whose action is to terminate the current process or to call a signal handling function.\n\nIf a child as requested by pid has already exited by the time of the call (a so-called \"zombie\" process), the function returns immediately. Any system resources used by the child are freed. Please see your system's waitpid(2) man page for specific details as to how waitpid works on your system.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "pcntl_waitpid() returns the process ID of the child which exited, -1 on error or zero if WNOHANG was used and no child was available",
@@ -221,7 +229,7 @@ DefineFunction(
       array(
         'name'   => "pid",
         'type'   => Int32,
-        'desc'   => "The value of pid can be one of the following: possible values for pid < -1 wait for any child process whose process group ID is equal to the absolute value of pid. -1 wait for any child process; this is the same behaviour that the wait function exhibits. 0 wait for any child process whose process group ID is equal to that of the calling process. > 0 wait for the child whose process ID is equal to the value of pid. Note: Specifying -1 as the pid is equivalent to the functionality pcntl_wait() provides (minus options).",
+        'desc'   => "The value of pid can be one of the following: possible values for pid < -1 wait for any child process whose process group ID is equal to the absolute value of pid. -1 wait for any child process; this is the same behaviour that the wait function exhibits. 0 wait for any child process whose process group ID is equal to that of the calling process. > 0 wait for the child whose process ID is equal to the value of pid.\n\nSpecifying -1 as the pid is equivalent to the functionality pcntl_wait() provides (minus options).",
       ),
       array(
         'name'   => "status",
@@ -241,6 +249,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_wexitstatus",
     'desc'   => "Returns the return code of a terminated child. This function is only useful if pcntl_wifexited() returned TRUE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the return code, as an integer.",
@@ -258,6 +267,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_wifexited",
     'desc'   => "Checks whether the child status code represents a normal exit.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the child status code represents a normal exit, FALSE otherwise.",
@@ -275,6 +285,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_wifsignaled",
     'desc'   => "Checks whether the child process exited because of a signal which was not caught.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the child process exited because of a signal which was not caught, FALSE otherwise.",
@@ -292,6 +303,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_wifstopped",
     'desc'   => "Checks whether the child process which caused the return is currently stopped; this is only possible if the call to pcntl_waitpid() was done using the option WUNTRACED.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the child process which caused the return is currently stopped, FALSE otherwise.",
@@ -309,6 +321,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_wstopsig",
     'desc'   => "Returns the number of the signal which caused the child to stop. This function is only useful if pcntl_wifstopped() returned TRUE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the signal number.",
@@ -326,6 +339,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_wtermsig",
     'desc'   => "Returns the number of the signal that caused the child process to terminate. This function is only useful if pcntl_wifsignaled() returned TRUE.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the signal number, as an integer.",
@@ -343,6 +357,7 @@ DefineFunction(
   array(
     'name'   => "pcntl_signal_dispatch",
     'desc'   => "The pcntl_signal_dispatch() function calls the signal handlers installed by pcntl_signal() for each pending signal.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -353,6 +368,7 @@ DefineFunction(
   array(
     'name'   => "shell_exec",
     'desc'   => "This function is identical to the backtick operator.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The output from the executed command.",
@@ -370,9 +386,10 @@ DefineFunction(
   array(
     'name'   => "exec",
     'desc'   => "exec() executes the given command.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "The last line from the result of the command. If you need to execute a command and have all the data from the command passed directly back without any interference, use the passthru() function.\nTo get the output of the executed command, be sure to set and use the output parameter.",
+      'desc'   => "The last line from the result of the command. If you need to execute a command and have all the data from the command passed directly back without any interference, use the passthru() function.\n\nTo get the output of the executed command, be sure to set and use the output parameter.",
     ),
     'args'   => array(
       array(
@@ -399,6 +416,7 @@ DefineFunction(
   array(
     'name'   => "passthru",
     'desc'   => "The passthru() function is similar to the exec() function in that it executes a command. This function should be used in place of exec() or system() when the output from the Unix command is binary data which needs to be passed directly back to the browser. A common use for this is to execute something like the pbmplus utilities that can output an image stream directly. By setting the Content-type to image/gif and then calling a pbmplus program to output a gif, you can create PHP scripts that output images directly.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -421,7 +439,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "system",
-    'desc'   => "system() is just like the C version of the function in that it executes the given command and outputs the result.\nThe system() call also tries to automatically flush the web server's output buffer after each line of output if PHP is running as a server module.\nIf you need to execute a command and have all the data from the command passed directly back without any interference, use the passthru() function.",
+    'desc'   => "system() is just like the C version of the function in that it executes the given command and outputs the result.\n\nThe system() call also tries to automatically flush the web server's output buffer after each line of output if PHP is running as a server module.\n\nIf you need to execute a command and have all the data from the command passed directly back without any interference, use the passthru() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Returns the last line of the command output on success, and FALSE on failure.",
@@ -445,6 +464,7 @@ DefineFunction(
   array(
     'name'   => "proc_open",
     'desc'   => "proc_open() is similar to popen() but provides a much greater degree of control over the program execution.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a resource representing the process, which should be freed using proc_close() when you are finished with it. On failure returns FALSE.",
@@ -458,7 +478,7 @@ DefineFunction(
       array(
         'name'   => "descriptorspec",
         'type'   => VariantVec,
-        'desc'   => "An indexed array where the key represents the descriptor number and the value represents how PHP will pass that descriptor to the child process. 0 is stdin, 1 is stdout, while 2 is stderr.\nEach element can be: An array describing the pipe to pass to the process. The first element is the descriptor type and the second element is an option for the given type. Valid types are pipe (the second element is either r to pass the read end of the pipe to the process, or w to pass the write end) and file (the second element is a filename). A stream resource representing a real file descriptor (e.g. opened file, a socket, STDIN).\nThe file descriptor numbers are not limited to 0, 1 and 2 - you may specify any valid file descriptor number and it will be passed to the child process. This allows your script to interoperate with other scripts that run as \"co-processes\". In particular, this is useful for passing passphrases to programs like PGP, GPG and openssl in a more secure manner. It is also useful for reading status information provided by those programs on auxiliary file descriptors.",
+        'desc'   => "An indexed array where the key represents the descriptor number and the value represents how PHP will pass that descriptor to the child process. 0 is stdin, 1 is stdout, while 2 is stderr.\n\nEach element can be: An array describing the pipe to pass to the process. The first element is the descriptor type and the second element is an option for the given type. Valid types are pipe (the second element is either r to pass the read end of the pipe to the process, or w to pass the write end) and file (the second element is a filename). A stream resource representing a real file descriptor (e.g. opened file, a socket, STDIN).\n\nThe file descriptor numbers are not limited to 0, 1 and 2 - you may specify any valid file descriptor number and it will be passed to the child process. This allows your script to interoperate with other scripts that run as \"co-processes\". In particular, this is useful for passing passphrases to programs like PGP, GPG and openssl in a more secure manner. It is also useful for reading status information provided by those programs on auxiliary file descriptors.",
       ),
       array(
         'name'   => "pipes",
@@ -489,7 +509,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "proc_terminate",
-    'desc'   => "Signals a process (created using proc_open()) that it should terminate. proc_terminate() returns immediately and does not wait for the process to terminate.\nproc_terminate() allows you terminate the process and continue with other tasks. You may poll the process (to see if it has stopped yet) by using the proc_get_status() function.",
+    'desc'   => "Signals a process (created using proc_open()) that it should terminate. proc_terminate() returns immediately and does not wait for the process to terminate.\n\nproc_terminate() allows you terminate the process and continue with other tasks. You may poll the process (to see if it has stopped yet) by using the proc_get_status() function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns the termination status of the process that was run.",
@@ -513,9 +534,10 @@ DefineFunction(
   array(
     'name'   => "proc_close",
     'desc'   => "proc_close() is similar to pclose() except that it only works on processes opened by proc_open(). proc_close() waits for the process to terminate, and returns its exit code. If you have open pipes to that process, you should fclose() them prior to calling this function in order to avoid a deadlock - the child process may not be able to exit while the pipes are open.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
-      'desc'   => "Returns the termination status of the process that was run. proc_get_status passthru Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns the termination status of the process that was run. proc_get_status passthru Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -530,6 +552,7 @@ DefineFunction(
   array(
     'name'   => "proc_get_status",
     'desc'   => "proc_get_status() fetches data about a process opened using proc_open().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -545,7 +568,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "proc_nice",
-    'desc'   => "proc_nice() changes the priority of the current process by the amount specified in increment. A positive increment will lower the priority of the current process, whereas a negative increment will raise the priority.\nproc_nice() is not related to proc_open() and its associated functions in any way.",
+    'desc'   => "proc_nice() changes the priority of the current process by the amount specified in increment. A positive increment will lower the priority of the current process, whereas a negative increment will raise the priority.\n\nproc_nice() is not related to proc_open() and its associated functions in any way.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure. If an error occurs, like the user lacks permission to change the priority, an error of level E_WARNING is also generated.",
@@ -563,6 +587,7 @@ DefineFunction(
   array(
     'name'   => "escapeshellarg",
     'desc'   => "escapeshellarg() adds single quotes around a string and quotes/escapes any existing single quotes allowing you to pass a string directly to a shell function and having it be treated as a single safe argument. This function should be used to escape individual arguments to shell functions coming from user input. The shell functions include exec(), system() and the backtick operator.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The escaped string.",
@@ -579,7 +604,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "escapeshellcmd",
-    'desc'   => "escapeshellcmd() escapes any characters in a string that might be used to trick a shell command into executing arbitrary commands. This function should be used to make sure that any data coming from user input is escaped before this data is passed to the exec() or system() functions, or to the backtick operator.\nFollowing characters are preceded by a backslash: #&;`|*?~<>^()[]{}\$\\, \\x0A and \\xFF. ' and \" are escaped only if they are not paired. In Windows, all these characters plus % are replaced by a space instead.",
+    'desc'   => "escapeshellcmd() escapes any characters in a string that might be used to trick a shell command into executing arbitrary commands. This function should be used to make sure that any data coming from user input is escaped before this data is passed to the exec() or system() functions, or to the backtick operator.\n\nFollowing characters are preceded by a backslash: #&;`|*?~<>^()[]{}\$\\, \\x0A and \\xFF. ' and \" are escaped only if they are not paired. In Windows, all these characters plus % are replaced by a space instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The escaped string.",

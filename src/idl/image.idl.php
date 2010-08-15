@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "gd_info",
     'desc'   => "Gets information about the version and capabilities of the installed GD library.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
     ),
@@ -61,7 +62,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getimagesize",
-    'desc'   => "The getimagesize() function will determine the size of any given image file and return the dimensions along with the file type and a height/width text string to be used inside a normal HTML IMG tag and the correspondant HTTP content type.\ngetimagesize() can also return some more information in imageinfo parameter. Note: Note that JPC and JP2 are capable of having components with different bit depths. In this case, the value for \"bits\" is the highest bit depth encountered. Also, JP2 files may contain multiple JPEG 2000 codestreams. In this case, getimagesize() returns the values for the first codestream it encounters in the root of the file. Note: The information about icons are retrieved from the icon with the highest bitrate.",
+    'desc'   => "The getimagesize() function will determine the size of any given image file and return the dimensions along with the file type and a height/width text string to be used inside a normal HTML IMG tag and the correspondant HTTP content type.\n\ngetimagesize() can also return some more information in imageinfo parameter. Note that JPC and JP2 are capable of having components with different bit depths. In this case, the value for \"bits\" is the highest bit depth encountered. Also, JP2 files may contain multiple JPEG 2000 codestreams. In this case, getimagesize() returns the values for the first codestream it encounters in the root of the file. The information about icons are retrieved from the icon with the highest bitrate.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -84,6 +86,7 @@ DefineFunction(
   array(
     'name'   => "image_type_to_extension",
     'desc'   => "Returns the extension for the given IMAGETYPE_XXX constant.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "A string with the extension corresponding to the given image type.",
@@ -107,6 +110,7 @@ DefineFunction(
   array(
     'name'   => "image_type_to_mime_type",
     'desc'   => "The image_type_to_mime_type() function will determine the Mime-Type for an IMAGETYPE constant.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "The returned values are as follows Returned values Constants imagetype Returned value IMAGETYPE_GIF image/gif IMAGETYPE_JPEG image/jpeg IMAGETYPE_PNG image/png IMAGETYPE_SWF application/x-shockwave-flash IMAGETYPE_PSD image/psd IMAGETYPE_BMP image/bmp IMAGETYPE_TIFF_II (intel byte order) image/tiff IMAGETYPE_TIFF_MM (motorola byte order) image/tiff IMAGETYPE_JPC application/octet-stream IMAGETYPE_JP2 image/jp2 IMAGETYPE_JPX application/octet-stream IMAGETYPE_JB2 application/octet-stream IMAGETYPE_SWC application/x-shockwave-flash IMAGETYPE_IFF image/iff IMAGETYPE_WBMP image/vnd.wap.wbmp IMAGETYPE_XBM image/xbm IMAGETYPE_ICO image/vnd.microsoft.icon",
@@ -124,6 +128,7 @@ DefineFunction(
   array(
     'name'   => "image2wbmp",
     'desc'   => "image2wbmp() outputs or save a WBMP version of the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -153,6 +158,7 @@ DefineFunction(
   array(
     'name'   => "imagealphablending",
     'desc'   => "imagealphablending() allows for two different modes of drawing on truecolor images. In blending mode, the alpha channel component of the color supplied to all drawing function, such as imagesetpixel() determines how much of the underlying color should be allowed to shine through. As a result, gd automatically blends the existing color at that point with the drawing color, and stores the result in the image. The resulting pixel is opaque. In non-blending mode, the drawing color is copied literally with its alpha channel information, replacing the destination pixel. Blending mode is not available when drawing on palette images.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -174,7 +180,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imageantialias",
-    'desc'   => "Activate the fast drawing antialiased methods for lines and wired polygons. It does not support alpha components. It works using a direct blend operation. It works only with truecolor images.\nThickness and styled are not supported.\nUsing antialiased primitives with transparent background color can end with some unexpected results. The blend method uses the background color as any other colors. The lack of alpha component support does not allow an alpha based antialiasing method.",
+    'desc'   => "Activate the fast drawing antialiased methods for lines and wired polygons. It does not support alpha components. It works using a direct blend operation. It works only with truecolor images.\n\nThickness and styled are not supported.\n\nUsing antialiased primitives with transparent background color can end with some unexpected results. The blend method uses the background color as any other colors. The lack of alpha component support does not allow an alpha based antialiasing method.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -197,6 +204,7 @@ DefineFunction(
   array(
     'name'   => "imagearc",
     'desc'   => "imagearc() draws an arc of circle centered at the given coordinates.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -249,6 +257,7 @@ DefineFunction(
   array(
     'name'   => "imagechar",
     'desc'   => "imagechar() draws the first character of c in the image identified by image with its upper-left at x,y (top left is 0, 0) with the color color.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -291,6 +300,7 @@ DefineFunction(
   array(
     'name'   => "imagecharup",
     'desc'   => "Draws the character c vertically at the specified coordinate on the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -332,7 +342,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecolorallocate",
-    'desc'   => "Returns a color identifier representing the color composed of the given RGB components.\nimagecolorallocate() must be called to create each color that is to be used in the image represented by image. Note: The first call to imagecolorallocate() fills the background color in palette-based images - images created using imagecreate().\nThese parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'desc'   => "Returns a color identifier representing the color composed of the given RGB components.\n\nimagecolorallocate() must be called to create each color that is to be used in the image represented by image.\n\nThe first call to imagecolorallocate() fills the background color in palette-based images - images created using imagecreate().\nThese parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A color identifier or FALSE if the allocation failed.",
@@ -365,6 +376,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorallocatealpha",
     'desc'   => "imagecolorallocatealpha() behaves identically to imagecolorallocate() with the addition of the transparency parameter alpha.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "A color identifier or FALSE if the allocation failed.",
@@ -401,7 +413,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecolorat",
-    'desc'   => "Returns the index of the color of the pixel at the specified location in the image specified by image.\nIf PHP is compiled against GD library 2.0 or higher and the image is a truecolor image, this function returns the RGB value of that pixel as integer. Use bitshifting and masking to access the distinct red, green and blue component values:",
+    'desc'   => "Returns the index of the color of the pixel at the specified location in the image specified by image.\n\nIf PHP is compiled against GD library 2.0 or higher and the image is a truecolor image, this function returns the RGB value of that pixel as integer. Use bitshifting and masking to access the distinct red, green and blue component values:",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the index of the color.",
@@ -428,7 +441,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecolorclosest",
-    'desc'   => "Returns the index of the color in the palette of the image which is \"closest\" to the specified RGB value.\nThe \"distance\" between the desired color and each color in the palette is calculated as if the RGB values represented points in three-dimensional space.\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'desc'   => "Returns the index of the color in the palette of the image which is \"closest\" to the specified RGB value.\n\nThe \"distance\" between the desired color and each color in the palette is calculated as if the RGB values represented points in three-dimensional space.\n\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the index of the closest color, in the palette of the image, to the specified one",
@@ -461,6 +475,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorclosestalpha",
     'desc'   => "Returns the index of the color in the palette of the image which is \"closest\" to the specified RGB value and alpha level.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the index of the closest color in the palette.",
@@ -498,6 +513,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorclosesthwb",
     'desc'   => "Get the index of the color which has the hue, white and blackness nearest the given color.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an integer with the index of the color which has the hue, white and blackness nearest the given color.",
@@ -530,6 +546,7 @@ DefineFunction(
   array(
     'name'   => "imagecolordeallocate",
     'desc'   => "De-allocates a color previously allocated with imagecolorallocate() or imagecolorallocatealpha().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -551,7 +568,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecolorexact",
-    'desc'   => "Returns the index of the specified color in the palette of the image.\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.",
+    'desc'   => "Returns the index of the specified color in the palette of the image.\n\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the index of the specified color in the palette, or -1 if the color does not exist.",
@@ -584,6 +602,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorexactalpha",
     'desc'   => "Returns the index of the specified color+alpha in the palette of the image.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the index of the specified color+alpha in the palette of the image, or -1 if the color does not exist in the image's palette.",
@@ -621,6 +640,7 @@ DefineFunction(
   array(
     'name'   => "imagecolormatch",
     'desc'   => "Makes the colors of the palette version of an image more closely match the true color version.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -642,7 +662,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecolorresolve",
-    'desc'   => "This function is guaranteed to return a color index for a requested color, either the exact color or the closest possible alternative.\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.",
+    'desc'   => "This function is guaranteed to return a color index for a requested color, either the exact color or the closest possible alternative.\n\nIf you created the image from a file, only colors used in the image are resolved. Colors present only in the palette are not resolved.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a color index.",
@@ -675,6 +696,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorresolvealpha",
     'desc'   => "This function is guaranteed to return a color index for a requested color, either the exact color or the closest possible alternative.\nThe colors parameters are integers between 0 and 255 or hexadecimals between 0x00 and 0xFF.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a color index.",
@@ -712,6 +734,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorset",
     'desc'   => "This sets the specified index in the palette to the specified color. This is useful for creating flood-fill-like effects in palleted images without the overhead of performing the actual flood-fill.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
@@ -749,6 +772,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorsforindex",
     'desc'   => "Gets the color for a specified index.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an associative array with red, green, blue and alpha keys that contain the appropriate values for the specified color index.",
@@ -771,6 +795,7 @@ DefineFunction(
   array(
     'name'   => "imagecolorstotal",
     'desc'   => "Returns the number of colors in an image palette.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of colors in the specified image's palette or 0 for truecolor images.",
@@ -788,6 +813,7 @@ DefineFunction(
   array(
     'name'   => "imagecolortransparent",
     'desc'   => "Sets the transparent color in the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The identifier of the new (or current, if none is specified) transparent color is returned.",
@@ -811,6 +837,7 @@ DefineFunction(
   array(
     'name'   => "imageconvolution",
     'desc'   => "Applies a convolution matrix on the image, using the given coefficient and offset.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -843,6 +870,7 @@ DefineFunction(
   array(
     'name'   => "imagecopy",
     'desc'   => "Copy a part of src_im onto dst_im starting at the x,y coordinates src_x, src_y with a width of src_w and a height of src_h. The portion defined will be copied onto the x,y coordinates, dst_x and dst_y.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -895,6 +923,7 @@ DefineFunction(
   array(
     'name'   => "imagecopymerge",
     'desc'   => "Copy a part of src_im onto dst_im starting at the x,y coordinates src_x, src_y with a width of src_w and a height of src_h. The portion defined will be copied onto the x,y coordinates, dst_x and dst_y.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -951,7 +980,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecopymergegray",
-    'desc'   => "imagecopymergegray() copy a part of src_im onto dst_im starting at the x,y coordinates src_x, src_y with a width of src_w and a height of src_h. The portion defined will be copied onto the x,y coordinates, dst_x and dst_y.\nThis function is identical to imagecopymerge() except that when merging it preserves the hue of the source by converting the destination pixels to gray scale before the copy operation.",
+    'desc'   => "imagecopymergegray() copy a part of src_im onto dst_im starting at the x,y coordinates src_x, src_y with a width of src_w and a height of src_h. The portion defined will be copied onto the x,y coordinates, dst_x and dst_y.\n\nThis function is identical to imagecopymerge() except that when merging it preserves the hue of the source by converting the destination pixels to gray scale before the copy operation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1008,7 +1038,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecopyresampled",
-    'desc'   => "imagecopyresampled() copies a rectangular portion of one image to another image, smoothly interpolating pixel values so that, in particular, reducing the size of an image still retains a great deal of clarity.\nIn other words, imagecopyresampled() will take an rectangular area from src_image of width src_w and height src_h at position (src_x,src_y) and place it in a rectangular area of dst_image of width dst_w and height dst_h at position (dst_x,dst_y).\nIf the source and destination coordinates and width and heights differ, appropriate stretching or shrinking of the image fragment will be performed. The coordinates refer to the upper left corner. This function can be used to copy regions within the same image (if dst_image is the same as src_image) but if the regions overlap the results will be unpredictable.",
+    'desc'   => "imagecopyresampled() copies a rectangular portion of one image to another image, smoothly interpolating pixel values so that, in particular, reducing the size of an image still retains a great deal of clarity.\n\nIn other words, imagecopyresampled() will take an rectangular area from src_image of width src_w and height src_h at position (src_x,src_y) and place it in a rectangular area of dst_image of width dst_w and height dst_h at position (dst_x,dst_y).\n\nIf the source and destination coordinates and width and heights differ, appropriate stretching or shrinking of the image fragment will be performed. The coordinates refer to the upper left corner. This function can be used to copy regions within the same image (if dst_image is the same as src_image) but if the regions overlap the results will be unpredictable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1070,7 +1101,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecopyresized",
-    'desc'   => "imagecopyresized() copies a rectangular portion of one image to another image. dst_image is the destination image, src_image is the source image identifier.\nIn other words, imagecopyresized() will take an rectangular area from src_image of width src_w and height src_h at position (src_x,src_y) and place it in a rectangular area of dst_image of width dst_w and height dst_h at position (dst_x,dst_y).\nIf the source and destination coordinates and width and heights differ, appropriate stretching or shrinking of the image fragment will be performed. The coordinates refer to the upper left corner. This function can be used to copy regions within the same image (if dst_image is the same as src_image) but if the regions overlap the results will be unpredictable.",
+    'desc'   => "imagecopyresized() copies a rectangular portion of one image to another image. dst_image is the destination image, src_image is the source image identifier.\n\nIn other words, imagecopyresized() will take an rectangular area from src_image of width src_w and height src_h at position (src_x,src_y) and place it in a rectangular area of dst_image of width dst_w and height dst_h at position (dst_x,dst_y).\n\nIf the source and destination coordinates and width and heights differ, appropriate stretching or shrinking of the image fragment will be performed. The coordinates refer to the upper left corner. This function can be used to copy regions within the same image (if dst_image is the same as src_image) but if the regions overlap the results will be unpredictable.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1132,7 +1164,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecreate",
-    'desc'   => "imagecreate() returns an image identifier representing a blank image of specified size.\nWe recommend the use of imagecreatetruecolor().",
+    'desc'   => "imagecreate() returns an image identifier representing a blank image of specified size.\n\nWe recommend the use of imagecreatetruecolor().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1155,6 +1188,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromgd2part",
     'desc'   => "Create a new image from a given part of GD2 file or URL. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1192,6 +1226,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromgd",
     'desc'   => "Create a new image from GD file or URL. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1209,6 +1244,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromgd2",
     'desc'   => "Create a new image from GD2 file or URL. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1226,6 +1262,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromgif",
     'desc'   => "imagecreatefromgif() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1243,6 +1280,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromjpeg",
     'desc'   => "imagecreatefromjpeg() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1260,6 +1298,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefrompng",
     'desc'   => "imagecreatefrompng() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1277,6 +1316,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromstring",
     'desc'   => "imagecreatefromstring() returns an image identifier representing the image obtained from the given data. These types will be automatically detected if your build of PHP supports them: JPEG, PNG, GIF, WBMP, and GD2.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An image resource will be returned on success. FALSE is returned if the image type is unsupported, the data is not in a recognised format, or the image is corrupt and cannot be loaded.",
@@ -1294,6 +1334,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromwbmp",
     'desc'   => "imagecreatefromwbmp() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1311,6 +1352,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromxbm",
     'desc'   => "imagecreatefromxbm() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1328,6 +1370,7 @@ DefineFunction(
   array(
     'name'   => "imagecreatefromxpm",
     'desc'   => "imagecreatefromxpm() returns an image identifier representing the image obtained from the given filename. TipA URL can be used as a filename with this function if the fopen wrappers have been enabled. See fopen() for more details on how to specify the filename. See the List of Supported Protocols/Wrappers for links to information about what abilities the various wrappers have, notes on their usage, and information on any predefined variables they may provide.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1344,7 +1387,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagecreatetruecolor",
-    'desc'   => "imagecreatetruecolor() returns an image identifier representing a black image of the specified size.\nDepending on your PHP and GD versions this function is defined or not. With PHP 4.0.6 through 4.1.x this function always exists if the GD module is loaded, but calling it without GD2 being installed PHP will issue a fatal error and exit. With PHP 4.2.x this behaviour is different in issuing a warning instead of an error. Other versions only define this function, if the correct GD version is installed.",
+    'desc'   => "imagecreatetruecolor() returns an image identifier representing a black image of the specified size.\n\nDepending on your PHP and GD versions this function is defined or not. With PHP 4.0.6 through 4.1.x this function always exists if the GD module is loaded, but calling it without GD2 being installed PHP will issue a fatal error and exit. With PHP 4.2.x this behaviour is different in issuing a warning instead of an error. Other versions only define this function, if the correct GD version is installed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on errors.",
@@ -1367,6 +1411,7 @@ DefineFunction(
   array(
     'name'   => "imagedashedline",
     'desc'   => "This function is deprecated. Use combination of imagesetstyle() and imageline() instead.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Always returns true",
@@ -1409,6 +1454,7 @@ DefineFunction(
   array(
     'name'   => "imagedestroy",
     'desc'   => "imagedestroy() frees any memory associated with image image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1426,6 +1472,7 @@ DefineFunction(
   array(
     'name'   => "imageellipse",
     'desc'   => "Draws an ellipse centered at the specified coordinates.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1468,6 +1515,7 @@ DefineFunction(
   array(
     'name'   => "imagefill",
     'desc'   => "Performs a flood fill starting at the given coordinate (top left is 0, 0) with the given color in the image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1500,6 +1548,7 @@ DefineFunction(
   array(
     'name'   => "imagefilledarc",
     'desc'   => "Draws a partial arc centered at the specified coordinate in the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1557,6 +1606,7 @@ DefineFunction(
   array(
     'name'   => "imagefilledellipse",
     'desc'   => "Draws an ellipse centered at the specified coordinate on the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1599,6 +1649,7 @@ DefineFunction(
   array(
     'name'   => "imagefilledpolygon",
     'desc'   => "imagefilledpolygon() creates a filled polygon in the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1631,6 +1682,7 @@ DefineFunction(
   array(
     'name'   => "imagefilledrectangle",
     'desc'   => "Creates a rectangle filled with color in the given image starting at point 1 and ending at point 2. 0, 0 is the top left corner of the image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1673,6 +1725,7 @@ DefineFunction(
   array(
     'name'   => "imagefilltoborder",
     'desc'   => "imagefilltoborder() performs a flood fill whose border color is defined by border. The starting point for the fill is x, y (top left is 0, 0) and the region is filled with color color.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1710,6 +1763,7 @@ DefineFunction(
   array(
     'name'   => "imagefilter",
     'desc'   => "imagefilter() applies the given filter filtertype on the image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1756,6 +1810,7 @@ DefineFunction(
   array(
     'name'   => "imagefontheight",
     'desc'   => "Returns the pixel height of a character in the specified font.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the height of the pixel.",
@@ -1773,6 +1828,7 @@ DefineFunction(
   array(
     'name'   => "imagefontwidth",
     'desc'   => "Returns the pixel width of a character in font.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the width of the pixel",
@@ -1790,9 +1846,10 @@ DefineFunction(
   array(
     'name'   => "imageftbbox",
     'desc'   => "This function calculates and returns the bounding box in pixels for a FreeType text.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "imageftbbox() returns an array with 8 elements representing four points making the bounding box of the text: 0 lower left corner, X position 1 lower left corner, Y position 2 lower right corner, X position 3 lower right corner, Y position 4 upper right corner, X position 5 upper right corner, Y position 6 upper left corner, X position 7 upper left corner, Y position\nThe points are relative to the text regardless of the angle, so \"upper left\" means in the top left-hand corner seeing the text horizontally.",
+      'desc'   => "imageftbbox() returns an array with 8 elements representing four points making the bounding box of the text: 0 lower left corner, X position 1 lower left corner, Y position 2 lower right corner, X position 3 lower right corner, Y position 4 upper right corner, X position 5 upper right corner, Y position 6 upper left corner, X position 7 upper left corner, Y position\n\nThe points are relative to the text regardless of the angle, so \"upper left\" means in the top left-hand corner seeing the text horizontally.",
     ),
     'args'   => array(
       array(
@@ -1827,6 +1884,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagefttext",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "This function returns an array defining the four points of the box, starting in the lower left and moving counter-clockwise: 0 lower left x-coordinate 1 lower left y-coordinate 2 lower right x-coordinate 3 lower right y-coordinate 4 upper right x-coordinate 5 upper right y-coordinate 6 upper left x-coordinate 7 upper left y-coordinate",
@@ -1865,7 +1923,7 @@ DefineFunction(
       array(
         'name'   => "font_file",
         'type'   => String,
-        'desc'   => "The path to the TrueType font you wish to use.\nDepending on which version of the GD library PHP is using, when fontfile does not begin with a leading / then .ttf will be appended to the filename and the library will attempt to search for that filename along a library-defined font path.\nWhen using versions of the GD library lower than 2.0.18, a space character, rather than a semicolon, was used as the 'path separator' for different font files. Unintentional use of this feature will result in the warning message: Warning: Could not find/open font. For these affected versions, the only solution is moving the font to a path which does not contain spaces.\nIn many cases where a font resides in the same directory as the script using it the following trick will alleviate any include problems.",
+        'desc'   => "The path to the TrueType font you wish to use.\n\nDepending on which version of the GD library PHP is using, when fontfile does not begin with a leading / then .ttf will be appended to the filename and the library will attempt to search for that filename along a library-defined font path.\n\nWhen using versions of the GD library lower than 2.0.18, a space character, rather than a semicolon, was used as the 'path separator' for different font files. Unintentional use of this feature will result in the warning message: Warning: Could not find/open font. For these affected versions, the only solution is moving the font to a path which does not contain spaces.\n\nIn many cases where a font resides in the same directory as the script using it the following trick will alleviate any include problems.",
       ),
       array(
         'name'   => "text",
@@ -1885,6 +1943,7 @@ DefineFunction(
   array(
     'name'   => "imagegammacorrect",
     'desc'   => "Applies gamma correction to the given gd image given an input and an output gamma.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1912,6 +1971,7 @@ DefineFunction(
   array(
     'name'   => "imagegd2",
     'desc'   => "Outputs a GD2 image to the given filename.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1947,6 +2007,7 @@ DefineFunction(
   array(
     'name'   => "imagegd",
     'desc'   => "Outputs a GD image to the given filename.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1969,7 +2030,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagegif",
-    'desc'   => "imagegif() creates the GIF file in filename from the image image. The image argument is the return from the imagecreate() or imagecreatefrom* function.\nThe image format will be GIF87a unless the image has been made transparent with imagecolortransparent(), in which case the image format will be GIF89a.",
+    'desc'   => "imagegif() creates the GIF file in filename from the image image. The image argument is the return from the imagecreate() or imagecreatefrom* function.\n\nThe image format will be GIF87a unless the image has been made transparent with imagecolortransparent(), in which case the image format will be GIF89a.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1993,6 +2055,7 @@ DefineFunction(
   array(
     'name'   => "imagegrabscreen",
     'desc'   => "Grabs a screenshot of the whole screen.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on failure.",
@@ -2003,6 +2066,7 @@ DefineFunction(
   array(
     'name'   => "imagegrabwindow",
     'desc'   => "Grabs a window or its client area using a windows handle (HWND property in COM instance)",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource identifier on success, FALSE on failure.",
@@ -2025,7 +2089,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imageinterlace",
-    'desc'   => "imageinterlace() turns the interlace bit on or off.\nIf the interlace bit is set and the image is used as a JPEG image, the image is created as a progressive JPEG.",
+    'desc'   => "imageinterlace() turns the interlace bit on or off.\n\nIf the interlace bit is set and the image is used as a JPEG image, the image is created as a progressive JPEG.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns 1 if the interlace bit is set for the image, 0 otherwise.",
@@ -2049,6 +2114,7 @@ DefineFunction(
   array(
     'name'   => "imageistruecolor",
     'desc'   => "imageistruecolor() finds whether the image image is a truecolor image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the image is truecolor, FALSE otherwise.",
@@ -2066,6 +2132,7 @@ DefineFunction(
   array(
     'name'   => "imagejpeg",
     'desc'   => "imagejpeg() creates a JPEG file from the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2080,7 +2147,7 @@ DefineFunction(
         'name'   => "filename",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The path to save the file to. If not set or NULL, the raw image stream will be outputted directly.\nTo skip this argument in order to provide the quality parameter, use NULL.",
+        'desc'   => "The path to save the file to. If not set or NULL, the raw image stream will be outputted directly.\n\nTo skip this argument in order to provide the quality parameter, use NULL.",
       ),
       array(
         'name'   => "quality",
@@ -2095,6 +2162,7 @@ DefineFunction(
   array(
     'name'   => "imagelayereffect",
     'desc'   => "Set the alpha blending flag to use the bundled libgd layering effects.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2117,6 +2185,7 @@ DefineFunction(
   array(
     'name'   => "imageline",
     'desc'   => "Draws a line between the two given points.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2159,6 +2228,7 @@ DefineFunction(
   array(
     'name'   => "imageloadfont",
     'desc'   => "imageloadfont() loads a user-defined bitmap and returns its identifier.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The font identifier which is always bigger than 5 to avoid conflicts with built-in fonts or FALSE on errors.",
@@ -2167,7 +2237,7 @@ DefineFunction(
       array(
         'name'   => "file",
         'type'   => String,
-        'desc'   => "The font file format is currently binary and architecture dependent. This means you should generate the font files on the same type of CPU as the machine you are running PHP on.\nFont file format byte position C data type description byte 0-3 int number of characters in the font byte 4-7 int value of first character in the font (often 32 for space) byte 8-11 int pixel width of each character byte 12-15 int pixel height of each character byte 16- char array with character data, one byte per pixel in each character, for a total of (nchars*width*height) bytes.",
+        'desc'   => "The font file format is currently binary and architecture dependent. This means you should generate the font files on the same type of CPU as the machine you are running PHP on.\n\nFont file format byte position C data type description byte 0-3 int number of characters in the font byte 4-7 int value of first character in the font (often 32 for space) byte 8-11 int pixel width of each character byte 12-15 int pixel height of each character byte 16- char array with character data, one byte per pixel in each character, for a total of (nchars*width*height) bytes.",
       ),
     ),
   ));
@@ -2176,6 +2246,7 @@ DefineFunction(
   array(
     'name'   => "imagepalettecopy",
     'desc'   => "imagepalettecopy() copies the palette from the source image to the destination image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -2198,6 +2269,7 @@ DefineFunction(
   array(
     'name'   => "imagepng",
     'desc'   => "Outputs or saves a PNG image from the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2212,7 +2284,7 @@ DefineFunction(
         'name'   => "filename",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "The path to save the file to. If not set or NULL, the raw image stream will be outputted directly. Note: NULL is invalid if the quality and filters arguments are not used.",
+        'desc'   => "The path to save the file to. If not set or NULL, the raw image stream will be outputted directly.\n\nNULL is invalid if the quality and filters arguments are not used.",
       ),
       array(
         'name'   => "quality",
@@ -2233,6 +2305,7 @@ DefineFunction(
   array(
     'name'   => "imagepolygon",
     'desc'   => "imagepolygon() creates a polygon in the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2264,7 +2337,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagepsbbox",
-    'desc'   => "Gives the bounding box of a text rectangle using PostScript Type1 fonts.\nThe bounding box is calculated using information available from character metrics, and unfortunately tends to differ slightly from the results achieved by actually rasterizing the text. If the angle is 0 degrees, you can expect the text to need 1 pixel more to every direction.",
+    'desc'   => "Gives the bounding box of a text rectangle using PostScript Type1 fonts.\n\nThe bounding box is calculated using information available from character metrics, and unfortunately tends to differ slightly from the results achieved by actually rasterizing the text. If the angle is 0 degrees, you can expect the text to need 1 pixel more to every direction.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int64Vec,
       'desc'   => "Returns an array containing the following elements: 0 left x-coordinate 1 upper y-coordinate 2 right x-coordinate 3 lower y-coordinate",
@@ -2309,7 +2383,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagepsencodefont",
-    'desc'   => "Loads a character encoding vector from a file and changes the fonts encoding vector to it. As a PostScript fonts default vector lacks most of the character positions above 127, you'll definitely want to change this if you use an other language than English.\nIf you find yourself using this function all the time, a much better way to define the encoding is to set ps.default_encoding in the configuration file to point to the right encoding file and all fonts you load will automatically have the right encoding.",
+    'desc'   => "Loads a character encoding vector from a file and changes the fonts encoding vector to it. As a PostScript fonts default vector lacks most of the character positions above 127, you'll definitely want to change this if you use an other language than English.\n\nIf you find yourself using this function all the time, a much better way to define the encoding is to set ps.default_encoding in the configuration file to point to the right encoding file and all fonts you load will automatically have the right encoding.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2332,6 +2407,7 @@ DefineFunction(
   array(
     'name'   => "imagepsextendfont",
     'desc'   => "Extend or condense a font (font_index), if the value of the extend parameter is less than one you will be condensing the font.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2354,6 +2430,7 @@ DefineFunction(
   array(
     'name'   => "imagepsfreefont",
     'desc'   => "imagepsfreefont() frees memory used by a PostScript Type 1 font.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2371,6 +2448,7 @@ DefineFunction(
   array(
     'name'   => "imagepsloadfont",
     'desc'   => "Load a PostScript Type 1 font from the given filename.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
       'desc'   => "In the case everything went right, a valid font index will be returned and can be used for further purposes. Otherwise the function returns FALSE.",
@@ -2388,6 +2466,7 @@ DefineFunction(
   array(
     'name'   => "imagepsslantfont",
     'desc'   => "Slant a given font given.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2409,7 +2488,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagepstext",
-    'desc'   => "Draws a text on an image using PostScript Type1 fonts.\nRefer to PostScript documentation about fonts and their measuring system if you have trouble understanding how this works.",
+    'desc'   => "Draws a text on an image using PostScript Type1 fonts.\n\nRefer to PostScript documentation about fonts and their measuring system if you have trouble understanding how this works.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
       'desc'   => "This function returns an array containing the following elements: 0 lower left x-coordinate 1 lower left y-coordinate 2 upper right x-coordinate 3 upper right y-coordinate",
@@ -2486,6 +2566,7 @@ DefineFunction(
   array(
     'name'   => "imagerectangle",
     'desc'   => "imagerectangle() creates a rectangle starting at the specified coordinates.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2527,7 +2608,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagerotate",
-    'desc'   => "Rotates the image image using the given angle in degrees.\nThe center of rotation is the center of the image, and the rotated image may have different dimensions than the original image.",
+    'desc'   => "Rotates the image image using the given angle in degrees.\n\nThe center of rotation is the center of the image, and the rotated image may have different dimensions than the original image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an image resource for the rotated image, or FALSE on failure.",
@@ -2560,7 +2642,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagesavealpha",
-    'desc'   => "imagesavealpha() sets the flag to attempt to save full alpha channel information (as opposed to single-color transparency) when saving PNG images.\nYou have to unset alphablending (imagealphablending(\$im, false)), to use it.\nAlpha channel is not supported by all browsers, if you have problem with your browser, try to load your script with an alpha channel compliant browser, e.g. latest Mozilla.",
+    'desc'   => "imagesavealpha() sets the flag to attempt to save full alpha channel information (as opposed to single-color transparency) when saving PNG images.\n\nYou have to unset alphablending (imagealphablending(\$im, false)), to use it.\n\nAlpha channel is not supported by all browsers, if you have problem with your browser, try to load your script with an alpha channel compliant browser, e.g. latest Mozilla.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2583,6 +2666,7 @@ DefineFunction(
   array(
     'name'   => "imagesetbrush",
     'desc'   => "imagesetbrush() sets the brush image to be used by all line drawing functions (such as imageline() and imagepolygon()) when drawing with the special colors IMG_COLOR_BRUSHED or IMG_COLOR_STYLEDBRUSHED.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2605,6 +2689,7 @@ DefineFunction(
   array(
     'name'   => "imagesetpixel",
     'desc'   => "imagesetpixel() draws a pixel at the specified coordinate.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2637,6 +2722,7 @@ DefineFunction(
   array(
     'name'   => "imagesetstyle",
     'desc'   => "imagesetstyle() sets the style to be used by all line drawing functions (such as imageline() and imagepolygon()) when drawing with the special color IMG_COLOR_STYLED or lines of images with color IMG_COLOR_STYLEDBRUSHED.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2659,6 +2745,7 @@ DefineFunction(
   array(
     'name'   => "imagesetthickness",
     'desc'   => "imagesetthickness() sets the thickness of the lines drawn when drawing rectangles, polygons, ellipses etc. etc. to thickness pixels.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2680,7 +2767,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "imagesettile",
-    'desc'   => "imagesettile() sets the tile image to be used by all region filling functions (such as imagefill() and imagefilledpolygon()) when filling with the special color IMG_COLOR_TILED.\nA tile is an image used to fill an area with a repeated pattern. Any GD image can be used as a tile, and by setting the transparent color index of the tile image with imagecolortransparent(), a tile allows certain parts of the underlying area to shine through can be created. Note: You need not take special action when you are finished with a tile, but if you destroy the tile image, you must not use the IMG_COLOR_TILED color until you have set a new tile image!",
+    'desc'   => "imagesettile() sets the tile image to be used by all region filling functions (such as imagefill() and imagefilledpolygon()) when filling with the special color IMG_COLOR_TILED.\n\nA tile is an image used to fill an area with a repeated pattern. Any GD image can be used as a tile, and by setting the transparent color index of the tile image with imagecolortransparent(), a tile allows certain parts of the underlying area to shine through can be created.\n\nYou need not take special action when you are finished with a tile, but if you destroy the tile image, you must not use the IMG_COLOR_TILED color until you have set a new tile image!",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2703,6 +2791,7 @@ DefineFunction(
   array(
     'name'   => "imagestring",
     'desc'   => "Draws a string at the given coordinates.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2745,6 +2834,7 @@ DefineFunction(
   array(
     'name'   => "imagestringup",
     'desc'   => "Draws a string vertically at the given coordinates.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2787,6 +2877,7 @@ DefineFunction(
   array(
     'name'   => "imagesx",
     'desc'   => "Returns the width of the given image resource.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return the width of the image or FALSE on errors.",
@@ -2804,6 +2895,7 @@ DefineFunction(
   array(
     'name'   => "imagesy",
     'desc'   => "Returns the height of the given image resource.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Return the height of the image or FALSE on errors.",
@@ -2821,6 +2913,7 @@ DefineFunction(
   array(
     'name'   => "imagetruecolortopalette",
     'desc'   => "imagetruecolortopalette() converts a truecolor image to a palette image. The code for this function was originally drawn from the Independent JPEG Group library code, which is excellent. The code has been modified to preserve as much alpha channel information as possible in the resulting palette, in addition to preserving colors as well as possible. This does not work as well as might be hoped. It is usually best to simply produce a truecolor output image instead, which guarantees the highest output quality.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2848,9 +2941,10 @@ DefineFunction(
   array(
     'name'   => "imagettfbbox",
     'desc'   => "This function calculates and returns the bounding box in pixels for a TrueType text.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "imagettfbbox() returns an array with 8 elements representing four points making the bounding box of the text on success and FALSE on error. key contents 0 lower left corner, X position 1 lower left corner, Y position 2 lower right corner, X position 3 lower right corner, Y position 4 upper right corner, X position 5 upper right corner, Y position 6 upper left corner, X position 7 upper left corner, Y position\nThe points are relative to the text regardless of the angle, so \"upper left\" means in the top left-hand corner seeing the text horizontally.",
+      'desc'   => "imagettfbbox() returns an array with 8 elements representing four points making the bounding box of the text on success and FALSE on error. key contents 0 lower left corner, X position 1 lower left corner, Y position 2 lower right corner, X position 3 lower right corner, Y position 4 upper right corner, X position 5 upper right corner, Y position 6 upper left corner, X position 7 upper left corner, Y position\n\nThe points are relative to the text regardless of the angle, so \"upper left\" means in the top left-hand corner seeing the text horizontally.",
     ),
     'args'   => array(
       array(
@@ -2880,6 +2974,7 @@ DefineFunction(
   array(
     'name'   => "imagettftext",
     'desc'   => "Writes the given text into the image using TrueType fonts.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array with 8 elements representing four points making the bounding box of the text. The order of the points is lower left, lower right, upper right, upper left. The points are relative to the text regardless of the angle, so \"upper left\" means in the top left-hand corner when you see the text horizontally. Returns FALSE on error.",
@@ -2918,12 +3013,12 @@ DefineFunction(
       array(
         'name'   => "fontfile",
         'type'   => String,
-        'desc'   => "The path to the TrueType font you wish to use.\nDepending on which version of the GD library PHP is using, when fontfile does not begin with a leading / then .ttf will be appended to the filename and the library will attempt to search for that filename along a library-defined font path.\nWhen using versions of the GD library lower than 2.0.18, a space character, rather than a semicolon, was used as the 'path separator' for different font files. Unintentional use of this feature will result in the warning message: Warning: Could not find/open font. For these affected versions, the only solution is moving the font to a path which does not contain spaces.\nIn many cases where a font resides in the same directory as the script using it the following trick will alleviate any include problems.",
+        'desc'   => "The path to the TrueType font you wish to use.\n\nDepending on which version of the GD library PHP is using, when fontfile does not begin with a leading / then .ttf will be appended to the filename and the library will attempt to search for that filename along a library-defined font path.\n\nWhen using versions of the GD library lower than 2.0.18, a space character, rather than a semicolon, was used as the 'path separator' for different font files. Unintentional use of this feature will result in the warning message: Warning: Could not find/open font. For these affected versions, the only solution is moving the font to a path which does not contain spaces.\n\nIn many cases where a font resides in the same directory as the script using it the following trick will alleviate any include problems.",
       ),
       array(
         'name'   => "text",
         'type'   => String,
-        'desc'   => "The text string in UTF-8 encoding.\nMay include decimal numeric character references (of the form: &#8364;) to access characters in a font beyond position 127. The hexadecimal format (like &#xA9;) is supported. Strings in UTF-8 encoding can be passed directly.\nNamed entities, such as &copy;, are not supported. Consider using html_entity_decode() to decode these named entities into UTF-8 strings (html_entity_decode() supports this as of PHP 5.0.0).\nIf a character is used in the string which is not supported by the font, a hollow rectangle will replace the character.",
+        'desc'   => "The text string in UTF-8 encoding.\n\nMay include decimal numeric character references (of the form: &#8364;) to access characters in a font beyond position 127. The hexadecimal format (like &#xA9;) is supported. Strings in UTF-8 encoding can be passed directly.\n\nNamed entities, such as &copy;, are not supported. Consider using html_entity_decode() to decode these named entities into UTF-8 strings (html_entity_decode() supports this as of PHP 5.0.0).\n\nIf a character is used in the string which is not supported by the font, a hollow rectangle will replace the character.",
       ),
     ),
   ));
@@ -2932,6 +3027,7 @@ DefineFunction(
   array(
     'name'   => "imagetypes",
     'desc'   => "Returns the image types supported by the current PHP installation.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns a bit-field corresponding to the image formats supported by the version of GD linked into PHP. The following bits are returned, IMG_GIF | IMG_JPG | IMG_PNG | IMG_WBMP | IMG_XPM.",
@@ -2942,6 +3038,7 @@ DefineFunction(
   array(
     'name'   => "imagewbmp",
     'desc'   => "imagewbmp() outputs or save a WBMP version of the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -2971,6 +3068,7 @@ DefineFunction(
   array(
     'name'   => "imagexbm",
     'desc'   => "Outputs or save an XBM version of the given image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3000,6 +3098,7 @@ DefineFunction(
   array(
     'name'   => "iptcembed",
     'desc'   => "Embeds binary IPTC data into a JPEG image.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If success and spool flag is lower than 2 then the JPEG will not be returned as a string, FALSE on errors.",
@@ -3028,6 +3127,7 @@ DefineFunction(
   array(
     'name'   => "iptcparse",
     'desc'   => "Parses an » IPTC block into its single tags.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array using the tagmarker as an index and the value as the value. It returns FALSE on error or if no IPTC data was found.",
@@ -3045,6 +3145,7 @@ DefineFunction(
   array(
     'name'   => "jpeg2wbmp",
     'desc'   => "Converts a JPEG file into a WBMP file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3082,6 +3183,7 @@ DefineFunction(
   array(
     'name'   => "png2wbmp",
     'desc'   => "Converts a PNG file into a WBMP file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -3118,7 +3220,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "exif_imagetype",
-    'desc'   => "exif_imagetype() reads the first bytes of an image and checks its signature.\nexif_imagetype() can be used to avoid calls to other exif functions with unsupported file types or in conjunction with \$_SERVER['HTTP_ACCEPT'] to check whether or not the viewer is able to see a specific image in the browser.",
+    'desc'   => "exif_imagetype() reads the first bytes of an image and checks its signature.\n\nexif_imagetype() can be used to avoid calls to other exif functions with unsupported file types or in conjunction with \$_SERVER['HTTP_ACCEPT'] to check whether or not the viewer is able to see a specific image in the browser.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "When a correct signature is found, the appropriate constant value will be returned otherwise the return value is FALSE. The return value is the same value that getimagesize() returns in index 2 but exif_imagetype() is much faster.",
@@ -3135,7 +3238,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "exif_read_data",
-    'desc'   => "exif_read_data() reads the EXIF headers from a JPEG or TIFF image file. This way you can read meta data generated by digital cameras.\nEXIF headers tend to be present in JPEG/TIFF images generated by digital cameras, but unfortunately each digital camera maker has a different idea of how to actually tag their images, so you can't always rely on a specific Exif header being present.\nHeight and Width are computed the same way getimagesize() does so their values must not be part of any header returned. Also, html is a height/width text string to be used inside normal HTML.\nWhen an Exif header contains a Copyright note, this itself can contain two values. As the solution is inconsistent in the Exif 2.10 standard, the COMPUTED section will return both entries Copyright.Photographer and Copyright.Editor while the IFD0 sections contains the byte array with the NULL character that splits both entries. Or just the first entry if the datatype was wrong (normal behaviour of Exif). The COMPUTED will also contain the entry Copyright which is either the original copyright string, or a comma separated list of the photo and editor copyright.\nThe tag UserComment has the same problem as the Copyright tag. It can store two values. First the encoding used, and second the value itself. If so the IFD section only contains the encoding or a byte array. The COMPUTED section will store both in the entries UserCommentEncoding and UserComment. The entry UserComment is available in both cases so it should be used in preference to the value in IFD0 section.\nexif_read_data() also validates EXIF data tags according to the EXIF specification (» http://exif.org/Exif2-2.PDF, page 20). Note: Windows ME/XP can both wipe the Exif headers when connecting to a camera. More information available at » http://www.canon.co.jp/Imaging/NOTICE/011214-e.html.",
+    'desc'   => "exif_read_data() reads the EXIF headers from a JPEG or TIFF image file. This way you can read meta data generated by digital cameras.\n\nEXIF headers tend to be present in JPEG/TIFF images generated by digital cameras, but unfortunately each digital camera maker has a different idea of how to actually tag their images, so you can't always rely on a specific Exif header being present.\n\nHeight and Width are computed the same way getimagesize() does so their values must not be part of any header returned. Also, html is a height/width text string to be used inside normal HTML.\n\nWhen an Exif header contains a Copyright note, this itself can contain two values. As the solution is inconsistent in the Exif 2.10 standard, the COMPUTED section will return both entries Copyright.Photographer and Copyright.Editor while the IFD0 sections contains the byte array with the NULL character that splits both entries. Or just the first entry if the datatype was wrong (normal behaviour of Exif). The COMPUTED will also contain the entry Copyright which is either the original copyright string, or a comma separated list of the photo and editor copyright.\n\nThe tag UserComment has the same problem as the Copyright tag. It can store two values. First the encoding used, and second the value itself. If so the IFD section only contains the encoding or a byte array. The COMPUTED section will store both in the entries UserCommentEncoding and UserComment. The entry UserComment is available in both cases so it should be used in preference to the value in IFD0 section.\n\nexif_read_data() also validates EXIF data tags according to the EXIF specification (» http://exif.org/Exif2-2.PDF, page 20).\n\nWindows ME/XP can both wipe the Exif headers when connecting to a camera. More information available at » http://www.canon.co.jp/Imaging/NOTICE/011214-e.html.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "It returns an associative array where the array indexes are the header names and the array values are the values associated with those headers. If no data can be returned, exif_read_data() will return FALSE.",
@@ -3150,7 +3254,7 @@ DefineFunction(
         'name'   => "sections",
         'type'   => String,
         'value'  => "null_string",
-        'desc'   => "Is a comma separated list of sections that need to be present in file to produce a result array . If none of the requested sections could be found the return value is FALSE. FILE FileName, FileSize, FileDateTime, SectionsFound COMPUTED html, Width, Height, IsColor, and more if available. Height and Width are computed the same way getimagesize() does so their values must not be part of any header returned. Also, html is a height/width text string to be used inside normal HTML. ANY_TAG Any information that has a Tag e.g. IFD0, EXIF, ... IFD0 All tagged data of IFD0. In normal imagefiles this contains image size and so forth. THUMBNAIL A file is supposed to contain a thumbnail if it has a second IFD. All tagged information about the embedded thumbnail is stored in this section. COMMENT Comment headers of JPEG images. EXIF The EXIF section is a sub section of IFD0. It contains more detailed information about an image. Most of these entries are digital camera related.",
+        'desc'   => "Is a comma separated list of sections that need to be present in file to produce a result array. If none of the requested sections could be found the return value is FALSE. FILE FileName, FileSize, FileDateTime, SectionsFound COMPUTED html, Width, Height, IsColor, and more if available. Height and Width are computed the same way getimagesize() does so their values must not be part of any header returned. Also, html is a height/width text string to be used inside normal HTML. ANY_TAG Any information that has a Tag e.g. IFD0, EXIF, ... IFD0 All tagged data of IFD0. In normal imagefiles this contains image size and so forth. THUMBNAIL A file is supposed to contain a thumbnail if it has a second IFD. All tagged information about the embedded thumbnail is stored in this section. COMMENT Comment headers of JPEG images. EXIF The EXIF section is a sub section of IFD0. It contains more detailed information about an image. Most of these entries are digital camera related.",
       ),
       array(
         'name'   => "arrays",
@@ -3170,6 +3274,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "read_exif_data",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -3199,6 +3304,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "exif_tagname",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the header name, or FALSE if index is undefined.",
@@ -3215,7 +3321,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "exif_thumbnail",
-    'desc'   => "exif_thumbnail() reads the embedded thumbnail of a TIFF or JPEG image.\nIf you want to deliver thumbnails through this function, you should send the mimetype information using the header() function.\nIt is possible that exif_thumbnail() cannot create an image but can determine its size. In this case, the return value is FALSE but width and height are set.",
+    'desc'   => "exif_thumbnail() reads the embedded thumbnail of a TIFF or JPEG image.\n\nIf you want to deliver thumbnails through this function, you should send the mimetype information using the header() function.\n\nIt is possible that exif_thumbnail() cannot create an image but can determine its size. In this case, the return value is FALSE but width and height are set.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the embedded thumbnail, or FALSE if the image contains no thumbnail.",

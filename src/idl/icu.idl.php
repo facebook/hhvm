@@ -52,6 +52,7 @@ CPP
 DefineFunction(
   array(
     'name'   => "icu_transliterate",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),

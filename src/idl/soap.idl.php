@@ -54,6 +54,7 @@ DefineFunction(
   array(
     'name'   => "use_soap_error_handler",
     'desc'   => "This function sets whether or not to use the SOAP error handler in the SOAP server. It will return the previous value. If set to TRUE, details of errors in a SoapServer application will be sent to the clients. If FALSE, no information will be sent.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -71,7 +72,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "is_soap_fault",
-    'desc'   => "This function is useful to check if the SOAP call failed, but without using exceptions. To use it, create a SoapClient object with the exceptions option set to zero or FALSE. In this case, the SOAP method will return a special SoapFault object which encapsulates the fault details (faultcode, faultstring, faultactor and faultdetails).\nIf exceptions is not set then SOAP call will throw an exception on error. is_soap_fault() checks if the given parameter is a SoapFault object.",
+    'desc'   => "This function is useful to check if the SOAP call failed, but without using exceptions. To use it, create a SoapClient object with the exceptions option set to zero or FALSE. In this case, the SOAP method will return a special SoapFault object which encapsulates the fault details (faultcode, faultstring, faultactor and faultdetails).\n\nIf exceptions is not set then SOAP call will throw an exception on error. is_soap_fault() checks if the given parameter is a SoapFault object.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "This will return TRUE on error, and FALSE otherwise.",
@@ -126,6 +128,7 @@ BeginClass(
   array(
     'name'   => "SoapServer",
     'desc'   => "The SoapServer class provides a server for the » SOAP 1.1 and » SOAP 1.2 protocols. It can be used with or without a WSDL service description.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: int                        m_type;
@@ -149,6 +152,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -168,8 +172,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setclass",
-    'desc'   => "Exports all methods from specified class.\nThe object can be made persistent across request for a given PHP session with the SoapServer::setPersistence method.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Exports all methods from specified class.\n\nThe object can be made persistent across request for a given PHP session with the SoapServer::setPersistence() method.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -186,7 +190,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setobject",
-    'desc'   => "This sets a specific object as the handler for SOAP requests, rather than just a class as in SoapServer::setClass.",
+    'desc'   => "This sets a specific object as the handler for SOAP requests, rather than just a class as in SoapServer::setClass().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -204,6 +209,7 @@ DefineFunction(
   array(
     'name'   => "addfunction",
     'desc'   => "Exports one or more functions for remote clients",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -212,7 +218,7 @@ DefineFunction(
       array(
         'name'   => "func",
         'type'   => Variant,
-        'desc'   => "To export one function, pass the function name into this parameter as a string.\nTo export several functions, pass an array of function names.\nTo export all the functions, pass a special constant SOAP_FUNCTIONS_ALL. Note: functions must receive all input arguments in the same order as defined in the WSDL file (They should not receive any output parameters as arguments) and return one or more values. To return several values they must return an array with named output parameters.",
+        'desc'   => "To export one function, pass the function name into this parameter as a string.\n\nTo export several functions, pass an array of function names.\n\nTo export all the functions, pass a special constant SOAP_FUNCTIONS_ALL.\n\nfunctions must receive all input arguments in the same order as defined in the WSDL file (They should not receive any output parameters as arguments) and return one or more values. To return several values they must return an array with named output parameters.",
       ),
     ),
   ));
@@ -220,7 +226,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getfunctions",
-    'desc'   => "Returns a list of the defined functions in the SoapServer object. This method returns the list of all functions added by SoapServer::addFunction or SoapServer::setClass.",
+    'desc'   => "Returns a list of the defined functions in the SoapServer object. This method returns the list of all functions added by SoapServer::addFunction() or SoapServer::setClass().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array of the defined functions.",
@@ -231,6 +238,7 @@ DefineFunction(
   array(
     'name'   => "handle",
     'desc'   => "Processes a SOAP request, calls necessary functions, and sends a response back.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -248,7 +256,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "setpersistence",
-    'desc'   => "This function allows saving data between requests in a PHP session. It works only with a server that exports functions from a class with SoapServer::setClass or SoapServer::setObject. Note: The persistence SOAP_PERSISTENCE_SESSION makes only objects of the given class persistent, but not the class static data. In this case, use \$this->bar instead of self::\$bar.",
+    'desc'   => "This function allows saving data between requests in a PHP session. It works only with a server that exports functions from a class with SoapServer::setClass() or SoapServer::setObject().\n\nThe persistence SOAP_PERSISTENCE_SESSION makes only objects of the given class persistent, but not the class static data. In this case, use \$this->bar instead of self::\$bar.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -257,7 +266,7 @@ DefineFunction(
       array(
         'name'   => "mode",
         'type'   => Int64,
-        'desc'   => "One of the SOAP_PERSISTENCE_XXX constants.\nSOAP_PERSISTENCE_REQUEST - persist the object for the duration of a request.\nSOAP_PERSISTENCE_SESSION - persist the object for the duration of a session.",
+        'desc'   => "One of the SOAP_PERSISTENCE_XXX constants.\n\nSOAP_PERSISTENCE_REQUEST - persist the object for the duration of a request.\n\nSOAP_PERSISTENCE_SESSION - persist the object for the duration of a session.",
       ),
     ),
   ));
@@ -265,7 +274,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fault",
-    'desc'   => "Sends a response to the client of the current request indicating an error. Note: This can only be called when handling a request.",
+    'desc'   => "Sends a response to the client of the current request indicating an error.\n\nThis can only be called when handling a request.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -306,6 +316,7 @@ DefineFunction(
   array(
     'name'   => "addsoapheader",
     'desc'   => "Adds a SOAP header to be returned with the response to the current request.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -322,6 +333,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -336,6 +348,7 @@ BeginClass(
   array(
     'name'   => "SoapClient",
     'desc'   => "The SoapClient class provides a client for » SOAP 1.1, » SOAP 1.2 servers. It can be used in WSDL or non-WSDL mode.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: int                         m_soap_version;
@@ -378,6 +391,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -397,6 +411,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__call",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -415,6 +430,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__soapcall",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -448,6 +464,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__getlastrequest",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -456,6 +473,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__getlastresponse",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -464,6 +482,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__getlastrequestheaders",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -472,6 +491,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__getlastresponseheaders",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -480,6 +500,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__getfunctions",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -488,6 +509,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__gettypes",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -496,6 +518,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__dorequest",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -527,6 +550,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__setcookie",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -546,6 +570,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__setlocation",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -561,6 +586,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__setsoapheaders",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -576,6 +602,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -590,6 +617,7 @@ BeginClass(
   array(
     'name'   => "SoapVar",
     'desc'   => "A class representing a variable or object for use with SOAP services.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: Variant m_value;
@@ -605,6 +633,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -643,6 +672,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -658,6 +688,7 @@ BeginClass(
     'name'   => "SoapFault",
     'parent' => "exception",
     'desc'   => "Represents a SOAP fault.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: String  m_faultstring;
@@ -674,6 +705,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -712,6 +744,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__tostring",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -720,6 +753,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -734,6 +768,7 @@ BeginClass(
   array(
     'name'   => "SoapParam",
     'desc'   => "Represents parameter to a SOAP call.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: String  m_name;
@@ -745,6 +780,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -763,6 +799,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -777,6 +814,7 @@ BeginClass(
   array(
     'name'   => "SoapHeader",
     'desc'   => "Represents a SOAP header.",
+    'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: String  m_namespace;
@@ -791,6 +829,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
     ),
@@ -824,6 +863,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

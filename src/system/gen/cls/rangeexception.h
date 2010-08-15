@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 101 */
+/* SRC: classes/exception.php line 241 */
 class c_rangeexception : public c_runtimeexception {
   BEGIN_CLASS_MAP(RangeException)
     PARENT_CLASS(Exception)

@@ -53,6 +53,7 @@ DefineFunction(
   array(
     'name'   => "openssl_csr_export_to_file",
     'desc'   => "openssl_csr_export_to_file() takes the Certificate Signing Request represented by csr and saves it as ascii-armoured text into the file named by outfilename.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -80,6 +81,7 @@ DefineFunction(
   array(
     'name'   => "openssl_csr_export",
     'desc'   => "openssl_csr_export() takes the Certificate Signing Request represented by csr and stores it as ascii-armoured text into out, which is passed by reference.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -105,6 +107,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_csr_get_public_key",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -119,6 +122,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_csr_get_subject",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -138,7 +142,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_csr_new",
-    'desc'   => "openssl_csr_new() generates a new CSR (Certificate Signing Request) based on the information provided by dn, which represents the Distinguished Name to be used in the certificate. Note: You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'desc'   => "openssl_csr_new() generates a new CSR (Certificate Signing Request) based on the information provided by dn, which represents the Distinguished Name to be used in the certificate. You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the CSR.",
@@ -172,7 +177,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_csr_sign",
-    'desc'   => "openssl_csr_sign() generates an x509 certificate resource from the given CSR. Note: You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'desc'   => "openssl_csr_sign() generates an x509 certificate resource from the given CSR. You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an x509 certificate resource on success, FALSE on failure.",
@@ -217,6 +223,7 @@ DefineFunction(
   array(
     'name'   => "openssl_error_string",
     'desc'   => "openssl_error_string() returns the last error from the openSSL library. Error messages are stacked, so this function should be called multiple times to collect all of the information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an error message string, or FALSE if there are no more error messages to return.",
@@ -227,6 +234,7 @@ DefineFunction(
   array(
     'name'   => "openssl_open",
     'desc'   => "openssl_open() opens (decrypts) sealed_data using the private key associated with the key identifier priv_key_id and the envelope key env_key, and fills open_data with the decrypted data. The envelope key is generated when the data are sealed and can only be used by one specific private key. See openssl_seal() for more information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -256,6 +264,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkcs12_export_to_file",
     'desc'   => "openssl_pkcs12_export_to_file() stores x509 into a file named by filename in a PKCS#12 file format.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -293,6 +302,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkcs12_export",
     'desc'   => "openssl_pkcs12_export() stores x509 into a string named by out in a PKCS#12 file format.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -330,6 +340,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkcs12_read",
     'desc'   => "openssl_pkcs12_read() parses the PKCS#12 certificate store supplied by pkcs12 into a array named certs.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -356,6 +367,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkcs7_decrypt",
     'desc'   => "Decrypts the S/MIME encrypted message contained in the file specified by infilename using the certificate and its associated private key specified by recipcert and recipkey.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -386,6 +398,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkcs7_encrypt",
     'desc'   => "openssl_pkcs7_encrypt() takes the contents of the file named infile and encrypts them using an RC2 40-bit cipher so that they can only be read by the intended recipients specified by recipcerts.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -407,7 +420,7 @@ DefineFunction(
       array(
         'name'   => "headers",
         'type'   => StringVec,
-        'desc'   => "headers is an array of headers that will be prepended to the data after it has been encrypted.\nheaders can be either an associative array keyed by header name, or an indexed array, where each element contains a single header line.",
+        'desc'   => "headers is an array of headers that will be prepended to the data after it has been encrypted.\n\nheaders can be either an associative array keyed by header name, or an indexed array, where each element contains a single header line.",
       ),
       array(
         'name'   => "flags",
@@ -428,6 +441,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkcs7_sign",
     'desc'   => "openssl_pkcs7_sign() takes the contents of the file named infilename and signs them using the certificate and its matching private key specified by signcert and privkey parameters.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -473,6 +487,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkcs7_verify",
     'desc'   => "openssl_pkcs7_verify() reads the S/MIME message contained in the given file and examines the digital signature.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE if the signature is verified, FALSE if it is not correct (the message has been tampered with, or the signing certificate is invalid), or -1 on error.",
@@ -518,7 +533,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_pkey_export_to_file",
-    'desc'   => "openssl_pkey_export_to_file() saves an ascii-armoured (PEM encoded) rendition of key into the file named by outfilename. Note: You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'desc'   => "openssl_pkey_export_to_file() saves an ascii-armoured (PEM encoded) rendition of key into the file named by outfilename. You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -551,10 +567,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_pkey_export",
-    'desc'   => "openssl_pkey_export() exports key as a PEM encoded string and stores it into out (which is passed by reference). Note: You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'desc'   => "openssl_pkey_export() exports key as a PEM encoded string and stores it into out (which is passed by reference). You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. openssl_pkey_free openssl_pkey_export_to_file Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure. openssl_pkey_free openssl_pkey_export_to_file Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -584,6 +601,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkey_free",
     'desc'   => "This function frees a private key created by openssl_pkey_new().",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -601,6 +619,7 @@ DefineFunction(
   array(
     'name'   => "openssl_free_key",
     'desc'   => "openssl_free_key() frees the key associated with the specified key_identifier from memory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -617,6 +636,7 @@ DefineFunction(
   array(
     'name'   => "openssl_pkey_get_details",
     'desc'   => "This function returns the key details (bits, key, type).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns an array with the key details in success or FALSE in failure. Returned array has indexes bits (number of bits), key (string representation of the public key) and type (type of the key which is one of OPENSSL_KEYTYPE_RSA, OPENSSL_KEYTYPE_DSA, OPENSSL_KEYTYPE_DH, OPENSSL_KEYTYPE_EC or -1 meaning unknown).",
@@ -634,9 +654,10 @@ DefineFunction(
   array(
     'name'   => "openssl_pkey_get_private",
     'desc'   => "openssl_get_privatekey() parses key and prepares it for use by other functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error. openssl_pkey_get_public openssl_pkey_get_details Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error. openssl_pkey_get_public openssl_pkey_get_details Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -656,6 +677,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_get_privatekey",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -676,9 +698,10 @@ DefineFunction(
   array(
     'name'   => "openssl_pkey_get_public",
     'desc'   => "openssl_get_publickey() extracts the public key from certificate and prepares it for use by other functions.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error. openssl_pkey_new openssl_pkey_get_private Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error. openssl_pkey_new openssl_pkey_get_private Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -692,6 +715,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_get_publickey",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -706,7 +730,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_pkey_new",
-    'desc'   => "openssl_pkey_new() generates a new private and public key pair. The public component of the key can be obtained using openssl_pkey_get_public(). Note: You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'desc'   => "openssl_pkey_new() generates a new private and public key pair. The public component of the key can be obtained using openssl_pkey_get_public(). You need to have a valid openssl.cnf installed for this function to operate correctly. See the notes under the installation section for more information.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
       'desc'   => "Returns a resource identifier for the pkey on success, or FALSE on error.",
@@ -724,7 +749,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_private_decrypt",
-    'desc'   => "openssl_private_decrypt() decrypts data that was previous encrypted via openssl_public_encrypt() and stores the result into decrypted.\nYou can use this function e.g. to decrypt data which were supposed only to you.",
+    'desc'   => "openssl_private_decrypt() decrypts data that was previous encrypted via openssl_public_encrypt() and stores the result into decrypted.\n\nYou can use this function e.g. to decrypt data which were supposed only to you.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -755,7 +781,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_private_encrypt",
-    'desc'   => "openssl_private_encrypt() encrypts data with private key and stores the result into crypted. Encrypted data can be decrypted via openssl_public_decrypt().\nThis function can be used e.g. to sign data (or its hash) to prove that it is not written by someone else.",
+    'desc'   => "openssl_private_encrypt() encrypts data with private key and stores the result into crypted. Encrypted data can be decrypted via openssl_public_decrypt().\n\nThis function can be used e.g. to sign data (or its hash) to prove that it is not written by someone else.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -785,7 +812,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_public_decrypt",
-    'desc'   => "openssl_public_decrypt() decrypts data that was previous encrypted via openssl_private_encrypt() and stores the result into decrypted.\nYou can use this function e.g. to check if the message was written by the owner of the private key.",
+    'desc'   => "openssl_public_decrypt() decrypts data that was previous encrypted via openssl_private_encrypt() and stores the result into decrypted.\n\nYou can use this function e.g. to check if the message was written by the owner of the private key.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -816,7 +844,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "openssl_public_encrypt",
-    'desc'   => "openssl_public_encrypt() encrypts data with public key and stores the result into crypted. Encrypted data can be decrypted via openssl_private_decrypt().\nThis function can be used e.g. to encrypt message which can be then read only by owner of the private key. It can be also used to store secure data in database.",
+    'desc'   => "openssl_public_encrypt() encrypts data with public key and stores the result into crypted. Encrypted data can be decrypted via openssl_private_decrypt().\n\nThis function can be used e.g. to encrypt message which can be then read only by owner of the private key. It can be also used to store secure data in database.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -849,6 +878,7 @@ DefineFunction(
   array(
     'name'   => "openssl_seal",
     'desc'   => "openssl_seal() seals (encrypts) data by using RC4 with a randomly generated secret key. The key is encrypted with each of the public keys associated with the identifiers in pub_key_ids and each encrypted key is returned in env_keys. This means that one can send sealed data to multiple recipients (provided one has obtained their public keys). Each recipient must receive both the sealed data and the envelope key that was encrypted with the recipient's public key.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the length of the sealed data on success, or FALSE on error. If successful the sealed data is returned in sealed_data, and the envelope keys in env_keys.",
@@ -877,6 +907,7 @@ DefineFunction(
   array(
     'name'   => "openssl_sign",
     'desc'   => "openssl_sign() computes a signature for the specified data by using SHA1 for hashing followed by encryption using the private key associated with priv_key_id. Note that the data itself is not encrypted.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -908,6 +939,7 @@ DefineFunction(
   array(
     'name'   => "openssl_verify",
     'desc'   => "openssl_verify() verifies that the signature is correct for the specified data using the public key associated with pub_key_id. This must be the public key corresponding to the private key used for signing.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns 1 if the signature is correct, 0 if it is incorrect, and -1 on error.",
@@ -938,6 +970,7 @@ DefineFunction(
   array(
     'name'   => "openssl_x509_check_private_key",
     'desc'   => "Checks whether the given key is the private key that corresponds to cert.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if key is the private key that corresponds to cert, or FALSE otherwise.",
@@ -960,6 +993,7 @@ DefineFunction(
   array(
     'name'   => "openssl_x509_checkpurpose",
     'desc'   => "openssl_x509_checkpurpose() examines a certificate to see if it can be used for the specified purpose.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns TRUE if the certificate can be used for the intended purpose, FALSE if it cannot, or -1 on error.",
@@ -994,6 +1028,7 @@ DefineFunction(
   array(
     'name'   => "openssl_x509_export_to_file",
     'desc'   => "openssl_x509_export_to_file() stores x509 into a file named by outfilename in a PEM encoded format.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1022,6 +1057,7 @@ DefineFunction(
   array(
     'name'   => "openssl_x509_export",
     'desc'   => "openssl_x509_export() stores x509 into a string named by output in a PEM encoded format.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1050,6 +1086,7 @@ DefineFunction(
   array(
     'name'   => "openssl_x509_free",
     'desc'   => "openssl_x509_free() frees the certificate associated with the specified x509cert resource from memory.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
       'desc'   => "No value is returned.",
@@ -1066,9 +1103,10 @@ DefineFunction(
   array(
     'name'   => "openssl_x509_parse",
     'desc'   => "openssl_x509_parse() returns information about the supplied x509cert, including fields such as subject name, issuer name, purposes, valid from and valid to dates etc.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The structure of the returned data is (deliberately) not yet documented, as it is still subject to change. openssl_x509_read openssl_x509_free Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "The structure of the returned data is (deliberately) not yet documented, as it is still subject to change. openssl_x509_read openssl_x509_free Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(
@@ -1088,9 +1126,10 @@ DefineFunction(
   array(
     'name'   => "openssl_x509_read",
     'desc'   => "openssl_x509_read() parses the certificate supplied by x509certdata and returns a resource identifier for it.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a resource identifier on success or FALSE on failure. Database Extensions openssl_x509_parse Last updated: Fri, 06 Aug 2010  ",
+      'desc'   => "Returns a resource identifier on success or FALSE on failure. Database Extensions openssl_x509_parse Last updated: Fri, 13 Aug 2010  ",
     ),
     'args'   => array(
       array(

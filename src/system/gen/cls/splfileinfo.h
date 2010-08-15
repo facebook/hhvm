@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/splfile.php line 3 */
+/* SRC: classes/splfile.php line 11 */
 class c_splfileinfo : public ExtObjectData {
   BEGIN_CLASS_MAP(SplFileInfo)
   END_CLASS_MAP(SplFileInfo)

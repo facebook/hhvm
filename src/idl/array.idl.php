@@ -179,7 +179,7 @@ DefineFunction(
   array(
     'name'   => "array_change_key_case",
     'desc'   => "Returns an array with all keys from input lowercased or uppercased. Numbered indices are left as is.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array with its keys lower or uppercased, or FALSE if input is not an array.",
@@ -203,7 +203,7 @@ DefineFunction(
   array(
     'name'   => "array_chunk",
     'desc'   => "Chunks an array into size large chunks. The last chunk may contain less than size elements.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a multidimensional numerically indexed array, starting with zero, with each dimension containing size elements.",
@@ -232,16 +232,16 @@ DefineFunction(
   array(
     'name'   => "array_combine",
     'desc'   => "Creates an array by using the values from the keys array as keys and the values from the values array as the corresponding values.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the combined array , FALSE if the number of elements for each array isn't equal or if the arrays are empty.",
+      'desc'   => "Returns the combined array, FALSE if the number of elements for each array isn't equal or if the arrays are empty.",
     ),
     'args'   => array(
       array(
         'name'   => "keys",
         'type'   => Variant,
-        'desc'   => "Array of keys to be used. Illegal values for key will be converted to string .",
+        'desc'   => "Array of keys to be used. Illegal values for key will be converted to string.",
       ),
       array(
         'name'   => "values",
@@ -255,7 +255,7 @@ DefineFunction(
   array(
     'name'   => "array_count_values",
     'desc'   => "array_count_values() returns an array using the values of the input array as keys and their frequency in input as values.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an associative array of values from input as keys and their count as value.",
@@ -273,7 +273,7 @@ DefineFunction(
   array(
     'name'   => "array_fill_keys",
     'desc'   => "Fills an array with the value of the value parameter, using the values of the keys array as keys.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the filled array",
@@ -282,7 +282,7 @@ DefineFunction(
       array(
         'name'   => "keys",
         'type'   => Variant,
-        'desc'   => "Array of values that will be used as keys. Illegal values for key will be converted to string .",
+        'desc'   => "Array of values that will be used as keys. Illegal values for key will be converted to string.",
       ),
       array(
         'name'   => "value",
@@ -296,7 +296,7 @@ DefineFunction(
   array(
     'name'   => "array_fill",
     'desc'   => "Fills an array with num entries of the value of the value parameter, keys starting at the start_index parameter.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the filled array",
@@ -324,7 +324,7 @@ DefineFunction(
   array(
     'name'   => "array_filter",
     'desc'   => "Iterates over each value in the input array passing them to the callback function. If the callback function returns true, the current value from input is returned into the result array. Array keys are preserved.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the filtered array.",
@@ -339,7 +339,7 @@ DefineFunction(
         'name'   => "callback",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "The callback function to use\nIf no callback is supplied, all entries of input equal to FALSE (see converting to boolean) will be removed.",
+        'desc'   => "The callback function to use\n\nIf no callback is supplied, all entries of input equal to FALSE (see converting to boolean) will be removed.",
       ),
     ),
   ));
@@ -347,8 +347,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_flip",
-    'desc'   => "array_flip() returns an array in flip order, i.e. keys from trans become values and values from trans become keys.\nNote that the values of trans need to be valid keys, i.e. they need to be either integer or string . A warning will be emitted if a value has the wrong type, and the key/value pair in question will not be flipped.\nIf a value has several occurrences, the latest key will be used as its values, and all others will be lost.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "array_flip() returns an array in flip order, i.e. keys from trans become values and values from trans become keys.\n\nNote that the values of trans need to be valid keys, i.e. they need to be either integer or string. A warning will be emitted if a value has the wrong type, and the key/value pair in question will not be flipped.\n\nIf a value has several occurrences, the latest key will be used as its values, and all others will be lost.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the flipped array on success and NULL on failure.",
@@ -366,7 +366,7 @@ DefineFunction(
   array(
     'name'   => "array_key_exists",
     'desc'   => "array_key_exists() returns TRUE if the given key is set in the array. key can be any value possible for an array index.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -388,7 +388,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "key_exists",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -407,8 +407,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_keys",
-    'desc'   => "array_keys() returns the keys, numeric and string, from the input array.\nIf the optional search_value is specified, then only the keys for that value are returned. Otherwise, all the keys from the input are returned.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "array_keys() returns the keys, numeric and string, from the input array.\n\nIf the optional search_value is specified, then only the keys for that value are returned. Otherwise, all the keys from the input are returned.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array of all the keys in input.",
@@ -438,7 +438,7 @@ DefineFunction(
   array(
     'name'   => "array_map",
     'desc'   => "array_map() returns an array containing all the elements of arr1 after applying the callback function to each one. The number of parameters that the callback function accepts should match the number of arrays passed to the array_map()",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the elements of arr1 after applying the callback function to each one.",
@@ -460,8 +460,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_merge_recursive",
-    'desc'   => "array_merge_recursive() merges the elements of one or more arrays together so that the values of one are appended to the end of the previous one. It returns the resulting array.\nIf the input arrays have the same string keys, then the values for these keys are merged together into an array, and this is done recursively, so that if one of the values is an array itself, the function will merge it with a corresponding entry in another array too. If, however, the arrays have the same numeric key, the later value will not overwrite the original value, but will be appended.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'desc'   => "array_merge_recursive() merges the elements of one or more arrays together so that the values of one are appended to the end of the previous one. It returns the resulting array.\n\nIf the input arrays have the same string keys, then the values for these keys are merged together into an array, and this is done recursively, so that if one of the values is an array itself, the function will merge it with a corresponding entry in another array too. If, however, the arrays have the same numeric key, the later value will not overwrite the original value, but will be appended.",
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array of values resulted from merging the arguments together.",
@@ -478,8 +478,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_merge",
-    'desc'   => "Merges the elements of one or more arrays together so that the values of one are appended to the end of the previous one. It returns the resulting array.\nIf the input arrays have the same string keys, then the later value for that key will overwrite the previous one. If, however, the arrays contain numeric keys, the later value will not overwrite the original value, but will be appended.\nIf all of the arrays contain only numeric keys, the resulting array is given incrementing keys starting from zero.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'desc'   => "Merges the elements of one or more arrays together so that the values of one are appended to the end of the previous one. It returns the resulting array.\n\nIf the input arrays have the same string keys, then the later value for that key will overwrite the previous one. If, however, the arrays contain numeric keys, the later value will not overwrite the original value, but will be appended.\n\nIf all of the arrays contain only numeric keys, the resulting array is given incrementing keys starting from zero.",
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the resulting array.",
@@ -496,11 +496,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_replace_recursive",
-    'desc'   => "array_replace_recursive() replaces the values of the first array with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later array overwriting the previous values.\narray_replace_recursive() is recursive : it will recurse into arrays and apply the same process to the inner value.\nWhen the value in array is scalar, it will be replaced by the value in array1, may it be scalar or array. When the value in array and array1 are both arrays, array_replace_recursive() will replace their respective value recursively.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'desc'   => "array_replace_recursive() replaces the values of the first array with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later array overwriting the previous values.\n\narray_replace_recursive() is recursive : it will recurse into arrays and apply the same process to the inner value.\n\nWhen the value in array is scalar, it will be replaced by the value in array1, may it be scalar or array. When the value in array and array1 are both arrays, array_replace_recursive() will replace their respective value recursively.",
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an array , or NULL if an error occurs.",
+      'desc'   => "Returns an array, or NULL if an error occurs.",
     ),
     'args'   => array(
       array(
@@ -514,11 +514,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_replace",
-    'desc'   => "array_replace() replaces the values of the first array with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later arrays overwriting the previous values.\narray_replace() is not recursive : it will replace values in the first array by whatever type is in the second array.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'desc'   => "array_replace() replaces the values of the first array with the same values from all the following arrays. If a key from the first array exists in the second array, its value will be replaced by the value from the second array. If the key exists in the second array, and not the first, it will be created in the first array. If a key only exists in the first array, it will be left as is. If several arrays are passed for replacement, they will be processed in order, the later arrays overwriting the previous values.\n\narray_replace() is not recursive : it will replace values in the first array by whatever type is in the second array.",
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an array , or NULL if an error occurs.",
+      'desc'   => "Returns an array, or NULL if an error occurs.",
     ),
     'args'   => array(
       array(
@@ -532,8 +532,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_multisort",
-    'desc'   => "array_multisort() can be used to sort several arrays at once, or a multi-dimensional array by one or more dimensions.\nAssociative ( string ) keys will be maintained, but numeric keys will be re-indexed.",
-    'flags'  =>  MixedVariableArguments,
+    'desc'   => "array_multisort() can be used to sort several arrays at once, or a multi-dimensional array by one or more dimensions.\n\nAssociative (string) keys will be maintained, but numeric keys will be re-indexed.",
+    'flags'  =>  HasDocComment | MixedVariableArguments,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -551,7 +551,7 @@ DefineFunction(
   array(
     'name'   => "array_pad",
     'desc'   => "array_pad() returns a copy of the input padded to size specified by pad_size with value pad_value. If pad_size is positive then the array is padded on the right, if it's negative then on the left. If the absolute value of pad_size is less than or equal to the length of the input then no padding takes place. It is possible to add most 1048576 elements at a time.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns a copy of the input padded to size specified by pad_size with value pad_value. If pad_size is positive then the array is padded on the right, if it's negative then on the left. If the absolute value of pad_size is less than or equal to the length of the input then no padding takes place.",
@@ -578,7 +578,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_pop",
-    'desc'   => "array_pop() pops and returns the last value of the array, shortening the array by one element. If array is empty (or is not an array), NULL will be returned. Will additionally produce a Warning when called on a non-array. Note: This function will reset() the array pointer after use.",
+    'desc'   => "array_pop() pops and returns the last value of the array, shortening the array by one element. If array is empty (or is not an array), NULL will be returned. Will additionally produce a Warning when called on a non-array. This function will reset() the array pointer after use.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the last value of array. If array is empty (or is not an array), NULL will be returned.",
@@ -596,7 +597,7 @@ DefineFunction(
   array(
     'name'   => "array_product",
     'desc'   => "array_product() returns the product of values in an array.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the product as an integer or float.",
@@ -613,8 +614,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_push",
-    'desc'   => "array_push() treats array as a stack, and pushes the passed variables onto the end of array. The length of array increases by the number of variables pushed. Has the same effect as:\nrepeated for each var. Note: If you use array_push() to add one element to the array it's better to use \$array[] = because in that way there is no overhead of calling a function. Note: array_push() will raise a warning if the first argument is not an array. This differs from the \$var[] behaviour where a new array is created.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "array_push() treats array as a stack, and pushes the passed variables onto the end of array. The length of array increases by the number of variables pushed. Has the same effect as:\n\nrepeated for each var. If you use array_push() to add one element to the array it's better to use \$array[] = because in that way there is no overhead of calling a function. array_push() will raise a warning if the first argument is not an array. This differs from the \$var[] behaviour where a new array is created.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the new number of elements in the array.",
@@ -636,7 +637,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_rand",
-    'desc'   => "array_rand() is rather useful when you want to pick one or more random entries out of an array.",
+    'desc'   => "Picks one ore more random entries out of an array, and returns the key (or keys) of the random entries.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "If you are picking only one entry, array_rand() returns the key for a random entry. Otherwise, it returns an array of keys for the random entries. This is done so that you can pick random keys as well as values out of the array.",
@@ -660,9 +662,10 @@ DefineFunction(
   array(
     'name'   => "array_reduce",
     'desc'   => "array_reduce() applies iteratively the function function to the elements of the array input, so as to reduce the array to a single value.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the resulting value.\nIf the array is empty and initial is not passed, array_reduce() returns NULL.",
+      'desc'   => "Returns the resulting value.\n\nIf the array is empty and initial is not passed, array_reduce() returns NULL.",
     ),
     'args'   => array(
       array(
@@ -688,7 +691,7 @@ DefineFunction(
   array(
     'name'   => "array_reverse",
     'desc'   => "Takes an input array and returns a new array with the order of the elements reversed.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the reversed array.",
@@ -712,16 +715,16 @@ DefineFunction(
   array(
     'name'   => "array_search",
     'desc'   => "Searches haystack for needle.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the key for needle if it is found in the array, FALSE otherwise.\nIf needle is found in haystack more than once, the first matching key is returned. To return the keys for all matching values, use array_keys() with the optional search_value parameter instead. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
+      'desc'   => "Returns the key for needle if it is found in the array, FALSE otherwise.\n\nIf needle is found in haystack more than once, the first matching key is returned. To return the keys for all matching values, use array_keys() with the optional search_value parameter instead. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
     ),
     'args'   => array(
       array(
         'name'   => "needle",
         'type'   => Variant,
-        'desc'   => "The searched value. Note: If needle is a string, the comparison is done in a case-sensitive manner.",
+        'desc'   => "The searched value.\n\nIf needle is a string, the comparison is done in a case-sensitive manner.",
       ),
       array(
         'name'   => "haystack",
@@ -740,7 +743,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_shift",
-    'desc'   => "array_shift() shifts the first value of the array off and returns it, shortening the array by one element and moving everything down. All numerical array keys will be modified to start counting from zero while literal keys won't be touched. Note: This function will reset() the array pointer after use.",
+    'desc'   => "array_shift() shifts the first value of the array off and returns it, shortening the array by one element and moving everything down. All numerical array keys will be modified to start counting from zero while literal keys won't be touched. This function will reset() the array pointer after use.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the shifted value, or NULL if array is empty or is not an array.",
@@ -757,8 +761,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_slice",
-    'desc'   => "array_slice() returns the sequence of elements from the array array as specified by the offset and length parameters. Note: This function will reset() the array pointer after use.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "array_slice() returns the sequence of elements from the array array as specified by the offset and length parameters. This function will reset() the array pointer after use.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the slice.",
@@ -792,7 +796,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_splice",
-    'desc'   => "Removes the elements designated by offset and length from the input array, and replaces them with the elements of the replacement array, if supplied.\nNote that numeric keys in input are not preserved. Note: If replacement is not an array, it will be typecast to one (i.e. (array) \$parameter). This may result in unexpected behavior when using an object or NULL replacement.",
+    'desc'   => "Removes the elements designated by offset and length from the input array, and replaces them with the elements of the replacement array, if supplied.\n\nNote that numeric keys in input are not preserved. If replacement is not an array, it will be typecast to one (i.e. (array) \$parameter). This may result in unexpected behavior when using an object or NULL replacement.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the array consisting of the extracted elements.",
@@ -818,7 +823,7 @@ DefineFunction(
         'name'   => "replacement",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "If replacement array is specified, then the removed elements are replaced with elements from this array.\nIf offset and length are such that nothing is removed, then the elements from the replacement array are inserted in the place specified by the offset. Note that keys in replacement array are not preserved.\nIf replacement is just one element it is not necessary to put array() around it, unless the element is an array itself, an object or NULL.",
+        'desc'   => "If replacement array is specified, then the removed elements are replaced with elements from this array.\n\nIf offset and length are such that nothing is removed, then the elements from the replacement array are inserted in the place specified by the offset. Note that keys in replacement array are not preserved.\n\nIf replacement is just one element it is not necessary to put array() around it, unless the element is an array itself, an object or NULL.",
       ),
     ),
   ));
@@ -827,7 +832,7 @@ DefineFunction(
   array(
     'name'   => "array_sum",
     'desc'   => "array_sum() returns the sum of values in an array.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the sum of values as an integer or float.",
@@ -844,8 +849,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_unique",
-    'desc'   => "Takes an input array and returns a new array without duplicate values.\nNote that keys are preserved. array_unique() sorts the values treated as string at first, then will keep the first key encountered for every value, and ignore all following keys. It does not mean that the key of the first related value from the unsorted array will be kept. Note: Two elements are considered equal if and only if (string) \$elem1 === (string) \$elem2. In words: when the string representation is the same. The first element will be used.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Takes an input array and returns a new array without duplicate values.\n\nNote that keys are preserved. array_unique() sorts the values treated as string at first, then will keep the first key encountered for every value, and ignore all following keys. It does not mean that the key of the first related value from the unsorted array will be kept. Two elements are considered equal if and only if (string) \$elem1 === (string) \$elem2. In words: when the string representation is the same. The first element will be used.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the filtered array.",
@@ -863,7 +868,7 @@ DefineFunction(
   array(
     'name'   => "array_unshift",
     'desc'   => "array_unshift() prepends passed elements to the front of the array. Note that the list of elements is prepended as a whole, so that the prepended elements stay in the same order. All numerical array keys will be modified to start counting from zero while literal keys won't be touched.",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Int32,
       'desc'   => "Returns the new number of elements in the array.",
@@ -886,7 +891,7 @@ DefineFunction(
   array(
     'name'   => "array_values",
     'desc'   => "array_values() returns all the values from the input array and indexes numerically the array.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an indexed array of values.",
@@ -904,6 +909,7 @@ DefineFunction(
   array(
     'name'   => "array_walk_recursive",
     'desc'   => "Applies the user-defined function funcname to each element of the input array. This function will recur into deeper arrays.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -917,7 +923,7 @@ DefineFunction(
       array(
         'name'   => "funcname",
         'type'   => Variant,
-        'desc'   => "Typically, funcname takes on two parameters. The input parameter's value being the first, and the key/index second. Note: If funcname needs to be working with the actual values of the array, specify the first parameter of funcname as a reference. Then, any changes made to those elements will be made in the original array itself.",
+        'desc'   => "Typically, funcname takes on two parameters. The input parameter's value being the first, and the key/index second.\n\nIf funcname needs to be working with the actual values of the array, specify the first parameter of funcname as a reference. Then, any changes made to those elements will be made in the original array itself.",
       ),
       array(
         'name'   => "userdata",
@@ -931,6 +937,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_walk",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -944,7 +951,7 @@ DefineFunction(
       array(
         'name'   => "funcname",
         'type'   => Variant,
-        'desc'   => "Typically, funcname takes on two parameters. The array parameter's value being the first, and the key/index second. Note: If funcname needs to be working with the actual values of the array, specify the first parameter of funcname as a reference. Then, any changes made to those elements will be made in the original array itself.\nUsers may not change the array itself from the callback function. e.g. Add/delete elements, unset elements, etc. If the array that array_walk() is applied to is changed, the behavior of this function is undefined, and unpredictable.",
+        'desc'   => "Typically, funcname takes on two parameters. The array parameter's value being the first, and the key/index second.\n\nIf funcname needs to be working with the actual values of the array, specify the first parameter of funcname as a reference. Then, any changes made to those elements will be made in the original array itself.\n\nUsers may not change the array itself from the callback function. e.g. Add/delete elements, unset elements, etc. If the array that array_walk() is applied to is changed, the behavior of this function is undefined, and unpredictable.",
       ),
       array(
         'name'   => "userdata",
@@ -958,8 +965,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "compact",
-    'desc'   => "Creates an array containing variables and their values.\nFor each of these, compact() looks for a variable with that name in the current symbol table and adds it to the output array such that the variable name becomes the key and the contents of the variable become the value for that key. In short, it does the opposite of extract().\nAny strings that are not set will simply be skipped.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Creates an array containing variables and their values.\n\nFor each of these, compact() looks for a variable with that name in the current symbol table and adds it to the output array such that the variable name becomes the key and the contents of the variable become the value for that key. In short, it does the opposite of extract().\n\nAny strings that are not set will simply be skipped.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => VariantMap,
       'desc'   => "Returns the output array with all the variables added to it.",
@@ -977,6 +984,7 @@ DefineFunction(
   array(
     'name'   => "shuffle",
     'desc'   => "This function shuffles (randomizes the order of the elements in) an array.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -993,11 +1001,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "count",
-    'desc'   => "Counts all elements in an array, or properties in an object.\nFor objects, if you have SPL installed, you can hook into count() by implementing interface Countable. The interface has exactly one method, count(), which returns the return value for the count() function.\nPlease see the Array section of the manual for a detailed explanation of how arrays are implemented and used in PHP.",
-    'flags'  =>  FunctionIsFoldable,
+    'desc'   => "Counts all elements in an array, or properties in an object.\n\nFor objects, if you have SPL installed, you can hook into count() by implementing interface Countable. The interface has exactly one method, count(), which returns the return value for the count() function.\n\nPlease see the Array section of the manual for a detailed explanation of how arrays are implemented and used in PHP.",
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
-      'desc'   => "Returns the number of elements in var, which is typically an array , since anything else will have one element.\nIf var is not an array or an object with implemented Countable interface, 1 will be returned. There is one exception, if var is NULL, 0 will be returned. Caution\ncount() may return 0 for a variable that isn't set, but it may also return 0 for a variable that has been initialized with an empty array. Use isset() to test if a variable is set.",
+      'desc'   => "Returns the number of elements in var, which is typically an array, since anything else will have one element.\n\nIf var is not an array or an object with implemented Countable interface, 1 will be returned. There is one exception, if var is NULL, 0 will be returned. Caution\n\ncount() may return 0 for a variable that isn't set, but it may also return 0 for a variable that has been initialized with an empty array. Use isset() to test if a variable is set.",
     ),
     'args'   => array(
       array(
@@ -1017,7 +1025,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "sizeof",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Int32,
     ),
@@ -1037,10 +1045,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "each",
-    'desc'   => "Return the current key and value pair from an array and advance the array cursor.\nAfter each() has executed, the array cursor will be left on the next element of the array, or past the last element if it hits the end of the array. You have to use reset() if you want to traverse the array again using each.",
+    'desc'   => "Return the current key and value pair from an array and advance the array cursor.\n\nAfter each() has executed, the array cursor will be left on the next element of the array, or past the last element if it hits the end of the array. You have to use reset() if you want to traverse the array again using each.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the current key and value pair from the array array. This pair is returned in a four-element array, with the keys 0, 1, key, and value. Elements 0 and key contain the key name of the array element, and 1 and value contain the data.\nIf the internal pointer for the array points past the end of the array contents, each() returns FALSE.",
+      'desc'   => "Returns the current key and value pair from the array array. This pair is returned in a four-element array, with the keys 0, 1, key, and value. Elements 0 and key contain the key name of the array element, and 1 and value contain the data.\n\nIf the internal pointer for the array points past the end of the array contents, each() returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -1055,6 +1064,7 @@ DefineFunction(
   array(
     'name'   => "current",
     'desc'   => "Every array has an internal pointer to its \"current\" element, which is initialized to the first element inserted into the array.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The current() function simply returns the value of the array element that's currently being pointed to by the internal pointer. It does not move the pointer in any way. If the internal pointer points beyond the end of the elements list or the array is empty, current() returns FALSE. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
@@ -1072,6 +1082,7 @@ DefineFunction(
   array(
     'name'   => "next",
     'desc'   => "next() behaves like current(), with one difference. It advances the internal array pointer one place forward before returning the element value. That means it returns the next array value and advances the internal array pointer by one.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the array value in the next place that's pointed to by the internal array pointer, or FALSE if there are no more elements. WarningThis function may return Boolean FALSE, but may also return a non-Boolean value which evaluates to FALSE, such as 0 or \"\". Please read the section on Booleans for more information. Use the === operator for testing the return value of this function.",
@@ -1088,6 +1099,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "pos",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1102,7 +1114,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "prev",
-    'desc'   => "Rewind the internal array pointer.\nprev() behaves just like next(), except it rewinds the internal array pointer one place instead of advancing it.",
+    'desc'   => "Rewind the internal array pointer.\n\nprev() behaves just like next(), except it rewinds the internal array pointer one place instead of advancing it.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the array value in the previous place that's pointed to by the internal array pointer, or FALSE if there are no more elements.",
@@ -1120,6 +1133,7 @@ DefineFunction(
   array(
     'name'   => "reset",
     'desc'   => "reset() rewinds array's internal pointer to the first element and returns the value of the first array element.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the value of the first array element, or FALSE if the array is empty.",
@@ -1137,6 +1151,7 @@ DefineFunction(
   array(
     'name'   => "end",
     'desc'   => "end() advances array's internal pointer to the last element, and returns its value.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the value of the last element or FALSE for empty array.",
@@ -1154,7 +1169,7 @@ DefineFunction(
   array(
     'name'   => "in_array",
     'desc'   => "Searches haystack for needle.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if needle is found in the array, FALSE otherwise.",
@@ -1163,7 +1178,7 @@ DefineFunction(
       array(
         'name'   => "needle",
         'type'   => Variant,
-        'desc'   => "The searched value. Note: If needle is a string, the comparison is done in a case-sensitive manner.",
+        'desc'   => "The searched value.\n\nIf needle is a string, the comparison is done in a case-sensitive manner.",
       ),
       array(
         'name'   => "haystack",
@@ -1183,6 +1198,7 @@ DefineFunction(
   array(
     'name'   => "key",
     'desc'   => "key() returns the index element of the current array position.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The key() function simply returns the key of the array element that's currently being pointed to by the internal pointer. It does not move the pointer in any way. If the internal pointer points beyond the end of the elements list or the array is empty, key() returns NULL.",
@@ -1200,7 +1216,7 @@ DefineFunction(
   array(
     'name'   => "range",
     'desc'   => "Create an array containing a range of elements.",
-    'flags'  =>  FunctionIsFoldable,
+    'flags'  =>  HasDocComment | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array of elements from low to high, inclusive. If low > high, the sequence will be from high to low.",
@@ -1229,7 +1245,7 @@ DefineFunction(
   array(
     'name'   => "array_diff",
     'desc'   => "Compares array1 against array2 and returns the difference.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the entries from array1 that are not present in any of the other arrays.",
@@ -1252,7 +1268,7 @@ DefineFunction(
   array(
     'name'   => "array_udiff",
     'desc'   => "Computes the difference of arrays by using a callback function for data comparison. This is unlike array_diff() which uses an internal function for comparing the data.",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the values of array1 that are not present in any of the other arguments.",
@@ -1271,7 +1287,7 @@ DefineFunction(
       array(
         'name'   => "data_compare_func",
         'type'   => Variant,
-        'desc'   => "The callback comparison function.\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
+        'desc'   => "The callback comparison function.\n\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
   ));
@@ -1280,7 +1296,7 @@ DefineFunction(
   array(
     'name'   => "array_diff_assoc",
     'desc'   => "Compares array1 against array2 and returns the difference. Unlike array_diff() the array keys are used in the comparison.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the values from array1 that are not present in any of the other arrays.",
@@ -1302,8 +1318,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_diff_uassoc",
-    'desc'   => "Compares array1 against array2 and returns the difference. Unlike array_diff() the array keys are used in the comparison.\nUnlike array_diff_assoc() an user supplied callback function is used for the indices comparison, not internal function.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Compares array1 against array2 and returns the difference. Unlike array_diff() the array keys are used in the comparison.\n\nUnlike array_diff_assoc() an user supplied callback function is used for the indices comparison, not internal function.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the entries from array1 that are not present in any of the other arrays.",
@@ -1330,8 +1346,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_udiff_assoc",
-    'desc'   => "Computes the difference of arrays with additional index check, compares data by a callback function. Note: Please note that this function only checks one dimension of a n-dimensional array. Of course you can check deeper dimensions by using, for example, array_udiff_assoc(\$array1[0], \$array2[0], \"some_comparison_func\");.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Computes the difference of arrays with additional index check, compares data by a callback function. Please note that this function only checks one dimension of a n-dimensional array. Of course you can check deeper dimensions by using, for example, array_udiff_assoc(\$array1[0], \$array2[0], \"some_comparison_func\");.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "array_udiff_assoc() returns an array containing all the values from array1 that are not present in any of the other arguments. Note that the keys are used in the comparison unlike array_diff() and array_udiff(). The comparison of arrays' data is performed by using an user-supplied callback. In this aspect the behaviour is opposite to the behaviour of array_diff_assoc() which uses internal function for comparison.",
@@ -1350,7 +1366,7 @@ DefineFunction(
       array(
         'name'   => "data_compare_func",
         'type'   => Variant,
-        'desc'   => "The callback comparison function.\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
+        'desc'   => "The callback comparison function.\n\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
   ));
@@ -1358,8 +1374,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_udiff_uassoc",
-    'desc'   => "Computes the difference of arrays with additional index check, compares data and indexes by a callback function.\nNote that the keys are used in the comparison unlike array_diff() and array_udiff().",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Computes the difference of arrays with additional index check, compares data and indexes by a callback function.\n\nNote that the keys are used in the comparison unlike array_diff() and array_udiff().",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the values from array1 that are not present in any of the other arguments.",
@@ -1378,7 +1394,7 @@ DefineFunction(
       array(
         'name'   => "data_compare_func",
         'type'   => Variant,
-        'desc'   => "The callback comparison function.\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.\nThe comparison of arrays' data is performed by using an user-supplied callback : data_compare_func. In this aspect the behaviour is opposite to the behaviour of array_diff_assoc() which uses internal function for comparison.",
+        'desc'   => "The callback comparison function.\n\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.\n\nThe comparison of arrays' data is performed by using an user-supplied callback : data_compare_func. In this aspect the behaviour is opposite to the behaviour of array_diff_assoc() which uses internal function for comparison.",
       ),
       array(
         'name'   => "key_compare_func",
@@ -1392,7 +1408,7 @@ DefineFunction(
   array(
     'name'   => "array_diff_key",
     'desc'   => "Compares the keys from array1 against the keys from array2 and returns the difference. This function is like array_diff() except the comparison is done on the keys instead of the values.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the entries from array1 whose keys are not present in any of the other arrays.",
@@ -1414,8 +1430,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_diff_ukey",
-    'desc'   => "Compares the keys from array1 against the keys from array2 and returns the difference. This function is like array_diff() except the comparison is done on the keys instead of the values.\nUnlike array_diff_key() an user supplied callback function is used for the indices comparison, not internal function.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Compares the keys from array1 against the keys from array2 and returns the difference. This function is like array_diff() except the comparison is done on the keys instead of the values.\n\nUnlike array_diff_key() an user supplied callback function is used for the indices comparison, not internal function.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the entries from array1 that are not present in any of the other arrays.",
@@ -1443,7 +1459,7 @@ DefineFunction(
   array(
     'name'   => "array_intersect",
     'desc'   => "array_intersect() returns an array containing all the values of array1 that are present in all the arguments. Note that keys are preserved.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all of the values in array1 whose values exist in all of the parameters.",
@@ -1466,7 +1482,7 @@ DefineFunction(
   array(
     'name'   => "array_uintersect",
     'desc'   => "Computes the intersection of arrays, compares data by a callback function.",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the values of array1 that are present in all the arguments.",
@@ -1485,7 +1501,7 @@ DefineFunction(
       array(
         'name'   => "data_compare_func",
         'type'   => Variant,
-        'desc'   => "The callback comparison function.\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
+        'desc'   => "The callback comparison function.\n\nThe user supplied callback function is used for comparison. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
   ));
@@ -1493,7 +1509,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_intersect_assoc",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an associative array containing all the values in array1 that are present in all of the arguments.",
@@ -1515,8 +1531,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_intersect_uassoc",
-    'desc'   => "array_intersect_uassoc() returns an array containing all the values of array1 that are present in all the arguments. Note that the keys are used in the comparison unlike in array_intersect().\nThe index comparison is done by a user supplied callback function. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "array_intersect_uassoc() returns an array containing all the values of array1 that are present in all the arguments. Note that the keys are used in the comparison unlike in array_intersect().\n\nThe index comparison is done by a user supplied callback function. It must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the values of array1 whose values exist in all of the arguments.",
@@ -1543,8 +1559,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_uintersect_assoc",
-    'desc'   => "Computes the intersection of arrays with additional index check, compares data by a callback function.\nNote that the keys are used in the comparison unlike in array_uintersect(). The data is compared by using a callback function.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "Computes the intersection of arrays with additional index check, compares data by a callback function.\n\nNote that the keys are used in the comparison unlike in array_uintersect(). The data is compared by using a callback function.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the values of array1 that are present in all the arguments.",
@@ -1572,7 +1588,7 @@ DefineFunction(
   array(
     'name'   => "array_uintersect_uassoc",
     'desc'   => "Computes the intersection of arrays with additional index check, compares data and indexes by a callback functions Note that the keys are used in the comparison unlike in array_uintersect(). Both the data and the indexes are compared by using separate callback functions.",
-    'flags'  =>  VariableArguments,
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an array containing all the values of array1 that are present in all the arguments.",
@@ -1605,7 +1621,7 @@ DefineFunction(
   array(
     'name'   => "array_intersect_key",
     'desc'   => "array_intersect_key() returns an array containing all the entries of array1 which have keys that are present in all the arguments.",
-    'flags'  =>  VariableArguments | FunctionIsFoldable,
+    'flags'  =>  HasDocComment | VariableArguments | FunctionIsFoldable,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns an associative array containing all the entries of array1 which have keys that are present in all arguments.",
@@ -1627,8 +1643,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "array_intersect_ukey",
-    'desc'   => "array_intersect_ukey() returns an array containing all the values of array1 which have matching keys that are present in all the arguments.\nThis comparison is done by a user supplied callback function. It must return an integer less than, equal to, or greater than zero if the first key is considered to be respectively less than, equal to, or greater than the second.",
-    'flags'  =>  VariableArguments,
+    'desc'   => "array_intersect_ukey() returns an array containing all the values of array1 which have matching keys that are present in all the arguments.\n\nThis comparison is done by a user supplied callback function. It must return an integer less than, equal to, or greater than zero if the first key is considered to be respectively less than, equal to, or greater than the second.",
+    'flags'  =>  HasDocComment | VariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the values of array1 whose keys exist in all the arguments.",
@@ -1656,6 +1672,7 @@ DefineFunction(
   array(
     'name'   => "sort",
     'desc'   => "This function sorts an array. Elements will be arranged from lowest to highest when this function has completed.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1670,7 +1687,7 @@ DefineFunction(
         'name'   => "sort_flags",
         'type'   => Int32,
         'value'  => "0",
-        'desc'   => "The optional second parameter sort_flags may be used to modify the sorting behavior using these values:\nSorting type flags: SORT_REGULAR - compare items normally (don't change types) SORT_NUMERIC - compare items numerically SORT_STRING - compare items as strings SORT_LOCALE_STRING - compare items as strings, based on the current locale. Added in PHP 4.4.0 and 5.0.2, it uses the system locale, which can be changed using setlocale().",
+        'desc'   => "The optional second parameter sort_flags may be used to modify the sorting behavior using these values:\n\nSorting type flags: SORT_REGULAR - compare items normally (don't change types) SORT_NUMERIC - compare items numerically SORT_STRING - compare items as strings SORT_LOCALE_STRING - compare items as strings, based on the current locale. Added in PHP 4.4.0 and 5.0.2, it uses the system locale, which can be changed using setlocale().",
       ),
       array(
         'name'   => "use_collator",
@@ -1684,6 +1701,7 @@ DefineFunction(
   array(
     'name'   => "rsort",
     'desc'   => "This function sorts an array in reverse order (highest to lowest).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1712,6 +1730,7 @@ DefineFunction(
   array(
     'name'   => "asort",
     'desc'   => "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with. This is used mainly when sorting associative arrays where the actual element order is significant.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1739,7 +1758,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "arsort",
-    'desc'   => "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with.\nThis is used mainly when sorting associative arrays where the actual element order is significant.",
+    'desc'   => "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with.\n\nThis is used mainly when sorting associative arrays where the actual element order is significant.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1768,6 +1788,7 @@ DefineFunction(
   array(
     'name'   => "ksort",
     'desc'   => "Sorts an array by key, maintaining key to data correlations. This is useful mainly for associative arrays.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1791,6 +1812,7 @@ DefineFunction(
   array(
     'name'   => "krsort",
     'desc'   => "Sorts an array by key in reverse order, maintaining key to data correlations. This is useful mainly for associative arrays.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1813,7 +1835,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "usort",
-    'desc'   => "This function will sort an array by its values using a user-supplied comparison function. If the array you wish to sort needs to be sorted by some non-trivial criteria, you should use this function. Note: If two members compare as equal, their order in the sorted array is undefined. Note: This function assigns new keys to the elements in array. It will remove any existing keys that may have been assigned, rather than just reordering the keys.",
+    'desc'   => "This function will sort an array by its values using a user-supplied comparison function. If the array you wish to sort needs to be sorted by some non-trivial criteria, you should use this function.\n\nIf two members compare as equal, their order in the sorted array is undefined. This function assigns new keys to the elements in array. It will remove any existing keys that may have been assigned, rather than just reordering the keys.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1835,7 +1858,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "uasort",
-    'desc'   => "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with, using a user-defined comparison function.\nThis is used mainly when sorting associative arrays where the actual element order is significant.",
+    'desc'   => "This function sorts an array such that array indices maintain their correlation with the array elements they are associated with, using a user-defined comparison function.\n\nThis is used mainly when sorting associative arrays where the actual element order is significant.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1858,6 +1882,7 @@ DefineFunction(
   array(
     'name'   => "uksort",
     'desc'   => "uksort() will sort the keys of an array using a user-supplied comparison function. If the array you wish to sort needs to be sorted by some non-trivial criteria, you should use this function.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1871,7 +1896,7 @@ DefineFunction(
       array(
         'name'   => "cmp_function",
         'type'   => Variant,
-        'desc'   => "The callback comparison function.\nFunction cmp_function should accept two parameters which will be filled by pairs of array keys. The comparison function must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
+        'desc'   => "The callback comparison function.\n\nFunction cmp_function should accept two parameters which will be filled by pairs of array keys. The comparison function must return an integer less than, equal to, or greater than zero if the first argument is considered to be respectively less than, equal to, or greater than the second.",
       ),
     ),
   ));
@@ -1880,6 +1905,7 @@ DefineFunction(
   array(
     'name'   => "natsort",
     'desc'   => "This function implements a sort algorithm that orders alphanumeric strings in the way a human being would while maintaining key/value associations. This is described as a \"natural ordering\". An example of the difference between this algorithm and the regular computer string sorting algorithms (used in sort()) can be seen in the example below.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1896,7 +1922,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "natcasesort",
-    'desc'   => "natcasesort() is a case insensitive version of natsort().\nThis function implements a sort algorithm that orders alphanumeric strings in the way a human being would while maintaining key/value associations. This is described as a \"natural ordering\".",
+    'desc'   => "natcasesort() is a case insensitive version of natsort().\n\nThis function implements a sort algorithm that orders alphanumeric strings in the way a human being would while maintaining key/value associations. This is described as a \"natural ordering\".",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -1913,6 +1940,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "i18n_loc_get_default",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
     ),
@@ -1921,6 +1949,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "i18n_loc_set_default",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1935,6 +1964,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "i18n_loc_set_attribute",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1953,6 +1983,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "i18n_loc_set_strength",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
     ),
@@ -1967,6 +1998,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "i18n_loc_get_error_code",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

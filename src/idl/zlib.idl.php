@@ -52,7 +52,8 @@ CPP
 DefineFunction(
   array(
     'name'   => "readgzfile",
-    'desc'   => "Reads a file, decompresses it and writes it to standard output.\nreadgzfile() can be used to read a file which is not in gzip format; in this case readgzfile() will directly read from the file without decompression.",
+    'desc'   => "Reads a file, decompresses it and writes it to standard output.\n\nreadgzfile() can be used to read a file which is not in gzip format; in this case readgzfile() will directly read from the file without decompression.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of (uncompressed) bytes read from the file. If an error occurs, FALSE is returned and unless the function was called as @readgzfile, an error message is printed.",
@@ -76,6 +77,7 @@ DefineFunction(
   array(
     'name'   => "gzfile",
     'desc'   => "This function is identical to readgzfile(), except that it returns the file in an array.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "An array containing the file, one line per cell.",
@@ -98,7 +100,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gzcompress",
-    'desc'   => "This function compress the given string using the ZLIB data format.\nFor details on the ZLIB compression algorithm see the document \"» ZLIB Compressed Data Format Specification version 3.3\" (RFC 1950). Note: This is not the same as gzip compression, which includes some header data. See gzencode() for gzip compression.",
+    'desc'   => "This function compress the given string using the ZLIB data format.\n\nFor details on the ZLIB compression algorithm see the document \"» ZLIB Compressed Data Format Specification version 3.3\" (RFC 1950).\n\nThis is not the same as gzip compression, which includes some header data. See gzencode() for gzip compression.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The compressed string or FALSE if an error occurred.",
@@ -122,9 +125,10 @@ DefineFunction(
   array(
     'name'   => "gzuncompress",
     'desc'   => "This function uncompress a compressed string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The original uncompressed data or FALSE on error.\nThe function will return an error if the uncompressed data is more than 32768 times the length of the compressed input data or more than the optional parameter length.",
+      'desc'   => "The original uncompressed data or FALSE on error.\n\nThe function will return an error if the uncompressed data is more than 32768 times the length of the compressed input data or more than the optional parameter length.",
     ),
     'args'   => array(
       array(
@@ -144,7 +148,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gzdeflate",
-    'desc'   => "This function compress the given string using the DEFLATE data format.\nFor details on the DEFLATE compression algorithm see the document \"» DEFLATE Compressed Data Format Specification version 1.3\" (RFC 1951).",
+    'desc'   => "This function compress the given string using the DEFLATE data format.\n\nFor details on the DEFLATE compression algorithm see the document \"» DEFLATE Compressed Data Format Specification version 1.3\" (RFC 1951).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The deflated string or FALSE if an error occurred.",
@@ -168,9 +173,10 @@ DefineFunction(
   array(
     'name'   => "gzinflate",
     'desc'   => "This function inflate a deflated string.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The original uncompressed data or FALSE on error.\nThe function will return an error if the uncompressed data is more than 32768 times the length of the compressed input data or more than the optional parameter length.",
+      'desc'   => "The original uncompressed data or FALSE on error.\n\nThe function will return an error if the uncompressed data is more than 32768 times the length of the compressed input data or more than the optional parameter length.",
     ),
     'args'   => array(
       array(
@@ -190,7 +196,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gzencode",
-    'desc'   => "This function returns a compressed version of the input data compatible with the output of the gzip program.\nFor more information on the GZIP file format, see the document: » GZIP file format specification version 4.3 (RFC 1952).",
+    'desc'   => "This function returns a compressed version of the input data compatible with the output of the gzip program.\n\nFor more information on the GZIP file format, see the document: » GZIP file format specification version 4.3 (RFC 1952).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The encoded string, or FALSE if an error occurred.",
@@ -211,7 +218,7 @@ DefineFunction(
         'name'   => "encoding_mode",
         'type'   => Int32,
         'value'  => "k_FORCE_GZIP",
-        'desc'   => "The encoding mode. Can be FORCE_GZIP (the default) or FORCE_DEFLATE.\nIf you use FORCE_DEFLATE, you get a standard zlib deflated string (inclusive zlib headers) after the gzip file header but without the trailing crc32 checksum.",
+        'desc'   => "The encoding mode. Can be FORCE_GZIP (the default) or FORCE_DEFLATE.\n\nIf you use FORCE_DEFLATE, you get a standard zlib deflated string (inclusive zlib headers) after the gzip file header but without the trailing crc32 checksum.",
       ),
     ),
   ));
@@ -220,6 +227,7 @@ DefineFunction(
   array(
     'name'   => "gzdecode",
     'desc'   => "This function returns a decoded version of the input data.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The decoded string, or FALSE if an error occurred.",
@@ -237,6 +245,7 @@ DefineFunction(
   array(
     'name'   => "zlib_get_coding_type",
     'desc'   => "Returns the coding type used for output compression.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
       'desc'   => "Possible return values are gzip, deflate, or FALSE.",
@@ -246,10 +255,11 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gzopen",
-    'desc'   => "Opens a gzip (.gz) file for reading or writing.\ngzopen() can be used to read a file which is not in gzip format; in this case gzread() will directly read from the file without decompression.",
+    'desc'   => "Opens a gzip (.gz) file for reading or writing.\n\ngzopen() can be used to read a file which is not in gzip format; in this case gzread() will directly read from the file without decompression.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Resource,
-      'desc'   => "Returns a file pointer to the file opened, after that, everything you read from this file descriptor will be transparently decompressed and what you write gets compressed.\nIf the open fails, the function returns FALSE.",
+      'desc'   => "Returns a file pointer to the file opened, after that, everything you read from this file descriptor will be transparently decompressed and what you write gets compressed.\n\nIf the open fails, the function returns FALSE.",
     ),
     'args'   => array(
       array(
@@ -275,6 +285,7 @@ DefineFunction(
   array(
     'name'   => "gzclose",
     'desc'   => "Closes the given gz-file pointer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -292,6 +303,7 @@ DefineFunction(
   array(
     'name'   => "gzrewind",
     'desc'   => "Sets the file position indicator of the given gz-file pointer to the beginning of the file stream.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -309,6 +321,7 @@ DefineFunction(
   array(
     'name'   => "gzeof",
     'desc'   => "Tests the given GZ file pointer for EOF.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE if the gz-file pointer is at EOF or an error occurs; otherwise returns FALSE.",
@@ -326,6 +339,7 @@ DefineFunction(
   array(
     'name'   => "gzgetc",
     'desc'   => "Returns a string containing a single (uncompressed) character read from the given gz-file pointer.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The uncompressed character or FALSE on EOF (unlike gzeof()).",
@@ -343,6 +357,7 @@ DefineFunction(
   array(
     'name'   => "gzgets",
     'desc'   => "Gets a (uncompressed) string of up to length - 1 bytes read from the given file pointer. Reading ends when length - 1 bytes have been read, on a newline, or on EOF (whichever comes first).",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The uncompressed string, or FALSE on error.",
@@ -366,6 +381,7 @@ DefineFunction(
   array(
     'name'   => "gzgetss",
     'desc'   => "Identical to gzgets(), except that gzgetss() attempts to strip any HTML and PHP tags from the text it reads.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The uncompressed and striped string, or FALSE on error.",
@@ -395,6 +411,7 @@ DefineFunction(
   array(
     'name'   => "gzread",
     'desc'   => "gzread() reads up to length bytes from the given gz-file pointer. Reading stops when length (uncompressed) bytes have been read or EOF is reached, whichever comes first.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The data that have been read.",
@@ -417,7 +434,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gzpassthru",
-    'desc'   => "Reads to EOF on the given gz-file pointer from the current position and writes the (uncompressed) results to standard output. Note: You may need to call gzrewind() to reset the file pointer to the beginning of the file if you have already written data to it. Tip\nIf you just want to dump the contents of a file to the output buffer, without first modifying it or seeking to a particular offset, you may want to use the readgzfile() function, which saves you the gzopen() call.",
+    'desc'   => "Reads to EOF on the given gz-file pointer from the current position and writes the (uncompressed) results to standard output.\n\nYou may need to call gzrewind() to reset the file pointer to the beginning of the file if you have already written data to it. Tip\n\nIf you just want to dump the contents of a file to the output buffer, without first modifying it or seeking to a particular offset, you may want to use the readgzfile() function, which saves you the gzopen() call.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The number of uncompressed characters read from gz and passed through to the input, or FALSE on error.",
@@ -434,7 +452,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gzseek",
-    'desc'   => "Sets the file position indicator for the given file pointer to the given offset byte into the file stream. Equivalent to calling (in C) gzseek(zp, offset, SEEK_SET).\nIf the file is opened for reading, this function is emulated but can be extremely slow. If the file is opened for writing, only forward seeks are supported; gzseek() then compresses a sequence of zeroes up to the new starting position.",
+    'desc'   => "Sets the file position indicator for the given file pointer to the given offset byte into the file stream. Equivalent to calling (in C) gzseek(zp, offset, SEEK_SET).\n\nIf the file is opened for reading, this function is emulated but can be extremely slow. If the file is opened for writing, only forward seeks are supported; gzseek() then compresses a sequence of zeroes up to the new starting position.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Upon success, returns 0; otherwise, returns -1. Note that seeking past EOF is not considered an error.",
@@ -454,7 +473,7 @@ DefineFunction(
         'name'   => "whence",
         'type'   => Int64,
         'value'  => "k_SEEK_SET",
-        'desc'   => "whence values are: SEEK_SET - Set position equal to offset bytes. SEEK_CUR - Set position to current location plus offset.\nIf whence is not specified, it is assumed to be SEEK_SET.",
+        'desc'   => "whence values are: SEEK_SET - Set position equal to offset bytes. SEEK_CUR - Set position to current location plus offset.\n\nIf whence is not specified, it is assumed to be SEEK_SET.",
       ),
     ),
   ));
@@ -463,6 +482,7 @@ DefineFunction(
   array(
     'name'   => "gztell",
     'desc'   => "Gets the position of the given file pointer; i.e., its offset into the uncompressed file stream.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The position of the file pointer or FALSE if an error occurs.",
@@ -480,6 +500,7 @@ DefineFunction(
   array(
     'name'   => "gzwrite",
     'desc'   => "gzwrite() writes the contents of string to the given gz-file.",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the number of (uncompressed) bytes written to the given gz-file stream.",
@@ -499,7 +520,7 @@ DefineFunction(
         'name'   => "length",
         'type'   => Int64,
         'value'  => "0",
-        'desc'   => "The number of uncompressed bytes to write. If supplied, writing will stop after length (uncompressed) bytes have been written or the end of string is reached, whichever comes first. Note: Note that if the length argument is given, then the magic_quotes_runtime configuration option will be ignored and no slashes will be stripped from string.",
+        'desc'   => "The number of uncompressed bytes to write. If supplied, writing will stop after length (uncompressed) bytes have been written or the end of string is reached, whichever comes first.\n\nNote that if the length argument is given, then the magic_quotes_runtime configuration option will be ignored and no slashes will be stripped from string.",
       ),
     ),
   ));
@@ -507,6 +528,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "gzputs",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),

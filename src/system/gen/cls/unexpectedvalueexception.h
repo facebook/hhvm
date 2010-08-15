@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 103 */
+/* SRC: classes/exception.php line 259 */
 class c_unexpectedvalueexception : public c_runtimeexception {
   BEGIN_CLASS_MAP(UnexpectedValueException)
     PARENT_CLASS(Exception)

@@ -24,7 +24,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 28 */
+/* SRC: classes/iterator.php line 164 */
 class c_recursiveiteratoriterator : public ExtObjectData {
   BEGIN_CLASS_MAP(RecursiveIteratorIterator)
     PARENT_CLASS(Iterator)

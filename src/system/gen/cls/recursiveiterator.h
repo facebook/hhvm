@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 23 */
+/* SRC: classes/iterator.php line 131 */
 class c_recursiveiterator {
   // public: virtual void t_getchildren() = 0;
   // public: virtual void t_haschildren() = 0;

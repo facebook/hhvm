@@ -25,7 +25,7 @@ namespace HPHP {
 
 /* preface starts */
 /* preface finishes */
-/* SRC: classes/splobjectstorage.php line 3 */
+/* SRC: classes/splobjectstorage.php line 12 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splobjectstorage
 Variant c_splobjectstorage::os_getInit(const char *s, int64 hash) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -821,38 +821,38 @@ void c_splobjectstorage::init() {
   m_storage = SystemScalarArrays::ssa_[0];
   m_index = 0LL;
 }
-/* SRC: classes/splobjectstorage.php line 7 */
+/* SRC: classes/splobjectstorage.php line 24 */
 void c_splobjectstorage::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::rewind);
   x_rewind(toObject(m_storage));
 } /* function */
-/* SRC: classes/splobjectstorage.php line 11 */
+/* SRC: classes/splobjectstorage.php line 37 */
 bool c_splobjectstorage::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::valid);
   return !same(x_key(ref(lval(m_storage))), false);
 } /* function */
-/* SRC: classes/splobjectstorage.php line 15 */
+/* SRC: classes/splobjectstorage.php line 50 */
 int64 c_splobjectstorage::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::key);
   return m_index;
 } /* function */
-/* SRC: classes/splobjectstorage.php line 19 */
+/* SRC: classes/splobjectstorage.php line 62 */
 Variant c_splobjectstorage::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::current);
   return x_current(ref(lval(m_storage)));
 } /* function */
-/* SRC: classes/splobjectstorage.php line 23 */
+/* SRC: classes/splobjectstorage.php line 74 */
 void c_splobjectstorage::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::next);
   x_next(ref(lval(m_storage)));
   m_index++;
 } /* function */
-/* SRC: classes/splobjectstorage.php line 28 */
+/* SRC: classes/splobjectstorage.php line 87 */
 int c_splobjectstorage::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::count);
   return x_count(m_storage);
 } /* function */
-/* SRC: classes/splobjectstorage.php line 32 */
+/* SRC: classes/splobjectstorage.php line 102 */
 bool c_splobjectstorage::t_contains(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::contains);
   Variant v_object;
@@ -878,7 +878,7 @@ bool c_splobjectstorage::t_contains(CVarRef v_obj) {
   }
   return false;
 } /* function */
-/* SRC: classes/splobjectstorage.php line 43 */
+/* SRC: classes/splobjectstorage.php line 124 */
 void c_splobjectstorage::t_attach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
   if ((x_is_object(v_obj) && !(t_contains(v_obj)))) {
@@ -890,7 +890,7 @@ void c_splobjectstorage::t_attach(CVarRef v_obj) {
     }
   }
 } /* function */
-/* SRC: classes/splobjectstorage.php line 49 */
+/* SRC: classes/splobjectstorage.php line 140 */
 void c_splobjectstorage::t_detach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::detach);
   DECLARE_SYSTEM_GLOBALS(g);

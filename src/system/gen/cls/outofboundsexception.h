@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 99 */
+/* SRC: classes/exception.php line 225 */
 class c_outofboundsexception : public c_runtimeexception {
   BEGIN_CLASS_MAP(OutOfBoundsException)
     PARENT_CLASS(Exception)

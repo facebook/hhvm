@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/iterator.php line 7 */
+/* SRC: classes/iterator.php line 40 */
 class c_serializable {
   // public: virtual void t_serialize() = 0;
   // public: virtual void t_unserialize(CVarRef v_serialized) = 0;

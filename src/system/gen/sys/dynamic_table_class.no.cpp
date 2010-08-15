@@ -35997,6 +35997,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
   int count __attribute__((__unused__)) = params.size();
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
+    case 0x1:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        return (t_next());
+      }
+      break;
     case 0xdc:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
@@ -36026,6 +36032,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
         }
       }
       break;
+    case 0x2:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        return (t_key());
+      }
+      break;
     case 0xe9:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
@@ -36035,6 +36047,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           CVarRef arg0((ad->getValue(pos)));
           return (t_getcolumnmeta(arg0));
         }
+      }
+      break;
+    case 0x3:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        return (t_valid());
       }
       break;
     case 0xea:
@@ -36213,6 +36231,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
         }
       }
       break;
+    case 0x7:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        return (t_current());
+      }
+      break;
     case 0xe6:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
@@ -36229,6 +36253,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
         return (t_debugdumpparams());
+      }
+      break;
+    case 0x9:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        return (t_rewind());
       }
       break;
     default:
@@ -36265,6 +36295,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
           return (t_bindvalue(arg0, arg1, arg2));
         }
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        return (t_valid());
       }
       break;
     case 5:
@@ -36307,6 +36343,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       HASH_GUARD(0x32A381ECDC91918FLL, columncount) {
         if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
         return (t_columncount());
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        return (t_key());
       }
       break;
     case 18:
@@ -36356,6 +36398,10 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
+      }
+      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        return (t_current());
       }
       break;
     case 29:
@@ -36430,6 +36476,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
         }
       }
       break;
+    case 42:
+      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        return (t_rewind());
+      }
+      break;
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
@@ -36440,6 +36492,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
+      }
+      break;
+    case 56:
+      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        return (t_next());
       }
       break;
     case 59:
@@ -36478,6 +36536,12 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
+    case 0x1:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        return (t_next());
+      }
+      break;
     case 0xdc:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
@@ -36497,10 +36561,22 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
         return (t_fetchcolumn(a0));
       }
       break;
+    case 0x2:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        return (t_key());
+      }
+      break;
     case 0xe9:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
         return (t_getcolumnmeta(a0));
+      }
+      break;
+    case 0x3:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        return (t_valid());
       }
       break;
     case 0xea:
@@ -36622,6 +36698,12 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
         return (t_fetch(a0, a1, a2));
       }
       break;
+    case 0x7:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        return (t_current());
+      }
+      break;
     case 0xe6:
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
@@ -36638,6 +36720,12 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       if (methodIndex.m_overloadIndex == 0x1) { 
         if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
         return (t_debugdumpparams());
+      }
+      break;
+    case 0x9:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        return (t_rewind());
       }
       break;
     default:
@@ -36660,6 +36748,12 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
         if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         if (count <= 2) return (t_bindvalue(a0, a1));
         return (t_bindvalue(a0, a1, a2));
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        return (t_valid());
       }
       break;
     case 5:
@@ -36691,6 +36785,12 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       HASH_GUARD(0x32A381ECDC91918FLL, columncount) {
         if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
         return (t_columncount());
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        return (t_key());
       }
       break;
     case 18:
@@ -36725,6 +36825,10 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       HASH_GUARD(0x4389F50CAA085CDCLL, __wakeup) {
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
+      }
+      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        return (t_current());
       }
       break;
     case 29:
@@ -36779,6 +36883,12 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
         return (t_getattribute(a0));
       }
       break;
+    case 42:
+      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        return (t_rewind());
+      }
+      break;
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
@@ -36789,6 +36899,12 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       HASH_GUARD(0x7F974836AACC1EF3LL, __destruct) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
+      }
+      break;
+    case 56:
+      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        return (t_next());
       }
       break;
     case 59:
@@ -36824,6 +36940,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
 #ifdef FMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
+    case 0x1:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_next());
+      }
+      break;
     case 0xdc:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -36875,6 +37005,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         else return (t_fetchcolumn(a0));
       }
       break;
+    case 0x2:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_key());
+      }
+      break;
     case 0xe9:
       if (methodIndex.m_overloadIndex == 0x1) { 
         Variant a0;
@@ -36891,6 +37035,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
           (*it)->eval(env);
         }
         return (t_getcolumnmeta(a0));
+      }
+      break;
+    case 0x3:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_valid());
       }
       break;
     case 0xea:
@@ -37235,6 +37393,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         else return (t_fetch(a0, a1, a2));
       }
       break;
+    case 0x7:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_current());
+      }
+      break;
     case 0xe6:
       if (methodIndex.m_overloadIndex == 0x1) { 
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37275,6 +37447,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
           (*it)->eval(env);
         }
         return (t_debugdumpparams());
+      }
+      break;
+    case 0x9:
+      if (methodIndex.m_overloadIndex == 0x1) { 
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_rewind());
       }
       break;
     default:
@@ -37337,6 +37523,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         }
         if (count <= 2) return (t_bindvalue(a0, a1));
         else return (t_bindvalue(a0, a1, a2));
+      }
+      break;
+    case 4:
+      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("valid", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_valid());
       }
       break;
     case 5:
@@ -37420,6 +37620,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
           (*it)->eval(env);
         }
         return (t_columncount());
+      }
+      break;
+    case 17:
+      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("key", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_key());
       }
       break;
     case 18:
@@ -37518,6 +37732,18 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
           (*it)->eval(env);
         }
         return (t___wakeup());
+      }
+      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("current", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_current());
       }
       break;
     case 29:
@@ -37659,6 +37885,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
         return (t_getattribute(a0));
       }
       break;
+    case 42:
+      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_rewind());
+      }
+      break;
     case 45:
       HASH_GUARD(0x61D1244DDADBC02DLL, __sleep) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37685,6 +37925,20 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
           (*it)->eval(env);
         }
         return (t___destruct());
+      }
+      break;
+    case 56:
+      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("next", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_next());
       }
       break;
     case 59:

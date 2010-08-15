@@ -2590,11 +2590,13 @@ clean_up:
 ///////////////////////////////////////////////////////////////////////////////
 // PDOStatement
 
-c_pdostatement::c_pdostatement() {
+c_pdostatement::c_pdostatement() : m_rowIndex(-1) {
 }
 
 c_pdostatement::~c_pdostatement() {
-  m_stmt.reset(); // needed for sweeping
+  // needed for sweeping
+  m_stmt.reset();
+  m_row.reset();
 }
 
 void c_pdostatement::t___construct() {
@@ -3106,6 +3108,39 @@ Variant c_pdostatement::t_debugdumpparams() {
               params);
   }
   return true;
+}
+
+Variant c_pdostatement::t_current() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::current);
+  return m_row;
+}
+
+Variant c_pdostatement::t_key() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::key);
+  return m_rowIndex;
+}
+
+Variant c_pdostatement::t_next() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::next);
+  m_row = t_fetch(PDO_FETCH_BOTH);
+  if (m_row.same(false)) {
+    m_rowIndex = -1;
+  } else {
+    ++m_rowIndex;
+  }
+  return null;
+}
+
+Variant c_pdostatement::t_rewind() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::rewind);
+  m_rowIndex = -1;
+  t_next();
+  return null;
+}
+
+Variant c_pdostatement::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::valid);
+  return m_rowIndex >= 0;
 }
 
 Variant c_pdostatement::t___wakeup() {

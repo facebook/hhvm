@@ -116,7 +116,29 @@ bool TestExtPdo::test_pdo_sqlite() {
     VS(e, null);
   }
 
-  {
+  try {
+    string source = "sqlite:/tmp/foo.db";
+
+    sp_pdo dbh((NEW(c_pdo)())->
+              create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
+                     CREATE_MAP1(q_pdo_ATTR_PERSISTENT, false)));
+    Variant vstmt = dbh->t_query("select * from foo");
+    ArrayIterPtr iter = vstmt.begin();
+    VERIFY(!iter->end());
+    VS(iter->first(), 0);
+    VS(iter->second(), CREATE_MAP2("bar", "ABC", 0, "ABC"));
+    iter->next();
+    VERIFY(!iter->end());
+    VS(iter->first(), 1);
+    VS(iter->second(), CREATE_MAP2("bar", "DEF", 0, "DEF"));
+    iter->next();
+    VERIFY(iter->end());
+
+  } catch (Object &e) {
+    VS(e, null);
+  }
+
+  try {
     string source = "sqlite:/tmp/foo.db";
     sp_pdo dbh((NEW(c_pdo)())->
                create(source.c_str(), TEST_USERNAME, TEST_PASSWORD,
@@ -127,6 +149,9 @@ bool TestExtPdo::test_pdo_sqlite() {
     c_pdostatement *stmt = res.toObject().getTyped<c_pdostatement>();
     Variant ret = stmt->t_fetch();
     VS(ret["id"], "1");
+
+  } catch (Object &e) {
+    VS(e, null);
   }
 
   CleanupSqliteTestTable();

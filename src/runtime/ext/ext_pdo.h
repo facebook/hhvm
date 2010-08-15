@@ -22,7 +22,6 @@
 
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/pdo_driver.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -162,6 +161,7 @@ FORWARD_DECLARE_CLASS(pdostatement);
 class c_pdostatement : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(pdostatement)
+  PARENT_CLASS(iterator)
   END_CLASS_MAP(pdostatement)
   DECLARE_CLASS(pdostatement, PDOStatement, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
@@ -190,6 +190,11 @@ class c_pdostatement : public ExtObjectData, public Sweepable {
   public: bool t_nextrowset();
   public: bool t_closecursor();
   public: Variant t_debugdumpparams();
+  public: Variant t_current();
+  public: Variant t_key();
+  public: Variant t_next();
+  public: Variant t_rewind();
+  public: Variant t_valid();
   public: Variant t___wakeup();
   public: Variant t___sleep();
   public: Variant t___destruct();
@@ -202,6 +207,8 @@ class c_pdostatement : public ExtObjectData, public Sweepable {
   public: virtual void destruct();
 
   public: sp_PDOStatement m_stmt;
+  public: Variant m_row;
+  public: int m_rowIndex;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

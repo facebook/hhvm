@@ -847,11 +847,14 @@ EndClass(
 BeginClass(
   array(
     'name'   => "PDOStatement",
+    'ifaces' => array('Iterator'),
     'bases'  => array('Sweepable'),
     'desc'   => "Represents a prepared statement and, after the statement is executed, an associated result set.",
     'footer' => <<<EOT
 
   public: sp_PDOStatement m_stmt;
+  public: Variant m_row;
+  public: int m_rowIndex;
 EOT
 ,
   ));
@@ -1224,6 +1227,46 @@ DefineFunction(
     'return' => array(
       'type'   => Variant,
       'desc'   => "No value is returned.",
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "current",
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "key",
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "next",
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "rewind",
+    'return' => array(
+      'type'   => Variant,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "valid",
+    'return' => array(
+      'type'   => Variant,
     ),
   ));
 

@@ -44,7 +44,7 @@ Array TimeStamp::CurrentTime() {
   ret.set("sec", (int)tp.tv_sec);
   ret.set("usec", (int)tp.tv_usec);
   ret.set("minuteswest", (int)(-offset->offset / 60));
-  ret.set("dsttime", (bool)offset->is_dst);
+  ret.set("dsttime", (int)offset->is_dst);
 
   timelib_time_offset_dtor(offset);
   return ret;

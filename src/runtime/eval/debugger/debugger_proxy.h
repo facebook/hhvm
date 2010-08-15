@@ -37,7 +37,7 @@ public:
   enum ThreadMode {
     Normal,
     Sticky,
-    Exclusive,
+    Exclusive
   };
 
   static std::string MakePHP(const std::string &php);

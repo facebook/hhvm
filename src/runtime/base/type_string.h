@@ -359,7 +359,7 @@ struct hphp_string_equal {
 };
 
 struct hphp_string_iequal {
-  bool operator()(CStrRef s1, const CStrRef s2) const {
+  bool operator()(CStrRef s1, CStrRef s2) const {
     return s1->iequal(s2.get());
   }
 };

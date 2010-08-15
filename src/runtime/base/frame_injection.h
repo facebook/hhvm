@@ -29,7 +29,7 @@ public:
   enum Flag {
     PseudoMain      = 1,
     BuiltinFunction = 2,
-    BreakPointHit   = 4,
+    BreakPointHit   = 4
   };
 
   static CStrRef GetClassName(bool skip = false);

@@ -194,6 +194,14 @@ struct file_closer {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
+// ICC compat
+#if !defined(__ICC) || __ICC>=1200
+#define ATTRIBUTE_COLD __attribute__((cold))
+#else
+#define ATTRIBUTE_COLD
+#endif
+
+///////////////////////////////////////////////////////////////////////////////
 // Fast Method Call generation control,
 #ifdef FMCGEN
 #define FMC "#ifndef NOFMCGEN\n"

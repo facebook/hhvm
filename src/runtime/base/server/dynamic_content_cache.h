@@ -44,12 +44,12 @@ public:
 private:
   ReadWriteMutex m_mutex;
 
+  DECLARE_BOOST_TYPES(ResourceFile);
   class ResourceFile {
   public:
     StringBufferPtr file;
     StringBufferPtr compressed;
   };
-  DECLARE_BOOST_TYPES(ResourceFile);
 
   StringToResourceFilePtrMap m_files;
 };

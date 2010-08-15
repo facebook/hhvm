@@ -30,7 +30,7 @@ public:
     XML,
     JSON,
     KVP,
-    HTML,
+    HTML
   };
 
   enum ThreadMode {
@@ -69,7 +69,7 @@ private:
     UDF_HIT  = 2, // count per hit
     UDF_SEC  = 4, // count per second
 
-    PRECISION = 1000,
+    PRECISION = 1000
   };
 
   static Mutex s_lock;

@@ -34,6 +34,7 @@ class DebuggerRestartException : public Exception {
 public:
   DebuggerRestartException(StringVecPtr args) : m_args(args) {}
   StringVecPtr m_args;
+  ~DebuggerRestartException() throw() {}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -49,7 +50,7 @@ enum CodeColor {
   CodeColorTag,
   CodeColorDeclaration,
   CodeColorConstant,
-  CodeColorLineNo,
+  CodeColorLineNo
 };
 
 String highlight_php(CStrRef source, int line);

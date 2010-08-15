@@ -181,7 +181,7 @@ enum PDOCaseConversion {
 enum PDONullHandling {
   PDO_NULL_NATURAL      = 0,
   PDO_NULL_EMPTY_STRING = 1,
-  PDO_NULL_TO_STRING    = 2,
+  PDO_NULL_TO_STRING    = 2
 };
 
 /* hook for bound params */
@@ -192,7 +192,7 @@ enum PDOParamEvent {
   PDO_PARAM_EVT_EXEC_POST,
   PDO_PARAM_EVT_FETCH_PRE,
   PDO_PARAM_EVT_FETCH_POST,
-  PDO_PARAM_EVT_NORMALIZE,
+  PDO_PARAM_EVT_NORMALIZE
 };
 
 enum PDOPlaceholderSupport {
@@ -252,7 +252,7 @@ public:
     MethodFetchErr,
     MethodGetAttribute,
     MethodCheckLiveness,
-    MethodPersistentShutdown,
+    MethodPersistentShutdown
   };
 
 public:
@@ -452,7 +452,7 @@ public:
     MethodGetAttribute,
     MethodGetColumnMeta,
     MethodNextRowset,
-    MethodCursorCloser,
+    MethodCursorCloser
   };
 
 public:

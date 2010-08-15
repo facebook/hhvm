@@ -47,7 +47,7 @@ struct FilePlace {
  */
 class StringData {
  private:
-    const static unsigned int IsLiteral = (1 << 31); // literal string
+    const static unsigned int IsLiteral = ((unsigned)1 << 31); // literal string
     const static unsigned int IsShared  = (1 << 30); // shared memory string
     const static unsigned int IsLinear  = (1 << 29); // linear allocator memory
 

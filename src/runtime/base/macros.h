@@ -572,7 +572,7 @@ do { \
 #define CT_ASSERT_DESCENDENT_OF_OBJECTDATA(T)   \
   do {                                          \
     if (false) {                                \
-      ObjectData * dummy;                       \
+      ObjectData * dummy = NULL;                \
       if (static_cast<T*>(dummy)) {}            \
     }                                           \
   } while(0)                                    \

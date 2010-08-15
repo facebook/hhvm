@@ -45,11 +45,11 @@ public:
 private:
   int m_totalSize;
 
+  DECLARE_BOOST_TYPES(ResourceFile);
   struct ResourceFile {
     StringBufferPtr file;
     StringBufferPtr compressed;
   };
-  DECLARE_BOOST_TYPES(ResourceFile);
 
   StringToResourceFilePtrMap m_files;
 };

@@ -160,7 +160,7 @@ String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
 
   Variant replaced;
   preg_replace(replaced,
-               "/\{\"__PHP_Incomplete_Class_Name\":\"(.*?)\"(,|)/",
+               "/\\{\"__PHP_Incomplete_Class_Name\":\"(.*?)\"(,|)/",
                "$1{", value);
   value = replaced.toString();
 

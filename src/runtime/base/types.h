@@ -227,9 +227,10 @@ private:
 };
 
 // implemented in runtime/base/timeout_thread
-extern void throw_request_timeout_exception() __attribute__((cold));
-extern void throw_memory_exceeded_exception() __attribute__((cold, noreturn));
-extern bool f_pcntl_signal_dispatch() __attribute__((cold));
+extern void throw_request_timeout_exception() ATTRIBUTE_COLD;
+extern void throw_memory_exceeded_exception() ATTRIBUTE_COLD
+                                              __attribute__((noreturn));
+extern bool f_pcntl_signal_dispatch() ATTRIBUTE_COLD;
 
 extern bool SegFaulting;
 class RequestInjection {
@@ -239,8 +240,8 @@ public:
     if (info->m_reqInjectionData.surprised) checkSurprise(info);
   }
 private:
-  void checkSurprise(ThreadInfo *info) __attribute__((cold));
-  void pauseAndExit() __attribute__((cold, noreturn));
+  void checkSurprise(ThreadInfo *info) ATTRIBUTE_COLD;
+  void pauseAndExit() ATTRIBUTE_COLD __attribute__((noreturn));
 };
 
 // implemented in runtime/ext/ext_hotprofiler.cpp

@@ -32,25 +32,25 @@ public:
   enum ToUpperType {
     ToUpperAll,
     ToUpperFirst,
-    ToUpperWords,
+    ToUpperWords
   };
 
   enum TrimType {
     TrimLeft  = 1,
     TrimRight = 2,
-    TrimBoth  = 3,
+    TrimBoth  = 3
   };
 
   enum PadType {
     PadLeft = 0,
     PadRight = 1,
-    PadBoth = 2,
+    PadBoth = 2
   };
 
   enum QuoteStyle {
     DoubleQuotes = 2,  // k_ENT_COMPAT:   escape double quotes only
     BothQuotes   = 3,  // k_ENT_QUOTES:   escape both double and single quotes
-    NoQuotes     = 0,  // k_ENT_NOQUOTES: leave all quotes alone
+    NoQuotes     = 0   // k_ENT_NOQUOTES: leave all quotes alone
   };
 
 public:

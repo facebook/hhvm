@@ -245,12 +245,12 @@ public:
 private:
   enum InputState {
     TakingCommand,
-    TakingCode,
+    TakingCode
   };
   enum RunState {
     NotYet,
     Running,
-    Stopped,
+    Stopped
   };
 
   std::string m_configFileName;

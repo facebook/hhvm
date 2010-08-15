@@ -88,6 +88,7 @@ public:
   void close();
 
 private:
+  DECLARE_BOOST_TYPES(Response);
   class Response {
   public:
     Response();
@@ -101,14 +102,13 @@ private:
     bool firstChunk;
     evbuffer *chunk;
   };
-  DECLARE_BOOST_TYPES(Response);
 
+  DECLARE_BOOST_TYPES(ResponseQueue);
   class ResponseQueue {
   public:
     Mutex m_mutex;
     std::deque<ResponsePtr> m_responses;
   };
-  DECLARE_BOOST_TYPES(ResponseQueue);
 
   // signal between worker thread and response processing thread
   event m_event;

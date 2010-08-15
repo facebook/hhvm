@@ -51,6 +51,7 @@ namespace HPHP {
  * achieved this because we ask our classes to derive from Countable,
  * something boost::shared_ptr<T> doesn't have the luxury to.
  */
+
 class Countable {
  public:
   Countable() : _count(0) {}

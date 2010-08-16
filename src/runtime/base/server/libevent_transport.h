@@ -54,6 +54,7 @@ private:
   LibEventServer *m_server;
   evhttp_request *m_request;
   struct event_base *m_eventBasePostData;
+  struct event m_moreDataRead;
   int m_workerId;
   std::string m_url;
   std::string m_remote_host;

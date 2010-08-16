@@ -125,7 +125,8 @@ const void *LibEventTransport::getMorePostData(int &size) {
   ASSERT(buf);
   evbuffer_drain(buf, EVBUFFER_LENGTH(buf));
 
-  if (evhttp_get_more_post_data(m_request, &m_eventBasePostData)) {
+  if (evhttp_get_more_post_data(m_request, &m_eventBasePostData,
+                                &m_moreDataRead)) {
     buf = m_request->input_buffer;
     ASSERT(buf);
     size = EVBUFFER_LENGTH(buf);

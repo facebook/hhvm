@@ -661,7 +661,9 @@ EOT
   foreach ($class['methods'] as $m) {
     generatePreImplemented($m, $class, $f);
   }
-  fprintf($f, $class['footer']);
+  if (!empty($class['footer'])) {
+    fprintf($f, $class['footer']);
+  }
   fprintf($f, "\n};\n");
 }
 

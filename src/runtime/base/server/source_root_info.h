@@ -56,6 +56,7 @@ private:
     SandboxError,
     SandboxOff
   } m_sandboxCond;
+  Array m_serverVars;
 
   std::string parseSandboxServerVariable(const std::string &format) const;
 };

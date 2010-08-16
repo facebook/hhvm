@@ -60,7 +60,7 @@ SourceRootInfo::SourceRootInfo(const char *host)
 
   string confpath = string(homePath.c_str()) +
     RuntimeOption::SandboxConfFile;
-  Hdf config;
+  Hdf config, serverVars;
   String sp, lp, alp, userOverride;
   try {
     config.open(confpath);
@@ -70,8 +70,14 @@ SourceRootInfo::SourceRootInfo(const char *host)
       sp = sboxConf["path"].get();
       lp = sboxConf["log"].get();
       alp = sboxConf["accesslog"].get();
+      serverVars = sboxConf["ServerVars"];
     }
   } catch (HdfException &e) {
+  }
+  if (serverVars.exists()) {
+    for (Hdf hdf = serverVars.firstChild(); hdf.exists(); hdf = hdf.next()) {
+      m_serverVars.set(String(hdf.getName()), String(hdf.getString()));
+    }
   }
   if (!userOverride.empty()) {
     m_user = userOverride;
@@ -139,6 +145,10 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   server.set("HPHP_SANDBOX_USER", m_user);
   server.set("HPHP_SANDBOX_NAME", m_sandbox);
   server.set("HPHP_SANDBOX_PATH", m_path);
+  if (!m_serverVars.empty()) {
+    server += m_serverVars;
+  }
+
   Eval::DSandboxInfo sandbox;
   sandbox.m_user = m_user.data();
   sandbox.m_name = m_sandbox.data();

@@ -191,12 +191,13 @@ void rename_function(CStrRef old_name, CStrRef new_name) {
   if (iter != funcs.end()) {
     if (!iter->second.empty()) {
       orig_name = iter->second;
+      iter->second.clear();
     }
-    funcs.erase(iter);
+  } else {
+    funcs[old_name] = "";
   }
 
   funcs[new_name] = orig_name;
-  funcs[orig_name] = "";
   s_intercept_data->m_has_renamed_functions = true;
 }
 

@@ -601,7 +601,8 @@ static Variant include_impl(CStrRef file, bool once,
   const char* c_file = file->data();
 
   if (c_file[0] == '/') {
-    String can_path(Util::canonicalize(file.c_str(), file.size()));
+    String can_path(Util::canonicalize(file.c_str(), file.size()),
+                    AttachString);
 
     try {
       return include_impl_invoke(can_path, once, variables, currentDir);
@@ -611,7 +612,8 @@ static Variant include_impl(CStrRef file, bool once,
     c_file[1] == '.' && c_file[2] == '/')))) {
 
     String path(String(g_context->getCwd() + "/" + file));
-    String can_path(Util::canonicalize(path.c_str(), path.size()));
+    String can_path(Util::canonicalize(path.c_str(), path.size()),
+                    AttachString);
 
     try {
       return include_impl_invoke(can_path, once, variables, currentDir);
@@ -634,7 +636,8 @@ static Variant include_impl(CStrRef file, bool once,
       }
 
       path += file;
-      String can_path(Util::canonicalize(path.c_str(), path.size()));
+      String can_path(Util::canonicalize(path.c_str(), path.size()),
+                      AttachString);
 
       try {
         return include_impl_invoke(can_path, once, variables, currentDir);
@@ -646,7 +649,8 @@ static Variant include_impl(CStrRef file, bool once,
       String path(currentDir);
       path += "/";
       path += file;
-      String can_path(Util::canonicalize(path.c_str(), path.size()));
+      String can_path(Util::canonicalize(path.c_str(), path.size()),
+                      AttachString);
 
       try {
         return include_impl_invoke(can_path, once, variables, currentDir);
@@ -654,7 +658,8 @@ static Variant include_impl(CStrRef file, bool once,
     } else {
       // Regular hphp
       String path(g_context->getCwd() + "/" + currentDir + file);
-      String can_path(Util::canonicalize(path.c_str(), path.size()));
+      String can_path(Util::canonicalize(path.c_str(), path.size()),
+                      AttachString);
 
       try {
         return include_impl_invoke(can_path, once, variables, currentDir);

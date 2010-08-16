@@ -405,8 +405,6 @@ std::string Util::relativePath(const std::string fromDir,
   const std::string toFile) {
 
   size_t maxlen = (fromDir.size() + toFile.size()) * 3;
-  char* path = (char*) malloc(maxlen);
-  int path_len = 0;
 
   // Sanity checks
   if (fromDir[0] != '/' || toFile[0] != '/' ||
@@ -419,6 +417,9 @@ std::string Util::relativePath(const std::string fromDir,
   if (strncmp(toFile.c_str(), fromDir.c_str(), from_len) == 0) {
     return toFile.substr(from_len);
   }
+
+  char* path = (char*) malloc(maxlen);
+  int path_len = 0;
 
   const char* from_dir = fromDir.c_str();
   const char* to_file = toFile.c_str();

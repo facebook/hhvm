@@ -62,7 +62,7 @@ Array ClassInfo::GetUserFunctions() {
     }
   }
   if (s_hook) {
-    Array dyn = s_hook->getClasses();
+    Array dyn = s_hook->getUserFunctions();
     if (!dyn.isNull()) {
       ret += dyn;
     }

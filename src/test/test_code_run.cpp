@@ -5933,6 +5933,10 @@ bool TestCodeRun::TestReflection() {
        "test('Y', 'y');"
        "test('Z', 'Z');"
        "test('Z', 'z');");
+  MVCR("<?php "
+      "function foo($a, $b) { }"
+      "$funcs = get_defined_functions();"
+      "var_dump($funcs['user']);");
 
   return true;
 }

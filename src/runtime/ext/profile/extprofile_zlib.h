@@ -115,7 +115,7 @@ inline Variant x_gzpassthru(CObjRef zp) {
   return f_gzpassthru(zp);
 }
 
-inline Variant x_gzseek(CObjRef zp, int64 offset, int64 whence = SEEK_SET) {
+inline Variant x_gzseek(CObjRef zp, int64 offset, int64 whence = k_SEEK_SET) {
   FUNCTION_INJECTION_BUILTIN(gzseek);
   return f_gzseek(zp, offset, whence);
 }

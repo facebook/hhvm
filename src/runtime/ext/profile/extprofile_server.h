@@ -50,14 +50,14 @@ inline bool x_pagelet_server_task_status(CObjRef task) {
   return f_pagelet_server_task_status(task);
 }
 
-inline String x_pagelet_server_task_result(CObjRef task, Variant headers, Variant code) {
+inline String x_pagelet_server_task_result(CObjRef task, CVarRef headers, CVarRef code) {
   FUNCTION_INJECTION_BUILTIN(pagelet_server_task_result);
-  return f_pagelet_server_task_result(task, ref(headers), ref(code));
+  return f_pagelet_server_task_result(task, headers, code);
 }
 
-inline bool x_xbox_send_message(CStrRef msg, Variant ret, int64 timeout_ms, CStrRef host = "localhost") {
+inline bool x_xbox_send_message(CStrRef msg, CVarRef ret, int64 timeout_ms, CStrRef host = "localhost") {
   FUNCTION_INJECTION_BUILTIN(xbox_send_message);
-  return f_xbox_send_message(msg, ref(ret), timeout_ms, host);
+  return f_xbox_send_message(msg, ret, timeout_ms, host);
 }
 
 inline bool x_xbox_post_message(CStrRef msg, CStrRef host = "localhost") {
@@ -75,9 +75,9 @@ inline bool x_xbox_task_status(CObjRef task) {
   return f_xbox_task_status(task);
 }
 
-inline int64 x_xbox_task_result(CObjRef task, int64 timeout_ms, Variant ret) {
+inline int64 x_xbox_task_result(CObjRef task, int64 timeout_ms, CVarRef ret) {
   FUNCTION_INJECTION_BUILTIN(xbox_task_result);
-  return f_xbox_task_result(task, timeout_ms, ref(ret));
+  return f_xbox_task_result(task, timeout_ms, ret);
 }
 
 

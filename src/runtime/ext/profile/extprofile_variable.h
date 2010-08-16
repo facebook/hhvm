@@ -107,9 +107,9 @@ inline String x_strval(CVarRef v) {
   return f_strval(v);
 }
 
-inline bool x_settype(Variant var, CStrRef type) {
+inline bool x_settype(CVarRef var, CStrRef type) {
   FUNCTION_INJECTION_BUILTIN(settype);
-  return f_settype(ref(var), type);
+  return f_settype(var, type);
 }
 
 inline Variant x_print_r(CVarRef expression, bool ret = false) {
@@ -152,7 +152,7 @@ inline bool x_import_request_variables(CStrRef types, CStrRef prefix = "") {
   return f_import_request_variables(types, prefix);
 }
 
-inline int x_extract(CArrRef var_array, int extract_type = EXTR_OVERWRITE, CStrRef prefix = "") {
+inline int x_extract(CArrRef var_array, int extract_type = k_EXTR_OVERWRITE, CStrRef prefix = "") {
   FUNCTION_INJECTION_BUILTIN(extract);
   return f_extract(var_array, extract_type, prefix);
 }

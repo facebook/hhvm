@@ -30,9 +30,9 @@ inline bool x_openssl_csr_export_to_file(CVarRef csr, CStrRef outfilename, bool 
   return f_openssl_csr_export_to_file(csr, outfilename, notext);
 }
 
-inline bool x_openssl_csr_export(CVarRef csr, Variant out, bool notext = true) {
+inline bool x_openssl_csr_export(CVarRef csr, CVarRef out, bool notext = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_export);
-  return f_openssl_csr_export(csr, ref(out), notext);
+  return f_openssl_csr_export(csr, out, notext);
 }
 
 inline Variant x_openssl_csr_get_public_key(CVarRef csr) {
@@ -45,9 +45,9 @@ inline Variant x_openssl_csr_get_subject(CVarRef csr, bool use_shortnames = true
   return f_openssl_csr_get_subject(csr, use_shortnames);
 }
 
-inline Variant x_openssl_csr_new(CArrRef dn, Variant privkey, CVarRef configargs = null_variant, CVarRef extraattribs = null_variant) {
+inline Variant x_openssl_csr_new(CArrRef dn, CVarRef privkey, CVarRef configargs = null_variant, CVarRef extraattribs = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_csr_new);
-  return f_openssl_csr_new(dn, ref(privkey), configargs, extraattribs);
+  return f_openssl_csr_new(dn, privkey, configargs, extraattribs);
 }
 
 inline Variant x_openssl_csr_sign(CVarRef csr, CVarRef cacert, CVarRef priv_key, int days, CVarRef configargs = null_variant, int serial = 0) {
@@ -60,9 +60,9 @@ inline Variant x_openssl_error_string() {
   return f_openssl_error_string();
 }
 
-inline bool x_openssl_open(CStrRef sealed_data, Variant open_data, CStrRef env_key, CVarRef priv_key_id) {
+inline bool x_openssl_open(CStrRef sealed_data, CVarRef open_data, CStrRef env_key, CVarRef priv_key_id) {
   FUNCTION_INJECTION_BUILTIN(openssl_open);
-  return f_openssl_open(sealed_data, ref(open_data), env_key, priv_key_id);
+  return f_openssl_open(sealed_data, open_data, env_key, priv_key_id);
 }
 
 inline bool x_openssl_pkcs12_export_to_file(CVarRef x509, CStrRef filename, CVarRef priv_key, CStrRef pass, CVarRef args = null_variant) {
@@ -70,14 +70,14 @@ inline bool x_openssl_pkcs12_export_to_file(CVarRef x509, CStrRef filename, CVar
   return f_openssl_pkcs12_export_to_file(x509, filename, priv_key, pass, args);
 }
 
-inline bool x_openssl_pkcs12_export(CVarRef x509, Variant out, CVarRef priv_key, CStrRef pass, CVarRef args = null_variant) {
+inline bool x_openssl_pkcs12_export(CVarRef x509, CVarRef out, CVarRef priv_key, CStrRef pass, CVarRef args = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs12_export);
-  return f_openssl_pkcs12_export(x509, ref(out), priv_key, pass, args);
+  return f_openssl_pkcs12_export(x509, out, priv_key, pass, args);
 }
 
-inline bool x_openssl_pkcs12_read(CStrRef pkcs12, Variant certs, CStrRef pass) {
+inline bool x_openssl_pkcs12_read(CStrRef pkcs12, CVarRef certs, CStrRef pass) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkcs12_read);
-  return f_openssl_pkcs12_read(pkcs12, ref(certs), pass);
+  return f_openssl_pkcs12_read(pkcs12, certs, pass);
 }
 
 inline bool x_openssl_pkcs7_decrypt(CStrRef infilename, CStrRef outfilename, CVarRef recipcert, CVarRef recipkey = null_variant) {
@@ -105,9 +105,9 @@ inline bool x_openssl_pkey_export_to_file(CVarRef key, CStrRef outfilename, CStr
   return f_openssl_pkey_export_to_file(key, outfilename, passphrase, configargs);
 }
 
-inline bool x_openssl_pkey_export(CVarRef key, Variant out, CStrRef passphrase = null_string, CVarRef configargs = null_variant) {
+inline bool x_openssl_pkey_export(CVarRef key, CVarRef out, CStrRef passphrase = null_string, CVarRef configargs = null_variant) {
   FUNCTION_INJECTION_BUILTIN(openssl_pkey_export);
-  return f_openssl_pkey_export(key, ref(out), passphrase, configargs);
+  return f_openssl_pkey_export(key, out, passphrase, configargs);
 }
 
 inline void x_openssl_pkey_free(CObjRef key) {
@@ -150,34 +150,34 @@ inline Object x_openssl_pkey_new(CVarRef configargs = null_variant) {
   return f_openssl_pkey_new(configargs);
 }
 
-inline bool x_openssl_private_decrypt(CStrRef data, Variant decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_private_decrypt(CStrRef data, CVarRef decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_private_decrypt);
-  return f_openssl_private_decrypt(data, ref(decrypted), key, padding);
+  return f_openssl_private_decrypt(data, decrypted, key, padding);
 }
 
-inline bool x_openssl_private_encrypt(CStrRef data, Variant crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_private_encrypt(CStrRef data, CVarRef crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_private_encrypt);
-  return f_openssl_private_encrypt(data, ref(crypted), key, padding);
+  return f_openssl_private_encrypt(data, crypted, key, padding);
 }
 
-inline bool x_openssl_public_decrypt(CStrRef data, Variant decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_public_decrypt(CStrRef data, CVarRef decrypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_public_decrypt);
-  return f_openssl_public_decrypt(data, ref(decrypted), key, padding);
+  return f_openssl_public_decrypt(data, decrypted, key, padding);
 }
 
-inline bool x_openssl_public_encrypt(CStrRef data, Variant crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
+inline bool x_openssl_public_encrypt(CStrRef data, CVarRef crypted, CVarRef key, int padding = k_OPENSSL_PKCS1_PADDING) {
   FUNCTION_INJECTION_BUILTIN(openssl_public_encrypt);
-  return f_openssl_public_encrypt(data, ref(crypted), key, padding);
+  return f_openssl_public_encrypt(data, crypted, key, padding);
 }
 
-inline Variant x_openssl_seal(CStrRef data, Variant sealed_data, Variant env_keys, CArrRef pub_key_ids) {
+inline Variant x_openssl_seal(CStrRef data, CVarRef sealed_data, CVarRef env_keys, CArrRef pub_key_ids) {
   FUNCTION_INJECTION_BUILTIN(openssl_seal);
-  return f_openssl_seal(data, ref(sealed_data), ref(env_keys), pub_key_ids);
+  return f_openssl_seal(data, sealed_data, env_keys, pub_key_ids);
 }
 
-inline bool x_openssl_sign(CStrRef data, Variant signature, CVarRef priv_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1) {
+inline bool x_openssl_sign(CStrRef data, CVarRef signature, CVarRef priv_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1) {
   FUNCTION_INJECTION_BUILTIN(openssl_sign);
-  return f_openssl_sign(data, ref(signature), priv_key_id, signature_alg);
+  return f_openssl_sign(data, signature, priv_key_id, signature_alg);
 }
 
 inline Variant x_openssl_verify(CStrRef data, CStrRef signature, CVarRef pub_key_id, int signature_alg = k_OPENSSL_ALGO_SHA1) {
@@ -200,9 +200,9 @@ inline bool x_openssl_x509_export_to_file(CVarRef x509, CStrRef outfilename, boo
   return f_openssl_x509_export_to_file(x509, outfilename, notext);
 }
 
-inline bool x_openssl_x509_export(CVarRef x509, Variant output, bool notext = true) {
+inline bool x_openssl_x509_export(CVarRef x509, CVarRef output, bool notext = true) {
   FUNCTION_INJECTION_BUILTIN(openssl_x509_export);
-  return f_openssl_x509_export(x509, ref(output), notext);
+  return f_openssl_x509_export(x509, output, notext);
 }
 
 inline void x_openssl_x509_free(CObjRef x509cert) {

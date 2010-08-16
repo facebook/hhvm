@@ -90,29 +90,29 @@ inline bool x_checkdnsrr(CStrRef host, CStrRef type = null_string) {
   return f_checkdnsrr(host, type);
 }
 
-inline Variant x_dns_get_record(CStrRef hostname, int type = -1, Variant authns = null, Variant addtl = null) {
+inline Variant x_dns_get_record(CStrRef hostname, int type = -1, CVarRef authns = null, CVarRef addtl = null) {
   FUNCTION_INJECTION_BUILTIN(dns_get_record);
-  return f_dns_get_record(hostname, type, ref(authns), ref(addtl));
+  return f_dns_get_record(hostname, type, authns, addtl);
 }
 
-inline bool x_dns_get_mx(CStrRef hostname, Variant mxhosts, Variant weights = null) {
+inline bool x_dns_get_mx(CStrRef hostname, CVarRef mxhosts, CVarRef weights = null) {
   FUNCTION_INJECTION_BUILTIN(dns_get_mx);
-  return f_dns_get_mx(hostname, ref(mxhosts), ref(weights));
+  return f_dns_get_mx(hostname, mxhosts, weights);
 }
 
-inline bool x_getmxrr(CStrRef hostname, Variant mxhosts, Variant weight = null) {
+inline bool x_getmxrr(CStrRef hostname, CVarRef mxhosts, CVarRef weight = null) {
   FUNCTION_INJECTION_BUILTIN(getmxrr);
-  return f_getmxrr(hostname, ref(mxhosts), ref(weight));
+  return f_getmxrr(hostname, mxhosts, weight);
 }
 
-inline Variant x_fsockopen(CStrRef hostname, int port = -1, Variant errnum = null, Variant errstr = null, double timeout = 0.0) {
+inline Variant x_fsockopen(CStrRef hostname, int port = -1, CVarRef errnum = null, CVarRef errstr = null, double timeout = 0.0) {
   FUNCTION_INJECTION_BUILTIN(fsockopen);
-  return f_fsockopen(hostname, port, ref(errnum), ref(errstr), timeout);
+  return f_fsockopen(hostname, port, errnum, errstr, timeout);
 }
 
-inline Variant x_pfsockopen(CStrRef hostname, int port = -1, Variant errnum = null, Variant errstr = null, double timeout = 0.0) {
+inline Variant x_pfsockopen(CStrRef hostname, int port = -1, CVarRef errnum = null, CVarRef errstr = null, double timeout = 0.0) {
   FUNCTION_INJECTION_BUILTIN(pfsockopen);
-  return f_pfsockopen(hostname, port, ref(errnum), ref(errstr), timeout);
+  return f_pfsockopen(hostname, port, errnum, errstr, timeout);
 }
 
 inline Variant x_socket_get_status(CObjRef stream) {
@@ -140,9 +140,9 @@ inline Array x_headers_list() {
   return f_headers_list();
 }
 
-inline bool x_headers_sent(Variant file = null, Variant line = null) {
+inline bool x_headers_sent(CVarRef file = null, CVarRef line = null) {
   FUNCTION_INJECTION_BUILTIN(headers_sent);
-  return f_headers_sent(ref(file), ref(line));
+  return f_headers_sent(file, line);
 }
 
 inline void x_header_remove(CStrRef name = null_string) {

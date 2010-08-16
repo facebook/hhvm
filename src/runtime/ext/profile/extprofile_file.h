@@ -45,7 +45,7 @@ inline Variant x_pclose(CObjRef handle) {
   return f_pclose(handle);
 }
 
-inline Variant x_fseek(CObjRef handle, int64 offset, int64 whence = SEEK_SET) {
+inline Variant x_fseek(CObjRef handle, int64 offset, int64 whence = k_SEEK_SET) {
   FUNCTION_INJECTION_BUILTIN(fseek);
   return f_fseek(handle, offset, whence);
 }
@@ -130,9 +130,9 @@ inline bool x_ftruncate(CObjRef handle, int64 size) {
   return f_ftruncate(handle, size);
 }
 
-inline bool x_flock(CObjRef handle, int operation, Variant wouldblock = null) {
+inline bool x_flock(CObjRef handle, int operation, CVarRef wouldblock = null) {
   FUNCTION_INJECTION_BUILTIN(flock);
-  return f_flock(handle, operation, ref(wouldblock));
+  return f_flock(handle, operation, wouldblock);
 }
 
 inline Variant x_fputcsv(CObjRef handle, CArrRef fields, CStrRef delimiter = ",", CStrRef enclosure = "\"") {

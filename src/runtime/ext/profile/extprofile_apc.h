@@ -35,9 +35,9 @@ inline bool x_apc_store(CStrRef key, CVarRef var, int64 ttl = 0, int64 cache_id 
   return f_apc_store(key, var, ttl, cache_id);
 }
 
-inline Variant x_apc_fetch(CVarRef key, Variant success = null, int64 cache_id = 0) {
+inline Variant x_apc_fetch(CVarRef key, CVarRef success = null, int64 cache_id = 0) {
   FUNCTION_INJECTION_BUILTIN(apc_fetch);
-  return f_apc_fetch(key, ref(success), cache_id);
+  return f_apc_fetch(key, success, cache_id);
 }
 
 inline Variant x_apc_delete(CVarRef key, int64 cache_id = 0) {
@@ -85,14 +85,14 @@ inline Variant x_apc_delete_file(CVarRef keys, int64 cache_id = 0) {
   return f_apc_delete_file(keys, cache_id);
 }
 
-inline Variant x_apc_inc(CStrRef key, int64 step = 1, Variant success = null, int64 cache_id = 0) {
+inline Variant x_apc_inc(CStrRef key, int64 step = 1, CVarRef success = null, int64 cache_id = 0) {
   FUNCTION_INJECTION_BUILTIN(apc_inc);
-  return f_apc_inc(key, step, ref(success), cache_id);
+  return f_apc_inc(key, step, success, cache_id);
 }
 
-inline Variant x_apc_dec(CStrRef key, int64 step = 1, Variant success = null, int64 cache_id = 0) {
+inline Variant x_apc_dec(CStrRef key, int64 step = 1, CVarRef success = null, int64 cache_id = 0) {
   FUNCTION_INJECTION_BUILTIN(apc_dec);
-  return f_apc_dec(key, step, ref(success), cache_id);
+  return f_apc_dec(key, step, success, cache_id);
 }
 
 inline bool x_apc_cas(CStrRef key, int64 old_cas, int64 new_cas, int64 cache_id = 0) {

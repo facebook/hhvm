@@ -155,9 +155,9 @@ inline String x_stream_resolve_include_path(CStrRef filename, CObjRef context = 
   return f_stream_resolve_include_path(filename, context);
 }
 
-inline Variant x_stream_select(Variant read, Variant write, Variant except, CVarRef vtv_sec, int tv_usec = 0) {
+inline Variant x_stream_select(CVarRef read, CVarRef write, CVarRef except, CVarRef vtv_sec, int tv_usec = 0) {
   FUNCTION_INJECTION_BUILTIN(stream_select);
-  return f_stream_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
+  return f_stream_select(read, write, except, vtv_sec, tv_usec);
 }
 
 inline bool x_stream_set_blocking(CObjRef stream, int mode) {
@@ -180,19 +180,19 @@ inline int x_set_file_buffer(CObjRef stream, int buffer) {
   return f_set_file_buffer(stream, buffer);
 }
 
-inline Variant x_stream_socket_accept(CObjRef server_socket, double timeout = 0.0, Variant peername = null) {
+inline Variant x_stream_socket_accept(CObjRef server_socket, double timeout = 0.0, CVarRef peername = null) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_accept);
-  return f_stream_socket_accept(server_socket, timeout, ref(peername));
+  return f_stream_socket_accept(server_socket, timeout, peername);
 }
 
-inline Variant x_stream_socket_server(CStrRef local_socket, Variant errnum = null, Variant errstr = null, int flags = 0, CObjRef context = null_object) {
+inline Variant x_stream_socket_server(CStrRef local_socket, CVarRef errnum = null, CVarRef errstr = null, int flags = 0, CObjRef context = null_object) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_server);
-  return f_stream_socket_server(local_socket, ref(errnum), ref(errstr), flags, context);
+  return f_stream_socket_server(local_socket, errnum, errstr, flags, context);
 }
 
-inline Variant x_stream_socket_client(CStrRef remote_socket, Variant errnum = null, Variant errstr = null, double timeout = 0.0, int flags = 0, CObjRef context = null_object) {
+inline Variant x_stream_socket_client(CStrRef remote_socket, CVarRef errnum = null, CVarRef errstr = null, double timeout = 0.0, int flags = 0, CObjRef context = null_object) {
   FUNCTION_INJECTION_BUILTIN(stream_socket_client);
-  return f_stream_socket_client(remote_socket, ref(errnum), ref(errstr), timeout, flags, context);
+  return f_stream_socket_client(remote_socket, errnum, errstr, timeout, flags, context);
 }
 
 inline Variant x_stream_socket_enable_crypto(CObjRef stream, bool enable, int crypto_type = 0, CObjRef session_stream = null_object) {

@@ -35,9 +35,9 @@ inline Variant x_socket_create_listen(int port, int backlog = 128) {
   return f_socket_create_listen(port, backlog);
 }
 
-inline bool x_socket_create_pair(int domain, int type, int protocol, Variant fd) {
+inline bool x_socket_create_pair(int domain, int type, int protocol, CVarRef fd) {
   FUNCTION_INJECTION_BUILTIN(socket_create_pair);
-  return f_socket_create_pair(domain, type, protocol, ref(fd));
+  return f_socket_create_pair(domain, type, protocol, fd);
 }
 
 inline Variant x_socket_get_option(CObjRef socket, int level, int optname) {
@@ -45,14 +45,14 @@ inline Variant x_socket_get_option(CObjRef socket, int level, int optname) {
   return f_socket_get_option(socket, level, optname);
 }
 
-inline bool x_socket_getpeername(CObjRef socket, Variant address, Variant port = null) {
+inline bool x_socket_getpeername(CObjRef socket, CVarRef address, CVarRef port = null) {
   FUNCTION_INJECTION_BUILTIN(socket_getpeername);
-  return f_socket_getpeername(socket, ref(address), ref(port));
+  return f_socket_getpeername(socket, address, port);
 }
 
-inline bool x_socket_getsockname(CObjRef socket, Variant address, Variant port = null) {
+inline bool x_socket_getsockname(CObjRef socket, CVarRef address, CVarRef port = null) {
   FUNCTION_INJECTION_BUILTIN(socket_getsockname);
-  return f_socket_getsockname(socket, ref(address), ref(port));
+  return f_socket_getsockname(socket, address, port);
 }
 
 inline bool x_socket_set_block(CObjRef socket) {
@@ -85,14 +85,14 @@ inline bool x_socket_listen(CObjRef socket, int backlog = 0) {
   return f_socket_listen(socket, backlog);
 }
 
-inline Variant x_socket_select(Variant read, Variant write, Variant except, CVarRef vtv_sec, int tv_usec = 0) {
+inline Variant x_socket_select(CVarRef read, CVarRef write, CVarRef except, CVarRef vtv_sec, int tv_usec = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_select);
-  return f_socket_select(ref(read), ref(write), ref(except), vtv_sec, tv_usec);
+  return f_socket_select(read, write, except, vtv_sec, tv_usec);
 }
 
-inline Variant x_socket_server(CStrRef hostname, int port = -1, Variant errnum = null, Variant errstr = null) {
+inline Variant x_socket_server(CStrRef hostname, int port = -1, CVarRef errnum = null, CVarRef errstr = null) {
   FUNCTION_INJECTION_BUILTIN(socket_server);
-  return f_socket_server(hostname, port, ref(errnum), ref(errstr));
+  return f_socket_server(hostname, port, errnum, errstr);
 }
 
 inline Variant x_socket_accept(CObjRef socket) {
@@ -120,14 +120,14 @@ inline Variant x_socket_sendto(CObjRef socket, CStrRef buf, int len, int flags, 
   return f_socket_sendto(socket, buf, len, flags, addr, port);
 }
 
-inline Variant x_socket_recv(CObjRef socket, Variant buf, int len, int flags) {
+inline Variant x_socket_recv(CObjRef socket, CVarRef buf, int len, int flags) {
   FUNCTION_INJECTION_BUILTIN(socket_recv);
-  return f_socket_recv(socket, ref(buf), len, flags);
+  return f_socket_recv(socket, buf, len, flags);
 }
 
-inline Variant x_socket_recvfrom(CObjRef socket, Variant buf, int len, int flags, Variant name, Variant port = 0) {
+inline Variant x_socket_recvfrom(CObjRef socket, CVarRef buf, int len, int flags, CVarRef name, CVarRef port = 0) {
   FUNCTION_INJECTION_BUILTIN(socket_recvfrom);
-  return f_socket_recvfrom(socket, ref(buf), len, flags, ref(name), ref(port));
+  return f_socket_recvfrom(socket, buf, len, flags, name, port);
 }
 
 inline bool x_socket_shutdown(CObjRef socket, int how = 0) {

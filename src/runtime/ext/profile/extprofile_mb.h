@@ -60,9 +60,9 @@ inline Variant x_mb_convert_kana(CStrRef str, CStrRef option = null_string, CStr
   return f_mb_convert_kana(str, option, encoding);
 }
 
-inline Variant x_mb_convert_variables(int _argc, CStrRef to_encoding, CVarRef from_encoding, Variant vars, CArrRef _argv = null_array) {
+inline Variant x_mb_convert_variables(int _argc, CStrRef to_encoding, CVarRef from_encoding, CVarRef vars, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(mb_convert_variables);
-  return f_mb_convert_variables(_argc, to_encoding, from_encoding, ref(vars), _argv);
+  return f_mb_convert_variables(_argc, to_encoding, from_encoding, vars, _argv);
 }
 
 inline Variant x_mb_decode_mimeheader(CStrRef str) {
@@ -140,9 +140,9 @@ inline Variant x_mb_ereg_search(CStrRef pattern = null_string, CStrRef option = 
   return f_mb_ereg_search(pattern, option);
 }
 
-inline Variant x_mb_ereg(CVarRef pattern, CStrRef str, Variant regs = null) {
+inline Variant x_mb_ereg(CVarRef pattern, CStrRef str, CVarRef regs = null) {
   FUNCTION_INJECTION_BUILTIN(mb_ereg);
-  return f_mb_ereg(pattern, str, ref(regs));
+  return f_mb_ereg(pattern, str, regs);
 }
 
 inline Variant x_mb_eregi_replace(CVarRef pattern, CStrRef replacement, CStrRef str, CStrRef option = null_string) {
@@ -150,9 +150,9 @@ inline Variant x_mb_eregi_replace(CVarRef pattern, CStrRef replacement, CStrRef 
   return f_mb_eregi_replace(pattern, replacement, str, option);
 }
 
-inline Variant x_mb_eregi(CVarRef pattern, CStrRef str, Variant regs = null) {
+inline Variant x_mb_eregi(CVarRef pattern, CStrRef str, CVarRef regs = null) {
   FUNCTION_INJECTION_BUILTIN(mb_eregi);
-  return f_mb_eregi(pattern, str, ref(regs));
+  return f_mb_eregi(pattern, str, regs);
 }
 
 inline Variant x_mb_get_info(CStrRef type = null_string) {
@@ -185,9 +185,9 @@ inline String x_mb_output_handler(CStrRef contents, int status) {
   return f_mb_output_handler(contents, status);
 }
 
-inline bool x_mb_parse_str(CStrRef encoded_string, Variant result = null) {
+inline bool x_mb_parse_str(CStrRef encoded_string, CVarRef result = null) {
   FUNCTION_INJECTION_BUILTIN(mb_parse_str);
-  return f_mb_parse_str(encoded_string, ref(result));
+  return f_mb_parse_str(encoded_string, result);
 }
 
 inline Variant x_mb_preferred_mime_name(CStrRef encoding) {
@@ -260,7 +260,7 @@ inline Variant x_mb_strripos(CStrRef haystack, CStrRef needle, int offset = 0, C
   return f_mb_strripos(haystack, needle, offset, encoding);
 }
 
-inline Variant x_mb_strrpos(CStrRef haystack, CStrRef needle, CVarRef offset = 0LL, CStrRef encoding = null_string) {
+inline Variant x_mb_strrpos(CStrRef haystack, CStrRef needle, CVarRef offset = 0, CStrRef encoding = null_string) {
   FUNCTION_INJECTION_BUILTIN(mb_strrpos);
   return f_mb_strrpos(haystack, needle, offset, encoding);
 }

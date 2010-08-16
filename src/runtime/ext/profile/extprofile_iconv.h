@@ -70,7 +70,7 @@ inline Variant x_iconv_strrpos(CStrRef haystack, CStrRef needle, CStrRef charset
   return f_iconv_strrpos(haystack, needle, charset);
 }
 
-inline Variant x_iconv_substr(CStrRef str, int offset, int length = INT_MAX, CStrRef charset = null_string) {
+inline Variant x_iconv_substr(CStrRef str, int offset, int length = k_PHP_INT_MAX, CStrRef charset = null_string) {
   FUNCTION_INJECTION_BUILTIN(iconv_substr);
   return f_iconv_substr(str, offset, length, charset);
 }

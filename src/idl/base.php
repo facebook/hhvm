@@ -499,8 +499,8 @@ function generateFuncArgsCPPHeader($func, $f, $forceRef = false,
   for ($i = 0; $i < count($args); $i++) {
     $arg = $args[$i];
     if ($static || $i > 0) fprintf($f, ', ');
-    fprintf($f, '%s %s', param_typename($arg['type'],
-                                        idx($arg, 'ref') || $forceRef),
+    $ref = $forceRef !== null && ($forceRef || idx($arg, 'ref'));
+    fprintf($f, '%s %s', param_typename($arg['type'], $ref),
             $arg['name']);
     if (isset($arg['default'])) {
       fprintf($f, ' = %s', $arg['default']);
@@ -552,7 +552,7 @@ function generateFuncProfileHeader($func, $f) {
   $args = $func['args'];
 
   fprintf($f, 'inline %s x_%s', typename($func['return']), $func['name']);
-  generateFuncArgsCPPHeader($func, $f, false);
+  generateFuncArgsCPPHeader($func, $f, null);
   fprintf($f, " {\n");
 
   if (!($func['flags'] & NoInjection)) {
@@ -569,7 +569,7 @@ function generateFuncProfileHeader($func, $f) {
   for ($i = 0; $i < count($args); $i++) {
     $arg = $args[$i];
     if ($i > 0) fprintf($f, ', ');
-    fprintf($f, idx($arg, 'ref') ? 'ref(%s)' : '%s', $arg['name']);
+    fprintf($f, '%s', $arg['name']);
   }
   if ($var_arg) {
     fprintf($f, ', _argv');

@@ -35,14 +35,14 @@ inline Variant x_msg_get_queue(int64 key, int64 perms = 0666) {
   return f_msg_get_queue(key, perms);
 }
 
-inline bool x_msg_send(CObjRef queue, int64 msgtype, CVarRef message, bool serialize = true, bool blocking = true, Variant errorcode = null) {
+inline bool x_msg_send(CObjRef queue, int64 msgtype, CVarRef message, bool serialize = true, bool blocking = true, CVarRef errorcode = null) {
   FUNCTION_INJECTION_BUILTIN(msg_send);
-  return f_msg_send(queue, msgtype, message, serialize, blocking, ref(errorcode));
+  return f_msg_send(queue, msgtype, message, serialize, blocking, errorcode);
 }
 
-inline bool x_msg_receive(CObjRef queue, int64 desiredmsgtype, Variant msgtype, int64 maxsize, Variant message, bool unserialize = true, int64 flags = 0, Variant errorcode = null) {
+inline bool x_msg_receive(CObjRef queue, int64 desiredmsgtype, CVarRef msgtype, int64 maxsize, CVarRef message, bool unserialize = true, int64 flags = 0, CVarRef errorcode = null) {
   FUNCTION_INJECTION_BUILTIN(msg_receive);
-  return f_msg_receive(queue, desiredmsgtype, ref(msgtype), maxsize, ref(message), unserialize, flags, ref(errorcode));
+  return f_msg_receive(queue, desiredmsgtype, msgtype, maxsize, message, unserialize, flags, errorcode);
 }
 
 inline bool x_msg_remove_queue(CObjRef queue) {

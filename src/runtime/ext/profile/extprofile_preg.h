@@ -30,24 +30,24 @@ inline Variant x_preg_grep(CStrRef pattern, CArrRef input, int flags = 0) {
   return f_preg_grep(pattern, input, flags);
 }
 
-inline Variant x_preg_match(CStrRef pattern, CStrRef subject, Variant matches = null, int flags = 0, int offset = 0) {
+inline Variant x_preg_match(CStrRef pattern, CStrRef subject, CVarRef matches = null, int flags = 0, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(preg_match);
-  return f_preg_match(pattern, subject, ref(matches), flags, offset);
+  return f_preg_match(pattern, subject, matches, flags, offset);
 }
 
-inline Variant x_preg_match_all(CStrRef pattern, CStrRef subject, Variant matches, int flags = 0, int offset = 0) {
+inline Variant x_preg_match_all(CStrRef pattern, CStrRef subject, CVarRef matches, int flags = 0, int offset = 0) {
   FUNCTION_INJECTION_BUILTIN(preg_match_all);
-  return f_preg_match_all(pattern, subject, ref(matches), flags, offset);
+  return f_preg_match_all(pattern, subject, matches, flags, offset);
 }
 
-inline Variant x_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject, int limit = -1, Variant count = null) {
+inline Variant x_preg_replace(CVarRef pattern, CVarRef replacement, CVarRef subject, int limit = -1, CVarRef count = null) {
   FUNCTION_INJECTION_BUILTIN(preg_replace);
-  return f_preg_replace(pattern, replacement, subject, limit, ref(count));
+  return f_preg_replace(pattern, replacement, subject, limit, count);
 }
 
-inline Variant x_preg_replace_callback(CVarRef pattern, CVarRef callback, CVarRef subject, int limit = -1, Variant count = null) {
+inline Variant x_preg_replace_callback(CVarRef pattern, CVarRef callback, CVarRef subject, int limit = -1, CVarRef count = null) {
   FUNCTION_INJECTION_BUILTIN(preg_replace_callback);
-  return f_preg_replace_callback(pattern, callback, subject, limit, ref(count));
+  return f_preg_replace_callback(pattern, callback, subject, limit, count);
 }
 
 inline Variant x_preg_split(CVarRef pattern, CVarRef subject, int limit = -1, int flags = 0) {
@@ -75,14 +75,14 @@ inline String x_eregi_replace(CStrRef pattern, CStrRef replacement, CStrRef str)
   return f_eregi_replace(pattern, replacement, str);
 }
 
-inline Variant x_ereg(CStrRef pattern, CStrRef str, Variant regs = null) {
+inline Variant x_ereg(CStrRef pattern, CStrRef str, CVarRef regs = null) {
   FUNCTION_INJECTION_BUILTIN(ereg);
-  return f_ereg(pattern, str, ref(regs));
+  return f_ereg(pattern, str, regs);
 }
 
-inline Variant x_eregi(CStrRef pattern, CStrRef str, Variant regs = null) {
+inline Variant x_eregi(CStrRef pattern, CStrRef str, CVarRef regs = null) {
   FUNCTION_INJECTION_BUILTIN(eregi);
-  return f_eregi(pattern, str, ref(regs));
+  return f_eregi(pattern, str, regs);
 }
 
 inline Variant x_split(CStrRef pattern, CStrRef str, int limit = -1) {

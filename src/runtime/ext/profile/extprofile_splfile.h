@@ -205,9 +205,9 @@ inline String x_hphp_splfileobject_fgetss(CObjRef obj, CStrRef allowable_tags) {
   return f_hphp_splfileobject_fgetss(obj, allowable_tags);
 }
 
-inline bool x_hphp_splfileobject_flock(CObjRef obj, Variant wouldblock) {
+inline bool x_hphp_splfileobject_flock(CObjRef obj, CVarRef wouldblock) {
   FUNCTION_INJECTION_BUILTIN(hphp_splfileobject_flock);
-  return f_hphp_splfileobject_flock(obj, ref(wouldblock));
+  return f_hphp_splfileobject_flock(obj, wouldblock);
 }
 
 inline int64 x_hphp_splfileobject_fpassthru(CObjRef obj) {

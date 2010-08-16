@@ -45,9 +45,9 @@ inline bool x_intl_is_failure(int64 error_code) {
   return f_intl_is_failure(error_code);
 }
 
-inline Variant x_collator_asort(CVarRef obj, Variant arr, int64 sort_flag = 0) {
+inline Variant x_collator_asort(CVarRef obj, CVarRef arr, int64 sort_flag = 0) {
   FUNCTION_INJECTION_BUILTIN(collator_asort);
-  return f_collator_asort(obj, ref(arr), sort_flag);
+  return f_collator_asort(obj, arr, sort_flag);
 }
 
 inline Variant x_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2) {
@@ -95,29 +95,29 @@ inline Variant x_collator_set_strength(CVarRef obj, int64 strength) {
   return f_collator_set_strength(obj, strength);
 }
 
-inline Variant x_collator_sort_with_sort_keys(CVarRef obj, Variant arr) {
+inline Variant x_collator_sort_with_sort_keys(CVarRef obj, CVarRef arr) {
   FUNCTION_INJECTION_BUILTIN(collator_sort_with_sort_keys);
-  return f_collator_sort_with_sort_keys(obj, ref(arr));
+  return f_collator_sort_with_sort_keys(obj, arr);
 }
 
-inline Variant x_collator_sort(CVarRef obj, Variant arr, int64 sort_flag = 0) {
+inline Variant x_collator_sort(CVarRef obj, CVarRef arr, int64 sort_flag = 0) {
   FUNCTION_INJECTION_BUILTIN(collator_sort);
-  return f_collator_sort(obj, ref(arr), sort_flag);
+  return f_collator_sort(obj, arr, sort_flag);
 }
 
-inline Variant x_idn_to_ascii(CStrRef domain, Variant errorcode = null) {
+inline Variant x_idn_to_ascii(CStrRef domain, CVarRef errorcode = null) {
   FUNCTION_INJECTION_BUILTIN(idn_to_ascii);
-  return f_idn_to_ascii(domain, ref(errorcode));
+  return f_idn_to_ascii(domain, errorcode);
 }
 
-inline Variant x_idn_to_unicode(CStrRef domain, Variant errorcode = null) {
+inline Variant x_idn_to_unicode(CStrRef domain, CVarRef errorcode = null) {
   FUNCTION_INJECTION_BUILTIN(idn_to_unicode);
-  return f_idn_to_unicode(domain, ref(errorcode));
+  return f_idn_to_unicode(domain, errorcode);
 }
 
-inline Variant x_idn_to_utf8(CStrRef domain, Variant errorcode = null) {
+inline Variant x_idn_to_utf8(CStrRef domain, CVarRef errorcode = null) {
   FUNCTION_INJECTION_BUILTIN(idn_to_utf8);
-  return f_idn_to_utf8(domain, ref(errorcode));
+  return f_idn_to_utf8(domain, errorcode);
 }
 
 

@@ -105,14 +105,14 @@ inline bool x_oci_free_descriptor(CObjRef lob) {
   return f_oci_free_descriptor(lob);
 }
 
-inline bool x_oci_bind_array_by_name(CObjRef statement, CStrRef name, Variant var_array, int max_table_length, int max_item_length = -1, int type = k_SQLT_AFC) {
+inline bool x_oci_bind_array_by_name(CObjRef statement, CStrRef name, CVarRef var_array, int max_table_length, int max_item_length = -1, int type = k_SQLT_AFC) {
   FUNCTION_INJECTION_BUILTIN(oci_bind_array_by_name);
-  return f_oci_bind_array_by_name(statement, name, ref(var_array), max_table_length, max_item_length, type);
+  return f_oci_bind_array_by_name(statement, name, var_array, max_table_length, max_item_length, type);
 }
 
-inline bool x_oci_bind_by_name(CObjRef statement, CStrRef name, Variant variable, int max_length = -1, int type = 0) {
+inline bool x_oci_bind_by_name(CObjRef statement, CStrRef name, CVarRef variable, int max_length = -1, int type = 0) {
   FUNCTION_INJECTION_BUILTIN(oci_bind_by_name);
-  return f_oci_bind_by_name(statement, name, ref(variable), max_length, type);
+  return f_oci_bind_by_name(statement, name, variable, max_length, type);
 }
 
 inline bool x_oci_cancel(CObjRef statement) {
@@ -120,9 +120,9 @@ inline bool x_oci_cancel(CObjRef statement) {
   return f_oci_cancel(statement);
 }
 
-inline bool x_oci_define_by_name(CObjRef statement, CStrRef column_name, Variant variable, int type = 0) {
+inline bool x_oci_define_by_name(CObjRef statement, CStrRef column_name, CVarRef variable, int type = 0) {
   FUNCTION_INJECTION_BUILTIN(oci_define_by_name);
-  return f_oci_define_by_name(statement, column_name, ref(variable), type);
+  return f_oci_define_by_name(statement, column_name, variable, type);
 }
 
 inline bool x_oci_execute(CObjRef statement, int mode = k_OCI_COMMIT_ON_SUCCESS) {
@@ -150,9 +150,9 @@ inline bool x_oci_set_prefetch(CObjRef statement, int rows) {
   return f_oci_set_prefetch(statement, rows);
 }
 
-inline Variant x_oci_fetch_all(CObjRef statement, Variant output, int skip = 0, int maxrows = -1, int flags = 0) {
+inline Variant x_oci_fetch_all(CObjRef statement, CVarRef output, int skip = 0, int maxrows = -1, int flags = 0) {
   FUNCTION_INJECTION_BUILTIN(oci_fetch_all);
-  return f_oci_fetch_all(statement, ref(output), skip, maxrows, flags);
+  return f_oci_fetch_all(statement, output, skip, maxrows, flags);
 }
 
 inline Variant x_oci_fetch_array(CObjRef statement, int mode = k_OCI_BOTH | k_OCI_RETURN_NULLS) {

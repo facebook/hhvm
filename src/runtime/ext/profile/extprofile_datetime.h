@@ -125,7 +125,7 @@ inline Variant x_gmdate(CStrRef format, int64 timestamp = TimeStamp::Current()) 
   return f_gmdate(format, timestamp);
 }
 
-inline Variant x_gmmktime(int hour = INT_MAX, int minute = INT_MAX, int second = INT_MAX, int month = INT_MAX, int day = INT_MAX, int year = INT_MAX) {
+inline Variant x_gmmktime(int hour = k_PHP_INT_MAX, int minute = k_PHP_INT_MAX, int second = k_PHP_INT_MAX, int month = k_PHP_INT_MAX, int day = k_PHP_INT_MAX, int year = k_PHP_INT_MAX) {
   FUNCTION_INJECTION_BUILTIN(gmmktime);
   return f_gmmktime(hour, minute, second, month, day, year);
 }
@@ -150,7 +150,7 @@ inline Variant x_microtime(bool get_as_float = false) {
   return f_microtime(get_as_float);
 }
 
-inline Variant x_mktime(int hour = INT_MAX, int minute = INT_MAX, int second = INT_MAX, int month = INT_MAX, int day = INT_MAX, int year = INT_MAX) {
+inline Variant x_mktime(int hour = k_PHP_INT_MAX, int minute = k_PHP_INT_MAX, int second = k_PHP_INT_MAX, int month = k_PHP_INT_MAX, int day = k_PHP_INT_MAX, int year = k_PHP_INT_MAX) {
   FUNCTION_INJECTION_BUILTIN(mktime);
   return f_mktime(hour, minute, second, month, day, year);
 }

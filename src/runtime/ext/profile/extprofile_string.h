@@ -145,14 +145,14 @@ inline Variant x_strtok(CStrRef str, CVarRef token = null_variant) {
   return f_strtok(str, token);
 }
 
-inline Variant x_str_replace(CVarRef search, CVarRef replace, CVarRef subject, Variant count = null) {
+inline Variant x_str_replace(CVarRef search, CVarRef replace, CVarRef subject, CVarRef count = null) {
   FUNCTION_INJECTION_BUILTIN(str_replace);
-  return f_str_replace(search, replace, subject, ref(count));
+  return f_str_replace(search, replace, subject, count);
 }
 
-inline Variant x_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject, Variant count = null) {
+inline Variant x_str_ireplace(CVarRef search, CVarRef replace, CVarRef subject, CVarRef count = null) {
   FUNCTION_INJECTION_BUILTIN(str_ireplace);
-  return f_str_ireplace(search, replace, subject, ref(count));
+  return f_str_ireplace(search, replace, subject, count);
 }
 
 inline Variant x_substr_replace(CVarRef str, CVarRef replacement, CVarRef start, CVarRef length = 0x7FFFFFFF) {
@@ -460,9 +460,9 @@ inline int x_levenshtein(CStrRef str1, CStrRef str2, int cost_ins = 1, int cost_
   return f_levenshtein(str1, str2, cost_ins, cost_rep, cost_del);
 }
 
-inline int x_similar_text(CStrRef first, CStrRef second, Variant percent = null) {
+inline int x_similar_text(CStrRef first, CStrRef second, CVarRef percent = null) {
   FUNCTION_INJECTION_BUILTIN(similar_text);
-  return f_similar_text(first, second, ref(percent));
+  return f_similar_text(first, second, percent);
 }
 
 inline Variant x_soundex(CStrRef str) {
@@ -475,9 +475,9 @@ inline Variant x_metaphone(CStrRef str, int phones = 0) {
   return f_metaphone(str, phones);
 }
 
-inline void x_parse_str(CStrRef str, Variant arr = null) {
+inline void x_parse_str(CStrRef str, CVarRef arr = null) {
   FUNCTION_INJECTION_BUILTIN(parse_str);
-  f_parse_str(str, ref(arr));
+  f_parse_str(str, arr);
 }
 
 

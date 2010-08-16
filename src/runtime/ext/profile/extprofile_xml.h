@@ -40,9 +40,9 @@ inline int x_xml_parse(CObjRef parser, CStrRef data, bool is_final = true) {
   return f_xml_parse(parser, data, is_final);
 }
 
-inline int x_xml_parse_into_struct(CObjRef parser, CStrRef data, Variant values, Variant index = null) {
+inline int x_xml_parse_into_struct(CObjRef parser, CStrRef data, CVarRef values, CVarRef index = null) {
   FUNCTION_INJECTION_BUILTIN(xml_parse_into_struct);
-  return f_xml_parse_into_struct(parser, data, ref(values), ref(index));
+  return f_xml_parse_into_struct(parser, data, values, index);
 }
 
 inline Object x_xml_parser_create_ns(CStrRef encoding = null_string, CStrRef separator = null_string) {
@@ -105,9 +105,9 @@ inline bool x_xml_set_notation_decl_handler(CObjRef parser, CVarRef handler) {
   return f_xml_set_notation_decl_handler(parser, handler);
 }
 
-inline bool x_xml_set_object(CObjRef parser, Variant object) {
+inline bool x_xml_set_object(CObjRef parser, CVarRef object) {
   FUNCTION_INJECTION_BUILTIN(xml_set_object);
-  return f_xml_set_object(parser, ref(object));
+  return f_xml_set_object(parser, object);
 }
 
 inline int x_xml_get_current_byte_index(CObjRef parser) {

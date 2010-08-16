@@ -35,9 +35,9 @@ inline bool x_function_exists(CStrRef function_name) {
   return f_function_exists(function_name);
 }
 
-inline bool x_is_callable(CVarRef v, bool syntax = false, Variant name = null) {
+inline bool x_is_callable(CVarRef v, bool syntax = false, CVarRef name = null) {
   FUNCTION_INJECTION_BUILTIN(is_callable);
-  return f_is_callable(v, syntax, ref(name));
+  return f_is_callable(v, syntax, name);
 }
 
 inline Variant x_call_user_func_array(CVarRef function, CArrRef params) {

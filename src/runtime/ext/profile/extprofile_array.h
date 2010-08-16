@@ -105,9 +105,9 @@ inline Variant x_array_replace(int _argc, CVarRef array1, CArrRef _argv = null_a
   return f_array_replace(_argc, array1, _argv);
 }
 
-inline bool x_array_multisort(int _argc, Variant ar1, CArrRef _argv = null_array) {
+inline bool x_array_multisort(int _argc, CVarRef ar1, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(array_multisort);
-  return f_array_multisort(_argc, ref(ar1), _argv);
+  return f_array_multisort(_argc, ar1, _argv);
 }
 
 inline Variant x_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
@@ -115,9 +115,9 @@ inline Variant x_array_pad(CVarRef input, int pad_size, CVarRef pad_value) {
   return f_array_pad(input, pad_size, pad_value);
 }
 
-inline Variant x_array_pop(Variant array) {
+inline Variant x_array_pop(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(array_pop);
-  return f_array_pop(ref(array));
+  return f_array_pop(array);
 }
 
 inline Variant x_array_product(CVarRef array) {
@@ -125,9 +125,9 @@ inline Variant x_array_product(CVarRef array) {
   return f_array_product(array);
 }
 
-inline Variant x_array_push(int _argc, Variant array, CVarRef var, CArrRef _argv = null_array) {
+inline Variant x_array_push(int _argc, CVarRef array, CVarRef var, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(array_push);
-  return f_array_push(_argc, ref(array), var, _argv);
+  return f_array_push(_argc, array, var, _argv);
 }
 
 inline Variant x_array_rand(CVarRef input, int num_req = 1) {
@@ -150,9 +150,9 @@ inline Variant x_array_search(CVarRef needle, CVarRef haystack, bool strict = fa
   return f_array_search(needle, haystack, strict);
 }
 
-inline Variant x_array_shift(Variant array) {
+inline Variant x_array_shift(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(array_shift);
-  return f_array_shift(ref(array));
+  return f_array_shift(array);
 }
 
 inline Variant x_array_slice(CVarRef array, int offset, CVarRef length = null_variant, bool preserve_keys = false) {
@@ -160,9 +160,9 @@ inline Variant x_array_slice(CVarRef array, int offset, CVarRef length = null_va
   return f_array_slice(array, offset, length, preserve_keys);
 }
 
-inline Variant x_array_splice(Variant input, int offset, CVarRef length = null_variant, CVarRef replacement = null_variant) {
+inline Variant x_array_splice(CVarRef input, int offset, CVarRef length = null_variant, CVarRef replacement = null_variant) {
   FUNCTION_INJECTION_BUILTIN(array_splice);
-  return f_array_splice(ref(input), offset, length, replacement);
+  return f_array_splice(input, offset, length, replacement);
 }
 
 inline Variant x_array_sum(CVarRef array) {
@@ -175,9 +175,9 @@ inline Variant x_array_unique(CVarRef array) {
   return f_array_unique(array);
 }
 
-inline int x_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv = null_array) {
+inline int x_array_unshift(int _argc, CVarRef array, CVarRef var, CArrRef _argv = null_array) {
   FUNCTION_INJECTION_BUILTIN(array_unshift);
-  return f_array_unshift(_argc, ref(array), var, _argv);
+  return f_array_unshift(_argc, array, var, _argv);
 }
 
 inline Variant x_array_values(CVarRef input) {
@@ -185,14 +185,14 @@ inline Variant x_array_values(CVarRef input) {
   return f_array_values(input);
 }
 
-inline bool x_array_walk_recursive(Variant input, CVarRef funcname, CVarRef userdata = null_variant) {
+inline bool x_array_walk_recursive(CVarRef input, CVarRef funcname, CVarRef userdata = null_variant) {
   FUNCTION_INJECTION_BUILTIN(array_walk_recursive);
-  return f_array_walk_recursive(ref(input), funcname, userdata);
+  return f_array_walk_recursive(input, funcname, userdata);
 }
 
-inline bool x_array_walk(Variant input, CVarRef funcname, CVarRef userdata = null_variant) {
+inline bool x_array_walk(CVarRef input, CVarRef funcname, CVarRef userdata = null_variant) {
   FUNCTION_INJECTION_BUILTIN(array_walk);
-  return f_array_walk(ref(input), funcname, userdata);
+  return f_array_walk(input, funcname, userdata);
 }
 
 inline Array x_compact(int _argc, CVarRef varname, CArrRef _argv = null_array) {
@@ -200,9 +200,9 @@ inline Array x_compact(int _argc, CVarRef varname, CArrRef _argv = null_array) {
   return f_compact(_argc, varname, _argv);
 }
 
-inline bool x_shuffle(Variant array) {
+inline bool x_shuffle(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(shuffle);
-  return f_shuffle(ref(array));
+  return f_shuffle(array);
 }
 
 inline int x_count(CVarRef var, bool recursive = false) {
@@ -215,39 +215,39 @@ inline int x_sizeof(CVarRef var, bool recursive = false) {
   return f_sizeof(var, recursive);
 }
 
-inline Variant x_each(Variant array) {
+inline Variant x_each(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(each);
-  return f_each(ref(array));
+  return f_each(array);
 }
 
-inline Variant x_current(Variant array) {
+inline Variant x_current(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(current);
-  return f_current(ref(array));
+  return f_current(array);
 }
 
-inline Variant x_next(Variant array) {
+inline Variant x_next(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(next);
-  return f_next(ref(array));
+  return f_next(array);
 }
 
-inline Variant x_pos(Variant array) {
+inline Variant x_pos(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(pos);
-  return f_pos(ref(array));
+  return f_pos(array);
 }
 
-inline Variant x_prev(Variant array) {
+inline Variant x_prev(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(prev);
-  return f_prev(ref(array));
+  return f_prev(array);
 }
 
-inline Variant x_reset(Variant array) {
+inline Variant x_reset(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(reset);
-  return f_reset(ref(array));
+  return f_reset(array);
 }
 
-inline Variant x_end(Variant array) {
+inline Variant x_end(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(end);
-  return f_end(ref(array));
+  return f_end(array);
 }
 
 inline bool x_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
@@ -255,9 +255,9 @@ inline bool x_in_array(CVarRef needle, CVarRef haystack, bool strict = false) {
   return f_in_array(needle, haystack, strict);
 }
 
-inline Variant x_key(Variant array) {
+inline Variant x_key(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(key);
-  return f_key(ref(array));
+  return f_key(array);
 }
 
 inline Variant x_range(CVarRef low, CVarRef high, CVarRef step = 1) {
@@ -345,59 +345,59 @@ inline Variant x_array_intersect_ukey(int _argc, CVarRef array1, CVarRef array2,
   return f_array_intersect_ukey(_argc, array1, array2, key_compare_func, _argv);
 }
 
-inline bool x_sort(Variant array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_sort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(sort);
-  return f_sort(ref(array), sort_flags, use_collator);
+  return f_sort(array, sort_flags, use_collator);
 }
 
-inline bool x_rsort(Variant array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_rsort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(rsort);
-  return f_rsort(ref(array), sort_flags, use_collator);
+  return f_rsort(array, sort_flags, use_collator);
 }
 
-inline bool x_asort(Variant array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_asort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(asort);
-  return f_asort(ref(array), sort_flags, use_collator);
+  return f_asort(array, sort_flags, use_collator);
 }
 
-inline bool x_arsort(Variant array, int sort_flags = 0, bool use_collator = false) {
+inline bool x_arsort(CVarRef array, int sort_flags = 0, bool use_collator = false) {
   FUNCTION_INJECTION_BUILTIN(arsort);
-  return f_arsort(ref(array), sort_flags, use_collator);
+  return f_arsort(array, sort_flags, use_collator);
 }
 
-inline bool x_ksort(Variant array, int sort_flags = 0) {
+inline bool x_ksort(CVarRef array, int sort_flags = 0) {
   FUNCTION_INJECTION_BUILTIN(ksort);
-  return f_ksort(ref(array), sort_flags);
+  return f_ksort(array, sort_flags);
 }
 
-inline bool x_krsort(Variant array, int sort_flags = 0) {
+inline bool x_krsort(CVarRef array, int sort_flags = 0) {
   FUNCTION_INJECTION_BUILTIN(krsort);
-  return f_krsort(ref(array), sort_flags);
+  return f_krsort(array, sort_flags);
 }
 
-inline bool x_usort(Variant array, CVarRef cmp_function) {
+inline bool x_usort(CVarRef array, CVarRef cmp_function) {
   FUNCTION_INJECTION_BUILTIN(usort);
-  return f_usort(ref(array), cmp_function);
+  return f_usort(array, cmp_function);
 }
 
-inline bool x_uasort(Variant array, CVarRef cmp_function) {
+inline bool x_uasort(CVarRef array, CVarRef cmp_function) {
   FUNCTION_INJECTION_BUILTIN(uasort);
-  return f_uasort(ref(array), cmp_function);
+  return f_uasort(array, cmp_function);
 }
 
-inline bool x_uksort(Variant array, CVarRef cmp_function) {
+inline bool x_uksort(CVarRef array, CVarRef cmp_function) {
   FUNCTION_INJECTION_BUILTIN(uksort);
-  return f_uksort(ref(array), cmp_function);
+  return f_uksort(array, cmp_function);
 }
 
-inline Variant x_natsort(Variant array) {
+inline Variant x_natsort(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(natsort);
-  return f_natsort(ref(array));
+  return f_natsort(array);
 }
 
-inline Variant x_natcasesort(Variant array) {
+inline Variant x_natcasesort(CVarRef array) {
   FUNCTION_INJECTION_BUILTIN(natcasesort);
-  return f_natcasesort(ref(array));
+  return f_natcasesort(array);
 }
 
 inline String x_i18n_loc_get_default() {

@@ -30,9 +30,9 @@ inline Array x_gd_info() {
   return f_gd_info();
 }
 
-inline Variant x_getimagesize(CStrRef filename, Variant imageinfo = null) {
+inline Variant x_getimagesize(CStrRef filename, CVarRef imageinfo = null) {
   FUNCTION_INJECTION_BUILTIN(getimagesize);
-  return f_getimagesize(filename, ref(imageinfo));
+  return f_getimagesize(filename, imageinfo);
 }
 
 inline String x_image_type_to_extension(int imagetype, bool include_dot = true) {
@@ -555,9 +555,9 @@ inline Variant x_exif_tagname(int index) {
   return f_exif_tagname(index);
 }
 
-inline Variant x_exif_thumbnail(CStrRef filename, Variant width = null, Variant height = null, Variant imagetype = null) {
+inline Variant x_exif_thumbnail(CStrRef filename, CVarRef width = null, CVarRef height = null, CVarRef imagetype = null) {
   FUNCTION_INJECTION_BUILTIN(exif_thumbnail);
-  return f_exif_thumbnail(filename, ref(width), ref(height), ref(imagetype));
+  return f_exif_thumbnail(filename, width, height, imagetype);
 }
 
 

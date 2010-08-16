@@ -105,9 +105,9 @@ inline Variant x_pack(int _argc, CStrRef format, CArrRef _argv = null_array) {
   return f_pack(_argc, format, _argv);
 }
 
-inline bool x_php_check_syntax(CStrRef filename, Variant error_message = null) {
+inline bool x_php_check_syntax(CStrRef filename, CVarRef error_message = null) {
   FUNCTION_INJECTION_BUILTIN(php_check_syntax);
-  return f_php_check_syntax(filename, ref(error_message));
+  return f_php_check_syntax(filename, error_message);
 }
 
 inline String x_php_strip_whitespace(CStrRef filename) {

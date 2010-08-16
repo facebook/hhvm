@@ -95,9 +95,9 @@ inline bool x_ldap_unbind(CObjRef link) {
   return f_ldap_unbind(link);
 }
 
-inline bool x_ldap_get_option(CObjRef link, int option, Variant retval) {
+inline bool x_ldap_get_option(CObjRef link, int option, CVarRef retval) {
   FUNCTION_INJECTION_BUILTIN(ldap_get_option);
-  return f_ldap_get_option(link, option, ref(retval));
+  return f_ldap_get_option(link, option, retval);
 }
 
 inline bool x_ldap_set_option(CVarRef link, int option, CVarRef newval) {
@@ -200,14 +200,14 @@ inline Variant x_ldap_next_reference(CObjRef link, CObjRef result_entry) {
   return f_ldap_next_reference(link, result_entry);
 }
 
-inline bool x_ldap_parse_reference(CObjRef link, CObjRef result_entry, Variant referrals) {
+inline bool x_ldap_parse_reference(CObjRef link, CObjRef result_entry, CVarRef referrals) {
   FUNCTION_INJECTION_BUILTIN(ldap_parse_reference);
-  return f_ldap_parse_reference(link, result_entry, ref(referrals));
+  return f_ldap_parse_reference(link, result_entry, referrals);
 }
 
-inline bool x_ldap_parse_result(CObjRef link, CObjRef result, Variant errcode, Variant matcheddn = null, Variant errmsg = null, Variant referrals = null) {
+inline bool x_ldap_parse_result(CObjRef link, CObjRef result, CVarRef errcode, CVarRef matcheddn = null, CVarRef errmsg = null, CVarRef referrals = null) {
   FUNCTION_INJECTION_BUILTIN(ldap_parse_result);
-  return f_ldap_parse_result(link, result, ref(errcode), ref(matcheddn), ref(errmsg), ref(referrals));
+  return f_ldap_parse_result(link, result, errcode, matcheddn, errmsg, referrals);
 }
 
 inline bool x_ldap_free_result(CObjRef result) {

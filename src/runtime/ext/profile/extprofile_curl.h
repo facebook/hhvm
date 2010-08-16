@@ -35,7 +35,7 @@ inline Variant x_curl_copy_handle(CObjRef ch) {
   return f_curl_copy_handle(ch);
 }
 
-inline Variant x_curl_version(int uversion = CURLVERSION_NOW) {
+inline Variant x_curl_version(int uversion = k_CURLVERSION_NOW) {
   FUNCTION_INJECTION_BUILTIN(curl_version);
   return f_curl_version(uversion);
 }
@@ -90,9 +90,9 @@ inline Variant x_curl_multi_remove_handle(CObjRef mh, CObjRef ch) {
   return f_curl_multi_remove_handle(mh, ch);
 }
 
-inline Variant x_curl_multi_exec(CObjRef mh, Variant still_running) {
+inline Variant x_curl_multi_exec(CObjRef mh, CVarRef still_running) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_exec);
-  return f_curl_multi_exec(mh, ref(still_running));
+  return f_curl_multi_exec(mh, still_running);
 }
 
 inline Variant x_curl_multi_select(CObjRef mh, double timeout = 1.0) {
@@ -105,9 +105,9 @@ inline Variant x_curl_multi_getcontent(CObjRef ch) {
   return f_curl_multi_getcontent(ch);
 }
 
-inline Variant x_curl_multi_info_read(CObjRef mh, Variant msgs_in_queue = null) {
+inline Variant x_curl_multi_info_read(CObjRef mh, CVarRef msgs_in_queue = null) {
   FUNCTION_INJECTION_BUILTIN(curl_multi_info_read);
-  return f_curl_multi_info_read(mh, ref(msgs_in_queue));
+  return f_curl_multi_info_read(mh, msgs_in_queue);
 }
 
 inline Variant x_curl_multi_close(CObjRef mh) {

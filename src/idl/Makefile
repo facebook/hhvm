@@ -102,6 +102,9 @@ geninc-all: $(patsubst %.idl.php, %.geninc, $(IDL_PHPS))
 		../runtime/ext/sep/mhash/mhash.inc
 	@php idl.php inc ../system/helper.idl.php ../system/helper.inc
 
+update-all:
+	@for c in $(patsubst %.idl.php, %, $(IDL_PHPS)); do $(MAKE) update EXT=$$c; done;
+
 # re-generating .idl files
 
 %.gendoc:

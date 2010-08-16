@@ -145,14 +145,14 @@ inline Array x_getrusage(int who = 0) {
   return f_getrusage(who);
 }
 
-inline bool x_clock_getres(int clk_id, Variant sec, Variant nsec) {
+inline bool x_clock_getres(int clk_id, CVarRef sec, CVarRef nsec) {
   FUNCTION_INJECTION_BUILTIN(clock_getres);
-  return f_clock_getres(clk_id, ref(sec), ref(nsec));
+  return f_clock_getres(clk_id, sec, nsec);
 }
 
-inline bool x_clock_gettime(int clk_id, Variant sec, Variant nsec) {
+inline bool x_clock_gettime(int clk_id, CVarRef sec, CVarRef nsec) {
   FUNCTION_INJECTION_BUILTIN(clock_gettime);
-  return f_clock_gettime(clk_id, ref(sec), ref(nsec));
+  return f_clock_gettime(clk_id, sec, nsec);
 }
 
 inline bool x_clock_settime(int clk_id, int64 sec, int64 nsec) {

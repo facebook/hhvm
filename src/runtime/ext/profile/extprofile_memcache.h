@@ -50,9 +50,9 @@ inline bool x_memcache_replace(CObjRef memcache, CStrRef key, CVarRef var, int f
   return f_memcache_replace(memcache, key, var, flag, expire);
 }
 
-inline Variant x_memcache_get(CObjRef memcache, CVarRef key, Variant flags = null) {
+inline Variant x_memcache_get(CObjRef memcache, CVarRef key, CVarRef flags = null) {
   FUNCTION_INJECTION_BUILTIN(memcache_get);
-  return f_memcache_get(memcache, key, ref(flags));
+  return f_memcache_get(memcache, key, flags);
 }
 
 inline bool x_memcache_delete(CObjRef memcache, CStrRef key, int expire = 0) {

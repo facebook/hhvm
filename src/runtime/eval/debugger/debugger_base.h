@@ -62,8 +62,18 @@ extern const char *PHP_KEYWORDS[];
 DECLARE_BOOST_TYPES(DMachineInfo);
 class DMachineInfo {
 public:
+  DMachineInfo()
+      : m_interrupting(false), m_sandboxAttached(false), m_initialized(false),
+        m_rpcPort(0) {}
+
   std::string m_name;
   DebuggerThriftBuffer m_thrift;
+
+  bool m_interrupting;
+  bool m_sandboxAttached;
+  bool m_initialized;
+  std::string m_rpcHost;
+  int m_rpcPort;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -79,7 +89,13 @@ public:
   std::string m_path;
 
   const std::string &id() const;
+  const std::string desc() const;
+
   void set(const std::string &id);
+  void update(const DSandboxInfo &src);
+
+  void sendImpl(ThriftBuffer &thrift);
+  void recvImpl(ThriftBuffer &thrift);
 
 private:
   mutable std::string m_cached_id;

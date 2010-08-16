@@ -1,7 +1,7 @@
 
 <h2>Debugging Excessive Mutex</h2>
 
-1. Trun on mutex stats
+1. Turn on mutex stats
 
 Hit admin port with /stats-mutex to turn on mutex stats:
 

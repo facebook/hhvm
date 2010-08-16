@@ -16,6 +16,7 @@
 
 #include <runtime/eval/debugger/dummy_sandbox.h>
 #include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/debugger/cmd/cmd_signal.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/externals.h>
 #include <system/gen/sys/system_globals.h>
@@ -30,7 +31,8 @@ DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,
                            const std::string &startupFile)
     : m_proxy(proxy), m_defaultPath(defaultPath), m_startupFile(startupFile),
-      m_thread(this, &DummySandbox::run), m_stopped(false), m_signum(0) {
+      m_thread(this, &DummySandbox::run), m_stopped(false),
+      m_signum(CmdSignal::SignalNone) {
 }
 
 DummySandbox::~DummySandbox() {
@@ -52,29 +54,42 @@ void DummySandbox::run() {
       char *argv[] = {"", NULL};
       execute_command_line_begin(1, argv, 0);
 
+      DSandboxInfo sandbox = m_proxy->getSandbox();
       SystemGlobals *g = (SystemGlobals *)get_global_variables();
-      Variant &server = g->gv__SERVER;
-      const DSandboxInfo &sandbox = m_proxy->getSandbox();
-      server.set("HPHP_SANDBOX_USER", sandbox.m_user);
-      server.set("HPHP_SANDBOX_NAME", sandbox.m_name);
-      server.set("HPHP_SANDBOX_PATH", sandbox.m_path);
-      Eval::Debugger::RegisterSandbox(sandbox);
+      g->gv__SERVER.set("HPHP_SANDBOX_ID", sandbox.id());
 
-      if (!m_startupFile.empty()) {
-        hphp_invoke_simple(getStartupDoc(sandbox));
+      std::string doc = getStartupDoc(sandbox);
+      bool error; string errorMsg;
+      bool ret = hphp_invoke(g_context.get(), doc, false, null_array, null,
+                             "", "", "", error, errorMsg);
+      string msg;
+      if (!ret || error) {
+        msg = "Unable to pre-load " + doc;
+        if (!errorMsg.empty()) {
+          msg += ": " + errorMsg;
+        }
       }
 
-      Debugger::InterruptSessionStarted(NULL);
+      Debugger::RegisterSandbox(sandbox);
+      Debugger::InterruptSessionStarted(NULL, msg.c_str());
 
-      Lock lock(this);
-      while (!m_stopped && m_signum != SIGINT) {
-        wait(1);
+      // Blocking until Ctrl-C is issued by end user and DebuggerProxy cannot
+      // find a real sandbox thread to handle it.
+      {
+        Lock lock(this);
+        while (!m_stopped && m_signum != CmdSignal::SignalBreak) {
+          wait(1);
+        }
+        m_signum = CmdSignal::SignalNone;
       }
-      m_signum = 0;
 
+      execute_command_line_end(0, false, NULL);
+    } catch (const DebuggerRestartException &e) {
+      execute_command_line_end(0, false, NULL);
     } catch (const DebuggerClientExitException &e) {
       execute_command_line_end(0, false, NULL);
-      break; // end user quitting debugger
+      // no exit here, as there are cases when sandbox cannot find any
+      // matching proxy momentarily while proxy is changing its sandbox id.
     }
   }
 
@@ -89,39 +104,40 @@ void DummySandbox::notifySignal(int signum) {
 
 std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
   string path;
+  if (!m_startupFile.empty()){
+    // if relative path, prepend directory
+    if (m_startupFile[0] != '/' && m_startupFile[0] != '~') {
+      path = sandbox.m_path;
+      if (path.empty()) {
+        path = m_defaultPath;
+      }
+    }
+    if (!path.empty() && path[path.size() - 1] != '/') {
+      path += '/';
+    }
+    path += m_startupFile;
 
-  // if relative path, prepend directory
-  if (m_startupFile[0] != '/' && m_startupFile[0] != '~') {
-    path = sandbox.m_path;
-    if (path.empty()) {
-      path = m_defaultPath;
+    // resolving home directory
+    if (path[0] == '~') {
+      string user, home;
+      size_t pos = path.find('/');
+      if (pos == string::npos) pos = path.size();
+      if (pos > 1) {
+        user = path.substr(1, pos - 1);
+      }
+      if (user.empty()) user = sandbox.m_user;
+      if (user.empty() || user == Process::GetCurrentUser()) {
+        home = Process::GetHomeDirectory();
+      } else {
+        home = "/home/" + user + "/";
+      }
+      if (pos + 1 < path.size()) {
+        path = home + path.substr(pos + 1);
+      } else {
+        path = home;
+      }
     }
   }
-  if (!path.empty() && path[path.size() - 1] != '/') {
-    path += '/';
-  }
-  path += m_startupFile;
-
-  // resolving home directory
-  if (path[0] == '~') {
-    string user, home;
-    size_t pos = path.find('/');
-    if (pos == string::npos) pos = path.size();
-    if (pos > 1) {
-      path.substr(1, pos - 1);
-    }
-    if (user.empty()) user = sandbox.m_user;
-    if (user.empty() || user == Process::GetCurrentUser()) {
-      home = Process::GetHomeDirectory();
-    } else {
-      home = "/home/" + user + "/";
-    }
-    path = home;
-    if (pos < path.size()) {
-      path += path.substr(pos);
-    }
-  }
-
   return path;
 }
 

@@ -76,6 +76,10 @@ public:
   static void ClearThreadLog();
   static void SetNewOutput(FILE *output);
 
+  typedef void (*PFUNC_LOG)(const char *header, const char *msg,
+                            const char *ending, void *data);
+  static void SetThreadHook(PFUNC_LOG func, void *data);
+
   static void SetTheLogger(Logger* logger) {
     if (logger != NULL) {
       delete s_logger;
@@ -88,10 +92,12 @@ public:
 protected:
   class ThreadData {
   public:
-    ThreadData() : request(0), message(0), log(NULL) {}
+    ThreadData() : request(0), message(0), log(NULL), hook(NULL) {}
     int request;
     int message;
     FILE *log;
+    PFUNC_LOG hook;
+    void *hookData;
   };
   static DECLARE_THREAD_LOCAL(ThreadData, s_threadData);
 

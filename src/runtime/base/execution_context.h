@@ -115,6 +115,10 @@ public:
   void write(CStrRef s);
   void write(const char *s, int len);
   void write(const char *s) { write(s, strlen(s));}
+  void writeStdout(const char *s, int len);
+
+  typedef void (*PFUNC_STDOUT)(const char *s, int len, void *data);
+  void setStdout(PFUNC_STDOUT func, void *data);
 
   /**
    * Output buffering.
@@ -215,6 +219,8 @@ private:
   std::list<OutputBuffer*> m_buffers; // a stack of output buffers
   bool m_implicitFlush;
   int m_protectedLevel;
+  PFUNC_STDOUT m_stdout;
+  void *m_stdoutData;
 
   // request handlers
   std::set<RequestEventHandler*> m_requestEventHandlerSet;

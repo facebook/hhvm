@@ -19,17 +19,25 @@
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+void CmdEval::sendImpl(DebuggerThriftBuffer &thrift) {
+  DebuggerCommand::sendImpl(thrift);
+  thrift.write(m_output);
+}
+
+void CmdEval::recvImpl(DebuggerThriftBuffer &thrift) {
+  DebuggerCommand::recvImpl(thrift);
+  thrift.read(m_output);
+}
+
 bool CmdEval::onClient(DebuggerClient *client) {
   m_body = client->getCode();
   CmdEvalPtr res = client->xend<CmdEval>(this);
-  client->print(res->m_body);
+  client->print(res->m_output);
   return true;
 }
 
 bool CmdEval::onServer(DebuggerProxy *proxy) {
-  String output;
-  DebuggerProxy::ExecutePHP(m_body, output);
-  m_body = std::string(output.data(), output.size());
+  DebuggerProxy::ExecutePHP(m_body, m_output);
   return proxy->send(this);
 }
 

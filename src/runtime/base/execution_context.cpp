@@ -50,6 +50,7 @@ ExecutionContext::ExecutionContext()
     m_maxTime(RuntimeOption::RequestTimeoutSeconds),
     m_cwd(Process::CurrentWorkingDirectory),
     m_out(NULL), m_implicitFlush(false), m_protectedLevel(0),
+    m_stdout(NULL), m_stdoutData(NULL),
     m_errorState(ExecutionContext::NoError),
     m_errorReportingLevel(RuntimeOption::RuntimeErrorReportingLevel),
     m_lastErrorNum(0), m_logErrors(false), m_throwAllErrors(false) {
@@ -192,13 +193,22 @@ void ExecutionContext::write(CStrRef s) {
   write(s.data(), s.size());
 }
 
-static void writeStdout(const char *s, int len) {
-  if (Util::s_stdout_color) {
-    fwrite(Util::s_stdout_color, strlen(Util::s_stdout_color), 1, stdout);
-    fwrite(s, len, 1, stdout);
-    fwrite(ANSI_COLOR_END, strlen(ANSI_COLOR_END), 1, stdout);
+void ExecutionContext::setStdout(PFUNC_STDOUT func, void *data) {
+  m_stdout = func;
+  m_stdoutData = data;
+}
+
+void ExecutionContext::writeStdout(const char *s, int len) {
+  if (m_stdout == NULL) {
+    if (Util::s_stdout_color) {
+      fwrite(Util::s_stdout_color, strlen(Util::s_stdout_color), 1, stdout);
+      fwrite(s, len, 1, stdout);
+      fwrite(ANSI_COLOR_END, strlen(ANSI_COLOR_END), 1, stdout);
+    } else {
+      fwrite(s, len, 1, stdout);
+    }
   } else {
-    fwrite(s, len, 1, stdout);
+    m_stdout(s, len, m_stdoutData);
   }
 }
 

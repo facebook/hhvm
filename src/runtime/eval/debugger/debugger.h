@@ -39,20 +39,20 @@ public:
    * Add a new sandbox a debugger can connect to.
    */
   static void RegisterSandbox(const DSandboxInfo &sandbox);
-  static void GetRegisteredSandboxes(StringVec &ids);
+  static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
 
   /**
    * Add/remove/change DebuggerProxy.
    */
   static void RegisterProxy(SmartPtr<Socket> socket, bool local);
   static void RemoveProxy(DebuggerProxyPtr proxy);
-  static void SwitchSandbox(DebuggerProxyPtr proxy,
-                            const DSandboxInfo &sandbox);
+  static void SwitchSandbox(DebuggerProxyPtr proxy, const std::string &newId);
 
   /**
    * Called from differnt time point of execution thread.
    */
-  static void InterruptSessionStarted(const char *file);
+  static void InterruptSessionStarted(const char *file,
+                                      const char *error = NULL);
   static void InterruptSessionEnded(const char *file);
   static void InterruptRequestStarted(const char *url);
   static void InterruptRequestEnded(const char *url);
@@ -74,12 +74,13 @@ public:
 private:
   static Debugger s_debugger;
 
-  static DebuggerProxyPtrSet GetProxies();
+  static DebuggerProxyPtr GetProxy();
   static void Interrupt(int type, const char *program,
-                        InterruptSite *site = NULL);
+                        InterruptSite *site = NULL, const char *error = NULL);
 
   ReadWriteMutex m_mutex;
-  StringToDebuggerProxyPtrSetMap m_proxies;
+  StringToDebuggerProxyPtrMap m_proxies;
+  StringToDSandboxInfoPtrMap m_sandboxes;
 
   /**
    * m_threadInfos stores threads by sandbox id. These threads were started
@@ -99,13 +100,13 @@ private:
   void stop();
 
   void addSandbox(const DSandboxInfo &sandbox);
-  void getSandboxes(StringVec &ids);
+  void getSandboxes(DSandboxInfoPtrVec &sandboxes);
 
   void addProxy(SmartPtr<Socket> socket, bool local);
   void removeProxy(DebuggerProxyPtr proxy);
 
-  DebuggerProxyPtrSet findProxies(const std::string &id);
-  void switchSandbox(DebuggerProxyPtr proxy, const DSandboxInfo &sandbox);
+  DebuggerProxyPtr findProxy(const std::string &id);
+  void switchSandbox(DebuggerProxyPtr proxy, const std::string &newId);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

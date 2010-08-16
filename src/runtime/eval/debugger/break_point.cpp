@@ -337,6 +337,8 @@ std::string BreakPointInfo::desc() const {
 }
 
 bool BreakPointInfo::parseLines(const std::string &token) {
+  if (token.empty()) return false;
+
   for (unsigned int i = 0; i < token.size(); i++) {
     char ch = token[i];
     if ((ch < '0' || ch > '9') && ch != '-') {
@@ -397,6 +399,7 @@ void BreakPointInfo::parseBreakPointReached(const std::string &exp,
   size_t pos = input.find('@');
   if (pos != string::npos) {
     m_url = input.substr(pos + 1);
+    if (pos == 0) return;
     input = input.substr(0, pos);
   }
 

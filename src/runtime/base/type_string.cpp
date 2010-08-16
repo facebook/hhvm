@@ -83,9 +83,6 @@ String::String(double n) {
   m_px->incRefCount();
 }
 
-String::String(litstr s)
-  : SmartPtr<StringData>(NEW(StringData)(s, AttachLiteral)) { }
-
 void String::assign(const char *data, StringDataMode mode) {
   if (data) {
     SmartPtr<StringData>::operator=(NEW(StringData)(data, mode));

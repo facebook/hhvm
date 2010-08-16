@@ -50,14 +50,15 @@ public:
   ~DebuggerProxy();
 
   bool isLocal() const { return m_local;}
-  const DSandboxInfo &getSandbox() const { return m_sandbox;}
-  std::string getSandboxId() const { return m_sandbox.id();}
+  DSandboxInfo getSandbox() const;
+  std::string getSandboxId() const;
   void getThreads(DThreadInfoPtrVec &threads);
 
   void startDummySandbox();
   void startSignalThread();
 
-  void switchSandbox(const std::string &id);
+  void switchSandbox(const std::string &newId);
+  void updateSandbox(DSandboxInfoPtr sandbox);
   bool switchThread(DThreadInfoPtr thread);
   void switchThreadMode(ThreadMode mode, int64 threadId = 0);
   void setBreakPoints(BreakPointInfoPtrVec &breakpoints);
@@ -66,29 +67,31 @@ public:
   bool send(DebuggerCommand *cmd);
 
   void pollSignal(); // for signal polling thread
+  void notifyDummySandbox();
 
 private:
   bool m_stopped;
 
   bool m_local;
   DebuggerThriftBuffer m_thrift;
-  DSandboxInfo m_sandbox;
   DummySandboxPtr m_dummySandbox;
 
-  Mutex m_bpMutex;
+  mutable Mutex m_mutex;
   BreakPointInfoPtrVec m_breakpoints;
+  DSandboxInfo m_sandbox;
 
   ThreadMode m_threadMode;
-  pthread_t m_thread;
+  int64 m_thread;
   DThreadInfoPtr m_newThread;
-  std::map<pthread_t, DThreadInfoPtr> m_threads;
-  CmdInterrupt *m_interrupt;
+  std::map<int64, DThreadInfoPtr> m_threads;
 
   CmdFlowControlPtr m_flow; // c, s, n, o commands that can skip breakpoints
   CmdJumpPtr m_jump;
 
-  Mutex m_signalMutex;
+  Mutex m_signalMutex; // who can talk to client
   AsyncFunc<DebuggerProxy> m_signalThread; // polling signals from client
+
+  Mutex m_signumMutex;
   int m_signum;
 
   // helpers

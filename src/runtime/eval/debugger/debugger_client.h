@@ -46,6 +46,10 @@ public:
   static const char *DefaultCodeColors[];
 
 public:
+  static void LoadColors(Hdf hdf);
+  static const char *LoadColor(Hdf hdf, const char *defaultName);
+  static void LoadCodeColor(CodeColor index, Hdf hdf, const char *defaultName);
+
   /**
    * Starts/stops a debugger client.
    */
@@ -172,18 +176,24 @@ public:
   void send(DebuggerCommand *cmd) { send(cmd, 0);}
 
   /**
-   * Machine functions.
+   * Machine functions. True if we're switching to a machine that's not
+   * interrupting, therefore, we need to throw DebuggerConsoleExitException
+   * to pump more interrupts. False if we're switching to a machine that
+   * was already interrupting, OR, there was a failure to switch. We then
+   * need to call initializeMachine() immediately without waiting.
    */
-  void connect(const std::string &host, int port, bool rpc);
-  void disconnect();
+  bool connect(const std::string &host, int port);
+  bool connectRPC(const std::string &host, int port);
+  bool disconnect();
+  bool initializeMachine();
 
   /**
    * Sandbox functions.
    */
-  void updateSandboxes(const StringVec &sandboxes) {
+  void updateSandboxes(DSandboxInfoPtrVec &sandboxes) {
     m_sandboxes = sandboxes;
   }
-  std::string getSandbox(int index) const;
+  DSandboxInfoPtr getSandbox(int index) const;
 
   /**
    * Thread functions.
@@ -245,7 +255,8 @@ public:
 private:
   enum InputState {
     TakingCommand,
-    TakingCode
+    TakingCode,
+    TakingInterrupt
   };
   enum RunState {
     NotYet,
@@ -291,7 +302,7 @@ private:
   DMachineInfoPtr m_machine;     // current
   std::string m_rpcHost;         // current RPC host
 
-  StringVec m_sandboxes;
+  DSandboxInfoPtrVec m_sandboxes;
   DThreadInfoPtrVec m_threads;
   int64 m_threadId;
   std::map<int64, int> m_threadIdMap; // maps threadId to index
@@ -330,16 +341,14 @@ private:
 
   // config and macros
   void defineColors();
-  const char *loadColor(Hdf hdf, const char *defaultName);
-  void loadCodeColor(CodeColor index, Hdf hdf, const char *defaultName);
   void loadConfig();
   void saveConfig();
   void record(const char *line);
 
-  // communications
+  // connections
   void switchMachine(DMachineInfoPtr machine);
   SmartPtr<Socket> connectLocal();
-  void connectRemote(const std::string &host, int port);
+  bool connectRemote(const std::string &host, int port);
 
   DebuggerCommandPtr send(DebuggerCommand *cmd, int expected);
   DebuggerCommandPtr xend(DebuggerCommand *cmd);

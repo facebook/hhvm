@@ -168,16 +168,19 @@ void Logger::log(const std::string &msg, const StackTrace *stackTrace,
       }
     }
     const char *escaped = escape ? EscapeString(msg) : msg.c_str();
+    const char *ending = escapeMore ? "\\n" : "\n";
     bool color = (f == stdout && Util::s_stderr_color);
     fprintf(f, "%s%s%s%s%s",
             color ? Util::s_stderr_color : "",
-            sheader.c_str(), escaped, escapeMore ? "\\n" : "\n",
+            sheader.c_str(), escaped, ending,
             color ? ANSI_COLOR_END : "");
     FILE *tf = threadData->log;
     if (tf) {
-      fprintf(tf, "%s%s%s", header.c_str(), escaped,
-                            escapeMore ? "\\n" : "\n");
+      fprintf(tf, "%s%s%s", header.c_str(), escaped, ending);
       fflush(tf);
+    }
+    if (threadData->hook) {
+      threadData->hook(header.c_str(), escaped, ending, threadData->hookData);
     }
     if (escape) {
       free((void*)escaped);
@@ -245,6 +248,12 @@ void Logger::ClearThreadLog() {
     fclose(threadData->log);
   }
   threadData->log = NULL;
+}
+
+void Logger::SetThreadHook(PFUNC_LOG func, void *data) {
+  ThreadData *threadData = s_threadData.get();
+  threadData->hook = func;
+  threadData->hookData = data;
 }
 
 void Logger::SetNewOutput(FILE *output) {

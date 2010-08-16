@@ -141,10 +141,6 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
                String(parseSandboxServerVariable(it->second)));
   }
 
-  // EvalDebugger needs these to associate debugger clients
-  server.set("HPHP_SANDBOX_USER", m_user);
-  server.set("HPHP_SANDBOX_NAME", m_sandbox);
-  server.set("HPHP_SANDBOX_PATH", m_path);
   if (!m_serverVars.empty()) {
     server += m_serverVars;
   }
@@ -153,6 +149,7 @@ void SourceRootInfo::setServerVariables(Variant &server) const {
   sandbox.m_user = m_user.data();
   sandbox.m_name = m_sandbox.data();
   sandbox.m_path = m_path.data();
+  server.set("HPHP_SANDBOX_ID", sandbox.id()); // EvalDebugger needs this
   Eval::Debugger::RegisterSandbox(sandbox);
 }
 

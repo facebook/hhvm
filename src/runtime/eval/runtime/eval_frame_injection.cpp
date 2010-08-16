@@ -34,9 +34,11 @@ Array EvalFrameInjection::getArgs() {
 }
 
 bool EvalFrameInjection::SetLine(const Construct *c) {
-  int line1 = c->loc()->line1;
   ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
   FrameInjection *frame = ti->m_top;
+  if (!frame) return true;
+
+  int line1 = c->loc()->line1;
   frame->setLine(line1);
   if (RuntimeOption::EnableDebugger && ti->m_reqInjectionData.debugger) {
     InterruptSite site(frame);

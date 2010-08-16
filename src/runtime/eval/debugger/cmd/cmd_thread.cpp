@@ -92,8 +92,7 @@ void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
   for (int i = 0; i < (int)res->m_threads.size(); i++) {
     DThreadInfoPtr thread = res->m_threads[i];
     const char *flag = " ";
-    if (thread->m_id == client->getCurrentThreadId() &&
-        res->m_threads.size() > 1) {
+    if (thread->m_id == client->getCurrentThreadId()) {
       flag = "*";
     }
     client->print("%4d %s 0x%llx (%s) %s\n     %s", thread->m_index,
@@ -164,6 +163,7 @@ bool CmdThread::onClient(DebuggerClient *client) {
     m_body = "switch";
     m_threads.push_back(thread);
     client->send(this);
+    throw DebuggerConsoleExitException();
   }
 
   return true;
@@ -184,8 +184,10 @@ bool CmdThread::onServer(DebuggerProxy *proxy) {
     Transport *transport = g_context->getTransport();
     if (transport) {
       transport->debuggerInfo(info);
+    } else if (proxy->isLocal()) {
+      Add(info, "Thread Type", "Command Line Script");
     } else {
-      Add(info, "Thread Type", "CLI");
+      Add(info, "Thread Type", "Dummy Sandbox");
     }
     g_context->debuggerInfo(info);
 
@@ -199,7 +201,9 @@ bool CmdThread::onServer(DebuggerProxy *proxy) {
   }
   if (m_body == "switch") {
     if (!m_threads.empty()) {
-      return proxy->switchThread(m_threads[0]);
+      proxy->switchThread(m_threads[0]);
+      m_exitInterrupt = true;
+      return true;
     }
   }
 

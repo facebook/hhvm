@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/debugger_server.h>
+#include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/base/runtime_option.h>
 #include <util/network.h>
@@ -30,6 +31,12 @@ DebuggerServer DebuggerServer::s_debugger_server;
 void DebuggerServer::Start() {
   if (RuntimeOption::EnableDebuggerServer) {
     Debugger::SetTextColors();
+
+    // Some server commands pre-formatted texts with color for clients. Loading
+    // a set of default colors for better display.
+    Hdf hdf;
+    DebuggerClient::LoadColors(hdf);
+
     s_debugger_server.start();
   }
 }

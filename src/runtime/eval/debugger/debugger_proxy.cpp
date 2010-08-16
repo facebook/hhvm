@@ -33,8 +33,8 @@ namespace HPHP { namespace Eval {
 
 DebuggerProxy::DebuggerProxy(SmartPtr<Socket> socket, bool local)
     : m_stopped(false), m_local(local), m_threadMode(Normal), m_thread(0),
-      m_interrupt(NULL), m_signalThread(this, &DebuggerProxy::pollSignal),
-      m_signum(0) {
+      m_signalThread(this, &DebuggerProxy::pollSignal),
+      m_signum(CmdSignal::SignalNone) {
   m_thrift.create(socket);
 }
 
@@ -58,23 +58,39 @@ void DebuggerProxy::startSignalThread() {
   m_signalThread.start();
 }
 
+DSandboxInfo DebuggerProxy::getSandbox() const {
+  Lock lock(m_mutex);
+  return m_sandbox;
+}
+
+std::string DebuggerProxy::getSandboxId() const {
+  Lock lock(m_mutex);
+  return m_sandbox.id();
+}
+
+void DebuggerProxy::switchSandbox(const std::string &newId) {
+  Debugger::SwitchSandbox(shared_from_this(), newId);
+}
+
+void DebuggerProxy::updateSandbox(DSandboxInfoPtr sandbox) {
+  Lock lock(m_mutex);
+  if (sandbox) {
+    if (m_sandbox.id() != sandbox->id()) {
+      m_sandbox = *sandbox;
+    } else {
+      m_sandbox.update(*sandbox);
+    }
+  }
+}
+
 void DebuggerProxy::setBreakPoints(BreakPointInfoPtrVec &breakpoints) {
-  Lock lock(m_bpMutex);
+  Lock lock(m_mutex);
   m_breakpoints = breakpoints;
 }
 
 bool DebuggerProxy::checkBreakPoints(CmdInterrupt &cmd) {
-  Lock lock(m_bpMutex);
+  Lock lock(m_mutex);
   return cmd.shouldBreak(m_breakpoints);
-}
-
-void DebuggerProxy::switchSandbox(const std::string &id) {
-  DSandboxInfo sandbox(id);
-  Debugger::SwitchSandbox(shared_from_this(), sandbox);
-
-  // This has to be done after Debugger::SwitchSandbox() who still needs the
-  // old m_sandbox value.
-  m_sandbox = sandbox;
 }
 
 bool DebuggerProxy::switchThread(DThreadInfoPtr thread) {
@@ -108,8 +124,13 @@ void DebuggerProxy::switchThreadMode(ThreadMode mode,
 
 void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
   Lock lock(this);
-  threads.push_back(CreateThreadInfo(m_interrupt->desc()));
-  for (std::map<pthread_t, DThreadInfoPtr>::const_iterator iter =
+  CmdInterrupt *tint =
+    (CmdInterrupt*)ThreadInfo::s_threadInfo->m_reqInjectionData.interrupt;
+  ASSERT(tint);
+  if (tint) {
+    threads.push_back(CreateThreadInfo(tint->desc()));
+  }
+  for (std::map<int64, DThreadInfoPtr>::const_iterator iter =
          m_threads.begin(); iter != m_threads.end(); ++iter) {
     DThreadInfoPtr thread(new DThreadInfo());
     *thread = *iter->second;
@@ -118,7 +139,7 @@ void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
 }
 
 bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
-  pthread_t self = Process::GetThreadId();
+  int64 self = cmd.getThreadId();
 
   Lock lock(this);
   if (m_thread && m_thread != self) {
@@ -145,8 +166,6 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
 // main functions
 
 void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
-  m_interrupt = &cmd;
-
   if (!blockUntilOwn(cmd, true)) {
     return;
   }
@@ -154,7 +173,7 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
     while (true) {
       try {
         Lock lock(m_signalMutex);
-        m_signum = 0;
+        m_signum = CmdSignal::SignalNone;
         processInterrupt(cmd);
       } catch (...) {
         switchThreadMode(Normal);
@@ -180,14 +199,22 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
   }
 }
 
+void DebuggerProxy::notifyDummySandbox() {
+  m_dummySandbox->notifySignal(CmdSignal::SignalBreak);
+}
+
 void DebuggerProxy::pollSignal() {
   while (!m_stopped) {
     sleep(1);
 
     // after 1 second that no active thread picks up the signal, we send it
     // to dummy sandbox
-    if (m_signum && m_dummySandbox) {
-      m_dummySandbox->notifySignal(m_signum);
+    if (m_signum != CmdSignal::SignalNone && m_dummySandbox) {
+      Lock lock(m_signumMutex);
+      if (m_signum != CmdSignal::SignalNone) {
+        m_dummySandbox->notifySignal(m_signum);
+        m_signum = CmdSignal::SignalNone;
+      }
     }
 
     Lock lock(m_signalMutex);
@@ -215,10 +242,14 @@ void DebuggerProxy::pollSignal() {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool DebuggerProxy::checkJumpFlowBreak(CmdInterrupt &cmd) {
-  if (m_signum == SIGINT) {
-    m_jump.reset();
-    m_flow.reset();
-    return true;
+  if (m_signum == CmdSignal::SignalBreak) {
+    Lock lock(m_signumMutex);
+    if (m_signum == CmdSignal::SignalBreak) {
+      m_signum = CmdSignal::SignalNone;
+      m_jump.reset();
+      m_flow.reset();
+      return true;
+    }
   }
 
   // jump command skips everything until the file:line or label is reached
@@ -285,9 +316,6 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     Debugger::RemoveProxy(shared_from_this()); // on socket error
     return;
   }
-  if (cmd.shouldExitInterrupt()) {
-    return;
-  }
 
   while (true) {
     DebuggerCommandPtr res;
@@ -322,6 +350,9 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
     }
     if (!res || !res->onServer(this)) {
       Debugger::RemoveProxy(shared_from_this());
+      return;
+    }
+    if (res->shouldExitInterrupt()) {
       return;
     }
   }
@@ -429,29 +460,51 @@ std::string DebuggerProxy::MakePHPReturn(const std::string &php) {
   return "<?php return " + php + ";";
 }
 
+static void append_stdout(const char *s, int len, void *data) {
+  StringBuffer *sb = (StringBuffer*)data;
+  if (Util::s_stdout_color) {
+    sb->append(Util::s_stdout_color);
+  }
+  sb->append(s, len);
+  if (Util::s_stdout_color) {
+    sb->append(ANSI_COLOR_END);
+  }
+}
+
+static void append_stderr(const char *header, const char *msg,
+                          const char *ending, void *data) {
+  StringBuffer *sb = (StringBuffer*)data;
+  if (Util::s_stderr_color) {
+    sb->append(Util::s_stderr_color);
+  }
+  sb->append(msg);
+  sb->append(ending);
+  if (Util::s_stderr_color) {
+    sb->append(ANSI_COLOR_END);
+  }
+}
+
 Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output) {
   DECLARE_THREAD_INFO
   // using "_" as filename
   FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain)
   Variant ret;
+  StringBuffer sb;
+  g_context->setStdout(append_stdout, &sb);
+  Logger::SetThreadHook(append_stderr, &sb);
   try {
-    g_context->obStart("");
     ret = eval(get_variable_table(), Object(),
                String(php.c_str(), php.size(), AttachLiteral), false);
-
-    output = Debugger::ColorStdout(g_context->obDetachContents());
-    g_context->obClean();
-    g_context->obEnd();
   } catch (Exception &e) {
-    output = Debugger::ColorStdout(g_context->obDetachContents());
-    output += Debugger::ColorStderr(String(e.what()));
+    sb.append(Debugger::ColorStderr(String(e.what())));
   } catch (Object &e) {
-    output = Debugger::ColorStdout(g_context->obDetachContents());
-    output += Debugger::ColorStderr(DebuggerClient::FormatVariable(e));
+    sb.append(Debugger::ColorStderr(DebuggerClient::FormatVariable(e)));
   } catch (...) {
-    output = Debugger::ColorStdout(g_context->obDetachContents());
-    output += Debugger::ColorStderr(String("(unknown exception"));
+    sb.append(Debugger::ColorStderr(String("(unknown exception was thrown")));
   }
+  g_context->setStdout(NULL, NULL);
+  Logger::SetThreadHook(NULL, NULL);
+  output = sb.detach();
   return ret;
 }
 

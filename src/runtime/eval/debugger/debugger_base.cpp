@@ -28,9 +28,13 @@ namespace HPHP { namespace Eval {
 
 const std::string &DSandboxInfo::id() const {
   if (m_cached_id.empty() && !m_user.empty()) {
-    m_cached_id = m_user + "\t" + m_name + "\t" + m_path;
+    m_cached_id = m_user + "\t" + m_name;
   }
   return m_cached_id;
+}
+
+const std::string DSandboxInfo::desc() const {
+  return m_user + "'s " + m_name + " sandbox";
 }
 
 void DSandboxInfo::set(const std::string &id) {
@@ -41,12 +45,29 @@ void DSandboxInfo::set(const std::string &id) {
   if (!id.empty()) {
     vector<string> tokens;
     Util::split('\t', id.c_str(), tokens);
-    if (tokens.size() == 3) {
+    if (tokens.size() == 2) {
       m_user = tokens[0];
       m_name = tokens[1];
-      m_path = tokens[2];
     }
   }
+}
+
+void DSandboxInfo::update(const DSandboxInfo &src) {
+  if (!src.m_path.empty() && m_path.empty()) {
+    m_path = src.m_path;
+  }
+}
+
+void DSandboxInfo::sendImpl(ThriftBuffer &thrift) {
+  thrift.write(m_user);
+  thrift.write(m_name);
+  thrift.write(m_path);
+}
+
+void DSandboxInfo::recvImpl(ThriftBuffer &thrift) {
+  thrift.read(m_user);
+  thrift.read(m_name);
+  thrift.read(m_path);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

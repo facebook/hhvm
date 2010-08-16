@@ -18,6 +18,7 @@
 #define __HPHP_EVAL_DEBUGGER_CMD_INTERRUPT_H__
 
 #include <runtime/eval/debugger/debugger_command.h>
+#include <util/process.h>
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -27,18 +28,21 @@ class CmdInterrupt : public DebuggerCommand {
 public:
   CmdInterrupt()
       : DebuggerCommand(KindOfInterrupt),
-        m_interrupt(-1), m_site(NULL), m_pendingJump(false) {}
+        m_interrupt(-1), m_threadId(0), m_site(NULL), m_pendingJump(false) {}
 
   CmdInterrupt(InterruptType interrupt, const char *program,
-               InterruptSite *site)
+               InterruptSite *site, const char *error)
       : DebuggerCommand(KindOfInterrupt),
         m_interrupt(interrupt), m_program(program ? program : ""),
-        m_threadId(0), m_site(site), m_pendingJump(false) {}
-
-  InterruptType getInterruptType() const {
-    return (InterruptType)m_interrupt;
+        m_site(site), m_pendingJump(false) {
+    m_threadId = Process::GetThreadId();
+    if (error) m_errorMsg = error;
   }
+
+  int64 getThreadId() const { return m_threadId;}
+  InterruptType getInterruptType() const { return (InterruptType)m_interrupt;}
   std::string desc() const;
+  std::string error() const { return m_errorMsg;}
 
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);
@@ -57,6 +61,7 @@ public:
 private:
   int16 m_interrupt;
   std::string m_program;   // informational only
+  std::string m_errorMsg;  // informational only
   int64 m_threadId;
   InterruptSite *m_site;   // server side
   BreakPointInfoPtr m_bpi; // client side

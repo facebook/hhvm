@@ -13,6 +13,7 @@ $topics =
         'Server Statistics' => 'server.stats',
       ),
       'Debugger' => array(
+        'Getting Started' => 'debugger_start',
         'All Commands' => 'debugger.cmds',
         'Command A-Z' => 'debugger.refs',
       ),

@@ -25,9 +25,16 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdSignal);
 class CmdSignal : public DebuggerCommand {
 public:
-  CmdSignal(int sig = 0) : DebuggerCommand(KindOfSignal), m_signum(sig) {}
+  enum Signal {
+    SignalNone,
+    SignalBreak,
+  };
 
-  int getSignal() const { return m_signum;}
+public:
+  CmdSignal(Signal sig = SignalNone)
+      : DebuggerCommand(KindOfSignal), m_signum(sig) {}
+
+  Signal getSignal() const { return (Signal)m_signum;}
 
   virtual bool onClient(DebuggerClient *client);
   virtual bool onServer(DebuggerProxy *proxy);

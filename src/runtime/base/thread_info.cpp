@@ -65,6 +65,7 @@ void RequestInjectionData::onSessionInit() {
   signaled    = false;
   surprised   = false;
   debugger    = false;
+  interrupt   = NULL;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,6 +28,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_interrupt);
   thrift.write(m_program);
+  thrift.write(m_errorMsg);
   thrift.write(m_threadId);
   thrift.write(m_pendingJump);
   if (m_site) {
@@ -54,6 +55,7 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_interrupt);
   thrift.read(m_program);
+  thrift.read(m_errorMsg);
   thrift.read(m_threadId);
   thrift.read(m_pendingJump);
   m_bpi = BreakPointInfoPtr(new BreakPointInfo());
@@ -204,6 +206,10 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
     }
   }
 
+  if (!m_errorMsg.empty()) {
+    client->error(m_errorMsg);
+  }
+
   // watches
   switch (m_interrupt) {
     case SessionStarted:
@@ -213,7 +219,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
       DebuggerClient::WatchPtrVec &watches = client->getWatches();
       for (int i = 0; i < (int)watches.size(); i++) {
         if (i > 0) client->output("");
-        client->info("Watch %d: %s =", i, watches[i]->second.c_str());
+        client->info("Watch %d: %s =", i + 1, watches[i]->second.c_str());
         CmdPrint().processWatch(client, watches[i]->first, watches[i]->second);
       }
     }

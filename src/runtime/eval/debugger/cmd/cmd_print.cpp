@@ -16,6 +16,7 @@
 
 #include <runtime/eval/debugger/cmd/cmd_print.h>
 #include <runtime/base/time/datetime.h>
+#include <runtime/base/string_util.h>
 
 using namespace std;
 
@@ -119,11 +120,13 @@ std::string CmdPrint::FormatResult(const char *format, CVarRef ret) {
 void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_ret);
+  thrift.write(m_output);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_ret);
+  thrift.read(m_output);
 }
 
 void CmdPrint::list(DebuggerClient *client) {
@@ -172,8 +175,9 @@ bool CmdPrint::help(DebuggerClient *client) {
 bool CmdPrint::processList(DebuggerClient *client) {
   DebuggerClient::WatchPtrVec &watches = client->getWatches();
   for (int i = 0; i < (int)watches.size(); i++) {
-    client->print("  %d\t%s  %s", i + 1,
-                  watches[i]->first,
+    client->print("  %d %s  %s", i + 1,
+                  StringUtil::Pad(watches[i]->first, 8, " ",
+                                  StringUtil::PadLeft).data(),
                   watches[i]->second.c_str());
   }
   if (watches.empty()) {
@@ -232,10 +236,10 @@ void CmdPrint::processWatch(DebuggerClient *client, const char *format,
                             const std::string &php) {
   m_body = php;
   CmdPrintPtr res = client->xend<CmdPrint>(this);
-  client->output(FormatResult(format, res->m_ret));
-  if (!res->m_body.empty()) {
-    client->output(res->m_body);
+  if (!res->m_output.empty()) {
+    client->output(res->m_output);
   }
+  client->output(FormatResult(format, res->m_ret));
 }
 
 bool CmdPrint::onClient(DebuggerClient *client) {
@@ -272,10 +276,8 @@ bool CmdPrint::onClient(DebuggerClient *client) {
 }
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
-  String output;
   m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                    output);
-  m_body = std::string(output.data(), output.size());
+                                    m_output);
   return proxy->send(this);
 }
 

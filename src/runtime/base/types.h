@@ -161,19 +161,21 @@ class RequestInjectionData {
 public:
   RequestInjectionData()
     : started(0), timeoutSeconds(-1), memExceeded(false), timedout(false),
-      signaled(false), surprised(false), debugger(false) {}
+      signaled(false), surprised(false), debugger(false), interrupt(NULL) {
+  }
 
-  time_t started;     // when a request was started
-  int timeoutSeconds; // how many seconds to timeout
+  time_t started;      // when a request was started
+  int timeoutSeconds;  // how many seconds to timeout
 
-  bool memExceeded;            // memory limit was exceeded
-  bool timedout;               // flag to set when timeout is detected
-  bool signaled;               // flag to set when a signal was raised
+  bool memExceeded;    // memory limit was exceeded
+  bool timedout;       // flag to set when timeout is detected
+  bool signaled;       // flag to set when a signal was raised
 
-  bool surprised;              // any surprise happened
-  Mutex surpriseMutex;         // mutex protecting per-request data
+  bool surprised;      // any surprise happened
+  Mutex surpriseMutex; // mutex protecting per-request data
 
-  bool debugger; // whether there is a DebuggerProxy attached to me
+  bool debugger;       // whether there is a DebuggerProxy attached to me
+  void *interrupt;     // current CmdInterrupt this thread's handling
 
   void onSessionInit();
 };

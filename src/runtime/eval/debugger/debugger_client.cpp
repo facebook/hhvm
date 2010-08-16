@@ -55,24 +55,30 @@ static char **debugger_completion(const char *text, int start, int end) {
 }
 
 static void debugger_signal_handler(int sig) {
-  rl_free_line_state();
-  rl_cleanup_after_signal();
   s_debugger_client.onSignal(sig);
 }
 
 void DebuggerClient::onSignal(int sig) {
-  m_signum = sig;
+  if (m_inputState == TakingInterrupt) {
+    info("Pausing program execution, please wait...");
+    m_signum = CmdSignal::SignalBreak;
+  }
 }
 
 int DebuggerClient::pollSignal() {
   int ret = m_signum;
-  m_signum = 0;
+  m_signum = CmdSignal::SignalNone;
   return ret;
 }
 
-class ReadlineHelper {
+///////////////////////////////////////////////////////////////////////////////
+
+/**
+ * Initialization and shutdown.
+ */
+class ReadlineApp {
 public:
-  ReadlineHelper() {
+  ReadlineApp() {
     DebuggerClient::AdjustScreenMetrics();
 
     rl_attempted_completion_function = debugger_completion;
@@ -85,9 +91,47 @@ public:
                   DebuggerClient::HistoryFileName).c_str());
   }
 
-  ~ReadlineHelper() {
+  ~ReadlineApp() {
     write_history((Process::GetHomeDirectory() +
                    DebuggerClient::HistoryFileName).c_str());
+  }
+};
+
+/**
+ * Displaying a spinning wait icon.
+ */
+class ReadlineWaitCursor {
+public:
+  ReadlineWaitCursor()
+      : m_thread(this, &ReadlineWaitCursor::animate), m_waiting(true) {
+    m_thread.start();
+  }
+
+  ~ReadlineWaitCursor() {
+    m_waiting = false;
+    m_thread.waitForEnd();
+  }
+
+  void animate() {
+    m_line = rl_line_buffer;
+    while (m_waiting) {
+      frame('|'); frame('/'); frame('-'); frame('\\');
+      frame('|'); frame('/'); frame('-'); frame('\\');
+      rl_replace_line(m_line.c_str(), 1);
+      rl_redisplay();
+    }
+  }
+
+private:
+  AsyncFunc<ReadlineWaitCursor> m_thread;
+  bool m_waiting;
+  string m_line;
+
+  void frame(char ch) {
+    string line = m_line + ch;
+    rl_replace_line(line.c_str(), 1);
+    rl_redisplay();
+    usleep(100000);
   }
 };
 
@@ -122,6 +166,43 @@ const char *DebuggerClient::DefaultCodeColors[] = {
   /* Constant    */ NULL, NULL,
   /* LineNo      */ NULL, NULL,
 };
+
+void DebuggerClient::LoadColors(Hdf hdf) {
+  HelpColor     = LoadColor(hdf["Help"],     "BROWN");
+  InfoColor     = LoadColor(hdf["Info"],     "GREEN");
+  OutputColor   = LoadColor(hdf["Output"],   "CYAN");
+  ErrorColor    = LoadColor(hdf["Error"],    "RED");
+  ItemNameColor = LoadColor(hdf["ItemName"], "GRAY");
+
+  Hdf code = hdf["Code"];
+  LoadCodeColor(CodeColorKeyword,      code["Keyword"],      "CYAN");
+  LoadCodeColor(CodeColorComment,      code["Comment"],      "RED");
+  LoadCodeColor(CodeColorString,       code["String"],       "GREEN");
+  LoadCodeColor(CodeColorVariable,     code["Variable"],     "BROWN");
+  LoadCodeColor(CodeColorHtml,         code["Html"],         "GRAY");
+  LoadCodeColor(CodeColorTag,          code["Tag"],          "MAGENTA");
+  LoadCodeColor(CodeColorDeclaration,  code["Declaration"],  "BLUE");
+  LoadCodeColor(CodeColorConstant,     code["Constant"],     "MAGENTA");
+  LoadCodeColor(CodeColorLineNo,       code["LineNo"],       "GRAY");
+}
+
+const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
+  const char *name = hdf.get(defaultName);
+  hdf = name;  // for starter
+  const char *color = Util::get_color_by_name(name);
+  if (color == NULL) {
+    Logger::Error("Bad color name %s", name);
+    color = Util::get_color_by_name(defaultName);
+  }
+  return color;
+}
+
+void DebuggerClient::LoadCodeColor(CodeColor index, Hdf hdf,
+                                   const char *defaultName) {
+  const char *color = LoadColor(hdf, defaultName);
+  DefaultCodeColors[index * 2] = color;
+  DefaultCodeColors[index * 2 + 1] = color ? ANSI_COLOR_END : NULL;
+}
 
 SmartPtr<Socket> DebuggerClient::Start(const std::string &host, int port,
                                        const std::string &extension,
@@ -189,14 +270,14 @@ String DebuggerClient::FormatInfoVec(const IDebuggable::InfoVec &info,
   // print
   StringBuffer sb;
   for (unsigned int i = 0; i < info.size(); i++) {
-    sb.append(ItemNameColor);
+    if (ItemNameColor) sb.append(ItemNameColor);
     string name = info[i].first;
     name += ":                                                        ";
     sb.append(name.substr(0, maxlen + 4));
-    sb.append(ANSI_COLOR_END);
-    sb.append(OutputColor);
+    if (ItemNameColor) sb.append(ANSI_COLOR_END);
+    if (OutputColor) sb.append(OutputColor);
     sb.append(info[i].second);
-    sb.append(ANSI_COLOR_END);
+    if (OutputColor) sb.append(ANSI_COLOR_END);
     sb.append("\n");
   }
   if (nameLen) *nameLen = maxlen + 4;
@@ -221,7 +302,8 @@ String DebuggerClient::FormatTitle(const char *title) {
 DebuggerClient::DebuggerClient()
     : m_tutorial(0),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
-      m_inputState(TakingCommand), m_runState(NotYet), m_signum(0),
+      m_inputState(TakingCommand), m_runState(NotYet),
+      m_signum(CmdSignal::SignalNone),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_frame(0) {
 }
@@ -230,6 +312,10 @@ DebuggerClient::~DebuggerClient() {
 }
 
 void DebuggerClient::reset() {
+  for (unsigned int i = 0; i < m_machines.size(); i++) {
+    m_machines[i]->m_thrift.close();
+  }
+
   m_stacktrace.reset();
   m_acItems.clear();
   m_acLiveLists.reset();
@@ -237,33 +323,44 @@ void DebuggerClient::reset() {
   m_machine.reset();
 }
 
-void DebuggerClient::connect(const std::string &host, int port, bool rpc) {
-  if (rpc) {
-    disconnect();
-    m_rpcHost = "rpc:" + host;
-    return;
-  }
-
+bool DebuggerClient::connect(const std::string &host, int port) {
   ASSERT(!m_machines.empty());
   ASSERT(m_machines[0]->m_name == LocalPrompt);
   for (unsigned int i = 1; i < m_machines.size(); i++) {
     if (f_gethostbyname(m_machines[i]->m_name) ==
         f_gethostbyname(host)) {
       switchMachine(m_machines[i]);
-      return;
+      return false;
     }
   }
-  connectRemote(host, port);
+  return connectRemote(host, port);
 }
 
-void DebuggerClient::disconnect() {
+bool DebuggerClient::connectRPC(const std::string &host, int port) {
+  m_rpcHost = "rpc:" + host;
   ASSERT(!m_machines.empty());
-  ASSERT(m_machines[0]->m_name == LocalPrompt);
-  switchMachine(m_machines[0]);
+  DMachineInfoPtr local = m_machines[0];
+  ASSERT(local->m_name == LocalPrompt);
+  local->m_rpcHost = host;
+  local->m_rpcPort = port;
+  switchMachine(local);
+  return !local->m_interrupting;
+}
+
+bool DebuggerClient::disconnect() {
+  ASSERT(!m_machines.empty());
+  DMachineInfoPtr local = m_machines[0];
+  ASSERT(local->m_name == LocalPrompt);
+  local->m_rpcHost.clear();
+  local->m_rpcPort = 0;
+  switchMachine(local);
+  return !local->m_interrupting;
 }
 
 void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
   m_rpcHost.clear();
+  machine->m_initialized = false; // even if m_machine == machine
+
   if (m_machine != machine) {
     m_machine = machine;
     m_sandboxes.clear();
@@ -275,10 +372,6 @@ void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
     m_listLine = 0;
     m_stacktrace.reset();
     m_frame = 0;
-
-    if (!m_breakpoints.empty()) {
-      CmdBreak().update(this); // upload breakpoints
-    }
   }
 }
 
@@ -291,6 +384,7 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   SmartPtr<Socket> socket2(new Socket(fds[1], AF_UNIX));
 
   DMachineInfoPtr machine(new DMachineInfo());
+  machine->m_sandboxAttached = true;
   machine->m_name = LocalPrompt;
   machine->m_thrift.create(socket1);
   ASSERT(m_machines.empty());
@@ -299,11 +393,11 @@ SmartPtr<Socket> DebuggerClient::connectLocal() {
   return socket2;
 }
 
-void DebuggerClient::connectRemote(const std::string &host, int port) {
+bool DebuggerClient::connectRemote(const std::string &host, int port) {
   if (port <= 0) {
     port = RuntimeOption::DebuggerServerPort;
   }
-  info("Connecting to %s:%d...", host.c_str(), port);
+  info("Connecting and pre-loading %s:%d...", host.c_str(), port);
   Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                             String(host), port);
   Object obj(sock);
@@ -313,7 +407,9 @@ void DebuggerClient::connectRemote(const std::string &host, int port) {
     machine->m_thrift.create(SmartPtr<Socket>(sock));
     m_machines.push_back(machine);
     switchMachine(machine);
+    return true;
   }
+  return false;
 }
 
 std::string DebuggerClient::getPrompt() {
@@ -360,7 +456,7 @@ void DebuggerClient::stop() {
 }
 
 void DebuggerClient::run() {
-  ReadlineHelper helper;
+  ReadlineApp app;
   playMacro("startup");
 
   if (!m_quickCmds.empty()) {
@@ -388,6 +484,12 @@ void DebuggerClient::run() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // auto-complete
+
+void DebuggerClient::updateLiveLists() {
+  ReadlineWaitCursor waitCursor;
+  CmdInfo::UpdateLiveLists(this);
+  m_acLiveListsDirty = false;
+}
 
 void DebuggerClient::phpCompletion(const char *text) {
   if (*text && text[strlen(text) - 1] == '(') {
@@ -540,13 +642,43 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
   return getCompletion(m_acItems, text);
 }
 
-void DebuggerClient::updateLiveLists() {
-  CmdInfo::UpdateLiveLists(this);
-  m_acLiveListsDirty = false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // main
+
+bool DebuggerClient::initializeMachine() {
+  if (!m_machine->m_initialized) {
+    // set/clear intercept for RPC thread
+    if (!m_machines.empty() && m_machine == m_machines[0]) {
+      CmdMachine::UpdateIntercept(this, m_machine->m_rpcHost,
+                                  m_machine->m_rpcPort);
+    }
+
+    // upload breakpoints
+    if (!m_breakpoints.empty()) {
+      info("Updating breakpoints...");
+      CmdBreak().update(this);
+    }
+
+    // attaching to default sandbox
+    if (!m_machine->m_sandboxAttached) {
+      try {
+        CmdMachine::AttachSandbox(this);
+      } catch (DebuggerConsoleExitException &e) {
+        m_machine->m_sandboxAttached = true;
+      }
+      if (!m_machine->m_sandboxAttached) {
+        Logger::Error("Unable to communicate with default sandbox.");
+        return false;
+      }
+
+      m_machine->m_initialized = true;
+      throw DebuggerConsoleExitException();
+    }
+
+    m_machine->m_initialized = true;
+  }
+  return true;
+}
 
 void DebuggerClient::runImpl() {
   const char *func = "DebuggerClient::runImpl()";
@@ -556,7 +688,7 @@ void DebuggerClient::runImpl() {
       DebuggerCommandPtr cmd;
       if (DebuggerCommand::Receive(m_machine->m_thrift, cmd, func)) {
         if (!cmd) {
-          Logger::Error("%s: debugger error", func);
+          Logger::Error("Unable to communicate with server. Server's down?");
           return;
         }
         if (cmd->is(DebuggerCommand::KindOfSignal)) {
@@ -574,9 +706,22 @@ void DebuggerClient::runImpl() {
           Logger::Error("%s: unable to process %d", func, cmd->getType());
           return;
         }
+        m_machine->m_interrupting = true;
+
+        m_inputState = TakingCommand;
+        if (!m_machine->m_initialized) {
+          try {
+            if (!initializeMachine()) {
+              return;
+            }
+          } catch (DebuggerConsoleExitException &e) {
+            continue;
+          }
+        }
         if (!console()) {
           return;
         }
+        m_inputState = TakingInterrupt;
       }
     }
   } catch (DebuggerClientExitException &e) { /* normal exit */ }
@@ -693,7 +838,7 @@ char DebuggerClient::ask(const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   Logger::VSNPrintf(msg, fmt, ap); va_end(ap);
-  if (UseColor) {
+  if (UseColor && InfoColor) {
     msg = InfoColor + msg + ANSI_COLOR_END;
   }
   fwrite(msg.data(), 1, msg.length(), stdout);
@@ -1116,8 +1261,10 @@ DebuggerCommandPtr DebuggerClient::send(DebuggerCommand *cmd, int expected) {
         }
         Logger::Error("DebuggerClient::send(): unexpected return: %d",
                       res->getType());
+        throw DebuggerProtocolException();
       } else {
-        Logger::Error("DebuggerClient::send(): unexpected return: null");
+        Logger::Error("Unable to communicate with server. Server's down?");
+        throw DebuggerClientExitException();
       }
     } else {
       return res;
@@ -1190,14 +1337,14 @@ void DebuggerClient::quit() {
   throw DebuggerClientExitException();
 }
 
-std::string DebuggerClient::getSandbox(int index) const {
+DSandboxInfoPtr DebuggerClient::getSandbox(int index) const {
   if (index > 0) {
     --index;
     if (index >= 0 && index < (int)m_sandboxes.size()) {
       return m_sandboxes[index];
     }
   }
-  return "";
+  return DSandboxInfoPtr();
 }
 
 void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
@@ -1219,7 +1366,7 @@ void DebuggerClient::updateThreads(DThreadInfoPtrVec threads) {
 DThreadInfoPtr DebuggerClient::getThread(int index) const {
   for (unsigned int i = 0; i < m_threads.size(); i++) {
     if (m_threads[i]->m_index == index) {
-      return m_threads[index];
+      return m_threads[i];
     }
   }
   return DThreadInfoPtr();
@@ -1395,24 +1542,6 @@ void DebuggerClient::record(const char *line) {
 ///////////////////////////////////////////////////////////////////////////////
 // configuration
 
-const char *DebuggerClient::loadColor(Hdf hdf, const char *defaultName) {
-  const char *name = hdf.get(defaultName);
-  hdf = name;  // for starter
-  const char *color = Util::get_color_by_name(name);
-  if (color == NULL) {
-    Logger::Error("Bad color name %s", name);
-    color = Util::get_color_by_name(defaultName);
-  }
-  return color;
-}
-
-void DebuggerClient::loadCodeColor(CodeColor index, Hdf hdf,
-                                   const char *defaultName) {
-  const char *color = loadColor(hdf, defaultName);
-  DefaultCodeColors[index * 2] = color;
-  DefaultCodeColors[index * 2 + 1] = color ? ANSI_COLOR_END : NULL;
-}
-
 void DebuggerClient::loadConfig() {
   m_configFileName = Process::GetHomeDirectory() + ConfigFileName;
 
@@ -1435,23 +1564,7 @@ void DebuggerClient::loadConfig() {
   color = UseColor; // for starter
   if (UseColor) {
     defineColors(); // (1) no one can overwrite, (2) for starter
-
-    HelpColor     = loadColor(color["Help"],     "BROWN");
-    InfoColor     = loadColor(color["Info"],     "GREEN");
-    OutputColor   = loadColor(color["Output"],   "CYAN");
-    ErrorColor    = loadColor(color["Error"],    "RED");
-    ItemNameColor = loadColor(color["ItemName"], "GRAY");
-
-    Hdf code = color["Code"];
-    loadCodeColor(CodeColorKeyword,      code["Keyword"],      "CYAN");
-    loadCodeColor(CodeColorComment,      code["Comment"],      "RED");
-    loadCodeColor(CodeColorString,       code["String"],       "GREEN");
-    loadCodeColor(CodeColorVariable,     code["Variable"],     "BROWN");
-    loadCodeColor(CodeColorHtml,         code["Html"],         "GRAY");
-    loadCodeColor(CodeColorTag,          code["Tag"],          "MAGENTA");
-    loadCodeColor(CodeColorDeclaration,  code["Declaration"],  "BLUE");
-    loadCodeColor(CodeColorConstant,     code["Constant"],     "MAGENTA");
-    loadCodeColor(CodeColorLineNo,       code["LineNo"],       "GRAY");
+    LoadColors(color);
   }
 
   m_tutorial = m_config["Tutorial"].getInt32(0);

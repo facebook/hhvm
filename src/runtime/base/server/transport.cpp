@@ -718,10 +718,10 @@ bool Transport::moveUploadedFile(CStrRef filename, CStrRef destination) {
 
 const char *Transport::getThreadTypeName() const {
   switch (m_threadType) {
-    case RequestThread: return "REQUEST";
-    case PageletThread: return "PAGELET";
-    case XboxThread:    return "XBOX";
-    case RpcThread:     return "RPC";
+    case RequestThread: return "Web Request";
+    case PageletThread: return "Pagelet Thread";
+    case XboxThread:    return "Xbox Thread";
+    case RpcThread:     return "RPC Thread";
   }
   return "(unknown)";
 }

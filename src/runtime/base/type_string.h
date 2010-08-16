@@ -53,9 +53,10 @@ public:
   String(int     n);
   String(int64   n);
   String(double  n);
-  String(litstr  s);
-  String(CStrRef str) : SmartPtr<StringData>(str.m_px) { }
-
+  String(litstr  s)
+    : SmartPtr<StringData>(s ? NEW(StringData)(s, AttachLiteral) : NULL) { }
+  String(CStrRef str)
+    : SmartPtr<StringData>(str.m_px) { }
   String(const std::string &s) // always make a copy
     : SmartPtr<StringData>(NEW(StringData)(s.data(), s.size(), CopyString)) { }
   String(const char *s, StringDataMode mode) // null-terminated string

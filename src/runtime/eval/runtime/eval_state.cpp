@@ -130,7 +130,9 @@ void RequestEvalState::addCodeContainer(CodeContainer *cc) {
 ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {
   RequestEvalState *self = s_res.get();
   const string &name = cls->name();
-  if (self->m_classes.find(name.c_str()) != self->m_classes.end()) {
+  if (self->m_classes.find(name.c_str()) != self->m_classes.end() ||
+      ClassInfo::FindClass(name.c_str()) ||
+      ClassInfo::FindInterface(name.c_str())) {
     raise_error("Cannot redeclare class %s", name.c_str());
   }
   ClassEvalState &ce = self->m_classes[name.c_str()];

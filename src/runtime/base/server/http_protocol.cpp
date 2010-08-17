@@ -45,8 +45,11 @@ static bool read_all_post_data(Transport *transport,
     do {
       int delta = 0;
       const void *extra = transport->getMorePostData(delta);
-      data = Util::buffer_append(data, size, extra, delta);
-      size += delta;
+      if (size + delta < RuntimeOption::MaxPostSize &&
+          RuntimeOption::AlwaysPopulateRawPostData) {
+        data = Util::buffer_append(data, size, extra, delta);
+        size += delta;
+      }
     } while (transport->hasMorePostData());
     return true;
   }

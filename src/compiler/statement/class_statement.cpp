@@ -275,8 +275,9 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   // be generated differently...
 
   cg_printf("DECLARE_CLASS_COMMON(%s, %s)\n", clsName, originalName);
-  cg_printf("DECLARE_INVOKE_EX(%s, %s, %s)\n",
-            clsName, originalName, parent);
+  cg_printf("DECLARE_INVOKE_EX%s(%s, %s, %s)\n",
+      Option::UseMethodIndex ? "WITH_INDEX" : "", clsName, originalName,
+      parent);
 
   cg.printSection("DECLARE_STATIC_PROP_OPS");
   cg_printf("public:\n");
@@ -341,23 +342,17 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   }
 
   cg.printSection("DECLARE_COMMON_INVOKE");
-  if (classScope->hasJumpTable(ClassScope::JumpTableStaticInvoke)) {
-    cg_printf("static Variant os_invoke(const char *c, "
-              "MethodIndex methodIndex,\n");
-    cg_printf("                         const char *s, CArrRef ps, int64 h, "
-              "bool f = true);\n");
+  cg.printf("static bool os_get_call_info(MethodCallPackage &mcp, "
+      "int64 hash = -1);\n");
+  if (Option::UseMethodIndex) {
+    cg.printf("virtual bool o_get_call_info_with_index(MethodCallPackage &mcp,"
+        " MethodIndex mi, int64 hash = -1);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s 1\n", clsName);
   }
   if (classScope->hasJumpTable(ClassScope::JumpTableInvoke)) {
-    cg_printf("virtual Variant o_invoke(MethodIndex methodIndex, "
-              "const char *s, CArrRef ps,\n");
-    cg_printf("                         int64 h, bool f = true);\n");
-    cg_printf("virtual Variant o_invoke_few_args(MethodIndex methodIndex, "
-              "const char *s,\n");
-    cg_printf("                                  int64 h, int count,\n");
-    cg_printf("                                  "
-              "INVOKE_FEW_ARGS_DECL_ARGS);\n");
+    cg.printf("virtual bool o_get_call_info(MethodCallPackage &mcp, "
+        "int64 hash = -1);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_INVOKE_%s 1\n", clsName);
   }
@@ -409,16 +404,18 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool redeclared = classScope->isRedeclaring();
   switch (cg.getContext()) {
   case CodeGenerator::CppForwardDeclaration:
-    if (Option::GenerateCPPMacros) {
-      cg_printf("FORWARD_DECLARE_CLASS(%s);\n", clsName);
-      if (redeclared) {
-        cg_printf("FORWARD_DECLARE_REDECLARED_CLASS(%s);\n", clsName);
+    {
+      if (Option::GenerateCPPMacros) {
+        cg_printf("FORWARD_DECLARE_CLASS(%s);\n", clsName);
+        if (redeclared) {
+          cg_printf("FORWARD_DECLARE_REDECLARED_CLASS(%s);\n", clsName);
+        }
       }
-    }
-    if (m_stmt) {
-      cg.setContext(CodeGenerator::CppClassConstantsDecl);
-      m_stmt->outputCPP(cg, ar);
-      cg.setContext(CodeGenerator::CppForwardDeclaration);
+      if (m_stmt) {
+        cg.setContext(CodeGenerator::CppClassConstantsDecl);
+        m_stmt->outputCPP(cg, ar);
+        cg.setContext(CodeGenerator::CppForwardDeclaration);
+      }
     }
     break;
   case CodeGenerator::CppDeclaration:
@@ -601,7 +598,9 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           !classScope->hasProperty("rsrc")) {
         cg_printf("public: Variant %srsrc;\n", Option::PropertyPrefix);
       }
-
+      if (Option::GenerateCPPMacros) {
+        classScope->outputCPPJumpTableDecl(cg, ar);
+      }
       cg_indentEnd("};\n");
 
       if (redeclared) {
@@ -628,22 +627,11 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("return %s%s::%slval(s);\n", Option::ClassPrefix,
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
-        cg_indentBegin("Variant %sinvoke(const char *c, "
-                       "MethodIndex methodIndex,"
-                       "const char *s, "
-                       "CArrRef params, int64 hash = -1, bool fatal = true) "
-                       "{\n",
-                       Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sinvoke(c, methodIndex, s, params, hash, "
-                  "fatal);\n",
-                  Option::ClassPrefix, clsName,
-                  Option::ObjectStaticPrefix);
-        cg_indentEnd("}\n");
-        cg_indentBegin("Object create(CArrRef params, bool init = true, "
-                       "ObjectData* root = NULL) {\n");
-        cg_printf("return Object((NEW(%s%s)(root))->"
-                  "dynCreate(params, init));\n",
-                  Option::ClassPrefix, clsName);
+        cg_indentBegin("Object createOnly(ObjectData* root = NULL) {\n");
+        cg_printf("Object r((NEW(%s%s)(root)));\n", Option::ClassPrefix,
+            clsName);
+        cg_printf("r->init();\n");
+        cg_printf("return r;\n");
         cg_indentEnd("}\n");
         cg_indentBegin("Variant %sconstant(const char* s) {\n",
                        Option::ObjectStaticPrefix);
@@ -660,6 +648,12 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   "fatal);\n",
                   Option::ClassPrefix, clsName,
                   Option::ObjectStaticPrefix);
+        cg_indentEnd("}\n");
+        cg_indentBegin("bool %sget_call_info(MethodCallPackage &mcp, "
+          "int64 hash = -1) {\n",
+            Option::ObjectStaticPrefix);
+        cg_printf("return %s%s::%sget_call_info(mcp, hash);\n",
+            Option::ClassPrefix, clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
         cg_indentEnd("};\n");
       }

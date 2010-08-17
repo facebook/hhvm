@@ -25,6 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
+extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/reflection.php line 248 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionFunctionAbstract
@@ -101,540 +102,7 @@ void c_ReflectionFunctionAbstract::cloneSet(c_ReflectionFunctionAbstract *clone)
   clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 1:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 1:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 16:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionFunctionAbstract
 Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparameters());
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_returnsreference());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclosure());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 0:
@@ -816,15 +284,575 @@ Variant c_ReflectionFunctionAbstract::o_invoke_from_eval(const char *s, Eval::Va
     default:
       break;
   }
-  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_ReflectionFunctionAbstract::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_isuserdefined((void*)&c_ReflectionFunctionAbstract::i_isuserdefined, (void*)&c_ReflectionFunctionAbstract::ifa_isuserdefined, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getnumberofparameters((void*)&c_ReflectionFunctionAbstract::i_getnumberofparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getnumberofparameters, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getendline((void*)&c_ReflectionFunctionAbstract::i_getendline, (void*)&c_ReflectionFunctionAbstract::ifa_getendline, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getstaticvariables((void*)&c_ReflectionFunctionAbstract::i_getstaticvariables, (void*)&c_ReflectionFunctionAbstract::ifa_getstaticvariables, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getparameters((void*)&c_ReflectionFunctionAbstract::i_getparameters, (void*)&c_ReflectionFunctionAbstract::ifa_getparameters, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_returnsreference((void*)&c_ReflectionFunctionAbstract::i_returnsreference, (void*)&c_ReflectionFunctionAbstract::ifa_returnsreference, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getfilename((void*)&c_ReflectionFunctionAbstract::i_getfilename, (void*)&c_ReflectionFunctionAbstract::ifa_getfilename, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getstartline((void*)&c_ReflectionFunctionAbstract::i_getstartline, (void*)&c_ReflectionFunctionAbstract::ifa_getstartline, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getdoccomment((void*)&c_ReflectionFunctionAbstract::i_getdoccomment, (void*)&c_ReflectionFunctionAbstract::ifa_getdoccomment, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getclosure((void*)&c_ReflectionFunctionAbstract::i_getclosure, (void*)&c_ReflectionFunctionAbstract::ifa_getclosure, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_getname((void*)&c_ReflectionFunctionAbstract::i_getname, (void*)&c_ReflectionFunctionAbstract::ifa_getname, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunctionAbstract::ci_isinternal((void*)&c_ReflectionFunctionAbstract::i_isinternal, (void*)&c_ReflectionFunctionAbstract::ifa_isinternal, 0, 0, 0x0000000000000000LL);
+Variant c_ReflectionFunctionAbstract::i_getnumberofrequiredparameters(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
+  return (self->t_getnumberofrequiredparameters());
+}
+Variant c_ReflectionFunctionAbstract::i_isuserdefined(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
+  return (self->t_isuserdefined());
+}
+Variant c_ReflectionFunctionAbstract::i_getnumberofparameters(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
+  return (self->t_getnumberofparameters());
+}
+Variant c_ReflectionFunctionAbstract::i_getendline(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
+  return (self->t_getendline());
+}
+Variant c_ReflectionFunctionAbstract::i_getstaticvariables(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
+  return (self->t_getstaticvariables());
+}
+Variant c_ReflectionFunctionAbstract::i_getparameters(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
+  return (self->t_getparameters());
+}
+Variant c_ReflectionFunctionAbstract::i_returnsreference(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
+  return (self->t_returnsreference());
+}
+Variant c_ReflectionFunctionAbstract::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
+  return (self->t_getfilename());
+}
+Variant c_ReflectionFunctionAbstract::i_getstartline(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
+  return (self->t_getstartline());
+}
+Variant c_ReflectionFunctionAbstract::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
+  return (self->t_getdoccomment());
+}
+Variant c_ReflectionFunctionAbstract::i_getclosure(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
+  return (self->t_getclosure());
+}
+Variant c_ReflectionFunctionAbstract::i_getname(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionFunctionAbstract::i_isinternal(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
+  return (self->t_isinternal());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getnumberofrequiredparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
+  return (self->t_getnumberofrequiredparameters());
+}
+Variant c_ReflectionFunctionAbstract::ifa_isuserdefined(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
+  return (self->t_isuserdefined());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getnumberofparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
+  return (self->t_getnumberofparameters());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getendline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
+  return (self->t_getendline());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getstaticvariables(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
+  return (self->t_getstaticvariables());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getparameters(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
+  return (self->t_getparameters());
+}
+Variant c_ReflectionFunctionAbstract::ifa_returnsreference(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
+  return (self->t_returnsreference());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
+  return (self->t_getfilename());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getstartline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
+  return (self->t_getstartline());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
+  return (self->t_getdoccomment());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getclosure(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
+  return (self->t_getclosure());
+}
+Variant c_ReflectionFunctionAbstract::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionFunctionAbstract::ifa_isinternal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunctionAbstract *self = NULL;
+  p_ReflectionFunctionAbstract pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunctionAbstract*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunctionAbstract)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
+  return (self->t_isinternal());
+}
+bool c_ReflectionFunctionAbstract::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofparameters;
+        return true;
+      }
+      break;
+    case 1:
+      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters;
+        return true;
+      }
+      break;
+    case 2:
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getclosure;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_isuserdefined;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getstartline;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getname;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getstaticvariables;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_returnsreference;
+        return true;
+      }
+      break;
+    case 13:
+      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getparameters;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getfilename;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_isinternal;
+        return true;
+      }
+      break;
+    case 16:
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getendline;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getdoccomment;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionFunctionAbstract::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofparameters;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 1:
+      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getnumberofrequiredparameters;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 2:
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getclosure;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_isuserdefined;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getstartline;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getname;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getstaticvariables;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_returnsreference;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 13:
+      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getparameters;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getfilename;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_isinternal;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 16:
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getendline;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        mcp.ci = &c_ReflectionFunctionAbstract::ci_getdoccomment;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_getInit,
@@ -832,6 +860,7 @@ struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract = {
   c_ReflectionFunctionAbstract::os_lval,
   c_ReflectionFunctionAbstract::os_invoke,
   c_ReflectionFunctionAbstract::os_constant,
+  c_ReflectionFunctionAbstract::os_get_call_info
 };
 void c_ReflectionFunctionAbstract::init() {
   m_info = null;
@@ -926,7 +955,7 @@ int c_ReflectionFunctionAbstract::t_getnumberofparameters() {
 int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfRequiredParameters);
   int64 v_count = 0;
-  Array v_params;
+  Variant v_params;
   Primitive v_name = 0;
   Variant v_param;
 
@@ -937,14 +966,23 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   }
   {
     LOOP_COUNTER(2);
-    for (ArrayIter iter4 = v_params.begin(s_class_name); !iter4.end(); ++iter4) {
+    for (ArrayIterPtr iter4 = v_params.begin(s_class_name); !iter4->end(); iter4->next()) {
       LOOP_COUNTER_CHECK(2);
-      iter4.second(v_param);
-      v_name = iter4.first();
+      iter4->second(v_param);
+      v_name = iter4->first();
       {
-        if (toBoolean(v_param. BIND_CLASS_DOT o_invoke_few_args(/* isOptional */ MethodIndex(321, 1) /* isOptional */ ,  "isOptional", 0x2D6EF48BBAB22735LL, 0))) {
+        {
+          bool tmp5;
           {
-            break;
+            MethodCallPackage mcp1;
+            mcp1.methodCall((v_param), NAMSTR(s_sys_ss454dd8cb, "isOptional"), 0x2D6EF48BBAB22735LL);
+            const CallInfo *cit1  __attribute__((__unused__)) = mcp1.ci;
+            tmp5 = (toBoolean((mcp1.bindClass(info)->getMethFewArgs())(mcp1, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+          }
+          if (tmp5) {
+            {
+              break;
+            }
           }
         }
         v_count++;
@@ -1017,1452 +1055,11 @@ ObjectData *c_ReflectionObject::cloneImpl() {
 void c_ReflectionObject::cloneSet(c_ReflectionObject *clone) {
   c_ReflectionClass::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionObject
-Variant c_ReflectionObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x104:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t_getmethods());
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethods(arg0));
-        }
-      }
-      break;
-    case 0x105:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 0x106:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_getstaticpropertyvalue(arg0, arg1));
-        }
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x108:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,params.slice(0, count - 0, false)));
-      }
-      break;
-    case 0x109:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 0x10a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x10b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_newinstanceargs(arg0));
-        }
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x10e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_isinstance(arg0));
-        }
-      }
-      break;
-    case 0x10d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasmethod(arg0));
-        }
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 0x112:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 0x113:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasconstant(arg0));
-        }
-      }
-      break;
-    case 0x114:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethod(arg0));
-        }
-      }
-      break;
-    case 0x115:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 0x116:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x117:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_implementsinterface(arg0));
-        }
-      }
-      break;
-    case 0x118:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 0x11a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getconstant(arg0));
-        }
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x11d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 0x11e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_issubclassof(arg0));
-        }
-      }
-      break;
-    case 0x11f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasproperty(arg0));
-        }
-      }
-      break;
-    case 0x121:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 0x122:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 0x123:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_setstaticpropertyvalue(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x124:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 0x125:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x128:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getproperty(arg0));
-        }
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 127) {
-    case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasproperty(arg0));
-        }
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasmethod(arg0));
-        }
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_isinstance(arg0));
-        }
-      }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t_getmethods());
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethods(arg0));
-        }
-      }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_getstaticpropertyvalue(arg0, arg1));
-        }
-      }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,params.slice(0, count - 0, false)));
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getconstant(arg0));
-        }
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethod(arg0));
-        }
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasconstant(arg0));
-        }
-      }
-      break;
-    case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getproperty(arg0));
-        }
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_newinstanceargs(arg0));
-        }
-      }
-      break;
-    case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_setstaticpropertyvalue(arg0, arg1), null);
-        }
-      }
-      break;
-    case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_implementsinterface(arg0));
-        }
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_issubclassof(arg0));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ReflectionClass::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionObject
-Variant c_ReflectionObject::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x104:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        if (count <= 0) return (t_getmethods());
-        return (t_getmethods(a0));
-      }
-      break;
-    case 0x105:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 0x106:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        return (t_getstaticpropertyvalue(a0, a1));
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x108:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count <= 0) return (t_newinstance(count));
-        Array params;
-        if (count >= 1) params.append(a0);
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_newinstance(count,params));
-      }
-      break;
-    case 0x109:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 0x10a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x10b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x10e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        return (t_isinstance(a0));
-      }
-      break;
-    case 0x10d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 0x112:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 0x113:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 0x114:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        return (t_getmethod(a0));
-      }
-      break;
-    case 0x115:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 0x116:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x117:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        return (t_implementsinterface(a0));
-      }
-      break;
-    case 0x118:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 0x11a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        return (t_getconstant(a0));
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x11d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 0x11e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        return (t_issubclassof(a0));
-      }
-      break;
-    case 0x11f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 0x121:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 0x122:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 0x123:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 0x124:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 0x125:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x128:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        return (t_getproperty(a0));
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 127) {
-    case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        return (t_isinstance(a0));
-      }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        if (count <= 0) return (t_getmethods());
-        return (t_getmethods(a0));
-      }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        return (t_getstaticpropertyvalue(a0, a1));
-      }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
-        if (count <= 0) return (t_newinstance(count));
-        Array params;
-        if (count >= 1) params.append(a0);
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_newinstance(count,params));
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        return (t_getconstant(a0));
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        return (t_getmethod(a0));
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        return (t_getproperty(a0));
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        return (t_implementsinterface(a0));
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        return (t_issubclassof(a0));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ReflectionClass::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionObject
-Variant c_ReflectionObject::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #else
+Variant c_ReflectionObject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
       HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ReflectionClass::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionObject
-Variant c_ReflectionObject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x104:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t_getmethods());
-        else return (t_getmethods(a0));
-      }
-      break;
-    case 0x105:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isiterateable());
-      }
-      break;
-    case 0x106:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        else return (t_getstaticpropertyvalue(a0, a1));
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x108:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,vargs));
-      }
-      break;
-    case 0x109:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextension());
-      }
-      break;
-    case 0x10a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstructor());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x10b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 0x10e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstance(a0));
-      }
-      break;
-    case 0x10d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isfinal());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2483,1047 +1080,12 @@ Variant c_ReflectionObject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (ti_export(o_getClassName(), a0, a1));
       }
       break;
-    case 0x112:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperties());
-      }
-      break;
-    case 0x113:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 0x114:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmethod(a0));
-      }
-      break;
-    case 0x115:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextensionname());
-      }
-      break;
-    case 0x116:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparentclass());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 0x117:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_implementsinterface(a0));
-      }
-      break;
-    case 0x118:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfacenames());
-      }
-      break;
-    case 0x11a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstant(a0));
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstants());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x11d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinterface());
-      }
-      break;
-    case 0x11e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_issubclassof(a0));
-      }
-      break;
-    case 0x11f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 0x121:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticproperties());
-      }
-      break;
-    case 0x122:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 0x123:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 0x124:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstantiable());
-      }
-      break;
-    case 0x125:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfaces());
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 0x128:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperty(a0));
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
     default:
       break;
   }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 127) {
-    case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinterface());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticproperties());
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstance(a0));
-      }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextensionname());
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t_getmethods());
-        else return (t_getmethods(a0));
-      }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstructor());
-      }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfacenames());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        else return (t_getstaticpropertyvalue(a0, a1));
-      }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isfinal());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,vargs));
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstant(a0));
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmethod(a0));
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isabstract());
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextension());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstantiable());
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfaces());
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperties());
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperty(a0));
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isiterateable());
-      }
-      break;
-    case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstants());
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparentclass());
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_implementsinterface(a0));
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_issubclassof(a0));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_ReflectionClass::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_ReflectionObject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1));
-      }
-      break;
-    default:
-      break;
-  }
-  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 1) {
     case 0:
@@ -3551,8 +1113,66 @@ Variant c_ReflectionObject::os_invoke_from_eval(const char *c, const char *s, Ev
     default:
       break;
   }
-  #endif
   return c_ReflectionClass::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionObject::ci_export((void*)&c_ReflectionObject::i_export, (void*)&c_ReflectionObject::ifa_export, 2, 0, 0x0000000000000000LL);
+Variant c_ReflectionObject::i_export(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (c_ReflectionObject::ti_export(c, arg0, arg1));
+  }
+}
+Variant c_ReflectionObject::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionObject::export", count, 2, 2, 1);
+  return (c_ReflectionObject::ti_export(c, a0, a1));
+}
+bool c_ReflectionObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionObject::ci_export;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionClass::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionObject::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionObject::ci_export;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionClass::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_getInit,
@@ -3560,6 +1180,7 @@ struct ObjectStaticCallbacks cw_ReflectionObject = {
   c_ReflectionObject::os_lval,
   c_ReflectionObject::os_invoke,
   c_ReflectionObject::os_constant,
+  c_ReflectionObject::os_get_call_info
 };
 void c_ReflectionObject::init() {
   c_ReflectionClass::init();
@@ -3638,580 +1259,19 @@ ObjectData *c_ReflectionException::cloneImpl() {
 void c_ReflectionException::cloneSet(c_ReflectionException *clone) {
   c_Exception::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionException
-Variant c_ReflectionException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionException
-Variant c_ReflectionException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionException
-Variant c_ReflectionException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionException
 Variant c_ReflectionException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_ReflectionException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_ReflectionException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_Exception::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_Exception::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_getInit,
@@ -4219,6 +1279,7 @@ struct ObjectStaticCallbacks cw_ReflectionException = {
   c_ReflectionException::os_lval,
   c_ReflectionException::os_invoke,
   c_ReflectionException::os_constant,
+  c_ReflectionException::os_get_call_info
 };
 void c_ReflectionException::init() {
   c_Exception::init();
@@ -4327,6 +1388,2615 @@ Variant c_ReflectionClass::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionClass
 IMPLEMENT_CLASS(ReflectionClass)
+ObjectData *c_ReflectionClass::cloneImpl() {
+  c_ReflectionClass *obj = NEW(c_ReflectionClass)();
+  cloneSet(obj);
+  return obj;
+}
+void c_ReflectionClass::cloneSet(c_ReflectionClass *clone) {
+  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
+  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+  ObjectData::cloneSet(clone);
+}
+Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 127) {
+    case 4:
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstartline());
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasproperty(a0));
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmodifiers());
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasmethod(a0));
+      }
+      break;
+    case 27:
+      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdefaultproperties());
+      }
+      break;
+    case 30:
+      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinterface());
+      }
+      break;
+    case 34:
+      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getstaticproperties());
+      }
+      break;
+    case 41:
+      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinstance(a0));
+      }
+      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getextensionname());
+      }
+      break;
+    case 42:
+      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getmethods());
+        else return (t_getmethods(a0));
+      }
+      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstructor());
+      }
+      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinterfacenames());
+      }
+      break;
+    case 46:
+      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 1) return (t_getstaticpropertyvalue(a0));
+        else return (t_getstaticpropertyvalue(a0, a1));
+      }
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isfinal());
+      }
+      break;
+    case 48:
+      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 0) return (t_newinstance(count));
+        return (t_newinstance(count,vargs));
+      }
+      break;
+    case 52:
+      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstant(a0));
+      }
+      break;
+    case 54:
+      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmethod(a0));
+      }
+      break;
+    case 55:
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isabstract());
+      }
+      break;
+    case 59:
+      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getextension());
+      }
+      break;
+    case 60:
+      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinstantiable());
+      }
+      break;
+    case 63:
+      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_hasconstant(a0));
+      }
+      break;
+    case 67:
+      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinterfaces());
+      }
+      break;
+    case 68:
+      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getproperties());
+      }
+      break;
+    case 71:
+      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getproperty(a0));
+      }
+      break;
+    case 77:
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfilename());
+      }
+      break;
+    case 78:
+      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isiterateable());
+      }
+      break;
+    case 79:
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isinternal());
+      }
+      break;
+    case 85:
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstants());
+      }
+      break;
+    case 95:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    case 100:
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isuserdefined());
+      }
+      break;
+    case 101:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 102:
+      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_newinstanceargs(a0));
+      }
+      break;
+    case 103:
+      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_test(a0, a1));
+      }
+      break;
+    case 104:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 112:
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getendline());
+      }
+      break;
+    case 113:
+      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setstaticpropertyvalue(a0, a1), null);
+      }
+      break;
+    case 114:
+      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getparentclass());
+      }
+      break;
+    case 120:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 123:
+      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_implementsinterface(a0));
+      }
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_fetch(a0));
+      }
+      break;
+    case 126:
+      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_issubclassof(a0));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_ReflectionClass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionClass::ci_getmethods((void*)&c_ReflectionClass::i_getmethods, (void*)&c_ReflectionClass::ifa_getmethods, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isiterateable((void*)&c_ReflectionClass::i_isiterateable, (void*)&c_ReflectionClass::ifa_isiterateable, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getstaticpropertyvalue((void*)&c_ReflectionClass::i_getstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_getstaticpropertyvalue, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isuserdefined((void*)&c_ReflectionClass::i_isuserdefined, (void*)&c_ReflectionClass::ifa_isuserdefined, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_newinstance((void*)&c_ReflectionClass::i_newinstance, (void*)&c_ReflectionClass::ifa_newinstance, 0, 1, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getextension((void*)&c_ReflectionClass::i_getextension, (void*)&c_ReflectionClass::ifa_getextension, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getconstructor((void*)&c_ReflectionClass::i_getconstructor, (void*)&c_ReflectionClass::ifa_getconstructor, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci___tostring((void*)&c_ReflectionClass::i___tostring, (void*)&c_ReflectionClass::ifa___tostring, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_newinstanceargs((void*)&c_ReflectionClass::i_newinstanceargs, (void*)&c_ReflectionClass::ifa_newinstanceargs, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getendline((void*)&c_ReflectionClass::i_getendline, (void*)&c_ReflectionClass::ifa_getendline, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinstance((void*)&c_ReflectionClass::i_isinstance, (void*)&c_ReflectionClass::ifa_isinstance, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_hasmethod((void*)&c_ReflectionClass::i_hasmethod, (void*)&c_ReflectionClass::ifa_hasmethod, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci___construct((void*)&c_ReflectionClass::i___construct, (void*)&c_ReflectionClass::ifa___construct, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isfinal((void*)&c_ReflectionClass::i_isfinal, (void*)&c_ReflectionClass::ifa_isfinal, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getmodifiers((void*)&c_ReflectionClass::i_getmodifiers, (void*)&c_ReflectionClass::ifa_getmodifiers, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_export((void*)&c_ReflectionClass::i_export, (void*)&c_ReflectionClass::ifa_export, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getproperties((void*)&c_ReflectionClass::i_getproperties, (void*)&c_ReflectionClass::ifa_getproperties, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_hasconstant((void*)&c_ReflectionClass::i_hasconstant, (void*)&c_ReflectionClass::ifa_hasconstant, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getmethod((void*)&c_ReflectionClass::i_getmethod, (void*)&c_ReflectionClass::ifa_getmethod, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getextensionname((void*)&c_ReflectionClass::i_getextensionname, (void*)&c_ReflectionClass::ifa_getextensionname, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getparentclass((void*)&c_ReflectionClass::i_getparentclass, (void*)&c_ReflectionClass::ifa_getparentclass, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getfilename((void*)&c_ReflectionClass::i_getfilename, (void*)&c_ReflectionClass::ifa_getfilename, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_implementsinterface((void*)&c_ReflectionClass::i_implementsinterface, (void*)&c_ReflectionClass::ifa_implementsinterface, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getinterfacenames((void*)&c_ReflectionClass::i_getinterfacenames, (void*)&c_ReflectionClass::ifa_getinterfacenames, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getconstant((void*)&c_ReflectionClass::i_getconstant, (void*)&c_ReflectionClass::ifa_getconstant, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getstartline((void*)&c_ReflectionClass::i_getstartline, (void*)&c_ReflectionClass::ifa_getstartline, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getconstants((void*)&c_ReflectionClass::i_getconstants, (void*)&c_ReflectionClass::ifa_getconstants, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getdoccomment((void*)&c_ReflectionClass::i_getdoccomment, (void*)&c_ReflectionClass::ifa_getdoccomment, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinterface((void*)&c_ReflectionClass::i_isinterface, (void*)&c_ReflectionClass::ifa_isinterface, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_issubclassof((void*)&c_ReflectionClass::i_issubclassof, (void*)&c_ReflectionClass::ifa_issubclassof, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_hasproperty((void*)&c_ReflectionClass::i_hasproperty, (void*)&c_ReflectionClass::ifa_hasproperty, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getstaticproperties((void*)&c_ReflectionClass::i_getstaticproperties, (void*)&c_ReflectionClass::ifa_getstaticproperties, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_test((void*)&c_ReflectionClass::i_test, (void*)&c_ReflectionClass::ifa_test, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getdefaultproperties((void*)&c_ReflectionClass::i_getdefaultproperties, (void*)&c_ReflectionClass::ifa_getdefaultproperties, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_setstaticpropertyvalue((void*)&c_ReflectionClass::i_setstaticpropertyvalue, (void*)&c_ReflectionClass::ifa_setstaticpropertyvalue, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinstantiable((void*)&c_ReflectionClass::i_isinstantiable, (void*)&c_ReflectionClass::ifa_isinstantiable, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getinterfaces((void*)&c_ReflectionClass::i_getinterfaces, (void*)&c_ReflectionClass::ifa_getinterfaces, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_fetch((void*)&c_ReflectionClass::i_fetch, (void*)&c_ReflectionClass::ifa_fetch, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isabstract((void*)&c_ReflectionClass::i_isabstract, (void*)&c_ReflectionClass::ifa_isabstract, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getname((void*)&c_ReflectionClass::i_getname, (void*)&c_ReflectionClass::ifa_getname, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_getproperty((void*)&c_ReflectionClass::i_getproperty, (void*)&c_ReflectionClass::ifa_getproperty, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionClass::ci_isinternal((void*)&c_ReflectionClass::i_isinternal, (void*)&c_ReflectionClass::ifa_isinternal, 0, 0, 0x0000000000000000LL);
+Variant c_ReflectionClass::i_getmethods(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (self->t_getmethods());
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_getmethods(arg0));
+  }
+}
+Variant c_ReflectionClass::i_isiterateable(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
+  return (self->t_isiterateable());
+}
+Variant c_ReflectionClass::i_getstaticpropertyvalue(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_getstaticpropertyvalue(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_getstaticpropertyvalue(arg0, arg1));
+  }
+}
+Variant c_ReflectionClass::i_isuserdefined(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
+  return (self->t_isuserdefined());
+}
+Variant c_ReflectionClass::i_newinstance(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count <= 0) return (self->t_newinstance(count));
+  return (self->t_newinstance(count,params.slice(0, count - 0, false)));
+}
+Variant c_ReflectionClass::i_getextension(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
+  return (self->t_getextension());
+}
+Variant c_ReflectionClass::i_getconstructor(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
+  return (self->t_getconstructor());
+}
+Variant c_ReflectionClass::i___tostring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionClass::i_newinstanceargs(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_newinstanceargs(arg0));
+  }
+}
+Variant c_ReflectionClass::i_getendline(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
+  return (self->t_getendline());
+}
+Variant c_ReflectionClass::i_isinstance(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_isinstance(arg0));
+  }
+}
+Variant c_ReflectionClass::i_hasmethod(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_hasmethod(arg0));
+  }
+}
+Variant c_ReflectionClass::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___construct(arg0), null);
+  }
+}
+Variant c_ReflectionClass::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
+  return (self->t_isfinal());
+}
+Variant c_ReflectionClass::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
+  return (self->t_getmodifiers());
+}
+Variant c_ReflectionClass::i_export(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (c_ReflectionClass::ti_export(c, arg0, arg1));
+  }
+}
+Variant c_ReflectionClass::i_getproperties(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
+  return (self->t_getproperties());
+}
+Variant c_ReflectionClass::i_hasconstant(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_hasconstant(arg0));
+  }
+}
+Variant c_ReflectionClass::i_getmethod(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_getmethod(arg0));
+  }
+}
+Variant c_ReflectionClass::i_getextensionname(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
+  return (self->t_getextensionname());
+}
+Variant c_ReflectionClass::i_getparentclass(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
+  return (self->t_getparentclass());
+}
+Variant c_ReflectionClass::i_getfilename(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
+  return (self->t_getfilename());
+}
+Variant c_ReflectionClass::i_implementsinterface(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_implementsinterface(arg0));
+  }
+}
+Variant c_ReflectionClass::i_getinterfacenames(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
+  return (self->t_getinterfacenames());
+}
+Variant c_ReflectionClass::i_getconstant(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_getconstant(arg0));
+  }
+}
+Variant c_ReflectionClass::i_getstartline(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
+  return (self->t_getstartline());
+}
+Variant c_ReflectionClass::i_getconstants(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
+  return (self->t_getconstants());
+}
+Variant c_ReflectionClass::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
+  return (self->t_getdoccomment());
+}
+Variant c_ReflectionClass::i_isinterface(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
+  return (self->t_isinterface());
+}
+Variant c_ReflectionClass::i_issubclassof(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_issubclassof(arg0));
+  }
+}
+Variant c_ReflectionClass::i_hasproperty(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_hasproperty(arg0));
+  }
+}
+Variant c_ReflectionClass::i_getstaticproperties(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
+  return (self->t_getstaticproperties());
+}
+Variant c_ReflectionClass::i_test(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_test(arg0, arg1));
+  }
+}
+Variant c_ReflectionClass::i_getdefaultproperties(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
+  return (self->t_getdefaultproperties());
+}
+Variant c_ReflectionClass::i_setstaticpropertyvalue(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_setstaticpropertyvalue(arg0, arg1), null);
+  }
+}
+Variant c_ReflectionClass::i_isinstantiable(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
+  return (self->t_isinstantiable());
+}
+Variant c_ReflectionClass::i_getinterfaces(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
+  return (self->t_getinterfaces());
+}
+Variant c_ReflectionClass::i_fetch(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_fetch(arg0));
+  }
+}
+Variant c_ReflectionClass::i_isabstract(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
+  return (self->t_isabstract());
+}
+Variant c_ReflectionClass::i_getname(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionClass::i_getproperty(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_getproperty(arg0));
+  }
+}
+Variant c_ReflectionClass::i_isinternal(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
+  return (self->t_isinternal());
+}
+Variant c_ReflectionClass::ifa_getmethods(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
+  if (count <= 0) return (self->t_getmethods());
+  return (self->t_getmethods(a0));
+}
+Variant c_ReflectionClass::ifa_isiterateable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
+  return (self->t_isiterateable());
+}
+Variant c_ReflectionClass::ifa_getstaticpropertyvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
+  if (count <= 1) return (self->t_getstaticpropertyvalue(a0));
+  return (self->t_getstaticpropertyvalue(a0, a1));
+}
+Variant c_ReflectionClass::ifa_isuserdefined(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
+  return (self->t_isuserdefined());
+}
+Variant c_ReflectionClass::ifa_newinstance(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count <= 0) return (self->t_newinstance(count));
+  Array params;
+  if (count >= 1) params.append(a0);
+  if (count >= 2) params.append(a1);
+  if (count >= 3) params.append(a2);
+  if (count >= 4) params.append(a3);
+  if (count >= 5) params.append(a4);
+  if (count >= 6) params.append(a5);
+  return (self->t_newinstance(count,params));
+}
+Variant c_ReflectionClass::ifa_getextension(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
+  return (self->t_getextension());
+}
+Variant c_ReflectionClass::ifa_getconstructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
+  return (self->t_getconstructor());
+}
+Variant c_ReflectionClass::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionClass::ifa_newinstanceargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
+  return (self->t_newinstanceargs(a0));
+}
+Variant c_ReflectionClass::ifa_getendline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
+  return (self->t_getendline());
+}
+Variant c_ReflectionClass::ifa_isinstance(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
+  return (self->t_isinstance(a0));
+}
+Variant c_ReflectionClass::ifa_hasmethod(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
+  return (self->t_hasmethod(a0));
+}
+Variant c_ReflectionClass::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
+  return (self->t___construct(a0), null);
+}
+Variant c_ReflectionClass::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
+  return (self->t_isfinal());
+}
+Variant c_ReflectionClass::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
+  return (self->t_getmodifiers());
+}
+Variant c_ReflectionClass::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
+  return (c_ReflectionClass::ti_export(c, a0, a1));
+}
+Variant c_ReflectionClass::ifa_getproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
+  return (self->t_getproperties());
+}
+Variant c_ReflectionClass::ifa_hasconstant(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
+  return (self->t_hasconstant(a0));
+}
+Variant c_ReflectionClass::ifa_getmethod(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
+  return (self->t_getmethod(a0));
+}
+Variant c_ReflectionClass::ifa_getextensionname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
+  return (self->t_getextensionname());
+}
+Variant c_ReflectionClass::ifa_getparentclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
+  return (self->t_getparentclass());
+}
+Variant c_ReflectionClass::ifa_getfilename(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
+  return (self->t_getfilename());
+}
+Variant c_ReflectionClass::ifa_implementsinterface(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
+  return (self->t_implementsinterface(a0));
+}
+Variant c_ReflectionClass::ifa_getinterfacenames(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
+  return (self->t_getinterfacenames());
+}
+Variant c_ReflectionClass::ifa_getconstant(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
+  return (self->t_getconstant(a0));
+}
+Variant c_ReflectionClass::ifa_getstartline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
+  return (self->t_getstartline());
+}
+Variant c_ReflectionClass::ifa_getconstants(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
+  return (self->t_getconstants());
+}
+Variant c_ReflectionClass::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
+  return (self->t_getdoccomment());
+}
+Variant c_ReflectionClass::ifa_isinterface(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
+  return (self->t_isinterface());
+}
+Variant c_ReflectionClass::ifa_issubclassof(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
+  return (self->t_issubclassof(a0));
+}
+Variant c_ReflectionClass::ifa_hasproperty(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
+  return (self->t_hasproperty(a0));
+}
+Variant c_ReflectionClass::ifa_getstaticproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
+  return (self->t_getstaticproperties());
+}
+Variant c_ReflectionClass::ifa_test(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
+  return (self->t_test(a0, a1));
+}
+Variant c_ReflectionClass::ifa_getdefaultproperties(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
+  return (self->t_getdefaultproperties());
+}
+Variant c_ReflectionClass::ifa_setstaticpropertyvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
+  return (self->t_setstaticpropertyvalue(a0, a1), null);
+}
+Variant c_ReflectionClass::ifa_isinstantiable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
+  return (self->t_isinstantiable());
+}
+Variant c_ReflectionClass::ifa_getinterfaces(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
+  return (self->t_getinterfaces());
+}
+Variant c_ReflectionClass::ifa_fetch(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
+  return (self->t_fetch(a0));
+}
+Variant c_ReflectionClass::ifa_isabstract(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
+  return (self->t_isabstract());
+}
+Variant c_ReflectionClass::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionClass::ifa_getproperty(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
+  return (self->t_getproperty(a0));
+}
+Variant c_ReflectionClass::ifa_isinternal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionClass *self = NULL;
+  p_ReflectionClass pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionClass*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionClass)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
+  return (self->t_isinternal());
+}
+bool c_ReflectionClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 127) {
+    case 4:
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+        mcp.ci = &c_ReflectionClass::ci_getstartline;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
+        mcp.ci = &c_ReflectionClass::ci_hasproperty;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionClass::ci___tostring;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        mcp.ci = &c_ReflectionClass::ci_getmodifiers;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
+        mcp.ci = &c_ReflectionClass::ci_hasmethod;
+        return true;
+      }
+      break;
+    case 27:
+      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
+        mcp.ci = &c_ReflectionClass::ci_getdefaultproperties;
+        return true;
+      }
+      break;
+    case 30:
+      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
+        mcp.ci = &c_ReflectionClass::ci_isinterface;
+        return true;
+      }
+      break;
+    case 34:
+      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
+        mcp.ci = &c_ReflectionClass::ci_getstaticproperties;
+        return true;
+      }
+      break;
+    case 41:
+      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
+        mcp.ci = &c_ReflectionClass::ci_isinstance;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
+        mcp.ci = &c_ReflectionClass::ci_getextensionname;
+        return true;
+      }
+      break;
+    case 42:
+      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
+        mcp.ci = &c_ReflectionClass::ci_getmethods;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
+        mcp.ci = &c_ReflectionClass::ci_getconstructor;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
+        mcp.ci = &c_ReflectionClass::ci_getinterfacenames;
+        return true;
+      }
+      break;
+    case 46:
+      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
+        mcp.ci = &c_ReflectionClass::ci_getstaticpropertyvalue;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+        mcp.ci = &c_ReflectionClass::ci_isfinal;
+        return true;
+      }
+      break;
+    case 48:
+      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
+        mcp.ci = &c_ReflectionClass::ci_newinstance;
+        return true;
+      }
+      break;
+    case 52:
+      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
+        mcp.ci = &c_ReflectionClass::ci_getconstant;
+        return true;
+      }
+      break;
+    case 54:
+      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
+        mcp.ci = &c_ReflectionClass::ci_getmethod;
+        return true;
+      }
+      break;
+    case 55:
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+        mcp.ci = &c_ReflectionClass::ci_isabstract;
+        return true;
+      }
+      break;
+    case 59:
+      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
+        mcp.ci = &c_ReflectionClass::ci_getextension;
+        return true;
+      }
+      break;
+    case 60:
+      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
+        mcp.ci = &c_ReflectionClass::ci_isinstantiable;
+        return true;
+      }
+      break;
+    case 63:
+      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
+        mcp.ci = &c_ReflectionClass::ci_hasconstant;
+        return true;
+      }
+      break;
+    case 67:
+      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
+        mcp.ci = &c_ReflectionClass::ci_getinterfaces;
+        return true;
+      }
+      break;
+    case 68:
+      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
+        mcp.ci = &c_ReflectionClass::ci_getproperties;
+        return true;
+      }
+      break;
+    case 71:
+      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
+        mcp.ci = &c_ReflectionClass::ci_getproperty;
+        return true;
+      }
+      break;
+    case 77:
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+        mcp.ci = &c_ReflectionClass::ci_getfilename;
+        return true;
+      }
+      break;
+    case 78:
+      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
+        mcp.ci = &c_ReflectionClass::ci_isiterateable;
+        return true;
+      }
+      break;
+    case 79:
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+        mcp.ci = &c_ReflectionClass::ci_isinternal;
+        return true;
+      }
+      break;
+    case 85:
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+        mcp.ci = &c_ReflectionClass::ci_getconstants;
+        return true;
+      }
+      break;
+    case 95:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionClass::ci___construct;
+        return true;
+      }
+      break;
+    case 100:
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+        mcp.ci = &c_ReflectionClass::ci_isuserdefined;
+        return true;
+      }
+      break;
+    case 101:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionClass::ci_getname;
+        return true;
+      }
+      break;
+    case 102:
+      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
+        mcp.ci = &c_ReflectionClass::ci_newinstanceargs;
+        return true;
+      }
+      break;
+    case 103:
+      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
+        mcp.ci = &c_ReflectionClass::ci_test;
+        return true;
+      }
+      break;
+    case 104:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionClass::ci_export;
+        return true;
+      }
+      break;
+    case 112:
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+        mcp.ci = &c_ReflectionClass::ci_getendline;
+        return true;
+      }
+      break;
+    case 113:
+      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
+        mcp.ci = &c_ReflectionClass::ci_setstaticpropertyvalue;
+        return true;
+      }
+      break;
+    case 114:
+      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
+        mcp.ci = &c_ReflectionClass::ci_getparentclass;
+        return true;
+      }
+      break;
+    case 120:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        mcp.ci = &c_ReflectionClass::ci_getdoccomment;
+        return true;
+      }
+      break;
+    case 123:
+      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
+        mcp.ci = &c_ReflectionClass::ci_implementsinterface;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+        mcp.ci = &c_ReflectionClass::ci_fetch;
+        return true;
+      }
+      break;
+    case 126:
+      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
+        mcp.ci = &c_ReflectionClass::ci_issubclassof;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 127) {
+    case 4:
+      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
+        mcp.ci = &c_ReflectionClass::ci_getstartline;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
+        mcp.ci = &c_ReflectionClass::ci_hasproperty;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionClass::ci___tostring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        mcp.ci = &c_ReflectionClass::ci_getmodifiers;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
+        mcp.ci = &c_ReflectionClass::ci_hasmethod;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 27:
+      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
+        mcp.ci = &c_ReflectionClass::ci_getdefaultproperties;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 30:
+      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
+        mcp.ci = &c_ReflectionClass::ci_isinterface;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 34:
+      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
+        mcp.ci = &c_ReflectionClass::ci_getstaticproperties;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 41:
+      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
+        mcp.ci = &c_ReflectionClass::ci_isinstance;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
+        mcp.ci = &c_ReflectionClass::ci_getextensionname;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 42:
+      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
+        mcp.ci = &c_ReflectionClass::ci_getmethods;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
+        mcp.ci = &c_ReflectionClass::ci_getconstructor;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
+        mcp.ci = &c_ReflectionClass::ci_getinterfacenames;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 46:
+      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
+        mcp.ci = &c_ReflectionClass::ci_getstaticpropertyvalue;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+        mcp.ci = &c_ReflectionClass::ci_isfinal;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 48:
+      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
+        mcp.ci = &c_ReflectionClass::ci_newinstance;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 52:
+      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
+        mcp.ci = &c_ReflectionClass::ci_getconstant;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 54:
+      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
+        mcp.ci = &c_ReflectionClass::ci_getmethod;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 55:
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+        mcp.ci = &c_ReflectionClass::ci_isabstract;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 59:
+      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
+        mcp.ci = &c_ReflectionClass::ci_getextension;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 60:
+      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
+        mcp.ci = &c_ReflectionClass::ci_isinstantiable;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 63:
+      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
+        mcp.ci = &c_ReflectionClass::ci_hasconstant;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 67:
+      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
+        mcp.ci = &c_ReflectionClass::ci_getinterfaces;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 68:
+      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
+        mcp.ci = &c_ReflectionClass::ci_getproperties;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 71:
+      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
+        mcp.ci = &c_ReflectionClass::ci_getproperty;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 77:
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
+        mcp.ci = &c_ReflectionClass::ci_getfilename;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 78:
+      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
+        mcp.ci = &c_ReflectionClass::ci_isiterateable;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 79:
+      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
+        mcp.ci = &c_ReflectionClass::ci_isinternal;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 85:
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+        mcp.ci = &c_ReflectionClass::ci_getconstants;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 95:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionClass::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 100:
+      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
+        mcp.ci = &c_ReflectionClass::ci_isuserdefined;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 101:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionClass::ci_getname;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 102:
+      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
+        mcp.ci = &c_ReflectionClass::ci_newinstanceargs;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 103:
+      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
+        mcp.ci = &c_ReflectionClass::ci_test;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 104:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionClass::ci_export;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 112:
+      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
+        mcp.ci = &c_ReflectionClass::ci_getendline;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 113:
+      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
+        mcp.ci = &c_ReflectionClass::ci_setstaticpropertyvalue;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 114:
+      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
+        mcp.ci = &c_ReflectionClass::ci_getparentclass;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 120:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        mcp.ci = &c_ReflectionClass::ci_getdoccomment;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 123:
+      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
+        mcp.ci = &c_ReflectionClass::ci_implementsinterface;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
+        mcp.ci = &c_ReflectionClass::ci_fetch;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 126:
+      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
+        mcp.ci = &c_ReflectionClass::ci_issubclassof;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_get_call_info(mcp, hash);
+}
 c_ReflectionClass *c_ReflectionClass::create(Variant v_name) {
   CountableHelper h(this);
   init();
@@ -4358,6 +4028,10 @@ void c_ReflectionClass::dynConstruct(CArrRef params) {
     (t___construct(arg0));
   }
 }
+void c_ReflectionClass::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_ReflectionClass::ci___construct;
+  mcp.obj = this;
+}
 void c_ReflectionClass::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4374,2703 +4048,13 @@ void c_ReflectionClass::dynConstructFromEval(Eval::VariableEnvironment &env, con
   }
   (t___construct(a0), null);
 }
-ObjectData *c_ReflectionClass::cloneImpl() {
-  c_ReflectionClass *obj = NEW(c_ReflectionClass)();
-  cloneSet(obj);
-  return obj;
-}
-void c_ReflectionClass::cloneSet(c_ReflectionClass *clone) {
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
-  ObjectData::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionClass
-Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x104:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t_getmethods());
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethods(arg0));
-        }
-      }
-      break;
-    case 0x105:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 0x106:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_getstaticpropertyvalue(arg0, arg1));
-        }
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x108:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,params.slice(0, count - 0, false)));
-      }
-      break;
-    case 0x109:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 0x10a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x10b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_newinstanceargs(arg0));
-        }
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x10e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_isinstance(arg0));
-        }
-      }
-      break;
-    case 0x10d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasmethod(arg0));
-        }
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 0x112:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 0x113:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasconstant(arg0));
-        }
-      }
-      break;
-    case 0x114:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethod(arg0));
-        }
-      }
-      break;
-    case 0x115:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 0x116:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x117:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_implementsinterface(arg0));
-        }
-      }
-      break;
-    case 0x118:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 0x11a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getconstant(arg0));
-        }
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x11d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 0x11e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_issubclassof(arg0));
-        }
-      }
-      break;
-    case 0x11f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasproperty(arg0));
-        }
-      }
-      break;
-    case 0x121:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 0x120:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_test(arg0, arg1));
-        }
-      }
-      break;
-    case 0x122:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 0x123:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_setstaticpropertyvalue(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x124:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 0x125:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 0xfe:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_fetch(arg0));
-        }
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x128:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getproperty(arg0));
-        }
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 127) {
-    case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasproperty(arg0));
-        }
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasmethod(arg0));
-        }
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_isinstance(arg0));
-        }
-      }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t_getmethods());
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethods(arg0));
-        }
-      }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_getstaticpropertyvalue(arg0, arg1));
-        }
-      }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,params.slice(0, count - 0, false)));
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getconstant(arg0));
-        }
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getmethod(arg0));
-        }
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_hasconstant(arg0));
-        }
-      }
-      break;
-    case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getproperty(arg0));
-        }
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_newinstanceargs(arg0));
-        }
-      }
-      break;
-    case 103:
-      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_test(arg0, arg1));
-        }
-      }
-      break;
-    case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_setstaticpropertyvalue(arg0, arg1), null);
-        }
-      }
-      break;
-    case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_implementsinterface(arg0));
-        }
-      }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_fetch(arg0));
-        }
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_issubclassof(arg0));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionClass
-Variant c_ReflectionClass::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x104:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        if (count <= 0) return (t_getmethods());
-        return (t_getmethods(a0));
-      }
-      break;
-    case 0x105:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 0x106:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        return (t_getstaticpropertyvalue(a0, a1));
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x108:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count <= 0) return (t_newinstance(count));
-        Array params;
-        if (count >= 1) params.append(a0);
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_newinstance(count,params));
-      }
-      break;
-    case 0x109:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 0x10a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x10b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x10e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        return (t_isinstance(a0));
-      }
-      break;
-    case 0x10d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 0x112:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 0x113:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 0x114:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        return (t_getmethod(a0));
-      }
-      break;
-    case 0x115:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 0x116:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x117:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        return (t_implementsinterface(a0));
-      }
-      break;
-    case 0x118:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 0x11a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        return (t_getconstant(a0));
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x11d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 0x11e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        return (t_issubclassof(a0));
-      }
-      break;
-    case 0x11f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 0x121:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 0x120:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
-        return (t_test(a0, a1));
-      }
-      break;
-    case 0x122:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 0x123:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 0x124:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 0x125:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 0xfe:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
-        return (t_fetch(a0));
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x128:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        return (t_getproperty(a0));
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 127) {
-    case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        return (t_isinterface());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        return (t_getstaticproperties());
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        return (t_isinstance(a0));
-      }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        return (t_getextensionname());
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        if (count <= 0) return (t_getmethods());
-        return (t_getmethods(a0));
-      }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        return (t_getconstructor());
-      }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        return (t_getinterfacenames());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        return (t_getstaticpropertyvalue(a0, a1));
-      }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
-        if (count <= 0) return (t_newinstance(count));
-        Array params;
-        if (count >= 1) params.append(a0);
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_newinstance(count,params));
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        return (t_getconstant(a0));
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        return (t_getmethod(a0));
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        return (t_getextension());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        return (t_isinstantiable());
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        return (t_getinterfaces());
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        return (t_getproperties());
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        return (t_getproperty(a0));
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        return (t_isiterateable());
-      }
-      break;
-    case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 103:
-      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
-        return (t_test(a0, a1));
-      }
-      break;
-    case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        return (t_getparentclass());
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        return (t_implementsinterface(a0));
-      }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
-        return (t_fetch(a0));
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        return (t_issubclassof(a0));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionClass
-Variant c_ReflectionClass::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionClass
-Variant c_ReflectionClass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x104:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t_getmethods());
-        else return (t_getmethods(a0));
-      }
-      break;
-    case 0x105:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isiterateable());
-      }
-      break;
-    case 0x106:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        else return (t_getstaticpropertyvalue(a0, a1));
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x108:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,vargs));
-      }
-      break;
-    case 0x109:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextension());
-      }
-      break;
-    case 0x10a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstructor());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x10b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 0x10e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstance(a0));
-      }
-      break;
-    case 0x10d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isfinal());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 0x112:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperties());
-      }
-      break;
-    case 0x113:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 0x114:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmethod(a0));
-      }
-      break;
-    case 0x115:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextensionname());
-      }
-      break;
-    case 0x116:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparentclass());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 0x117:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_implementsinterface(a0));
-      }
-      break;
-    case 0x118:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfacenames());
-      }
-      break;
-    case 0x11a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstant(a0));
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstants());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x11d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinterface());
-      }
-      break;
-    case 0x11e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_issubclassof(a0));
-      }
-      break;
-    case 0x11f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 0x121:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticproperties());
-      }
-      break;
-    case 0x120:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_test(a0, a1));
-      }
-      break;
-    case 0x122:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 0x123:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 0x124:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstantiable());
-      }
-      break;
-    case 0x125:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfaces());
-      }
-      break;
-    case 0xfe:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_fetch(a0));
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 0x128:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperty(a0));
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 127) {
-    case 4:
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x40C7B30DCB439C8FLL, NAMSTR(s_sys_ss34bc6371, "hasProperty")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasproperty(a0));
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x21820E7AA4733998LL, NAMSTR(s_sys_ss5b8cc668, "hasMethod")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasmethod(a0));
-      }
-      break;
-    case 27:
-      HASH_GUARD_LITSTR(0x0F1AD0A8EC4C229BLL, NAMSTR(s_sys_ss13b3dd65, "getDefaultProperties")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDefaultProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdefaultproperties());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x1BC5F3D87676509ELL, NAMSTR(s_sys_ss7676509e, "isInterface")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInterface", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinterface());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x323D9BCB05797B22LL, NAMSTR(s_sys_ss05797b22, "getStaticProperties")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getStaticProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticproperties());
-      }
-      break;
-    case 41:
-      HASH_GUARD_LITSTR(0x030CE1D6142F8C29LL, NAMSTR(s_sys_ss142f8c29, "isInstance")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isInstance", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstance(a0));
-      }
-      HASH_GUARD_LITSTR(0x1D6B8CA358B49929LL, NAMSTR(s_sys_ss58b49929, "getExtensionName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtensionName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextensionname());
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x16BA16CE6488AAAALL, NAMSTR(s_sys_ss6488aaaa, "getMethods")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("ReflectionClass::getMethods", 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t_getmethods());
-        else return (t_getmethods(a0));
-      }
-      HASH_GUARD_LITSTR(0x226F6E80CECD3CAALL, NAMSTR(s_sys_ss3132c356, "getConstructor")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstructor());
-      }
-      HASH_GUARD_LITSTR(0x24596BE6D21F7CAALL, NAMSTR(s_sys_ss2de08356, "getInterfaceNames")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaceNames", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfacenames());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x3C882D4A895F612ELL, NAMSTR(s_sys_ss76a09ed2, "getStaticPropertyValue")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("ReflectionClass::getStaticPropertyValue", count, 1, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 1) return (t_getstaticpropertyvalue(a0));
-        else return (t_getstaticpropertyvalue(a0, a1));
-      }
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isFinal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isfinal());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x30A86FCA01FE7030LL, NAMSTR(s_sys_ss01fe7030, "newInstance")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 0) return (t_newinstance(count));
-        return (t_newinstance(count,vargs));
-      }
-      break;
-    case 52:
-      HASH_GUARD_LITSTR(0x3DB53E1FBD3C0734LL, NAMSTR(s_sys_ss42c3f8cc, "getConstant")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstant(a0));
-      }
-      break;
-    case 54:
-      HASH_GUARD_LITSTR(0x0D81ECE253A3B5B6LL, NAMSTR(s_sys_ss53a3b5b6, "getMethod")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getMethod", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmethod(a0));
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isAbstract", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isabstract());
-      }
-      break;
-    case 59:
-      HASH_GUARD_LITSTR(0x25D24435915E6E3BLL, NAMSTR(s_sys_ss6ea191c5, "getExtension")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getExtension", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getextension());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x0D8AAD6BA2BBCD3CLL, NAMSTR(s_sys_ss5d4432c4, "isInstantiable")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInstantiable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinstantiable());
-      }
-      break;
-    case 63:
-      HASH_GUARD_LITSTR(0x54C2DC04C4A62B3FLL, NAMSTR(s_sys_ss3b59d4c1, "hasConstant")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::hasConstant", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_hasconstant(a0));
-      }
-      break;
-    case 67:
-      HASH_GUARD_LITSTR(0x67C15E3D98C00B43LL, NAMSTR(s_sys_ss673ff4bd, "getInterfaces")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getInterfaces", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinterfaces());
-      }
-      break;
-    case 68:
-      HASH_GUARD_LITSTR(0x1EB679C3602F4B44LL, NAMSTR(s_sys_ss602f4b44, "getProperties")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getProperties", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperties());
-      }
-      break;
-    case 71:
-      HASH_GUARD_LITSTR(0x0FD73627FB023047LL, NAMSTR(s_sys_ss04fdcfb9, "getProperty")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::getProperty", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getproperty(a0));
-      }
-      break;
-    case 77:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 78:
-      HASH_GUARD_LITSTR(0x7D5A57B5370B68CELL, NAMSTR(s_sys_ss370b68ce, "isIterateable")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isIterateable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isiterateable());
-      }
-      break;
-    case 79:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    case 85:
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getConstants", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstants());
-      }
-      break;
-    case 95:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 100:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 101:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 102:
-      HASH_GUARD_LITSTR(0x2735DCC254EE5C66LL, NAMSTR(s_sys_ss54ee5c66, "newInstanceArgs")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::newInstanceArgs", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_newinstanceargs(a0));
-      }
-      break;
-    case 103:
-      HASH_GUARD_LITSTR(0x37349B25A0ED29E7LL, NAMSTR(s_sys_ss5f12d619, "test")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::test", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_test(a0, a1));
-      }
-      break;
-    case 104:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 112:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 113:
-      HASH_GUARD_LITSTR(0x07ECA928E37717F1LL, NAMSTR(s_sys_ss1c88e80f, "setStaticPropertyValue")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::setStaticPropertyValue", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setstaticpropertyvalue(a0, a1), null);
-      }
-      break;
-    case 114:
-      HASH_GUARD_LITSTR(0x74F7FEDE16957472LL, NAMSTR(s_sys_ss16957472, "getParentClass")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getParentClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparentclass());
-      }
-      break;
-    case 120:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionClass::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 123:
-      HASH_GUARD_LITSTR(0x28DC702215C7D6FBLL, NAMSTR(s_sys_ss15c7d6fb, "implementsInterface")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::implementsInterface", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_implementsinterface(a0));
-      }
-      HASH_GUARD_LITSTR(0x5E82B850BB90B0FBLL, NAMSTR(s_sys_ss446f4f05, "fetch")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::fetch", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_fetch(a0));
-      }
-      break;
-    case 126:
-      HASH_GUARD_LITSTR(0x373333991926C97ELL, NAMSTR(s_sys_ss1926c97e, "isSubclassOf")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionClass::isSubclassOf", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_issubclassof(a0));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ReflectionClass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1));
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionClass::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_ReflectionClass = {
   c_ReflectionClass::os_getInit,
   c_ReflectionClass::os_get,
   c_ReflectionClass::os_lval,
   c_ReflectionClass::os_invoke,
   c_ReflectionClass::os_constant,
+  c_ReflectionClass::os_get_call_info
 };
 void c_ReflectionClass::init() {
   m_name = null;
@@ -7695,7 +4679,10 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   if (instanceOf(v_cls, "ReflectionClass")) {
     {
       {
-        Variant tmp1((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* fetch */ MethodIndex(254, 1) /* fetch */ ,  "fetch", 0x5E82B850BB90B0FBLL, 1, NAMSTR(s_sys_ss77e35232, "name"))));
+        MethodCallPackage mcp2;
+        mcp2.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit2  __attribute__((__unused__)) = mcp2.ci;
+        Variant tmp1(((mcp2.bindClass(info)->getMethFewArgs())(mcp2, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_cls = tmp1;
       }
     }
@@ -7750,8 +4737,10 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
     }
   }
   {
-    const Object &tmp13((toObject(t_getparentclass())));
-    return wrap_variant(tmp13-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* isSubclassOf */ MethodIndex(286, 1) /* isSubclassOf */ ,  "isSubclassOf", 0x373333991926C97ELL, 1, v_cls));
+    MethodCallPackage mcp3;
+    mcp3.methodCall((t_getparentclass()), NAMSTR(s_sys_ss1926c97e, "isSubclassOf"), 0x373333991926C97ELL);
+    const CallInfo *cit3  __attribute__((__unused__)) = mcp3.ci;
+    return wrap_variant((mcp3.bindClass(info)->getMethFewArgs())(mcp3, 1, v_cls, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
 } /* function */
 /* SRC: classes/reflection.php line 1136 */
@@ -7768,12 +4757,21 @@ Variant c_ReflectionClass::t_getstaticproperties() {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
-        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isStatic */ MethodIndex(311, 1) /* isStatic */ ,  "isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
+        {
+          bool tmp4;
           {
+            MethodCallPackage mcp4;
+            mcp4.methodCall((v_prop), NAMSTR(s_sys_ss1733f4e7, "isStatic"), 0x7A15DC56E8CC0B19LL);
+            const CallInfo *cit4  __attribute__((__unused__)) = mcp4.ci;
+            tmp4 = (toBoolean((mcp4.bindClass(info)->getMethFewArgs())(mcp4, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+          }
+          if (tmp4) {
             {
-              const Variant &tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
-              Variant tmp5((v_prop));
-              v_ret.set(tmp4, (tmp5));
+              {
+                const Variant &tmp5((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                Variant tmp6((v_prop));
+                v_ret.set(tmp5, (tmp6));
+              }
             }
           }
         }
@@ -7823,12 +4821,21 @@ Variant c_ReflectionClass::t_getdefaultproperties() {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
-        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isDefault */ MethodIndex(325, 1) /* isDefault */ ,  "isDefault", 0x384A52597AB11F15LL, 0))) {
+        {
+          bool tmp4;
           {
+            MethodCallPackage mcp5;
+            mcp5.methodCall((v_prop), NAMSTR(s_sys_ss7ab11f15, "isDefault"), 0x384A52597AB11F15LL);
+            const CallInfo *cit5  __attribute__((__unused__)) = mcp5.ci;
+            tmp4 = (toBoolean((mcp5.bindClass(info)->getMethFewArgs())(mcp5, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+          }
+          if (tmp4) {
             {
-              const Variant &tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
-              Variant tmp5((v_prop));
-              v_ret.set(tmp4, (tmp5));
+              {
+                const Variant &tmp5((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+                Variant tmp6((v_prop));
+                v_ret.set(tmp5, (tmp6));
+              }
             }
           }
         }
@@ -7851,7 +4858,10 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   if (instanceOf(v_cls, "ReflectionClass")) {
     {
       {
-        Variant tmp1((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* fetch */ MethodIndex(254, 1) /* fetch */ ,  "fetch", 0x5E82B850BB90B0FBLL, 1, NAMSTR(s_sys_ss77e35232, "name"))));
+        MethodCallPackage mcp6;
+        mcp6.methodCall((v_cls), NAMSTR(s_sys_ss446f4f05, "fetch"), 0x5E82B850BB90B0FBLL);
+        const CallInfo *cit6  __attribute__((__unused__)) = mcp6.ci;
+        Variant tmp1(((mcp6.bindClass(info)->getMethFewArgs())(mcp6, 1, NAMSTR(s_sys_ss77e35232, "name"), null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_cls = tmp1;
       }
     }
@@ -7890,8 +4900,10 @@ Variant c_ReflectionClass::t_getextension() {
 Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
-    const Object &tmp1((toObject(t_fetch(NAMSTR(s_sys_ss02406793, "extension")))));
-    return wrap_variant(tmp1-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* getName */ MethodIndex(139, 1) /* getName */ ,  "getName", 0x23F51CDECC198965LL, 0));
+    MethodCallPackage mcp7;
+    mcp7.methodCall((t_fetch(NAMSTR(s_sys_ss02406793, "extension"))), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
+    const CallInfo *cit7  __attribute__((__unused__)) = mcp7.ci;
+    return wrap_variant((mcp7.bindClass(info)->getMethFewArgs())(mcp7, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
 } /* function */
 /* SRC: classes/reflection.php line 1803 */
@@ -7979,6 +4991,702 @@ Variant c_ReflectionExtension::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionExtension
 IMPLEMENT_CLASS(ReflectionExtension)
+ObjectData *c_ReflectionExtension::cloneImpl() {
+  c_ReflectionExtension *obj = NEW(c_ReflectionExtension)();
+  cloneSet(obj);
+  return obj;
+}
+void c_ReflectionExtension::cloneSet(c_ReflectionExtension *clone) {
+  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
+  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+  ObjectData::cloneSet(clone);
+}
+Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclasses());
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfunctions());
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclassnames());
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getinientries());
+      }
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getconstants());
+      }
+      break;
+    case 22:
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getversion());
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_info());
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_ReflectionExtension::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionExtension::ci___tostring((void*)&c_ReflectionExtension::i___tostring, (void*)&c_ReflectionExtension::ifa___tostring, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci___construct((void*)&c_ReflectionExtension::i___construct, (void*)&c_ReflectionExtension::ifa___construct, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getfunctions((void*)&c_ReflectionExtension::i_getfunctions, (void*)&c_ReflectionExtension::ifa_getfunctions, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_export((void*)&c_ReflectionExtension::i_export, (void*)&c_ReflectionExtension::ifa_export, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_info((void*)&c_ReflectionExtension::i_info, (void*)&c_ReflectionExtension::ifa_info, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getinientries((void*)&c_ReflectionExtension::i_getinientries, (void*)&c_ReflectionExtension::ifa_getinientries, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getconstants((void*)&c_ReflectionExtension::i_getconstants, (void*)&c_ReflectionExtension::ifa_getconstants, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getclassnames((void*)&c_ReflectionExtension::i_getclassnames, (void*)&c_ReflectionExtension::ifa_getclassnames, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getversion((void*)&c_ReflectionExtension::i_getversion, (void*)&c_ReflectionExtension::ifa_getversion, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getname((void*)&c_ReflectionExtension::i_getname, (void*)&c_ReflectionExtension::ifa_getname, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionExtension::ci_getclasses((void*)&c_ReflectionExtension::i_getclasses, (void*)&c_ReflectionExtension::ifa_getclasses, 0, 0, 0x0000000000000000LL);
+Variant c_ReflectionExtension::i___tostring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionExtension::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___construct(arg0), null);
+  }
+}
+Variant c_ReflectionExtension::i_getfunctions(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
+  return (self->t_getfunctions());
+}
+Variant c_ReflectionExtension::i_export(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (c_ReflectionExtension::ti_export(c, arg0, arg1));
+  }
+}
+Variant c_ReflectionExtension::i_info(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
+  return (self->t_info());
+}
+Variant c_ReflectionExtension::i_getinientries(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
+  return (self->t_getinientries());
+}
+Variant c_ReflectionExtension::i_getconstants(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
+  return (self->t_getconstants());
+}
+Variant c_ReflectionExtension::i_getclassnames(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
+  return (self->t_getclassnames());
+}
+Variant c_ReflectionExtension::i_getversion(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
+  return (self->t_getversion());
+}
+Variant c_ReflectionExtension::i_getname(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionExtension::i_getclasses(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
+  return (self->t_getclasses());
+}
+Variant c_ReflectionExtension::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionExtension::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
+  return (self->t___construct(a0), null);
+}
+Variant c_ReflectionExtension::ifa_getfunctions(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
+  return (self->t_getfunctions());
+}
+Variant c_ReflectionExtension::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
+  return (c_ReflectionExtension::ti_export(c, a0, a1));
+}
+Variant c_ReflectionExtension::ifa_info(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
+  return (self->t_info());
+}
+Variant c_ReflectionExtension::ifa_getinientries(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
+  return (self->t_getinientries());
+}
+Variant c_ReflectionExtension::ifa_getconstants(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
+  return (self->t_getconstants());
+}
+Variant c_ReflectionExtension::ifa_getclassnames(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
+  return (self->t_getclassnames());
+}
+Variant c_ReflectionExtension::ifa_getversion(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
+  return (self->t_getversion());
+}
+Variant c_ReflectionExtension::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionExtension::ifa_getclasses(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionExtension *self = NULL;
+  p_ReflectionExtension pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionExtension*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionExtension)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
+  return (self->t_getclasses());
+}
+bool c_ReflectionExtension::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
+        mcp.ci = &c_ReflectionExtension::ci_getclasses;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionExtension::ci_getname;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionExtension::ci_export;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
+        mcp.ci = &c_ReflectionExtension::ci_getfunctions;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionExtension::ci___tostring;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
+        mcp.ci = &c_ReflectionExtension::ci_getclassnames;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
+        mcp.ci = &c_ReflectionExtension::ci_getinientries;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+        mcp.ci = &c_ReflectionExtension::ci_getconstants;
+        return true;
+      }
+      break;
+    case 22:
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+        mcp.ci = &c_ReflectionExtension::ci_getversion;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionExtension::ci___construct;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
+        mcp.ci = &c_ReflectionExtension::ci_info;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionExtension::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
+        mcp.ci = &c_ReflectionExtension::ci_getclasses;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionExtension::ci_getname;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionExtension::ci_export;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
+        mcp.ci = &c_ReflectionExtension::ci_getfunctions;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionExtension::ci___tostring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
+        mcp.ci = &c_ReflectionExtension::ci_getclassnames;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
+        mcp.ci = &c_ReflectionExtension::ci_getinientries;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
+        mcp.ci = &c_ReflectionExtension::ci_getconstants;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 22:
+      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
+        mcp.ci = &c_ReflectionExtension::ci_getversion;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionExtension::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
+        mcp.ci = &c_ReflectionExtension::ci_info;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_get_call_info(mcp, hash);
+}
 c_ReflectionExtension *c_ReflectionExtension::create(Variant v_name) {
   CountableHelper h(this);
   init();
@@ -8010,6 +5718,10 @@ void c_ReflectionExtension::dynConstruct(CArrRef params) {
     (t___construct(arg0));
   }
 }
+void c_ReflectionExtension::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_ReflectionExtension::ci___construct;
+  mcp.obj = this;
+}
 void c_ReflectionExtension::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8026,781 +5738,13 @@ void c_ReflectionExtension::dynConstructFromEval(Eval::VariableEnvironment &env,
   }
   (t___construct(a0), null);
 }
-ObjectData *c_ReflectionExtension::cloneImpl() {
-  c_ReflectionExtension *obj = NEW(c_ReflectionExtension)();
-  cloneSet(obj);
-  return obj;
-}
-void c_ReflectionExtension::cloneSet(c_ReflectionExtension *clone) {
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
-  ObjectData::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionExtension
-Variant c_ReflectionExtension::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 0x129:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
-        return (t_getfunctions());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 0x98:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
-        return (t_info());
-      }
-      break;
-    case 0x12a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
-        return (t_getinientries());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 0x12b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
-        return (t_getclassnames());
-      }
-      break;
-    case 0xde:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
-        return (t_getversion());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x12c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
-        return (t_getclasses());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
-        return (t_getclasses());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
-        return (t_getfunctions());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
-        return (t_getclassnames());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
-        return (t_getinientries());
-      }
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
-        return (t_getversion());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
-        return (t_info());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionExtension
-Variant c_ReflectionExtension::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x129:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
-        return (t_getfunctions());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 0x98:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
-        return (t_info());
-      }
-      break;
-    case 0x12a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
-        return (t_getinientries());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 0x12b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
-        return (t_getclassnames());
-      }
-      break;
-    case 0xde:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
-        return (t_getversion());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x12c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
-        return (t_getclasses());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
-        return (t_getclasses());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
-        return (t_getfunctions());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
-        return (t_getclassnames());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
-        return (t_getinientries());
-      }
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
-        return (t_getconstants());
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
-        return (t_getversion());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
-        return (t_info());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionExtension
-Variant c_ReflectionExtension::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionExtension
-Variant c_ReflectionExtension::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x129:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfunctions());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 0x98:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_info());
-      }
-      break;
-    case 0x12a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinientries());
-      }
-      break;
-    case 0x11b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstants());
-      }
-      break;
-    case 0x12b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclassnames());
-      }
-      break;
-    case 0xde:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getversion());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 0x12c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclasses());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x0113D73FC859EDC2LL, NAMSTR(s_sys_ss37a6123e, "getClasses")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClasses", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclasses());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x652BDFA6E22F17AFLL, NAMSTR(s_sys_ss1dd0e851, "getFunctions")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getFunctions", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfunctions());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x5CE2786E11341594LL, NAMSTR(s_sys_ss11341594, "getClassNames")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getClassNames", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclassnames());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x306B5F4D1D03D335LL, NAMSTR(s_sys_ss1d03d335, "getINIEntries")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getINIEntries", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getinientries());
-      }
-      HASH_GUARD_LITSTR(0x1CC71CB013143955LL, NAMSTR(s_sys_ss13143955, "getConstants")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getConstants", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getconstants());
-      }
-      break;
-    case 22:
-      HASH_GUARD_LITSTR(0x7521E8833BE3D316LL, NAMSTR(s_sys_ss3be3d316, "getVersion")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::getVersion", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getversion());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionExtension::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      HASH_GUARD_LITSTR(0x0F2EF58F157D479FLL, NAMSTR(s_sys_ss157d479f, "info")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionExtension::info", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_info());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ReflectionExtension::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1));
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionExtension::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_ReflectionExtension = {
   c_ReflectionExtension::os_getInit,
   c_ReflectionExtension::os_get,
   c_ReflectionExtension::os_lval,
   c_ReflectionExtension::os_invoke,
   c_ReflectionExtension::os_constant,
+  c_ReflectionExtension::os_get_call_info
 };
 void c_ReflectionExtension::init() {
   m_name = null;
@@ -8886,8 +5830,12 @@ Array c_ReflectionExtension::t_getclassnames() {
       iter3->second(v_cls);
       {
         {
-          Variant tmp4((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getName */ MethodIndex(139, 1) /* getName */ ,  "getName", 0x23F51CDECC198965LL, 0)));
-          v_ret.append((tmp4));
+          const Object &tmp4((toObject(v_cls)));
+          MethodCallPackage mcp8;
+          mcp8.methodCall((tmp4), NAMSTR(s_sys_ss33e6769b, "getName"), 0x23F51CDECC198965LL);
+          const CallInfo *cit8  __attribute__((__unused__)) = mcp8.ci;
+          Variant tmp5(((mcp8.bindClass(info)->getMethFewArgs())(mcp8, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
+          v_ret.append((tmp5));
         }
       }
     }
@@ -9000,6 +5948,1040 @@ Variant c_ReflectionMethod::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionMethod
 IMPLEMENT_CLASS(ReflectionMethod)
+ObjectData *c_ReflectionMethod::cloneImpl() {
+  c_ReflectionMethod *obj = NEW(c_ReflectionMethod)();
+  cloneSet(obj);
+  return obj;
+}
+void c_ReflectionMethod::cloneSet(c_ReflectionMethod *clone) {
+  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
+  clone->m_class = m_class.isReferenced() ? ref(m_class) : m_class;
+  c_ReflectionFunctionAbstract::cloneSet(clone);
+}
+Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 1) return (t_invoke(count, a0));
+        return (t_invoke(count, a0,vargs));
+      }
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclosure());
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_invokeargs(a0, a1));
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isdestructor());
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprotected());
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isfinal());
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprivate());
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmodifiers());
+      }
+      break;
+    case 23:
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isabstract());
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isstatic());
+      }
+      break;
+    case 26:
+      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isconstructor());
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_ispublic());
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_ReflectionMethod::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1, a2));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionMethod::ci_isprivate((void*)&c_ReflectionMethod::i_isprivate, (void*)&c_ReflectionMethod::ifa_isprivate, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci___tostring((void*)&c_ReflectionMethod::i___tostring, (void*)&c_ReflectionMethod::ifa___tostring, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isprotected((void*)&c_ReflectionMethod::i_isprotected, (void*)&c_ReflectionMethod::ifa_isprotected, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isstatic((void*)&c_ReflectionMethod::i_isstatic, (void*)&c_ReflectionMethod::ifa_isstatic, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_getdeclaringclass((void*)&c_ReflectionMethod::i_getdeclaringclass, (void*)&c_ReflectionMethod::ifa_getdeclaringclass, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isconstructor((void*)&c_ReflectionMethod::i_isconstructor, (void*)&c_ReflectionMethod::ifa_isconstructor, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci___construct((void*)&c_ReflectionMethod::i___construct, (void*)&c_ReflectionMethod::ifa___construct, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isfinal((void*)&c_ReflectionMethod::i_isfinal, (void*)&c_ReflectionMethod::ifa_isfinal, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_invokeargs((void*)&c_ReflectionMethod::i_invokeargs, (void*)&c_ReflectionMethod::ifa_invokeargs, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_getmodifiers((void*)&c_ReflectionMethod::i_getmodifiers, (void*)&c_ReflectionMethod::ifa_getmodifiers, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_export((void*)&c_ReflectionMethod::i_export, (void*)&c_ReflectionMethod::ifa_export, 3, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_invoke((void*)&c_ReflectionMethod::i_invoke, (void*)&c_ReflectionMethod::ifa_invoke, 1, 1, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_ispublic((void*)&c_ReflectionMethod::i_ispublic, (void*)&c_ReflectionMethod::ifa_ispublic, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isdestructor((void*)&c_ReflectionMethod::i_isdestructor, (void*)&c_ReflectionMethod::ifa_isdestructor, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_getclosure((void*)&c_ReflectionMethod::i_getclosure, (void*)&c_ReflectionMethod::ifa_getclosure, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionMethod::ci_isabstract((void*)&c_ReflectionMethod::i_isabstract, (void*)&c_ReflectionMethod::ifa_isabstract, 0, 0, 0x0000000000000000LL);
+Variant c_ReflectionMethod::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
+  return (self->t_isprivate());
+}
+Variant c_ReflectionMethod::i___tostring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionMethod::i_isprotected(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
+  return (self->t_isprotected());
+}
+Variant c_ReflectionMethod::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
+  return (self->t_isstatic());
+}
+Variant c_ReflectionMethod::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
+  return (self->t_getdeclaringclass());
+}
+Variant c_ReflectionMethod::i_isconstructor(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
+  return (self->t_isconstructor());
+}
+Variant c_ReflectionMethod::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1), null);
+  }
+}
+Variant c_ReflectionMethod::i_isfinal(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
+  return (self->t_isfinal());
+}
+Variant c_ReflectionMethod::i_invokeargs(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_invokeargs(arg0, arg1));
+  }
+}
+Variant c_ReflectionMethod::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
+  return (self->t_getmodifiers());
+}
+Variant c_ReflectionMethod::i_export(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (c_ReflectionMethod::ti_export(c, arg0, arg1, arg2));
+  }
+}
+Variant c_ReflectionMethod::i_invoke(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (self->t_invoke(count, arg0));
+    return (self->t_invoke(count,arg0, params.slice(1, count - 1, false)));
+  }
+}
+Variant c_ReflectionMethod::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
+  return (self->t_ispublic());
+}
+Variant c_ReflectionMethod::i_isdestructor(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
+  return (self->t_isdestructor());
+}
+Variant c_ReflectionMethod::i_getclosure(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
+  return (self->t_getclosure());
+}
+Variant c_ReflectionMethod::i_isabstract(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
+  return (self->t_isabstract());
+}
+Variant c_ReflectionMethod::ifa_isprivate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
+  return (self->t_isprivate());
+}
+Variant c_ReflectionMethod::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionMethod::ifa_isprotected(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
+  return (self->t_isprotected());
+}
+Variant c_ReflectionMethod::ifa_isstatic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
+  return (self->t_isstatic());
+}
+Variant c_ReflectionMethod::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
+  return (self->t_getdeclaringclass());
+}
+Variant c_ReflectionMethod::ifa_isconstructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
+  return (self->t_isconstructor());
+}
+Variant c_ReflectionMethod::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
+  return (self->t___construct(a0, a1), null);
+}
+Variant c_ReflectionMethod::ifa_isfinal(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
+  return (self->t_isfinal());
+}
+Variant c_ReflectionMethod::ifa_invokeargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
+  return (self->t_invokeargs(a0, a1));
+}
+Variant c_ReflectionMethod::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
+  return (self->t_getmodifiers());
+}
+Variant c_ReflectionMethod::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
+  return (c_ReflectionMethod::ti_export(c, a0, a1, a2));
+}
+Variant c_ReflectionMethod::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
+  if (count <= 1) return (self->t_invoke(count, a0));
+  Array params;
+  if (count >= 2) params.append(a1);
+  if (count >= 3) params.append(a2);
+  if (count >= 4) params.append(a3);
+  if (count >= 5) params.append(a4);
+  if (count >= 6) params.append(a5);
+  return (self->t_invoke(count,a0, params));
+}
+Variant c_ReflectionMethod::ifa_ispublic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
+  return (self->t_ispublic());
+}
+Variant c_ReflectionMethod::ifa_isdestructor(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
+  return (self->t_isdestructor());
+}
+Variant c_ReflectionMethod::ifa_getclosure(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
+  return (self->t_getclosure());
+}
+Variant c_ReflectionMethod::ifa_isabstract(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionMethod *self = NULL;
+  p_ReflectionMethod pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionMethod*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionMethod)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
+  return (self->t_isabstract());
+}
+bool c_ReflectionMethod::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+        mcp.ci = &c_ReflectionMethod::ci_invoke;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+        mcp.ci = &c_ReflectionMethod::ci_getclosure;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        mcp.ci = &c_ReflectionMethod::ci_getdeclaringclass;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+        mcp.ci = &c_ReflectionMethod::ci_invokeargs;
+        return true;
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
+        mcp.ci = &c_ReflectionMethod::ci_isdestructor;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionMethod::ci_export;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+        mcp.ci = &c_ReflectionMethod::ci_isprotected;
+        return true;
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+        mcp.ci = &c_ReflectionMethod::ci_isfinal;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+        mcp.ci = &c_ReflectionMethod::ci_isprivate;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionMethod::ci___tostring;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        mcp.ci = &c_ReflectionMethod::ci_getmodifiers;
+        return true;
+      }
+      break;
+    case 23:
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+        mcp.ci = &c_ReflectionMethod::ci_isabstract;
+        return true;
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+        mcp.ci = &c_ReflectionMethod::ci_isstatic;
+        return true;
+      }
+      break;
+    case 26:
+      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
+        mcp.ci = &c_ReflectionMethod::ci_isconstructor;
+        return true;
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+        mcp.ci = &c_ReflectionMethod::ci_ispublic;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionMethod::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionMethod::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+        mcp.ci = &c_ReflectionMethod::ci_invoke;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
+        mcp.ci = &c_ReflectionMethod::ci_getclosure;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        mcp.ci = &c_ReflectionMethod::ci_getdeclaringclass;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+        mcp.ci = &c_ReflectionMethod::ci_invokeargs;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
+        mcp.ci = &c_ReflectionMethod::ci_isdestructor;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionMethod::ci_export;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+        mcp.ci = &c_ReflectionMethod::ci_isprotected;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 14:
+      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
+        mcp.ci = &c_ReflectionMethod::ci_isfinal;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+        mcp.ci = &c_ReflectionMethod::ci_isprivate;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionMethod::ci___tostring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        mcp.ci = &c_ReflectionMethod::ci_getmodifiers;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 23:
+      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
+        mcp.ci = &c_ReflectionMethod::ci_isabstract;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+        mcp.ci = &c_ReflectionMethod::ci_isstatic;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 26:
+      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
+        mcp.ci = &c_ReflectionMethod::ci_isconstructor;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+        mcp.ci = &c_ReflectionMethod::ci_ispublic;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionMethod::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::o_get_call_info(mcp, hash);
+}
 c_ReflectionMethod *c_ReflectionMethod::create(Variant v_cls, Variant v_name) {
   CountableHelper h(this);
   init();
@@ -9033,6 +7015,10 @@ void c_ReflectionMethod::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1));
   }
 }
+void c_ReflectionMethod::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_ReflectionMethod::ci___construct;
+  mcp.obj = this;
+}
 void c_ReflectionMethod::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -9053,1755 +7039,13 @@ void c_ReflectionMethod::dynConstructFromEval(Eval::VariableEnvironment &env, co
   }
   (t___construct(a0, a1), null);
 }
-ObjectData *c_ReflectionMethod::cloneImpl() {
-  c_ReflectionMethod *obj = NEW(c_ReflectionMethod)();
-  cloneSet(obj);
-  return obj;
-}
-void c_ReflectionMethod::cloneSet(c_ReflectionMethod *clone) {
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_class = m_class.isReferenced() ? ref(m_class) : m_class;
-  c_ReflectionFunctionAbstract::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionMethod
-Variant c_ReflectionMethod::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x135:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x136:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 0x137:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x139:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
-        return (t_isconstructor());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 0x131:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_invokeargs(arg0, arg1));
-        }
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1, arg2));
-        }
-      }
-      break;
-    case 0x133:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_invoke(count, arg0));
-          return (t_invoke(count,arg0, params.slice(1, count - 1, false)));
-        }
-      }
-      break;
-    case 0x13a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x13b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
-        return (t_isdestructor());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 63) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_invoke(count, arg0));
-          return (t_invoke(count,arg0, params.slice(1, count - 1, false)));
-        }
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_invokeargs(arg0, arg1));
-        }
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
-        return (t_isdestructor());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 35:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1, arg2));
-        }
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
-        return (t_isconstructor());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionMethod
-Variant c_ReflectionMethod::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x135:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x136:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 0x137:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x139:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
-        return (t_isconstructor());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 0x131:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
-        return (t_invokeargs(a0, a1));
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 0x133:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
-        if (count <= 1) return (t_invoke(count, a0));
-        Array params;
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_invoke(count,a0, params));
-      }
-      break;
-    case 0x13a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x13b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
-        return (t_isdestructor());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 63) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
-        if (count <= 1) return (t_invoke(count, a0));
-        Array params;
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_invoke(count,a0, params));
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
-        return (t_invokeargs(a0, a1));
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
-        return (t_isdestructor());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 35:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
-        return (t_isfinal());
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
-        return (t_isabstract());
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
-        return (t_isconstructor());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionMethod
-Variant c_ReflectionMethod::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1, arg2));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1, arg2));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionMethod
-Variant c_ReflectionMethod::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x135:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprivate());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x136:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprotected());
-      }
-      break;
-    case 0x137:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isstatic());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x139:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isconstructor());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparameters());
-      }
-      break;
-    case 0x10f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isfinal());
-      }
-      break;
-    case 0x131:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_invokeargs(a0, a1));
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_returnsreference());
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 0x133:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 1) return (t_invoke(count, a0));
-        return (t_invoke(count, a0,vargs));
-      }
-      break;
-    case 0x13a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_ispublic());
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 0x13b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isdestructor());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclosure());
-      }
-      break;
-    case 0x126:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isabstract());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 63) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count < 1) return throw_missing_arguments("ReflectionMethod::invoke", count+1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 1) return (t_invoke(count, a0));
-        return (t_invoke(count, a0,vargs));
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::invokeArgs", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_invokeargs(a0, a1));
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x51A20EA0E327F607LL, NAMSTR(s_sys_ss1cd809f9, "isDestructor")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isDestructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isdestructor());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isStatic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isstatic());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionMethod::__construct", count, 2, 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getClosure", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclosure());
-      }
-      break;
-    case 35:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::getDeclaringClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_returnsreference());
-      }
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 42:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isProtected", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprotected());
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparameters());
-      }
-      break;
-    case 46:
-      HASH_GUARD_LITSTR(0x06FB6A7DC3D795AELL, NAMSTR(s_sys_ss3c286a52, "isFinal")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isFinal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isfinal());
-      }
-      break;
-    case 47:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPrivate", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprivate());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 55:
-      HASH_GUARD_LITSTR(0x7460D945DA32FDB7LL, NAMSTR(s_sys_ss25cd0249, "isAbstract")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isAbstract", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isabstract());
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 58:
-      HASH_GUARD_LITSTR(0x654B5F965C5CAC7ALL, NAMSTR(s_sys_ss5c5cac7a, "isConstructor")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isConstructor", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isconstructor());
-      }
-      break;
-    case 60:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionMethod::isPublic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_ispublic());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ReflectionFunctionAbstract::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ReflectionMethod::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1, a2));
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionMethod::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1, a2));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ReflectionFunctionAbstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_ReflectionMethod = {
   c_ReflectionMethod::os_getInit,
   c_ReflectionMethod::os_get,
   c_ReflectionMethod::os_lval,
   c_ReflectionMethod::os_invoke,
   c_ReflectionMethod::os_constant,
+  c_ReflectionMethod::os_get_call_info
 };
 void c_ReflectionMethod::init() {
   c_ReflectionFunctionAbstract::init();
@@ -10824,7 +7068,10 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getMethod */ MethodIndex(276, 1) /* getMethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+        MethodCallPackage mcp9;
+        mcp9.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
+        const CallInfo *cit9  __attribute__((__unused__)) = mcp9.ci;
+        Variant tmp2(((mcp9.bindClass(info)->getMethFewArgs())(mcp9, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_method = tmp2;
       }
       if (toBoolean(v_method)) {
@@ -10866,7 +7113,10 @@ Variant c_ReflectionMethod::ti_export(const char* cls, Variant v_cls, CVarRef v_
     }
   }
   {
-    const Variant &tmp2((v_cls.o_invoke_few_args(/* getMethod */ MethodIndex(276, 1) /* getMethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+    MethodCallPackage mcp10;
+    mcp10.methodCall((v_cls), NAMSTR(s_sys_ss53a3b5b6, "getMethod"), 0x0D81ECE253A3B5B6LL);
+    const CallInfo *cit10  __attribute__((__unused__)) = mcp10.ci;
+    const Variant &tmp2(((mcp10.bindClass(info)->getMethFewArgs())(mcp10, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));
@@ -11075,6 +7325,971 @@ Variant c_ReflectionProperty::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionProperty
 IMPLEMENT_CLASS(ReflectionProperty)
+ObjectData *c_ReflectionProperty::cloneImpl() {
+  c_ReflectionProperty *obj = NEW(c_ReflectionProperty)();
+  cloneSet(obj);
+  return obj;
+}
+void c_ReflectionProperty::cloneSet(c_ReflectionProperty *clone) {
+  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
+  clone->m_class = m_class.isReferenced() ? ref(m_class) : m_class;
+  ObjectData::cloneSet(clone);
+}
+Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setaccessible(), null);
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t_getvalue());
+        else return (t_getvalue(a0));
+      }
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprotected());
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isprivate());
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmodifiers());
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isdefault());
+      }
+      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_setvalue(a0, a1));
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdoccomment());
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isstatic());
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_ispublic());
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_ReflectionProperty::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1, a2));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionProperty::ci_isprivate((void*)&c_ReflectionProperty::i_isprivate, (void*)&c_ReflectionProperty::ifa_isprivate, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getvalue((void*)&c_ReflectionProperty::i_getvalue, (void*)&c_ReflectionProperty::ifa_getvalue, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci___tostring((void*)&c_ReflectionProperty::i___tostring, (void*)&c_ReflectionProperty::ifa___tostring, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_isprotected((void*)&c_ReflectionProperty::i_isprotected, (void*)&c_ReflectionProperty::ifa_isprotected, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_isstatic((void*)&c_ReflectionProperty::i_isstatic, (void*)&c_ReflectionProperty::ifa_isstatic, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getdeclaringclass((void*)&c_ReflectionProperty::i_getdeclaringclass, (void*)&c_ReflectionProperty::ifa_getdeclaringclass, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_isdefault((void*)&c_ReflectionProperty::i_isdefault, (void*)&c_ReflectionProperty::ifa_isdefault, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci___construct((void*)&c_ReflectionProperty::i___construct, (void*)&c_ReflectionProperty::ifa___construct, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getmodifiers((void*)&c_ReflectionProperty::i_getmodifiers, (void*)&c_ReflectionProperty::ifa_getmodifiers, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_export((void*)&c_ReflectionProperty::i_export, (void*)&c_ReflectionProperty::ifa_export, 3, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_ispublic((void*)&c_ReflectionProperty::i_ispublic, (void*)&c_ReflectionProperty::ifa_ispublic, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_setaccessible((void*)&c_ReflectionProperty::i_setaccessible, (void*)&c_ReflectionProperty::ifa_setaccessible, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getdoccomment((void*)&c_ReflectionProperty::i_getdoccomment, (void*)&c_ReflectionProperty::ifa_getdoccomment, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_setvalue((void*)&c_ReflectionProperty::i_setvalue, (void*)&c_ReflectionProperty::ifa_setvalue, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionProperty::ci_getname((void*)&c_ReflectionProperty::i_getname, (void*)&c_ReflectionProperty::ifa_getname, 0, 0, 0x0000000000000000LL);
+Variant c_ReflectionProperty::i_isprivate(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
+  return (self->t_isprivate());
+}
+Variant c_ReflectionProperty::i_getvalue(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (self->t_getvalue());
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_getvalue(arg0));
+  }
+}
+Variant c_ReflectionProperty::i___tostring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionProperty::i_isprotected(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
+  return (self->t_isprotected());
+}
+Variant c_ReflectionProperty::i_isstatic(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
+  return (self->t_isstatic());
+}
+Variant c_ReflectionProperty::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
+  return (self->t_getdeclaringclass());
+}
+Variant c_ReflectionProperty::i_isdefault(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
+  return (self->t_isdefault());
+}
+Variant c_ReflectionProperty::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1), null);
+  }
+}
+Variant c_ReflectionProperty::i_getmodifiers(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
+  return (self->t_getmodifiers());
+}
+Variant c_ReflectionProperty::i_export(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (c_ReflectionProperty::ti_export(c, arg0, arg1, arg2));
+  }
+}
+Variant c_ReflectionProperty::i_ispublic(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
+  return (self->t_ispublic());
+}
+Variant c_ReflectionProperty::i_setaccessible(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
+  return (self->t_setaccessible(), null);
+}
+Variant c_ReflectionProperty::i_getdoccomment(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
+  return (self->t_getdoccomment());
+}
+Variant c_ReflectionProperty::i_setvalue(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t_setvalue(arg0, arg1));
+  }
+}
+Variant c_ReflectionProperty::i_getname(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionProperty::ifa_isprivate(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
+  return (self->t_isprivate());
+}
+Variant c_ReflectionProperty::ifa_getvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
+  if (count <= 0) return (self->t_getvalue());
+  return (self->t_getvalue(a0));
+}
+Variant c_ReflectionProperty::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionProperty::ifa_isprotected(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
+  return (self->t_isprotected());
+}
+Variant c_ReflectionProperty::ifa_isstatic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
+  return (self->t_isstatic());
+}
+Variant c_ReflectionProperty::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
+  return (self->t_getdeclaringclass());
+}
+Variant c_ReflectionProperty::ifa_isdefault(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
+  return (self->t_isdefault());
+}
+Variant c_ReflectionProperty::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
+  return (self->t___construct(a0, a1), null);
+}
+Variant c_ReflectionProperty::ifa_getmodifiers(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
+  return (self->t_getmodifiers());
+}
+Variant c_ReflectionProperty::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
+  return (c_ReflectionProperty::ti_export(c, a0, a1, a2));
+}
+Variant c_ReflectionProperty::ifa_ispublic(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
+  return (self->t_ispublic());
+}
+Variant c_ReflectionProperty::ifa_setaccessible(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
+  return (self->t_setaccessible(), null);
+}
+Variant c_ReflectionProperty::ifa_getdoccomment(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
+  return (self->t_getdoccomment());
+}
+Variant c_ReflectionProperty::ifa_setvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
+  return (self->t_setvalue(a0, a1));
+}
+Variant c_ReflectionProperty::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionProperty *self = NULL;
+  p_ReflectionProperty pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionProperty*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionProperty)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
+  return (self->t_getname());
+}
+bool c_ReflectionProperty::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
+        mcp.ci = &c_ReflectionProperty::ci_setaccessible;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
+        mcp.ci = &c_ReflectionProperty::ci_getvalue;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        mcp.ci = &c_ReflectionProperty::ci_getdeclaringclass;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionProperty::ci_getname;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionProperty::ci_export;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+        mcp.ci = &c_ReflectionProperty::ci_isprotected;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+        mcp.ci = &c_ReflectionProperty::ci_isprivate;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionProperty::ci___tostring;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        mcp.ci = &c_ReflectionProperty::ci_getmodifiers;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
+        mcp.ci = &c_ReflectionProperty::ci_isdefault;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
+        mcp.ci = &c_ReflectionProperty::ci_setvalue;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        mcp.ci = &c_ReflectionProperty::ci_getdoccomment;
+        return true;
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+        mcp.ci = &c_ReflectionProperty::ci_isstatic;
+        return true;
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+        mcp.ci = &c_ReflectionProperty::ci_ispublic;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionProperty::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionProperty::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 2:
+      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
+        mcp.ci = &c_ReflectionProperty::ci_setaccessible;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
+        mcp.ci = &c_ReflectionProperty::ci_getvalue;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        mcp.ci = &c_ReflectionProperty::ci_getdeclaringclass;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionProperty::ci_getname;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionProperty::ci_export;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
+        mcp.ci = &c_ReflectionProperty::ci_isprotected;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
+        mcp.ci = &c_ReflectionProperty::ci_isprivate;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionProperty::ci___tostring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 20:
+      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
+        mcp.ci = &c_ReflectionProperty::ci_getmodifiers;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
+        mcp.ci = &c_ReflectionProperty::ci_isdefault;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
+        mcp.ci = &c_ReflectionProperty::ci_setvalue;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 24:
+      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
+        mcp.ci = &c_ReflectionProperty::ci_getdoccomment;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 25:
+      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
+        mcp.ci = &c_ReflectionProperty::ci_isstatic;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 28:
+      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
+        mcp.ci = &c_ReflectionProperty::ci_ispublic;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionProperty::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_get_call_info(mcp, hash);
+}
 c_ReflectionProperty *c_ReflectionProperty::create(Variant v_cls, Variant v_name) {
   CountableHelper h(this);
   init();
@@ -11108,6 +8323,10 @@ void c_ReflectionProperty::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1));
   }
 }
+void c_ReflectionProperty::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_ReflectionProperty::ci___construct;
+  mcp.obj = this;
+}
 void c_ReflectionProperty::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -11128,1072 +8347,13 @@ void c_ReflectionProperty::dynConstructFromEval(Eval::VariableEnvironment &env, 
   }
   (t___construct(a0, a1), null);
 }
-ObjectData *c_ReflectionProperty::cloneImpl() {
-  c_ReflectionProperty *obj = NEW(c_ReflectionProperty)();
-  cloneSet(obj);
-  return obj;
-}
-void c_ReflectionProperty::cloneSet(c_ReflectionProperty *clone) {
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
-  clone->m_name = m_name.isReferenced() ? ref(m_name) : m_name;
-  clone->m_class = m_class.isReferenced() ? ref(m_class) : m_class;
-  ObjectData::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionProperty
-Variant c_ReflectionProperty::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x135:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 0x144:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t_getvalue());
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getvalue(arg0));
-        }
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x136:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 0x137:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x145:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
-        return (t_isdefault());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1, arg2));
-        }
-      }
-      break;
-    case 0x13a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    case 0x146:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
-        return (t_setaccessible(), null);
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x147:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_setvalue(arg0, arg1));
-        }
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
-        return (t_setaccessible(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
-        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t_getvalue());
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_getvalue(arg0));
-        }
-      }
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1, arg2));
-        }
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
-        return (t_isdefault());
-      }
-      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t_setvalue(arg0, arg1));
-        }
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionProperty
-Variant c_ReflectionProperty::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x135:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 0x144:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
-        if (count <= 0) return (t_getvalue());
-        return (t_getvalue(a0));
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x136:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 0x137:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x145:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
-        return (t_isdefault());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 0x13a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    case 0x146:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
-        return (t_setaccessible(), null);
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x147:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
-        return (t_setvalue(a0, a1));
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
-        return (t_setaccessible(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
-        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
-        if (count <= 0) return (t_getvalue());
-        return (t_getvalue(a0));
-      }
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
-        return (t_isprotected());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
-        return (t_isprivate());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
-        return (t_getmodifiers());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
-        return (t_isdefault());
-      }
-      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
-        return (t_setvalue(a0, a1));
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
-        return (t_isstatic());
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
-        return (t_ispublic());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionProperty
-Variant c_ReflectionProperty::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1, arg2));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1, arg2));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionProperty
-Variant c_ReflectionProperty::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x135:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprivate());
-      }
-      break;
-    case 0x144:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t_getvalue());
-        else return (t_getvalue(a0));
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x136:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprotected());
-      }
-      break;
-    case 0x137:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isstatic());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x145:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isdefault());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x110:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 0x13a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_ispublic());
-      }
-      break;
-    case 0x146:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setaccessible(), null);
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x147:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setvalue(a0, a1));
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 2:
-      HASH_GUARD_LITSTR(0x791E9751F5B8C5A2LL, NAMSTR(s_sys_ss0a473a5e, "setAccessible")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::setAccessible", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setaccessible(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x56879BCEB40997E3LL, NAMSTR(s_sys_ss4bf6681d, "getValue")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 1) return throw_toomany_arguments("ReflectionProperty::getValue", 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t_getvalue());
-        else return (t_getvalue(a0));
-      }
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDeclaringClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x2D7209A590477CEALL, NAMSTR(s_sys_ss6fb88316, "isProtected")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isProtected", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprotected());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x37AAE0845E2F636FLL, NAMSTR(s_sys_ss5e2f636f, "isPrivate")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPrivate", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isprivate());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 20:
-      HASH_GUARD_LITSTR(0x24253EBA491D6014LL, NAMSTR(s_sys_ss491d6014, "getModifiers")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getModifiers", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmodifiers());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x384A52597AB11F15LL, NAMSTR(s_sys_ss7ab11f15, "isDefault")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isDefault", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isdefault());
-      }
-      HASH_GUARD_LITSTR(0x36FBED35008C8DB5LL, NAMSTR(s_sys_ss008c8db5, "setValue")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::setValue", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_setvalue(a0, a1));
-      }
-      break;
-    case 24:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 25:
-      HASH_GUARD_LITSTR(0x7A15DC56E8CC0B19LL, NAMSTR(s_sys_ss1733f4e7, "isStatic")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isStatic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isstatic());
-      }
-      break;
-    case 28:
-      HASH_GUARD_LITSTR(0x2820F10358723B7CLL, NAMSTR(s_sys_ss58723b7c, "isPublic")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionProperty::isPublic", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_ispublic());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionProperty::__construct", count, 2, 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ReflectionProperty::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1, a2));
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionProperty::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1, a2));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_ReflectionProperty = {
   c_ReflectionProperty::os_getInit,
   c_ReflectionProperty::os_get,
   c_ReflectionProperty::os_lval,
   c_ReflectionProperty::os_invoke,
   c_ReflectionProperty::os_constant,
+  c_ReflectionProperty::os_get_call_info
 };
 void c_ReflectionProperty::init() {
   m_info = null;
@@ -12216,7 +8376,10 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getProperty */ MethodIndex(296, 1) /* getProperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+        MethodCallPackage mcp11;
+        mcp11.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
+        const CallInfo *cit11  __attribute__((__unused__)) = mcp11.ci;
+        Variant tmp2(((mcp11.bindClass(info)->getMethFewArgs())(mcp11, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_prop = tmp2;
       }
       if (toBoolean(v_prop)) {
@@ -12258,7 +8421,10 @@ Variant c_ReflectionProperty::ti_export(const char* cls, Variant v_cls, CVarRef 
     }
   }
   {
-    const Variant &tmp2((v_cls.o_invoke_few_args(/* getProperty */ MethodIndex(296, 1) /* getProperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+    MethodCallPackage mcp12;
+    mcp12.methodCall((v_cls), NAMSTR(s_sys_ss04fdcfb9, "getProperty"), 0x0FD73627FB023047LL);
+    const CallInfo *cit12  __attribute__((__unused__)) = mcp12.ci;
+    const Variant &tmp2(((mcp12.bindClass(info)->getMethFewArgs())(mcp12, 1, v_name, null_variant, null_variant, null_variant, null_variant, null_variant)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));
@@ -12427,6 +8593,387 @@ Variant c_ReflectionFunction::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunction
 IMPLEMENT_CLASS(ReflectionFunction)
+ObjectData *c_ReflectionFunction::cloneImpl() {
+  c_ReflectionFunction *obj = NEW(c_ReflectionFunction)();
+  cloneSet(obj);
+  return obj;
+}
+void c_ReflectionFunction::cloneSet(c_ReflectionFunction *clone) {
+  c_ReflectionFunctionAbstract::cloneSet(clone);
+}
+Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 15) {
+    case 2:
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        Array vargs;
+        for (; it != params.end(); ++it) {
+          vargs.append((*it)->eval(env));
+        }
+        if (count <= 0) return (t_invoke(count));
+        return (t_invoke(count,vargs));
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_invokeargs(a0));
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1));
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_ReflectionFunction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionFunction::ci___tostring((void*)&c_ReflectionFunction::i___tostring, (void*)&c_ReflectionFunction::ifa___tostring, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci___construct((void*)&c_ReflectionFunction::i___construct, (void*)&c_ReflectionFunction::ifa___construct, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci_invokeargs((void*)&c_ReflectionFunction::i_invokeargs, (void*)&c_ReflectionFunction::ifa_invokeargs, 1, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci_export((void*)&c_ReflectionFunction::i_export, (void*)&c_ReflectionFunction::ifa_export, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionFunction::ci_invoke((void*)&c_ReflectionFunction::i_invoke, (void*)&c_ReflectionFunction::ifa_invoke, 0, 1, 0x0000000000000000LL);
+Variant c_ReflectionFunction::i___tostring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionFunction::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___construct(arg0), null);
+  }
+}
+Variant c_ReflectionFunction::i_invokeargs(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t_invokeargs(arg0));
+  }
+}
+Variant c_ReflectionFunction::i_export(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (c_ReflectionFunction::ti_export(c, arg0, arg1));
+  }
+}
+Variant c_ReflectionFunction::i_invoke(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count <= 0) return (self->t_invoke(count));
+  return (self->t_invoke(count,params.slice(0, count - 0, false)));
+}
+Variant c_ReflectionFunction::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionFunction::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
+  return (self->t___construct(a0), null);
+}
+Variant c_ReflectionFunction::ifa_invokeargs(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
+  return (self->t_invokeargs(a0));
+}
+Variant c_ReflectionFunction::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
+  return (c_ReflectionFunction::ti_export(c, a0, a1));
+}
+Variant c_ReflectionFunction::ifa_invoke(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionFunction *self = NULL;
+  p_ReflectionFunction pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionFunction*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionFunction)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count <= 0) return (self->t_invoke(count));
+  Array params;
+  if (count >= 1) params.append(a0);
+  if (count >= 2) params.append(a1);
+  if (count >= 3) params.append(a2);
+  if (count >= 4) params.append(a3);
+  if (count >= 5) params.append(a4);
+  if (count >= 6) params.append(a5);
+  return (self->t_invoke(count,params));
+}
+bool c_ReflectionFunction::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 15) {
+    case 2:
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+        mcp.ci = &c_ReflectionFunction::ci_invoke;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionFunction::ci___tostring;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+        mcp.ci = &c_ReflectionFunction::ci_invokeargs;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionFunction::ci_export;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionFunction::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionFunction::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 15) {
+    case 2:
+      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
+        mcp.ci = &c_ReflectionFunction::ci_invoke;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionFunction::ci___tostring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 4:
+      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
+        mcp.ci = &c_ReflectionFunction::ci_invokeargs;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionFunction::ci_export;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionFunction::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ReflectionFunctionAbstract::o_get_call_info(mcp, hash);
+}
 c_ReflectionFunction *c_ReflectionFunction::create(Variant v_name) {
   CountableHelper h(this);
   init();
@@ -12458,6 +9005,10 @@ void c_ReflectionFunction::dynConstruct(CArrRef params) {
     (t___construct(arg0));
   }
 }
+void c_ReflectionFunction::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_ReflectionFunction::ci___construct;
+  mcp.obj = this;
+}
 void c_ReflectionFunction::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -12474,1171 +9025,13 @@ void c_ReflectionFunction::dynConstructFromEval(Eval::VariableEnvironment &env, 
   }
   (t___construct(a0), null);
 }
-ObjectData *c_ReflectionFunction::cloneImpl() {
-  c_ReflectionFunction *obj = NEW(c_ReflectionFunction)();
-  cloneSet(obj);
-  return obj;
-}
-void c_ReflectionFunction::cloneSet(c_ReflectionFunction *clone) {
-  c_ReflectionFunctionAbstract::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunction
-Variant c_ReflectionFunction::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 0x131:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_invokeargs(arg0));
-        }
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 0x133:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count <= 0) return (t_invoke(count));
-        return (t_invoke(count,params.slice(0, count - 0, false)));
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 63) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        if (count <= 0) return (t_invoke(count));
-        return (t_invoke(count,params.slice(0, count - 0, false)));
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t_invokeargs(arg0));
-        }
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1));
-        }
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunction
-Variant c_ReflectionFunction::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 0x131:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
-        return (t_invokeargs(a0));
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 0x133:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count <= 0) return (t_invoke(count));
-        Array params;
-        if (count >= 1) params.append(a0);
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_invoke(count,params));
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 63) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        if (count <= 0) return (t_invoke(count));
-        Array params;
-        if (count >= 1) params.append(a0);
-        if (count >= 2) params.append(a1);
-        if (count >= 3) params.append(a2);
-        if (count >= 4) params.append(a3);
-        if (count >= 5) params.append(a4);
-        if (count >= 6) params.append(a5);
-        return (t_invoke(count,params));
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
-        return (t_invokeargs(a0));
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        return (t_getstartline());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        return (t_isinternal());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        return (t_getclosure());
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        return (t_isuserdefined());
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        return (t_returnsreference());
-      }
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        return (t_getparameters());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        return (t_getendline());
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        return (t_getdoccomment());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionFunction
-Variant c_ReflectionFunction::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionFunction
-Variant c_ReflectionFunction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x12d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 0x107:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x12e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 0x10c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 0x12f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticvariables());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0x130:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparameters());
-      }
-      break;
-    case 0x131:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_invokeargs(a0));
-      }
-      break;
-    case 0x132:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_returnsreference());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 0x133:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 0) return (t_invoke(count));
-        return (t_invoke(count,vargs));
-      }
-      break;
-    case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 0x119:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 0x11c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    case 0x134:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclosure());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 0x127:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 63) {
-    case 2:
-      HASH_GUARD_LITSTR(0x3FCE192CF6199942LL, NAMSTR(s_sys_ss09e666be, "invoke")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        Array vargs;
-        for (; it != params.end(); ++it) {
-          vargs.append((*it)->eval(env));
-        }
-        if (count <= 0) return (t_invoke(count));
-        return (t_invoke(count,vargs));
-      }
-      break;
-    case 4:
-      HASH_GUARD_LITSTR(0x3235AF57F23103C4LL, NAMSTR(s_sys_ss0dcefc3c, "invokeArgs")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::invokeArgs", count, 1, 1, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_invokeargs(a0));
-      }
-      HASH_GUARD_LITSTR(0x39C1BB731CB1CB04LL, NAMSTR(s_sys_ss1cb1cb04, "getStartLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStartLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstartline());
-      }
-      break;
-    case 13:
-      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d_1, "getFileName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getFileName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfilename());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x48FDF6C5835C64CFLL, NAMSTR(s_sys_ss7ca39b31, "isInternal")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isInternal", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isinternal());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunction::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("ReflectionFunction::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 32:
-      HASH_GUARD_LITSTR(0x57D8DC34C9A03560LL, NAMSTR(s_sys_ss365fcaa0, "getNumberOfParameters")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofparameters());
-      }
-      break;
-    case 33:
-      HASH_GUARD_LITSTR(0x4D637DECDBFA6221LL, NAMSTR(s_sys_ss24059ddf, "getNumberOfRequiredParameters")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getNumberOfRequiredParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getnumberofrequiredparameters());
-      }
-      break;
-    case 34:
-      HASH_GUARD_LITSTR(0x33A6C2CFBDB05EE2LL, NAMSTR(s_sys_ss424fa11e, "getClosure")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getClosure", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclosure());
-      }
-      break;
-    case 36:
-      HASH_GUARD_LITSTR(0x6A6B8BECAE7D4164LL, NAMSTR(s_sys_ss5182be9c, "isUserDefined")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::isUserDefined", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isuserdefined());
-      }
-      break;
-    case 37:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 40:
-      HASH_GUARD_LITSTR(0x37FFB8F44A3329A8LL, NAMSTR(s_sys_ss4a3329a8, "getStaticVariables")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getStaticVariables", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getstaticvariables());
-      }
-      HASH_GUARD_LITSTR(0x1A3AB3B0276D2668LL, NAMSTR(s_sys_ss276d2668, "returnsReference")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::returnsReference", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_returnsreference());
-      }
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1));
-      }
-      break;
-    case 45:
-      HASH_GUARD_LITSTR(0x3E62225132C2A32DLL, NAMSTR(s_sys_ss32c2a32d, "getParameters")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getParameters", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getparameters());
-      }
-      break;
-    case 48:
-      HASH_GUARD_LITSTR(0x6C19E85007BC4570LL, NAMSTR(s_sys_ss07bc4570, "getEndLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getEndLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getendline());
-      }
-      break;
-    case 56:
-      HASH_GUARD_LITSTR(0x7C4F424FDA56ADF8LL, NAMSTR(s_sys_ss25a95208, "getDocComment")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionFunctionAbstract::getDocComment", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdoccomment());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ReflectionFunctionAbstract::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ReflectionFunction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1));
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionFunction::export", count, 2, 2, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ReflectionFunctionAbstract::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_ReflectionFunction = {
   c_ReflectionFunction::os_getInit,
   c_ReflectionFunction::os_get,
   c_ReflectionFunction::os_lval,
   c_ReflectionFunction::os_invoke,
   c_ReflectionFunction::os_constant,
+  c_ReflectionFunction::os_get_call_info
 };
 void c_ReflectionFunction::init() {
   c_ReflectionFunctionAbstract::init();
@@ -13775,6 +9168,829 @@ Variant c_ReflectionParameter::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionParameter
 IMPLEMENT_CLASS(ReflectionParameter)
+ObjectData *c_ReflectionParameter::cloneImpl() {
+  c_ReflectionParameter *obj = NEW(c_ReflectionParameter)();
+  cloneSet(obj);
+  return obj;
+}
+void c_ReflectionParameter::cloneSet(c_ReflectionParameter *clone) {
+  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
+  ObjectData::cloneSet(clone);
+}
+Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 31) {
+    case 3:
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdeclaringclass());
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getname());
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(o_getClassName(), a0, a1, a2));
+      }
+      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getposition());
+      }
+      break;
+    case 9:
+      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getclass());
+      }
+      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_allowsnull());
+      }
+      break;
+    case 12:
+      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getdefaultvalue());
+      }
+      break;
+    case 17:
+      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_ispassedbyreference());
+      }
+      break;
+    case 18:
+      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isdefaultvalueavailable());
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isoptional());
+      }
+      break;
+    case 29:
+      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_isarray());
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0, a1), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_ReflectionParameter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 1) {
+    case 0:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (ti_export(c, a0, a1, a2));
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ReflectionParameter::ci___tostring((void*)&c_ReflectionParameter::i___tostring, (void*)&c_ReflectionParameter::ifa___tostring, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getdeclaringclass((void*)&c_ReflectionParameter::i_getdeclaringclass, (void*)&c_ReflectionParameter::ifa_getdeclaringclass, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_isdefaultvalueavailable((void*)&c_ReflectionParameter::i_isdefaultvalueavailable, (void*)&c_ReflectionParameter::ifa_isdefaultvalueavailable, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci___construct((void*)&c_ReflectionParameter::i___construct, (void*)&c_ReflectionParameter::ifa___construct, 2, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getclass((void*)&c_ReflectionParameter::i_getclass, (void*)&c_ReflectionParameter::ifa_getclass, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_export((void*)&c_ReflectionParameter::i_export, (void*)&c_ReflectionParameter::ifa_export, 3, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_allowsnull((void*)&c_ReflectionParameter::i_allowsnull, (void*)&c_ReflectionParameter::ifa_allowsnull, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getposition((void*)&c_ReflectionParameter::i_getposition, (void*)&c_ReflectionParameter::ifa_getposition, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_isarray((void*)&c_ReflectionParameter::i_isarray, (void*)&c_ReflectionParameter::ifa_isarray, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_isoptional((void*)&c_ReflectionParameter::i_isoptional, (void*)&c_ReflectionParameter::ifa_isoptional, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getdefaultvalue((void*)&c_ReflectionParameter::i_getdefaultvalue, (void*)&c_ReflectionParameter::ifa_getdefaultvalue, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_getname((void*)&c_ReflectionParameter::i_getname, (void*)&c_ReflectionParameter::ifa_getname, 0, 0, 0x0000000000000000LL);
+CallInfo c_ReflectionParameter::ci_ispassedbyreference((void*)&c_ReflectionParameter::i_ispassedbyreference, (void*)&c_ReflectionParameter::ifa_ispassedbyreference, 0, 0, 0x0000000000000000LL);
+Variant c_ReflectionParameter::i___tostring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionParameter::i_getdeclaringclass(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
+  return (self->t_getdeclaringclass());
+}
+Variant c_ReflectionParameter::i_isdefaultvalueavailable(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
+  return (self->t_isdefaultvalueavailable());
+}
+Variant c_ReflectionParameter::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1), null);
+  }
+}
+Variant c_ReflectionParameter::i_getclass(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
+  return (self->t_getclass());
+}
+Variant c_ReflectionParameter::i_export(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (c_ReflectionParameter::ti_export(c, arg0, arg1, arg2));
+  }
+}
+Variant c_ReflectionParameter::i_allowsnull(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
+  return (self->t_allowsnull());
+}
+Variant c_ReflectionParameter::i_getposition(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
+  return (self->t_getposition());
+}
+Variant c_ReflectionParameter::i_isarray(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
+  return (self->t_isarray());
+}
+Variant c_ReflectionParameter::i_isoptional(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
+  return (self->t_isoptional());
+}
+Variant c_ReflectionParameter::i_getdefaultvalue(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
+  return (self->t_getdefaultvalue());
+}
+Variant c_ReflectionParameter::i_getname(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionParameter::i_ispassedbyreference(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
+  return (self->t_ispassedbyreference());
+}
+Variant c_ReflectionParameter::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_ReflectionParameter::ifa_getdeclaringclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
+  return (self->t_getdeclaringclass());
+}
+Variant c_ReflectionParameter::ifa_isdefaultvalueavailable(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
+  return (self->t_isdefaultvalueavailable());
+}
+Variant c_ReflectionParameter::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
+  return (self->t___construct(a0, a1), null);
+}
+Variant c_ReflectionParameter::ifa_getclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
+  return (self->t_getclass());
+}
+Variant c_ReflectionParameter::ifa_export(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  const char *c;
+  if (mcp.rootObj.is(KindOfObject)) {
+    c = mcp.rootObj.getObjectData()->o_getClassName();
+  } else {
+    c = mcp.rootObj.getCStr();
+  }
+  if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
+  return (c_ReflectionParameter::ti_export(c, a0, a1, a2));
+}
+Variant c_ReflectionParameter::ifa_allowsnull(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
+  return (self->t_allowsnull());
+}
+Variant c_ReflectionParameter::ifa_getposition(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
+  return (self->t_getposition());
+}
+Variant c_ReflectionParameter::ifa_isarray(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
+  return (self->t_isarray());
+}
+Variant c_ReflectionParameter::ifa_isoptional(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
+  return (self->t_isoptional());
+}
+Variant c_ReflectionParameter::ifa_getdefaultvalue(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
+  return (self->t_getdefaultvalue());
+}
+Variant c_ReflectionParameter::ifa_getname(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
+  return (self->t_getname());
+}
+Variant c_ReflectionParameter::ifa_ispassedbyreference(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ReflectionParameter *self = NULL;
+  p_ReflectionParameter pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ReflectionParameter*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ReflectionParameter)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
+  return (self->t_ispassedbyreference());
+}
+bool c_ReflectionParameter::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 3:
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        mcp.ci = &c_ReflectionParameter::ci_getdeclaringclass;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionParameter::ci_getname;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionParameter::ci_export;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
+        mcp.ci = &c_ReflectionParameter::ci_getposition;
+        return true;
+      }
+      break;
+    case 9:
+      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
+        mcp.ci = &c_ReflectionParameter::ci_getclass;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
+        mcp.ci = &c_ReflectionParameter::ci_allowsnull;
+        return true;
+      }
+      break;
+    case 12:
+      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
+        mcp.ci = &c_ReflectionParameter::ci_getdefaultvalue;
+        return true;
+      }
+      break;
+    case 17:
+      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
+        mcp.ci = &c_ReflectionParameter::ci_ispassedbyreference;
+        return true;
+      }
+      break;
+    case 18:
+      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
+        mcp.ci = &c_ReflectionParameter::ci_isdefaultvalueavailable;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionParameter::ci___tostring;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
+        mcp.ci = &c_ReflectionParameter::ci_isoptional;
+        return true;
+      }
+      break;
+    case 29:
+      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
+        mcp.ci = &c_ReflectionParameter::ci_isarray;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionParameter::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_ReflectionParameter::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 3:
+      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
+        mcp.ci = &c_ReflectionParameter::ci_getdeclaringclass;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 5:
+      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
+        mcp.ci = &c_ReflectionParameter::ci_getname;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 8:
+      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
+        mcp.ci = &c_ReflectionParameter::ci_export;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
+        mcp.ci = &c_ReflectionParameter::ci_getposition;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 9:
+      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
+        mcp.ci = &c_ReflectionParameter::ci_getclass;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
+        mcp.ci = &c_ReflectionParameter::ci_allowsnull;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 12:
+      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
+        mcp.ci = &c_ReflectionParameter::ci_getdefaultvalue;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 17:
+      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
+        mcp.ci = &c_ReflectionParameter::ci_ispassedbyreference;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 18:
+      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
+        mcp.ci = &c_ReflectionParameter::ci_isdefaultvalueavailable;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_ReflectionParameter::ci___tostring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 21:
+      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
+        mcp.ci = &c_ReflectionParameter::ci_isoptional;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 29:
+      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
+        mcp.ci = &c_ReflectionParameter::ci_isarray;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ReflectionParameter::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_get_call_info(mcp, hash);
+}
 c_ReflectionParameter *c_ReflectionParameter::create(Variant v_func, Variant v_param) {
   CountableHelper h(this);
   init();
@@ -13808,6 +10024,10 @@ void c_ReflectionParameter::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1));
   }
 }
+void c_ReflectionParameter::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_ReflectionParameter::ci___construct;
+  mcp.obj = this;
+}
 void c_ReflectionParameter::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -13828,914 +10048,13 @@ void c_ReflectionParameter::dynConstructFromEval(Eval::VariableEnvironment &env,
   }
   (t___construct(a0, a1), null);
 }
-ObjectData *c_ReflectionParameter::cloneImpl() {
-  c_ReflectionParameter *obj = NEW(c_ReflectionParameter)();
-  cloneSet(obj);
-  return obj;
-}
-void c_ReflectionParameter::cloneSet(c_ReflectionParameter *clone) {
-  clone->m_info = m_info.isReferenced() ? ref(m_info) : m_info;
-  ObjectData::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionParameter
-Variant c_ReflectionParameter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x13c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
-        return (t_isdefaultvalueavailable());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x13d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
-        return (t_getclass());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1, arg2));
-        }
-      }
-      break;
-    case 0x13e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
-        return (t_allowsnull());
-      }
-      break;
-    case 0x13f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
-        return (t_getposition());
-      }
-      break;
-    case 0x140:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
-        return (t_isarray());
-      }
-      break;
-    case 0x141:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
-        return (t_isoptional());
-      }
-      break;
-    case 0x142:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
-        return (t_getdefaultvalue());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x143:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
-        return (t_ispassedbyreference());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(o_getClassName(), arg0, arg1, arg2));
-        }
-      }
-      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
-        return (t_getposition());
-      }
-      break;
-    case 9:
-      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
-        return (t_getclass());
-      }
-      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
-        return (t_allowsnull());
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
-        return (t_getdefaultvalue());
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
-        return (t_ispassedbyreference());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
-        return (t_isdefaultvalueavailable());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
-        return (t_isoptional());
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
-        return (t_isarray());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionParameter
-Variant c_ReflectionParameter::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x13c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
-        return (t_isdefaultvalueavailable());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x13d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
-        return (t_getclass());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 0x13e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
-        return (t_allowsnull());
-      }
-      break;
-    case 0x13f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
-        return (t_getposition());
-      }
-      break;
-    case 0x140:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
-        return (t_isarray());
-      }
-      break;
-    case 0x141:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
-        return (t_isoptional());
-      }
-      break;
-    case 0x142:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
-        return (t_getdefaultvalue());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 0x143:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
-        return (t_ispassedbyreference());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
-        return (t_getposition());
-      }
-      break;
-    case 9:
-      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
-        return (t_getclass());
-      }
-      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
-        return (t_allowsnull());
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
-        return (t_getdefaultvalue());
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
-        return (t_ispassedbyreference());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
-        return (t_isdefaultvalueavailable());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
-        return (t_isoptional());
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
-        return (t_isarray());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionParameter
-Variant c_ReflectionParameter::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1, arg2));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          return (ti_export(c, arg0, arg1, arg2));
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionParameter
-Variant c_ReflectionParameter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x138:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 0x13c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isdefaultvalueavailable());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x13d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclass());
-      }
-      break;
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      break;
-    case 0x13e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_allowsnull());
-      }
-      break;
-    case 0x13f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getposition());
-      }
-      break;
-    case 0x140:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isarray());
-      }
-      break;
-    case 0x141:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isoptional());
-      }
-      break;
-    case 0x142:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdefaultvalue());
-      }
-      break;
-    case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 0x143:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_ispassedbyreference());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 3:
-      HASH_GUARD_LITSTR(0x6ED51288559D6063LL, NAMSTR(s_sys_ss559d6063, "getDeclaringClass")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDeclaringClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdeclaringclass());
-      }
-      break;
-    case 5:
-      HASH_GUARD_LITSTR(0x23F51CDECC198965LL, NAMSTR(s_sys_ss33e6769b, "getName")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getName", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getname());
-      }
-      break;
-    case 8:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(o_getClassName(), a0, a1, a2));
-      }
-      HASH_GUARD_LITSTR(0x4044F1EEBF3BB8C8LL, NAMSTR(s_sys_ss40c44738, "getPosition")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getPosition", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getposition());
-      }
-      break;
-    case 9:
-      HASH_GUARD_LITSTR(0x4F51DA0B633E9909LL, NAMSTR(s_sys_ss633e9909, "getClass")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getClass", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getclass());
-      }
-      HASH_GUARD_LITSTR(0x24ED05F4504C4C09LL, NAMSTR(s_sys_ss504c4c09, "allowsNull")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::allowsNull", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_allowsnull());
-      }
-      break;
-    case 12:
-      HASH_GUARD_LITSTR(0x27C482A6C7951E0CLL, NAMSTR(s_sys_ss386ae1f4, "getDefaultValue")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::getDefaultValue", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getdefaultvalue());
-      }
-      break;
-    case 17:
-      HASH_GUARD_LITSTR(0x13E3F304BDD89FB1LL, NAMSTR(s_sys_ss4227604f, "isPassedByReference")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isPassedByReference", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_ispassedbyreference());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x6E34805C91257C92LL, NAMSTR(s_sys_ss6eda836e, "isDefaultValueAvailable")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isDefaultValueAvailable", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isdefaultvalueavailable());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 21:
-      HASH_GUARD_LITSTR(0x2D6EF48BBAB22735LL, NAMSTR(s_sys_ss454dd8cb, "isOptional")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isOptional", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isoptional());
-      }
-      break;
-    case 29:
-      HASH_GUARD_LITSTR(0x5A9CE40C0F25871DLL, NAMSTR(s_sys_ss0f25871d, "isArray")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ReflectionParameter::isArray", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_isarray());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 2) return throw_wrong_arguments("ReflectionParameter::__construct", count, 2, 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ReflectionParameter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x111:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1, a2));
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_LITSTR(0x0B5ABC58C98E70E8LL, NAMSTR(s_sys_ss36718f18, "export")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 3) return throw_wrong_arguments("ReflectionParameter::export", count, 3, 3, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (ti_export(c, a0, a1, a2));
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_ReflectionParameter = {
   c_ReflectionParameter::os_getInit,
   c_ReflectionParameter::os_get,
   c_ReflectionParameter::os_lval,
   c_ReflectionParameter::os_invoke,
   c_ReflectionParameter::os_constant,
+  c_ReflectionParameter::os_get_call_info
 };
 void c_ReflectionParameter::init() {
   m_info = null;
@@ -14749,7 +10068,10 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
   if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
-        Variant tmp1((v_func. BIND_CLASS_DOT o_invoke_few_args(/* getParameters */ MethodIndex(304, 1) /* getParameters */ ,  "getParameters", 0x3E62225132C2A32DLL, 0)));
+        MethodCallPackage mcp13;
+        mcp13.methodCall((v_func), NAMSTR(s_sys_ss32c2a32d, "getParameters"), 0x3E62225132C2A32DLL);
+        const CallInfo *cit13  __attribute__((__unused__)) = mcp13.ci;
+        Variant tmp1(((mcp13.bindClass(info)->getMethFewArgs())(mcp13, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant)));
         v_params = tmp1;
       }
       {
@@ -14880,29 +10202,74 @@ Variant c_ReflectionParameter::t_getposition() {
 Object co_ReflectionFunctionAbstract(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionFunctionAbstract)())->dynCreate(params, init));
 }
+Object coo_ReflectionFunctionAbstract() {
+  Object r(NEW(c_ReflectionFunctionAbstract)());
+  r->init();
+  return r;
+}
 Object co_ReflectionObject(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionObject)())->dynCreate(params, init));
+}
+Object coo_ReflectionObject() {
+  Object r(NEW(c_ReflectionObject)());
+  r->init();
+  return r;
 }
 Object co_ReflectionException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionException)())->dynCreate(params, init));
 }
+Object coo_ReflectionException() {
+  Object r(NEW(c_ReflectionException)());
+  r->init();
+  return r;
+}
 Object co_ReflectionClass(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionClass)())->dynCreate(params, init));
+}
+Object coo_ReflectionClass() {
+  Object r(NEW(c_ReflectionClass)());
+  r->init();
+  return r;
 }
 Object co_ReflectionExtension(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionExtension)())->dynCreate(params, init));
 }
+Object coo_ReflectionExtension() {
+  Object r(NEW(c_ReflectionExtension)());
+  r->init();
+  return r;
+}
 Object co_ReflectionMethod(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionMethod)())->dynCreate(params, init));
+}
+Object coo_ReflectionMethod() {
+  Object r(NEW(c_ReflectionMethod)());
+  r->init();
+  return r;
 }
 Object co_ReflectionProperty(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionProperty)())->dynCreate(params, init));
 }
+Object coo_ReflectionProperty() {
+  Object r(NEW(c_ReflectionProperty)());
+  r->init();
+  return r;
+}
 Object co_ReflectionFunction(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionFunction)())->dynCreate(params, init));
 }
+Object coo_ReflectionFunction() {
+  Object r(NEW(c_ReflectionFunction)());
+  r->init();
+  return r;
+}
 Object co_ReflectionParameter(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ReflectionParameter)())->dynCreate(params, init));
+}
+Object coo_ReflectionParameter() {
+  Object r(NEW(c_ReflectionParameter)());
+  r->init();
+  return r;
 }
 Variant pm_php$classes$reflection_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/reflection.php, pm_php$classes$reflection_php);

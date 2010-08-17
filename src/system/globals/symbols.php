@@ -21,6 +21,7 @@ $_COOKIE = array();
 $_FILES = array();
 $_ENV = array();
 $_REQUEST = array();
+$_SESSION = array();
 
 //TODO: global variables
 $HTTP_RAW_POST_DATA = null;

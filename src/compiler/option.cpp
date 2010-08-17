@@ -88,7 +88,10 @@ string Option::Tab = "  ";
 const char *Option::FunctionPrefix = "f_";
 const char *Option::BuiltinFunctionPrefix = "x_";
 const char *Option::InvokePrefix = "i_";
+const char *Option::InvokeFewArgsPrefix = "ifa_";
+const char *Option::InvokeSinglePrefix = "is_";
 const char *Option::CreateObjectPrefix = "co_";
+const char *Option::CreateObjectOnlyPrefix = "coo_";
 const char *Option::PseudoMainPrefix = "pm_";
 const char *Option::VariablePrefix = "v_";
 const char *Option::GlobalVariablePrefix = "gv_";
@@ -117,6 +120,7 @@ const char *Option::ExceptionPrefix = "e_";
 const char *Option::TempVariablePrefix = "r_";
 const char *Option::EvalOrderTempPrefix = "eo_";
 const char *Option::EvalInvokePrefix = "ei_";
+const char *Option::CallInfoPrefix = "ci_";
 const char *Option::SilencerPrefix = "sil_";
 
 const char *Option::FFIFnPrefix = "ffi_";
@@ -196,6 +200,7 @@ bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
 bool Option::FlAnnotate = false;
 bool Option::SystemGen = false;
+bool Option::UseMethodIndex = false;
 
 void (*Option::m_hookHandler)(Hdf &config);
 

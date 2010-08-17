@@ -23,6 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
+extern CallInfo ci_;
 /* preface finishes */
 Variant pm_php$classes$debugger_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/debugger.php, pm_php$classes$debugger_php);

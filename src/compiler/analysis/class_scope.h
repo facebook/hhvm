@@ -277,6 +277,9 @@ public:
   static void outputCPPInvokeStaticMethodImpl
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
    const std::vector<const char*> &classes);
+  static void outputCPPGetCallInfoStaticMethodImpl
+  (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
+   const std::vector<const char*> &classes);
   static void outputCPPGetStaticPropertyImpl
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
    const std::vector<const char*> &classes);
@@ -291,6 +294,7 @@ public:
   bool hasConst(const std::string &name);
   void outputCPPHeader(CodeGenerator &cg, AnalysisResultPtr ar,
                        CodeGenerator::Output output);
+  void outputCPPJumpTableDecl(CodeGenerator &cg, AnalysisResultPtr ar);
 
   void outputMethodWrappers(CodeGenerator &cg, AnalysisResultPtr ar);
 
@@ -333,9 +337,15 @@ public:
    * Override function container
    */
   virtual bool addFunction(AnalysisResultPtr ar, FunctionScopePtr funcScope);
+
+  enum TableType {
+    Invoke,
+    Eval,
+    CallInfo
+  };
   void outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
                           bool staticOnly, bool dynamicObject = false,
-                          bool forEval = false);
+                          TableType type = Invoke);
 
   void outputVolatileCheckBegin(CodeGenerator &cg,
                                 AnalysisResultPtr ar,
@@ -345,6 +355,8 @@ public:
                                        AnalysisResultPtr ar,
                                        const std::string &origName);
   static void OutputVolatileCheckEnd(CodeGenerator &cg);
+  static void OutputVolatileCheck(CodeGenerator &cg, AnalysisResultPtr ar,
+      const std::string &origName, bool noThrow);
 
 
   /**
@@ -381,13 +393,15 @@ private:
 
   static void outputCPPClassJumpTable
   (CodeGenerator &cg, const StringToClassScopePtrVecMap &classScopes,
-   const std::vector<const char*> &classes, const char* macro,
-   const char* methodIndex);
+   const std::vector<const char*> &classes, const char* macro);
   void outputCPPMethodInvokeTable
     (CodeGenerator &cg, AnalysisResultPtr ar,
      const std::vector <const char*> &keys,
      const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs,
-     bool staticOnly, bool forEval, bool useMethodIndex);
+     bool staticOnly, TableType type);
+  void outputCPPMethodInvokeTableSupport(CodeGenerator &cg,
+      AnalysisResultPtr ar, const std::vector<const char*> &keys,
+      const StringToFunctionScopePtrVecMap &funcScopes, bool fewArgs);
   hphp_const_char_imap<int> m_implemented;
 };
 

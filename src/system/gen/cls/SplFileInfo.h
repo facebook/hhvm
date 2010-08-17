@@ -53,12 +53,9 @@ class c_SplFileInfo : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileInfo 1
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileInfo 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -67,6 +64,7 @@ class c_SplFileInfo : public ExtObjectData {
   public: c_SplFileInfo *create(Variant v_file_name);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t_getpath();
   public: String t_getfilename();
@@ -96,6 +94,34 @@ class c_SplFileInfo : public ExtObjectData {
   public: Variant t_setfileclass(CVarRef v_class_name = NAMSTR(s_sys_ss5da6122e, "SplFileObject"));
   public: Variant t_setinfoclass(CVarRef v_class_name = NAMSTR(s_sys_ss016dc059, "SplFileInfo"));
   public: Variant m_rsrc;
+  DECLARE_METHOD_INVOKE_HELPERS(getperms);
+  DECLARE_METHOD_INVOKE_HELPERS(iswritable);
+  DECLARE_METHOD_INVOKE_HELPERS(getbasename);
+  DECLARE_METHOD_INVOKE_HELPERS(getpathname);
+  DECLARE_METHOD_INVOKE_HELPERS(getgroup);
+  DECLARE_METHOD_INVOKE_HELPERS(setfileclass);
+  DECLARE_METHOD_INVOKE_HELPERS(setinfoclass);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(getlinktarget);
+  DECLARE_METHOD_INVOKE_HELPERS(isreadable);
+  DECLARE_METHOD_INVOKE_HELPERS(getrealpath);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(getpathinfo);
+  DECLARE_METHOD_INVOKE_HELPERS(getctime);
+  DECLARE_METHOD_INVOKE_HELPERS(getpath);
+  DECLARE_METHOD_INVOKE_HELPERS(getinode);
+  DECLARE_METHOD_INVOKE_HELPERS(islink);
+  DECLARE_METHOD_INVOKE_HELPERS(getsize);
+  DECLARE_METHOD_INVOKE_HELPERS(isfile);
+  DECLARE_METHOD_INVOKE_HELPERS(getfilename);
+  DECLARE_METHOD_INVOKE_HELPERS(getowner);
+  DECLARE_METHOD_INVOKE_HELPERS(getmtime);
+  DECLARE_METHOD_INVOKE_HELPERS(isdir);
+  DECLARE_METHOD_INVOKE_HELPERS(getfileinfo);
+  DECLARE_METHOD_INVOKE_HELPERS(isexecutable);
+  DECLARE_METHOD_INVOKE_HELPERS(getatime);
+  DECLARE_METHOD_INVOKE_HELPERS(openfile);
+  DECLARE_METHOD_INVOKE_HELPERS(gettype);
 };
 extern struct ObjectStaticCallbacks cw_SplFileInfo;
 

@@ -36,6 +36,13 @@ MethodStatement::MethodStatement(STATEMENT_ARGS, const string &name,
                       ClassStatement::Private)) == 0) {
     m_modifiers |= ClassStatement::Public;
   }
+  m_callInfo.m_invoker = (void*)MethInvoker;
+  m_callInfo.m_invokerFewArgs = (void*)MethInvokerFewArgs;
+  if (m_modifiers & ClassStatement::Static) {
+    m_callInfo.m_flags |= CallInfo::StaticMethod;
+  } else {
+    m_callInfo.m_flags |= CallInfo::Method;
+  }
 }
 
 const string &MethodStatement::fullName() const {
@@ -207,6 +214,27 @@ void MethodStatement::attemptAccess(const char *context) const {
 bool MethodStatement::isAbstract() const {
   return getModifiers() & ClassStatement::Abstract ||
     m_class->getModifiers() & ClassStatement::Interface;
+}
+Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
+  const MethodStatement *ms = (const MethodStatement*)mcp.extra;
+  if (ms->getModifiers() & ClassStatement::Static || !mcp.obj) {
+    String cn(mcp.getClassName());
+    if (ms->refReturn()) {
+      return ref(ms->invokeStatic(cn.c_str(), params));
+    } else {
+      return ms->invokeStatic(cn.c_str(), params);
+    }
+  } else {
+    if (ms->refReturn()) {
+      return ref(ms->invokeInstance(mcp.rootObj, params));
+    } else {
+      return ms->invokeInstance(mcp.rootObj, params);
+    }
+  }
+}
+Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
+    int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  return Variant();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

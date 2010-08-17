@@ -32,6 +32,7 @@ DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
+DECLARE_BOOST_TYPES(ClassScope);
 
 class CodeGenerator;
 
@@ -118,6 +119,9 @@ public:
     m_system = true;
     m_volatile = false;
   }
+
+  void setClass(ClassScopePtr cls);
+  ClassScopePtr getClass();
 
   /**
    * Get original name of the function, without case being lowered.
@@ -307,7 +311,8 @@ public:
                               bool fewArgs = false,
                               bool ret = true,
                               const char *extraArg = NULL,
-                              bool constructor = false);
+                              bool constructor = false,
+                              const char *instance = NULL);
   void outputCPPEvalInvoke(CodeGenerator &cg, AnalysisResultPtr ar,
       const char *funcPrefix, const char *name, const char *extraArg = NULL,
       bool ret = true, bool constructor = false);
@@ -324,6 +329,11 @@ public:
    */
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputMethodWrapper(CodeGenerator &cg, AnalysisResultPtr ar);
+
+  /**
+   * Output CallInfo instance for this function.
+   */
+  void outputCPPCallInfo(CodeGenerator &cg, AnalysisResultPtr ar);
 
   FileScopePtr getFileScope() {
     FileScopePtr fs = m_file.lock();
@@ -429,6 +439,7 @@ private:
   int m_inlineIndex;
   bool m_directInvoke;
   FunctionOptPtr m_optFunction;
+  boost::weak_ptr<HPHP::ClassScope> m_class;
   bool outputCPPInvokeArgCountCheck(CodeGenerator &cg, AnalysisResultPtr ar,
       bool ret, bool constructor);
 };

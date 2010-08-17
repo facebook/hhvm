@@ -23,6 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
+extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/stdclass.php line 4 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_stdClass
@@ -79,45 +80,19 @@ ObjectData *c_stdClass::cloneImpl() {
 void c_stdClass::cloneSet(c_stdClass *clone) {
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_stdClass
-Variant c_stdClass::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_stdClass
-Variant c_stdClass::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_stdClass
-Variant c_stdClass::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_stdClass
 Variant c_stdClass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_stdClass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_stdClass::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_stdClass::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_ObjectData::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_getInit,
@@ -125,6 +100,7 @@ struct ObjectStaticCallbacks cw_stdClass = {
   c_stdClass::os_lval,
   c_stdClass::os_invoke,
   c_stdClass::os_constant,
+  c_stdClass::os_get_call_info
 };
 void c_stdClass::init() {
 }
@@ -183,45 +159,19 @@ ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
 void c___PHP_Incomplete_Class::cloneSet(c___PHP_Incomplete_Class *clone) {
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___PHP_Incomplete_Class
 Variant c___PHP_Incomplete_Class::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c___PHP_Incomplete_Class::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c___PHP_Incomplete_Class::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c___PHP_Incomplete_Class::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_ObjectData::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_getInit,
@@ -229,14 +179,25 @@ struct ObjectStaticCallbacks cw___PHP_Incomplete_Class = {
   c___PHP_Incomplete_Class::os_lval,
   c___PHP_Incomplete_Class::os_invoke,
   c___PHP_Incomplete_Class::os_constant,
+  c___PHP_Incomplete_Class::os_get_call_info
 };
 void c___PHP_Incomplete_Class::init() {
 }
 Object co_stdClass(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_stdClass)())->dynCreate(params, init));
 }
+Object coo_stdClass() {
+  Object r(NEW(c_stdClass)());
+  r->init();
+  return r;
+}
 Object co___PHP_Incomplete_Class(CArrRef params, bool init /* = true */) {
   return Object((NEW(c___PHP_Incomplete_Class)())->dynCreate(params, init));
+}
+Object coo___PHP_Incomplete_Class() {
+  Object r(NEW(c___PHP_Incomplete_Class)());
+  r->init();
+  return r;
 }
 Variant pm_php$classes$stdclass_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/stdclass.php, pm_php$classes$stdclass_php);

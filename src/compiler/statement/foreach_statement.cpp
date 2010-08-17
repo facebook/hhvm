@@ -142,7 +142,7 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
     ar->getCodeError()->record(self, CodeError::ComplexForEach, self);
   }
 
-  m_array->inferAndCheck(ar, Type::Array, true);
+  m_array->inferAndCheck(ar, Type::Variant, true);
   if (m_name) {
     m_name->inferAndCheck(ar, NEW_TYPE(Primitive), true);
   }

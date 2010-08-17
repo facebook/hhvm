@@ -39,6 +39,7 @@ private:
   bool m_redeclared;
   bool m_dynamic;
   std::string m_receiverTemp;
+  int m_objectTemp;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

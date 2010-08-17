@@ -141,6 +141,8 @@ public:
   int getError() const { return m_error;}
   bool hasError(Error error) const { return m_error & error; }
 
+  void setArgNum(int n);
+
   /**
    * Implementing Construct.
    */
@@ -313,6 +315,7 @@ protected:
   TypePtr m_expectedType; // null if the same as m_actualType
   TypePtr m_implementedType; // null if the same as m_actualType
   std::string m_cppTemp;
+  int m_argNum;
 
   TypePtr inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                bool coerce, ExpressionPtr variable,

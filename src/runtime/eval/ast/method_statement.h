@@ -53,6 +53,9 @@ private:
   std::string m_fullName;
   virtual const std::string &fullName() const;
   Variant evalBody(VariableEnvironment &env) const;
+  static Variant MethInvoker(MethodCallPackage &mcp, CArrRef params);
+  static Variant MethInvokerFewArgs(MethodCallPackage &mcp, int count,
+      INVOKE_FEW_ARGS_IMPL_ARGS);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

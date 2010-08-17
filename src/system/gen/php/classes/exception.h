@@ -48,20 +48,35 @@ Variant pm_php$classes$exception_php(bool incOnce = false, LVariableTable* varia
 
 // Dynamic Class Declarations
 Object co_UnexpectedValueException(CArrRef params, bool init = true);
+Object coo_UnexpectedValueException();
 Object co_OverflowException(CArrRef params, bool init = true);
+Object coo_OverflowException();
 Object co_OutOfBoundsException(CArrRef params, bool init = true);
+Object coo_OutOfBoundsException();
 Object co_LogicException(CArrRef params, bool init = true);
+Object coo_LogicException();
 Object co_RangeException(CArrRef params, bool init = true);
+Object coo_RangeException();
 Object co_InvalidArgumentException(CArrRef params, bool init = true);
+Object coo_InvalidArgumentException();
 Object co_UnderflowException(CArrRef params, bool init = true);
+Object coo_UnderflowException();
 Object co_OutOfRangeException(CArrRef params, bool init = true);
+Object coo_OutOfRangeException();
 Object co_BadMethodCallException(CArrRef params, bool init = true);
+Object coo_BadMethodCallException();
 Object co_RuntimeException(CArrRef params, bool init = true);
+Object coo_RuntimeException();
 Object co_Exception(CArrRef params, bool init = true);
+Object coo_Exception();
 Object co_ErrorException(CArrRef params, bool init = true);
+Object coo_ErrorException();
 Object co_BadFunctionCallException(CArrRef params, bool init = true);
+Object coo_BadFunctionCallException();
 Object co_LengthException(CArrRef params, bool init = true);
+Object coo_LengthException();
 Object co_DomainException(CArrRef params, bool init = true);
+Object coo_DomainException();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

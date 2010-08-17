@@ -100,11 +100,9 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
   }
 
   m_dynamic = Option::IsDynamicFunction(method, m_name) ||
-    Option::EnableEval == Option::FullEval;
-
+    Option::EnableEval == Option::FullEval || Option::AllDynamic;
   m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
     Option::DynamicInvokeFunctions.end();
-
   if (modifiers) {
     m_virtual = modifiers->isAbstract();
   }
@@ -279,6 +277,14 @@ bool FunctionScope::isMagic() const {
   return m_name.size() >= 2 && m_name[0] == '_' && m_name[1] == '_';
 }
 
+void FunctionScope::setClass(ClassScopePtr cls) {
+  m_class = cls;
+}
+
+ClassScopePtr FunctionScope::getClass() {
+  return m_class.lock();
+}
+
 static std::string s_empty;
 const string &FunctionScope::getOriginalName() const {
   if (m_pseudoMain) return s_empty;
@@ -392,7 +398,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       param->clearContext(Expression::NoRefWrapper);
     }
     TypePtr expType;
-    if (!canSetParamType && i < m_maxParam) {
+    if (valid && !canSetParamType && i < m_maxParam) {
       expType = param->inferAndCheck(ar, getParamType(i), false);
     } else {
       expType = param->inferAndCheck(ar, NEW_TYPE(Some), false);
@@ -424,11 +430,13 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       if (canSetParamType) {
         paramType = setParamType(ar, i, expType);
       }
-      if (!Type::IsLegalCast(ar, expType, paramType) &&
-          paramType->isNonConvertibleType()) {
-        param->inferAndCheck(ar, paramType, true);
+      if (valid) {
+        if (!Type::IsLegalCast(ar, expType, paramType) &&
+            paramType->isNonConvertibleType()) {
+          param->inferAndCheck(ar, paramType, true);
+        }
+        param->setExpectedType(paramType);
       }
-      param->setExpectedType(paramType);
     }
     // we do a best-effort check for bad pass-by-reference and do not report
     // error for some vararg case (e.g., array_multisort can have either ref
@@ -787,7 +795,6 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
                                        int extraArgArrayId /* = -1 */,
                                        int extraArgArrayHash /* = -1 */,
                                        int extraArgArrayIndex /* = -1 */) {
-
   int paramCount = params ? params->getOutputCount() : 0;
   ASSERT(extraArg <= paramCount);
   int iMax = paramCount - extraArg;
@@ -916,7 +923,8 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
                                            bool fewArgs /* = false */,
                                            bool ret /* = true */,
                                            const char *extraArg /* = NULL */,
-                                           bool constructor /* = false */) {
+                                           bool constructor /* = false */,
+                                           const char *instance /* = NULL */) {
   const char *voidWrapper = (m_returnType || voidWrapperOff) ? "" : ", null";
   const char *retrn = ret ? "return " : "";
   int maxParam = fewArgs && m_maxParam > Option::InvokeFewArgsCount ?
@@ -960,6 +968,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
 
   stringstream callss;
   callss << retrn << (m_refReturn ? "ref(" : "(");
+  if (instance) callss << instance;
   if (m_perfectVirtual) {
     ClassScopePtr cls = ar->getClassScope();
     callss << Option::ClassPrefix << cls->getId(cg) << "::";
@@ -1020,7 +1029,8 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
                 isRefParam(iMax) ? "Ref" : "",
                 iMax ? " = ad->iter_advance(pos)" : "");
     }
-    if (++iMax < maxParam || variable) {
+    if (++iMax < maxParam || (variable &&
+          (!fewArgs || maxParam < Option::InvokeFewArgsCount))) {
       cg_printf("if (count == %d) ", iMax);
       if (do_while) cg_indentBegin("{\n");
     }
@@ -1276,6 +1286,7 @@ void FunctionScope::outputCPPCreateDecl(CodeGenerator &cg,
             "\n");
   if (isDynamic()) {
     cg_printf("public: void dynConstruct(CArrRef params);\n");
+    cg_printf("public: void getConstructor(MethodCallPackage &mcp);\n");
     if (cg.getOutput() == CodeGenerator::SystemCPP ||
         Option::EnableEval >= Option::LimitedEval) {
       cg_printf("public: void dynConstructFromEval(Eval::VariableEnvironment "
@@ -1323,6 +1334,12 @@ void FunctionScope::outputCPPCreateImpl(CodeGenerator &cg,
     outputCPPDynamicInvoke(cg, ar, Option::MethodPrefix,
                            cg.formatLabel(consName).c_str(),
                            true, false, false, NULL, true);
+    cg_indentEnd("}\n");
+    cg_indentBegin("void %s%s::getConstructor(MethodCallPackage &mcp) {\n",
+        Option::ClassPrefix, clsName);
+    cg_printf("mcp.ci = &%s%s::%s%s;\n", Option::ClassPrefix, clsName,
+        Option::CallInfoPrefix, cg.formatLabel(consName).c_str());
+    cg_printf("mcp.obj = this;\n");
     cg_indentEnd("}\n");
     if (cg.getOutput() == CodeGenerator::SystemCPP ||
         Option::EnableEval >= Option::LimitedEval) {
@@ -1443,6 +1460,45 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf("NULL,\n");
 
   m_variables->outputCPPStaticVariables(cg, ar);
+}
+
+
+void FunctionScope::outputCPPCallInfo(CodeGenerator &cg,
+    AnalysisResultPtr ar) {
+  if (isAbstract()) return;
+  string id;
+  if (m_method) {
+    id = cg.formatLabel(m_name).c_str();
+  } else {
+    id = getId(cg);
+  }
+  int64 refflags = 0;
+  for (int i = 0; i < m_maxParam; ++i) {
+    if (isRefParam(i)) {
+      refflags |= 1 << i;
+    }
+  }
+  int flags = 0;
+  if (isReferenceVariableArgument()) {
+    flags |= CallInfo::RefVarArgs;
+  } else if (isVariableArgument()) {
+    flags |= CallInfo::VarArgs;
+  }
+  if (m_method) {
+    ClassScopePtr scope = ar->getClassScope();
+    string clsName = scope->getId(cg);
+    cg.printf("CallInfo %s%s::%s%s((void*)&%s%s::%s%s, ", Option::ClassPrefix,
+        clsName.c_str(), Option::CallInfoPrefix, id.c_str(),
+        Option::ClassPrefix, clsName.c_str(), Option::InvokePrefix,
+        id.c_str());
+    cg.printf("(void*)&%s%s::%s%s", Option::ClassPrefix, clsName.c_str(),
+        Option::InvokeFewArgsPrefix, id.c_str());
+  } else {
+    cg.printf("CallInfo %s%s((void*)&%s%s, ", Option::CallInfoPrefix,
+        id.c_str(), Option::InvokePrefix, id.c_str());
+    cg.printf("(void*)&%s%s", Option::InvokeFewArgsPrefix, id.c_str());
+  }
+  cg.printf(", %d, %d, 0x%.16lXLL);\n", m_maxParam, flags, refflags);
 }
 
 FunctionScope::StringToRefParamInfoPtrMap FunctionScope::s_refParamInfo;

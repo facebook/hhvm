@@ -18,7 +18,6 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/externals.h>
-#include <runtime/base/runtime_option.h>
 #include <util/util.h>
 
 namespace HPHP {
@@ -45,6 +44,14 @@ void DynamicObjectData::init() {
 void DynamicObjectData::dynConstruct(CArrRef params) {
   if (!parent.isNull()) {
     parent->dynConstruct(params);
+  }
+}
+
+void DynamicObjectData::getConstructor(MethodCallPackage &mcp) {
+  if (!parent.isNull()) {
+    parent->getConstructor(mcp);
+  } else {
+    ObjectData::getConstructor(mcp);
   }
 }
 
@@ -135,203 +142,24 @@ Array DynamicObjectData::o_getDynamicProperties() const {
   }
 }
 
-Variant DynamicObjectData::o_invoke(MethodIndex methodIndex,
-                                    const char *s, CArrRef params, int64 hash,
-                                    bool fatal /* = false */) {
+bool DynamicObjectData::o_get_call_info(MethodCallPackage &info,
+    int64 hash /* = -1*/) {
   if (!parent.isNull()) {
-    return parent->o_invoke(methodIndex, s, params, hash, fatal);
+    return parent->o_get_call_info(info, hash);
   } else {
-    // FMC need test case
-    if (RuntimeOption::FastMethodCall) {
-      s = g_bypassMILR ? s : methodIndexLookupReverse(methodIndex);
-    }
-    return root->doCall(s, params, fatal);
+    return ObjectData::o_get_call_info(info, hash);
   }
-}
-Variant DynamicObjectData::o_invoke_mil(const char *s, CArrRef params,
-                                        int64 hash,
-                                        bool fatal /* = false */) {
-  MethodIndex methodIndex(MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      return root->doCall(s, params, fatal);
-    }
-  }
-  return o_invoke( methodIndex, s, params, hash, fatal);
 }
 
-Variant DynamicObjectData::o_invoke_ex(const char *clsname,
-                                       MethodIndex methodIndex,
-                                       const char *s,
-                                       CArrRef params, int64 hash,
-                                       bool fatal /* = false */) {
+bool DynamicObjectData::o_get_call_info_ex(const char *clsname,
+      MethodCallPackage &info, int64 hash) {
   if (strcasecmp(o_getClassName(), clsname) == 0) {
-    return o_invoke(methodIndex, s, params, hash );
+    return o_get_call_info(info, hash);
   } else if(!parent.isNull()) {
-    return parent->o_invoke_ex(clsname, methodIndex, s, params, hash, fatal);
+    return parent->o_get_call_info_ex(clsname, info, hash);
   } else {
-    return ObjectData::o_invoke_ex(clsname, methodIndex, s, params, hash,
-                                   fatal);
+    return ObjectData::o_get_call_info_ex(clsname, info, hash);
   }
-}
-
-Variant DynamicObjectData::o_invoke_ex_mil(const char *clsname,
-                                           const char *s,
-                                           CArrRef params, int64 hash,
-                                           bool fatal /* = false */) {
-  MethodIndex methodIndex(MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      return root->doCall(s, params, fatal);
-    }
-  }
-  return o_invoke_ex(clsname, methodIndex, s, params, hash, fatal);
-}
-
-Variant DynamicObjectData::o_invoke_few_args(MethodIndex methodIndex,
-                                             const char *s, int64 hash,
-                                             int count,
-                                             INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (!parent.isNull()) {
-    return parent->o_invoke_few_args(methodIndex, s, hash, count,
-        INVOKE_FEW_ARGS_PASS_ARGS);
-  } else {
-    switch (count) {
-    case 0: {
-      return DynamicObjectData::o_invoke(methodIndex, s, Array(), hash);
-    }
-    case 1: {
-      Array params(ArrayInit(1, true).set(a0).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
-    }
-    case 2: {
-      Array params(ArrayInit(2, true).set(a0).set(a1).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
-    }
-    case 3: {
-      Array params(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
-    }
-#if INVOKE_FEW_ARGS_COUNT > 3
-    case 4: {
-      Array params(ArrayInit(4, true).set(a0).set(a1).set(a2).
-                                      set(a3).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
-    }
-    case 5: {
-      Array params(ArrayInit(5, true).set(a0).set(a1).set(a2).
-                                      set(a3).set(a4).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash );
-    }
-    case 6: {
-      Array params(ArrayInit(6, true).set(a0).set(a1).set(a2).
-                                      set(a3).set(a4).set(a5).
-                                      create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
-    }
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-    case 7: {
-      Array params(ArrayInit(7, true).set(a0).set(a1).set(a2).
-                                      set(a3).set(a4).set(a5).
-                                      set(a6).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
-    }
-    case 8: {
-      Array params(ArrayInit(8, true).set(a0).set(a1).set(a2).
-                                      set(a3).set(a4).set(a5).
-                                      set(a6).set(a7).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
-    }
-    case 9: {
-      Array params(ArrayInit(9, true).set(a0).set(a1).set(a2).
-                                      set(a3).set(a4).set(a5).
-                                      set(a6).set(a7).set(a8).
-                                      create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
-    }
-    case 10: {
-      Array params(ArrayInit(10, true).set(a0).set(a1).set(a2).
-                                       set(a3).set(a4).set(a5).
-                                       set(6, a6).set(7, a7).set(8, a8).
-                                       set(9, a9).create());
-      return DynamicObjectData::o_invoke(methodIndex, s, params, hash);
-    }
-#endif
-    default:
-      ASSERT(false);
-    }
-    return null;
-  }
-}
-
-Variant DynamicObjectData::o_invoke_few_args_mil(const char *s, int64 hash,
-                                                 int count,
-                                                 INVOKE_FEW_ARGS_IMPL_ARGS) {
-  MethodIndex methodIndex(MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      return root->doCall(s, collectArgs(count, INVOKE_FEW_ARGS_PASS_ARGS),
-                          true);
-    }
-  }
-  return o_invoke_few_args(methodIndex, s, hash, count,
-                           INVOKE_FEW_ARGS_PASS_ARGS);
-}
-
-Variant
-DynamicObjectData::o_root_invoke_few_args(MethodIndex methodIndex,
-                                          const char *s, int64 hash, int count,
-                                          INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (root != this) {
-    return root->o_invoke_few_args(methodIndex, s, hash, count,
-      INVOKE_FEW_ARGS_PASS_ARGS);
-  } else {
-    return o_invoke_few_args(methodIndex, s, hash, count,
-      INVOKE_FEW_ARGS_PASS_ARGS);
-  }
-}
-
-Variant
-DynamicObjectData::o_root_invoke_few_args_mil(const char *s, int64 hash,
-                                              int count,
-                                              INVOKE_FEW_ARGS_IMPL_ARGS) {
-  MethodIndex methodIndex(MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      return root->doCall(s, collectArgs(count, INVOKE_FEW_ARGS_PASS_ARGS),
-                          true);
-    }
-  }
-  return o_root_invoke_few_args(methodIndex, s, hash, count,
-                                INVOKE_FEW_ARGS_PASS_ARGS);
-}
-
-Variant DynamicObjectData::o_root_invoke(MethodIndex methodIndex,
-                                         const char *s, CArrRef params,
-                                         int64 hash, bool fatal /* = false */) {
-  if (root != this) {
-    return root->o_root_invoke(methodIndex, s, params, hash, fatal);
-  } else {
-    return o_invoke(methodIndex, s, params, hash, fatal);
-  }
-}
-
-Variant DynamicObjectData::o_root_invoke_mil(const char *s, CArrRef params,
-                                             int64 hash,
-                                             bool fatal /* = false */) {
-  MethodIndex methodIndex(MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      return root->doCall(s, params, fatal);
-    }
-  }
-  return o_root_invoke(methodIndex, s, params, hash, fatal) ;
 }
 
 Variant DynamicObjectData::doCall(Variant v_name, Variant v_arguments,

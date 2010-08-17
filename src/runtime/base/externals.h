@@ -34,42 +34,25 @@ namespace HPHP {
 /**
  * Invoking an arbitrary user-defined function.
  */
-extern Variant invoke(const char *function, CArrRef params,
-                      int64 hash = -1,
-                      bool tryInterp = true, bool fatal = true);
+Variant invoke(const char *function, CArrRef params, int64 hash = -1,
+    bool tryInterp = true, bool fatal = true);
 
 /**
  * Invoking an arbitrary system function. This is the fallback for invoke.
  */
-extern Variant invoke_builtin(const char* s, const Array &params,
-                              int64 hash, bool fatal);
+Variant invoke_builtin(const char *s, const Array &params, int64 hash,
+    bool fatal);
 
 /**
  * Invoking an arbitrary static method.
  */
-extern Variant invoke_static_method(const char* s, MethodIndex,
-                                    const char* method,
-                                    const Array &params, bool fatal = true);
-extern Variant invoke_static_method_mil(const char* s,
-                                        const char* method,
-                                        const Array &params, bool fatal = true);
+Variant invoke_static_method(const char *s, const char *method,
+    const Array &params, bool fatal = true);
 /**
  * defined in builtin_functions.cpp, used for "static::" resolution
  */
-Variant invoke_static_method_bind(CStrRef s, MethodIndex,
-                                  const char* method,
+Variant invoke_static_method_bind(CStrRef s, const char *method,
                                   const Array &params, bool fatal = true);
-Variant invoke_static_method_bind_mil(CStrRef s,
-                                      const char* method,
-                                      const Array &params, bool fatal = true);
-
-/**
- * Invoking an arbitrary system static method.
- */
-extern Variant invoke_builtin_static_method(const char *s,
-                                            MethodIndex methodIndex,
-                                            const char* method,
-                                            const Array &params, bool fatal);
 
 /**
  * Getting the object static callbacks for a given class
@@ -112,6 +95,20 @@ extern Variant get_builtin_class_constant(const char *s, const char *prop,
                                           bool fatal = true);
 
 /**
+ * Getting function info
+ */
+extern bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
+    int64 hash = -1);
+extern bool get_call_info_builtin(const CallInfo *&ci, void *&extra,
+    const char *s, int64 hash = -1);
+extern bool get_call_info_static_method(MethodCallPackage &info);
+extern bool get_call_info_static_method_builtin(MethodCallPackage &info);
+extern bool get_call_info_static_method_with_index(MethodCallPackage &info,
+    MethodIndex mi);
+extern bool get_call_info_static_method_with_index_builtin
+  (MethodCallPackage &info, MethodIndex mi);
+
+/**
  * Class/function meta info entirely encoded here as a const char * array.
  */
 extern const char *g_class_map[];
@@ -124,13 +121,16 @@ extern const char *g_paramrtti_map[];
 /**
  * Dynamically create an object.
  */
-extern Object create_object(const char *s, const Array &params,
-                            bool init = true, ObjectData *root = NULL);
+Object create_object(const char *s, const Array &params,
+    bool init = true, ObjectData *root = NULL);
+extern Object create_object_only(const char *s, ObjectData *root = NULL);
 /**
  * Dynamically create a system object.
  */
 extern Object create_builtin_object(const char *s, const Array &params,
                                     bool init = true, ObjectData *root = NULL);
+extern Object create_builtin_object_only(const char *s,
+    ObjectData *root = NULL);
 /**
  * Dynamically include a file.
  */

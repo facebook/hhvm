@@ -35,9 +35,12 @@ public:
 
   virtual TypePtr inferAndCheck(AnalysisResultPtr ar, TypePtr type,
                                 bool coerce);
+  virtual bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+      int state);
 
 private:
   ExpressionPtr m_object;
+  int m_objTemp;
 
   void setInvokeParams(AnalysisResultPtr ar);
   ClassScopePtr resolveClass(AnalysisResultPtr ar, std::string &name);
@@ -46,6 +49,9 @@ private:
   bool canInvokeFewArgs();
   bool m_invokeFewArgsDecision;
   bool m_bindClass;
+
+  void outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPObjectCall(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

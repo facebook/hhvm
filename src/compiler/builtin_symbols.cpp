@@ -176,7 +176,7 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
     // Parse methods
     FunctionScopePtrVec methods;
     while (*p) {
-      FunctionScopePtr fs = ParseExtFunction(ar, p);
+      FunctionScopePtr fs = ParseExtFunction(ar, p, true);
       if (sep) {
         fs->setSepExtension();
       }
@@ -200,6 +200,9 @@ void BuiltinSymbols::ParseExtClasses(AnalysisResultPtr ar, const char **p,
       ifaces.insert(ifaces.begin(), cparent);
     }
     ClassScopePtr cl(new ClassScope(ar, cname, cparent, ifaces, methods));
+    for (uint i = 0; i < methods.size(); ++i) {
+      methods[i]->setClass(cl);
+    }
     p++;
     // Parse properties
     while (*p) {
@@ -241,7 +244,7 @@ void BuiltinSymbols::ParseExtDynamics(AnalysisResultPtr ar, const char **p,
 }
 
 FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
-                                                  const char** &p) {
+    const char** &p, bool method /* = false */) {
   const char *name = *p++;
   TypePtr retType = ParseType(p);
   bool reference = *p++;
@@ -262,7 +265,7 @@ FunctionScopePtr BuiltinSymbols::ParseExtFunction(AnalysisResultPtr ar,
   }
   if (minParam < 0) minParam = maxParam;
 
-  FunctionScopePtr f(new FunctionScope(false, name, reference));
+  FunctionScopePtr f(new FunctionScope(method, name, reference));
   f->setParamCounts(ar, minParam, maxParam);
   if (retType) {
     f->setReturnType(ar, retType);

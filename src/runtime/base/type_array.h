@@ -330,6 +330,11 @@ class Array : public SmartPtr<ArrayData> {
 
   Variant refvalAt(CStrRef key, bool isString = false);
 
+  // defined in type_variant.h
+  template<typename T>
+  Variant argvalAt(bool byRef, const T &key);
+  Variant argvalAt(bool byRef, CStrRef key, bool isString = false);
+
   /**
    * Membership functions.
    */

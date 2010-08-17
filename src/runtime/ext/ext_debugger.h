@@ -46,15 +46,20 @@ class c_DebuggerProxy : public ExtObjectData {
   public: c_DebuggerProxy();
   public: ~c_DebuggerProxy();
   public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_islocal();
+  DECLARE_METHOD_INVOKE_HELPERS(islocal);
   public: Variant t_send(p_DebuggerCommand cmd);
+  DECLARE_METHOD_INVOKE_HELPERS(send);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DebuggerProxy *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
  public:
@@ -87,41 +92,72 @@ class c_DebuggerClient : public ExtObjectData {
   public: c_DebuggerClient();
   public: ~c_DebuggerClient();
   public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_quit();
+  DECLARE_METHOD_INVOKE_HELPERS(quit);
   public: void t_print(int _argc, CStrRef format, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(print);
   public: void t_help(int _argc, CStrRef format, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(help);
   public: void t_info(int _argc, CStrRef format, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(info);
   public: void t_output(int _argc, CStrRef format, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(output);
   public: void t_error(int _argc, CStrRef format, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(error);
   public: void t_code(CStrRef source, int highlight_line = 0, int start_line_no = 0, int end_line_no = 0);
+  DECLARE_METHOD_INVOKE_HELPERS(code);
   public: Variant t_ask(int _argc, CStrRef format, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(ask);
   public: String t_wrap(CStrRef str);
+  DECLARE_METHOD_INVOKE_HELPERS(wrap);
   public: void t_helptitle(CStrRef str);
+  DECLARE_METHOD_INVOKE_HELPERS(helptitle);
   public: void t_helpcmds(int _argc, CStrRef cmd, CStrRef desc, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(helpcmds);
   public: void t_helpbody(CStrRef str);
+  DECLARE_METHOD_INVOKE_HELPERS(helpbody);
   public: void t_helpsection(CStrRef str);
+  DECLARE_METHOD_INVOKE_HELPERS(helpsection);
   public: void t_tutorial(CStrRef str);
+  DECLARE_METHOD_INVOKE_HELPERS(tutorial);
   public: String t_getcode();
+  DECLARE_METHOD_INVOKE_HELPERS(getcode);
   public: String t_getcommand();
+  DECLARE_METHOD_INVOKE_HELPERS(getcommand);
   public: bool t_arg(int index, CStrRef str);
+  DECLARE_METHOD_INVOKE_HELPERS(arg);
   public: int t_argcount();
+  DECLARE_METHOD_INVOKE_HELPERS(argcount);
   public: String t_argvalue(int index);
+  DECLARE_METHOD_INVOKE_HELPERS(argvalue);
   public: String t_argrest(int index);
+  DECLARE_METHOD_INVOKE_HELPERS(argrest);
   public: Array t_args();
+  DECLARE_METHOD_INVOKE_HELPERS(args);
   public: Variant t_send(p_DebuggerCommand cmd);
+  DECLARE_METHOD_INVOKE_HELPERS(send);
   public: Variant t_xend(p_DebuggerCommand cmd);
+  DECLARE_METHOD_INVOKE_HELPERS(xend);
   public: Variant t_getcurrentlocation();
+  DECLARE_METHOD_INVOKE_HELPERS(getcurrentlocation);
   public: Variant t_getstacktrace();
+  DECLARE_METHOD_INVOKE_HELPERS(getstacktrace);
   public: int t_getframe();
+  DECLARE_METHOD_INVOKE_HELPERS(getframe);
   public: void t_printframe(int index);
+  DECLARE_METHOD_INVOKE_HELPERS(printframe);
   public: void t_addcompletion(CVarRef list);
+  DECLARE_METHOD_INVOKE_HELPERS(addcompletion);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DebuggerClient *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
  public:

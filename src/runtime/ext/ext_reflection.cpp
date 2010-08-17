@@ -308,11 +308,9 @@ Variant f_hphp_invoke(CStrRef name, CArrRef params) {
 Variant f_hphp_invoke_method(CVarRef obj, CStrRef cls, CStrRef name,
                              CArrRef params) {
   if (!obj.isObject()) {
-    return invoke_static_method_mil(cls.data(), name.data(),
-                                params, -1);
+    return invoke_static_method(cls.data(), name.data(), params);
   }
-  return obj.toObject()->o_invoke_mil(name.data(),
-                                  params, -1);
+  return obj.toObject()->o_invoke(name.data(), params, -1);
 }
 
 bool f_hphp_instanceof(CObjRef obj, CStrRef name) {

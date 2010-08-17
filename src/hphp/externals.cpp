@@ -20,7 +20,7 @@ using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-//
+
 const char *g_source_root = "";
 const char *g_class_map[] = { NULL};
 const char *g_source_info[] = { NULL};
@@ -28,27 +28,8 @@ const char *g_source_cls2file[] = { NULL};
 const char *g_source_func2file[] = { NULL};
 const char *g_paramrtti_map[] = { NULL};
 
-Object create_object(const char *s, const Array &params, bool init,
-                     ObjectData *root) {
+Object create_object_only(const char *s, ObjectData *root) {
   return Object();
-}
-
-Variant invoke(const char* function,
-               CArrRef params, int64 hash,
-               bool tryInterp /* = true */, bool fatal /* = true */) {
-  return true;
-}
-
-Variant invoke_static_method(const char* cls, MethodIndex methodIndex,
-                             const char *function,
-                             CArrRef params, bool fatal /* = true */) {
-  return null;
-}
-
-Variant invoke_static_method_mil(const char* cls,
-                                 const char *function,
-                                 CArrRef params, bool fatal /* = true */) {
-  return null;
 }
 
 class GlobalVariables;
@@ -91,31 +72,26 @@ Variant get_class_var_init(const char *s, const char *var) {
 Array get_global_array_wrapper() {
   return Array();
 }
+
+bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
+    int64 hash /* = -1 */) {
+  return NULL;
+}
+bool get_call_info_static_method(MethodCallPackage &info) {
+  return false;
+}
+bool get_call_info_static_method_with_index(MethodCallPackage &info,
+    MethodIndex mi) {
+  return false;
+}
+
 namespace Eval {
 Variant invoke_from_eval(const char *function, VariableEnvironment &env,
                          const FunctionCallExpression *caller,
                          int64 hash /* = -1 */, bool fatal /* = true */) {
   return Variant();
 }
-
-Variant invoke_from_eval(const char *function, VariableEnvironment &env,
-                         const FunctionCallExpression *caller,
-                         bool fatal /* = true */) {
-  return Variant();
 }
-}
-
-// Class Invoke Tables dummies
-extern const MethodIndex methodIndexMapInit[];
-const MethodIndex methodIndexMapInit[] = {MethodIndex(0,0)};
-const char * methodIndexMapInitName[] = {NULL};
-extern const MethodIndex methodIndexMapInitSys[];
-extern const MethodIndex methodIndexMapInitNameSys[];
-
-const unsigned methodIndexHMapSize = 0;
-const MethodIndexHMap methodIndexHMap[] = {MethodIndexHMap()};
-const unsigned methodIndexReverseCallIndex[] = {0};
-const char * methodIndexReverseIndex[] = {0};
 
 const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
   return NULL;
@@ -130,6 +106,16 @@ void fiber_unmarshal_global_state(GlobalVariables *g1, GlobalVariables *g2,
                                   char defstrategy,
                                   const vector<pair<string, char> > &resolver){
 }
+extern const MethodIndex g_methodIndexMapInit[];
+const MethodIndex g_methodIndexMapInit[] = {MethodIndex(0,0)};
+const char * g_methodIndexMapInitName[] = {NULL};
+extern const MethodIndex g_methodIndexMapInitSys[];
+extern const MethodIndex g_methodIndexMapInitNameSys[];
+
+const unsigned g_methodIndexHMapSize = 0;
+const MethodIndexHMap g_methodIndexHMap[] = {MethodIndexHMap()};
+const unsigned g_methodIndexReverseCallIndex[] = {0};
+const char * g_methodIndexReverseIndex[] = {0};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

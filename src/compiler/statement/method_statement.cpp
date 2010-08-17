@@ -221,7 +221,9 @@ void MethodStatement::onParse(AnalysisResultPtr ar) {
   ClassScopePtr classScope =
     dynamic_pointer_cast<ClassScope>(ar->getScope());
 
-  classScope->addFunction(ar, onParseImpl(ar));
+  FunctionScopePtr fs = onParseImpl(ar);
+  classScope->addFunction(ar, fs);
+  fs->setClass(classScope);
   if (m_name == "__construct") {
     classScope->setAttribute(ClassScope::HasConstructor);
   } else if (m_name == "__destruct") {
@@ -278,10 +280,10 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (ar->isFirstPass()) {
     ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
                                         "", getFullName(), shared_from_this());
-    if (Option::AllDynamic || hasHphpNote("Dynamic") ||
+    if (hasHphpNote("Dynamic") ||
         funcScope->isSepExtension() ||
         BuiltinSymbols::IsDeclaredDynamic(m_name) ||
-        Option::IsDynamicFunction(m_method, m_name)) {
+        Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }
     if (hasHphpNote("Volatile")) funcScope->setVolatile();

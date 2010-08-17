@@ -56,13 +56,9 @@ class c_ReflectionParameter : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, MethodIndex methodIndex,
-                           const char *s, CArrRef ps, int64 h, bool f = true);
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionParameter 1
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -71,6 +67,7 @@ class c_ReflectionParameter : public ExtObjectData {
   public: c_ReflectionParameter *create(Variant v_func, Variant v_param);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
   public: static Variant ti_export(const char* cls, CVarRef v_func, CVarRef v_param, CVarRef v_ret);
@@ -85,6 +82,19 @@ class c_ReflectionParameter : public ExtObjectData {
   public: Variant t_getdefaultvalue();
   public: Variant t_getposition();
   public: static Variant t_export(CVarRef v_func, CVarRef v_param, CVarRef v_ret) { return ti_export("ReflectionParameter", v_func, v_param, v_ret); }
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(getdeclaringclass);
+  DECLARE_METHOD_INVOKE_HELPERS(isdefaultvalueavailable);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(getclass);
+  DECLARE_METHOD_INVOKE_HELPERS(export);
+  DECLARE_METHOD_INVOKE_HELPERS(allowsnull);
+  DECLARE_METHOD_INVOKE_HELPERS(getposition);
+  DECLARE_METHOD_INVOKE_HELPERS(isarray);
+  DECLARE_METHOD_INVOKE_HELPERS(isoptional);
+  DECLARE_METHOD_INVOKE_HELPERS(getdefaultvalue);
+  DECLARE_METHOD_INVOKE_HELPERS(getname);
+  DECLARE_METHOD_INVOKE_HELPERS(ispassedbyreference);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionParameter;
 

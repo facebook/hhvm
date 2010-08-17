@@ -231,6 +231,7 @@ void ExpressionList::markParam(int p, bool noRefWrapper) {
       param->setContext(Expression::NoRefWrapper);
     }
   }
+  param->setArgNum(p);
 }
 
 void ExpressionList::markParams(bool noRefWrapper) {

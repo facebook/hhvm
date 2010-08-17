@@ -89,28 +89,42 @@ class c_Collator : public ExtObjectData, public Sweepable {
   public: c_Collator();
   public: ~c_Collator();
   public: void t___construct(CStrRef locale);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: bool t_asort(Variant arr, int64 sort_flag = q_Collator_SORT_REGULAR);
+  DECLARE_METHOD_INVOKE_HELPERS(asort);
   public: Variant t_compare(CStrRef str1, CStrRef str2);
+  DECLARE_METHOD_INVOKE_HELPERS(compare);
   public: static Variant ti_create(const char* cls , CStrRef locale);
   public: static Variant t_create(CStrRef locale) {
     return ti_create("collator", locale);
   }
+  DECLARE_METHOD_INVOKE_HELPERS(create);
   public: int64 t_getattribute(int64 attr);
+  DECLARE_METHOD_INVOKE_HELPERS(getattribute);
   public: int64 t_geterrorcode();
+  DECLARE_METHOD_INVOKE_HELPERS(geterrorcode);
   public: String t_geterrormessage();
+  DECLARE_METHOD_INVOKE_HELPERS(geterrormessage);
   public: String t_getlocale(int64 type = 0);
+  DECLARE_METHOD_INVOKE_HELPERS(getlocale);
   public: int64 t_getstrength();
+  DECLARE_METHOD_INVOKE_HELPERS(getstrength);
   public: bool t_setattribute(int64 attr, int64 val);
+  DECLARE_METHOD_INVOKE_HELPERS(setattribute);
   public: bool t_setstrength(int64 strength);
+  DECLARE_METHOD_INVOKE_HELPERS(setstrength);
   public: bool t_sortwithsortkeys(Variant arr);
+  DECLARE_METHOD_INVOKE_HELPERS(sortwithsortkeys);
   public: bool t_sort(Variant arr, int64 sort_flag = q_Collator_SORT_REGULAR);
+  DECLARE_METHOD_INVOKE_HELPERS(sort);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Collator *create(String locale);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
-                                    const Eval::FunctionCallExpression *call);
+  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
  private:
@@ -137,13 +151,16 @@ class c_Locale : public ExtObjectData {
   public: c_Locale();
   public: ~c_Locale();
   public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Locale *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
 };
@@ -173,21 +190,26 @@ class c_Normalizer : public ExtObjectData, public Sweepable {
   public: c_Normalizer();
   public: ~c_Normalizer();
   public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: static Variant ti_isnormalized(const char* cls , CStrRef input, int64 form = q_Normalizer_FORM_C);
   public: static Variant t_isnormalized(CStrRef input, int64 form = q_Normalizer_FORM_C) {
     return ti_isnormalized("normalizer", input, form);
   }
+  DECLARE_METHOD_INVOKE_HELPERS(isnormalized);
   public: static Variant ti_normalize(const char* cls , CStrRef input, int64 form = q_Normalizer_FORM_C);
   public: static Variant t_normalize(CStrRef input, int64 form = q_Normalizer_FORM_C) {
     return ti_normalize("normalizer", input, form);
   }
+  DECLARE_METHOD_INVOKE_HELPERS(normalize);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_Normalizer *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
 };

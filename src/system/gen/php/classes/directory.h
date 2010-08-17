@@ -34,6 +34,7 @@ Variant pm_php$classes$directory_php(bool incOnce = false, LVariableTable* varia
 
 // Dynamic Class Declarations
 Object co_Directory(CArrRef params, bool init = true);
+Object coo_Directory();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

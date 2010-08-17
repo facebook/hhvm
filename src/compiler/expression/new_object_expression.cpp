@@ -209,14 +209,46 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf(")");
     }
   } else {
+    bool wrap = false;
+    wrap = m_actualType && m_actualType->is(Type::KindOfVariant) &&
+      !m_expectedType && !m_implementedType;
+    if (wrap) {
+      cg_printf("((Variant)");
+    }
+    cg_printf("id(obj%d)", m_objectTemp);
+    if (wrap) {
+      cg_printf(")");
+    }
+  }
+}
+
+bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+                                       int state) {
+  string &cname = (m_origName == "self" || m_origName == "parent") ?
+    m_name : m_origName;
+  if (m_name.empty() || m_redeclared || !m_validClass || m_dynamic) {
+    // Short circuit out if inExpression() returns false
+    if (!ar->inExpression()) return true;
+
+    if (m_nameExp) m_nameExp->preOutputCPP(cg, ar, state);
+    ar->wrapExpressionBegin(cg);
+    m_ciTemp = cg.createNewId(ar);
+    m_objectTemp = cg.createNewId(ar);
+    cg_printf("Object obj%d(", m_objectTemp);
     if (m_redeclared) {
+      bool outsideClass = !ar->checkClassPresent(m_origName);
+      ClassScopePtr cls = ar->resolveClass(m_name);
+      ASSERT(cls);
       if (outsideClass) {
-        ClassScope::OutputVolatileCheckBegin(cg, ar, cname);
+        cls->outputVolatileCheckBegin(cg, ar, cname);
       }
-      cg_printf("g->%s%s->create(", Option::ClassStaticsObjectPrefix,
+      cg_printf("g->%s%s->createOnly()", Option::ClassStaticsObjectPrefix,
                 m_name.c_str());
+      if (outsideClass) {
+        cls->outputVolatileCheckEnd(cg);
+      }
     } else {
-      cg_printf("create_object(");
+      cg_printf("create_object_only(");
       if (!cname.empty()) {
         cg_printf("\"%s\"", cname.c_str());
       } else if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
@@ -226,63 +258,75 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
         m_nameExp->outputCPP(cg, ar);
         cg_printf(")");
       }
-      cg_printf(", ");
+      cg_printf(")");
     }
+    cg_printf(");\n");
+    cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp,
+        m_objectTemp);
+    cg_printf("mcp%d.construct(obj%d);\n", m_ciTemp, m_objectTemp);
+    cg_printf("const CallInfo *cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
+
+    if (m_params && m_params->getCount() > 0) {
+      ar->pushCallInfo(m_ciTemp);
+      m_params->preOutputCPP(cg, ar, state);
+      ar->popCallInfo();
+    }
+    cg_printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
     if (m_params && m_params->getOutputCount()) {
+      ar->pushCallInfo(m_ciTemp);
       FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+      ar->popCallInfo();
     } else {
       cg_printf("Array()");
     }
-    cg_printf(")");
-    if (m_redeclared && outsideClass) {
-      ClassScope::OutputVolatileCheckEnd(cg);
+    cg_printf(");\n");
+
+    if (state & FixOrder) {
+      ar->pushCallInfo(m_ciTemp);
+      preOutputStash(cg, ar, state);
+      ar->popCallInfo();
     }
-  }
-}
 
-bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-                                       int state) {
-  bool tempRcvr = true;
+    if (hasCPPTemp() && !(state & FixOrder)) {
+      cg_printf("id(%s);\n", cppTemp().c_str());
+    }
+    return true;
+  } else {
+    bool tempRcvr = true;
 
-  if (m_name.empty() || m_redeclared || !m_validClass || m_dynamic) {
-    tempRcvr = false;
-  }
-
-  bool paramEffect = false;
-  if (m_params && m_params->getCount() > 0) {
-    for (int i = m_params->getCount(); i--; ) {
-      if (!(*m_params)[i]->isScalar()) {
-        paramEffect = true;
-        break;
+    bool paramEffect = false;
+    if (m_params && m_params->getCount() > 0) {
+      for (int i = m_params->getCount(); i--; ) {
+        if (!(*m_params)[i]->isScalar()) {
+          paramEffect = true;
+          break;
+        }
       }
     }
-  }
 
-  if (!paramEffect) {
-    tempRcvr = false;
-  }
-
-  string &cname = (m_origName == "self" || m_origName == "parent") ?
-    m_name : m_origName;
-
-  if (tempRcvr && ar->inExpression()) {
-    ar->wrapExpressionBegin(cg);
-    m_receiverTemp = genCPPTemp(cg, ar);
-    bool outsideClass = !ar->checkClassPresent(m_origName);
-    ClassScopePtr cls = ar->resolveClass(m_name);
-    ASSERT(cls);
-    cg_printf("%s%s %s = ", Option::SmartPtrPrefix,
-              cls->getId(cg).c_str(), m_receiverTemp.c_str());
-    if (outsideClass) {
-      cls->outputVolatileCheckBegin(cg, ar, cname);
+    if (!paramEffect) {
+      tempRcvr = false;
     }
-    cg_printf("NEWOBJ(%s%s)()", Option::ClassPrefix, cls->getId(cg).c_str());
-    if (outsideClass) {
-      cls->outputVolatileCheckEnd(cg);
-    }
-    cg_printf(";\n");
-  }
 
-  bool tempParams = FunctionCall::preOutputCPP(cg, ar, state);
-  return tempRcvr || tempParams;
+    if (tempRcvr && ar->inExpression()) {
+      bool outsideClass = !ar->checkClassPresent(m_origName);
+      ClassScopePtr cls = ar->resolveClass(m_name);
+      ASSERT(cls);
+      ar->wrapExpressionBegin(cg);
+      m_receiverTemp = genCPPTemp(cg, ar);
+      cg_printf("%s%s %s = ", Option::SmartPtrPrefix, cls->getId(cg).c_str(),
+          m_receiverTemp.c_str());
+      if (outsideClass) {
+        cls->outputVolatileCheckBegin(cg, ar, cname);
+      }
+      cg_printf("NEWOBJ(%s%s)()", Option::ClassPrefix, cls->getId(cg).c_str());
+      if (outsideClass) {
+        cls->outputVolatileCheckEnd(cg);
+      }
+      cg_printf(";\n");
+    }
+
+    bool tempParams = FunctionCall::preOutputCPP(cg, ar, state);
+    return tempRcvr || tempParams;
+  }
 }

@@ -23,6 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
+extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/exception.php line 259 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_UnexpectedValueException
@@ -79,580 +80,19 @@ ObjectData *c_UnexpectedValueException::cloneImpl() {
 void c_UnexpectedValueException::cloneSet(c_UnexpectedValueException *clone) {
   c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
-Variant c_UnexpectedValueException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
-Variant c_UnexpectedValueException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnexpectedValueException
-Variant c_UnexpectedValueException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnexpectedValueException
 Variant c_UnexpectedValueException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_UnexpectedValueException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_UnexpectedValueException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::os_get_call_info(mcp, hash);
+}
+bool c_UnexpectedValueException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_getInit,
@@ -660,6 +100,7 @@ struct ObjectStaticCallbacks cw_UnexpectedValueException = {
   c_UnexpectedValueException::os_lval,
   c_UnexpectedValueException::os_invoke,
   c_UnexpectedValueException::os_constant,
+  c_UnexpectedValueException::os_get_call_info
 };
 void c_UnexpectedValueException::init() {
   c_RuntimeException::init();
@@ -719,580 +160,19 @@ ObjectData *c_OverflowException::cloneImpl() {
 void c_OverflowException::cloneSet(c_OverflowException *clone) {
   c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
-Variant c_OverflowException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
-Variant c_OverflowException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OverflowException
-Variant c_OverflowException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OverflowException
 Variant c_OverflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_OverflowException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_OverflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::os_get_call_info(mcp, hash);
+}
+bool c_OverflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_getInit,
@@ -1300,6 +180,7 @@ struct ObjectStaticCallbacks cw_OverflowException = {
   c_OverflowException::os_lval,
   c_OverflowException::os_invoke,
   c_OverflowException::os_constant,
+  c_OverflowException::os_get_call_info
 };
 void c_OverflowException::init() {
   c_RuntimeException::init();
@@ -1359,580 +240,19 @@ ObjectData *c_OutOfBoundsException::cloneImpl() {
 void c_OutOfBoundsException::cloneSet(c_OutOfBoundsException *clone) {
   c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
-Variant c_OutOfBoundsException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
-Variant c_OutOfBoundsException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfBoundsException
-Variant c_OutOfBoundsException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfBoundsException
 Variant c_OutOfBoundsException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_OutOfBoundsException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_OutOfBoundsException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::os_get_call_info(mcp, hash);
+}
+bool c_OutOfBoundsException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_getInit,
@@ -1940,6 +260,7 @@ struct ObjectStaticCallbacks cw_OutOfBoundsException = {
   c_OutOfBoundsException::os_lval,
   c_OutOfBoundsException::os_invoke,
   c_OutOfBoundsException::os_constant,
+  c_OutOfBoundsException::os_get_call_info
 };
 void c_OutOfBoundsException::init() {
   c_RuntimeException::init();
@@ -1999,580 +320,19 @@ ObjectData *c_LogicException::cloneImpl() {
 void c_LogicException::cloneSet(c_LogicException *clone) {
   c_Exception::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
-Variant c_LogicException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
-Variant c_LogicException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LogicException
-Variant c_LogicException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LogicException
 Variant c_LogicException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_LogicException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_LogicException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_Exception::os_get_call_info(mcp, hash);
+}
+bool c_LogicException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_Exception::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_getInit,
@@ -2580,6 +340,7 @@ struct ObjectStaticCallbacks cw_LogicException = {
   c_LogicException::os_lval,
   c_LogicException::os_invoke,
   c_LogicException::os_constant,
+  c_LogicException::os_get_call_info
 };
 void c_LogicException::init() {
   c_Exception::init();
@@ -2639,580 +400,19 @@ ObjectData *c_RangeException::cloneImpl() {
 void c_RangeException::cloneSet(c_RangeException *clone) {
   c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
-Variant c_RangeException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
-Variant c_RangeException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RangeException
-Variant c_RangeException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RangeException
 Variant c_RangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_RangeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_RangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::os_get_call_info(mcp, hash);
+}
+bool c_RangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_getInit,
@@ -3220,6 +420,7 @@ struct ObjectStaticCallbacks cw_RangeException = {
   c_RangeException::os_lval,
   c_RangeException::os_invoke,
   c_RangeException::os_constant,
+  c_RangeException::os_get_call_info
 };
 void c_RangeException::init() {
   c_RuntimeException::init();
@@ -3279,580 +480,19 @@ ObjectData *c_InvalidArgumentException::cloneImpl() {
 void c_InvalidArgumentException::cloneSet(c_InvalidArgumentException *clone) {
   c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
-Variant c_InvalidArgumentException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
-Variant c_InvalidArgumentException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_InvalidArgumentException
-Variant c_InvalidArgumentException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_InvalidArgumentException
 Variant c_InvalidArgumentException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_InvalidArgumentException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_InvalidArgumentException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::os_get_call_info(mcp, hash);
+}
+bool c_InvalidArgumentException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_getInit,
@@ -3860,6 +500,7 @@ struct ObjectStaticCallbacks cw_InvalidArgumentException = {
   c_InvalidArgumentException::os_lval,
   c_InvalidArgumentException::os_invoke,
   c_InvalidArgumentException::os_constant,
+  c_InvalidArgumentException::os_get_call_info
 };
 void c_InvalidArgumentException::init() {
   c_LogicException::init();
@@ -3919,580 +560,19 @@ ObjectData *c_UnderflowException::cloneImpl() {
 void c_UnderflowException::cloneSet(c_UnderflowException *clone) {
   c_RuntimeException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
-Variant c_UnderflowException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
-Variant c_UnderflowException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnderflowException
-Variant c_UnderflowException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnderflowException
 Variant c_UnderflowException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_RuntimeException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_UnderflowException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_RuntimeException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_UnderflowException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::os_get_call_info(mcp, hash);
+}
+bool c_UnderflowException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_RuntimeException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_getInit,
@@ -4500,6 +580,7 @@ struct ObjectStaticCallbacks cw_UnderflowException = {
   c_UnderflowException::os_lval,
   c_UnderflowException::os_invoke,
   c_UnderflowException::os_constant,
+  c_UnderflowException::os_get_call_info
 };
 void c_UnderflowException::init() {
   c_RuntimeException::init();
@@ -4559,580 +640,19 @@ ObjectData *c_OutOfRangeException::cloneImpl() {
 void c_OutOfRangeException::cloneSet(c_OutOfRangeException *clone) {
   c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
-Variant c_OutOfRangeException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
-Variant c_OutOfRangeException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfRangeException
-Variant c_OutOfRangeException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfRangeException
 Variant c_OutOfRangeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_OutOfRangeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_OutOfRangeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::os_get_call_info(mcp, hash);
+}
+bool c_OutOfRangeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_getInit,
@@ -5140,6 +660,7 @@ struct ObjectStaticCallbacks cw_OutOfRangeException = {
   c_OutOfRangeException::os_lval,
   c_OutOfRangeException::os_invoke,
   c_OutOfRangeException::os_constant,
+  c_OutOfRangeException::os_get_call_info
 };
 void c_OutOfRangeException::init() {
   c_LogicException::init();
@@ -5199,580 +720,19 @@ ObjectData *c_BadMethodCallException::cloneImpl() {
 void c_BadMethodCallException::cloneSet(c_BadMethodCallException *clone) {
   c_BadFunctionCallException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
-Variant c_BadMethodCallException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
-Variant c_BadMethodCallException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadMethodCallException
-Variant c_BadMethodCallException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadMethodCallException
 Variant c_BadMethodCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_BadFunctionCallException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_BadMethodCallException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_BadFunctionCallException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_BadMethodCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_BadFunctionCallException::os_get_call_info(mcp, hash);
+}
+bool c_BadMethodCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_BadFunctionCallException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_getInit,
@@ -5780,6 +740,7 @@ struct ObjectStaticCallbacks cw_BadMethodCallException = {
   c_BadMethodCallException::os_lval,
   c_BadMethodCallException::os_invoke,
   c_BadMethodCallException::os_constant,
+  c_BadMethodCallException::os_get_call_info
 };
 void c_BadMethodCallException::init() {
   c_BadFunctionCallException::init();
@@ -5839,580 +800,19 @@ ObjectData *c_RuntimeException::cloneImpl() {
 void c_RuntimeException::cloneSet(c_RuntimeException *clone) {
   c_Exception::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
-Variant c_RuntimeException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
-Variant c_RuntimeException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RuntimeException
-Variant c_RuntimeException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RuntimeException
 Variant c_RuntimeException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_RuntimeException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_RuntimeException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_Exception::os_get_call_info(mcp, hash);
+}
+bool c_RuntimeException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_Exception::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_getInit,
@@ -6420,6 +820,7 @@ struct ObjectStaticCallbacks cw_RuntimeException = {
   c_RuntimeException::os_lval,
   c_RuntimeException::os_invoke,
   c_RuntimeException::os_constant,
+  c_RuntimeException::os_get_call_info
 };
 void c_RuntimeException::init() {
   c_Exception::init();
@@ -6522,6 +923,581 @@ Variant c_Exception::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
 IMPLEMENT_CLASS(Exception)
+ObjectData *c_Exception::cloneImpl() {
+  c_Exception *obj = NEW(c_Exception)();
+  cloneSet(obj);
+  return obj;
+}
+void c_Exception::cloneSet(c_Exception *clone) {
+  clone->m_message = m_message.isReferenced() ? ref(m_message) : m_message;
+  clone->m_code = m_code.isReferenced() ? ref(m_code) : m_code;
+  clone->m_file = m_file.isReferenced() ? ref(m_file) : m_file;
+  clone->m_line = m_line.isReferenced() ? ref(m_line) : m_line;
+  clone->m_trace = m_trace.isReferenced() ? ref(m_trace) : m_trace;
+  ObjectData::cloneSet(clone);
+}
+Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___init__(), null);
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getline());
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_gettraceasstring());
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getcode());
+      }
+      break;
+    case 18:
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getmessage());
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___tostring());
+      }
+      break;
+    case 26:
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_gettrace());
+      }
+      break;
+    case 30:
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getfile());
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        Variant a1;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t___construct(), null);
+        else if (count == 1) return (t___construct(a0), null);
+        else return (t___construct(a0, a1), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_Exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_Exception::ci_getmessage((void*)&c_Exception::i_getmessage, (void*)&c_Exception::ifa_getmessage, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci___tostring((void*)&c_Exception::i___tostring, (void*)&c_Exception::ifa___tostring, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci___construct((void*)&c_Exception::i___construct, (void*)&c_Exception::ifa___construct, 2, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getcode((void*)&c_Exception::i_getcode, (void*)&c_Exception::ifa_getcode, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getline((void*)&c_Exception::i_getline, (void*)&c_Exception::ifa_getline, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci___init__((void*)&c_Exception::i___init__, (void*)&c_Exception::ifa___init__, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci_getfile((void*)&c_Exception::i_getfile, (void*)&c_Exception::ifa_getfile, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci_gettraceasstring((void*)&c_Exception::i_gettraceasstring, (void*)&c_Exception::ifa_gettraceasstring, 0, 0, 0x0000000000000000LL);
+CallInfo c_Exception::ci_gettrace((void*)&c_Exception::i_gettrace, (void*)&c_Exception::ifa_gettrace, 0, 0, 0x0000000000000000LL);
+Variant c_Exception::i_getmessage(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
+  return (self->t_getmessage());
+}
+Variant c_Exception::i___tostring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_Exception::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (self->t___construct(), null);
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) return (self->t___construct(arg0), null);
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1), null);
+  }
+}
+Variant c_Exception::i_getcode(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
+  return (self->t_getcode());
+}
+Variant c_Exception::i_getline(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
+  return (self->t_getline());
+}
+Variant c_Exception::i___init__(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
+  return (self->t___init__(), null);
+}
+Variant c_Exception::i_getfile(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
+  return (self->t_getfile());
+}
+Variant c_Exception::i_gettraceasstring(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
+  return (self->t_gettraceasstring());
+}
+Variant c_Exception::i_gettrace(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
+  return (self->t_gettrace());
+}
+Variant c_Exception::ifa_getmessage(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
+  return (self->t_getmessage());
+}
+Variant c_Exception::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
+  return (self->t___tostring());
+}
+Variant c_Exception::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
+  if (count <= 0) return (self->t___construct(), null);
+  if (count == 1) return (self->t___construct(a0), null);
+  return (self->t___construct(a0, a1), null);
+}
+Variant c_Exception::ifa_getcode(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
+  return (self->t_getcode());
+}
+Variant c_Exception::ifa_getline(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
+  return (self->t_getline());
+}
+Variant c_Exception::ifa___init__(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
+  return (self->t___init__(), null);
+}
+Variant c_Exception::ifa_getfile(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
+  return (self->t_getfile());
+}
+Variant c_Exception::ifa_gettraceasstring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
+  return (self->t_gettraceasstring());
+}
+Variant c_Exception::ifa_gettrace(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Exception *self = NULL;
+  p_Exception pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Exception*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Exception)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
+  return (self->t_gettrace());
+}
+bool c_Exception::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
+        mcp.ci = &c_Exception::ci___init__;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
+        mcp.ci = &c_Exception::ci_getline;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
+        mcp.ci = &c_Exception::ci_gettraceasstring;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
+        mcp.ci = &c_Exception::ci_getcode;
+        return true;
+      }
+      break;
+    case 18:
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
+        mcp.ci = &c_Exception::ci_getmessage;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_Exception::ci___tostring;
+        return true;
+      }
+      break;
+    case 26:
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
+        mcp.ci = &c_Exception::ci_gettrace;
+        return true;
+      }
+      break;
+    case 30:
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
+        mcp.ci = &c_Exception::ci_getfile;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_Exception::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_Exception::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 31) {
+    case 0:
+      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
+        mcp.ci = &c_Exception::ci___init__;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 3:
+      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
+        mcp.ci = &c_Exception::ci_getline;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 10:
+      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
+        mcp.ci = &c_Exception::ci_gettraceasstring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 15:
+      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
+        mcp.ci = &c_Exception::ci_getcode;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 18:
+      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
+        mcp.ci = &c_Exception::ci_getmessage;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 19:
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
+        mcp.ci = &c_Exception::ci___tostring;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 26:
+      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
+        mcp.ci = &c_Exception::ci_gettrace;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 30:
+      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
+        mcp.ci = &c_Exception::ci_getfile;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 31:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_Exception::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_get_call_info(mcp, hash);
+}
 c_Exception *c_Exception::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 ) {
@@ -6573,6 +1549,10 @@ void c_Exception::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1));
   } while (false);
 }
+void c_Exception::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_Exception::ci___construct;
+  mcp.obj = this;
+}
 void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -6595,600 +1575,13 @@ void c_Exception::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   else if (count == 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
-ObjectData *c_Exception::cloneImpl() {
-  c_Exception *obj = NEW(c_Exception)();
-  cloneSet(obj);
-  return obj;
-}
-void c_Exception::cloneSet(c_Exception *clone) {
-  clone->m_message = m_message.isReferenced() ? ref(m_message) : m_message;
-  clone->m_code = m_code.isReferenced() ? ref(m_code) : m_code;
-  clone->m_file = m_file.isReferenced() ? ref(m_file) : m_file;
-  clone->m_line = m_line.isReferenced() ? ref(m_line) : m_line;
-  clone->m_trace = m_trace.isReferenced() ? ref(m_trace) : m_trace;
-  ObjectData::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
-Variant c_Exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
-Variant c_Exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Exception
-Variant c_Exception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Exception
-Variant c_Exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_Exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_Exception = {
   c_Exception::os_getInit,
   c_Exception::os_get,
   c_Exception::os_lval,
   c_Exception::os_invoke,
   c_Exception::os_constant,
+  c_Exception::os_get_call_info
 };
 void c_Exception::init() {
   m_message = NAMSTR(s_sys_ss00000000, "");
@@ -7426,6 +1819,196 @@ Variant c_ErrorException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
 IMPLEMENT_CLASS(ErrorException)
+ObjectData *c_ErrorException::cloneImpl() {
+  c_ErrorException *obj = NEW(c_ErrorException)();
+  cloneSet(obj);
+  return obj;
+}
+void c_ErrorException::cloneSet(c_ErrorException *clone) {
+  clone->m_severity = m_severity.isReferenced() ? ref(m_severity) : m_severity;
+  c_Exception::cloneSet(clone);
+}
+Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        Variant a1;
+        Variant a2;
+        Variant a3;
+        Variant a4;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a1 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a4 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        if (count <= 0) return (t___construct(), null);
+        else if (count == 1) return (t___construct(a0), null);
+        else if (count == 2) return (t___construct(a0, a1), null);
+        else if (count == 3) return (t___construct(a0, a1, a2), null);
+        else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
+        else return (t___construct(a0, a1, a2, a3, a4), null);
+      }
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_getseverity());
+      }
+      break;
+    default:
+      break;
+  }
+  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_ErrorException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_ErrorException::ci___construct((void*)&c_ErrorException::i___construct, (void*)&c_ErrorException::ifa___construct, 5, 0, 0x0000000000000000LL);
+CallInfo c_ErrorException::ci_getseverity((void*)&c_ErrorException::i_getseverity, (void*)&c_ErrorException::ifa_getseverity, 0, 0, 0x0000000000000000LL);
+Variant c_ErrorException::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ErrorException *self = NULL;
+  p_ErrorException pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ErrorException*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ErrorException)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (self->t___construct(), null);
+    CVarRef arg0((ad->getValue(pos)));
+    if (count == 1) return (self->t___construct(arg0), null);
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (self->t___construct(arg0, arg1), null);
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (self->t___construct(arg0, arg1, arg2), null);
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (self->t___construct(arg0, arg1, arg2, arg3), null);
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (self->t___construct(arg0, arg1, arg2, arg3, arg4), null);
+  }
+}
+Variant c_ErrorException::i_getseverity(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_ErrorException *self = NULL;
+  p_ErrorException pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ErrorException*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ErrorException)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
+  return (self->t_getseverity());
+}
+Variant c_ErrorException::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ErrorException *self = NULL;
+  p_ErrorException pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ErrorException*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ErrorException)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
+  if (count <= 0) return (self->t___construct(), null);
+  if (count == 1) return (self->t___construct(a0), null);
+  if (count == 2) return (self->t___construct(a0, a1), null);
+  if (count == 3) return (self->t___construct(a0, a1, a2), null);
+  if (count == 4) return (self->t___construct(a0, a1, a2, a3), null);
+  return (self->t___construct(a0, a1, a2, a3, a4), null);
+}
+Variant c_ErrorException::ifa_getseverity(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_ErrorException *self = NULL;
+  p_ErrorException pobj;
+  if (mcp.obj) {
+    self = static_cast<c_ErrorException*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_ErrorException)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
+  return (self->t_getseverity());
+}
+bool c_ErrorException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ErrorException::ci___construct;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
+        mcp.ci = &c_ErrorException::ci_getseverity;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_Exception::os_get_call_info(mcp, hash);
+}
+bool c_ErrorException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 3) {
+    case 3:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_ErrorException::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
+        mcp.ci = &c_ErrorException::ci_getseverity;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_Exception::o_get_call_info(mcp, hash);
+}
 c_ErrorException *c_ErrorException::create(Variant v_message //  = NAMSTR(s_sys_ss00000000, "")
 , Variant v_code //  = 0LL
 , Variant v_severity //  = 0LL
@@ -7510,6 +2093,10 @@ void c_ErrorException::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1, arg2, arg3, arg4));
   } while (false);
 }
+void c_ErrorException::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_ErrorException::ci___construct;
+  mcp.obj = this;
+}
 void c_ErrorException::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -7547,690 +2134,13 @@ void c_ErrorException::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   else if (count == 4) (t___construct(a0, a1, a2, a3), null);
   else (t___construct(a0, a1, a2, a3, a4), null);
 }
-ObjectData *c_ErrorException::cloneImpl() {
-  c_ErrorException *obj = NEW(c_ErrorException)();
-  cloneSet(obj);
-  return obj;
-}
-void c_ErrorException::cloneSet(c_ErrorException *clone) {
-  clone->m_severity = m_severity.isReferenced() ? ref(m_severity) : m_severity;
-  c_Exception::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
-Variant c_ErrorException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0xc8:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
-        return (t_getseverity());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-          if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-          if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
-        }
-      }
-      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
-        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
-        return (t_getseverity());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
-Variant c_ErrorException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        if (count == 2) return (t___construct(a0, a1), null);
-        if (count == 3) return (t___construct(a0, a1, a2), null);
-        if (count == 4) return (t___construct(a0, a1, a2, a3), null);
-        return (t___construct(a0, a1, a2, a3, a4), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0xc8:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
-        return (t_getseverity());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        if (count == 2) return (t___construct(a0, a1), null);
-        if (count == 3) return (t___construct(a0, a1, a2), null);
-        if (count == 4) return (t___construct(a0, a1, a2, a3), null);
-        return (t___construct(a0, a1, a2, a3, a4), null);
-      }
-      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
-        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
-        return (t_getseverity());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ErrorException
-Variant c_ErrorException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ErrorException
-Variant c_ErrorException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        Variant a3;
-        Variant a4;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a3 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a4 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else if (count == 2) return (t___construct(a0, a1), null);
-        else if (count == 3) return (t___construct(a0, a1, a2), null);
-        else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
-        else return (t___construct(a0, a1, a2, a3, a4), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0xc8:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getseverity());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        Variant a2;
-        Variant a3;
-        Variant a4;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 5) return throw_toomany_arguments("ErrorException::__construct", 5, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a2 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a3 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a4 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else if (count == 2) return (t___construct(a0, a1), null);
-        else if (count == 3) return (t___construct(a0, a1, a2), null);
-        else if (count == 4) return (t___construct(a0, a1, a2, a3), null);
-        else return (t___construct(a0, a1, a2, a3, a4), null);
-      }
-      HASH_GUARD_LITSTR(0x4B378D0258AF461FLL, NAMSTR(s_sys_ss58af461f, "getSeverity")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("ErrorException::getSeverity", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getseverity());
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_Exception::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_ErrorException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
-  return c_Exception::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_ErrorException = {
   c_ErrorException::os_getInit,
   c_ErrorException::os_get,
   c_ErrorException::os_lval,
   c_ErrorException::os_invoke,
   c_ErrorException::os_constant,
+  c_ErrorException::os_get_call_info
 };
 void c_ErrorException::init() {
   c_Exception::init();
@@ -8319,580 +2229,19 @@ ObjectData *c_BadFunctionCallException::cloneImpl() {
 void c_BadFunctionCallException::cloneSet(c_BadFunctionCallException *clone) {
   c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
-Variant c_BadFunctionCallException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
-Variant c_BadFunctionCallException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadFunctionCallException
-Variant c_BadFunctionCallException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_BadFunctionCallException
 Variant c_BadFunctionCallException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_BadFunctionCallException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_BadFunctionCallException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::os_get_call_info(mcp, hash);
+}
+bool c_BadFunctionCallException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_getInit,
@@ -8900,6 +2249,7 @@ struct ObjectStaticCallbacks cw_BadFunctionCallException = {
   c_BadFunctionCallException::os_lval,
   c_BadFunctionCallException::os_invoke,
   c_BadFunctionCallException::os_constant,
+  c_BadFunctionCallException::os_get_call_info
 };
 void c_BadFunctionCallException::init() {
   c_LogicException::init();
@@ -8959,580 +2309,19 @@ ObjectData *c_LengthException::cloneImpl() {
 void c_LengthException::cloneSet(c_LengthException *clone) {
   c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
-Variant c_LengthException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
-Variant c_LengthException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LengthException
-Variant c_LengthException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_LengthException
 Variant c_LengthException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_LengthException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_LengthException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::os_get_call_info(mcp, hash);
+}
+bool c_LengthException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_getInit,
@@ -9540,6 +2329,7 @@ struct ObjectStaticCallbacks cw_LengthException = {
   c_LengthException::os_lval,
   c_LengthException::os_invoke,
   c_LengthException::os_constant,
+  c_LengthException::os_get_call_info
 };
 void c_LengthException::init() {
   c_LogicException::init();
@@ -9599,580 +2389,19 @@ ObjectData *c_DomainException::cloneImpl() {
 void c_DomainException::cloneSet(c_DomainException *clone) {
   c_LogicException::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
-Variant c_DomainException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          if (count <= 0) return (t___construct(), null);
-          CVarRef arg0((ad->getValue(pos)));
-          if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-          return (t___construct(arg0, arg1), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
-Variant c_DomainException::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        if (count <= 0) return (t___construct(), null);
-        if (count == 1) return (t___construct(a0), null);
-        return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DomainException
-Variant c_DomainException::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DomainException
 Variant c_DomainException::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 31) {
-    case 0:
-      HASH_GUARD_LITSTR(0x625661A755F425C0LL, NAMSTR(s_sys_ss55f425c0, "__init__")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___init__(), null);
-      }
-      break;
-    case 3:
-      HASH_GUARD_LITSTR(0x31D981FD9D2728E3LL, NAMSTR(s_sys_ss62d8d71d, "getLine")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getline());
-      }
-      break;
-    case 10:
-      HASH_GUARD_LITSTR(0x03CA4360169ECC8ALL, NAMSTR(s_sys_ss169ecc8a, "getTraceAsString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettraceasstring());
-      }
-      break;
-    case 15:
-      HASH_GUARD_LITSTR(0x5C108B351DC3D04FLL, NAMSTR(s_sys_ss1dc3d04f, "getCode")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getcode());
-      }
-      break;
-    case 18:
-      HASH_GUARD_LITSTR(0x71859D7313E682D2LL, NAMSTR(s_sys_ss13e682d2, "getMessage")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getmessage());
-      }
-      break;
-    case 19:
-      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___tostring());
-      }
-      break;
-    case 26:
-      HASH_GUARD_LITSTR(0x6800B2B4C4EC4CBALL, NAMSTR(s_sys_ss3b13b346, "getTrace")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_gettrace());
-      }
-      break;
-    case 30:
-      HASH_GUARD_LITSTR(0x3CE90CB8F0C9579ELL, NAMSTR(s_sys_ss0f36a862, "getFile")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_getfile());
-      }
-      break;
-    case 31:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        Variant a1;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 2) return throw_toomany_arguments("Exception::__construct", 2, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-          if (it == params.end()) break;
-          a1 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        if (count <= 0) return (t___construct(), null);
-        else if (count == 1) return (t___construct(a0), null);
-        else return (t___construct(a0, a1), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
   return c_LogicException::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_DomainException::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
   return c_LogicException::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+bool c_DomainException::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::os_get_call_info(mcp, hash);
+}
+bool c_DomainException::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  return c_LogicException::o_get_call_info(mcp, hash);
 }
 struct ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_getInit,
@@ -10180,6 +2409,7 @@ struct ObjectStaticCallbacks cw_DomainException = {
   c_DomainException::os_lval,
   c_DomainException::os_invoke,
   c_DomainException::os_constant,
+  c_DomainException::os_get_call_info
 };
 void c_DomainException::init() {
   c_LogicException::init();
@@ -10187,47 +2417,122 @@ void c_DomainException::init() {
 Object co_UnexpectedValueException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_UnexpectedValueException)())->dynCreate(params, init));
 }
+Object coo_UnexpectedValueException() {
+  Object r(NEW(c_UnexpectedValueException)());
+  r->init();
+  return r;
+}
 Object co_OverflowException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_OverflowException)())->dynCreate(params, init));
+}
+Object coo_OverflowException() {
+  Object r(NEW(c_OverflowException)());
+  r->init();
+  return r;
 }
 Object co_OutOfBoundsException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_OutOfBoundsException)())->dynCreate(params, init));
 }
+Object coo_OutOfBoundsException() {
+  Object r(NEW(c_OutOfBoundsException)());
+  r->init();
+  return r;
+}
 Object co_LogicException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_LogicException)())->dynCreate(params, init));
+}
+Object coo_LogicException() {
+  Object r(NEW(c_LogicException)());
+  r->init();
+  return r;
 }
 Object co_RangeException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_RangeException)())->dynCreate(params, init));
 }
+Object coo_RangeException() {
+  Object r(NEW(c_RangeException)());
+  r->init();
+  return r;
+}
 Object co_InvalidArgumentException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_InvalidArgumentException)())->dynCreate(params, init));
+}
+Object coo_InvalidArgumentException() {
+  Object r(NEW(c_InvalidArgumentException)());
+  r->init();
+  return r;
 }
 Object co_UnderflowException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_UnderflowException)())->dynCreate(params, init));
 }
+Object coo_UnderflowException() {
+  Object r(NEW(c_UnderflowException)());
+  r->init();
+  return r;
+}
 Object co_OutOfRangeException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_OutOfRangeException)())->dynCreate(params, init));
+}
+Object coo_OutOfRangeException() {
+  Object r(NEW(c_OutOfRangeException)());
+  r->init();
+  return r;
 }
 Object co_BadMethodCallException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_BadMethodCallException)())->dynCreate(params, init));
 }
+Object coo_BadMethodCallException() {
+  Object r(NEW(c_BadMethodCallException)());
+  r->init();
+  return r;
+}
 Object co_RuntimeException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_RuntimeException)())->dynCreate(params, init));
+}
+Object coo_RuntimeException() {
+  Object r(NEW(c_RuntimeException)());
+  r->init();
+  return r;
 }
 Object co_Exception(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_Exception)())->dynCreate(params, init));
 }
+Object coo_Exception() {
+  Object r(NEW(c_Exception)());
+  r->init();
+  return r;
+}
 Object co_ErrorException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_ErrorException)())->dynCreate(params, init));
+}
+Object coo_ErrorException() {
+  Object r(NEW(c_ErrorException)());
+  r->init();
+  return r;
 }
 Object co_BadFunctionCallException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_BadFunctionCallException)())->dynCreate(params, init));
 }
+Object coo_BadFunctionCallException() {
+  Object r(NEW(c_BadFunctionCallException)());
+  r->init();
+  return r;
+}
 Object co_LengthException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_LengthException)())->dynCreate(params, init));
 }
+Object coo_LengthException() {
+  Object r(NEW(c_LengthException)());
+  r->init();
+  return r;
+}
 Object co_DomainException(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_DomainException)())->dynCreate(params, init));
+}
+Object coo_DomainException() {
+  Object r(NEW(c_DomainException)());
+  r->init();
+  return r;
 }
 Variant pm_php$classes$exception_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/exception.php, pm_php$classes$exception_php);

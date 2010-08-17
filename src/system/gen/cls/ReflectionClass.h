@@ -58,13 +58,9 @@ class c_ReflectionClass : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, MethodIndex methodIndex,
-                           const char *s, CArrRef ps, int64 h, bool f = true);
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionClass 1
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -73,6 +69,7 @@ class c_ReflectionClass : public ExtObjectData {
   public: c_ReflectionClass *create(Variant v_name);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_fetch(CVarRef v_what);
   public: bool t_test(CVarRef v_what, CVarRef v_name);
@@ -116,6 +113,48 @@ class c_ReflectionClass : public ExtObjectData {
   public: Variant t_getextension();
   public: Variant t_getextensionname();
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export("ReflectionClass", v_name, v_ret); }
+  DECLARE_METHOD_INVOKE_HELPERS(getmethods);
+  DECLARE_METHOD_INVOKE_HELPERS(isiterateable);
+  DECLARE_METHOD_INVOKE_HELPERS(getstaticpropertyvalue);
+  DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
+  DECLARE_METHOD_INVOKE_HELPERS(newinstance);
+  DECLARE_METHOD_INVOKE_HELPERS(getextension);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstructor);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(newinstanceargs);
+  DECLARE_METHOD_INVOKE_HELPERS(getendline);
+  DECLARE_METHOD_INVOKE_HELPERS(isinstance);
+  DECLARE_METHOD_INVOKE_HELPERS(hasmethod);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(isfinal);
+  DECLARE_METHOD_INVOKE_HELPERS(getmodifiers);
+  DECLARE_METHOD_INVOKE_HELPERS(export);
+  DECLARE_METHOD_INVOKE_HELPERS(getproperties);
+  DECLARE_METHOD_INVOKE_HELPERS(hasconstant);
+  DECLARE_METHOD_INVOKE_HELPERS(getmethod);
+  DECLARE_METHOD_INVOKE_HELPERS(getextensionname);
+  DECLARE_METHOD_INVOKE_HELPERS(getparentclass);
+  DECLARE_METHOD_INVOKE_HELPERS(getfilename);
+  DECLARE_METHOD_INVOKE_HELPERS(implementsinterface);
+  DECLARE_METHOD_INVOKE_HELPERS(getinterfacenames);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstant);
+  DECLARE_METHOD_INVOKE_HELPERS(getstartline);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstants);
+  DECLARE_METHOD_INVOKE_HELPERS(getdoccomment);
+  DECLARE_METHOD_INVOKE_HELPERS(isinterface);
+  DECLARE_METHOD_INVOKE_HELPERS(issubclassof);
+  DECLARE_METHOD_INVOKE_HELPERS(hasproperty);
+  DECLARE_METHOD_INVOKE_HELPERS(getstaticproperties);
+  DECLARE_METHOD_INVOKE_HELPERS(test);
+  DECLARE_METHOD_INVOKE_HELPERS(getdefaultproperties);
+  DECLARE_METHOD_INVOKE_HELPERS(setstaticpropertyvalue);
+  DECLARE_METHOD_INVOKE_HELPERS(isinstantiable);
+  DECLARE_METHOD_INVOKE_HELPERS(getinterfaces);
+  DECLARE_METHOD_INVOKE_HELPERS(fetch);
+  DECLARE_METHOD_INVOKE_HELPERS(isabstract);
+  DECLARE_METHOD_INVOKE_HELPERS(getname);
+  DECLARE_METHOD_INVOKE_HELPERS(getproperty);
+  DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionClass;
 

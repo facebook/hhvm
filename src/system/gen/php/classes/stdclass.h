@@ -35,7 +35,9 @@ Variant pm_php$classes$stdclass_php(bool incOnce = false, LVariableTable* variab
 
 // Dynamic Class Declarations
 Object co_stdClass(CArrRef params, bool init = true);
+Object coo_stdClass();
 Object co___PHP_Incomplete_Class(CArrRef params, bool init = true);
+Object coo___PHP_Incomplete_Class();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -22,6 +22,7 @@
 #include <util/mutex.h>
 #include <util/case_insensitive.h>
 #include <vector>
+#include <runtime/base/macros.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -280,15 +281,15 @@ struct MethodIndexHMap {
   static void initialize(bool useSystem);
 };
 
-extern const unsigned methodIndexHMapSize;
-extern const MethodIndexHMap methodIndexHMap[];
-extern const unsigned methodIndexReverseCallIndex[];
-extern const char * methodIndexReverseIndex[];
+extern const unsigned g_methodIndexHMapSize;
+extern const MethodIndexHMap g_methodIndexHMap[];
+extern const unsigned g_methodIndexReverseCallIndex[];
+extern const char * g_methodIndexReverseIndex[];
 
-extern const unsigned methodIndexHMapSizeSys;
-extern const MethodIndexHMap methodIndexHMapSys[];
-extern const unsigned methodIndexReverseCallIndexSys[];
-extern const char * methodIndexReverseIndexSys[];
+extern const unsigned g_methodIndexHMapSizeSys;
+extern const MethodIndexHMap g_methodIndexHMapSys[];
+extern const unsigned g_methodIndexReverseCallIndexSys[];
+extern const char * g_methodIndexReverseIndexSys[];
 
 inline MethodIndex methodIndexExists(const char * methodName) {
   return MethodIndexHMap::methodIndexExists(methodName);
@@ -302,6 +303,9 @@ inline MethodIndex methodIndexLookup(const char * methodName) {
 
 const bool g_bypassMILR = true;
 const char * methodIndexLookupReverse(MethodIndex methodIndex) ;
+
+class CallInfo;
+class MethodCallPackage;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

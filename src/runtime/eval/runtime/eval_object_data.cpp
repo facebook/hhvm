@@ -77,6 +77,17 @@ void EvalObjectData::dynConstructUnchecked(CArrRef params) {
   }
 }
 
+void EvalObjectData::getConstructor(MethodCallPackage &mcp) {
+  const MethodStatement *ms = m_cls.getConstructor();
+  if (ms) {
+    mcp.extra = (void*)ms;
+    mcp.obj = this;
+    mcp.ci = ms->getCallInfo();
+  } else {
+    ObjectData::getConstructor(mcp);
+  }
+}
+
 void EvalObjectData::destruct() {
   const MethodStatement *ms;
   incRefCount();
@@ -194,146 +205,49 @@ bool EvalObjectData::o_instanceof(const char *s) const {
     (!parent.isNull() && parent->o_instanceof(s));
 }
 
-Variant EvalObjectData::o_invoke(MethodIndex methodIndex,
-                                 const char *s,
-                                 CArrRef params, int64 hash,
-                                 bool fatal /* = true */) {
-  // should only come here through EvalObjectData::o_invoke_mil,
-  // which already handled meths.find(s), 's' is going away here
-  // so avoid using it
-  return DynamicObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-
-Variant EvalObjectData::o_invoke_mil( const char *s,
-                                      CArrRef params, int64 hash,
-                                      bool fatal /* = true */) {
+bool EvalObjectData::o_get_call_info(MethodCallPackage &mcp,
+    int64 hash /* = -1 */) {
   const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
-  ClassEvalState::MethodTable::const_iterator it = meths.find(s);
+  ClassEvalState::MethodTable::const_iterator it =
+    meths.find(mcp.name.c_str());
   if (it != meths.end()) {
     if (it->second.first) {
-      return it->second.first->invokeInstance(Object(root), params);
+      mcp.extra = (void*)it->second.first;
+      mcp.obj = this;
+      mcp.ci = it->second.first->getCallInfo();
+      return true;
     } else {
-      return DynamicObjectData::o_invoke_mil(s, params, hash, fatal);
+      return DynamicObjectData::o_get_call_info(mcp, hash);
     }
   } else {
-    return doCall(s, params, fatal);
+    return ObjectData::o_get_call_info(mcp, hash);
   }
+
 }
-
-
-Variant EvalObjectData::o_invoke_ex(const char *clsname,
-                                    MethodIndex methodIndex,
-                                    const char *s,
-                                       CArrRef params, int64 hash,
-                                       bool fatal /* = false */) {
-  // we should come here only thru o_invoke_ex_mil
-  // and it already handled this case
-  ASSERT( !(m_cls.getClass()->subclassOf(clsname)) );
-  return DynamicObjectData::o_invoke_ex(clsname, methodIndex, s, params, hash,
-                                        fatal);
-}
-
-Variant EvalObjectData::o_invoke_ex_mil(const char *clsname,
-                                        const char *s,
-                                        CArrRef params, int64 hash,
-                                        bool fatal /* = false */) {
+bool EvalObjectData::o_get_call_info_ex(const char *clsname,
+      MethodCallPackage &mcp, int64 hash) {
   if (m_cls.getClass()->subclassOf(clsname)) {
     bool foundClass;
-    const MethodStatement *ms = RequestEvalState::findMethod(clsname, s,
-                                                             foundClass);
+    const MethodStatement *ms =
+      RequestEvalState::findMethod(clsname, mcp.name.c_str(),
+          foundClass);
     if (ms) {
-      return ms->invokeInstance(Object(root), params);
+      mcp.extra = (void*)ms;
+      mcp.obj = this;
+      mcp.ci = ms->getCallInfo();
+      return true;
     } else {
       // Possibly builtin class has this method
       const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
-      if (meths.find(s) == meths.end()) {
+      if (meths.find(mcp.name.c_str()) == meths.end()) {
         // Absolutely nothing in the hierarchy has this method
-        return doCall(s, params, fatal);
+        return ObjectData::o_get_call_info(mcp, hash);
       }
     }
-    return DynamicObjectData::o_invoke_mil(s, params, hash, fatal);
+    // Know it's a builtin parent so no need for _ex
+    return DynamicObjectData::o_get_call_info(mcp, hash);
   }
-  return DynamicObjectData::o_invoke_ex_mil(clsname, s, params,
-                                        hash, fatal);
-}
-
-Variant EvalObjectData::o_invoke_few_args(MethodIndex methodIndex,
-                                          const char *s,
-                                          int64 hash, int count,
-                                          INVOKE_FEW_ARGS_IMPL_ARGS) {
-  // o_invoke_few_args needs to pass 's' (the method name)
-  // to o_invoke for eval processing.  Thus, there is not a usable
-  // methodIndex version of EvalObjectData::o_invoke_few_args.
-  ASSERT(0);
-  return "";
-}
-
-Variant EvalObjectData::o_invoke_few_args_mil(const char *s,
-                                              int64 hash, int count,
-                                              INVOKE_FEW_ARGS_IMPL_ARGS) {
-  switch (count) {
-  case 0: {
-    return o_invoke_mil(s, Array(), hash);
-  }
-  case 1: {
-    Array params(ArrayInit(1, true).set(a0).create());
-    return o_invoke_mil(s, params, hash);
-  }
-  case 2: {
-    Array params(ArrayInit(2, true).set(a0).set(a1).create());
-    return o_invoke_mil(s, params, hash);
-  }
-  case 3: {
-    Array params(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
-    return o_invoke_mil(s, params, hash);
-  }
-#if INVOKE_FEW_ARGS_COUNT > 3
-  case 4: {
-    Array params(ArrayInit(4, true).set(a0).set(a1).set(a2).set(a3).create());
-    return o_invoke_mil(s, params, hash);
-  }
-  case 5: {
-    Array params(ArrayInit(5, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).create());
-    return o_invoke_mil(s, params, hash);
-  }
-  case 6: {
-    Array params(ArrayInit(6, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).create());
-    return o_invoke_mil(s, params, hash);
-  }
-#endif
-#if INVOKE_FEW_ARGS_COUNT > 6
-  case 7: {
-    Array params(ArrayInit(7, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).
-                                    set(a6).create());
-    return o_invoke_mil(s, params, hash);
-  }
-  case 8: {
-    Array params(ArrayInit(8, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).
-                                    set(a6).set(a7).create());
-    return o_invoke_mil(s, params, hash);
-  }
-  case 9: {
-    Array params(ArrayInit(9, true).set(a0).set(a1).set(a2).
-                                    set(a3).set(a4).set(a5).
-                                    set(a6).set(a7).set(a8).create());
-    return o_invoke_mil(s, params, hash);
-  }
-  case 10: {
-    Array params(ArrayInit(10, true).set(a0).set(a1).set(a2).
-                                     set(a3).set(a4).set(a5).
-                                     set(a6).set(a7).set(a8).
-                                     set(a9).create());
-    return o_invoke_mil(s, params, hash);
-  }
-#endif
-  default:
-    ASSERT(false);
-  }
-  return null;
+  return DynamicObjectData::o_get_call_info_ex(clsname, mcp, hash);
 }
 
 Variant EvalObjectData::doCall(Variant v_name, Variant v_arguments,

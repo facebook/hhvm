@@ -382,6 +382,9 @@ void Construct::dump(int spc, AnalysisResultPtr ar) {
       if (e->getExpectedType()) {
         type_info += ":" + e->getExpectedType()->toString();
       }
+      if (e->getImplementedType()) {
+        type_info += ";" + e->getImplementedType()->toString();
+      }
       type_info = "{" + type_info + "} ";
     }
   } else {

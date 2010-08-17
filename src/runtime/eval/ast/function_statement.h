@@ -84,6 +84,7 @@ public:
   bool refReturn() const { return m_ref; }
   const std::vector<ParameterPtr>& getParams() const { return m_params; }
   bool hasBody() const { return m_body;}
+  virtual const CallInfo *getCallInfo() const;
 
 protected:
   bool m_ref;
@@ -102,6 +103,10 @@ protected:
                   const FunctionCallExpression *caller,
                   FuncScopeVariableEnvironment &fenv) const;
   Variant evalBody(VariableEnvironment &env) const;
+  CallInfo m_callInfo;
+private:
+  static Variant Invoker(void *ms, CArrRef params);
+  static Variant InvokerFewArgs(void *ms, int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

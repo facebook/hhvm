@@ -75,9 +75,9 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
     String sfunction = function.toString();
     int c = sfunction.find("::");
     if (c != 0 && c != String::npos && c+2 < sfunction.size()) {
-      return invoke_static_method_mil(sfunction.substr(0, c).c_str(),
-                                      sfunction.substr(c+2).c_str(), params,
-                                      false);
+      return invoke_static_method(sfunction.substr(0, c).c_str(),
+                                  sfunction.substr(c+2).c_str(), params,
+                                  false);
     }
     return invoke(sfunction, params, -1, true, false);
   } else if (function.is(KindOfArray)) {
@@ -96,18 +96,16 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
     if (classname.is(KindOfObject)) {
       int c = method.find("::");
       if (c != 0 && c != String::npos && c+2 < method.size()) {
-        // e.g. call_user_func_array(array($g,'G::f'),array(2));
         String cls = method.substr(0, c);
         if (cls == "self") {
           cls = FrameInjection::GetClassName(true);
         } else if (cls == "parent") {
           cls = FrameInjection::GetParentClassName(true);
         }
-        return classname.toObject()->o_invoke_ex_mil
+        return classname.toObject()->o_invoke_ex
           (cls.c_str(), method.substr(c+2).c_str(), params, -1, false);
       }
-      return classname.toObject()->o_invoke_mil(method.c_str(), params,
-                                                -1, false);
+      return classname.toObject()->o_invoke(method, params, -1, false);
     } else {
       if (!classname.isString()) {
         throw_invalid_argument("function: classname not string");
@@ -121,11 +119,11 @@ Variant f_call_user_func_array(CVarRef function, CArrRef params) {
       }
       Object obj = FrameInjection::GetThis(true);
       if (obj.instanceof(sclass.c_str())) {
-        return obj->o_invoke_ex_mil(sclass.c_str(), method.c_str(), params,
-                                    -1, false);
+        return obj->o_invoke_ex(sclass.c_str(), method.c_str(), params, -1,
+                                false);
       }
-      return invoke_static_method_mil(sclass.c_str(), method.c_str(),
-                                      params, false);
+      return invoke_static_method(sclass.c_str(), method.c_str(),
+                                  params, false);
     }
   }
   throw_invalid_argument("function: not string or array");
@@ -138,6 +136,40 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash /* = -1 */,
   ASSERT(sd && sd->data());
   return invoke(sd->data(), params, hash < 0 ? sd->hash() : hash,
                 tryInterp, fatal);
+}
+
+Variant invoke(const char *function, CArrRef params, int64 hash /* = -1*/,
+                      bool tryInterp /* = true */, bool fatal /* = true */) {
+  const CallInfo *ci;
+  void *extra;
+  if (get_call_info(ci, extra, function, hash)) {
+    return (ci->getFunc())(extra, params);
+  } else {
+    return invoke_failed(function, params, hash, fatal);
+  }
+}
+
+Variant invoke_builtin(const char *s, const Array &params, int64 hash,
+                              bool fatal) {
+  const CallInfo *ci;
+  void *extra;
+  if (get_call_info_builtin(ci, extra, s, hash)) {
+    return (ci->getFunc())(extra, params);
+  } else {
+    return invoke_failed(s, params, hash, fatal);
+  }
+}
+
+Variant invoke_static_method(const char *s, const char *method,
+    const Array &params, bool fatal /* = true */) {
+  MethodCallPackage mcp;
+  if (!fatal) mcp.noFatal();
+  mcp.dynamicNamedCall(s, method, -1);
+  if (mcp.ci) {
+    return (mcp.ci->getMeth())(mcp, params);
+  } else {
+    return null;
+  }
 }
 
 Variant invoke_failed(const char *func, CArrRef params, int64 hash,
@@ -172,6 +204,19 @@ void throw_instance_method_fatal(const char *name) {
   }
 }
 
+Object create_object(const char *s, const Array &params,
+    bool init /* = true */, ObjectData *root /* = NULL */) {
+  Object o(create_object_only(s, root));
+  if (init) {
+    MethodCallPackage mcp;
+    mcp.construct(o);
+    if (mcp.ci) {
+      (mcp.ci->getMeth())(mcp, params);
+    }
+  }
+  return o;
+}
+
 void RequestInjection::checkSurprise(ThreadInfo *info) {
   RequestInjectionData &p = info->m_reqInjectionData;
   bool do_timedout, do_memExceeded, do_signaled;
@@ -197,6 +242,13 @@ void RequestInjection::checkSurprise(ThreadInfo *info) {
   if (do_timedout) throw_request_timeout_exception();
   if (do_memExceeded) throw_memory_exceeded_exception();
   if (do_signaled) f_pcntl_signal_dispatch();
+}
+
+const void get_call_info_or_fail(const CallInfo *&ci, void *&extra,
+    const char *s, int64 hash /* = -1 */) {
+  if (!get_call_info(ci, extra, s, hash)) {
+    throw InvalidFunctionCallException(s);
+  }
 }
 
 Variant throw_missing_arguments(const char *fn, int num, int level /* = 0 */) {
@@ -748,8 +800,7 @@ Variant &get_static_property_lval(const char *s, const char *prop) {
   return Variant::lvalBlackHole();
 }
 
-Variant invoke_static_method_bind(CStrRef s, MethodIndex methodIndex,
-                                  const char *method,
+Variant invoke_static_method_bind(CStrRef s, const char *method,
                                   const Array &params,
                                   bool fatal /* = true */) {
   ThreadInfo *info = ThreadInfo::s_threadInfo.get();
@@ -761,35 +812,133 @@ Variant invoke_static_method_bind(CStrRef s, MethodIndex methodIndex,
   } else {
     FrameInjection::SetStaticClassName(info, cls);
   }
-  Variant ret = invoke_static_method(cls.data(), methodIndex,
-                                     method, params, fatal);
+  Variant ret = invoke_static_method(cls.data(), method, params, fatal);
   if (!isStatic) {
     FrameInjection::ResetStaticClassName(info);
   }
   return ref(ret);
 }
 
-Variant invoke_static_method_bind_mil(CStrRef s,
-                                      const char *method,
-                                      const Array &params,
-                                      bool fatal /* = true */) {
-  MethodIndex methodIndex(MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(method);
-    if (methodIndex.isFail()) {
-      // do this here, where we still have the method name,
-      // instead of invoke_builtin_static_method.
-      if (fatal) {
-        return throw_missing_class(s);
-      } else {
-        raise_warning("call_user_func to non-existent class's method %s::%s",
-                      s.c_str(), method);
-        return false;
-      }
+void MethodCallPackage::dynamicNamedCall(CVarRef self, CStrRef method,
+    int64 prehash /* = -1 */) {
+  rootObj = self;
+  name = method;
+  if (rootObj.is(KindOfObject)) {
+    rootObj.getObjectData()->o_get_call_info(*this, prehash);
+  } else {
+    Object obj = FrameInjection::GetThis();
+    if (obj.isNull() || !obj->o_instanceof(rootObj.toString())) {
+      get_call_info_static_method(*this);
+    } else {
+      rootObj = obj;
+      obj->o_get_call_info_ex(self.toString().data(), *this, prehash);
     }
   }
-  return invoke_static_method_bind(s, methodIndex, method, params, fatal);
+}
 
+void MethodCallPackage::dynamicNamedCallWithIndex(CVarRef self, CStrRef method,
+    MethodIndex mi, int64 prehash /* = -1 */) {
+  rootObj = self;
+  name = method;
+  if (rootObj.is(KindOfObject)) {
+    rootObj.getObjectData()->o_get_call_info_with_index(*this, mi, prehash);
+  } else {
+    Object obj = FrameInjection::GetThis();
+    if (obj.isNull() || !obj->o_instanceof(rootObj.toString())) {
+      get_call_info_static_method_with_index(*this, mi);
+    } else {
+      rootObj = obj;
+      obj->o_get_call_info_with_index_ex(self.toString().data(), *this, mi,
+          prehash);
+    }
+  }
+}
+
+void MethodCallPackage::dynamicNamedCall(CStrRef self, CStrRef method,
+    int64 prehash /* = -1 */) {
+  rootObj = self;
+  name = method;
+  Object obj = FrameInjection::GetThis();
+  if (obj.isNull() || !obj->o_instanceof(self)) {
+    get_call_info_static_method(*this);
+  } else {
+    rootObj = obj;
+    obj->o_get_call_info_ex(self, *this, prehash);
+  }
+}
+
+void MethodCallPackage::dynamicNamedCallWithIndex(CStrRef self, CStrRef method,
+    MethodIndex mi, int64 prehash /* = -1 */) {
+  rootObj = self;
+  name = method;
+  Object obj = FrameInjection::GetThis();
+  if (obj.isNull() || !obj->o_instanceof(self)) {
+    get_call_info_static_method_with_index(*this, mi);
+  } else {
+    rootObj = obj;
+    obj->o_get_call_info_with_index_ex(self, *this, mi, prehash);
+  }
+}
+
+void MethodCallPackage::dynamicNamedCall(const char *self, CStrRef method,
+    int64 prehash /* = -1 */) {
+  rootObj = self;
+  name = method;
+  Object obj = FrameInjection::GetThis();
+  if (obj.isNull() || !obj->o_instanceof(self)) {
+    get_call_info_static_method(*this);
+  } else {
+    rootObj = obj;
+    obj->o_get_call_info_ex(self, *this, prehash);
+  }
+}
+
+void MethodCallPackage::dynamicNamedCallWithIndex(const char *self,
+    CStrRef method, MethodIndex mi, int64 prehash /* = -1 */) {
+  rootObj = self;
+  name = method;
+  Object obj = FrameInjection::GetThis();
+  if (obj.isNull() || !obj->o_instanceof(self)) {
+    get_call_info_static_method_with_index(*this, mi);
+  } else {
+    rootObj = obj;
+    obj->o_get_call_info_with_index_ex(self, *this, mi, prehash);
+  }
+}
+
+void MethodCallPackage::construct(CObjRef self) {
+  rootObj = self;
+  self->getConstructor(*this);
+}
+void MethodCallPackage::fail() {
+  if (m_fatal) {
+    o_invoke_failed(rootObj.is(KindOfObject) ?
+        rootObj.getObjectData()->o_getClassName().c_str() : rootObj.getCStr(),
+        name.data(), true);
+  }
+}
+String MethodCallPackage::getClassName() {
+  if (rootObj.is(KindOfObject)) {
+    return rootObj.getObjectData()->o_getClassName();
+  } else {
+    return rootObj.toString();
+  }
+}
+void MethodCallPackage::lateStaticBind(ThreadInfo *ti) {
+#ifdef ENABLE_LATE_STATIC_BINDING
+  rootObj = FrameInjection::GetStaticClassName(ti);
+  get_call_info_static_method(*this);
+#else
+  m_fatal = true;
+  fail();
+#endif
+}
+
+const CallInfo *MethodCallPackage::bindClass(ThreadInfo *ti) {
+#ifdef ENABLE_LATE_STATIC_BINDING
+  FrameInjection::SetCallingObject(ti, obj);
+#endif
+  return ci;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

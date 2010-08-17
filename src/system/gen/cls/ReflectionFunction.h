@@ -57,13 +57,9 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunction 1
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, MethodIndex methodIndex,
-                           const char *s, CArrRef ps, int64 h, bool f = true);
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionFunction 1
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -72,12 +68,18 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   public: c_ReflectionFunction *create(Variant v_name);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
   public: static Variant ti_export(const char* cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_invoke(int num_args, Array args = Array());
   public: Variant t_invokeargs(CVarRef v_args);
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export("ReflectionFunction", v_name, v_ret); }
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(invokeargs);
+  DECLARE_METHOD_INVOKE_HELPERS(export);
+  DECLARE_METHOD_INVOKE_HELPERS(invoke);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionFunction;
 

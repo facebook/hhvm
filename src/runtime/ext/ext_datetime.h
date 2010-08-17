@@ -53,15 +53,25 @@ class c_DateTime : public ExtObjectData {
   public: ~c_DateTime();
   public: void t___construct(CStrRef time = "now",
                              CObjRef timezone = null_object);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: String t_format(CStrRef format);
+  DECLARE_METHOD_INVOKE_HELPERS(format);
   public: int64 t_getoffset();
+  DECLARE_METHOD_INVOKE_HELPERS(getoffset);
   public: Variant t_gettimezone();
+  DECLARE_METHOD_INVOKE_HELPERS(gettimezone);
   public: Object t_modify(CStrRef modify);
+  DECLARE_METHOD_INVOKE_HELPERS(modify);
   public: Object t_setdate(int64 year, int64 month, int64 day);
+  DECLARE_METHOD_INVOKE_HELPERS(setdate);
   public: Object t_setisodate(int64 year, int64 week, int64 day = 1);
+  DECLARE_METHOD_INVOKE_HELPERS(setisodate);
   public: Object t_settime(int64 hour, int64 minute, int64 second = 0);
+  DECLARE_METHOD_INVOKE_HELPERS(settime);
   public: Object t_settimezone(CObjRef timezone);
+  DECLARE_METHOD_INVOKE_HELPERS(settimezone);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DateTime *create(String time = "now",
@@ -69,6 +79,7 @@ class c_DateTime : public ExtObjectData {
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   // Helper for DateTime -> c_DateTime conversion
@@ -122,24 +133,32 @@ class c_DateTimeZone : public ExtObjectData {
   public: c_DateTimeZone();
   public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: String t_getname();
+  DECLARE_METHOD_INVOKE_HELPERS(getname);
   public: int64 t_getoffset(CObjRef datetime);
+  DECLARE_METHOD_INVOKE_HELPERS(getoffset);
   public: Array t_gettransitions();
-  public: static Array ti_listabbreviations(const char* cls);
+  DECLARE_METHOD_INVOKE_HELPERS(gettransitions);
+  public: static Array ti_listabbreviations(const char* cls );
   public: static Array t_listabbreviations() {
     return ti_listabbreviations("datetimezone");
   }
-  public: static Array ti_listidentifiers(const char* cls);
+  DECLARE_METHOD_INVOKE_HELPERS(listabbreviations);
+  public: static Array ti_listidentifiers(const char* cls );
   public: static Array t_listidentifiers() {
     return ti_listidentifiers("datetimezone");
   }
+  DECLARE_METHOD_INVOKE_HELPERS(listidentifiers);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_DateTimeZone *create(String timezone);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   // Helper for TimeZone -> c_DateTimeZone conversion

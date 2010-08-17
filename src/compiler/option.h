@@ -196,7 +196,10 @@ public:
   static const char *FunctionPrefix;
   static const char *BuiltinFunctionPrefix;
   static const char *InvokePrefix;
+  static const char *InvokeFewArgsPrefix;
+  static const char *InvokeSinglePrefix;
   static const char *CreateObjectPrefix;
+  static const char *CreateObjectOnlyPrefix;
   static const char *PseudoMainPrefix;
   static const char *VariablePrefix;
   static const char *GlobalVariablePrefix;
@@ -226,6 +229,7 @@ public:
   static const char *EvalOrderTempPrefix;
   static const char *SilencerPrefix;
   static const char *EvalInvokePrefix;
+  static const char *CallInfoPrefix;
 
   static const char *TempPrefix;
   static const char *MapPrefix;
@@ -341,6 +345,7 @@ public:
     m_hookHandler = hookHandler;
   }
 
+  static bool UseMethodIndex;
 private:
   /**
    * Directory that has system HPHP files for loading builtin classes, etc.

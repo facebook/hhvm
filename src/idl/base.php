@@ -722,6 +722,7 @@ function generateMethodCPPHeader($method, $class, $f) {
                         $method['name'] != "__construct" &&
                         strpos($method['name'], "__") === 0,
                         $method['flags'] & IsStatic, $class);
+  fprintf($f, "  DECLARE_METHOD_INVOKE_HELPERS(%s);\n", $method['name']);
   if ($method['name'] == "__call") {
     fprintf($f, "  public: Variant doCall(Variant v_name, ");
     fprintf($f, "Variant v_arguments, bool fatal);\n");
@@ -758,6 +759,7 @@ function generatePreImplemented($method, $class, $f) {
     fprintf($f, "(Eval::VariableEnvironment &env,\n");
     fprintf($f, "                                    ");
     fprintf($f, "const Eval::FunctionCallExpression *call);\n");
+    fprintf($f, "  public: void getConstructor(MethodCallPackage &mcp);\n");
   } else if ($method['name'] == '__destruct') {
     fprintf($f, "  public: virtual void destruct();\n", $class['name']);
   }

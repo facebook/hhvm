@@ -30,7 +30,6 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/array/array_iterator.h>
-#include <runtime/base/runtime_option.h>
 #include <runtime/base/macros.h>
 
 namespace HPHP {
@@ -619,6 +618,18 @@ class Variant {
   Variant refvalAt(CStrRef key, bool isString = false);
   Variant refvalAt(CVarRef key);
 
+  Variant argvalAt(bool byRef, bool    key);
+  Variant argvalAt(bool byRef, char    key);
+  Variant argvalAt(bool byRef, short   key);
+  Variant argvalAt(bool byRef, int     key);
+  Variant argvalAt(bool byRef, int64   key);
+  Variant argvalAt(bool byRef, double  key);
+  Variant argvalAt(bool byRef, litstr  key,
+      bool isString = false);
+  Variant argvalAt(bool byRef, CStrRef key,
+      bool isString = false);
+  Variant argvalAt(bool byRef, CVarRef key);
+
   Variant &bindClass(ThreadInfo *info) const;
 
   Variant o_get(CStrRef propName, bool error = true,
@@ -629,35 +640,24 @@ class Variant {
                   CStrRef context = null_string);
   Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
                        CStrRef context = null_string);
+  Variant o_argval(bool byRef, CStrRef propName, bool error = true,
+      CStrRef context = null_string) const;
 
+  Variant o_invoke(const char *s, CArrRef params, int64 hash = -1);
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
+  Variant o_root_invoke(const char *s, CArrRef params, int64 hash = -1);
   Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);
-  Variant o_invoke(MethodIndex, const char *s, CArrRef params, int64 hash);
-  Variant o_invoke_mil(const char *s, CArrRef params, int64 hash);
-  Variant o_root_invoke(MethodIndex, const char *s, CArrRef params, int64 hash);
-  Variant o_root_invoke_mil(const char *s, CArrRef params, int64 hash);
-  Variant o_invoke_ex(const char *clsname, MethodIndex, const char *s,
+  Variant o_invoke_ex(const char *clsname, const char *s,
                       CArrRef params, int64 hash);
-  Variant o_invoke_ex_mil(const char *clsname, const char *s,
-                      CArrRef params, int64 hash);
-
-  Variant o_invoke_few_args(MethodIndex,
-                            const char *s, int64 hash, int count,
+  Variant o_invoke_few_args(const char *s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
- Variant o_invoke_few_args(CStrRef s, int64 hash, int count,
+  Variant o_invoke_few_args(CStrRef s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
- Variant o_invoke_few_args_mil(
-                                const char *s, int64 hash, int count,
-                                INVOKE_FEW_ARGS_DECL_ARGS);
-  Variant o_root_invoke_few_args(MethodIndex,
-                                 const char *s, int64 hash, int count,
-                                 INVOKE_FEW_ARGS_DECL_ARGS);
+  Variant o_root_invoke_few_args(const char *s, int64 hash, int count,
+                            INVOKE_FEW_ARGS_DECL_ARGS);
   Variant o_root_invoke_few_args(CStrRef s, int64 hash, int count,
                             INVOKE_FEW_ARGS_DECL_ARGS);
-  Variant o_root_invoke_few_args_mil(
-                                     const char *s, int64 hash, int count,
-                                     INVOKE_FEW_ARGS_DECL_ARGS);
-
+  bool o_get_call_info(MethodCallPackage &info, int64 hash = -1);
 
   /**
    * The whole purpose of VariantOffset is to collect "v" parameter to call
@@ -836,6 +836,17 @@ class Variant {
     ASSERT(m_type == KindOfVariant);
     return m_data.pvar;
   }
+
+  const char *getCStr() const {
+    if (getType() == KindOfString) {
+      return m_type == KindOfVariant ? m_data.pvar->m_data.pstr->data() :
+        m_data.pstr->data();
+    } else {
+      ASSERT(false);
+      return NULL;
+    }
+  }
+
   ObjectData *getArrayAccess() const;
   void callOffsetUnset(CVarRef key);
   int64 getNumData() const { return m_data.num; }
@@ -1039,6 +1050,21 @@ class Variant {
 
   Variant refvalAtImpl(CStrRef key, bool isString = false);
 
+  template<class T>
+  Variant argvalAtImpl(bool byRef, const T &key) {
+    if (m_type == KindOfVariant) {
+      return m_data.pvar->argvalAtImpl(byRef, key);
+    }
+    if (byRef && (is(KindOfArray) || isNull() ||
+          (is(KindOfBoolean) && !toBoolean()) ||
+          (is(KindOfStaticString) && getStringData()->empty()) ||
+          (is(KindOfString) && getStringData()->empty()))) {
+      return ref(lvalAt(key, false));
+    } else {
+      return rvalAt(key);
+    }
+  }
+  Variant argvalAtImpl(bool byRef, CStrRef key, bool isString = false);
 
  private:
   static void compileTimeAssertions() {
@@ -1123,6 +1149,15 @@ CVarRef Array::setImpl(const T &key, CVarRef v) {
 template<typename T>
 Variant Array::refvalAt(const T &key) {
   return ref(lvalAt(key));
+}
+
+template<typename T>
+Variant Array::argvalAt(bool byRef, const T &key) {
+  if (byRef) {
+    return ref(lvalAt(key));
+  } else {
+    return rvalAt(key);
+  }
 }
 
 inline const Variant Array::operator[](bool    key) const {

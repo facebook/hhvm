@@ -32,6 +32,7 @@ class DynamicObjectData : public ObjectData {
   virtual void dynConstruct(CArrRef params);
   virtual void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  virtual void getConstructor(MethodCallPackage &mcp);
 
   virtual void destruct();
   virtual void setRoot(ObjectData *r);
@@ -50,29 +51,10 @@ class DynamicObjectData : public ObjectData {
   virtual void o_setArray(CArrRef props);
 
   // methods
-  virtual Variant o_invoke(MethodIndex, const char *s, CArrRef params,
-                           int64 hash, bool fatal = true);
-  virtual Variant o_invoke_mil(const char *s, CArrRef params,
-                               int64 hash, bool fatal = true);
-  virtual Variant o_invoke_ex(const char *clsname, MethodIndex, const char *s,
-                              CArrRef params, int64 hash, bool fatal = true);
-  virtual Variant o_invoke_ex_mil(const char *clsname, const char *s,
-                                  CArrRef params, int64 hash,
-                                  bool fatal = true);
-  virtual Variant o_invoke_few_args(MethodIndex, const char *s, int64 hash,
-                                    int count, INVOKE_FEW_ARGS_DECL_ARGS);
-  virtual Variant o_invoke_few_args_mil(const char *s,
-                                        int64 hash,
-                                        int count, INVOKE_FEW_ARGS_DECL_ARGS);
-  virtual Variant o_root_invoke(MethodIndex, const char *s, CArrRef params,
-                                int64 hash, bool fatal = false);
-  virtual Variant o_root_invoke_mil(const char *s, CArrRef params,
-                                    int64 hash, bool fatal = false);
-  virtual Variant o_root_invoke_few_args(MethodIndex, const char *s, int64 hash,
-                                         int count, INVOKE_FEW_ARGS_DECL_ARGS);
-  virtual Variant o_root_invoke_few_args_mil(const char *s, int64 hash,
-                                             int count,
-                                             INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &info, int64 hash = -1);
+  virtual bool o_get_call_info_ex(const char *clsname,
+      MethodCallPackage &info, int64 hash);
+
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
 

@@ -319,15 +319,12 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
   }
   return false;
 }
-
-void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
-                                           AnalysisResultPtr ar) {
+void ObjectMethodExpression::outputCPPObject(CodeGenerator &cg,
+    AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
   if (isThis && ar->getFunctionScope()->isStatic()) {
     cg_printf("GET_THIS_ARROW()");
   }
-
-  bool fewParams = canInvokeFewArgs();
 
   if (!isThis) {
     if (!m_object->getActualType() ||
@@ -338,7 +335,17 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       m_object->setExpectedType(TypePtr());
       m_object->outputCPP(cg, ar);
       m_object->setExpectedType(expectedType);
-
+    } else {
+      m_object->outputCPP(cg, ar);
+    }
+  }
+}
+void ObjectMethodExpression::outputCPPObjectCall(CodeGenerator &cg,
+    AnalysisResultPtr ar) {
+  outputCPPObject(cg, ar);
+  bool isThis = m_object->isThis();
+  if (!isThis) {
+    if (directVariantProxy(ar) && !m_object->hasCPPTemp()) {
       if (m_bindClass) {
         cg_printf(". BIND_CLASS_DOT ");
       } else {
@@ -354,8 +361,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         objType = "ObjectData";
       }
-
-      m_object->outputCPP(cg, ar);
       if (m_bindClass) {
         cg_printf("-> BIND_CLASS_ARROW(%s) ", objType.c_str());
       } else {
@@ -365,70 +370,110 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
   } else if (m_bindClass && m_classScope) {
     cg_printf(" BIND_CLASS_ARROW(%s) ", m_classScope->getId(cg).c_str());
   }
+}
 
+bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
+    AnalysisResultPtr ar, int state) {
+  if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
+    return FunctionCall::preOutputCPP(cg, ar, state);
+  }
+  // Short circuit out if inExpression() returns false
+  if (!ar->inExpression()) return true;
+  m_ciTemp = cg.createNewId(ar);
+
+  ar->wrapExpressionBegin(cg);
+  bool isThis = m_object->isThis();
+  if (!isThis) {
+    m_object->preOutputCPP(cg, ar, state);
+  }
+  if (m_name.empty()) {
+    m_nameExp->preOutputCPP(cg, ar, state);
+  }
+  const MethodSlot *ms = NULL;
   if (!m_name.empty()) {
-    if (m_valid && m_object->getType()->isSpecificObject()) {
-      cg_printf("%s%s(", Option::MethodPrefix, m_name.c_str());
-      FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                        m_variableArgument, m_argArrayId,
-                                        m_argArrayHash, m_argArrayIndex);
-      cg_printf(")");
-    } else {
-      const MethodSlot *ms = ar->getOrAddMethodSlot(m_origName);
-      if (fewParams) {
-        cg_printf("%s%sinvoke_few_args%s(%s \"%s\"",
-                  Option::ObjectPrefix, isThis ? "root_" : "",
-                  (ms->isError() ? "_mil" : ""),
-                  ms->runObjParam().c_str(), m_origName.c_str());
-        uint64 hash = hash_string_i(m_name.data(), m_name.size());
-        cg_printf(", 0x%016llXLL, ", hash);
-
-        if (m_params && m_params->getCount()) {
-          cg_printf("%d, ", m_params->getCount());
-          FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
-        } else {
-          cg_printf("0");
-        }
-        cg_printf(")");
-      } else {
-        cg_printf("%s%sinvoke%s(%s \"%s\"",
-                  Option::ObjectPrefix, isThis ? "root_" : "",
-                  (ms->isError() ? "_mil" : ""),
-                  ms->runObjParam().c_str(), m_origName.c_str());
-        cg_printf(", ");
-        if (m_params && m_params->getCount()) {
-          FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
-        } else {
-          cg_printf("Array()");
-        }
-        uint64 hash = hash_string_i(m_name.data(), m_name.size());
-        cg_printf(", 0x%016llXLL)", hash);
-      }
-    }
+    ms = ar->getOrAddMethodSlot(m_name);
+  }
+  cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
+  if (ms) {
+    cg_printf("mcp%d.methodCallWithIndex((", m_ciTemp);
   } else {
+    cg_printf("mcp%d.methodCall((", m_ciTemp);
+  }
+  if (isThis) {
+    cg_printf("GET_THIS()");
+  } else {
+    outputCPPObject(cg, ar);
+  }
+  cg_printf("), ");
+  if (!m_name.empty()) {
+    uint64 hash = hash_string_i(m_name.c_str());
+    cg_printString(m_origName, ar);
+    if (ms) {
+      cg_printf(", %s", ms->runObjParam().c_str());
+    }
+    cg_printf(", 0x%016llXLL);\n", hash);
+  } else {
+    m_nameExp->outputCPP(cg, ar);
+    cg_printf(", -1);\n");
+  }
+  cg_printf("const CallInfo *cit%d  __attribute__((__unused__)) ="
+      " mcp%d.ci;\n", m_ciTemp, m_ciTemp);
+
+  if (m_params && m_params->getCount() > 0) {
+    ar->pushCallInfo(m_ciTemp);
+    m_params->preOutputCPP(cg, ar, state);
+    ar->popCallInfo();
+  }
+
+  if (state & FixOrder) {
+    ar->pushCallInfo(m_ciTemp);
+    preOutputStash(cg, ar, state);
+    ar->popCallInfo();
+  }
+  if (hasCPPTemp() && !(state & FixOrder)) {
+    cg_printf("id(%s);\n", cppTemp().c_str());
+  }
+  return true;
+}
+
+void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
+    AnalysisResultPtr ar) {
+
+  bool fewParams = canInvokeFewArgs();
+  if (!m_name.empty() && m_valid && m_object->getType()->isSpecificObject()) {
+    // Static method call
+    outputCPPObjectCall(cg, ar);
+    cg_printf("%s%s(", Option::MethodPrefix, m_name.c_str());
+    FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
+        m_variableArgument, m_argArrayId, m_argArrayHash, m_argArrayIndex);
+    cg_printf(")");
+  } else {
+    cg_printf("(mcp%d.bindClass(info)->", m_ciTemp);
     if (fewParams) {
-      cg_printf("%s%sinvoke_few_args_mil(",
-                Option::ObjectPrefix, isThis ? "root_" : "");
-      m_nameExp->outputCPP(cg, ar);
-      cg_printf(", -1LL, ");
-      if (m_params && m_params->getCount()) {
-        cg_printf("%d, ", m_params->getCount());
+      cg_printf("getMethFewArgs())(mcp%d, ", m_ciTemp);
+      int pcount = m_params ? m_params->getCount() : 0;
+      if (pcount) {
+        cg_printf("%d, ", pcount);
+        ar->pushCallInfo(m_ciTemp);
         FunctionScope::outputCPPArguments(m_params, cg, ar, 0, false);
+        ar->popCallInfo();
       } else {
         cg_printf("0");
       }
+      for (int i = pcount; i < Option::InvokeFewArgsCount; ++i) {
+        cg.printf(", null_variant");
+      }
       cg_printf(")");
     } else {
-      cg_printf("%s%sinvoke_mil(",
-          Option::ObjectPrefix, isThis ? "root_" : "");
-      m_nameExp->outputCPP(cg, ar);
-      cg_printf(", ");
+      cg_printf("getMeth())(mcp%d, ", m_ciTemp);
       if (m_params && m_params->getCount()) {
+        ar->pushCallInfo(m_ciTemp);
         FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+        ar->popCallInfo();
       } else {
         cg_printf("Array()");
       }
-      cg_printf(", -1LL)");
+      cg_printf(")");
     }
   }
 }

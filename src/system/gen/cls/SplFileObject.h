@@ -62,12 +62,9 @@ class c_SplFileObject : public c_SplFileInfo {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileObject 1
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileObject 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -76,6 +73,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: c_SplFileObject *create(Variant v_filename, Variant v_open_mode = NAMSTR(s_sys_ss122506fb, "r"), Variant v_use_include_path = false, Variant v_context = null);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_current();
   public: bool t_eof();
@@ -105,6 +103,35 @@ class c_SplFileObject : public c_SplFileInfo {
   public: Variant t_setflags(CVarRef v_flags);
   public: Variant t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();
+  DECLARE_METHOD_INVOKE_HELPERS(fscanf);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(fseek);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(fgetss);
+  DECLARE_METHOD_INVOKE_HELPERS(fgetcsv);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(setcsvcontrol);
+  DECLARE_METHOD_INVOKE_HELPERS(getcsvcontrol);
+  DECLARE_METHOD_INVOKE_HELPERS(setflags);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(setmaxlinelen);
+  DECLARE_METHOD_INVOKE_HELPERS(getmaxlinelen);
+  DECLARE_METHOD_INVOKE_HELPERS(ftruncate);
+  DECLARE_METHOD_INVOKE_HELPERS(fflush);
+  DECLARE_METHOD_INVOKE_HELPERS(eof);
+  DECLARE_METHOD_INVOKE_HELPERS(fgetc);
+  DECLARE_METHOD_INVOKE_HELPERS(fpassthru);
+  DECLARE_METHOD_INVOKE_HELPERS(haschildren);
+  DECLARE_METHOD_INVOKE_HELPERS(fgets);
+  DECLARE_METHOD_INVOKE_HELPERS(seek);
+  DECLARE_METHOD_INVOKE_HELPERS(flock);
+  DECLARE_METHOD_INVOKE_HELPERS(getflags);
+  DECLARE_METHOD_INVOKE_HELPERS(getchildren);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(fwrite);
+  DECLARE_METHOD_INVOKE_HELPERS(ftell);
+  DECLARE_METHOD_INVOKE_HELPERS(fstat);
+  DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_SplFileObject;
 

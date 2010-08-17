@@ -45,21 +45,32 @@ class c_SoapServer : public ExtObjectData {
   public: c_SoapServer();
   public: ~c_SoapServer();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: void t_setclass(int _argc, CStrRef name, CArrRef _argv = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(setclass);
   public: void t_setobject(CObjRef obj);
+  DECLARE_METHOD_INVOKE_HELPERS(setobject);
   public: void t_addfunction(CVarRef func);
+  DECLARE_METHOD_INVOKE_HELPERS(addfunction);
   public: Variant t_getfunctions();
+  DECLARE_METHOD_INVOKE_HELPERS(getfunctions);
   public: void t_handle(CStrRef request = null_string);
+  DECLARE_METHOD_INVOKE_HELPERS(handle);
   public: void t_setpersistence(int64 mode);
+  DECLARE_METHOD_INVOKE_HELPERS(setpersistence);
   public: void t_fault(CVarRef code, CStrRef fault, CStrRef actor = null_string, CVarRef detail = null, CStrRef name = null_string);
+  DECLARE_METHOD_INVOKE_HELPERS(fault);
   public: void t_addsoapheader(CObjRef fault);
+  DECLARE_METHOD_INVOKE_HELPERS(addsoapheader);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapServer *create(Variant wsdl, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   public: int                        m_type;
@@ -94,26 +105,41 @@ class c_SoapClient : public ExtObjectData {
   public: c_SoapClient();
   public: ~c_SoapClient();
   public: void t___construct(CVarRef wsdl, CArrRef options = null_array);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___call(Variant name, Variant args);
+  DECLARE_METHOD_INVOKE_HELPERS(__call);
   public: Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   public: Variant t___soapcall(String name, Array args, Array options = null_array, Variant input_headers = null, Variant output_headers = null);
+  DECLARE_METHOD_INVOKE_HELPERS(__soapcall);
   public: Variant t___getlastrequest();
+  DECLARE_METHOD_INVOKE_HELPERS(__getlastrequest);
   public: Variant t___getlastresponse();
+  DECLARE_METHOD_INVOKE_HELPERS(__getlastresponse);
   public: Variant t___getlastrequestheaders();
+  DECLARE_METHOD_INVOKE_HELPERS(__getlastrequestheaders);
   public: Variant t___getlastresponseheaders();
+  DECLARE_METHOD_INVOKE_HELPERS(__getlastresponseheaders);
   public: Variant t___getfunctions();
+  DECLARE_METHOD_INVOKE_HELPERS(__getfunctions);
   public: Variant t___gettypes();
+  DECLARE_METHOD_INVOKE_HELPERS(__gettypes);
   public: Variant t___dorequest(String buf, String location, String action, int64 version, bool oneway = false);
+  DECLARE_METHOD_INVOKE_HELPERS(__dorequest);
   public: Variant t___setcookie(String name, String value = null_string);
+  DECLARE_METHOD_INVOKE_HELPERS(__setcookie);
   public: Variant t___setlocation(String new_location = null_string);
+  DECLARE_METHOD_INVOKE_HELPERS(__setlocation);
   public: bool t___setsoapheaders(Variant headers = null);
+  DECLARE_METHOD_INVOKE_HELPERS(__setsoapheaders);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapClient *create(Variant wsdl, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   public: int                         m_soap_version;
@@ -167,13 +193,16 @@ class c_SoapVar : public ExtObjectData {
   public: c_SoapVar();
   public: ~c_SoapVar();
   public: void t___construct(CVarRef data, CVarRef type, CStrRef type_name = null_string, CStrRef type_namespace = null_string, CStrRef node_name = null_string, CStrRef node_namespace = null_string);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapVar *create(Variant data, Variant type, String type_name = null_string, String type_namespace = null_string, String node_name = null_string, String node_namespace = null_string);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   public: Variant m_value;
@@ -201,14 +230,18 @@ class c_SoapFault : public c_Exception {
   public: c_SoapFault();
   public: ~c_SoapFault();
   public: void t___construct(CVarRef code, CStrRef message, CStrRef actor = null_string, CVarRef detail = null, CStrRef name = null_string, CVarRef header = null);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: String t___tostring();
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapFault *create(Variant code, String message, String actor = null_string, Variant detail = null, String name = null_string, Variant header = null);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   public: String  m_faultstring;
@@ -236,13 +269,16 @@ class c_SoapParam : public ExtObjectData {
   public: c_SoapParam();
   public: ~c_SoapParam();
   public: void t___construct(CVarRef data, CStrRef name);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapParam *create(Variant data, String name);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   public: String  m_name;
@@ -265,13 +301,16 @@ class c_SoapHeader : public ExtObjectData {
   public: c_SoapHeader();
   public: ~c_SoapHeader();
   public: void t___construct(CStrRef ns, CStrRef name, CVarRef data = null, bool mustunderstand = false, CVarRef actor = null);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_SoapHeader *create(String ns, String name, Variant data = null, bool mustunderstand = false, Variant actor = null);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
   public: String  m_namespace;

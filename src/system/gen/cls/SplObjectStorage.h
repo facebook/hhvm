@@ -61,12 +61,9 @@ class c_SplObjectStorage : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplObjectStorage 1
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplObjectStorage 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -80,6 +77,15 @@ class c_SplObjectStorage : public ExtObjectData {
   public: bool t_contains(CVarRef v_obj);
   public: void t_attach(CVarRef v_obj);
   public: void t_detach(CVarRef v_obj);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(detach);
+  DECLARE_METHOD_INVOKE_HELPERS(attach);
+  DECLARE_METHOD_INVOKE_HELPERS(count);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(contains);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_SplObjectStorage;
 

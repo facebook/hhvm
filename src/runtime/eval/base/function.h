@@ -32,6 +32,7 @@ public:
   virtual Variant invoke(CArrRef params) const = 0;
   virtual Variant directInvoke(VariableEnvironment &env,
                                const FunctionCallExpression *caller) const = 0;
+  virtual const CallInfo *getCallInfo() const = 0;
 };
 
 extern Variant invoke_from_eval(const char *function,

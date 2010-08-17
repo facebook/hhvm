@@ -35,6 +35,7 @@ Variant pm_php$classes$splobjectstorage_php(bool incOnce = false, LVariableTable
 
 // Dynamic Class Declarations
 Object co_SplObjectStorage(CArrRef params, bool init = true);
+Object coo_SplObjectStorage();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

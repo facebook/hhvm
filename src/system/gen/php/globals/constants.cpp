@@ -1988,12 +1988,23 @@ const int64 k_YESEXPR = 327680LL;
 const bool k_ZEND_THREAD_SAFE = false;
 
 /* preface starts */
+extern CallInfo ci_;
 /* preface finishes */
 Variant pm_php$globals$constants_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::globals/constants.php, pm_php$globals$constants_php);
   LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
-  g->declareConstant("SID", g->k_SID, NAMSTR(s_sys_ss00000000, ""));
-  g->declareConstant("SID", g->k_SID, NAMSTR(s_sys_ss00000000, ""));
+  {
+    const CallInfo *cit1 = NULL;
+    void *vt1 = NULL;
+    get_call_info_or_fail(cit1, vt1, "define", 0x25D578B4772C1715LL);
+    g->declareConstant("SID", g->k_SID, NAMSTR(s_sys_ss00000000, ""));
+  }
+  {
+    const CallInfo *cit2 = NULL;
+    void *vt2 = NULL;
+    get_call_info_or_fail(cit2, vt2, "define", 0x25D578B4772C1715LL);
+    g->declareConstant("SID", g->k_SID, NAMSTR(s_sys_ss00000000, ""));
+  }
   return true;
 } /* function */
 

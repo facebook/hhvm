@@ -535,6 +535,14 @@ Variant Array::refvalAt(CStrRef key, bool isString /* = false */) {
   return ref(lvalAt(key, false, isString));
 }
 
+Variant Array::argvalAt(bool byRef, CStrRef key, bool isString /* = false */) {
+  if (byRef) {
+    return ref(lvalAt(key, false, isString));
+  } else {
+    return rvalAt(key);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // membership functions
 

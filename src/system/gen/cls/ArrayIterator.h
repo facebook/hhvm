@@ -64,12 +64,9 @@ class c_ArrayIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ArrayIterator 1
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ArrayIterator 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -78,6 +75,7 @@ class c_ArrayIterator : public ExtObjectData {
   public: c_ArrayIterator *create(Variant v_array, Variant v_flags = 0LL /* SORT_REGULAR */);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: void t_append(CVarRef v_value);
   public: bool t_asort();
@@ -101,6 +99,28 @@ class c_ArrayIterator : public ExtObjectData {
   public: bool t_uasort(CVarRef v_cmp_function);
   public: bool t_uksort(Variant v_cmp_function);
   public: bool t_valid();
+  DECLARE_METHOD_INVOKE_HELPERS(getarraycopy);
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(count);
+  DECLARE_METHOD_INVOKE_HELPERS(natsort);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(append);
+  DECLARE_METHOD_INVOKE_HELPERS(setflags);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetexists);
+  DECLARE_METHOD_INVOKE_HELPERS(uksort);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetget);
+  DECLARE_METHOD_INVOKE_HELPERS(natcasesort);
+  DECLARE_METHOD_INVOKE_HELPERS(asort);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetunset);
+  DECLARE_METHOD_INVOKE_HELPERS(seek);
+  DECLARE_METHOD_INVOKE_HELPERS(getflags);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(ksort);
+  DECLARE_METHOD_INVOKE_HELPERS(uasort);
+  DECLARE_METHOD_INVOKE_HELPERS(rewind);
+  DECLARE_METHOD_INVOKE_HELPERS(offsetset);
 };
 extern struct ObjectStaticCallbacks cw_ArrayIterator;
 

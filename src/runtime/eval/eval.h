@@ -32,6 +32,8 @@ bool eval_get_class_var_init_hook(Variant &res, const char *s,
                                   const char *var);
 bool eval_create_object_hook(Variant &res, const char *s, CArrRef params,
                              bool init, ObjectData *root);
+bool eval_create_object_only_hook(Variant &res, const char *s,
+    ObjectData *root);
 bool eval_try_autoload(const char *s);
 bool eval_invoke_static_method_hook(Variant &res, const char *s,
                                     const char* method, CArrRef params,
@@ -45,6 +47,10 @@ bool eval_get_class_constant_hook(Variant &res, const char *s,
 bool eval_constant_hook(Variant &res, CStrRef name);
 bool eval_invoke_file_hook(Variant &res, CStrRef path, bool once,
                            LVariableTable* variables, const char *currentDir);
+bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
+  int64 hash = -1);
+bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
+    bool &foundClass);
 
 // Global state getters
 inline void eval_get_static_global_variables(Array &arr) {}

@@ -132,27 +132,28 @@ namespace HPHP {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;        \
 
 #define DECLARE_COMMON_INVOKES                                          \
-  static Variant os_invoke(const char *c, MethodIndex methodIndex,      \
-                           const char *s,                               \
-                           CArrRef ps, int64 h, bool f = true);         \
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s,      \
-                           CArrRef ps, int64 h,                         \
-                           bool f = true);                              \
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex,            \
-                                    const char *s, int64 h, int count,  \
-                                    INVOKE_FEW_ARGS_DECL_ARGS);         \
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1); \
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);\
 
 #define DECLARE_INVOKE_EX(cls, originalName, parent)                    \
-  virtual Variant o_invoke_ex(const char *clsname,                      \
-                              MethodIndex methodIndex, const char *s,   \
-                              CArrRef ps, int64 h, bool f = true) {     \
+  virtual bool o_get_call_info_ex(const char *clsname,               \
+      MethodCallPackage &mcp, int64 h) {                                \
     if (clsname && strcasecmp(clsname, #originalName) == 0) {           \
-      return c_##cls::o_invoke(methodIndex, s, ps, h, f);               \
+      return c_##cls::o_get_call_info(mcp, h);                          \
     }                                                                   \
-    return c_##parent::o_invoke_ex(clsname, methodIndex, s, ps, h, f);  \
+    return c_##parent::o_get_call_info_ex(clsname, mcp, h);             \
   }                                                                     \
 
-#define DECLARE_CLASS_COMMON(cls, originalName)                         \
+#define DECLARE_INVOKE_EX_WITH_INDEX(cls, originalName, parent)         \
+  virtual bool o_get_call_info_with_index_ex(const char *clsname,       \
+      MethodCallPackage &mcp, MethodIndex mi, int64 h) {                \
+    if (clsname && strcasecmp(clsname, #originalName) == 0) {           \
+      return c_##cls::o_get_call_info_with_index(mcp, mi, h);           \
+    }                                                                   \
+    return c_##parent::o_get_call_info_with_index_ex(clsname, mcp, mi, h);\
+  }                                                                     \
+
+#define DECLARE_CLASS_COMMON(cls, originalName) \
   DECLARE_OBJECT_ALLOCATION(c_##cls)                                    \
   protected:                                                            \
   ObjectData *cloneImpl();                                              \
@@ -179,7 +180,6 @@ namespace HPHP {
   DECLARE_INVOKE_EX(cls, originalName, parent)                          \
   public:                                                               \
 
-
 #define DECLARE_INVOKES_FROM_EVAL                                       \
   static Variant os_invoke_from_eval(const char *c, const char *s,      \
                                      Eval::VariableEnvironment &env,    \
@@ -193,22 +193,19 @@ namespace HPHP {
                              bool fatal /* = true */);
 
 #define DECLARE_ROOT                                                    \
-  Variant o_root_invoke(MethodIndex methodIndex, const char *s,         \
-                        CArrRef ps, int64 h, bool f = true) {           \
-    return root->o_invoke(methodIndex, s, ps, h, f);                    \
-  }                                                                     \
-  Variant o_root_invoke_few_args(MethodIndex methodIndex, const char *s,\
-                                 int64 h, int count,                    \
-                                 INVOKE_FEW_ARGS_DECL_ARGS) {           \
-    return root->o_invoke_few_args(methodIndex, s, h, count,            \
-                                   INVOKE_FEW_ARGS_PASS_ARGS);          \
-  }
 
 #define CLASS_CHECK(exp) (checkClassExists(s, g), (exp))
 
 #define IMPLEMENT_CLASS(cls)                                            \
   StaticString c_##cls::s_class_name(c_##cls::GetClassName());          \
   IMPLEMENT_OBJECT_ALLOCATION(c_##cls)
+
+#define DECLARE_METHOD_INVOKE_HELPERS(methname)               \
+  static CallInfo ci_##methname;                           \
+  static Variant ifa_##methname(MethodCallPackage &mcp,           \
+      int count, INVOKE_FEW_ARGS_IMPL_ARGS);                            \
+  static Variant i_##methname(MethodCallPackage &mcp,             \
+      CArrRef params);
 
 //////////////////////////////////////////////////////////////////////////////
 // jump table entries
@@ -282,29 +279,39 @@ do { \
   if (hash == code && strcmp(s, #str) == 0) { return index;}
 
 #define HASH_INVOKE(code, f)                                            \
-  if (hash == code && !strcasecmp(s, #f)) return i_ ## f(params)
+  if (hash == code && !strcasecmp(s, #f)) return i_ ## f(NULL, params)
 #define HASH_INVOKE_REDECLARED(code, f)                                 \
-  if (hash == code && !strcasecmp(s, #f)) return g->i_ ## f(params)
+  if (hash == code && !strcasecmp(s, #f)) return g->i_ ## f(NULL, params)
 #define HASH_INVOKE_METHOD(code, f)                                     \
   if (hash == code && !strcasecmp(s, #f)) return o_i_ ## f(params)
 #define HASH_INVOKE_CONSTRUCTOR(code, f, id)                            \
   if (hash == code && !strcasecmp(s, #f)) return o_i_ ## id(params)
-#define HASH_INVOKE_STATIC_METHOD(code, f, methodIndex)                 \
-  if (hash == code && !strcasecmp(s, #f))                               \
-     return cw_ ## f.os_invoke(#f, methodIndex, method, params, -1, fatal)
-#define HASH_INVOKE_STATIC_METHOD_VOLATILE(code, f, methodIndex)        \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f.os_invoke(#f, methodIndex,              \
-                       method, params, -1, fatal))
-#define HASH_INVOKE_STATIC_METHOD_REDECLARED(code, f, methodIndex)      \
-  if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(g->cso_ ## f->os_invoke(#f, methodIndex,         \
-                       method, params, -1, fatal))
 #define HASH_GET_OBJECT_STATIC_CALLBACKS(code, f)                       \
   if (hash == code && !strcasecmp(s, #f)) return &cw_ ## f
 #define HASH_GET_OBJECT_STATIC_CALLBACKS_VOLATILE(code, f)              \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(&cw_ ## f)
+#define HASH_CALL_INFO_STATIC_METHOD(code, f)                              \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return cw_ ## f.os_get_call_info(mcp, -1)
+#define HASH_CALL_INFO_STATIC_METHOD_VOLATILE(code, f)                     \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return CLASS_CHECK(cw_ ## f.os_get_call_info(mcp, -1))
+#define HASH_CALL_INFO_STATIC_METHOD_REDECLARED(code, f)                   \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return CLASS_CHECK(g->cso_ ## f->os_get_call_info(mcp, -1))
+#define HASH_GET_OBJECT_STATIC_CALLBACKS_REDECLARED(code, f)            \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return CLASS_CHECK(g->cwo_ ## f)
+#define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX(code, f)                \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return cw_ ## f.os_get_call_info_with_index(mcp, mi, -1)
+#define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX_VOLATILE(code, f)       \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return CLASS_CHECK(cw_ ## f.os_get_call_info_with_index(mcp, mi, -1))
+#define HASH_CALL_INFO_STATIC_METHOD_WITH_INDEX_REDECLARED(code, f)     \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return CLASS_CHECK(g->cso_ ## f->os_get_call_info_with_index(mcp, mi, -1))
 #define HASH_GET_OBJECT_STATIC_CALLBACKS_REDECLARED(code, f)            \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cwo_ ## f)
@@ -325,6 +332,14 @@ do { \
 #define HASH_CREATE_OBJECT_REDECLARED(code, f)                          \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cso_ ## f->create(params, init, root))
+#define HASH_CREATE_OBJECT_ONLY(code, f)                                     \
+  if (hash == code && !strcasecmp(s, #f)) return coo_ ## f()
+#define HASH_CREATE_OBJECT_ONLY_VOLATILE(code, f)                            \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return CLASS_CHECK(coo_ ## f())
+#define HASH_CREATE_OBJECT_ONLY_REDECLARED(code, f)                     \
+  if (hash == code && !strcasecmp(s, #f))                               \
+    return CLASS_CHECK(g->cso_ ## f->createOnly(root))
 #define HASH_INCLUDE(code, file, fun)                                   \
   if (hash == code && !strcmp(file, s.c_str())) {                       \
     return pm_ ## fun(once, variables);                                 \
@@ -520,20 +535,19 @@ do { \
 #ifdef ENABLE_LATE_STATIC_BINDING
 
 #define STATIC_CLASS_NAME_CALL(s, exp)                             \
-  (FrameInjection::StaticClassNameHelper(info, s), exp)            \
+  (FrameInjection::StaticClassNameHelper(info, s), exp)
+#define STATIC_CLASS_INVOKE_CALL(s, exp)                             \
+  (FrameInjection::StaticClassNameHelper(info, s), exp)
 
 #define BIND_CLASS_DOT  bindClass(info).
 #define BIND_CLASS_ARROW(T) bindClass<c_##T>(info)->
-#define INVOKE_STATIC_METHOD invoke_static_method_bind
-#define INVOKE_STATIC_METHOD_MIL invoke_static_method_bind_mil
 
 #else
 
 #define STATIC_CLASS_NAME_CALL(s, exp) exp
+#define STATIC_CLASS_INVOKE_CALL(s, exp) exp
 #define BIND_CLASS_DOT
 #define BIND_CLASS_ARROW(T)
-#define INVOKE_STATIC_METHOD invoke_static_method
-#define INVOKE_STATIC_METHOD_MIL invoke_static_method_mil
 
 #endif
 

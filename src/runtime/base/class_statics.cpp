@@ -16,7 +16,7 @@
 #include <runtime/base/class_statics.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_error.h>
-#include <runtime/base/runtime_option.h>
+#include <runtime/base/builtin_functions.h>
 
 namespace HPHP {
 
@@ -46,41 +46,32 @@ Variant &ClassStatics::os_lval(CStrRef s) {
   throw FatalErrorException(m_msg);
 }
 
-Variant ClassStatics::os_invoke(const char *c, MethodIndex methodIndex,
-                                const char *s,
-                                CArrRef params, int64 hash,
+Variant ClassStatics::os_invoke(const char *c, const char *s,
+                                CArrRef params, int64 hash /* = -1 */,
                                 bool fatal /* = true */) {
   if (fatal) {
     throw FatalErrorException(m_msg);
   } else {
-    if (RuntimeOption::FastMethodCall) {
-      // only call with known methodIndex, must succeed
-      s = g_bypassMILR ? s : methodIndexLookupReverse(methodIndex);
-    }
     raise_warning("call_user_func to non-existent method %s::%s",
                     c, s);
     return false;
   }
 }
 
-Variant ClassStatics::os_invoke_mil(const char *c,
-                                    const char *s,
-                                    CArrRef params, int64 hash,
-                                    bool fatal /* = true */) {
-
-  MethodIndex methodIndex (MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      raise_warning("call_user_func to non-existent method %s::%s", c, s);
-    }
-  }
-  // redispatch
-  return os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-
 Object ClassStatics::create(CArrRef params, bool init /* = true */,
                             ObjectData* root /* = NULL */) {
+  Object o(createOnly(root));
+  if (init) {
+    MethodCallPackage mcp;
+    mcp.construct(o);
+    if (mcp.ci) {
+      (mcp.ci->getMeth())(mcp, params);
+    }
+  }
+  return o;
+}
+
+Object ClassStatics::createOnly(ObjectData* root /* = NULL */) {
   throw FatalErrorException(m_msg);
 }
 
@@ -89,8 +80,7 @@ Variant ClassStatics::os_constant(const char *s) {
 }
 
 Variant ClassStatics::os_invoke_from_eval
-(const char *c, const char *s,
- Eval::VariableEnvironment &env,
+(const char *c, const char *s, Eval::VariableEnvironment &env,
  const Eval::FunctionCallExpression *call, int64 hash,
  bool fatal /* = true */) {
   if (fatal) {
@@ -100,6 +90,12 @@ Variant ClassStatics::os_invoke_from_eval
                     c, s);
     return false;
   }
+}
+
+bool ClassStatics::os_get_call_info(MethodCallPackage &info,
+    int64 hash /* = -1 */) {
+  info.fail();
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

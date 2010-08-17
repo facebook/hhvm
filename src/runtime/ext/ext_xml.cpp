@@ -332,20 +332,19 @@ static Variant xml_call_handler(XmlParser *parser, CVarRef handler,
         retval = invoke(handler.toString().c_str(), args, -1);
       } else {
         retval = parser->object.toObject()->
-          o_invoke_mil(handler.toString(), args, -1);
+          o_invoke(handler.toString().c_str(), args, -1);
       }
     } else if (handler.isArray() && handler.getArrayData()->size() == 2 &&
                (handler[0].isString() || handler[0].isObject()) &&
                handler[1].isString()) {
       if (handler[0].isString()) {
         // static method
-        retval = ObjectData::os_invoke_mil(handler[0].toString(),
-                                           handler[1].toString(), args, -1);
+        retval = ObjectData::os_invoke(handler[0].toString(),
+                                       handler[1].toString(), args, -1);
       } else {
         // instance method
-        retval = handler[0].toObject()->o_invoke_mil(
-                                                     handler[1].toString(),
-                                                     args, -1);
+        retval = handler[0].toObject()->o_invoke(handler[1].toString(),
+                                                 args, -1);
       }
     } else {
       raise_warning("Handler is invalid");

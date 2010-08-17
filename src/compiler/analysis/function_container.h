@@ -57,6 +57,8 @@ public:
   const StringToFunctionScopePtrVecMap &getFunctions() const {
     return m_functions;
   }
+  void outputCPPCodeInfoTable(CodeGenerator &cg, AnalysisResultPtr ar,
+      bool support, const StringToFunctionScopePtrVecMap *functions = NULL);
 
 protected:
   // name => functions. Order of declaration
@@ -69,7 +71,8 @@ protected:
   void outputCPPJumpTableEvalSupport(CodeGenerator &cg, AnalysisResultPtr ar,
                                      bool &hasRedeclared,
                                      std::vector<const char *> *funcs = NULL);
-
+  void outputCPPCallInfoTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
+      bool &hasRedeclared, std::vector<const char *> *funcs = NULL);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

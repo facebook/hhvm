@@ -37,6 +37,7 @@ public:
   void dynConstructFromEval(VariableEnvironment &env,
                             const FunctionCallExpression *call);
   virtual void dynConstructUnchecked(CArrRef params);
+  virtual void getConstructor(MethodCallPackage &mcp);
   virtual void init();
   virtual void destruct();
 
@@ -55,23 +56,11 @@ public:
   virtual CStrRef o_getClassName() const;
   virtual const MethodStatement *getMethodStatement(const char* name) const;
 
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  virtual bool o_get_call_info_ex(const char *clsname,
+      MethodCallPackage &mcp, int64 hash);
+
   virtual bool o_instanceof(const char *s) const;
-
-   virtual Variant o_invoke(MethodIndex, const char *s, CArrRef params,
-                            int64 hash, bool fatal = true);
-   virtual Variant o_invoke_mil(const char *s, CArrRef params,
-                                int64 hash, bool fatal = true);
-  virtual Variant o_invoke_ex(const char *clsname, MethodIndex, const char *s,
-                              CArrRef params, int64 hash,
-                               bool fatal /* = false */);
-  virtual Variant o_invoke_ex_mil(const char *clsname, const char *s,
-                                  CArrRef params, int64 hash,
-                                  bool fatal /* = false */);
-  virtual Variant o_invoke_few_args(MethodIndex, const char *s, int64 hash,
-                                    int count, INVOKE_FEW_ARGS_DECL_ARGS);
-  virtual Variant o_invoke_few_args_mil(const char *s, int64 hash,
-                                        int count, INVOKE_FEW_ARGS_DECL_ARGS);
-
 
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
 

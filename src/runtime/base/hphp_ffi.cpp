@@ -168,15 +168,14 @@ int hphp_ffi_invoke_function(void** ret, const char* func, ArrayData* args) {
 int hphp_ffi_invoke_static_method(void** ret, const char* cls,
                                   const char* func, ArrayData* args) {
   Array argsArr(args);
-  Variant result = invoke_static_method_mil(cls, func, argsArr);
+  Variant result = invoke_static_method(cls, func, argsArr);
   return hphp_ffi_exportVariant(result, ret);
 }
 
 int hphp_ffi_invoke_object_method(void** ret, ObjectData* receiver,
                                   const char* func, ArrayData* args) {
   Array argsArr(args);
-  Variant result = receiver->o_invoke_mil( func,
-                                      argsArr, -1);
+  Variant result = receiver->o_invoke(func, argsArr, -1);
   return hphp_ffi_exportVariant(result, ret);
 }
 

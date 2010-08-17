@@ -60,12 +60,9 @@ class c_DirectoryIterator : public c_SplFileInfo {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DirectoryIterator 1
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DirectoryIterator 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -74,6 +71,7 @@ class c_DirectoryIterator : public c_SplFileInfo {
   public: c_DirectoryIterator *create(Variant v_path);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_current();
   public: Variant t_key();
@@ -83,6 +81,15 @@ class c_DirectoryIterator : public c_SplFileInfo {
   public: String t___tostring();
   public: bool t_valid();
   public: bool t_isdot();
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(seek);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(isdot);
+  DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_DirectoryIterator;
 

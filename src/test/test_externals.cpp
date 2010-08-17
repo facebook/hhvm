@@ -31,16 +31,15 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool fastMethodCall = true;
-extern const MethodIndex methodIndexMapInit[];
-const MethodIndex methodIndexMapInit[] = {MethodIndex(0,0)};
-const char * methodIndexMapInitName[] = {NULL};
+extern const MethodIndex g_methodIndexMapInit[];
+const MethodIndex g_methodIndexMapInit[] = {MethodIndex(0,0)};
+const char * g_methodIndexMapInitName[] = {NULL};
 
 
-const unsigned methodIndexHMapSize = 0;
-const MethodIndexHMap methodIndexHMap[] = {MethodIndexHMap()};
-const unsigned methodIndexReverseCallIndex[] = {0};
-const char * methodIndexReverseIndex[] = {0};
+const unsigned g_methodIndexHMapSize = 0;
+const MethodIndexHMap g_methodIndexHMap[] = {MethodIndexHMap()};
+const unsigned g_methodIndexReverseCallIndex[] = {0};
+const char * g_methodIndexReverseIndex[] = {0};
 
 // Used by test_ext_preg
 static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
@@ -128,13 +127,12 @@ Variant get_class_var_init(const char *s, const char *var) {
   return null;
 }
 
-Object create_object(const char *s, const Array &params, bool init,
-                     ObjectData *root) {
-  return create_builtin_object(s, params, init, root);
+Object create_object_only(const char *s, ObjectData *root /* = NULL */) {
+  return create_builtin_object_only(s, root);
 }
 
-Variant invoke(const char *function, CArrRef params, int64 hash,
-               bool tryinterp, bool fatal) {
+Variant invokeImpl(void *extra, CArrRef params) {
+  const char *function = (const char*)extra;
   // for TestExtFunction
   if (strcasecmp(function, "test") == 0) {
     return params[0];
@@ -293,15 +291,12 @@ Variant invoke(const char *function, CArrRef params, int64 hash,
 
   return true;
 }
-
-Variant invoke_static_method(const char* cls, MethodIndex, const char *function,
-                             CArrRef params, bool fatal) {
-  return null;
-}
-
-Variant invoke_static_method_mil(const char* cls, const char *function,
-                             CArrRef params, bool fatal) {
-  return null;
+CallInfo invokeImplCallInfo((void*)invokeImpl, NULL, 0, CallInfo::VarArgs, 0);
+bool get_call_info(const CallInfo *&ci, void *&extra, const char *s,
+    int64 hash /* = -1 */) {
+  extra = (void*)s;
+  ci = &invokeImplCallInfo;
+  return true;
 }
 
 void init_static_variables() { SystemScalarArrays::initialize();}
@@ -362,6 +357,14 @@ Variant *get_static_property_lv(const char *s, const char *prop) {
   return NULL;
 }
 
+bool get_call_info_static_method(MethodCallPackage &info) {
+  return NULL;
+}
+bool get_call_info_static_method_with_index(MethodCallPackage &info,
+    MethodIndex mi) {
+  return false;
+}
+
 namespace Eval {
 Variant invoke_from_eval(const char *function, VariableEnvironment &env,
                          const FunctionCallExpression *caller,
@@ -371,7 +374,7 @@ Variant invoke_from_eval(const char *function, VariableEnvironment &env,
 }
 
 const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
-    return NULL;
+  return NULL;
 }
 
 void fiber_marshal_global_state(GlobalVariables *g1, GlobalVariables *g2,

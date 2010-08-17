@@ -59,9 +59,22 @@ Variant ExtFunction::directInvoke(VariableEnvironment &env,
 #define EVAL_EXT(name)                                                 \
   class Eval##name : public ExtFunction {                              \
   public:                                                              \
+    static Variant InvokeImpl(VariableEnvironment &env,                \
+                       CArrRef params);                                \
     Variant invokeImpl(VariableEnvironment &env,                       \
-                       CArrRef params) const;                          \
-  }
+                       CArrRef params) const {                         \
+      return InvokeImpl(env, params);                                  \
+    }                                                                  \
+    static Variant Invoker(void *extra, CArrRef params) {              \
+      return InvokeImpl(*((VariableEnvironment*)extra), params);       \
+    }                                                                  \
+    const CallInfo *getCallInfo() const {                              \
+      return &s_ci;                                                    \
+    }                                                                  \
+    static CallInfo s_ci;                                              \
+  };                                                                   \
+  CallInfo Eval##name::s_ci((void*)Eval##name::Invoker, NULL, 0, 0, 0);
+
 
 
 #define EVAL_EXT_DYN(name)                                             \
@@ -69,10 +82,18 @@ Variant ExtFunction::directInvoke(VariableEnvironment &env,
   public:                                                              \
     Variant invokeImpl(VariableEnvironment &env,                       \
                        CArrRef params) const {                         \
-      return invoke(params);                                           \
+      return Invoke(params);                                           \
     }                                                                  \
-    Variant invoke(CArrRef params) const;                              \
-  }
+    static Variant Invoke(CArrRef params);                             \
+    static Variant Invoker(void *extra, CArrRef params) {              \
+      return Invoke(params);                                           \
+    }                                                                  \
+    const CallInfo *getCallInfo() const {                              \
+      return &s_ci;                                                    \
+    }                                                                  \
+    static CallInfo s_ci;                                              \
+  };                                                                   \
+  CallInfo Eval##name::s_ci((void*)Eval##name::Invoker, NULL, 0, 0, 0);
 
 EVAL_EXT(Extract);
 EVAL_EXT(Define);
@@ -87,15 +108,28 @@ EVAL_EXT_DYN(HphpGetClassInfo);
 EVAL_EXT_DYN(ClassExists);
 EVAL_EXT_DYN(InterfaceExists);
 #undef EVAL_EXT
+#undef EVAL_EXT_DYN
 
 class EvalFunctionExists : public ExtFunction {
 public:
   EvalFunctionExists();
-  Variant invokeImpl(VariableEnvironment &env,
-                     CArrRef params) const;
+  Variant invokeImpl(VariableEnvironment &env, CArrRef params) const {
+    return InvokeImpl(env, params);
+  }
+  static Variant InvokeImpl(VariableEnvironment &env, CArrRef params);
+  static Variant Invoker(void *extra, CArrRef params) {
+    return InvokeImpl(*((VariableEnvironment*)extra), params);
+  }
+  const CallInfo *getCallInfo() const {
+    return &s_ci;
+  }
+  static CallInfo s_ci;
 private:
-  hphp_const_char_imap<bool> m_blacklist;
+  static hphp_const_char_imap<bool> s_blacklist;
 };
+hphp_const_char_imap<bool> EvalFunctionExists::s_blacklist;
+CallInfo EvalFunctionExists::s_ci((void*)EvalFunctionExists::Invoker, NULL, 0,
+    0, 0);
 
 EvalOverrides::EvalOverrides() {
   m_functions["extract"] = new EvalExtract();
@@ -134,8 +168,8 @@ EvalOverrides evalOverrides;
 //////////////////////////////////////////////////////////////////////////////
 ///// Invoke definitions
 
-Variant EvalExtract::invokeImpl(VariableEnvironment &env,
-                                CArrRef params) const {
+Variant EvalExtract::InvokeImpl(VariableEnvironment &env,
+                                CArrRef params) {
   int size = params.size();
   switch (size) {
   case 1: return extract(&env,params.rvalAt(0));
@@ -145,8 +179,8 @@ Variant EvalExtract::invokeImpl(VariableEnvironment &env,
   default: throw InvalidFunctionCallException("extract");
   }
 }
-Variant EvalDefine::invokeImpl(VariableEnvironment &env,
-                               CArrRef params) const {
+Variant EvalDefine::InvokeImpl(VariableEnvironment &env,
+                               CArrRef params) {
   int size = params.size();
   switch (size) {
   case 2:
@@ -164,8 +198,8 @@ Variant EvalDefine::invokeImpl(VariableEnvironment &env,
   }
 }
 
-Variant EvalFuncGetArg::invokeImpl(VariableEnvironment &env,
-                                   CArrRef params) const {
+Variant EvalFuncGetArg::InvokeImpl(VariableEnvironment &env,
+                                   CArrRef params) {
   int size = params.size();
   switch (size) {
   case 1: return env.getParams().rvalAt(params.rvalAt(0));
@@ -173,8 +207,8 @@ Variant EvalFuncGetArg::invokeImpl(VariableEnvironment &env,
   }
 }
 
-Variant EvalFuncGetArgs::invokeImpl(VariableEnvironment &env,
-                                    CArrRef params) const {
+Variant EvalFuncGetArgs::InvokeImpl(VariableEnvironment &env,
+                                    CArrRef params) {
   int size = params.size();
   switch (size) {
   case 0: {
@@ -188,23 +222,23 @@ Variant EvalFuncGetArgs::invokeImpl(VariableEnvironment &env,
   }
 }
 
-Variant EvalFuncNumArgs::invokeImpl(VariableEnvironment &env,
-                                    CArrRef params) const {
+Variant EvalFuncNumArgs::InvokeImpl(VariableEnvironment &env,
+                                    CArrRef params) {
   int size = params.size();
   if (size != 0) throw InvalidFunctionCallException("func_num_args");
   return env.getParams().size();
 }
 
-Variant EvalCompact::invokeImpl(VariableEnvironment &env,
-                                CArrRef params) const {
+Variant EvalCompact::InvokeImpl(VariableEnvironment &env,
+                                CArrRef params) {
   int size = params.size();
   if (size == 0) throw InvalidFunctionCallException("compact");
   return compact(&env, params.size(), params.rvalAt(0),
                  params.slice(1, params.size() - 1, false));
 }
 
-Variant EvalCreateFunction::invokeImpl(VariableEnvironment &env,
-                                       CArrRef params) const {
+Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
+                                       CArrRef params) {
   int size = params.size();
   if (size != 2) throw InvalidFunctionCallException("create_function");
   Variant var = params.rvalAt(0);
@@ -228,8 +262,8 @@ Variant EvalCreateFunction::invokeImpl(VariableEnvironment &env,
   return String(f->name().c_str(), f->name().size(), AttachLiteral);
 }
 
-Variant EvalAssert::invokeImpl(VariableEnvironment &env,
-                               CArrRef params) const {
+Variant EvalAssert::InvokeImpl(VariableEnvironment &env,
+                               CArrRef params) {
   Variant assertion = params.rvalAt(0);
   if (assertion.isString()) {
     // Todo: eval this assertion
@@ -238,7 +272,7 @@ Variant EvalAssert::invokeImpl(VariableEnvironment &env,
   return f_assert(assertion);
 }
 
-Variant EvalClassExists::invoke(CArrRef params) const {
+Variant EvalClassExists::Invoke(CArrRef params) {
   String cname = params.rvalAt(0);
   if (!f_class_exists(cname, false)) {
     if ((params.size() == 1 || params.rvalAt(1).toBoolean()) &&
@@ -251,7 +285,7 @@ Variant EvalClassExists::invoke(CArrRef params) const {
   return true;
 }
 
-Variant EvalInterfaceExists::invoke(CArrRef params) const {
+Variant EvalInterfaceExists::Invoke(CArrRef params) {
   String cname = params.rvalAt(0);
   if (!f_interface_exists(cname, false)) {
     if ((params.size() == 1 || params.rvalAt(1).toBoolean()) &&
@@ -264,13 +298,13 @@ Variant EvalInterfaceExists::invoke(CArrRef params) const {
   return true;
 }
 
-Variant EvalGetDefinedVars::invokeImpl(VariableEnvironment &env,
-                                       CArrRef params) const {
+Variant EvalGetDefinedVars::InvokeImpl(VariableEnvironment &env,
+                                       CArrRef params) {
   return env.getDefinedVariables();
 }
 
 
-Variant EvalHphpGetClassInfo::invoke(CArrRef params) const {
+Variant EvalHphpGetClassInfo::Invoke(CArrRef params) {
   String cname = params.rvalAt(0);
   if (!f_class_exists(cname) && !f_interface_exists(cname)) {
     eval_try_autoload(cname.data());
@@ -279,16 +313,16 @@ Variant EvalHphpGetClassInfo::invoke(CArrRef params) const {
 }
 
 EvalFunctionExists::EvalFunctionExists() {
-  m_blacklist["fb_get_derived_classes"] = true;
+  s_blacklist["fb_get_derived_classes"] = true;
 }
 
-Variant EvalFunctionExists::invokeImpl(VariableEnvironment &env,
-                                       CArrRef params) const {
+Variant EvalFunctionExists::InvokeImpl(VariableEnvironment &env,
+                                       CArrRef params) {
 
   if (params.size() != 1)
     throw InvalidFunctionCallException("function_exists");
   String fn = params.rvalAt(0).toString();
-  if (m_blacklist.find(fn.data()) != m_blacklist.end()) return false;
+  if (s_blacklist.find(fn.data()) != s_blacklist.end()) return false;
   return f_function_exists(fn);
 }
 

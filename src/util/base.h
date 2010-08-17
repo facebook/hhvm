@@ -204,16 +204,6 @@ struct file_closer {
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
-// Fast Method Call generation control,
-// #ifndef NOFMCGEN - ON by default
-// #ifdef FMCGEN - OFF by default
-#ifndef NOFMCGEN
-#define FMC "#ifndef NOFMCGEN\n"
-#else
-#define FMC "#ifdef FMCGEN\n"
-#endif
-
-///////////////////////////////////////////////////////////////////////////////
 // debugging
 
 #include <assert.h>

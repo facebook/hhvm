@@ -58,12 +58,9 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveIteratorIterator 1
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveIteratorIterator 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -72,6 +69,7 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public: c_RecursiveIteratorIterator *create(Variant v_iterator, Variant v_mode = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */, Variant v_flags = 0LL);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Object t_getinneriterator();
   public: Variant t_current();
@@ -80,6 +78,13 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public: Variant t_rewind();
   public: bool t_valid();
   public: Variant m_rsrc;
+  DECLARE_METHOD_INVOKE_HELPERS(next);
+  DECLARE_METHOD_INVOKE_HELPERS(key);
+  DECLARE_METHOD_INVOKE_HELPERS(valid);
+  DECLARE_METHOD_INVOKE_HELPERS(getinneriterator);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(current);
+  DECLARE_METHOD_INVOKE_HELPERS(rewind);
 };
 extern struct ObjectStaticCallbacks cw_RecursiveIteratorIterator;
 

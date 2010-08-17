@@ -54,12 +54,9 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionFunctionAbstract 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -77,6 +74,19 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   public: Array t_getparameters();
   public: int t_getnumberofparameters();
   public: int64 t_getnumberofrequiredparameters();
+  DECLARE_METHOD_INVOKE_HELPERS(getnumberofrequiredparameters);
+  DECLARE_METHOD_INVOKE_HELPERS(isuserdefined);
+  DECLARE_METHOD_INVOKE_HELPERS(getnumberofparameters);
+  DECLARE_METHOD_INVOKE_HELPERS(getendline);
+  DECLARE_METHOD_INVOKE_HELPERS(getstaticvariables);
+  DECLARE_METHOD_INVOKE_HELPERS(getparameters);
+  DECLARE_METHOD_INVOKE_HELPERS(returnsreference);
+  DECLARE_METHOD_INVOKE_HELPERS(getfilename);
+  DECLARE_METHOD_INVOKE_HELPERS(getstartline);
+  DECLARE_METHOD_INVOKE_HELPERS(getdoccomment);
+  DECLARE_METHOD_INVOKE_HELPERS(getclosure);
+  DECLARE_METHOD_INVOKE_HELPERS(getname);
+  DECLARE_METHOD_INVOKE_HELPERS(isinternal);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionFunctionAbstract;
 

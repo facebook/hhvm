@@ -66,6 +66,7 @@ public:
   static SimpleFunctionCallPtr getFunctionCallForCallUserFunc(
     AnalysisResultPtr ar, SimpleFunctionCallPtr call, bool testOnly,
     int firstParam, bool &error);
+  bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
 private:
   enum FunctionType {

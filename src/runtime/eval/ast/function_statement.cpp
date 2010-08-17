@@ -156,8 +156,10 @@ void Parameter::dropDefault() {
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
                                      const string &doc)
   : Statement(STATEMENT_PASS), m_name(name),
-    m_lname(Util::toLower(m_name)), m_maybeIntercepted(-1), m_docComment(doc) {
+    m_lname(Util::toLower(m_name)), m_maybeIntercepted(-1), m_docComment(doc),
+    m_callInfo((void*)Invoker, (void*)InvokerFewArgs, 0, 0, 0) {
 }
+
 FunctionStatement::~FunctionStatement() {
   unregister_intercept_flag(&m_maybeIntercepted);
 }
@@ -179,6 +181,7 @@ void FunctionStatement::init(bool ref, const vector<ParameterPtr> params,
     } else if (m_params[i]->isOptional()) {
       m_params[i]->dropDefault();
     }
+    if (m_params[i]->isRef()) m_callInfo.m_refFlags |= 1 << i;
   }
 }
 
@@ -189,6 +192,10 @@ const string &FunctionStatement::fullName() const {
 void FunctionStatement::changeName(const std::string &name) {
   m_name = name;
   m_lname = Util::toLower(name);
+}
+
+const CallInfo *FunctionStatement::getCallInfo() const {
+  return &m_callInfo;
 }
 
 void FunctionStatement::eval(VariableEnvironment &env) const {
@@ -376,6 +383,19 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
     }
     info.staticVariables.push_back(ci);
   }
+}
+
+Variant FunctionStatement::Invoker(void *extra, CArrRef params) {
+  const Function *f = (const Function*)extra;
+  const FunctionStatement *ms = static_cast<const FunctionStatement*>(f);
+  if (ms->refReturn()) {
+    return ref(ms->invoke(params));
+  }
+  return ms->invoke(params);
+}
+Variant FunctionStatement::InvokerFewArgs(void*, int count,
+    INVOKE_FEW_ARGS_IMPL_ARGS) {
+  return Variant();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

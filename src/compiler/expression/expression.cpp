@@ -94,6 +94,17 @@ void Expression::clearContext() {
   }
 }
 
+void Expression::setArgNum(int n) {
+  m_argNum = n;
+  int kc = getKidCount();
+  for (int i=0; i < kc; i++) {
+    ExpressionPtr kid = getNthExpr(i);
+    if (kid) {
+      kid->setArgNum(n);
+    }
+  }
+}
+
 void Expression::deepCopy(ExpressionPtr exp) {
   exp->m_actualType = m_actualType;
   exp->m_expectedType = m_expectedType;
@@ -617,9 +628,11 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       }
   }
 
+  bool eltOrPropArg = hasContext(InvokeArgument) &&
+    (is(KindOfArrayElementExpression) || is(KindOfObjectPropertyExpression));
   bool constRef = dstType &&
     ((m_context & (RefValue|RefParameter)) ||
-     (isTemp && !dstType->isPrimitive()) ||
+     (isTemp && !dstType->isPrimitive()) || eltOrPropArg ||
      (isLvalue && dynamic_cast<FunctionCall*>(this)));
 
   ar->wrapExpressionBegin(cg);
@@ -662,7 +675,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
       array elements and object properties.
     */
     int save = m_context;
-    if (m_context & RefValue) {
+    if (hasContext(RefValue)) {
       m_context &= ~RefValue;
       if (is(KindOfObjectPropertyExpression) ||
           (is(KindOfArrayElementExpression) &&
@@ -811,7 +824,8 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
       }
     }
   }
-  if (!ret || !ar->inExpression()) return ret;
+  if (!ret) return Expression::preOutputCPP(cg, ar, state);
+  if (!ar->inExpression()) return ret;
 
   state |= FixOrder;
 
@@ -885,7 +899,7 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
     closeParen++;
     outputCPPImpl(cg, ar);
   } else {
-    if (((m_context & RefValue) != 0) && ((m_context & NoRefWrapper) == 0) &&
+    if (hasContext(RefValue) && !hasContext(NoRefWrapper) &&
         isRefable()) {
       cg_printf("ref(");
       closeParen++;

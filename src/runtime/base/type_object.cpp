@@ -109,6 +109,15 @@ Variant Object::o_unset(CStrRef propName,
   return m_px->o_unset(propName, context);
 }
 
+Variant Object::o_argval(bool byRef, CStrRef propName,
+    bool error /* = true */, CStrRef context /* = null_string */) {
+  if (!byRef) {
+    return o_get(propName, error, context);
+  } else {
+    return ref(o_lval(propName, context));
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // output
 

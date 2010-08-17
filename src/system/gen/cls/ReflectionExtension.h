@@ -58,13 +58,9 @@ class c_ReflectionExtension : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionExtension 1
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, MethodIndex methodIndex,
-                           const char *s, CArrRef ps, int64 h, bool f = true);
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionExtension 1
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -73,6 +69,7 @@ class c_ReflectionExtension : public ExtObjectData {
   public: c_ReflectionExtension *create(Variant v_name);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
   public: static Variant ti_export(const char* cls, CVarRef v_name, CVarRef v_ret);
@@ -85,6 +82,17 @@ class c_ReflectionExtension : public ExtObjectData {
   public: Array t_getclassnames();
   public: Variant t_info();
   public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export("ReflectionExtension", v_name, v_ret); }
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(getfunctions);
+  DECLARE_METHOD_INVOKE_HELPERS(export);
+  DECLARE_METHOD_INVOKE_HELPERS(info);
+  DECLARE_METHOD_INVOKE_HELPERS(getinientries);
+  DECLARE_METHOD_INVOKE_HELPERS(getconstants);
+  DECLARE_METHOD_INVOKE_HELPERS(getclassnames);
+  DECLARE_METHOD_INVOKE_HELPERS(getversion);
+  DECLARE_METHOD_INVOKE_HELPERS(getname);
+  DECLARE_METHOD_INVOKE_HELPERS(getclasses);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionExtension;
 

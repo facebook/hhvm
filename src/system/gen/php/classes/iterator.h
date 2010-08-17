@@ -50,11 +50,17 @@ Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variab
 
 // Dynamic Class Declarations
 Object co_ArrayIterator(CArrRef params, bool init = true);
+Object coo_ArrayIterator();
 Object co_AppendIterator(CArrRef params, bool init = true);
+Object coo_AppendIterator();
 Object co_RecursiveDirectoryIterator(CArrRef params, bool init = true);
+Object coo_RecursiveDirectoryIterator();
 Object co_DirectoryIterator(CArrRef params, bool init = true);
+Object coo_DirectoryIterator();
 Object co_RecursiveIteratorIterator(CArrRef params, bool init = true);
+Object coo_RecursiveIteratorIterator();
 Object co_FilterIterator(CArrRef params, bool init = true);
+Object coo_FilterIterator();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -58,12 +58,9 @@ class c_Exception : public ExtObjectData {
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Exception 1
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
@@ -73,6 +70,7 @@ class c_Exception : public ExtObjectData {
   public: c_Exception *create(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_getmessage();
   public: Variant t_getcode();
@@ -81,6 +79,15 @@ class c_Exception : public ExtObjectData {
   public: Variant t_gettrace();
   public: String t_gettraceasstring();
   public: String t___tostring();
+  DECLARE_METHOD_INVOKE_HELPERS(getmessage);
+  DECLARE_METHOD_INVOKE_HELPERS(__tostring);
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
+  DECLARE_METHOD_INVOKE_HELPERS(getcode);
+  DECLARE_METHOD_INVOKE_HELPERS(getline);
+  DECLARE_METHOD_INVOKE_HELPERS(__init__);
+  DECLARE_METHOD_INVOKE_HELPERS(getfile);
+  DECLARE_METHOD_INVOKE_HELPERS(gettraceasstring);
+  DECLARE_METHOD_INVOKE_HELPERS(gettrace);
 };
 extern struct ObjectStaticCallbacks cw_Exception;
 

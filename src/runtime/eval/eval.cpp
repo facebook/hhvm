@@ -81,6 +81,15 @@ bool eval_create_object_hook(Variant &res, const char *s, CArrRef params,
   }
   return false;
 }
+bool eval_create_object_only_hook(Variant &res, const char *s,
+    ObjectData *root) {
+  Eval::ClassEvalState *ce = Eval::RequestEvalState::findClassState(s, true);
+  if (ce) {
+    res = ce->getClass()->create(*ce, null_array, false, root);
+    return true;
+  }
+  return false;
+}
 bool eval_try_autoload(const char *s) {
   const Eval::Function *fn =
     Eval::RequestEvalState::findFunction("__autoload");
@@ -167,5 +176,27 @@ Array Eval::eval_get_params(VariableEnvironment &env,
   return ret;
 }
 
+bool eval_get_call_info_hook(const CallInfo *&ci, void *&extra, const char *s,
+  int64 hash /* = -1 */) {
+  const Eval::Function *fs = Eval::RequestEvalState::findFunction(s);
+  if (fs) {
+    ci = fs->getCallInfo();
+    extra = (void*)fs;
+    return true;
+  }
+  return false;
+}
+bool eval_get_call_info_static_method_hook(MethodCallPackage &info,
+    bool &foundClass) {
+  const char *s __attribute__((__unused__)) (info.rootObj.getCStr());
+  const MethodStatement *ms = Eval::RequestEvalState::findMethod(s,
+      info.name.data(), foundClass, true);
+  if (ms) {
+    info.ci = ms->getCallInfo();
+    info.extra = (void*)ms;
+    return true;
+  }
+  return false;
+}
 ///////////////////////////////////////////////////////////////////////////////
 }

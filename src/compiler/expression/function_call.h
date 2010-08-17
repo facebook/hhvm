@@ -55,6 +55,7 @@ protected:
   ExpressionPtr m_nameExp;
   std::string m_name;
   std::string m_origName;
+  int m_ciTemp;
   ExpressionListPtr m_params;
 
   // Pointers to the corresponding function scope and class scope for this

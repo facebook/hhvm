@@ -583,10 +583,15 @@ Variant invoke(CStrRef function, CArrRef params, int64 hash = -1,
  * matching the name.  If no handlers are able to
  * invoke the function, throw an InvalidFunctionCallException.
  */
-Variant invoke_failed(const char *s, CArrRef params,
-                      int64 hash, bool fatal = true);
+Variant invoke_failed(const char *func, CArrRef params, int64 hash,
+                      bool fatal = true);
 
-Variant o_invoke_failed(const char *cls, const char *meth, bool fatal = true);
+Variant o_invoke_failed(const char *cls, const char *meth,
+                        bool fatal = true);
+
+
+const void get_call_info_or_fail(const CallInfo *&ci, void *&extra,
+    const char *s, int64 hash = -1);
 
 /**
  * When fatal coding errors are transformed to this function call.
@@ -730,6 +735,107 @@ bool checkClassExists(CStrRef name, const bool *declared, bool autoloadExists,
                       bool nothrow = false);
 bool checkInterfaceExists(CStrRef name, const bool *declared,
                           bool autoloadExists, bool nothrow = false);
+
+class CallInfo;
+
+class MethodCallPackage {
+public:
+  MethodCallPackage() : ci(NULL), extra(NULL), m_fatal(true), obj(NULL) {}
+
+  // e->n() style method call
+  void methodCall(CObjRef self, CStrRef method, int64 prehash = -1) {
+    methodCall(self.get(), method, prehash);
+  }
+  void methodCall(ObjectData *self, CStrRef method, int64 prehash = -1) {
+    rootObj = self;
+    name = method;
+    self->o_get_call_info(*this, prehash);
+  }
+  void methodCallWithIndex(CObjRef self, CStrRef method, MethodIndex mi,
+      int64 prehash = -1) {
+    methodCallWithIndex(self.get(), method, mi, prehash);
+  }
+  void methodCallWithIndex(ObjectData *self, CStrRef method, MethodIndex mi,
+      int64 prehash = -1) {
+    rootObj = self;
+    name = method;
+    self->o_get_call_info_with_index(*this, mi, prehash);
+  }
+  // K::n() style call, where K is a parent and n is not static and in an
+  // instance method. Lookup is done outside since K is known.
+  void methodCallEx(CObjRef self, CStrRef method) {
+    rootObj = self;
+    name = method;
+  }
+  // K::n() style call where K::n() is a static method. Lookup is done outside
+  void staticMethodCall(litstr cname, CStrRef method) {
+    rootObj = cname;
+    name = method;
+  }
+  // e::n() call. e could evaluate to be either a string or object.
+  void dynamicNamedCall(CVarRef self, CStrRef method, int64 prehash = -1);
+  void dynamicNamedCallWithIndex(CVarRef self, CStrRef method,
+      MethodIndex mi, int64 prehash = -1);
+  // e::n() call where e is definitely a string
+  void dynamicNamedCall(CStrRef self, CStrRef method, int64 prehash = -1);
+  void dynamicNamedCallWithIndex(CStrRef self, CStrRef method,
+      MethodIndex mi, int64 prehash = -1);
+  void dynamicNamedCall(const char *self, CStrRef method, int64 prehash = -1);
+  void dynamicNamedCallWithIndex(const char *self, CStrRef method,
+      MethodIndex mi, int64 prehash = -1);
+  // Get constructor
+  void construct(CObjRef self);
+
+  void noFatal() { m_fatal = false; }
+  void fail();
+  void lateStaticBind(ThreadInfo *ti);
+  const CallInfo *bindClass(ThreadInfo *ti);
+  String getClassName();
+  const CallInfo *ci;
+  void *extra;
+  Variant rootObj; // object or class name
+  bool m_fatal;
+  ObjectData *obj;
+  String name;
+};
+
+class CallInfo {
+public:
+  enum Flags {
+    VarArgs = 0x1,
+    RefVarArgs = 0x2,
+    Method = 0x4,
+    StaticMethod = 0x8,
+    CallMagicMethod = 0x10 // Special flag for __call handler
+  };
+  CallInfo(void *inv, void *invFa, int ac, int flags, int64 refs)
+    : m_invoker(inv), m_invokerFewArgs(invFa), m_argCount(ac), m_flags(flags),
+    m_refFlags(refs) {}
+  void *m_invoker;
+  void *m_invokerFewArgs; // remove in time
+  int m_argCount;
+  int m_flags;
+  int64 m_refFlags;
+  bool isRef(int n) const {
+    return n <= m_argCount ? (m_refFlags & (1 << n)) : (m_flags & RefVarArgs);
+  }
+  typedef Variant (*FuncInvoker)(void*, CArrRef);
+  typedef Variant (*FuncInvokerFewArgs)(void*, int,
+      INVOKE_FEW_ARGS_IMPL_ARGS);
+  FuncInvoker getFunc() const { return (FuncInvoker)m_invoker; }
+  FuncInvokerFewArgs getFuncFewArgs() const {
+    return (FuncInvokerFewArgs)m_invokerFewArgs;
+  }
+  typedef Variant (*MethInvoker)(MethodCallPackage &mcp, CArrRef);
+  typedef Variant (*MethInvokerFewArgs)(MethodCallPackage &mcp, int,
+      INVOKE_FEW_ARGS_IMPL_ARGS);
+  MethInvoker getMeth() const {
+    return (MethInvoker)m_invoker;
+  }
+  MethInvokerFewArgs getMethFewArgs() const {
+    return (MethInvokerFewArgs)m_invokerFewArgs;
+  }
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 }

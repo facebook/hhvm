@@ -14,9 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <boost/static_assert.hpp>
 #include <runtime/base/execution_context.h>
-#include <runtime/base/runtime_option.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/comparisons.h>
@@ -873,9 +871,9 @@ void MethodIndexHMap::initialize(bool useSystem) {
 
 MethodIndex MethodIndexHMap::methodIndexExists(const char * methodName) {
   const MethodIndexHMap *map =
-    g_methodIndexUseSys ? methodIndexHMapSys : methodIndexHMap;
+    g_methodIndexUseSys ? g_methodIndexHMapSys : g_methodIndexHMap;
   unsigned size =
-    g_methodIndexUseSys ? methodIndexHMapSizeSys : methodIndexHMapSize;
+    g_methodIndexUseSys ? g_methodIndexHMapSizeSys : g_methodIndexHMapSize;
   unsigned hash = (unsigned)(hash_string_i(methodName) % size);
   while (map[hash].name && strcasecmp(map[hash].name, methodName)!=0) {
     hash = hash ? hash - 1 : size - 1;
@@ -886,9 +884,9 @@ MethodIndex MethodIndexHMap::methodIndexExists(const char * methodName) {
 
 const char * methodIndexLookupReverse(MethodIndex methodIndex) {
   const unsigned *callIndex = g_methodIndexUseSys
-    ? methodIndexReverseCallIndexSys : methodIndexReverseCallIndex;
+    ? g_methodIndexReverseCallIndexSys : g_methodIndexReverseCallIndex;
   const char **map = g_methodIndexUseSys
-    ?  methodIndexReverseIndexSys : methodIndexReverseIndex;
+    ?  g_methodIndexReverseIndexSys : g_methodIndexReverseIndex;
   unsigned callIndexOffset = callIndex[methodIndex.m_callIndex - 1];
   return map[methodIndex.m_overloadIndex + callIndexOffset - 1];
 }

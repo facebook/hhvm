@@ -310,7 +310,7 @@ public:
   static int PregBacktraceLimit;
   static int PregRecursionLimit;
 
-  static bool FastMethodCall;
+  static bool MethodSlotCalls;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

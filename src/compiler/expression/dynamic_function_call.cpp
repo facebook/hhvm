@@ -18,7 +18,6 @@
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/scalar_expression.h>
-#include <compiler/expression/simple_variable.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <util/util.h>
@@ -111,7 +110,6 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
-
 void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   outputLineMap(cg, ar);
 
@@ -138,38 +136,125 @@ void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   cg_printf(")");
 }
 
-void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
-                                        AnalysisResultPtr ar) {
-  if (m_class || !m_className.empty()) {
+bool DynamicFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
+    int state) {
+  bool nonStatic = !m_class && m_className.empty();
+  if (!nonStatic && !m_class && !m_validClass && !m_redeclared)
+    return FunctionCall::preOutputCPP(cg, ar, state);
+  // Short circuit out if inExpression() returns false
+  if (!ar->inExpression()) return true;
+
+  if (m_class) {
+    m_class->preOutputCPP(cg, ar, state);
+  }
+
+  m_nameExp->preOutputCPP(cg, ar, state);
+
+  ar->wrapExpressionBegin(cg);
+  m_ciTemp = cg.createNewId(ar);
+  bool lsb = false;
+  ClassScopePtr cls;
+  if (m_validClass) {
+    cls = ar->findClass(m_className);
+  }
+  if (nonStatic) {
+    cg_printf("const CallInfo *cit%d;\n", m_ciTemp);
+    cg_printf("void *vt%d;\n", m_ciTemp);
+    cg_printf("get_call_info_or_fail(cit%d, vt%d, ", m_ciTemp, m_ciTemp);
+  } else {
+      cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
     if (m_class) {
-      // e.g. $cls::$func(...)
-      cg_printf("INVOKE_STATIC_METHOD_MIL(get_static_class_name(");
       if (m_class->is(KindOfScalarExpression)) {
         ASSERT(strcasecmp(dynamic_pointer_cast<ScalarExpression>(m_class)->
                           getString().c_str(), "static") == 0);
+        cg_printf("mcp%d.staticMethodCall(", m_ciTemp);
         cg_printf("\"static\"");
+        lsb = true;
       } else {
+        cg_printf("mcp%d.dynamicNamedCall(", m_ciTemp);
         m_class->outputCPP(cg, ar);
       }
-      cg_printf("), ");
+      cg_printf(", ");
     } else if (m_validClass) {
-      ClassScopePtr cls = ar->findClass(m_className);
-      // e.g. A::$b(); must lookup "b" even if simple, so _mil
-      cg_printf("%s%s::%sinvoke_mil(\"%s\", ", Option::ClassPrefix,
-                cls->getId(cg).c_str(), Option::ObjectStaticPrefix,
-                m_className.c_str());
+      cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
+          cls->getId(cg).c_str());
+    } else {
+      cg_printf("mcp%d.staticMethodCall(\"%s\", ", m_ciTemp,
+          m_className.c_str());
+    }
+  }
+
+  if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
+    m_nameExp->outputCPP(cg, ar);
+  } else {
+    cg_printf("(");
+    m_nameExp->outputCPP(cg, ar);
+    cg_printf(")");
+  }
+
+  if (!nonStatic) {
+    cg_printf(");\n");
+    if (lsb) cg_printf("mcp%d.lateStaticBind(info);\n");
+    cg_printf("const CallInfo *&cit%d = mcp%d.ci;\n", m_ciTemp, m_ciTemp);
+    if (m_validClass) {
+      cg_printf("%s%s::%sget_call_info(mcp%d",
+          Option::ClassPrefix, cls->getId(cg).c_str(),
+          Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
     } else if (m_redeclared) {
-      cg_printf("g->%s%s->%sinvoke_mil(\"%s\", ",
-                Option::ClassStaticsObjectPrefix,
-                m_className.c_str(), Option::ObjectStaticPrefix,
-                m_className.c_str());
+      cg_printf("g->%s%s->%sget_call_info(mcp%d",
+          Option::ClassStaticsObjectPrefix, m_className.c_str(),
+          Option::ObjectStaticPrefix, m_ciTemp, m_className.c_str());
+    }
+  }
+  if (nonStatic || !m_class) {
+    cg_printf(");\n");
+  }
+  if (m_params && m_params->getCount() > 0) {
+    ar->pushCallInfo(m_ciTemp);
+    m_params->preOutputCPP(cg, ar, state);
+    ar->popCallInfo();
+  }
+
+  ar->pushCallInfo(m_ciTemp);
+  preOutputStash(cg, ar, state);
+  ar->popCallInfo();
+  if (!(state & FixOrder)) {
+    cg_printf("id(%s);\n", cppTemp().c_str());
+  }
+  return true;
+}
+
+void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
+                                        AnalysisResultPtr ar) {
+  if (m_class || !m_className.empty()) {
+    if (m_class || m_validClass || m_redeclared) {
+      cg.printf("(cit%d->getMeth())(mcp%d, ", m_ciTemp, m_ciTemp);
+      if (m_params && m_params->getCount() > 0) {
+        ar->pushCallInfo(m_ciTemp);
+        FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+        ar->popCallInfo();
+      } else {
+        cg_printf("Array()");
+      }
+      cg_printf(")");
+      return;
     } else {
       cg_printf("throw_fatal(\"unknown class %s\")", m_className.c_str());
       cg_printf(")");
       return;
     }
   } else {
-    cg_printf("invoke(");
+    //cg.printf("invoke(");
+    cg_printf("(cit%d->getFunc())(vt%d, ", m_ciTemp, m_ciTemp);
+    if (m_params && m_params->getCount() > 0) {
+      ar->pushCallInfo(m_ciTemp);
+      FunctionScope::outputCPPArguments(m_params, cg, ar, -1, false);
+      ar->popCallInfo();
+    } else {
+      cg_printf("Array()");
+    }
+    cg_printf(")");
+    return;
   }
   if (m_nameExp->is(Expression::KindOfSimpleVariable)) {
     m_nameExp->outputCPP(cg, ar);

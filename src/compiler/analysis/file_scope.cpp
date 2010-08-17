@@ -313,6 +313,15 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     cg_printf("%s\n", it->body.c_str());
     cg_indentEnd("}\n");
   }
+
+  for (StringToFunctionScopePtrVecMap::iterator it = m_functions.begin();
+       it != m_functions.end(); ++it) {
+    BOOST_FOREACH(FunctionScopePtr func, it->second) {
+      cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
+          func->getId(cg).c_str());
+    }
+  }
+
   cg_printf("/* preface finishes */\n");
 
   outputCPPHelper(cg, ar);
@@ -320,6 +329,7 @@ void FileScope::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::GenerateCPPMacros) {
     bool hasRedec;
     outputCPPJumpTableSupport(cg, ar, hasRedec);
+    outputCPPCallInfoTableSupport(cg, ar, hasRedec);
     for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
          it != m_classes.end(); ++it) {
       BOOST_FOREACH(ClassScopePtr cls, it->second) {

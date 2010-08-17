@@ -45,14 +45,23 @@ Variant pm_php$classes$reflection_php(bool incOnce = false, LVariableTable* vari
 
 // Dynamic Class Declarations
 Object co_ReflectionFunctionAbstract(CArrRef params, bool init = true);
+Object coo_ReflectionFunctionAbstract();
 Object co_ReflectionObject(CArrRef params, bool init = true);
+Object coo_ReflectionObject();
 Object co_ReflectionException(CArrRef params, bool init = true);
+Object coo_ReflectionException();
 Object co_ReflectionClass(CArrRef params, bool init = true);
+Object coo_ReflectionClass();
 Object co_ReflectionExtension(CArrRef params, bool init = true);
+Object coo_ReflectionExtension();
 Object co_ReflectionMethod(CArrRef params, bool init = true);
+Object coo_ReflectionMethod();
 Object co_ReflectionProperty(CArrRef params, bool init = true);
+Object coo_ReflectionProperty();
 Object co_ReflectionFunction(CArrRef params, bool init = true);
+Object coo_ReflectionFunction();
 Object co_ReflectionParameter(CArrRef params, bool init = true);
+Object coo_ReflectionParameter();
 
 ///////////////////////////////////////////////////////////////////////////////
 }

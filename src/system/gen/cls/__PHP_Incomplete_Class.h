@@ -53,8 +53,9 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___PHP_Incomplete_Class 1
 
   // DECLARE_COMMON_INVOKE
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_INVOKE___PHP_Incomplete_Class 1
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL

@@ -74,6 +74,7 @@ void ObjectPropertyExpression::setContext(Context context) {
     case Expression::ExistContext:
     case Expression::UnsetContext:
     case Expression::DeepReference:
+    case Expression::InvokeArgument:
       m_object->setContext(context);
       break;
     case Expression::RefValue:
@@ -83,9 +84,11 @@ void ObjectPropertyExpression::setContext(Context context) {
     default:
       break;
   }
-
   if (m_context & (LValue|RefValue)) {
     setEffect(CreateEffect);
+  }
+  if (context == InvokeArgument) {
+    setContext(NoLValueWrapper);
   }
 }
 void ObjectPropertyExpression::clearContext(Context context) {
@@ -96,6 +99,7 @@ void ObjectPropertyExpression::clearContext(Context context) {
     case Expression::DeepAssignmentLHS:
     case Expression::UnsetContext:
     case Expression::DeepReference:
+    case Expression::InvokeArgument:
       m_object->clearContext(context);
       break;
     case Expression::RefValue:
@@ -108,6 +112,9 @@ void ObjectPropertyExpression::clearContext(Context context) {
 
   if (!(m_context & (LValue|RefValue))) {
     clearEffect(CreateEffect);
+  }
+  if (context == InvokeArgument) {
+    clearContext(NoLValueWrapper);
   }
 }
 
@@ -373,7 +380,10 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     if (m_context & ExistContext) {
       error = ", false";
     }
-    if (m_context & (LValue | RefValue | UnsetContext)) {
+    if (m_context & InvokeArgument) {
+      ASSERT(ar->callInfoTop() != -1);
+      func += "argval";
+    } else if (m_context & (LValue | RefValue | UnsetContext)) {
       if (m_context & UnsetContext) {
         assert(!(m_context & LValue)); // call outputCPPUnset instead
         func += "unsetLval";
@@ -401,6 +411,9 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     if (doExist) cg_printf(")");
   } else {
     cg_printf("%s(", func.c_str());
+    if (hasContext(InvokeArgument)) {
+      cg_printf("cit%d->isRef(%d), ", ar->callInfoTop(), m_argNum);
+    }
     outputCPPProperty(cg, ar);
     cg_printf("%s%s)", error, context.c_str());
   }
@@ -450,7 +463,7 @@ void ObjectPropertyExpression::outputCPPObject(CodeGenerator &cg,
 }
 
 void ObjectPropertyExpression::outputCPPProperty(CodeGenerator &cg,
-                                                 AnalysisResultPtr ar) {
+    AnalysisResultPtr ar) {
   if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);

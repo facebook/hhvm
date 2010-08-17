@@ -44,23 +44,36 @@ class c_ImageSprite : public ExtObjectData, public Sweepable {
   public: c_ImageSprite();
   public: ~c_ImageSprite();
   public: void t___construct();
+  DECLARE_METHOD_INVOKE_HELPERS(__construct);
   public: Object t_addfile(CStrRef file, CArrRef options = null);
+  DECLARE_METHOD_INVOKE_HELPERS(addfile);
   public: Object t_addstring(CStrRef id, CStrRef data, CArrRef options = null);
+  DECLARE_METHOD_INVOKE_HELPERS(addstring);
   public: Object t_addurl(CStrRef url, int timeout_ms = 0, CArrRef Options = null);
+  DECLARE_METHOD_INVOKE_HELPERS(addurl);
   public: Object t_clear(CVarRef paths = null);
+  DECLARE_METHOD_INVOKE_HELPERS(clear);
   public: Object t_loaddims(bool block = false);
+  DECLARE_METHOD_INVOKE_HELPERS(loaddims);
   public: Object t_loadimages(bool block = false);
+  DECLARE_METHOD_INVOKE_HELPERS(loadimages);
   public: String t_output(CStrRef output_file = null_string, CStrRef format = "png", int quality = 75);
+  DECLARE_METHOD_INVOKE_HELPERS(output);
   public: String t_css(CStrRef css_namespace, CStrRef sprite_file = null_string, CStrRef output_file = null_string, bool verbose = false);
+  DECLARE_METHOD_INVOKE_HELPERS(css);
   public: Array t_geterrors();
+  DECLARE_METHOD_INVOKE_HELPERS(geterrors);
   public: Array t_mapping();
+  DECLARE_METHOD_INVOKE_HELPERS(mapping);
   public: Variant t___destruct();
+  DECLARE_METHOD_INVOKE_HELPERS(__destruct);
 
   // implemented by HPHP
   public: c_ImageSprite *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  public: void getConstructor(MethodCallPackage &mcp);
   public: virtual void destruct();
 
  private:

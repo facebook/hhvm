@@ -57,19 +57,16 @@ class c_ReflectionObject : public c_ReflectionClass {
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionObject 1
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, MethodIndex methodIndex,
-                           const char *s, CArrRef ps, int64 h, bool f = true);
-  virtual Variant o_invoke(MethodIndex methodIndex, const char *s, CArrRef ps,
-                           int64 h, bool f = true);
-  virtual Variant o_invoke_few_args(MethodIndex methodIndex, const char *s,
-                                    int64 h, int count,
-                                    INVOKE_FEW_ARGS_DECL_ARGS);
+  static bool os_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
+  #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ReflectionObject 1
+  virtual bool o_get_call_info(MethodCallPackage &mcp, int64 hash = -1);
 
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
   public: static Variant ti_export(const char* cls, Variant v_obj, CVarRef v_ret);
   public: static Variant t_export(CVarRef v_obj, CVarRef v_ret) { return ti_export("ReflectionObject", v_obj, v_ret); }
+  DECLARE_METHOD_INVOKE_HELPERS(export);
 };
 extern struct ObjectStaticCallbacks cw_ReflectionObject;
 

@@ -238,12 +238,16 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool staticClassName = false;
   if (!m_noStatic && !m_className.empty() && m_cppTemp.empty() &&
-      m_origClassName != "self" &&
-      m_origClassName != "parent") {
-
-    cg_printf("STATIC_CLASS_NAME_CALL(");
-    cg_printString(m_origClassName, ar);
-    cg_printf(", ");
+      m_origClassName != "self" && m_origClassName != "parent" &&
+      m_origClassName != "static") {
+    if (!m_className.empty()) {
+      cg_printf("STATIC_CLASS_NAME_CALL(");
+      cg_printString(m_origClassName, ar);
+      cg_printf(", ");
+    } else {
+      cg_printf("STATIC_CLASS_INVOKE_CALL(mcp%d.getClassName(), ",
+          m_ciTemp);
+    }
     if (m_voidReturn) m_voidWrapper = true;
     staticClassName = true;
   }

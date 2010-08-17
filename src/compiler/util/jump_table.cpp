@@ -28,7 +28,7 @@ JumpTableMethodIndex::JumpTableMethodIndex(CodeGenerator &cg,
                                            const vector<const char*> &keys)
   : m_cg(cg), m_ar(ar), m_keys(keys), m_iter(m_keys.begin()) {
   if (keys.empty()) return;
-  m_cg.indentBegin("switch (methodIndex.m_callIndex) {\n");
+  m_cg.indentBegin("switch (mi.m_callIndex) {\n");
   if (ready()) {
     const MethodSlot* ms = m_ar->getMethodSlot(*m_iter);
     cg_indentBegin("case 0x%x:\n", ms->getCallIndex());

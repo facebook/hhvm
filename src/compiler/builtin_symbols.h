@@ -93,7 +93,7 @@ private:
   static void ParseExtDynamics(AnalysisResultPtr ar, const char **p, bool sep);
 
   static FunctionScopePtr ParseExtFunction(AnalysisResultPtr ar,
-                                           const char** &p);
+      const char** &p, bool method = false);
   static FunctionScopePtr ParseHelperFunction(AnalysisResultPtr ar,
                                               const char** &p);
 };

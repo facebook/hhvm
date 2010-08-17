@@ -81,6 +81,9 @@ void ArrayElementExpression::setContext(Context context) {
     case Expression::RefParameter:
       m_variable->setContext(DeepReference);
       break;
+    case Expression::InvokeArgument:
+      m_variable->setContext(context);
+      setContext(NoLValueWrapper);
     default:
       break;
   }
@@ -95,6 +98,10 @@ void ArrayElementExpression::clearContext(Context context) {
     case Expression::UnsetContext:
     case Expression::DeepReference:
       m_variable->clearContext(context);
+      break;
+    case Expression::InvokeArgument:
+      m_variable->clearContext(context);
+      clearContext(NoLValueWrapper);
       break;
     case Expression::RefValue:
     case Expression::RefParameter:
@@ -371,8 +378,9 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       bool rvalAt = false;
       if (hasContext(UnsetContext)) {
         // do nothing
-      } else if (m_context & InvokeArgument) {
-        cg_printf(".refvalAt(");
+      } else if (hasContext(InvokeArgument) && ar->callInfoTop() != -1) {
+        cg_printf(".argvalAt(cit%d->isRef(%d), ", ar->callInfoTop(),
+            m_argNum);
       } else if (m_context & (LValue|RefValue)) {
         cg_printf(".lvalAt(");
         lvalAt = true;

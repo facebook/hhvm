@@ -147,6 +147,8 @@ class Object : public SmartPtr<ObjectData> {
   Variant o_unset(CStrRef propName, CStrRef context = null_string) const;
   template<typename T, int op>
   T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
+  Variant o_argval(bool byRef, CStrRef propName, bool error = true,
+      CStrRef context = null_string);
   /**
    * Input/Output
    */

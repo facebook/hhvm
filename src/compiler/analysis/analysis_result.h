@@ -377,6 +377,9 @@ public:
   std::set<int> m_concatLengths;
   std::set<int> m_arrayLitstrKeySizes;
   std::set<int> m_arrayIntegerKeySizes;
+  void pushCallInfo(int cit);
+  void popCallInfo();
+  int callInfoTop();
 
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
@@ -465,6 +468,8 @@ private:
   int m_funcTableSize;
   CodeGenerator::MapIntToStringVec m_funcTable;
   bool m_system;
+
+  std::deque<int> m_callInfos;
 
   /**
    * Checks whether the file is in one of the on-demand parsing directories.

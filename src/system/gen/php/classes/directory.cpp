@@ -23,6 +23,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /* preface starts */
+extern CallInfo ci_;
 /* preface finishes */
 /* SRC: classes/directory.php line 3 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Directory
@@ -98,6 +99,276 @@ Variant c_Directory::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
 IMPLEMENT_CLASS(Directory)
+ObjectData *c_Directory::cloneImpl() {
+  c_Directory *obj = NEW(c_Directory)();
+  cloneSet(obj);
+  return obj;
+}
+void c_Directory::cloneSet(c_Directory *clone) {
+  clone->m_path = m_path.isReferenced() ? ref(m_path) : m_path;
+  clone->m_handle = m_handle.isReferenced() ? ref(m_handle) : m_handle;
+  ObjectData::cloneSet(clone);
+}
+Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  if (hash < 0) hash = hash_string(s);
+  switch (hash & 7) {
+    case 1:
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_close());
+      }
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_read());
+      }
+      break;
+    case 2:
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t_rewind());
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        Variant a0;
+        const std::vector<Eval::ExpressionPtr> &params = caller->params();
+        int count __attribute__((__unused__)) = params.size();
+        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
+        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+        do {
+          if (it == params.end()) break;
+          a0 = (*it)->eval(env);
+          it++;
+        } while(false);
+        for (; it != params.end(); ++it) {
+          (*it)->eval(env);
+        }
+        return (t___construct(a0), null);
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
+}
+Variant c_Directory::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+}
+CallInfo c_Directory::ci___construct((void*)&c_Directory::i___construct, (void*)&c_Directory::ifa___construct, 1, 0, 0x0000000000000000LL);
+CallInfo c_Directory::ci_close((void*)&c_Directory::i_close, (void*)&c_Directory::ifa_close, 0, 0, 0x0000000000000000LL);
+CallInfo c_Directory::ci_read((void*)&c_Directory::i_read, (void*)&c_Directory::ifa_read, 0, 0, 0x0000000000000000LL);
+CallInfo c_Directory::ci_rewind((void*)&c_Directory::i_rewind, (void*)&c_Directory::ifa_rewind, 0, 0, 0x0000000000000000LL);
+Variant c_Directory::i___construct(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (self->t___construct(arg0), null);
+  }
+}
+Variant c_Directory::i_close(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
+  return (self->t_close());
+}
+Variant c_Directory::i_read(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
+  return (self->t_read());
+}
+Variant c_Directory::i_rewind(MethodCallPackage &mcp, CArrRef params) {
+  int count __attribute__((__unused__)) = params.size();
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
+  return (self->t_rewind());
+}
+Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
+  return (self->t___construct(a0), null);
+}
+Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
+  return (self->t_close());
+}
+Variant c_Directory::ifa_read(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
+  return (self->t_read());
+}
+Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  c_Directory *self = NULL;
+  p_Directory pobj;
+  if (mcp.obj) {
+    self = static_cast<c_Directory*>(mcp.obj);
+  } else {
+    pobj = (NEW(c_Directory)());
+    pobj->init();
+    pobj->setDummy();
+    self = pobj.get();
+  }
+  if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
+  return (self->t_rewind());
+}
+bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+        mcp.ci = &c_Directory::ci_close;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
+        mcp.ci = &c_Directory::ci_read;
+        return true;
+      }
+      break;
+    case 2:
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+        mcp.ci = &c_Directory::ci_rewind;
+        return true;
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_Directory::ci___construct;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::os_get_call_info(mcp, hash);
+}
+bool c_Directory::o_get_call_info(MethodCallPackage &mcp, int64 hash) {
+  CStrRef s __attribute__((__unused__)) (mcp.name);
+  if (hash < 0) hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
+        mcp.ci = &c_Directory::ci_close;
+        mcp.obj = this;
+        return true;
+      }
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
+        mcp.ci = &c_Directory::ci_read;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 2:
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
+        mcp.ci = &c_Directory::ci_rewind;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    case 7:
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
+        mcp.ci = &c_Directory::ci___construct;
+        mcp.obj = this;
+        return true;
+      }
+      break;
+    default:
+      break;
+  }
+  return c_ObjectData::o_get_call_info(mcp, hash);
+}
 c_Directory *c_Directory::create(Variant v_path) {
   CountableHelper h(this);
   init();
@@ -129,6 +400,10 @@ void c_Directory::dynConstruct(CArrRef params) {
     (t___construct(arg0));
   }
 }
+void c_Directory::getConstructor(MethodCallPackage &mcp) {
+  mcp.ci = &c_Directory::ci___construct;
+  mcp.obj = this;
+}
 void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -145,309 +420,13 @@ void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   }
   (t___construct(a0), null);
 }
-ObjectData *c_Directory::cloneImpl() {
-  c_Directory *obj = NEW(c_Directory)();
-  cloneSet(obj);
-  return obj;
-}
-void c_Directory::cloneSet(c_Directory *clone) {
-  clone->m_path = m_path.isReferenced() ? ref(m_path) : m_path;
-  clone->m_handle = m_handle.isReferenced() ? ref(m_handle) : m_handle;
-  ObjectData::cloneSet(clone);
-}
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
-Variant c_Directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-        return (t_close());
-      }
-      break;
-    case 0xac:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
-        return (t_read());
-      }
-      break;
-    case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-        return (t_rewind());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
-        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-        return (t_close());
-      }
-      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
-        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
-        return (t_read());
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-        return (t_rewind());
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-        {
-          ArrayData *ad(params.get());
-          ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValue(pos)));
-          return (t___construct(arg0), null);
-        }
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
-Variant c_Directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-  #ifndef NOFMCGEN
-  switch (methodIndex.m_callIndex) {
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-        return (t_close());
-      }
-      break;
-    case 0xac:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
-        return (t_read());
-      }
-      break;
-    case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-        return (t_rewind());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
-        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-        return (t_close());
-      }
-      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
-        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
-        return (t_read());
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-        return (t_rewind());
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-        return (t___construct(a0), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Directory
-Variant c_Directory::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
-  int count __attribute__((__unused__)) = params.size();
-  #ifndef NOFMCGEN
-  #else
-  #endif
-  return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Directory
-Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  switch (methodIndex.m_callIndex) {
-    case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_close());
-      }
-      break;
-    case 0xac:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_read());
-      }
-      break;
-    case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_rewind());
-      }
-      break;
-    default:
-      break;
-  }
-  #else
-  if (hash < 0) hash = hash_string(s);
-  switch (hash & 7) {
-    case 1:
-      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_close());
-      }
-      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_read());
-      }
-      break;
-    case 2:
-      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t_rewind());
-      }
-      break;
-    case 7:
-      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
-        Variant a0;
-        const std::vector<Eval::ExpressionPtr> &params = caller->params();
-        int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
-        std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-        do {
-          if (it == params.end()) break;
-          a0 = (*it)->eval(env);
-          it++;
-        } while(false);
-        for (; it != params.end(); ++it) {
-          (*it)->eval(env);
-        }
-        return (t___construct(a0), null);
-      }
-      break;
-    default:
-      break;
-  }
-  #endif
-  return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
-}
-Variant c_Directory::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-  #ifndef NOFMCGEN
-  MethodIndex methodIndex = methodIndexExists(s);
-  #else
-  #endif
-  return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
-}
 struct ObjectStaticCallbacks cw_Directory = {
   c_Directory::os_getInit,
   c_Directory::os_get,
   c_Directory::os_lval,
   c_Directory::os_invoke,
   c_Directory::os_constant,
+  c_Directory::os_get_call_info
 };
 void c_Directory::init() {
   m_path = null;
@@ -481,6 +460,11 @@ Variant c_Directory::t_close() {
 } /* function */
 Object co_Directory(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_Directory)())->dynCreate(params, init));
+}
+Object coo_Directory() {
+  Object r(NEW(c_Directory)());
+  r->init();
+  return r;
 }
 Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directory.php, pm_php$classes$directory_php);

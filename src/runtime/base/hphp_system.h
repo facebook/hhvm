@@ -44,7 +44,6 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/simple_counter.h>
 
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

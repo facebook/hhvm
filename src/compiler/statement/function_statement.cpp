@@ -150,9 +150,11 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
       cg_printf("g->%s%s = %s%s;\n",
                 Option::InvokePrefix, rname.c_str(),
                 Option::InvokePrefix, fname.c_str());
-      cg_printf("g->%s%s_few_args = %s%s_few_args;\n",
-                Option::InvokePrefix, rname.c_str(),
-                Option::InvokePrefix, fname.c_str());
+      cg_printf("g->%s%s = %s%s;\n",
+                Option::InvokeFewArgsPrefix, rname.c_str(),
+                Option::InvokeFewArgsPrefix, fname.c_str());
+      cg.printf("g->%s%s = &%s%s;\n", Option::CallInfoPrefix, m_name.c_str(),
+          Option::CallInfoPrefix, fname.c_str());
     }
     if (funcScope->isVolatile()) {
       cg_printf("g->declareFunctionLit(");
@@ -227,7 +229,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
     cg_printf(");\n");
     if (funcScope->hasDirectInvoke()) {
-      cg_printf("Variant %s%s(CArrRef params);\n",
+      cg_printf("Variant %s%s(void *extra, CArrRef params);\n",
                 Option::InvokePrefix, fname.c_str());
     }
     break;

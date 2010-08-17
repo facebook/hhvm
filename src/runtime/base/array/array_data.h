@@ -262,7 +262,8 @@ class ArrayData : public Countable {
   /**
    * Comparisons. Similar to serialize(), we implemented it here generically.
    */
-  int compare(const ArrayData *v2, bool strict) const;
+  int compare(const ArrayData *v2) const;
+  bool equal(const ArrayData *v2, bool strict) const;
 
   void setPosition(ssize_t p) { m_pos = p; }
 

@@ -23,14 +23,18 @@ namespace HPHP {
 
 bool not_more(CVarRef v1, CVarRef v2) {
   if (v1.is(KindOfArray) && v2.is(KindOfArray)) {
-    return !v1.toArray().more(v2.toArray(), false);
+    Array a1 = v1.toArray();
+    Array a2 = v2.toArray();
+    return a1.less(a2) || a1.equal(a2);
   }
   return !more(v1, v2);
 }
 
 bool not_less(CVarRef v1, CVarRef v2) {
   if (v1.is(KindOfArray) && v2.is(KindOfArray)) {
-    return !v1.toArray().less(v2.toArray(), true);
+    Array a1 = v1.toArray();
+    Array a2 = v2.toArray();
+    return a1.more(a2) || a1.equal(a2);
   }
   return !less(v1, v2);
 }

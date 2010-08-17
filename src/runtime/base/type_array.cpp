@@ -279,7 +279,7 @@ Object Array::toObject() const {
 bool Array::same(CArrRef v2) const {
   if (m_px == NULL && v2.get() == NULL) return true;
   if (m_px && v2.get()) {
-    return m_px->compare(v2.get(), true) == 0;
+    return m_px->equal(v2.get(), true);
   }
   return false;
 }
@@ -292,7 +292,7 @@ bool Array::equal(CArrRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
     return HPHP::equal(toBoolean(), v2.toBoolean());
   }
-  return m_px->compare(v2.get(), false) == 0;
+  return m_px->equal(v2.get(), false);
 }
 
 bool Array::equal(CObjRef v2) const {
@@ -307,9 +307,9 @@ bool Array::less(CArrRef v2, bool flip /* = false */) const {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   if (flip) {
-    return v2.get()->compare(m_px, false) > 0;
+    return v2.get()->compare(m_px) > 0;
   }
-  return m_px->compare(v2.get(), false) < 0;
+  return m_px->compare(v2.get()) < 0;
 }
 
 bool Array::less(CObjRef v2) const {
@@ -324,7 +324,7 @@ bool Array::less(CVarRef v2) const {
     return HPHP::less(toBoolean(), v2.toBoolean());
   }
   if (v2.getType() == KindOfArray) {
-    return m_px->compare(v2.toArray().get(), false) < 0;
+    return m_px->compare(v2.toArray().get()) < 0;
   }
   return v2.more(*this);
 }
@@ -334,9 +334,9 @@ bool Array::more(CArrRef v2, bool flip /* = true */) const {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   if (flip) {
-    return v2.get()->compare(m_px, false) < 0;
+    return v2.get()->compare(m_px) < 0;
   }
-  return m_px->compare(v2.get(), false) > 0;
+  return m_px->compare(v2.get()) > 0;
 }
 
 bool Array::more(CObjRef v2) const {
@@ -351,7 +351,7 @@ bool Array::more(CVarRef v2) const {
     return HPHP::more(toBoolean(), v2.toBoolean());
   }
   if (v2.getType() == KindOfArray) {
-    return v2.toArray().get()->compare(m_px, false) < 0;
+    return v2.toArray().get()->compare(m_px) < 0;
   }
   return v2.less(*this);
 }

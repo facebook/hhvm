@@ -4210,6 +4210,8 @@ bool TestCodeRun::TestObjectPropertyExpression() {
     COMPARE(a, op, array('a' => 1))             \
     COMPARE(a, op, array('b' => 1))             \
     COMPARE(a, op, array('a' => 1, 'b' => 2))   \
+    COMPARE(a, op, array(array('a' => 1)))      \
+    COMPARE(a, op, array(array('b' => 1)))      \
     COMPARE(a, op, 'php')                       \
     COMPARE(a, op, '')                          \
 
@@ -4233,6 +4235,8 @@ bool TestCodeRun::TestObjectPropertyExpression() {
   MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1), op));              \
   MVCR("<?php $i = 0; " COMPARE_ALL(array('b' => 1), op));              \
   MVCR("<?php $i = 0; " COMPARE_ALL(array('a' => 1, 'b' => 2), op));    \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(array('a' => 1)), op));       \
+  MVCR("<?php $i = 0; " COMPARE_ALL(array(array('b' => 1)), op));       \
   MVCR("<?php $i = 0; " COMPARE_ALL('php', op));                        \
   MVCR("<?php $i = 0; " COMPARE_ALL('', op));                           \
 

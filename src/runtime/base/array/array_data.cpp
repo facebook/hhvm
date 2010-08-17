@@ -74,7 +74,7 @@ bool ArrayData::isVectorData() const {
   return true;
 }
 
-int ArrayData::compare(const ArrayData *v2, bool strict) const {
+int ArrayData::compare(const ArrayData *v2) const {
   ASSERT(v2);
 
   int count1 = size();
@@ -86,29 +86,52 @@ int ArrayData::compare(const ArrayData *v2, bool strict) const {
   // prevent circular referenced objects/arrays or deep ones
   DECLARE_THREAD_INFO; RECURSION_INJECTION;
 
+  for (ArrayIter iter(this); iter; ++iter) {
+    Variant key(iter.first());
+    if (!v2->exists(key)) return 1;
+
+    Variant value1(iter.second());
+    Variant value2(v2->get(key));
+    if (value1.more(value2)) return 1;
+    if (value1.less(value2)) return -1;
+  }
+
+  return 0;
+}
+
+bool ArrayData::equal(const ArrayData *v2, bool strict) const {
+  ASSERT(v2);
+
+  int count1 = size();
+  int count2 = v2->size();
+  if (count1 != count2) return false;
+  if (count1 == 0) return true;
+
+  // prevent circular referenced objects/arrays or deep ones
+  DECLARE_THREAD_INFO; RECURSION_INJECTION;
+
   if (strict) {
     for (ArrayIter iter1(this), iter2(v2); iter1 && iter2; ++iter1, ++iter2) {
       Variant key1(iter1.first());
       Variant key2(iter2.first());
-      if (!key1.same(key2)) return 1; // or -1
+      if (!key1.same(key2)) return false;
 
       Variant value1(iter1.second());
       Variant value2(iter2.second());
-      if (!value1.same(value2)) return 1; // or -1
+      if (!value1.same(value2)) return false;
     }
   } else {
     for (ArrayIter iter(this); iter; ++iter) {
       Variant key(iter.first());
-      if (!v2->exists(key)) return 1;
+      if (!v2->exists(key)) return false;
 
       Variant value1(iter.second());
       Variant value2(v2->get(key));
-      if (value1.more(value2)) return 1;
-      if (value1.less(value2)) return -1;
+      if (!value1.equal(value2)) return false;
     }
   }
 
-  return 0;
+  return true;
 }
 
 void ArrayData::load(CVarRef k, Variant &v) const {

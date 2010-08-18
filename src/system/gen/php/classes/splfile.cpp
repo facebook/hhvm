@@ -247,19 +247,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0xae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0x15e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -270,7 +270,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xaf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -282,19 +282,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xb0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x15f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -306,19 +306,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xb1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x160:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -329,7 +329,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xb2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -341,7 +341,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x161:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -357,7 +357,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xb3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -369,13 +369,13 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x162:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -391,37 +391,37 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0xb4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0x163:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 0xb5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0xb6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x11:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -432,7 +432,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         {
           ArrayData *ad(params.get());
@@ -449,7 +449,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xb7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -461,7 +461,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x164:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -472,25 +472,25 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x165:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 0xb8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0xb9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0x166:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -501,79 +501,79 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xba:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0x168:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 0x167:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 0xbb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0xbc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0xbe:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0x169:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 0x16a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 0xbf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0xf9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 0x16b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 0x15:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -584,7 +584,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x16c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -597,25 +597,25 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xc0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0xc1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0x16:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 0xc2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -627,19 +627,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0xfa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x16e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -651,25 +651,25 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x16d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 0xc4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0xc3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0xc5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -685,19 +685,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x16f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0xc7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
@@ -1160,75 +1160,75 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0xae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0x15e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         return (t_fscanf(a0));
       }
       break;
     case 0xaf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 0xb0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         return (t_next());
       }
       break;
     case 0x15f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         return (t_fseek(a0, a1));
       }
       break;
     case 0xb1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x160:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         return (t_fgetss(a0));
       }
       break;
     case 0xb2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 0x161:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         if (count <= 0) return (t_fgetcsv());
         if (count == 1) return (t_fgetcsv(a0));
@@ -1237,20 +1237,20 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 0xb3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x162:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         if (count <= 0) return (t_setcsvcontrol());
         if (count == 1) return (t_setcsvcontrol(a0));
@@ -1259,43 +1259,43 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0xb4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0x163:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 0xb5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0xb6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x11:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         return (t_setflags(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
@@ -1304,189 +1304,189 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 0xb7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
     case 0x164:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         return (t_setmaxlinelen(a0));
       }
       break;
     case 0x165:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 0xb8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0xb9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0x166:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         return (t_ftruncate(a0));
       }
       break;
     case 0xba:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0x168:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 0x167:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 0xbb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0xbc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0xbe:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0x169:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 0x16a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 0xbf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0xf9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 0x16b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 0x15:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 0x16c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         return (t_flock(a0, ref(a1)));
       }
       break;
     case 0xc0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0xc1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0x16:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 0xc2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 0xfa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x16e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         return (t_fwrite(a0, a1));
       }
       break;
     case 0x16d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 0xc4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0xc3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0xc5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
@@ -1495,19 +1495,19 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 0x16f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 0xc7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
@@ -1876,7 +1876,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
@@ -1890,7 +1890,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
@@ -1904,7 +1904,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x15e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1922,7 +1922,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xaf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1941,7 +1941,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
@@ -1955,7 +1955,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
@@ -1969,7 +1969,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x15f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1991,7 +1991,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
@@ -2005,7 +2005,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
@@ -2019,7 +2019,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x160:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2037,7 +2037,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2056,7 +2056,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x161:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -2085,7 +2085,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2104,7 +2104,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
@@ -2118,7 +2118,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x162:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -2147,7 +2147,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
@@ -2161,7 +2161,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
@@ -2175,7 +2175,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x163:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
@@ -2189,7 +2189,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
@@ -2203,7 +2203,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
@@ -2217,7 +2217,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x11:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2235,7 +2235,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -2268,7 +2268,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2287,7 +2287,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x164:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2305,7 +2305,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x165:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
@@ -2319,7 +2319,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
@@ -2333,7 +2333,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xb9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
@@ -2347,7 +2347,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x166:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2365,7 +2365,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xba:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
@@ -2379,7 +2379,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x168:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
@@ -2393,7 +2393,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x167:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
@@ -2407,7 +2407,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xbb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
@@ -2421,7 +2421,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xbc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
@@ -2435,7 +2435,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xbe:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
@@ -2449,7 +2449,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
@@ -2463,7 +2463,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x169:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
@@ -2477,7 +2477,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x16a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
@@ -2491,7 +2491,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xbf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
@@ -2505,7 +2505,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xf9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
@@ -2519,7 +2519,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x16b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
@@ -2533,7 +2533,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x15:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2551,7 +2551,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x16c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2573,7 +2573,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xc0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
@@ -2587,7 +2587,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xc1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
@@ -2601,7 +2601,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x16:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
@@ -2615,7 +2615,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xc2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2634,7 +2634,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xfa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
@@ -2648,7 +2648,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
@@ -2662,7 +2662,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x16e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2684,7 +2684,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x16d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
@@ -2698,7 +2698,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xc4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
@@ -2712,7 +2712,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xc3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
@@ -2726,7 +2726,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xc5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -2755,7 +2755,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x16f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
@@ -2769,7 +2769,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
@@ -2783,7 +2783,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xc7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
@@ -4041,19 +4041,19 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0xae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0xaf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4065,19 +4065,19 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xb0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0xb1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0xb2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4089,7 +4089,7 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xb3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4101,31 +4101,31 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0xb4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0xb5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0xb6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
@@ -4136,7 +4136,7 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xb7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4148,67 +4148,67 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xb8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0xb9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0xba:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0xbb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0xbc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0xbe:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0xbf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0xc0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0xc1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0xc2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4220,19 +4220,19 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xc4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0xc3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0xc5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -4248,7 +4248,7 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xc7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
@@ -4476,168 +4476,168 @@ Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 0xae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 0xaf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 0xb0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 0xb1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
       break;
     case 0xb2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 0xb3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0xb4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 0xb5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 0xb6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 0xb7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
     case 0xb8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 0xb9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
       break;
     case 0xba:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 0xbb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 0xbc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 0xbe:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 0xbf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 0xc0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 0xc1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 0xc2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 0xc4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 0xc3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 0xc5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
@@ -4646,7 +4646,7 @@ Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 0xc7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
@@ -4846,7 +4846,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
@@ -4860,7 +4860,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
@@ -4874,7 +4874,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xaf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4893,7 +4893,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
@@ -4907,7 +4907,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
@@ -4921,7 +4921,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4940,7 +4940,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4959,7 +4959,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
@@ -4973,7 +4973,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
@@ -4987,7 +4987,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
@@ -5001,7 +5001,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
@@ -5015,7 +5015,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5033,7 +5033,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5052,7 +5052,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
@@ -5066,7 +5066,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xb9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
@@ -5080,7 +5080,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xba:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
@@ -5094,7 +5094,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xbb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
@@ -5108,7 +5108,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xbc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
@@ -5122,7 +5122,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xbe:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
@@ -5136,7 +5136,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xbd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
@@ -5150,7 +5150,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xbf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
@@ -5164,7 +5164,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xc0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
@@ -5178,7 +5178,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xc1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
@@ -5192,7 +5192,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xc2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5211,7 +5211,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xc4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
@@ -5225,7 +5225,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xc3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
@@ -5239,7 +5239,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xc5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -5268,7 +5268,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xc7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);

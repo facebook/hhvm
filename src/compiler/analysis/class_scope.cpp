@@ -748,7 +748,7 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
     cg_printf("method = methodIndexLookupReverse(methodIndex);\n");
     cg_printf("#endif\n");
     cg_printf("if (eval_invoke_static_method_hook(r, s, method, params, "
-        "foundClass)) return r; \n");
+        "foundClass)) return r;\n");
     cg_indentBegin("else if (foundClass) {\n");
     cg_printf("return o_invoke_failed(s, method, fatal);\n");
 
@@ -787,7 +787,7 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
     cg_printf("bool foundClass = false;\n");
     cg_printf("Variant r;\n");
     cg_printf("if (eval_invoke_static_method_hook(r, s, method, params, "
-              "foundClass)) return r; \n");
+              "foundClass)) return r;\n");
     cg_printf("if (foundClass) return o_invoke_failed(s, method, fatal);\n");
   }
   cg_printf("MethodIndex methodIndex(MethodIndex::fail());\n");

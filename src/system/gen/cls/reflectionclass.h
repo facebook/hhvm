@@ -69,7 +69,7 @@ class c_reflectionclass : public ExtObjectData {
   virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, MethodIndex methodIndex, 
+  static Variant os_invoke(const char *c, MethodIndex methodIndex,
                            const char *s, CArrRef ps, int64 h, bool f = true);
   virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);

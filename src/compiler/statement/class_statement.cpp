@@ -408,7 +408,7 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg.printSection("DECLARE_COMMON_INVOKE");
   if (classScope->hasJumpTable(ClassScope::JumpTableStaticInvoke)) {
     cg_printf("static Variant os_invoke(const char *c, "
-              "MethodIndex methodIndex, \n");
+              "MethodIndex methodIndex,\n");
     cg_printf("                         const char *s, CArrRef ps, int64 h, "
               "bool f = true);\n");
   } else {

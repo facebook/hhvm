@@ -960,7 +960,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
 
   if (!system) {
     cg_printf("\n");
-    cg_indentBegin("void init_static_variables() { \n");
+    cg_indentBegin("void init_static_variables() {\n");
     if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
       cg_printf("LiteralStringInitializer::initialize();\n");
     }
@@ -1799,7 +1799,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       ExpressionPtr value =
         dynamic_pointer_cast<Expression>(getClassInitVal(name));
       if (value) {
-        cg_printf("HASH_RETURN(0x%016llXLL, \n", hash_string(name));
+        cg_printf("HASH_RETURN(0x%016llXLL,\n", hash_string(name));
         cg_printf("            ");
         CodeGenerator::Context oldContext = cg.getContext();
         cg.setContext(CodeGenerator::CppStaticInitializer);

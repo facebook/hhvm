@@ -32,11 +32,11 @@ Variant c_splobjectstorage::os_getInit(const char *s, int64 hash) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 2:
-      HASH_RETURN(0x4B27521443880CAELL, 
+      HASH_RETURN(0x4B27521443880CAELL,
                   0LL, "index");
       break;
     case 3:
-      HASH_RETURN(0x17AC96477E2B6DC3LL, 
+      HASH_RETURN(0x17AC96477E2B6DC3LL,
                   SystemScalarArrays::ssa_[0], "storage");
       break;
     default:
@@ -233,13 +233,13 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 0x171:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -250,7 +250,7 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x170:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -261,25 +261,25 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0xf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         return (t_count());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x172:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -290,13 +290,13 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
         return (t_rewind(), null);
       }
@@ -386,55 +386,55 @@ Variant c_splobjectstorage::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
         return (t_next(), null);
       }
       break;
     case 0x171:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         return (t_detach(a0), null);
       }
       break;
     case 0x170:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         return (t_attach(a0), null);
       }
       break;
     case 0xf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
         return (t_count());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x172:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         return (t_contains(a0));
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);
         return (t_rewind(), null);
       }
@@ -518,7 +518,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::next", 0, 1);
@@ -532,7 +532,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x171:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -550,7 +550,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x170:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -568,7 +568,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0xf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::count", 0, 1);
@@ -582,7 +582,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::key", 0, 1);
@@ -596,7 +596,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::valid", 0, 1);
@@ -610,7 +610,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x172:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -628,7 +628,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::current", 0, 1);
@@ -642,7 +642,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplObjectStorage::rewind", 0, 1);

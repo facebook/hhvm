@@ -67,7 +67,7 @@ class c_reflectionextension : public ExtObjectData {
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionextension 1
 
   // DECLARE_COMMON_INVOKE
-  static Variant os_invoke(const char *c, MethodIndex methodIndex, 
+  static Variant os_invoke(const char *c, MethodIndex methodIndex,
                            const char *s, CArrRef ps, int64 h, bool f = true);
   virtual Variant o_invoke(MethodIndex methodIndex, const char *s,CArrRef ps, int64 h,
                            bool f = true);

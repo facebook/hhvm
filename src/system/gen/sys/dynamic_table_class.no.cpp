@@ -219,61 +219,61 @@ Variant c_pdoexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
@@ -354,61 +354,61 @@ Variant c_pdoexception::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
@@ -498,7 +498,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -512,7 +512,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -526,7 +526,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -540,7 +540,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -554,7 +554,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -568,7 +568,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -582,7 +582,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -596,7 +596,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -610,7 +610,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -624,7 +624,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -950,13 +950,13 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -969,7 +969,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -980,7 +980,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -991,7 +991,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1002,13 +1002,13 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -1020,7 +1020,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1032,13 +1032,13 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -1050,7 +1050,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -1068,13 +1068,13 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1085,19 +1085,19 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -1116,7 +1116,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1127,7 +1127,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1138,7 +1138,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1149,7 +1149,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -1161,7 +1161,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x66:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1172,7 +1172,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -1413,69 +1413,69 @@ Variant c_domdocumentfragment::o_invoke_few_args(MethodIndex methodIndex, const 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -1485,31 +1485,31 @@ Variant c_domdocumentfragment::o_invoke_few_args(MethodIndex methodIndex, const 
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -1519,37 +1519,37 @@ Variant c_domdocumentfragment::o_invoke_few_args(MethodIndex methodIndex, const 
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x66:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendxml", count, 1, 1, 1);
         return (t_appendxml(a0));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -1713,7 +1713,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -1727,7 +1727,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1750,7 +1750,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1768,7 +1768,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1786,7 +1786,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1804,7 +1804,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -1818,7 +1818,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1840,7 +1840,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1859,7 +1859,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -1873,7 +1873,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1895,7 +1895,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -1929,7 +1929,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -1943,7 +1943,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -1961,7 +1961,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -1975,7 +1975,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -1989,7 +1989,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -2027,7 +2027,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2045,7 +2045,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2063,7 +2063,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2081,7 +2081,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2103,7 +2103,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x66:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2121,7 +2121,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -2747,13 +2747,13 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -2766,7 +2766,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2777,7 +2777,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2788,7 +2788,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2799,13 +2799,13 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -2817,7 +2817,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -2829,7 +2829,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -2841,7 +2841,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2853,7 +2853,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2865,7 +2865,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -2877,7 +2877,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -2895,13 +2895,13 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2912,19 +2912,19 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -2943,7 +2943,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2954,7 +2954,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2965,7 +2965,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2976,7 +2976,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -2987,7 +2987,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -3000,7 +3000,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -3012,13 +3012,13 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x46:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -3030,7 +3030,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x47:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -3041,7 +3041,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -3352,82 +3352,82 @@ Variant c_domtext::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         if (count <= 0) return (t___construct(), null);
         return (t___construct(a0), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -3437,31 +3437,31 @@ Variant c_domtext::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -3471,61 +3471,61 @@ Variant c_domtext::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 0x46:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x47:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         return (t_splittext(a0));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -3724,7 +3724,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -3738,7 +3738,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3761,7 +3761,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3779,7 +3779,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3797,7 +3797,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3815,7 +3815,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -3829,7 +3829,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3851,7 +3851,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3873,7 +3873,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3895,7 +3895,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3914,7 +3914,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3933,7 +3933,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3955,7 +3955,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -3989,7 +3989,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -4003,7 +4003,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4021,7 +4021,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -4035,7 +4035,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -4049,7 +4049,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -4087,7 +4087,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4105,7 +4105,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4123,7 +4123,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4141,7 +4141,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4159,7 +4159,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -4185,7 +4185,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4207,7 +4207,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x46:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
@@ -4221,7 +4221,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -4243,7 +4243,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x47:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4261,7 +4261,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -5017,13 +5017,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x8c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
         return (t_argcount());
       }
       break;
     case 0x8d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -5035,7 +5035,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x8e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2) return throw_missing_arguments("helpcmds", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -5048,7 +5048,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x8f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("ask", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -5060,7 +5060,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x90:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("error", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -5072,7 +5072,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x91:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5083,13 +5083,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x92:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5100,13 +5100,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x93:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
         return (t_getcommand());
       }
       break;
     case 0x94:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5117,19 +5117,19 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x95:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5140,7 +5140,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x96:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("output", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -5152,13 +5152,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x97:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
         return (t_getstacktrace());
       }
       break;
     case 0x98:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("info", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -5170,7 +5170,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x99:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5181,7 +5181,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x9a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("print", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -5193,7 +5193,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x9b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -5206,7 +5206,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x9c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5217,13 +5217,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x9d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("quit", 0, 1);
         return (t_quit(), null);
       }
       break;
     case 0x9e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5234,13 +5234,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0x9f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
         return (t_getframe());
       }
       break;
     case 0xa0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("help", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -5252,13 +5252,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0xa1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("args", 0, 1);
         return (t_args());
       }
       break;
     case 0xa2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5269,7 +5269,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0xa3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5280,13 +5280,13 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0xa4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
         return (t_getcurrentlocation());
       }
       break;
     case 0xa6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5297,7 +5297,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       }
       break;
     case 0xa5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -5600,19 +5600,19 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x8c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
         return (t_argcount());
       }
       break;
     case 0x8d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("arg", count, 2, 2, 1);
         return (t_arg(a0, a1));
       }
       break;
     case 0x8e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2) return throw_missing_arguments("helpcmds", count+1, 1);
         if (count <= 2) return (t_helpcmds(count, a0, a1), null);
         Array params;
@@ -5624,7 +5624,7 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       }
       break;
     case 0x8f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("ask", count+1, 1);
         if (count <= 1) return (t_ask(count, a0));
         Array params;
@@ -5637,7 +5637,7 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       }
       break;
     case 0x90:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("error", count+1, 1);
         if (count <= 1) return (t_error(count, a0), null);
         Array params;
@@ -5650,55 +5650,55 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       }
       break;
     case 0x91:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("xend", count, 1, 1, 1);
         return (t_xend(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x92:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("helptitle", count, 1, 1, 1);
         return (t_helptitle(a0), null);
       }
       break;
     case 0x93:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
         return (t_getcommand());
       }
       break;
     case 0x94:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("tutorial", count, 1, 1, 1);
         return (t_tutorial(a0), null);
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x95:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("argvalue", count, 1, 1, 1);
         return (t_argvalue(a0));
       }
       break;
     case 0x96:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("output", count+1, 1);
         if (count <= 1) return (t_output(count, a0), null);
         Array params;
@@ -5711,13 +5711,13 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       }
       break;
     case 0x97:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
         return (t_getstacktrace());
       }
       break;
     case 0x98:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("info", count+1, 1);
         if (count <= 1) return (t_info(count, a0), null);
         Array params;
@@ -5730,13 +5730,13 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       }
       break;
     case 0x99:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("printframe", count, 1, 1, 1);
         return (t_printframe(a0), null);
       }
       break;
     case 0x9a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("print", count+1, 1);
         if (count <= 1) return (t_print(count, a0), null);
         Array params;
@@ -5749,38 +5749,38 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       }
       break;
     case 0x9b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
         if (count <= 1) return (t_code(a0), null);
         return (t_code(a0, a1), null);
       }
       break;
     case 0x9c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("helpsection", count, 1, 1, 1);
         return (t_helpsection(a0), null);
       }
       break;
     case 0x9d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("quit", 0, 1);
         return (t_quit(), null);
       }
       break;
     case 0x9e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("helpbody", count, 1, 1, 1);
         return (t_helpbody(a0), null);
       }
       break;
     case 0x9f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
         return (t_getframe());
       }
       break;
     case 0xa0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("help", count+1, 1);
         if (count <= 1) return (t_help(count, a0), null);
         Array params;
@@ -5793,37 +5793,37 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       }
       break;
     case 0xa1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("args", 0, 1);
         return (t_args());
       }
       break;
     case 0xa2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("addcompletion", count, 1, 1, 1);
         return (t_addcompletion(a0), null);
       }
       break;
     case 0xa3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("argrest", count, 1, 1, 1);
         return (t_argrest(a0));
       }
       break;
     case 0xa4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
         return (t_getcurrentlocation());
       }
       break;
     case 0xa6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
         return (t_send(a0));
       }
       break;
     case 0xa5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("wrap", count, 1, 1, 1);
         return (t_wrap(a0));
       }
@@ -6068,7 +6068,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x8c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("argcount", 0, 1);
@@ -6082,7 +6082,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x8d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6104,7 +6104,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x8e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6128,7 +6128,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x8f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6148,7 +6148,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x90:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6168,7 +6168,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x91:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6186,7 +6186,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -6200,7 +6200,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x92:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6218,7 +6218,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x93:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getcommand", 0, 1);
@@ -6232,7 +6232,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x94:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6250,7 +6250,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -6264,7 +6264,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getcode", 0, 1);
@@ -6278,7 +6278,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x95:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6296,7 +6296,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x96:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6316,7 +6316,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x97:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getstacktrace", 0, 1);
@@ -6330,7 +6330,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x98:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6350,7 +6350,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x99:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6368,7 +6368,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x9a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6388,7 +6388,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x9b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -6411,7 +6411,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x9c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6429,7 +6429,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x9d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("quit", 0, 1);
@@ -6443,7 +6443,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x9e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6461,7 +6461,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0x9f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getframe", 0, 1);
@@ -6475,7 +6475,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0xa0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6495,7 +6495,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0xa1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("args", 0, 1);
@@ -6509,7 +6509,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0xa2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6527,7 +6527,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0xa3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6545,7 +6545,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0xa4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getcurrentlocation", 0, 1);
@@ -6559,7 +6559,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0xa6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -6577,7 +6577,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       }
       break;
     case 0xa5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -7294,13 +7294,13 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -7313,7 +7313,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7324,7 +7324,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7335,7 +7335,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7346,13 +7346,13 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -7364,7 +7364,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -7376,7 +7376,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -7388,7 +7388,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7400,7 +7400,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7411,7 +7411,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -7423,7 +7423,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -7441,13 +7441,13 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7458,19 +7458,19 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -7489,7 +7489,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7500,7 +7500,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7511,7 +7511,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7522,7 +7522,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7533,7 +7533,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -7546,7 +7546,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -7558,13 +7558,13 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x46:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -7576,7 +7576,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x47:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -7587,7 +7587,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -7897,81 +7897,81 @@ Variant c_domcdatasection::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -7981,31 +7981,31 @@ Variant c_domcdatasection::o_invoke_few_args(MethodIndex methodIndex, const char
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -8015,61 +8015,61 @@ Variant c_domcdatasection::o_invoke_few_args(MethodIndex methodIndex, const char
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 0x46:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
         return (t_iswhitespaceinelementcontent());
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x47:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("splittext", count, 1, 1, 1);
         return (t_splittext(a0));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -8267,7 +8267,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -8281,7 +8281,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8304,7 +8304,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8322,7 +8322,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8340,7 +8340,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8358,7 +8358,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -8372,7 +8372,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8394,7 +8394,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8416,7 +8416,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8438,7 +8438,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8457,7 +8457,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8475,7 +8475,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8497,7 +8497,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -8531,7 +8531,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -8545,7 +8545,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8563,7 +8563,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -8577,7 +8577,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -8591,7 +8591,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -8629,7 +8629,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8647,7 +8647,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8665,7 +8665,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8683,7 +8683,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8701,7 +8701,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -8727,7 +8727,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8749,7 +8749,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x46:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("iswhitespaceinelementcontent", 0, 1);
@@ -8763,7 +8763,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -8785,7 +8785,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x47:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -8803,7 +8803,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -9538,13 +9538,13 @@ Variant c_locale::o_invoke(MethodIndex methodIndex, const char *s, CArrRef param
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
@@ -9577,13 +9577,13 @@ Variant c_locale::o_invoke_few_args(MethodIndex methodIndex, const char *s, int6
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
@@ -9625,7 +9625,7 @@ Variant c_locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &e
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -9639,7 +9639,7 @@ Variant c_locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &e
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -9856,13 +9856,13 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -9875,7 +9875,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -9886,7 +9886,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -9897,7 +9897,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -9908,13 +9908,13 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -9926,7 +9926,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -9938,13 +9938,13 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -9956,7 +9956,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -9974,13 +9974,13 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -9991,19 +9991,19 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -10022,7 +10022,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -10033,7 +10033,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -10044,7 +10044,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -10055,7 +10055,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -10067,7 +10067,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -10299,69 +10299,69 @@ Variant c_domdocumenttype::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -10371,31 +10371,31 @@ Variant c_domdocumenttype::o_invoke_few_args(MethodIndex methodIndex, const char
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -10405,31 +10405,31 @@ Variant c_domdocumenttype::o_invoke_few_args(MethodIndex methodIndex, const char
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -10589,7 +10589,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -10603,7 +10603,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -10626,7 +10626,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10644,7 +10644,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10662,7 +10662,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10680,7 +10680,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -10694,7 +10694,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -10716,7 +10716,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10735,7 +10735,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -10749,7 +10749,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -10771,7 +10771,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10805,7 +10805,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -10819,7 +10819,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10837,7 +10837,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -10851,7 +10851,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -10865,7 +10865,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -10903,7 +10903,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10921,7 +10921,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10939,7 +10939,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -10957,7 +10957,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -10979,7 +10979,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -11583,13 +11583,13 @@ Variant c_sqlite3stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -11601,19 +11601,19 @@ Variant c_sqlite3stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 0x18d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
         return (t_paramcount());
       }
       break;
     case 0xee:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -11628,25 +11628,25 @@ Variant c_sqlite3stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0xf1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("execute", 0, 1);
         return (t_execute());
       }
       break;
     case 0x18b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 0x18e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("clear", 0, 1);
         return (t_clear());
       }
       break;
     case 0xf4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -11754,56 +11754,56 @@ Variant c_sqlite3stmt::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         return (t___construct(a0, a1), null);
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 0x18d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
         return (t_paramcount());
       }
       break;
     case 0xee:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindparam", count, 2, 3, 1);
         if (count <= 2) return (t_bindparam(a0, ref(a1)));
         return (t_bindparam(a0, ref(a1), a2));
       }
       break;
     case 0xf1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("execute", 0, 1);
         return (t_execute());
       }
       break;
     case 0x18b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 0x18e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("clear", 0, 1);
         return (t_clear());
       }
       break;
     case 0xf4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         if (count <= 2) return (t_bindvalue(a0, a1));
         return (t_bindvalue(a0, a1, a2));
@@ -11892,7 +11892,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -11906,7 +11906,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -11928,7 +11928,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
@@ -11942,7 +11942,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x18d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
@@ -11956,7 +11956,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xee:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -11983,7 +11983,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xf1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("execute", 0, 1);
@@ -11997,7 +11997,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x18b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
@@ -12011,7 +12011,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x18e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("clear", 0, 1);
@@ -12025,7 +12025,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0xf4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -12389,7 +12389,7 @@ Variant c_domnodelist::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -12400,13 +12400,13 @@ Variant c_domnodelist::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -12418,19 +12418,19 @@ Variant c_domnodelist::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -12506,37 +12506,37 @@ Variant c_domnodelist::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         return (t_item(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
@@ -12600,7 +12600,7 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x79:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -12618,7 +12618,7 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -12632,7 +12632,7 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -12654,7 +12654,7 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -12668,7 +12668,7 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
@@ -12682,7 +12682,7 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -12996,19 +12996,19 @@ Variant c_normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13021,7 +13021,7 @@ Variant c_normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0xdb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13089,26 +13089,26 @@ Variant c_normalizer::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
         if (count <= 1) return (ti_normalize(o_getClassName(), a0));
         return (ti_normalize(o_getClassName(), a0, a1));
       }
       break;
     case 0xdb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
         if (count <= 1) return (ti_isnormalized(o_getClassName(), a0));
         return (ti_isnormalized(o_getClassName(), a0, a1));
@@ -13159,7 +13159,7 @@ Variant c_normalizer::os_invoke(const char *c, MethodIndex methodIndex, const ch
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("normalize", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13172,7 +13172,7 @@ Variant c_normalizer::os_invoke(const char *c, MethodIndex methodIndex, const ch
       }
       break;
     case 0xdb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("isnormalized", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13228,7 +13228,7 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -13242,7 +13242,7 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -13256,7 +13256,7 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -13279,7 +13279,7 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0xdb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -13392,7 +13392,7 @@ Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -13415,7 +13415,7 @@ Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::Va
       }
       break;
     case 0xdb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -13654,13 +13654,13 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13673,7 +13673,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13684,7 +13684,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13695,7 +13695,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13706,13 +13706,13 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13724,7 +13724,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13736,7 +13736,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13748,7 +13748,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13760,13 +13760,13 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13778,7 +13778,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -13796,13 +13796,13 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13813,19 +13813,19 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -13844,7 +13844,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13855,7 +13855,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13866,7 +13866,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13877,7 +13877,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -13888,7 +13888,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -13901,7 +13901,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13913,7 +13913,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -13925,7 +13925,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -14215,81 +14215,81 @@ Variant c_domcharacterdata::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -14299,31 +14299,31 @@ Variant c_domcharacterdata::o_invoke_few_args(MethodIndex methodIndex, const cha
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -14333,49 +14333,49 @@ Variant c_domcharacterdata::o_invoke_few_args(MethodIndex methodIndex, const cha
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -14563,7 +14563,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -14577,7 +14577,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14600,7 +14600,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14618,7 +14618,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14636,7 +14636,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14654,7 +14654,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -14668,7 +14668,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14690,7 +14690,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14712,7 +14712,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14734,7 +14734,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14753,7 +14753,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -14767,7 +14767,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -14789,7 +14789,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -14823,7 +14823,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -14837,7 +14837,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14855,7 +14855,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -14869,7 +14869,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -14883,7 +14883,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -14921,7 +14921,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14939,7 +14939,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14957,7 +14957,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14975,7 +14975,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -14993,7 +14993,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -15019,7 +15019,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -15041,7 +15041,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -15063,7 +15063,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -15769,13 +15769,13 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -15788,7 +15788,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15799,7 +15799,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15810,7 +15810,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15821,13 +15821,13 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -15839,7 +15839,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15851,7 +15851,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15862,7 +15862,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -15874,7 +15874,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -15892,13 +15892,13 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15909,19 +15909,19 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -15940,7 +15940,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15951,7 +15951,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15962,7 +15962,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -15973,7 +15973,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -15985,7 +15985,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -16222,69 +16222,69 @@ Variant c_domentityreference::o_invoke_few_args(MethodIndex methodIndex, const c
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -16294,31 +16294,31 @@ Variant c_domentityreference::o_invoke_few_args(MethodIndex methodIndex, const c
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -16328,31 +16328,31 @@ Variant c_domentityreference::o_invoke_few_args(MethodIndex methodIndex, const c
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -16512,7 +16512,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -16526,7 +16526,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16549,7 +16549,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16567,7 +16567,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16585,7 +16585,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16603,7 +16603,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -16617,7 +16617,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16639,7 +16639,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16658,7 +16658,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16676,7 +16676,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16698,7 +16698,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16732,7 +16732,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -16746,7 +16746,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16764,7 +16764,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -16778,7 +16778,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -16792,7 +16792,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -16830,7 +16830,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16848,7 +16848,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16866,7 +16866,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -16884,7 +16884,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -16906,7 +16906,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -17494,43 +17494,43 @@ Variant c_simplexmlelementiterator::o_invoke(MethodIndex methodIndex, const char
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
@@ -17595,43 +17595,43 @@ Variant c_simplexmlelementiterator::o_invoke_few_args(MethodIndex methodIndex, c
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
@@ -17705,7 +17705,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
@@ -17719,7 +17719,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
@@ -17733,7 +17733,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
@@ -17747,7 +17747,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -17761,7 +17761,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -17775,7 +17775,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
@@ -17789,7 +17789,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
@@ -18132,25 +18132,25 @@ Variant c_datetimezone::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x88:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
         return (t_gettransitions());
       }
       break;
     case 0x89:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         return (ti_listidentifiers(o_getClassName()));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x82:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -18161,7 +18161,7 @@ Variant c_datetimezone::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -18172,13 +18172,13 @@ Variant c_datetimezone::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0x8a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         return (ti_listabbreviations(o_getClassName()));
       }
       break;
     case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
@@ -18251,43 +18251,43 @@ Variant c_datetimezone::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x88:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
         return (t_gettransitions());
       }
       break;
     case 0x89:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         return (ti_listidentifiers(o_getClassName()));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x82:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getoffset", count, 1, 1, 1);
         return (t_getoffset(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
     case 0x8a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         return (ti_listabbreviations(o_getClassName()));
       }
       break;
     case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
@@ -18351,13 +18351,13 @@ Variant c_datetimezone::os_invoke(const char *c, MethodIndex methodIndex, const 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x89:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
         return (ti_listidentifiers(c));
       }
       break;
     case 0x8a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
         return (ti_listabbreviations(c));
       }
@@ -18392,7 +18392,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x88:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("gettransitions", 0, 1);
@@ -18406,7 +18406,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x89:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
@@ -18420,7 +18420,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -18434,7 +18434,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x82:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -18452,7 +18452,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -18470,7 +18470,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x8a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
@@ -18484,7 +18484,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getname", 0, 1);
@@ -18618,7 +18618,7 @@ Variant c_datetimezone::os_invoke_from_eval(const char *c, const char *s, Eval::
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x89:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("listidentifiers", 0, 1);
@@ -18632,7 +18632,7 @@ Variant c_datetimezone::os_invoke_from_eval(const char *c, const char *s, Eval::
       }
       break;
     case 0x8a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("listabbreviations", 0, 1);
@@ -18841,43 +18841,43 @@ Variant c_domnodeiterator::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
@@ -18942,43 +18942,43 @@ Variant c_domnodeiterator::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
@@ -19052,7 +19052,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
@@ -19066,7 +19066,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
@@ -19080,7 +19080,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
@@ -19094,7 +19094,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -19108,7 +19108,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -19122,7 +19122,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
@@ -19136,7 +19136,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
@@ -19422,7 +19422,7 @@ Variant c_domimplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x75:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -19438,7 +19438,7 @@ Variant c_domimplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
       }
       break;
     case 0x76:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -19454,19 +19454,19 @@ Variant c_domimplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x77:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -19547,7 +19547,7 @@ Variant c_domimplementation::o_invoke_few_args(MethodIndex methodIndex, const ch
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x75:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("createdocument", 3, 1);
         if (count <= 0) return (t_createdocument());
         if (count == 1) return (t_createdocument(a0));
@@ -19556,7 +19556,7 @@ Variant c_domimplementation::o_invoke_few_args(MethodIndex methodIndex, const ch
       }
       break;
     case 0x76:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("createdocumenttype", 3, 1);
         if (count <= 0) return (t_createdocumenttype());
         if (count == 1) return (t_createdocumenttype(a0));
@@ -19565,19 +19565,19 @@ Variant c_domimplementation::o_invoke_few_args(MethodIndex methodIndex, const ch
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x77:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("hasfeature", count, 2, 2, 1);
         return (t_hasfeature(a0, a1));
       }
@@ -19641,7 +19641,7 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x75:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -19670,7 +19670,7 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 0x76:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -19699,7 +19699,7 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -19713,7 +19713,7 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -19727,7 +19727,7 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
       }
       break;
     case 0x77:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -20092,13 +20092,13 @@ Variant c_soapheader::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -20155,13 +20155,13 @@ Variant c_soapheader::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("__construct", count, 2, 5, 1);
         if (count <= 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -20209,7 +20209,7 @@ Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -20223,7 +20223,7 @@ Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -20486,13 +20486,13 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -20505,7 +20505,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20516,7 +20516,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20527,7 +20527,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20538,13 +20538,13 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -20556,7 +20556,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20568,13 +20568,13 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -20586,7 +20586,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -20604,13 +20604,13 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20621,19 +20621,19 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -20652,7 +20652,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20663,7 +20663,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20674,7 +20674,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -20685,7 +20685,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -20697,7 +20697,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -20929,69 +20929,69 @@ Variant c_domnotation::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -21001,31 +21001,31 @@ Variant c_domnotation::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -21035,31 +21035,31 @@ Variant c_domnotation::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -21219,7 +21219,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -21233,7 +21233,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21256,7 +21256,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21274,7 +21274,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21292,7 +21292,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21310,7 +21310,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -21324,7 +21324,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21346,7 +21346,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21365,7 +21365,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -21379,7 +21379,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21401,7 +21401,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -21435,7 +21435,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -21449,7 +21449,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21467,7 +21467,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -21481,7 +21481,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -21495,7 +21495,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -21533,7 +21533,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21551,7 +21551,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21569,7 +21569,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -21587,7 +21587,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -21609,7 +21609,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -22193,25 +22193,25 @@ Variant c_debuggerproxy::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xaa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
         return (t_islocal());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0xa6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22268,25 +22268,25 @@ Variant c_debuggerproxy::o_invoke_few_args(MethodIndex methodIndex, const char *
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xaa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
         return (t_islocal());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0xa6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("send", count, 1, 1, 1);
         return (t_send(a0));
       }
@@ -22342,7 +22342,7 @@ Variant c_debuggerproxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xaa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("islocal", 0, 1);
@@ -22356,7 +22356,7 @@ Variant c_debuggerproxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -22370,7 +22370,7 @@ Variant c_debuggerproxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -22384,7 +22384,7 @@ Variant c_debuggerproxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0xa6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -22659,13 +22659,13 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -22678,7 +22678,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22689,7 +22689,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22700,7 +22700,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22711,13 +22711,13 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -22729,7 +22729,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -22741,7 +22741,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -22753,7 +22753,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22765,7 +22765,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22777,7 +22777,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -22789,7 +22789,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -22807,13 +22807,13 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22824,19 +22824,19 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -22855,7 +22855,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22866,7 +22866,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22877,7 +22877,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22888,7 +22888,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -22899,7 +22899,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -22912,7 +22912,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -22924,7 +22924,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -22936,7 +22936,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -23232,82 +23232,82 @@ Variant c_domcomment::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("substringdata", count, 2, 2, 1);
         return (t_substringdata(a0, a1));
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("insertdata", count, 2, 2, 1);
         return (t_insertdata(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__construct", 1, 1);
         if (count <= 0) return (t___construct(), null);
         return (t___construct(a0), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -23317,31 +23317,31 @@ Variant c_domcomment::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -23351,49 +23351,49 @@ Variant c_domcomment::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appenddata", count, 1, 1, 1);
         return (t_appenddata(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("replacedata", count, 3, 3, 1);
         return (t_replacedata(a0, a1, a2));
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("deletedata", count, 2, 2, 1);
         return (t_deletedata(a0, a1));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -23582,7 +23582,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -23596,7 +23596,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23619,7 +23619,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23637,7 +23637,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23655,7 +23655,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23673,7 +23673,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -23687,7 +23687,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x41:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23709,7 +23709,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23731,7 +23731,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x42:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23753,7 +23753,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23772,7 +23772,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23791,7 +23791,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -23813,7 +23813,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -23847,7 +23847,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -23861,7 +23861,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23879,7 +23879,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -23893,7 +23893,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -23907,7 +23907,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -23945,7 +23945,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23963,7 +23963,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23981,7 +23981,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x43:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -23999,7 +23999,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -24017,7 +24017,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x44:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -24043,7 +24043,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x45:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -24065,7 +24065,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -24087,7 +24087,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -24784,7 +24784,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -24795,13 +24795,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x17b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("version", 0, 1);
         return (t_version());
       }
       break;
     case 0x17c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -24812,13 +24812,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x17d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -24832,19 +24832,19 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x17e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
         return (t_lastinsertrowid());
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -24855,13 +24855,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 0x180:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -24872,13 +24872,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x17f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         return (t_lasterrormsg());
       }
       break;
     case 0x181:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -24893,7 +24893,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x182:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -24908,13 +24908,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x183:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("changes", 0, 1);
         return (t_changes());
       }
       break;
     case 0x184:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -24929,13 +24929,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x185:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
         return (t_lasterrorcode());
       }
       break;
     case 0xe5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -24946,7 +24946,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x186:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -25149,81 +25149,81 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         return (t_exec(a0));
       }
       break;
     case 0x17b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("version", 0, 1);
         return (t_version());
       }
       break;
     case 0x17c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
         return (t_loadextension(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x17d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
         if (count <= 2) return (t_createfunction(a0, a1));
         return (t_createfunction(a0, a1, a2));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x17e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
         return (t_lastinsertrowid());
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         return (t_query(a0));
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 0x180:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
         return (t_escapestring(a0));
       }
       break;
     case 0x17f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         return (t_lasterrormsg());
       }
       break;
     case 0x181:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
         if (count <= 3) return (t_createaggregate(a0, a1, a2));
         return (t_createaggregate(a0, a1, a2, a3));
       }
       break;
     case 0x182:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
         if (count <= 1) return (t_open(a0), null);
         if (count == 2) return (t_open(a0, a1), null);
@@ -25231,32 +25231,32 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
       }
       break;
     case 0x183:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("changes", 0, 1);
         return (t_changes());
       }
       break;
     case 0x184:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
         if (count <= 3) return (t_openblob(a0, a1, a2));
         return (t_openblob(a0, a1, a2, a3));
       }
       break;
     case 0x185:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
         return (t_lasterrorcode());
       }
       break;
     case 0xe5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("prepare", count, 1, 1, 1);
         return (t_prepare(a0));
       }
       break;
     case 0x186:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
         if (count <= 1) return (t_querysingle(a0));
         return (t_querysingle(a0, a1));
@@ -25401,7 +25401,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xdd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -25419,7 +25419,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x17b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("version", 0, 1);
@@ -25433,7 +25433,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x17c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -25451,7 +25451,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -25465,7 +25465,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x17d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25492,7 +25492,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -25506,7 +25506,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x17e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
@@ -25520,7 +25520,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -25538,7 +25538,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
@@ -25552,7 +25552,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x180:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -25570,7 +25570,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x17f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
@@ -25584,7 +25584,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x181:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25615,7 +25615,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x182:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25643,7 +25643,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x183:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("changes", 0, 1);
@@ -25657,7 +25657,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x184:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -25688,7 +25688,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x185:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
@@ -25702,7 +25702,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0xe5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -25720,7 +25720,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x186:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -26289,13 +26289,13 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -26308,7 +26308,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26319,13 +26319,13 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x30:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("isid", 0, 1);
         return (t_isid());
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26336,7 +26336,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26347,13 +26347,13 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -26365,7 +26365,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26377,7 +26377,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -26390,7 +26390,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -26402,7 +26402,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -26420,13 +26420,13 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26437,19 +26437,19 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -26468,7 +26468,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26479,7 +26479,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26490,7 +26490,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -26501,7 +26501,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -26513,7 +26513,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -26756,76 +26756,76 @@ Variant c_domattr::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x30:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("isid", 0, 1);
         return (t_isid());
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -26835,31 +26835,31 @@ Variant c_domattr::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -26869,31 +26869,31 @@ Variant c_domattr::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -27058,7 +27058,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -27072,7 +27072,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -27095,7 +27095,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27113,7 +27113,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x30:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("isid", 0, 1);
@@ -27127,7 +27127,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27145,7 +27145,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27163,7 +27163,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -27177,7 +27177,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -27199,7 +27199,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27218,7 +27218,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -27241,7 +27241,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -27263,7 +27263,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -27297,7 +27297,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -27311,7 +27311,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27329,7 +27329,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -27343,7 +27343,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -27357,7 +27357,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -27395,7 +27395,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27413,7 +27413,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27431,7 +27431,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -27449,7 +27449,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -27471,7 +27471,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -28156,13 +28156,13 @@ Variant c_soapvar::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         {
           ArrayData *ad(params.get());
@@ -28223,13 +28223,13 @@ Variant c_soapvar::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         if (count <= 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -28279,7 +28279,7 @@ Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -28293,7 +28293,7 @@ Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -28566,7 +28566,7 @@ Variant c_domnamednodemap::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -28577,7 +28577,7 @@ Variant c_domnamednodemap::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x78:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -28588,13 +28588,13 @@ Variant c_domnamednodemap::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -28606,19 +28606,19 @@ Variant c_domnamednodemap::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -28629,7 +28629,7 @@ Variant c_domnamednodemap::o_invoke(MethodIndex methodIndex, const char *s, CArr
       }
       break;
     case 0x7b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -28729,49 +28729,49 @@ Variant c_domnamednodemap::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("item", count, 1, 1, 1);
         return (t_item(a0));
       }
       break;
     case 0x78:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getnameditem", count, 1, 1, 1);
         return (t_getnameditem(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x7b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getnameditemns", count, 2, 2, 1);
         return (t_getnameditemns(a0, a1));
       }
@@ -28847,7 +28847,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x79:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -28865,7 +28865,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x78:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -28883,7 +28883,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -28897,7 +28897,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -28919,7 +28919,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -28933,7 +28933,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
@@ -28947,7 +28947,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -28965,7 +28965,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
       }
       break;
     case 0x7b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -29297,7 +29297,7 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x187:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -29308,7 +29308,7 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x188:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -29319,25 +29319,25 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x189:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
         return (t_numcolumns());
       }
       break;
     case 0x18a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -29349,13 +29349,13 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 0x18b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 0x18c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
         return (t_finalize());
       }
@@ -29442,50 +29442,50 @@ Variant c_sqlite3result::o_invoke_few_args(MethodIndex methodIndex, const char *
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x187:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
         return (t_columnname(a0));
       }
       break;
     case 0x188:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
         return (t_columntype(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x189:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
         return (t_numcolumns());
       }
       break;
     case 0x18a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
         if (count <= 0) return (t_fetcharray());
         return (t_fetcharray(a0));
       }
       break;
     case 0x18b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
     case 0x18c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
         return (t_finalize());
       }
@@ -29566,7 +29566,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x187:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -29584,7 +29584,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x188:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -29602,7 +29602,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -29616,7 +29616,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -29630,7 +29630,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x189:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
@@ -29644,7 +29644,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x18a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -29663,7 +29663,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x18b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
@@ -29677,7 +29677,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 0x18c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
@@ -30067,7 +30067,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x141:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -30082,19 +30082,19 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0xf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("count", 0, 1);
         return (t_count());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x142:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30105,13 +30105,13 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -30123,7 +30123,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -30142,7 +30142,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0xa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30153,13 +30153,13 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 0x143:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -30171,7 +30171,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0xb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30182,7 +30182,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x144:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30194,7 +30194,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x145:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30205,7 +30205,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x146:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30217,7 +30217,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x147:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30229,7 +30229,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0xc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30240,7 +30240,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30251,7 +30251,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x148:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("children", 2, 1);
         {
           ArrayData *ad(params.get());
@@ -30265,7 +30265,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x149:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -30280,7 +30280,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x14a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -30291,13 +30291,13 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
       break;
     case 0x14b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
         {
           ArrayData *ad(params.get());
@@ -30311,7 +30311,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
       }
       break;
     case 0xd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -30592,7 +30592,7 @@ Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x141:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("addattribute", count, 1, 3, 1);
         if (count <= 1) return (t_addattribute(a0), null);
         if (count == 2) return (t_addattribute(a0, a1), null);
@@ -30600,37 +30600,37 @@ Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const cha
       }
       break;
     case 0xf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("count", 0, 1);
         return (t_count());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x142:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("xpath", count, 1, 1, 1);
         return (t_xpath(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("__construct", count, 1, 5, 1);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
@@ -30640,70 +30640,70 @@ Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const cha
       }
       break;
     case 0xa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("offsetexists", count, 1, 1, 1);
         return (t_offsetexists(a0));
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
         return (t_getiterator());
       }
       break;
     case 0x143:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("registerxpathnamespace", count, 2, 2, 1);
         return (t_registerxpathnamespace(a0, a1));
       }
       break;
     case 0xb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("offsetget", count, 1, 1, 1);
         return (t_offsetget(a0));
       }
       break;
     case 0x144:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("getnamespaces", 1, 1);
         if (count <= 0) return (t_getnamespaces());
         return (t_getnamespaces(a0));
       }
       break;
     case 0x145:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__unset", count, 1, 1, 1);
         return (t___unset(a0));
       }
       break;
     case 0x146:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("asxml", 1, 1);
         if (count <= 0) return (t_asxml());
         return (t_asxml(a0));
       }
       break;
     case 0x147:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("getdocnamespaces", 1, 1);
         if (count <= 0) return (t_getdocnamespaces());
         return (t_getdocnamespaces(a0));
       }
       break;
     case 0xc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("offsetunset", count, 1, 1, 1);
         return (t_offsetunset(a0), null);
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x148:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("children", 2, 1);
         if (count <= 0) return (t_children());
         if (count == 1) return (t_children(a0));
@@ -30711,7 +30711,7 @@ Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const cha
       }
       break;
     case 0x149:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("addchild", count, 1, 3, 1);
         if (count <= 1) return (t_addchild(a0));
         if (count == 2) return (t_addchild(a0, a1));
@@ -30719,19 +30719,19 @@ Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const cha
       }
       break;
     case 0x14a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__isset", count, 1, 1, 1);
         return (t___isset(a0));
       }
       break;
     case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getname", 0, 1);
         return (t_getname());
       }
       break;
     case 0x14b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("attributes", 2, 1);
         if (count <= 0) return (t_attributes());
         if (count == 1) return (t_attributes(a0));
@@ -30739,7 +30739,7 @@ Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const cha
       }
       break;
     case 0xd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("offsetset", count, 2, 2, 1);
         return (t_offsetset(a0, a1), null);
       }
@@ -30920,7 +30920,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x141:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -30948,7 +30948,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0xf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("count", 0, 1);
@@ -30962,7 +30962,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
@@ -30976,7 +30976,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x142:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -30994,7 +30994,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -31008,7 +31008,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31030,7 +31030,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -31068,7 +31068,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0xa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31086,7 +31086,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x7a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getiterator", 0, 1);
@@ -31100,7 +31100,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x143:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31122,7 +31122,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0xb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31140,7 +31140,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x144:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31159,7 +31159,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x145:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31177,7 +31177,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x146:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31196,7 +31196,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x147:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31215,7 +31215,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0xc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31233,7 +31233,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31251,7 +31251,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x148:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31275,7 +31275,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x149:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -31303,7 +31303,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x14a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -31321,7 +31321,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x8b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getname", 0, 1);
@@ -31335,7 +31335,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0x14b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31359,7 +31359,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
       }
       break;
     case 0xd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -32012,7 +32012,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xc9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
         {
           ArrayData *ad(params.get());
@@ -32039,7 +32039,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xca:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -32055,7 +32055,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xcb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
         {
           ArrayData *ad(params.get());
@@ -32076,19 +32076,19 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0xcc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -32101,7 +32101,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xcd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -32114,7 +32114,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xce:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -32130,7 +32130,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xcf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -32143,13 +32143,13 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 0xd0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -32160,7 +32160,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -32173,7 +32173,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -32187,7 +32187,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -32203,7 +32203,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -32220,13 +32220,13 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
         return (t_getversion());
       }
       break;
     case 0xd6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -32239,7 +32239,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -32256,7 +32256,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("flush", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -32268,7 +32268,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xd8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -32284,7 +32284,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0xda:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -32603,7 +32603,7 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xc9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 9) return throw_wrong_arguments("addserver", count, 1, 9, 1);
         if (count <= 1) return (t_addserver(a0));
         if (count == 2) return (t_addserver(a0, a1));
@@ -32614,7 +32614,7 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0xca:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 4) return throw_wrong_arguments("set", count, 2, 4, 1);
         if (count <= 2) return (t_set(a0, a1));
         if (count == 3) return (t_set(a0, a1, a2));
@@ -32622,7 +32622,7 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0xcb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 6) return throw_wrong_arguments("setserverparams", count, 1, 6, 1);
         if (count <= 1) return (t_setserverparams(a0));
         if (count == 2) return (t_setserverparams(a0, a1));
@@ -32633,33 +32633,33 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0xcc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("increment", count, 1, 2, 1);
         if (count <= 1) return (t_increment(a0));
         return (t_increment(a0, a1));
       }
       break;
     case 0xcd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("decrement", count, 1, 2, 1);
         if (count <= 1) return (t_decrement(a0));
         return (t_decrement(a0, a1));
       }
       break;
     case 0xce:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("getstats", 3, 1);
         if (count <= 0) return (t_getstats());
         if (count == 1) return (t_getstats(a0));
@@ -32668,40 +32668,40 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0xcf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("getserverstatus", count, 1, 2, 1);
         if (count <= 1) return (t_getserverstatus(a0));
         return (t_getserverstatus(a0, a1));
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
         return (t_close());
       }
       break;
     case 0xd0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setoptimeout", count, 1, 1, 1);
         return (t_setoptimeout(a0));
       }
       break;
     case 0xd1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("setcompressthreshold", count, 1, 2, 1);
         if (count <= 1) return (t_setcompressthreshold(a0));
         return (t_setcompressthreshold(a0, a1));
       }
       break;
     case 0xd2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("get", count, 1, 2, 1);
         if (count <= 1) return (t_get(a0));
         return (t_get(a0, ref(a1)));
       }
       break;
     case 0xd4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 4) return throw_wrong_arguments("add", count, 2, 4, 1);
         if (count <= 2) return (t_add(a0, a1));
         if (count == 3) return (t_add(a0, a1, a2));
@@ -32709,7 +32709,7 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0xd3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
         if (count <= 1) return (t_pconnect(a0), null);
         if (count == 2) return (t_pconnect(a0, a1), null);
@@ -32718,20 +32718,20 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0xd5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
         return (t_getversion());
       }
       break;
     case 0xd6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("delete", count, 1, 2, 1);
         if (count <= 1) return (t_delete(a0));
         return (t_delete(a0, a1));
       }
       break;
     case 0xd7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
         if (count <= 1) return (t_connect(a0), null);
         if (count == 2) return (t_connect(a0, a1), null);
@@ -32740,14 +32740,14 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0xd9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("flush", 1, 1);
         if (count <= 0) return (t_flush());
         return (t_flush(a0));
       }
       break;
     case 0xd8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 4) return throw_wrong_arguments("replace", count, 2, 4, 1);
         if (count <= 2) return (t_replace(a0, a1));
         if (count == 3) return (t_replace(a0, a1, a2));
@@ -32755,7 +32755,7 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0xda:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("getextendedstats", 3, 1);
         if (count <= 0) return (t_getextendedstats());
         if (count == 1) return (t_getextendedstats(a0));
@@ -32949,7 +32949,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xc9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33007,7 +33007,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xca:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33039,7 +33039,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xcb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33082,7 +33082,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -33096,7 +33096,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -33110,7 +33110,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xcc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33133,7 +33133,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xcd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33156,7 +33156,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xce:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33185,7 +33185,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xcf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33208,7 +33208,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("close", 0, 1);
@@ -33222,7 +33222,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -33240,7 +33240,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33263,7 +33263,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33286,7 +33286,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33318,7 +33318,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33351,7 +33351,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getversion", 0, 1);
@@ -33365,7 +33365,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -33388,7 +33388,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33421,7 +33421,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -33440,7 +33440,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xd8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -33472,7 +33472,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0xda:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -34257,13 +34257,13 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -34276,7 +34276,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34287,7 +34287,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34298,7 +34298,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34309,13 +34309,13 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -34327,7 +34327,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34339,7 +34339,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -34352,7 +34352,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -34364,7 +34364,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -34382,13 +34382,13 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34399,19 +34399,19 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -34430,7 +34430,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34441,7 +34441,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34452,7 +34452,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -34463,7 +34463,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -34475,7 +34475,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -34714,70 +34714,70 @@ Variant c_domprocessinginstruction::o_invoke_few_args(MethodIndex methodIndex, c
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -34787,31 +34787,31 @@ Variant c_domprocessinginstruction::o_invoke_few_args(MethodIndex methodIndex, c
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -34821,31 +34821,31 @@ Variant c_domprocessinginstruction::o_invoke_few_args(MethodIndex methodIndex, c
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -35006,7 +35006,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -35020,7 +35020,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -35043,7 +35043,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35061,7 +35061,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35079,7 +35079,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35097,7 +35097,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -35111,7 +35111,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -35133,7 +35133,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35152,7 +35152,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -35175,7 +35175,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -35197,7 +35197,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -35231,7 +35231,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -35245,7 +35245,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35263,7 +35263,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -35277,7 +35277,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -35291,7 +35291,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -35329,7 +35329,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35347,7 +35347,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35365,7 +35365,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -35383,7 +35383,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -35405,7 +35405,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -35998,19 +35998,19 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 0xdc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -36021,7 +36021,7 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xe8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -36033,13 +36033,13 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 0xe9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -36050,37 +36050,37 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0xea:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
         return (t_nextrowset());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0xdf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0xeb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -36099,7 +36099,7 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xec:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -36111,13 +36111,13 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xed:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
         return (t_columncount());
       }
       break;
     case 0xee:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -36136,13 +36136,13 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xef:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
         return (t_closecursor());
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -36154,13 +36154,13 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xf0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
         return (t_rowcount());
       }
       break;
     case 0xf1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("execute", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -36172,7 +36172,7 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xf2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
         {
           ArrayData *ad(params.get());
@@ -36186,7 +36186,7 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xf4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -36200,7 +36200,7 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xf3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -36216,7 +36216,7 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0xf5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -36232,31 +36232,31 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 0xe6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 0xe7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
       break;
     case 0xf6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
         return (t_debugdumpparams());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
@@ -36537,74 +36537,74 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
         return (t_next());
       }
       break;
     case 0xdc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         return (t_getattribute(a0));
       }
       break;
     case 0xe8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("fetchcolumn", 1, 1);
         if (count <= 0) return (t_fetchcolumn());
         return (t_fetchcolumn(a0));
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
         return (t_key());
       }
       break;
     case 0xe9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getcolumnmeta", count, 1, 1, 1);
         return (t_getcolumnmeta(a0));
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
         return (t_valid());
       }
       break;
     case 0xea:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
         return (t_nextrowset());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0xdf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0xeb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("bindcolumn", count, 2, 5, 1);
         if (count <= 2) return (t_bindcolumn(a0, ref(a1)));
         if (count == 3) return (t_bindcolumn(a0, ref(a1), a2));
@@ -36613,7 +36613,7 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       }
       break;
     case 0xec:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("setfetchmode", count+1, 1);
         if (count <= 1) return (t_setfetchmode(count, a0));
         Array params;
@@ -36626,13 +36626,13 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       }
       break;
     case 0xed:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
         return (t_columncount());
       }
       break;
     case 0xee:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("bindparam", count, 2, 5, 1);
         if (count <= 2) return (t_bindparam(a0, ref(a1)));
         if (count == 3) return (t_bindparam(a0, ref(a1), a2));
@@ -36641,32 +36641,32 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       }
       break;
     case 0xef:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
         return (t_closecursor());
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         return (t_setattribute(a0, a1));
       }
       break;
     case 0xf0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
         return (t_rowcount());
       }
       break;
     case 0xf1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("execute", 1, 1);
         if (count <= 0) return (t_execute());
         return (t_execute(a0));
       }
       break;
     case 0xf2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("fetchobject", 2, 1);
         if (count <= 0) return (t_fetchobject());
         if (count == 1) return (t_fetchobject(a0));
@@ -36674,14 +36674,14 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       }
       break;
     case 0xf4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("bindvalue", count, 2, 3, 1);
         if (count <= 2) return (t_bindvalue(a0, a1));
         return (t_bindvalue(a0, a1, a2));
       }
       break;
     case 0xf3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("fetchall", 3, 1);
         if (count <= 0) return (t_fetchall());
         if (count == 1) return (t_fetchall(a0));
@@ -36690,7 +36690,7 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       }
       break;
     case 0xf5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("fetch", 3, 1);
         if (count <= 0) return (t_fetch());
         if (count == 1) return (t_fetch(a0));
@@ -36699,31 +36699,31 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
         return (t_current());
       }
       break;
     case 0xe6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 0xe7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
       break;
     case 0xf6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
         return (t_debugdumpparams());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
         return (t_rewind());
       }
@@ -36941,7 +36941,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("next", 0, 1);
@@ -36955,7 +36955,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xdc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
@@ -36969,7 +36969,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -36987,7 +36987,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xe8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -37006,7 +37006,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("key", 0, 1);
@@ -37020,7 +37020,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xe9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -37038,7 +37038,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("valid", 0, 1);
@@ -37052,7 +37052,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xea:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("nextrowset", 0, 1);
@@ -37066,7 +37066,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -37080,7 +37080,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xdf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
@@ -37094,7 +37094,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -37108,7 +37108,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xeb:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -37145,7 +37145,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xec:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -37165,7 +37165,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xed:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("columncount", 0, 1);
@@ -37179,7 +37179,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xee:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -37216,7 +37216,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xef:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("closecursor", 0, 1);
@@ -37230,7 +37230,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37252,7 +37252,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xf0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("rowcount", 0, 1);
@@ -37266,7 +37266,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xf1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -37285,7 +37285,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xf2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37309,7 +37309,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xf4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -37336,7 +37336,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xf3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -37365,7 +37365,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xf5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -37394,7 +37394,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("current", 0, 1);
@@ -37408,7 +37408,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xe6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
@@ -37422,7 +37422,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xe7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
@@ -37436,7 +37436,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0xf6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("debugdumpparams", 0, 1);
@@ -37450,7 +37450,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("rewind", 0, 1);
@@ -38187,7 +38187,7 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x14c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -38203,13 +38203,13 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x14d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
         return (t___getlastrequest());
       }
       break;
     case 0x14e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -38221,7 +38221,7 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x14f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -38234,7 +38234,7 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x150:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -38253,13 +38253,13 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x151:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -38271,13 +38271,13 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x152:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
         return (t___getlastrequestheaders());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -38290,31 +38290,31 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x153:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
         return (t___getfunctions());
       }
       break;
     case 0x154:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
         return (t___getlastresponseheaders());
       }
       break;
     case 0x155:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
         return (t___getlastresponse());
       }
       break;
     case 0x156:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
         return (t___gettypes());
       }
       break;
     case 0x8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -38474,34 +38474,34 @@ Variant c_soapclient::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x14c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 4 || count > 5) return throw_wrong_arguments("__dorequest", count, 4, 5, 1);
         if (count <= 4) return (t___dorequest(a0, a1, a2, a3));
         return (t___dorequest(a0, a1, a2, a3, a4));
       }
       break;
     case 0x14d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
         return (t___getlastrequest());
       }
       break;
     case 0x14e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__setsoapheaders", 1, 1);
         if (count <= 0) return (t___setsoapheaders());
         return (t___setsoapheaders(a0));
       }
       break;
     case 0x14f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__setcookie", count, 1, 2, 1);
         if (count <= 1) return (t___setcookie(a0));
         return (t___setcookie(a0, a1));
       }
       break;
     case 0x150:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("__soapcall", count, 2, 5, 1);
         if (count <= 2) return (t___soapcall(a0, a1));
         if (count == 3) return (t___soapcall(a0, a1, a2));
@@ -38510,57 +38510,57 @@ Variant c_soapclient::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x151:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("__setlocation", 1, 1);
         if (count <= 0) return (t___setlocation());
         return (t___setlocation(a0));
       }
       break;
     case 0x152:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
         return (t___getlastrequestheaders());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 0x153:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
         return (t___getfunctions());
       }
       break;
     case 0x154:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
         return (t___getlastresponseheaders());
       }
       break;
     case 0x155:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
         return (t___getlastresponse());
       }
       break;
     case 0x156:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
         return (t___gettypes());
       }
       break;
     case 0x8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__call", count, 2, 2, 1);
         return (t___call(a0, a1));
       }
@@ -38676,7 +38676,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x14c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -38711,7 +38711,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x14d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__getlastrequest", 0, 1);
@@ -38725,7 +38725,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x14e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -38744,7 +38744,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x14f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -38767,7 +38767,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x150:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -38804,7 +38804,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -38818,7 +38818,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x151:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -38837,7 +38837,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x152:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__getlastrequestheaders", 0, 1);
@@ -38851,7 +38851,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -38874,7 +38874,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x153:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__getfunctions", 0, 1);
@@ -38888,7 +38888,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x154:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__getlastresponseheaders", 0, 1);
@@ -38902,7 +38902,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x155:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__getlastresponse", 0, 1);
@@ -38916,7 +38916,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x156:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__gettypes", 0, 1);
@@ -38930,7 +38930,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -39414,13 +39414,13 @@ Variant c_soapparam::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -39465,13 +39465,13 @@ Variant c_soapparam::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__construct", count, 2, 2, 1);
         return (t___construct(a0, a1), null);
       }
@@ -39513,7 +39513,7 @@ Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -39527,7 +39527,7 @@ Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -39827,7 +39827,7 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x80:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -39838,7 +39838,7 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x81:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -39851,19 +39851,19 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x82:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
         return (t_getoffset());
       }
       break;
     case 0x83:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -39877,7 +39877,7 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         {
           ArrayData *ad(params.get());
@@ -39891,13 +39891,13 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x84:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
         return (t_gettimezone());
       }
       break;
     case 0x85:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -39911,7 +39911,7 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x86:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -39922,7 +39922,7 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x87:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -40052,38 +40052,38 @@ Variant c_datetime::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x80:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("format", count, 1, 1, 1);
         return (t_format(a0));
       }
       break;
     case 0x81:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("setdate", count, 3, 3, 1);
         return (t_setdate(a0, a1, a2));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x82:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
         return (t_getoffset());
       }
       break;
     case 0x83:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("settime", count, 2, 3, 1);
         if (count <= 2) return (t_settime(a0, a1));
         return (t_settime(a0, a1, a2));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -40091,26 +40091,26 @@ Variant c_datetime::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
       }
       break;
     case 0x84:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
         return (t_gettimezone());
       }
       break;
     case 0x85:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("setisodate", count, 2, 3, 1);
         if (count <= 2) return (t_setisodate(a0, a1));
         return (t_setisodate(a0, a1, a2));
       }
       break;
     case 0x86:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("settimezone", count, 1, 1, 1);
         return (t_settimezone(a0));
       }
       break;
     case 0x87:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("modify", count, 1, 1, 1);
         return (t_modify(a0));
       }
@@ -40202,7 +40202,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x80:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -40220,7 +40220,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x81:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -40246,7 +40246,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -40260,7 +40260,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x82:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getoffset", 0, 1);
@@ -40274,7 +40274,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x83:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -40301,7 +40301,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -40325,7 +40325,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x84:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("gettimezone", 0, 1);
@@ -40339,7 +40339,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x85:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -40366,7 +40366,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x86:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -40384,7 +40384,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x87:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -40851,7 +40851,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -40862,7 +40862,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x22:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -40874,13 +40874,13 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -40891,7 +40891,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x24:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -40905,19 +40905,19 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x25:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
         return (t_geterrorcode());
       }
       break;
     case 0x26:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
         return (t_getstrength());
       }
       break;
     case 0x14:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -40931,7 +40931,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x27:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -40942,7 +40942,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x28:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -40953,7 +40953,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -40965,7 +40965,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x2a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -40977,13 +40977,13 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x2b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
         return (t_geterrormessage());
       }
       break;
     case 0x2c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -41154,88 +41154,88 @@ Variant c_collator::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         return (t_getattribute(a0));
       }
       break;
     case 0x22:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("sortwithsortkeys", count, 1, 1, 1);
         return (t_sortwithsortkeys(ref(a0)));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
     case 0x24:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("sort", count, 1, 2, 1);
         if (count <= 1) return (t_sort(ref(a0)));
         return (t_sort(ref(a0), a1));
       }
       break;
     case 0x25:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
         return (t_geterrorcode());
       }
       break;
     case 0x26:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
         return (t_getstrength());
       }
       break;
     case 0x14:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("asort", count, 1, 2, 1);
         if (count <= 1) return (t_asort(ref(a0)));
         return (t_asort(ref(a0), a1));
       }
       break;
     case 0x27:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setstrength", count, 1, 1, 1);
         return (t_setstrength(a0));
       }
       break;
     case 0x28:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
         return (ti_create(o_getClassName(), a0));
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         return (t_setattribute(a0, a1));
       }
       break;
     case 0x2a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("getlocale", 1, 1);
         if (count <= 0) return (t_getlocale());
         return (t_getlocale(a0));
       }
       break;
     case 0x2b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
         return (t_geterrormessage());
       }
       break;
     case 0x2c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("compare", count, 2, 2, 1);
         return (t_compare(a0, a1));
       }
@@ -41344,7 +41344,7 @@ Variant c_collator::os_invoke(const char *c, MethodIndex methodIndex, const char
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x28:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("create", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -41383,7 +41383,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -41401,7 +41401,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x22:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -41419,7 +41419,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -41433,7 +41433,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -41451,7 +41451,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x24:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -41474,7 +41474,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x25:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("geterrorcode", 0, 1);
@@ -41488,7 +41488,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x26:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getstrength", 0, 1);
@@ -41502,7 +41502,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x14:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -41525,7 +41525,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x27:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -41543,7 +41543,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x28:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -41561,7 +41561,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -41583,7 +41583,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x2a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -41602,7 +41602,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x2b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("geterrormessage", 0, 1);
@@ -41616,7 +41616,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x2c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -41907,7 +41907,7 @@ Variant c_collator::os_invoke_from_eval(const char *c, const char *s, Eval::Vari
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x28:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -42401,13 +42401,13 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -42418,7 +42418,7 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0xdd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -42429,7 +42429,7 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0xde:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -42441,19 +42441,19 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0xdf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -42470,7 +42470,7 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -42481,25 +42481,25 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0xe0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
         return (t_rollback());
       }
       break;
     case 0xe1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("commit", 0, 1);
         return (t_commit());
       }
       break;
     case 0xe2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
         return (ti_getavailabledrivers(o_getClassName()));
       }
       break;
     case 0xe3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -42512,7 +42512,7 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -42524,13 +42524,13 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0xe4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
         return (t_begintransaction());
       }
       break;
     case 0xe5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -42543,13 +42543,13 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
       }
       break;
     case 0xe6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 0xe7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
@@ -42726,44 +42726,44 @@ Variant c_pdo::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
         return (t_errorcode());
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         return (t_getattribute(a0));
       }
       break;
     case 0xdd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("exec", count, 1, 1, 1);
         return (t_exec(a0));
       }
       break;
     case 0xde:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("lastinsertid", 1, 1);
         if (count <= 0) return (t_lastinsertid());
         return (t_lastinsertid(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0xdf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
         return (t___wakeup());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("__construct", count, 1, 4, 1);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
@@ -42772,63 +42772,63 @@ Variant c_pdo::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("query", count, 1, 1, 1);
         return (t_query(a0));
       }
       break;
     case 0xe0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
         return (t_rollback());
       }
       break;
     case 0xe1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("commit", 0, 1);
         return (t_commit());
       }
       break;
     case 0xe2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
         return (ti_getavailabledrivers(o_getClassName()));
       }
       break;
     case 0xe3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("quote", count, 1, 2, 1);
         if (count <= 1) return (t_quote(a0));
         return (t_quote(a0, a1));
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         return (t_setattribute(a0, a1));
       }
       break;
     case 0xe4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
         return (t_begintransaction());
       }
       break;
     case 0xe5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("prepare", count, 1, 2, 1);
         if (count <= 1) return (t_prepare(a0));
         return (t_prepare(a0, a1));
       }
       break;
     case 0xe6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
         return (t_errorinfo());
       }
       break;
     case 0xe7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
         return (t___sleep());
       }
@@ -42960,7 +42960,7 @@ Variant c_pdo::os_invoke(const char *c, MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xe2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
         return (ti_getavailabledrivers(c));
       }
@@ -42989,7 +42989,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xdc:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("errorcode", 0, 1);
@@ -43003,7 +43003,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -43021,7 +43021,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xdd:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -43039,7 +43039,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xde:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -43058,7 +43058,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -43072,7 +43072,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xdf:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__wakeup", 0, 1);
@@ -43086,7 +43086,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -43119,7 +43119,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -43137,7 +43137,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("rollback", 0, 1);
@@ -43151,7 +43151,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("commit", 0, 1);
@@ -43165,7 +43165,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
@@ -43179,7 +43179,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43202,7 +43202,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43224,7 +43224,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("begintransaction", 0, 1);
@@ -43238,7 +43238,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -43261,7 +43261,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("errorinfo", 0, 1);
@@ -43275,7 +43275,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
       }
       break;
     case 0xe7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__sleep", 0, 1);
@@ -43605,7 +43605,7 @@ Variant c_pdo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableE
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xe2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getavailabledrivers", 0, 1);
@@ -43803,13 +43803,13 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -43822,7 +43822,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -43833,7 +43833,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -43844,7 +43844,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -43855,13 +43855,13 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -43873,7 +43873,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -43885,13 +43885,13 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -43903,7 +43903,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -43921,13 +43921,13 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -43938,19 +43938,19 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -43969,7 +43969,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -43980,7 +43980,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -43991,7 +43991,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -44002,7 +44002,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -44014,7 +44014,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -44246,69 +44246,69 @@ Variant c_domentity::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -44318,31 +44318,31 @@ Variant c_domentity::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -44352,31 +44352,31 @@ Variant c_domentity::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -44536,7 +44536,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -44550,7 +44550,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44573,7 +44573,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44591,7 +44591,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44609,7 +44609,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44627,7 +44627,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -44641,7 +44641,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44663,7 +44663,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44682,7 +44682,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -44696,7 +44696,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44718,7 +44718,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -44752,7 +44752,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -44766,7 +44766,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44784,7 +44784,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -44798,7 +44798,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -44812,7 +44812,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -44850,7 +44850,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44868,7 +44868,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44886,7 +44886,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -44904,7 +44904,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44926,7 +44926,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -45510,7 +45510,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x18f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -45525,7 +45525,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x192:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45537,19 +45537,19 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x191:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
         return (t_enddtdattlist());
       }
       break;
     case 0x190:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
         return (t_fullendelement());
       }
       break;
     case 0x193:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -45565,7 +45565,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x194:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -45577,13 +45577,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x195:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
         return (t_endcdata());
       }
       break;
     case 0x196:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45594,7 +45594,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x197:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -45606,19 +45606,19 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x198:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
         return (t_endcomment());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x199:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -45635,19 +45635,19 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x19a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         return (t_enddtdentity());
       }
       break;
     case 0x19b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -45660,7 +45660,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x19c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45671,7 +45671,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x19d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -45684,7 +45684,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x19e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45695,13 +45695,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
         return (t_enddocument());
       }
       break;
     case 0x19f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45712,7 +45712,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -45724,7 +45724,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
         {
           ArrayData *ad(params.get());
@@ -45738,7 +45738,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -45750,7 +45750,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45761,7 +45761,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45772,7 +45772,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -45785,13 +45785,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
         return (t_endelement());
       }
       break;
     case 0x1a8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45802,7 +45802,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1a9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
         {
           ArrayData *ad(params.get());
@@ -45822,13 +45822,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1aa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
         return (t_endpi());
       }
       break;
     case 0x1ab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -45843,7 +45843,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1ac:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45854,13 +45854,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1ad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
         return (t_enddtdelement());
       }
       break;
     case 0x1ae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45871,13 +45871,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1af:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
         return (t_startcdata());
       }
       break;
     case 0x1b0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -45889,13 +45889,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1b1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
         return (t_enddtd());
       }
       break;
     case 0x1b3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45906,19 +45906,19 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1b2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
         return (t_openmemory());
       }
       break;
     case 0x1b4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
         return (t_endattribute());
       }
       break;
     case 0x1b5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45929,7 +45929,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1b6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45940,7 +45940,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0xd9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("flush", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -45952,7 +45952,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1b7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
         return (t_startcomment());
       }
@@ -46417,33 +46417,33 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x18f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
         if (count <= 3) return (t_writeelementns(a0, a1, a2));
         return (t_writeelementns(a0, a1, a2, a3));
       }
       break;
     case 0x192:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
         if (count <= 0) return (t_outputmemory());
         return (t_outputmemory(a0));
       }
       break;
     case 0x191:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
         return (t_enddtdattlist());
       }
       break;
     case 0x190:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
         return (t_fullendelement());
       }
       break;
     case 0x193:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
         if (count <= 0) return (t_startdocument());
         if (count == 1) return (t_startdocument(a0));
@@ -46452,43 +46452,43 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       }
       break;
     case 0x194:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
         return (t_startdtdentity(a0, a1));
       }
       break;
     case 0x195:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
         return (t_endcdata());
       }
       break;
     case 0x196:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
         return (t_writecomment(a0));
       }
       break;
     case 0x197:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
         return (t_writeattribute(a0, a1));
       }
       break;
     case 0x198:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
         return (t_endcomment());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x199:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
         if (count <= 1) return (t_writedtd(a0));
         if (count == 2) return (t_writedtd(a0, a1));
@@ -46497,104 +46497,104 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x19a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         return (t_enddtdentity());
       }
       break;
     case 0x19b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
         return (t_startattributens(a0, a1, a2));
       }
       break;
     case 0x19c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
         return (t_startelement(a0));
       }
       break;
     case 0x19d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
         return (t_startelementns(a0, a1, a2));
       }
       break;
     case 0x19e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
         return (t_startdtdelement(a0));
       }
       break;
     case 0x1a0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
         return (t_enddocument());
       }
       break;
     case 0x19f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
         return (t_writecdata(a0));
       }
       break;
     case 0x1a1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
         return (t_writedtdelement(a0, a1));
       }
       break;
     case 0x1a2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
         return (t_writeattributens(a0, a1, a2, a3));
       }
       break;
     case 0x1a3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
         return (t_writepi(a0, a1));
       }
       break;
     case 0x1a4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
         return (t_setindentstring(a0));
       }
       break;
     case 0x1a5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
         return (t_startattribute(a0));
       }
       break;
     case 0x1a6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
         if (count <= 1) return (t_writeelement(a0));
         return (t_writeelement(a0, a1));
       }
       break;
     case 0x1a7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
         return (t_endelement());
       }
       break;
     case 0x1a8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
         return (t_writeraw(a0));
       }
       break;
     case 0x1a9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
         if (count <= 2) return (t_writedtdentity(a0, a1));
         if (count == 3) return (t_writedtdentity(a0, a1, a2));
@@ -46604,13 +46604,13 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       }
       break;
     case 0x1aa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
         return (t_endpi());
       }
       break;
     case 0x1ab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
         if (count <= 1) return (t_startdtd(a0));
         if (count == 2) return (t_startdtd(a0, a1));
@@ -46618,80 +46618,80 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       }
       break;
     case 0x1ac:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
         return (t_setindent(a0));
       }
       break;
     case 0x1ad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
         return (t_enddtdelement());
       }
       break;
     case 0x1ae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
         return (t_startdtdattlist(a0));
       }
       break;
     case 0x1af:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
         return (t_startcdata());
       }
       break;
     case 0x1b0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
         return (t_writedtdattlist(a0, a1));
       }
       break;
     case 0x1b1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
         return (t_enddtd());
       }
       break;
     case 0x1b3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
         return (t_openuri(a0));
       }
       break;
     case 0x1b2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
         return (t_openmemory());
       }
       break;
     case 0x1b4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
         return (t_endattribute());
       }
       break;
     case 0x1b5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
         return (t_startpi(a0));
       }
       break;
     case 0x1b6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
         return (t_text(a0));
       }
       break;
     case 0xd9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("flush", 1, 1);
         if (count <= 0) return (t_flush());
         return (t_flush(a0));
       }
       break;
     case 0x1b7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
         return (t_startcomment());
       }
@@ -46997,7 +46997,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x18f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47028,7 +47028,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x192:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47047,7 +47047,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x191:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
@@ -47061,7 +47061,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x190:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
@@ -47075,7 +47075,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x193:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47104,7 +47104,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x194:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47126,7 +47126,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x195:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
@@ -47140,7 +47140,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x196:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47158,7 +47158,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x197:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47180,7 +47180,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x198:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
@@ -47194,7 +47194,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -47208,7 +47208,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x199:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47241,7 +47241,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -47255,7 +47255,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x19a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
@@ -47269,7 +47269,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x19b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47295,7 +47295,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x19c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47313,7 +47313,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x19d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47339,7 +47339,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x19e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47357,7 +47357,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
@@ -47371,7 +47371,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x19f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47389,7 +47389,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47411,7 +47411,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47441,7 +47441,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47463,7 +47463,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47481,7 +47481,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47499,7 +47499,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47522,7 +47522,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
@@ -47536,7 +47536,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a8:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47554,7 +47554,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47596,7 +47596,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1aa:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
@@ -47610,7 +47610,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1ab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -47638,7 +47638,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1ac:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47656,7 +47656,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1ad:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
@@ -47670,7 +47670,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1ae:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47688,7 +47688,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1af:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
@@ -47702,7 +47702,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b0:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47724,7 +47724,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b1:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
@@ -47738,7 +47738,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b3:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47756,7 +47756,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b2:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
@@ -47770,7 +47770,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b4:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
@@ -47784,7 +47784,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b5:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47802,7 +47802,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47820,7 +47820,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0xd9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47839,7 +47839,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b7:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
@@ -48915,25 +48915,25 @@ Variant c_domexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         {
           ArrayData *ad(params.get());
@@ -48947,37 +48947,37 @@ Variant c_domexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
@@ -49066,25 +49066,25 @@ Variant c_domexception::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -49092,37 +49092,37 @@ Variant c_domexception::o_invoke_few_args(MethodIndex methodIndex, const char *s
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
@@ -49214,7 +49214,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -49228,7 +49228,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__toString", 0, 1);
@@ -49242,7 +49242,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -49256,7 +49256,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -49280,7 +49280,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -49294,7 +49294,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -49308,7 +49308,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -49322,7 +49322,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -49336,7 +49336,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -49350,7 +49350,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -49703,13 +49703,13 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -49721,7 +49721,7 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -49732,7 +49732,7 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -49745,7 +49745,7 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x7d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -49758,7 +49758,7 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x7e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -49770,7 +49770,7 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -49781,7 +49781,7 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
       }
       break;
     case 0x7f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -49896,52 +49896,52 @@ Variant c_domxpath::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__construct", count, 1, 1, 1);
         return (t___construct(a0), null);
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("query", count, 1, 2, 1);
         if (count <= 1) return (t_query(a0));
         return (t_query(a0, a1));
       }
       break;
     case 0x7d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("evaluate", count, 1, 2, 1);
         if (count <= 1) return (t_evaluate(a0));
         return (t_evaluate(a0, a1));
       }
       break;
     case 0x7e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("registerphpfunctions", 1, 1);
         if (count <= 0) return (t_registerphpfunctions());
         return (t_registerphpfunctions(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x7f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("registernamespace", count, 2, 2, 1);
         return (t_registernamespace(a0, a1));
       }
@@ -50020,7 +50020,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -50034,7 +50034,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -50056,7 +50056,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -50074,7 +50074,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x7c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -50097,7 +50097,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x7d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -50120,7 +50120,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x7e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -50139,7 +50139,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -50157,7 +50157,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
       }
       break;
     case 0x7f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -50537,7 +50537,7 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x157:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -50548,13 +50548,13 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -50567,13 +50567,13 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x120:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 0x158:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -50584,7 +50584,7 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x159:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -50595,7 +50595,7 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x15a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("handle", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -50607,7 +50607,7 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x15b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -50618,7 +50618,7 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x15c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -50636,7 +50636,7 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x15d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
         {
           ArrayData *ad(params.get());
@@ -50774,57 +50774,57 @@ Variant c_soapserver::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x157:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("addfunction", count, 1, 1, 1);
         return (t_addfunction(a0), null);
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("__construct", count, 1, 2, 1);
         if (count <= 1) return (t___construct(a0), null);
         return (t___construct(a0, a1), null);
       }
       break;
     case 0x120:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
         return (t_getfunctions());
       }
       break;
     case 0x158:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("addsoapheader", count, 1, 1, 1);
         return (t_addsoapheader(a0), null);
       }
       break;
     case 0x159:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setpersistence", count, 1, 1, 1);
         return (t_setpersistence(a0), null);
       }
       break;
     case 0x15a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("handle", 1, 1);
         if (count <= 0) return (t_handle(), null);
         return (t_handle(a0), null);
       }
       break;
     case 0x15b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setobject", count, 1, 1, 1);
         return (t_setobject(a0), null);
       }
       break;
     case 0x15c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 5) return throw_wrong_arguments("fault", count, 2, 5, 1);
         if (count <= 2) return (t_fault(a0, a1), null);
         if (count == 3) return (t_fault(a0, a1, a2), null);
@@ -50833,7 +50833,7 @@ Variant c_soapserver::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x15d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1) return throw_missing_arguments("setclass", count+1, 1);
         if (count <= 1) return (t_setclass(count, a0), null);
         Array params;
@@ -50942,7 +50942,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x157:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -50960,7 +50960,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -50974,7 +50974,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -50997,7 +50997,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x120:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getfunctions", 0, 1);
@@ -51011,7 +51011,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x158:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -51029,7 +51029,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x159:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -51047,7 +51047,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x15a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -51066,7 +51066,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x15b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -51084,7 +51084,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x15c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -51121,7 +51121,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x15d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -51515,13 +51515,13 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -51534,7 +51534,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51545,7 +51545,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51556,7 +51556,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51567,13 +51567,13 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -51585,7 +51585,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51597,13 +51597,13 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -51615,7 +51615,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -51633,13 +51633,13 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51650,19 +51650,19 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -51681,7 +51681,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51692,7 +51692,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51703,7 +51703,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -51714,7 +51714,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -51726,7 +51726,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -51958,69 +51958,69 @@ Variant c_domnode::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -52030,31 +52030,31 @@ Variant c_domnode::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -52064,31 +52064,31 @@ Variant c_domnode::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
@@ -52248,7 +52248,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -52262,7 +52262,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -52285,7 +52285,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52303,7 +52303,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52321,7 +52321,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52339,7 +52339,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -52353,7 +52353,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -52375,7 +52375,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52394,7 +52394,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -52408,7 +52408,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -52430,7 +52430,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -52464,7 +52464,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -52478,7 +52478,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52496,7 +52496,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -52510,7 +52510,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -52524,7 +52524,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -52562,7 +52562,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52580,7 +52580,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52598,7 +52598,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -52616,7 +52616,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -52638,7 +52638,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -53263,13 +53263,13 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53282,7 +53282,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x48:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53293,7 +53293,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x49:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53304,7 +53304,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53315,13 +53315,13 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x4a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("validate", 0, 1);
         return (t_validate());
       }
       break;
     case 0x4b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53333,7 +53333,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x4c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53344,7 +53344,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53355,7 +53355,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x4d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53366,7 +53366,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x4e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53377,7 +53377,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53388,7 +53388,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x4f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53399,7 +53399,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x50:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53410,13 +53410,13 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53428,7 +53428,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x51:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53442,7 +53442,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x52:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53455,7 +53455,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53467,7 +53467,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53481,7 +53481,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x53:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53493,7 +53493,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x54:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53506,7 +53506,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x55:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53518,7 +53518,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53530,7 +53530,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -53548,13 +53548,13 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x56:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53567,7 +53567,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x57:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -53581,7 +53581,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53592,7 +53592,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x58:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53605,7 +53605,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x59:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53616,13 +53616,13 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x5a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53633,19 +53633,19 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x5b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
         return (t_savehtml());
       }
       break;
     case 0x5c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53658,7 +53658,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -53677,7 +53677,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x5d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53690,7 +53690,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x5e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53701,7 +53701,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53712,7 +53712,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x5f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53724,7 +53724,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53735,7 +53735,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53746,7 +53746,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x60:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53757,7 +53757,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -53769,7 +53769,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x61:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53780,7 +53780,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x62:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53791,13 +53791,13 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 0x63:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -53808,13 +53808,13 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 0x64:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
         return (t_normalizedocument(), null);
       }
       break;
     case 0x65:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
         return (t_createdocumentfragment());
       }
@@ -54372,104 +54372,104 @@ Variant c_domdocument::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x48:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         return (t_getelementsbytagname(a0));
       }
       break;
     case 0x49:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createcdatasection", count, 1, 1, 1);
         return (t_createcdatasection(a0));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x4a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("validate", 0, 1);
         return (t_validate());
       }
       break;
     case 0x4b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         return (t_getelementsbytagnamens(a0, a1));
       }
       break;
     case 0x4c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("schemavalidatesource", count, 1, 1, 1);
         return (t_schemavalidatesource(a0));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x4d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("relaxngvalidate", count, 1, 1, 1);
         return (t_relaxngvalidate(a0));
       }
       break;
     case 0x4e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadhtml", count, 1, 1, 1);
         return (t_loadhtml(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x4f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createentityreference", count, 1, 1, 1);
         return (t_createentityreference(a0));
       }
       break;
     case 0x50:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("schemavalidate", count, 1, 1, 1);
         return (t_schemavalidate(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x51:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("savexml", 2, 1);
         if (count <= 0) return (t_savexml());
         if (count == 1) return (t_savexml(a0));
@@ -54477,21 +54477,21 @@ Variant c_domdocument::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 0x52:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("createprocessinginstruction", count, 1, 2, 1);
         if (count <= 1) return (t_createprocessinginstruction(a0));
         return (t_createprocessinginstruction(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 2) return throw_toomany_arguments("__construct", 2, 1);
         if (count <= 0) return (t___construct(), null);
         if (count == 1) return (t___construct(a0), null);
@@ -54499,32 +54499,32 @@ Variant c_domdocument::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 0x53:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("registernodeclass", count, 2, 2, 1);
         return (t_registernodeclass(a0, a1));
       }
       break;
     case 0x54:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("load", count, 1, 2, 1);
         if (count <= 1) return (t_load(a0));
         return (t_load(a0, a1));
       }
       break;
     case 0x55:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("createattributens", count, 2, 2, 1);
         return (t_createattributens(a0, a1));
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -54534,77 +54534,77 @@ Variant c_domdocument::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x56:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("createelement", count, 1, 2, 1);
         if (count <= 1) return (t_createelement(a0));
         return (t_createelement(a0, a1));
       }
       break;
     case 0x57:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createelementns", count, 2, 3, 1);
         if (count <= 2) return (t_createelementns(a0, a1));
         return (t_createelementns(a0, a1, a2));
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x58:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("importnode", count, 1, 2, 1);
         if (count <= 1) return (t_importnode(a0));
         return (t_importnode(a0, a1));
       }
       break;
     case 0x59:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("relaxngvalidatesource", count, 1, 1, 1);
         return (t_relaxngvalidatesource(a0));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x5a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createtextnode", count, 1, 1, 1);
         return (t_createtextnode(a0));
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x5b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
         return (t_savehtml());
       }
       break;
     case 0x5c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("loadxml", count, 1, 2, 1);
         if (count <= 1) return (t_loadxml(a0));
         return (t_loadxml(a0, a1));
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -54614,87 +54614,87 @@ Variant c_domdocument::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 0x5d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("save", count, 1, 2, 1);
         if (count <= 1) return (t_save(a0));
         return (t_save(a0, a1));
       }
       break;
     case 0x5e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createattribute", count, 1, 1, 1);
         return (t_createattribute(a0));
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x5f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("xinclude", 1, 1);
         if (count <= 0) return (t_xinclude());
         return (t_xinclude(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x60:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadhtmlfile", count, 1, 1, 1);
         return (t_loadhtmlfile(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x61:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("savehtmlfile", count, 1, 1, 1);
         return (t_savehtmlfile(a0));
       }
       break;
     case 0x62:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getelementbyid", count, 1, 1, 1);
         return (t_getelementbyid(a0));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 0x63:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("createcomment", count, 1, 1, 1);
         return (t_createcomment(a0));
       }
       break;
     case 0x64:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
         return (t_normalizedocument(), null);
       }
       break;
     case 0x65:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
         return (t_createdocumentfragment());
       }
@@ -55032,7 +55032,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -55046,7 +55046,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55069,7 +55069,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x48:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55087,7 +55087,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x49:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55105,7 +55105,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55123,7 +55123,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x4a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("validate", 0, 1);
@@ -55137,7 +55137,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x4b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55159,7 +55159,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x4c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55177,7 +55177,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55195,7 +55195,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x4d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55213,7 +55213,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x4e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55231,7 +55231,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55249,7 +55249,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x4f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55267,7 +55267,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x50:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55285,7 +55285,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -55299,7 +55299,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55321,7 +55321,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x51:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55345,7 +55345,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x52:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55368,7 +55368,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55387,7 +55387,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55411,7 +55411,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x53:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55433,7 +55433,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x54:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55456,7 +55456,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x55:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55478,7 +55478,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55500,7 +55500,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -55534,7 +55534,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -55548,7 +55548,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x56:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55571,7 +55571,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x57:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -55598,7 +55598,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55616,7 +55616,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x58:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55639,7 +55639,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x59:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55657,7 +55657,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -55671,7 +55671,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x5a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55689,7 +55689,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -55703,7 +55703,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x5b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("savehtml", 0, 1);
@@ -55717,7 +55717,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x5c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55740,7 +55740,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -55778,7 +55778,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x5d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55801,7 +55801,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x5e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55819,7 +55819,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55837,7 +55837,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x5f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55856,7 +55856,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55874,7 +55874,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55892,7 +55892,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x60:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55910,7 +55910,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55932,7 +55932,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x61:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55950,7 +55950,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x62:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -55968,7 +55968,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -55982,7 +55982,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x63:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -56000,7 +56000,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x64:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalizedocument", 0, 1);
@@ -56014,7 +56014,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x65:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("createdocumentfragment", 0, 1);
@@ -57176,13 +57176,13 @@ Variant c_libxmlerror::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
@@ -57215,13 +57215,13 @@ Variant c_libxmlerror::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
         return (t___construct(), null);
       }
@@ -57263,7 +57263,7 @@ Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -57277,7 +57277,7 @@ Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__construct", 0, 1);
@@ -57571,25 +57571,25 @@ Variant c_soapfault::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         {
           ArrayData *ad(params.get());
@@ -57609,37 +57609,37 @@ Variant c_soapfault::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
@@ -57734,25 +57734,25 @@ Variant c_soapfault::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
         return (t_getmessage());
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
         return (t___tostring());
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("__construct", count, 2, 6, 1);
         if (count <= 2) return (t___construct(a0, a1), null);
         if (count == 3) return (t___construct(a0, a1, a2), null);
@@ -57762,37 +57762,37 @@ Variant c_soapfault::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
         return (t_getcode());
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
         return (t_getline());
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
         return (t___init__(), null);
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
         return (t_getfile());
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
         return (t_gettraceasstring());
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
         return (t_gettrace());
       }
@@ -57886,7 +57886,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getMessage", 0, 1);
@@ -57900,7 +57900,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__tostring", 0, 1);
@@ -57914,7 +57914,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -57928,7 +57928,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -57970,7 +57970,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getCode", 0, 1);
@@ -57984,7 +57984,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getLine", 0, 1);
@@ -57998,7 +57998,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::__init__", 0, 1);
@@ -58012,7 +58012,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getFile", 0, 1);
@@ -58026,7 +58026,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x1f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTraceAsString", 0, 1);
@@ -58040,7 +58040,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x20:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Exception::getTrace", 0, 1);
@@ -58441,13 +58441,13 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58460,7 +58460,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x48:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58471,7 +58471,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x67:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -58484,7 +58484,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58495,7 +58495,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58506,7 +58506,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x4b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58518,7 +58518,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x68:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58530,7 +58530,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58541,7 +58541,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58552,13 +58552,13 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58570,7 +58570,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58582,7 +58582,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -58597,7 +58597,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x69:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58608,7 +58608,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58620,7 +58620,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x6a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58632,7 +58632,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         {
           ArrayData *ad(params.get());
@@ -58650,13 +58650,13 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x6b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58667,7 +58667,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x6c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
         {
           ArrayData *ad(params.get());
@@ -58680,7 +58680,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58691,7 +58691,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x6d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58703,7 +58703,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x6e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58715,13 +58715,13 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x6f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58732,13 +58732,13 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x70:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58750,7 +58750,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         {
           ArrayData *ad(params.get());
@@ -58769,7 +58769,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58780,7 +58780,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x71:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58792,7 +58792,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58804,7 +58804,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x72:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58815,7 +58815,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58826,7 +58826,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58837,7 +58837,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -58849,7 +58849,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x73:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -58860,13 +58860,13 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 0x74:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -59318,87 +59318,87 @@ Variant c_domelement::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
         return (t_getlineno());
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("insertbefore", count, 1, 2, 1);
         if (count <= 1) return (t_insertbefore(a0));
         return (t_insertbefore(a0, a1));
       }
       break;
     case 0x48:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getelementsbytagname", count, 1, 1, 1);
         return (t_getelementsbytagname(a0));
       }
       break;
     case 0x67:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("setidattributens", count, 3, 3, 1);
         return (t_setidattributens(a0, a1, a2));
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattribute", count, 1, 1, 1);
         return (t_getattribute(a0));
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("isdefaultnamespace", count, 1, 1, 1);
         return (t_isdefaultnamespace(a0));
       }
       break;
     case 0x4b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getelementsbytagnamens", count, 2, 2, 1);
         return (t_getelementsbytagnamens(a0, a1));
       }
       break;
     case 0x68:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getattributenodens", count, 2, 2, 1);
         return (t_getattributenodens(a0, a1));
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupnamespaceuri", count, 1, 1, 1);
         return (t_lookupnamespaceuri(a0));
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("appendchild", count, 1, 1, 1);
         return (t_appendchild(a0));
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
         return (t___destruct());
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("__set", count, 2, 2, 1);
         return (t___set(a0, a1));
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("clonenode", 1, 1);
         if (count <= 0) return (t_clonenode());
         return (t_clonenode(a0));
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("__construct", count, 1, 3, 1);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
@@ -59406,25 +59406,25 @@ Variant c_domelement::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x69:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("hasattribute", count, 1, 1, 1);
         return (t_hasattribute(a0));
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("replacechild", count, 2, 2, 1);
         return (t_replacechild(a0, a1));
       }
       break;
     case 0x6a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("hasattributens", count, 2, 2, 1);
         return (t_hasattributens(a0, a1));
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 4) return throw_toomany_arguments("c14n", 4, 1);
         if (count <= 0) return (t_c14n());
         if (count == 1) return (t_c14n(a0));
@@ -59434,67 +59434,67 @@ Variant c_domelement::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
         return (t_hasattributes());
       }
       break;
     case 0x6b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setattributenodens", count, 1, 1, 1);
         return (t_setattributenodens(a0));
       }
       break;
     case 0x6c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("setattributens", count, 3, 3, 1);
         return (t_setattributens(a0, a1, a2));
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("lookupprefix", count, 1, 1, 1);
         return (t_lookupprefix(a0));
       }
       break;
     case 0x6d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("getattributens", count, 2, 2, 1);
         return (t_getattributens(a0, a1));
       }
       break;
     case 0x6e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("removeattributens", count, 2, 2, 1);
         return (t_removeattributens(a0, a1));
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
         return (t_normalize(), null);
       }
       break;
     case 0x6f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("getattributenode", count, 1, 1, 1);
         return (t_getattributenode(a0));
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
         return (t_getnodepath());
       }
       break;
     case 0x70:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setidattribute", count, 2, 2, 1);
         return (t_setidattribute(a0, a1));
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 5) return throw_wrong_arguments("c14nfile", count, 1, 5, 1);
         if (count <= 1) return (t_c14nfile(a0));
         if (count == 2) return (t_c14nfile(a0, a1));
@@ -59504,61 +59504,61 @@ Variant c_domelement::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("issamenode", count, 1, 1, 1);
         return (t_issamenode(a0));
       }
       break;
     case 0x71:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setidattributenode", count, 2, 2, 1);
         return (t_setidattributenode(a0, a1));
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("setattribute", count, 2, 2, 1);
         return (t_setattribute(a0, a1));
       }
       break;
     case 0x72:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removeattributenode", count, 1, 1, 1);
         return (t_removeattributenode(a0));
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removechild", count, 1, 1, 1);
         return (t_removechild(a0));
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("__get", count, 1, 1, 1);
         return (t___get(a0));
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("issupported", count, 2, 2, 1);
         return (t_issupported(a0, a1));
       }
       break;
     case 0x73:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("removeattribute", count, 1, 1, 1);
         return (t_removeattribute(a0));
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
         return (t_haschildnodes());
       }
       break;
     case 0x74:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setattributenode", count, 1, 1, 1);
         return (t_setattributenode(a0));
       }
@@ -59824,7 +59824,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getlineno", 0, 1);
@@ -59838,7 +59838,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x2e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -59861,7 +59861,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x48:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -59879,7 +59879,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x67:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -59905,7 +59905,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x21:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -59923,7 +59923,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x2f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -59941,7 +59941,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x4b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -59963,7 +59963,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x68:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -59985,7 +59985,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x31:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60003,7 +60003,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x32:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60021,7 +60021,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x23:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("__destruct", 0, 1);
@@ -60035,7 +60035,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x33:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60057,7 +60057,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x34:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60076,7 +60076,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -60104,7 +60104,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x69:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60122,7 +60122,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x35:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60144,7 +60144,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60166,7 +60166,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x37:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -60200,7 +60200,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x36:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("hasattributes", 0, 1);
@@ -60214,7 +60214,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60232,7 +60232,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -60258,7 +60258,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x38:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60276,7 +60276,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60298,7 +60298,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60320,7 +60320,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x39:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("normalize", 0, 1);
@@ -60334,7 +60334,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x6f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60352,7 +60352,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3a:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("getnodepath", 0, 1);
@@ -60366,7 +60366,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x70:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60388,7 +60388,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3b:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -60426,7 +60426,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3c:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60444,7 +60444,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x71:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60466,7 +60466,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x29:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60488,7 +60488,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x72:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60506,7 +60506,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3d:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60524,7 +60524,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3e:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60542,7 +60542,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x3f:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -60564,7 +60564,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x73:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -60582,7 +60582,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x40:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("haschildnodes", 0, 1);
@@ -60596,7 +60596,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
       }
       break;
     case 0x74:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -62130,7 +62130,7 @@ Variant invoke_builtin_static_method(const char *s, MethodIndex methodIndex, con
 Variant invoke_builtin_static_method_mil(const char *s, const char *method, CArrRef params, bool fatal) {
   bool foundClass = false;
   Variant r;
-  if (eval_invoke_static_method_hook(r, s, method, params, foundClass)) return r; 
+  if (eval_invoke_static_method_hook(r, s, method, params, foundClass)) return r;
   if (foundClass) return o_invoke_failed(s, method, fatal);
   MethodIndex methodIndex(MethodIndex::fail());
   if (RuntimeOption::FastMethodCall) {

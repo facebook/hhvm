@@ -31,11 +31,11 @@ Variant c_directory::os_getInit(const char *s, int64 hash) {
   if (hash < 0) hash = hash_string(s);
   switch (hash & 3) {
     case 0:
-      HASH_RETURN(0x1429F792A6880074LL, 
+      HASH_RETURN(0x1429F792A6880074LL,
                   null, "path");
       break;
     case 2:
-      HASH_RETURN(0x5C4CA333F4541532LL, 
+      HASH_RETURN(0x5C4CA333F4541532LL,
                   null, "handle");
       break;
     default:
@@ -245,7 +245,7 @@ Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
@@ -256,19 +256,19 @@ Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       break;
     case 0xac:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         return (t_rewind());
       }
@@ -318,25 +318,25 @@ Variant c_directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifdef FMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
       break;
     case 0xac:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         return (t_rewind());
       }
@@ -390,7 +390,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x6:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -408,7 +408,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0xab:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
@@ -422,7 +422,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0xac:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
@@ -436,7 +436,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 0x9:
-      if (methodIndex.m_overloadIndex == 0x1) { 
+      if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);

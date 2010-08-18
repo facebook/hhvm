@@ -604,33 +604,72 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
         if ((*it)->isAbstract()) {
           const MethodStatement *m = cls->findMethod((*it)->name().c_str(),
               true);
-          if (!m || m->isAbstract()) {
-            throw FatalErrorException("Class %s does not implement abstract "
-                "method %s::%s", cls->name().c_str(),
-                name().c_str(), (*it)->name().c_str());
-          }
+          bool found = false;
           bool incompatible = false;
-          if (strcmp(m->name().c_str(), "__construct") == 0) {
-            // for some reason construct params aren't checked
-          } else if (m->getParams().size() < (*it)->getParams().size() ||
-              (m->getModifiers() & Static) !=
-              ((*it)->getModifiers() & Static)) {
-            incompatible = true;
-          } else {
-            const vector<ParameterPtr> &p1 = (*it)->getParams();
-            const vector<ParameterPtr> &p2 = m->getParams();
-            for (uint i = 0; i < p2.size(); ++i) {
-              if (i >= p1.size()) {
-                if (!p2[i]->isOptional()) {
+          if (!m) {
+            // Possibly built in
+            const ClassInfo *pcls = cls->getBuiltinParentInfo();
+            if (pcls) {
+              ClassInfo *methCls;
+              const ClassInfo::MethodInfo *meth =
+                pcls->hasMethod((*it)->name().c_str(), methCls);
+              if (meth) {
+                found = true;
+                if (strcmp(meth->name, "__construct") == 0) {
+                  // for some reason construct params aren't checked
+                } else if (meth->parameters.size() < (*it)->getParams().size()
+                    || !(meth->attribute & ClassInfo::IsStatic) !=
+                    !((*it)->getModifiers() & Static)) {
+                  incompatible = true;
+                } else {
+                  const vector<ParameterPtr> &p1 = (*it)->getParams();
+                  const vector<const ClassInfo::ParameterInfo *> &p2 =
+                    meth->parameters;
+                  for (uint i = 0; i < p2.size(); ++i) {
+                    if (i >= p1.size()) {
+                      if (!p2[i]->value) {
+                        incompatible = true;
+                        break;
+                      }
+                    } else if ((!p1[i]->isRef() !=
+                          !p2[i]->attribute & ClassInfo::IsReference) ||
+                        !p1[i]->isOptional() != !p2[i]->value) {
+                      incompatible = true;
+                      break;
+                    }
+                  }
+                }
+              }
+            }
+          } else if (!m->isAbstract()) {
+            found = true;
+            if (strcmp(m->name().c_str(), "__construct") == 0) {
+              // for some reason construct params aren't checked
+            } else if (m->getParams().size() < (*it)->getParams().size() ||
+                (m->getModifiers() & Static) !=
+                ((*it)->getModifiers() & Static)) {
+              incompatible = true;
+            } else {
+              const vector<ParameterPtr> &p1 = (*it)->getParams();
+              const vector<ParameterPtr> &p2 = m->getParams();
+              for (uint i = 0; i < p2.size(); ++i) {
+                if (i >= p1.size()) {
+                  if (!p2[i]->isOptional()) {
+                    incompatible = true;
+                    break;
+                  }
+                } else if (p1[i]->isRef() != p2[i]->isRef() ||
+                    p1[i]->isOptional() != p2[i]->isOptional()) {
                   incompatible = true;
                   break;
                 }
-              } else if (p1[i]->isRef() != p2[i]->isRef() ||
-                  p1[i]->isOptional() != p2[i]->isOptional()) {
-                incompatible = true;
-                break;
               }
             }
+          }
+          if (!found) {
+            throw FatalErrorException("Class %s does not implement abstract "
+                "method %s::%s", cls->name().c_str(),
+                name().c_str(), (*it)->name().c_str());
           }
           if (incompatible) {
             throw FatalErrorException("Declaration of %s::%s() must be "
@@ -787,6 +826,13 @@ const MethodStatement* ClassStatement::findParentMethod(const char* name,
       }
     }
   }
+  return NULL;
+}
+
+const ClassInfo *ClassStatement::getBuiltinParentInfo() const {
+  const ClassStatement *parent = parentStatement();
+  if (parent) return parent->getBuiltinParentInfo();
+  if (!m_parent.empty()) return ClassInfo::FindClass(m_parent.c_str());
   return NULL;
 }
 

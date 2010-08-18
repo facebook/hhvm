@@ -149,6 +149,7 @@ protected:
   void loadProperties(ClassInfoEvaled &info) const;
   const MethodStatement* findParentMethod(const char* name,
       bool interface) const;
+  const ClassInfo *getBuiltinParentInfo() const;
 
 };
 

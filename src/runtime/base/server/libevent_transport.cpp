@@ -250,6 +250,10 @@ void LibEventTransport::sendImpl(const void *data, int size, int code,
   } else {
     if (m_method != HEAD) {
       evbuffer_add(m_request->output_buffer, data, size);
+    } else {
+      char buf[11];
+      snprintf(buf, sizeof(buf), "%d", size);
+      addHeaderImpl("Content-Length", buf);
     }
     m_server->onResponse(m_workerId, m_request, code);
     m_sendEnded = true;

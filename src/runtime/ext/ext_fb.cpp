@@ -448,7 +448,7 @@ Variant f_fb_unserialize(CVarRef thing, Variant success,
 ///////////////////////////////////////////////////////////////////////////////
 
 static void output_dataset(Array &ret, int affected, DBDataSet &ds,
-                           const map<int, string> &errors) {
+                           const DBConn::ErrorInfoMap &errors) {
   ret.set("affected", affected);
 
   Array rows;
@@ -467,12 +467,14 @@ static void output_dataset(Array &ret, int affected, DBDataSet &ds,
   ret.set("result", rows);
 
   if (!errors.empty()) {
-    Array error;
-    for (map<int, string>::const_iterator iter = errors.begin();
+    Array error, codes;
+    for (DBConn::ErrorInfoMap::const_iterator iter = errors.begin();
          iter != errors.end(); ++iter) {
-      error.set(iter->first, String(iter->second));
+      error.set(iter->first, String(iter->second.msg));
+      codes.set(iter->first, iter->second.code);
     }
     ret.set("error", error);
+    ret.set("errno", codes);
   }
 }
 
@@ -522,7 +524,7 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
   Array ret;
   if (combine_result) {
     DBDataSet ds;
-    map<int, string> errors;
+    DBConn::ErrorInfoMap errors;
     int affected = DBConn::parallelExecute(queries, ds, errors, max_thread,
                                            retry_query_on_fail,
                                            connect_timeout, read_timeout);
@@ -533,7 +535,7 @@ Array f_fb_parallel_query(CArrRef sql_map, int max_thread /* = 50 */,
       dss[i] = DBDataSetPtr(new DBDataSet());
     }
 
-    map<int, string> errors;
+    DBConn::ErrorInfoMap errors;
     int affected = DBConn::parallelExecute(queries, dss, errors, max_thread,
                                            retry_query_on_fail,
                                            connect_timeout, read_timeout);
@@ -576,7 +578,7 @@ Array f_fb_crossall_query(CStrRef sql, int max_thread /* = 50 */,
 
   // do it
   DBDataSet ds;
-  map<int, string> errors;
+  DBConn::ErrorInfoMap errors;
   int affected = DBConn::parallelExecute(ssql.c_str(), ds, errors, max_thread,
                                          retry_query_on_fail,
                                          connect_timeout, read_timeout);

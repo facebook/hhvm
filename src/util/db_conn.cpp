@@ -143,11 +143,12 @@ void DBConn::open(ServerDataPtr server, int connectTimeout /* = -1 */,
                                   server->getDatabase().c_str(),
                                   server->getPort(), NULL, 0);
   if (!ret) {
+    int code = mysql_errno(m_conn);
     const char *msg = mysql_error(m_conn);
     string smsg = msg ? msg : "";
     mysql_close(m_conn);
     m_conn = NULL;
-    throw DBConnectionException(server->getIP().c_str(),
+    throw DBConnectionException(code, server->getIP().c_str(),
                                 server->getDatabase().c_str(),
                                 smsg.c_str());
   }
@@ -199,16 +200,20 @@ int DBConn::execute(const char *sql, DBDataSet *ds /* = NULL */,
         failure = mysql_query(m_conn, sql);
       }
       if (failure) {
-        throw DatabaseException("Failed to execute SQL '%s': %s", sql,
-                                mysql_error(m_conn));
+        int code = mysql_errno(m_conn);
+        throw DatabaseException(code, "Failed to execute SQL '%s': %s (%d)",
+                                sql, mysql_error(m_conn), code);
       }
     }
   }
 
   MYSQL_RES *result = mysql_store_result(m_conn);
-  if (!result && mysql_errno(m_conn)) {
-    throw DatabaseException("Failed to execute SQL '%s': %s", sql,
-                            mysql_error(m_conn));
+  if (!result) {
+    int code = mysql_errno(m_conn);
+    if (code) {
+      throw DatabaseException(code, "Failed to execute SQL '%s': %s (%d)", sql,
+                              mysql_error(m_conn), code);
+    }
   }
 
   int affected = mysql_affected_rows(m_conn);
@@ -226,7 +231,7 @@ int DBConn::getLastInsertId() {
 }
 
 int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
-                            map<int, string> &errors, int maxThread,
+                            ErrorInfoMap &errors, int maxThread,
                             bool retryQueryOnFail, int connectTimeout,
                             int readTimeout) {
   ASSERT(sql && *sql);
@@ -250,7 +255,7 @@ int DBConn::parallelExecute(const char *sql, DBDataSet &ds,
 }
 
 int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSet &ds,
-                            map<int, string> &errors, int maxThread,
+                            ErrorInfoMap &errors, int maxThread,
                             bool retryQueryOnFail, int connectTimeout,
                             int readTimeout) {
   if (sqls.empty()) {
@@ -271,9 +276,8 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSet &ds,
   return parallelExecute(jobs, errors, maxThread);
 }
 
-int DBConn::parallelExecute(const ServerQueryVec &sqls,
-                            DBDataSetPtrVec &dss,
-                            map<int, string> &errors, int maxThread,
+int DBConn::parallelExecute(const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
+                            ErrorInfoMap &errors, int maxThread,
                             bool retryQueryOnFail, int connectTimeout,
                             int readTimeout) {
   ASSERT(sqls.size() == dss.size());
@@ -296,8 +300,8 @@ int DBConn::parallelExecute(const ServerQueryVec &sqls,
   return parallelExecute(jobs, errors, maxThread);
 }
 
-int DBConn::parallelExecute(QueryJobPtrVec &jobs,
-                            map<int, string> &errors, int maxThread) {
+int DBConn::parallelExecute(QueryJobPtrVec &jobs, ErrorInfoMap &errors,
+                            int maxThread) {
   if (maxThread <= 0) maxThread = DefaultWorkerCount;
   JobDispatcher<QueryJob, QueryWorker>(jobs, maxThread).run();
 
@@ -321,7 +325,8 @@ void DBConn::QueryWorker::doJob(QueryJobPtr job) {
 
   if (!job->m_server) {
     job->m_affected = -1;
-    job->m_error = "(server info missing)";
+    job->m_error.code = -1;
+    job->m_error.msg = "(server info missing)";
     return;
   }
 
@@ -339,15 +344,22 @@ void DBConn::QueryWorker::doJob(QueryJobPtr job) {
       job->m_affected = conn.execute(sql.c_str(), NULL,
                                      job->m_retryQueryOnFail);
     }
-  } catch (Exception e) {
+  } catch (DatabaseException &e) {
     job->m_affected = -1;
-    job->m_error = e.getMessage();
+    job->m_error.code = e.m_code;
+    job->m_error.msg = e.getMessage();
+  } catch (Exception &e) {
+    job->m_affected = -1;
+    job->m_error.code = -1;
+    job->m_error.msg = e.getMessage();
   } catch (std::exception &e) {
     job->m_affected = -1;
-    job->m_error = e.what();
+    job->m_error.code = -1;
+    job->m_error.msg = e.what();
   } catch (...) {
     job->m_affected = -1;
-    job->m_error = "(unknown exception)";
+    job->m_error.code = -1;
+    job->m_error.msg = "(unknown exception)";
   }
 }
 

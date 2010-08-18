@@ -520,7 +520,7 @@ DefineFunction(
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
-      'desc'   => "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....)).",
+      'desc'   => "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....), 'errno' => array({dbId1} => {error code}, {dbId2} => ....)).",
     ),
     'args'   => array(
       array(
@@ -574,7 +574,7 @@ DefineFunction(
     'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => VariantMap,
-      'desc'   => "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....)).",
+      'desc'   => "Query result in a format of array('affected' => {number of affected rows}, 'result' => array({dbId1} => {dataset}, {dbId2} => ...), 'error' => array({dbId1} => {error message}, {dbId2} => ....), 'errno' => array({dbId1} => {error code}, {dbId2} => ....)).",
     ),
     'args'   => array(
       array(

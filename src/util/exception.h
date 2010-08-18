@@ -65,15 +65,19 @@ protected:
 
 class DatabaseException : public Exception {
 public:
-  DatabaseException(const char *fmt, ...) {
+  DatabaseException(int code, const char *fmt, ...)
+      : m_code(code) {
     va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
   }
+  int m_code;
 };
 
 class DBConnectionException : public DatabaseException {
 public:
-  DBConnectionException(const char *ip, const char *database, const char *msg)
-    : DatabaseException("Failed to connect to %s %s: %s", ip, database, msg) {
+  DBConnectionException(int code, const char *ip, const char *database,
+                        const char *msg)
+      : DatabaseException(code, "Failed to connect to %s %s: %s (%d)",
+                          ip, database, msg, code) {
   }
 };
 

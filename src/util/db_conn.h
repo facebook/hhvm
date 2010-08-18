@@ -98,24 +98,30 @@ class DBConn {
    */
   int getLastInsertId();
 
+  class ErrorInfo {
+  public:
+    ErrorInfo() : code(0) {}
+    int code;
+    std::string msg;
+  };
+  typedef std::map<int, ErrorInfo> ErrorInfoMap;
+
   /**
    * Query local dbs in parallel. Returns number of total affecected rows.
    * Use "DBID" for any place in the query that needs to be replaced by dbId.
    * For example, "SELECT DBID as dbid, count(*) as count FROM ...".
    */
   static int parallelExecute
-    (const char *sql, DBDataSet &ds, std::map<int, std::string> &errors,
-     int maxThread, bool retryQueryOnFail = true,
+    (const char *sql, DBDataSet &ds,
+     ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
      int connectTimeout = -1, int readTimeout = -1);
   static int parallelExecute
     (const ServerQueryVec &sqls, DBDataSet &ds,
-     std::map<int, std::string> &errors, int maxThread,
-     bool retryQueryOnFail = true,
+     ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
      int connectTimeout = -1, int readTimeout = -1);
   static int parallelExecute
     (const ServerQueryVec &sqls, DBDataSetPtrVec &dss,
-     std::map<int, std::string> &errors, int maxThread,
-     bool retryQueryOnFail = true,
+     ErrorInfoMap &errors, int maxThread, bool retryQueryOnFail = true,
      int connectTimeout = -1, int readTimeout = -1);
 
   /**
@@ -165,7 +171,7 @@ class DBConn {
     int m_affected;
     Mutex *m_dsMutex;
     DBDataSet *m_dsResult;
-    std::string m_error;
+    ErrorInfo m_error;
     bool m_retryQueryOnFail;
     int m_connectTimeout;
     int m_readTimeout;
@@ -178,8 +184,7 @@ class DBConn {
     void onThreadExit() { my_thread_end();}
   };
 
-  static int parallelExecute(QueryJobPtrVec &jobs,
-                             std::map<int, std::string> &errors,
+  static int parallelExecute(QueryJobPtrVec &jobs, ErrorInfoMap &errors,
                              int maxThread);
 };
 

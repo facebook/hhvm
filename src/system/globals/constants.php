@@ -1974,5 +1974,8 @@ define('GLOBAL_SYMBOL_DYNAMIC_CONSTANT',    3);
 define('GLOBAL_SYMBOL_FILE_INCLUDE',        4);
 define('GLOBAL_SYMBOL_REDECLARED_FUNCTION', 5);
 define('GLOBAL_SYMBOL_REDECLARED_CLASS',    6);
-define('SID', '');
-define('SID', '');
+// Don't actually define these
+if (false) {
+  define('SID', '');
+  define('SID', '');
+}

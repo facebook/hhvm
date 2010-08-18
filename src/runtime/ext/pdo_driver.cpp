@@ -51,6 +51,13 @@ PDOConnection *PDODriver::createConnection(CStrRef datasource,
   conn->data_source = string(datasource.data(), datasource.size());
   conn->username = string(username.data(), username.size());
   conn->password = string(password.data(), password.size());
+
+  if (options.exists(PDO_ATTR_AUTOCOMMIT)) {
+    conn->auto_commit = options[PDO_ATTR_AUTOCOMMIT].toInt64();
+  } else {
+    conn->auto_commit = 1;
+  }
+
   if (!conn->create(options)) {
     delete conn;
     return NULL;

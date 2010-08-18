@@ -1192,22 +1192,18 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       string fileHeader = root + header;
       string fwFileHeader = root + fwheader;
       {
-        ofstream f(fwFileHeader.c_str());
-        CodeGenerator cg(&f, output);
-        fs->outputCPPForwardDeclHeader(cg, ar);
-        f.close();
-      }
-      {
         ofstream f(fileHeader.c_str());
         CodeGenerator cg(&f, output);
         fs->outputCPPDeclHeader(cg, ar);
         f.close();
       }
-    }
-
-    // for each file, generate one list of class headers
-    BOOST_FOREACH(FileScopePtr fs, iter->second) {
       fs->outputCPPClassHeaders(cg, ar, output);
+      {
+        ofstream f(fwFileHeader.c_str());
+        CodeGenerator cg(&f, output);
+        fs->outputCPPForwardDeclHeader(cg, ar);
+        f.close();
+      }
     }
   }
 
@@ -1278,7 +1274,7 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-    if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+    if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
       cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
     }
     cg_printf("\n");
@@ -1380,7 +1376,7 @@ void AnalysisResult::outputCPPClassMapFile() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+  if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }
   cg_printf("\n");
@@ -2699,7 +2695,7 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+  if (Option::PrecomputeLiteralStrings || Option::UseNamedLiteralString) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }
   if (part == 1) {
@@ -3058,7 +3054,7 @@ void AnalysisResult::outputCPPMain() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if (Option::UseNamedLiteralString || Option::PrecomputeLiteralStrings) {
+  if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }
 
@@ -3466,6 +3462,7 @@ int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
     strings.push_back(s);
   }
   index = i;
+  getFileScope()->addUsedLiteralString(s);
   return hash;
 }
 

@@ -25,9 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Constants
+// 1. Static Strings 
 
-// 2. Classes
+// 2. Constants
+
+// 3. Classes
 FORWARD_DECLARE_GENERIC_INTERFACE(outeriterator);
 FORWARD_DECLARE_GENERIC_INTERFACE(serializable);
 FORWARD_DECLARE_GENERIC_INTERFACE(traversable);

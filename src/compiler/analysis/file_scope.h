@@ -103,6 +103,13 @@ public:
   }
   bool isErrorSuppressed(CodeError::ErrorType e);
 
+  void addUsedLiteralString(std::string s) {
+    m_usedLiteralStrings.insert(s);
+  }
+  std::set<std::string> &getUsedLiteralStrings() {
+    return m_usedLiteralStrings;
+  }
+
   /**
    * For separate compilation
    * These add edges between filescopes in the other dep graph and
@@ -197,6 +204,7 @@ private:
   std::set<std::string> m_usedClasses;
   std::set<std::string> m_usedConsts;
   std::set<std::string> m_usedIncludesInline;
+  std::set<std::string> m_usedLiteralStrings;
   std::string m_pseudoMainName;
   std::set<std::string> m_pseudoMainVariables;
 

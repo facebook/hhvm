@@ -363,14 +363,24 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   }
 
   cg.namespaceBegin();
-  cg.printSection("1. Constants", false);
+  cg.printSection("1. Static Strings ", false);
+  string str;
+  BOOST_FOREACH(str, m_usedLiteralStrings) {
+    int index = -1;
+    int stringId = cg.checkLiteralString(str, index, ar);
+    assert(index != -1);
+    string lisnam = ar->getLiteralStringName(stringId, index);
+    cg_printf("extern StaticString %s;\n", lisnam.c_str());
+  }
+  cg_printf("\n");
+  cg.printSection("2. Constants", false);
   if (cg.getOutput() != CodeGenerator::MonoCPP) {
     getConstants()->outputCPP(cg, ar);
   } else {
     cg_printf("// (omitted in MonoCPP mode)\n");
   }
 
-  cg.printSection("2. Classes");
+  cg.printSection("3. Classes");
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {

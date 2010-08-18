@@ -25,9 +25,11 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Constants
+// 1. Static Strings 
 
-// 2. Classes
+// 2. Constants
+
+// 3. Classes
 FORWARD_DECLARE_CLASS(splfileobject);
 extern const int64 q_splfileobject_DROP_NEW_LINE;
 extern const int64 q_splfileobject_READ_AHEAD;

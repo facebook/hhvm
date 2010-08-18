@@ -4,11 +4,48 @@ These are the known inconsistencies between current HipHop and PHP.
 
 1. Operators
 
-(1) instanceof
+(1) Arithmetic
+
+In PHP, the addition, subtraction, or multiplication of two integers will
+produce a floating-point value if the result overflows the integer type. In
+Hiphop, the addition, subtraction, or multiplication of two integers will
+always produce an integer value; if the result overflows the integer type, the
+upper bits of the result will be truncated.
+
+(2) Foreach by value
+
+In PHP, foreach by value will modify the array's internal cursor under certain
+circumstances. In HipHop, foreach by value will never modify the array's
+internal cursor.
+
+(3) Foreach by reference
+
+In PHP, if during a foreach by reference loop the next element of the array is
+unset, the foreach loop may fail to visit all of the elements in the array.
+Under HipHop, foreach by references loops that do not break early make the
+following guarantees:
+  a) If an original element is not deleted, the loop will visit it exactly
+     once.
+  b) If an element is appended and is not deleted, the loop will visit it
+     exactly once.
+  c) An original element or an appended element will not be visited if it is
+     deleted during a previous iteration.
+  d) The loop will visit all elements in order, original elements first
+     followed by appended elements.
+
+(4) instanceof
 
 In PHP, [constant] instanceof [class name] will cause a fatal.
 In HipHop, there is no special case for constants and the expression's value is
 false.
+
+(5) Internal array cursors
+
+In PHP, if an array's internal cursor points past the last element and then a
+copy of the array is made, the copy will have its internal cursor reset to
+point at the first element. In HipHop, when a copy of an array is made, the
+copy's internal cursor will always point to the same element that the original
+array's internal cursor pointed to.
 
 2. Classes and objects
 
@@ -105,9 +142,9 @@ are not supported, e.g.
 
 6. Misc
 
-(1) get_declared_classes
+(1) get_defined_vars() and get_declared_classes()
 
-Can return classes in different order from PHP's.
+Can return variables/classes in different order from PHP's.
 
 (2) uninitialized variables
 

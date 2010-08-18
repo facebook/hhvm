@@ -569,7 +569,6 @@ ExpressionPtr AliasManager::canonicalizeRecurNonNull(ExpressionPtr e) {
 
 static bool sameExpr(ExpressionPtr e1, ExpressionPtr e2) {
   if (e1 == e2) return true;
-  if (e1->getCanonID() != e2->getCanonID()) return false;
   while (e2->getCanonPtr()) {
     e2 = e2->getCanonPtr();
     if (e2 == e1) return true;
@@ -727,38 +726,57 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
                   rep->setReplacement(value);
                   m_replaced++;
                 } else {
-                  ExpressionPtr rhs = value;
-                  while (rhs->is(Expression::KindOfAssignmentExpression)) {
-                    rhs = spc(AssignmentExpression, rhs)->getValue();
+                  ExpressionPtr last = value;
+                  while (last->is(Expression::KindOfAssignmentExpression)) {
+                    last = spc(AssignmentExpression, last)->getValue();
                   }
-                  if (!rhs->hasEffect()) {
-                    m_noAdd = true;
-                    ExpressionPtr v = canonicalizeRecurNonNull(rhs->clone());
-                    m_noAdd = false;
-                    if (v->getCanonID() == rhs->getCanonID()) {
-                      if (a->isUnused() && rhs == value) {
-                        value = value->replaceValue(
-                          canonicalizeRecurNonNull(
-                            Expression::MakeConstant(
-                              m_arp, value->getLocation(), "null")));
-                        a->setNthKid(1, value);
-                        m_changes++;
-                      } else {
-                        ExpressionListPtr el(
-                          new ExpressionList(a->getLocation(),
-                                             Expression::KindOfExpressionList,
-                                             ExpressionList::ListKindWrapped));
-                        a = spc(AssignmentExpression, a->clone());
-                        el->addElement(a);
-                        el->addElement(a->getValue());
-                        a->setNthKid(
-                          1, Expression::MakeConstant(m_arp,
-                                                      value->getLocation(),
-                                                      "null"));
-                        rep->setReplacement(el);
-                        m_replaced++;
+                  ExpressionPtr cur = value;
+                  while (cur) {
+                    ExpressionPtr rhs = cur;
+                    ExpressionPtr next;
+                    if (cur->is(Expression::KindOfAssignmentExpression)) {
+                      rhs = spc(AssignmentExpression, cur)->getVariable();
+                      next = spc(AssignmentExpression, cur)->getValue();
+                    } else {
+                      next.reset();
+                    }
+                    if (!rhs->hasEffect()) {
+                      m_noAdd = true;
+                      ExpressionPtr v = rhs->clone();
+                      v->clearContext();
+                      v = canonicalizeRecurNonNull(v);
+                      m_noAdd = false;
+                      while (v->getCanonPtr() && v->getCanonPtr() != last) {
+                        v = v->getCanonPtr();
+                      }
+                      if (v->getCanonPtr()) {
+                        if (a->isUnused() && rhs == value) {
+                          value = value->replaceValue(
+                            canonicalizeRecurNonNull(
+                              Expression::MakeConstant(
+                                m_arp, value->getLocation(), "null")));
+                          a->setNthKid(1, value);
+                          m_changes++;
+                        } else {
+                          ExpressionListPtr el(
+                            new ExpressionList(
+                              a->getLocation(),
+                              Expression::KindOfExpressionList,
+                              ExpressionList::ListKindWrapped));
+                          a = spc(AssignmentExpression, a->clone());
+                          el->addElement(a);
+                          el->addElement(a->getValue());
+                          a->setNthKid(
+                            1, Expression::MakeConstant(m_arp,
+                                                        value->getLocation(),
+                                                        "null"));
+                          rep->setReplacement(el);
+                          m_replaced++;
+                        }
+                        break;
                       }
                     }
+                    cur = next;
                   }
                 }
               }
@@ -800,29 +818,42 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
           if (Option::LocalCopyProp &&
               rep->getKindOf() == Expression::KindOfAssignmentExpression) {
             AssignmentExpressionPtr ae = spc(AssignmentExpression,rep);
-            ExpressionPtr rhs = ae->getValue();
-            while (rhs->is(Expression::KindOfAssignmentExpression)) {
-              rhs = spc(AssignmentExpression, rhs)->getValue();
+            ExpressionPtr cur = ae->getValue(), last = cur;
+            while (last->is(Expression::KindOfAssignmentExpression)) {
+              last = spc(AssignmentExpression, last)->getValue();
             }
-            if (rhs->isScalar()) {
-              rhs = rhs->clone();
-              getCanonical(rhs);
-              return rhs;
+            if (last->isScalar()) {
+              last = last->clone();
+              getCanonical(last);
+              return last;
             }
-            if (rhs->is(Expression::KindOfSimpleVariable)) {
-              ExpressionPtr orig;
-              int i = findInterf(rhs, true, orig);
-              if (i == SameAccess && sameExpr(rhs, orig)) {
-                rhs = rhs->clone();
-                return e->replaceValue(canonicalizeRecurNonNull(rhs));
+            while (cur) {
+              ExpressionPtr rhs = cur;
+              ExpressionPtr next;
+              if (cur->is(Expression::KindOfAssignmentExpression)) {
+                rhs = spc(AssignmentExpression, cur)->getVariable();
+                next = spc(AssignmentExpression, cur)->getValue();
+              } else {
+                next.reset();
               }
+              if (rhs->is(Expression::KindOfSimpleVariable)) {
+                rhs = rhs->clone();
+                rhs->clearContext();
+                ExpressionPtr orig;
+                int i = findInterf(rhs, true, orig);
+                if (i == SameAccess &&
+                    (sameExpr(cur, orig) || next && sameExpr(next, orig))) {
+                  return e->replaceValue(canonicalizeRecurNonNull(rhs));
+                }
+              }
+              cur = next;
             }
             if (ae->isUnused() && m_bucketMap[0].isLast(ae)) {
               rep = ae->clone();
               ae->setContext(Expression::DeadStore);
               ae->setNthKid(1, Expression::MakeConstant(m_arp,
-                                                          ae->getLocation(),
-                                                          "null"));
+                                                        ae->getLocation(),
+                                                        "null"));
               ae->setNthKid(0, Expression::MakeConstant(m_arp,
                                                         ae->getLocation(),
                                                         "null"));
@@ -830,7 +861,7 @@ ExpressionPtr AliasManager::canonicalizeNode(ExpressionPtr e) {
               m_replaced++;
               return e->replaceValue(canonicalizeRecurNonNull(rep));
             }
-            e->setCanonPtr(rhs);
+            e->setCanonPtr(last);
           }
         }
       }

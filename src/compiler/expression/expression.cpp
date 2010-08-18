@@ -25,6 +25,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/expression_list.h>
 #include <compiler/expression/simple_variable.h>
+#include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/analysis/constant_table.h>
@@ -306,12 +307,20 @@ bool Expression::CheckNeeded(AnalysisResultPtr ar,
   // if the value may involve object, consider the variable as "needed"
   // so that objects are not destructed prematurely.
   bool needed = true;
-  TypePtr type = value ? value->getType() : TypePtr();
-  if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
-    type = value->getActualType();
+  if (value) {
+    while (value->is(KindOfAssignmentExpression)) {
+      value = dynamic_pointer_cast<AssignmentExpression>(value)->getValue();
+    }
+    if (value->isScalar()) {
+      needed = false;
+    } else {
+      TypePtr type = value->getType();
+      if (type && (type->is(Type::KindOfSome) || type->is(Type::KindOfAny))) {
+        type = value->getActualType();
+      }
+      if (type && type->isNoObjectInvolved()) needed = false;
+    }
   }
-  if (value && value->isScalar()) needed = false;
-  if (type && type->isNoObjectInvolved()) needed = false;
   if (variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(variable);

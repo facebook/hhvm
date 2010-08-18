@@ -162,8 +162,8 @@ Variant ProcessSharedVariant::toLocal() {
   case KindOfArray:
     {
       if (getSerializedArray()) {
-        return f_unserialize(String(m_data.str->data(), m_data.str->size(),
-                                    AttachLiteral));
+        SharedMemoryString* s = getString();
+        return f_unserialize(String(s->c_str(), s->size(), AttachLiteral));
       }
       return NEW(SharedMap)(this);
     }

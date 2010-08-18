@@ -100,9 +100,11 @@ public:
   virtual bool isResource() const { return m_conn != NULL;}
 
   bool connect(CStrRef host, int port, CStrRef socket, CStrRef username,
-               CStrRef password, CStrRef database, int client_flags, int connect_timeout);
+               CStrRef password, CStrRef database, int client_flags,
+               int connect_timeout);
   bool reconnect(CStrRef host, int port, CStrRef socket, CStrRef username,
-                 CStrRef password, CStrRef database, int client_flags, int connect_timeout);
+                 CStrRef password, CStrRef database, int client_flags,
+                 int connect_timeout);
 
   MYSQL *get() { return m_conn;}
 

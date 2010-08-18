@@ -33,8 +33,8 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-StaticString MySQL::s_class_name("MySQL");
-StaticString MySQLResult::s_class_name("MySQLResult");
+StaticString MySQL::s_class_name("mysql link");
+StaticString MySQLResult::s_class_name("mysql result");
 
 ///////////////////////////////////////////////////////////////////////////////
 

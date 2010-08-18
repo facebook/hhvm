@@ -631,6 +631,8 @@ static Variant include_impl(CStrRef file, bool once,
         path += (g_context->getCwd() + "/");
       }
 
+      path += RuntimeOption::IncludeSearchPaths[i];
+
       if (path[path.size() - 1] != '/') {
         path += "/";
       }

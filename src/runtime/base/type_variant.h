@@ -869,6 +869,13 @@ class Variant {
   mutable DataType m_type;
 
   bool isPrimitive() const { return m_type <= LiteralString; }
+  bool isObjectConvertable() {
+    return isNull() ||
+           (is(KindOfBoolean) && !toBoolean()) ||
+           (is(LiteralString) && !*getLiteralString()) ||
+           (is(KindOfString) && getStringData()->empty()) ||
+           (is(KindOfStaticString) && getStringData()->empty());
+  }
 
   CVarRef set(bool    v);
   CVarRef set(char    v);
@@ -1009,11 +1016,7 @@ class Variant {
     if (m_type == KindOfVariant) {
       return m_data.pvar->lvalAtImpl(key, prehash);
     }
-    if (isNull() ||
-        (m_type == KindOfBoolean && !toBoolean()) ||
-        (m_type == LiteralString && !*getLiteralString()) ||
-        (m_type == KindOfString && getStringData()->empty()) ||
-        (m_type == KindOfStaticString && getStringData()->empty())) {
+    if (isObjectConvertable()) {
       unset();
       set(toArray());
     }
@@ -1039,11 +1042,7 @@ class Variant {
     if (m_type == KindOfVariant) {
       return m_data.pvar->refvalAtImpl(key, prehash);
     }
-    if (is(KindOfArray) || isNull() ||
-        (is(KindOfBoolean) && !toBoolean()) ||
-        (is(LiteralString) && !*getLiteralString()) ||
-        (is(KindOfString) && getStringData()->empty()) ||
-        (is(KindOfStaticString) && getStringData()->empty())) {
+    if (is(KindOfArray) || isObjectConvertable()) {
       return ref(lvalAt(key, prehash));
     } else {
       return rvalAt(key, prehash);

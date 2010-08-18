@@ -5820,6 +5820,26 @@ bool TestCodeRun::TestCompilation() {
 
   MVCR("<?php var_dump(array(1,2,3)+array(4,5,6));");
 
+  MVCR("<?php "
+       "function foo($a) {"
+       "  $r = '';"
+       "  if ($a) {"
+       "    $r ->error = '';"
+       "  }"
+       "  return $r;"
+       "}"
+       "var_dump(foo(true));"
+       "var_dump(foo(false));");
+  MVCR("<?php "
+       "function foo($a) {"
+       "  $r = '';"
+       "  if ($a) {"
+       "    $r ->error->line = 1;"
+       "  }"
+       "  return $r;"
+       "}"
+       "var_dump(foo(true));"
+       "var_dump(foo(false));");
   return true;
 }
 

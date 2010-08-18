@@ -2325,11 +2325,7 @@ Variant Variant::refvalAtImpl(CStrRef key, int64 prehash /* = -1 */,
   if (m_type == KindOfVariant) {
     return m_data.pvar->refvalAtImpl(key, prehash, isString);
   }
-  if (is(KindOfArray) || isNull() ||
-      (is(KindOfBoolean) && !toBoolean()) ||
-      (is(LiteralString) && !*getLiteralString()) ||
-      (is(KindOfStaticString) && getStringData()->empty()) ||
-      (is(KindOfString) && getStringData()->empty())) {
+  if (is(KindOfArray) || isObjectConvertable()) {
     return ref(lvalAt(key, prehash, false, isString));
   } else {
     return rvalAt(key, prehash, isString);
@@ -2570,7 +2566,7 @@ ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */,
     return Object(m_data.pobj).o_lval(propName, prehash, context);
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_lval(propName, prehash, context);
-  } else if (m_type == KindOfNull) {
+  } else if (isObjectConvertable()) {
     set(Object(NEW(c_stdclass)()));
     return Object(m_data.pobj).o_lval(propName, prehash, context);
   } else {

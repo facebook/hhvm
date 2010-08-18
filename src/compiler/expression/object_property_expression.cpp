@@ -208,8 +208,16 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // what ->property has told us
     cls = ar->findClass(name, AnalysisResult::PropertyName);
     if (cls) {
-      m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()),
-                              false);
+      objectType =
+        m_object->inferAndCheck(ar, Type::CreateObjectType(cls->getName()),
+                                false);
+    }
+    if ((m_context & LValue) &&
+        objectType && !objectType->is(Type::KindOfObject) &&
+                      !objectType->is(Type::KindOfVariant) &&
+                      !objectType->is(Type::KindOfSome) &&
+                      !objectType->is(Type::KindOfAny)) {
+      m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
     }
   }
 

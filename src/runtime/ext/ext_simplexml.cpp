@@ -294,6 +294,8 @@ void c_simplexmlelement::t___construct(CStrRef data, int64 options /* = 0 */,
       m_children = create_children(m_doc, m_node, ns, is_prefix);
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
+  } else {
+    raise_error("String could not be parsed as XML");
   }
 }
 

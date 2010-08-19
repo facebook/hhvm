@@ -1214,6 +1214,11 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     // this calls outputCPPScalarArrays, so must happen
     // after function bodies have been output
     outputCPPSystem();
+    if (Option::UseNamedLiteralString) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "literal_strings";
+      outputCPPNamedLiteralStrings(false, file);
+    }
   } else if (Option::GenerateCPPMain) {
     outputCPPGlobalDeclarations();
     outputCPPMain();
@@ -1223,7 +1228,9 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     outputCPPGlobalVariablesMethods(3);
     outputCPPGlobalVariablesMethods(4);
     if (Option::UseNamedLiteralString) {
-      outputCPPNamedLiteralStrings();
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "literal_strings";
+      outputCPPNamedLiteralStrings(false, file);
     } else if (Option::PrecomputeLiteralStrings) {
       outputCPPLiteralStringPrecomputation();
     }
@@ -1701,6 +1708,7 @@ void AnalysisResult::outputCPPDynamicTablesHeader
     cg_printInclude("<runtime/base/runtime_option.h>");
     cg_printInclude("<runtime/ext/ext.h>");
     cg_printInclude("<runtime/eval/eval.h>");
+    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
     cg_printf("\n");
   } else {
     cg_printf("\n");
@@ -3433,7 +3441,7 @@ void AnalysisResult::outputSwigFFIStubs() {
  */
 string AnalysisResult::getLiteralStringName(int hash, int index) {
   assert(index >= 0);
-  string name("s_ss");
+  string name(Option::SystemGen ? "s_sys_ss" : "s_ss");
   name += boost::str(boost::format("%08x") % hash);
   if (index > 0) name += ("_" + lexical_cast<string>(index));
   return name;
@@ -3633,18 +3641,25 @@ void AnalysisResult::outputCPPLiteralStringPrecomputation() {
 }
 
 
-void AnalysisResult::outputCPPNamedLiteralStrings() {
+void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
+                                                  const string &file) {
   AnalysisResultPtr ar = shared_from_this();
-  string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "literal_strings.h";
+  string filename = genStatic ? file : (file + ".h");
   ofstream f(filename.c_str());
   CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
 
   cg_printf("\n");
-  cg_printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
-  cg_printf("#define __GENERATED_sys_literal_strings_h__\n");
-  cg_printInclude("<runtime/base/hphp.h>");
-  cg_printf("\n");
+  if (Option::SystemGen) {
+    cg_printf("#ifndef __GENERATED_gen_sys_literal_strings_h__\n");
+    cg_printf("#define __GENERATED_gen_sys_literal_strings_h__\n");
+  } else {
+    cg_printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
+    cg_printf("#define __GENERATED_sys_literal_strings_h__\n");
+  }
+  if (!genStatic) {
+    cg_printInclude("<runtime/base/hphp.h>");
+    cg_printf("\n");
+  }
   cg.namespaceBegin();
   for (map<int, vector<string> >::const_iterator it =
        m_namedStringLiterals.begin(); it != m_namedStringLiterals.end();
@@ -3653,15 +3668,26 @@ void AnalysisResult::outputCPPNamedLiteralStrings() {
     vector<string> &strings = m_namedStringLiterals[hash];
     for (unsigned int i = 0; i < strings.size(); i++) {
       string name = getLiteralStringName(hash, i);
-      cg_printf("extern StaticString %s;\n", name.c_str());
+      if (genStatic) {
+        cg_printf("static StaticString %s(", name.c_str());
+        cg_printString(strings[i], ar, false, false);
+        cg_printf(");\n");
+      } else {
+        cg_printf("extern StaticString %s;\n", name.c_str());
+      }
     }
   }
   cg.namespaceEnd();
-  cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
+  if (Option::SystemGen) {
+    cg_printf("#endif // __GENERATED_gen_sys_literal_strings_h__\n");
+  } else {
+    cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
+  }
   f.close();
 
-  filename = m_outputPath + "/" + Option::SystemFilePrefix +
-    "literal_strings.no.cpp";
+  if (genStatic) return;
+
+  filename = file + ".no.cpp";
   f.open(filename.c_str());
   cg_printf("\n");
   cg_printInclude("\"literal_strings.h\"");
@@ -3750,6 +3776,8 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
     Option::SepExtensionOptions &options = Option::SepExtensions[i];
     cg_printf("#include \"ext_%s.h\"\n", options.name.c_str());
   }
+  string litstrFile = filename + ".litstr";
+  cg_printf("#include \"%s\"\n", litstrFile.c_str());
 
   cg_printf("\n");
   cg_printf("using namespace std;\n");
@@ -3768,6 +3796,7 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
 
   cg.namespaceEnd();
   fTable.close();
+  outputCPPNamedLiteralStrings(true, litstrFile);
 }
 
 //

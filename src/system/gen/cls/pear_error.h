@@ -67,8 +67,8 @@ class c_pear_error : public ExtObjectData {
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: void t_pear_error(CVarRef v_message = "unknown error", CVarRef v_code = null_variant, CVarRef v_mode = null_variant, CVarRef v_options = null_variant, CVarRef v_userinfo = null_variant);
-  public: c_pear_error *create(CVarRef v_message = "unknown error", CVarRef v_code = null_variant, CVarRef v_mode = null_variant, CVarRef v_options = null_variant, CVarRef v_userinfo = null_variant);
+  public: void t_pear_error(CVarRef v_message = NAMSTR(s_sys_ss6dfe38ec, "unknown error"), CVarRef v_code = null_variant, CVarRef v_mode = null_variant, CVarRef v_options = null_variant, CVarRef v_userinfo = null_variant);
+  public: c_pear_error *create(CVarRef v_message = NAMSTR(s_sys_ss6dfe38ec, "unknown error"), CVarRef v_code = null_variant, CVarRef v_mode = null_variant, CVarRef v_options = null_variant, CVarRef v_userinfo = null_variant);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

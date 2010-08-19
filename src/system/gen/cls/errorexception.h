@@ -72,8 +72,8 @@ class c_errorexception : public c_exception {
   DECLARE_INVOKES_FROM_EVAL
   void init();
   public: Variant m_severity;
-  public: void t___construct(Variant v_message = "", Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
-  public: c_errorexception *create(Variant v_message = "", Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
+  public: void t___construct(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
+  public: c_errorexception *create(Variant v_message = NAMSTR(s_sys_ss00000000, ""), Variant v_code = 0LL, Variant v_severity = 0LL, Variant v_filename = null, Variant v_lineno = null);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);

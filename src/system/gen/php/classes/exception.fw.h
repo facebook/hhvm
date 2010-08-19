@@ -26,6 +26,29 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // 1. Static Strings 
+extern StaticString s_sys_ss00000000;
+extern StaticString s_sys_ss10600e60;
+extern StaticString s_sys_ss2e45e4ea;
+extern StaticString s_sys_ss229c615f;
+extern StaticString s_sys_ss55f425c0;
+extern StaticString s_sys_ss6b4cb5ed;
+extern StaticString s_sys_ss1f74c210;
+extern StaticString s_sys_ss7a853247;
+extern StaticString s_sys_ss7f49956c;
+extern StaticString s_sys_ss70cc2eb1;
+extern StaticString s_sys_ss58ba5adc;
+extern StaticString s_sys_ss1dc3d04f;
+extern StaticString s_sys_ss0f36a862;
+extern StaticString s_sys_ss62d8d71d;
+extern StaticString s_sys_ss13e682d2;
+extern StaticString s_sys_ss58af461f;
+extern StaticString s_sys_ss3b13b346;
+extern StaticString s_sys_ss169ecc8a;
+extern StaticString s_sys_ss30737366;
+extern StaticString s_sys_ss6b362b85;
+extern StaticString s_sys_ss05a0ea07;
+extern StaticString s_sys_ss2cf0a747;
+extern StaticString s_sys_ss1fe107ad;
 
 // 2. Constants
 

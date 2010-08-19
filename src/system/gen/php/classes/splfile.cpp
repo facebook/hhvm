@@ -138,7 +138,7 @@ Variant c_splfileobject::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileobject
 IMPLEMENT_CLASS(splfileobject)
-c_splfileobject *c_splfileobject::create(Variant v_filename, Variant v_open_mode //  = "r"
+c_splfileobject *c_splfileobject::create(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss122506fb, "r")
 , Variant v_use_include_path //  = false
 , Variant v_context //  = null
 ) {
@@ -709,17 +709,17 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
-      HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
+      HASH_GUARD_LITSTR(0x09637D7CA2E33F00LL, NAMSTR(s_sys_ss5d1cc100, "fgetc")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 6:
-      HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+      HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ss44934786, "getRealPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
-      HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
+      HASH_GUARD_LITSTR(0x44CE4DB1CE7E9F86LL, NAMSTR(s_sys_ss3181607a, "flock")) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         const_cast<Array&>(params).escalate(true);
         {
@@ -730,19 +730,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           return (t_flock(arg0, ref(arg1)));
         }
       }
-      HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+      HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
-      HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+      HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss371013f8, "isDir")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
-      HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
+      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -753,43 +753,43 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 14:
-      HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+      HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss52b41b72, "getOwner")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
-      HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
+      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
-      HASH_GUARD(0x40044334DA397C15LL, haschildren) {
+      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 26:
-      HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
+      HASH_GUARD_LITSTR(0x2B7CAC006AF27F9ALL, NAMSTR(s_sys_ss6af27f9a, "fflush")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 27:
-      HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
+      HASH_GUARD_LITSTR(0x5B33B55D4B7E339BLL, NAMSTR(s_sys_ss4b7e339b, "fpassthru")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 28:
-      HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+      HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss6731e29c, "getBasename")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -801,13 +801,13 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 29:
-      HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+      HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ss60465f1d, "isFile")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 30:
-      HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
+      HASH_GUARD_LITSTR(0x3E4E7C561D3A541ELL, NAMSTR(s_sys_ss1d3a541e, "fgetss")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -818,13 +818,13 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 31:
-      HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+      HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ss4aac3a61, "getATime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
-      HASH_GUARD(0x044B276686B77923LL, fscanf) {
+      HASH_GUARD_LITSTR(0x044B276686B77923LL, NAMSTR(s_sys_ss794886dd, "fscanf")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -835,7 +835,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 37:
-      HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+      HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5633b25b, "setFileClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -847,25 +847,25 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 43:
-      HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+      HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss48aaec55, "getLinkTarget")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 45:
-      HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
+      HASH_GUARD_LITSTR(0x1C1216F2B7C16CADLL, NAMSTR(s_sys_ss483e9353, "ftell")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 47:
-      HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+      HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss5d0078af, "getCTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
-      HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+      HASH_GUARD_LITSTR(0x337DEC2D48BDFE35LL, NAMSTR(s_sys_ss48bdfe35, "openFile")) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -881,7 +881,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 55:
-      HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
+      HASH_GUARD_LITSTR(0x4CEC6AA30E43D437LL, NAMSTR(s_sys_ss0e43d437, "setMaxLineLen")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -892,21 +892,21 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 56:
-      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         return (t_next());
       }
-      HASH_GUARD(0x0890F9052322E838LL, fstat) {
+      HASH_GUARD_LITSTR(0x0890F9052322E838LL, NAMSTR(s_sys_ss2322e838, "fstat")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 63:
-      HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+      HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss3e9ddbc1, "getPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
-      HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+      HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss062b6dc1, "getFileInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -918,7 +918,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 67:
-      HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
+      HASH_GUARD_LITSTR(0x5ACCF9166CD9D043LL, NAMSTR(s_sys_ss6cd9d043, "ftruncate")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -927,19 +927,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           return (t_ftruncate(arg0));
         }
       }
-      HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
+      HASH_GUARD_LITSTR(0x794FAFD4412AEFC3LL, NAMSTR(s_sys_ss412aefc3, "eof")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 68:
-      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
-      HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+      HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss25d241c5, "setInfoClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -951,7 +951,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 73:
-      HASH_GUARD(0x4282E0231F600049LL, fseek) {
+      HASH_GUARD_LITSTR(0x4282E0231F600049LL, NAMSTR(s_sys_ss1f600049, "fseek")) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -963,19 +963,19 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 74:
-      HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+      HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ss3cd2604a, "getInode")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
-      HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d, "getFilename")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
-      HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
+      HASH_GUARD_LITSTR(0x7E978C38D741664ELL, NAMSTR(s_sys_ss28be99b2, "fgetcsv")) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -991,13 +991,13 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 79:
-      HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+      HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss16bfe3b1, "isReadable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 80:
-      HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
+      HASH_GUARD_LITSTR(0x3A335010F905ACD0LL, NAMSTR(s_sys_ss06fa5330, "setCsvControl")) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -1013,31 +1013,31 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 81:
-      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
-      HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+      HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ss72c51c58, "isLink")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 90:
-      HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
+      HASH_GUARD_LITSTR(0x25F68E7910FE9CDALL, NAMSTR(s_sys_ss10fe9cda, "getMaxLineLen")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 92:
-      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         {
           ArrayData *ad(params.get());
@@ -1054,25 +1054,25 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 97:
-      HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
+      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 98:
-      HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
+      HASH_GUARD_LITSTR(0x6FE9F691E4A6D962LL, NAMSTR(s_sys_ss1b59269e, "getCsvControl")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 99:
-      HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+      HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss47b9c59d, "isWritable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 101:
-      HASH_GUARD(0x05D72365192CE465LL, fwrite) {
+      HASH_GUARD_LITSTR(0x05D72365192CE465LL, NAMSTR(s_sys_ss192ce465, "fwrite")) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         {
           ArrayData *ad(params.get());
@@ -1084,7 +1084,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 103:
-      HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+      HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss24e95019, "getPathInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1094,7 +1094,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           return (t_getpathinfo(arg0));
         }
       }
-      HASH_GUARD(0x7EF5445C77054C67LL, seek) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         {
           ArrayData *ad(params.get());
@@ -1105,45 +1105,45 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
       }
       break;
     case 106:
-      HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+      HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss2565d86a, "getGroup")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
-      HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+      HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss6d03a6ea, "getSize")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
-      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 115:
-      HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
+      HASH_GUARD_LITSTR(0x7AE1BE187F18FDF3LL, NAMSTR(s_sys_ss7f18fdf3, "fgets")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 116:
-      HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+      HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss366d118c, "getMTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 120:
-      HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+      HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss3c26db08, "getPathname")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
-      HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+      HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ss2a0ccb7a, "isExecutable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
-      HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+      HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss37a06e7d, "getPerms")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
@@ -1519,131 +1519,131 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
-      HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
+      HASH_GUARD_LITSTR(0x09637D7CA2E33F00LL, NAMSTR(s_sys_ss5d1cc100, "fgetc")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
     case 6:
-      HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+      HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ss44934786, "getRealPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
-      HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
+      HASH_GUARD_LITSTR(0x44CE4DB1CE7E9F86LL, NAMSTR(s_sys_ss3181607a, "flock")) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         return (t_flock(a0, ref(a1)));
       }
-      HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+      HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
-      HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+      HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss371013f8, "isDir")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
-      HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
+      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
         return (t_setflags(a0));
       }
       break;
     case 14:
-      HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+      HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss52b41b72, "getOwner")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
-      HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
+      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
         return (t_getchildren());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 21:
-      HASH_GUARD(0x40044334DA397C15LL, haschildren) {
+      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
         return (t_haschildren());
       }
       break;
     case 26:
-      HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
+      HASH_GUARD_LITSTR(0x2B7CAC006AF27F9ALL, NAMSTR(s_sys_ss6af27f9a, "fflush")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
     case 27:
-      HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
+      HASH_GUARD_LITSTR(0x5B33B55D4B7E339BLL, NAMSTR(s_sys_ss4b7e339b, "fpassthru")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
       }
       break;
     case 28:
-      HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+      HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss6731e29c, "getBasename")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
-      HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+      HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ss60465f1d, "isFile")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 30:
-      HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
+      HASH_GUARD_LITSTR(0x3E4E7C561D3A541ELL, NAMSTR(s_sys_ss1d3a541e, "fgetss")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         return (t_fgetss(a0));
       }
       break;
     case 31:
-      HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+      HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ss4aac3a61, "getATime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
-      HASH_GUARD(0x044B276686B77923LL, fscanf) {
+      HASH_GUARD_LITSTR(0x044B276686B77923LL, NAMSTR(s_sys_ss794886dd, "fscanf")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         return (t_fscanf(a0));
       }
       break;
     case 37:
-      HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+      HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5633b25b, "setFileClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 43:
-      HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+      HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss48aaec55, "getLinkTarget")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 45:
-      HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
+      HASH_GUARD_LITSTR(0x1C1216F2B7C16CADLL, NAMSTR(s_sys_ss483e9353, "ftell")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
       }
       break;
     case 47:
-      HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+      HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss5d0078af, "getCTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 53:
-      HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+      HASH_GUARD_LITSTR(0x337DEC2D48BDFE35LL, NAMSTR(s_sys_ss48bdfe35, "openFile")) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
@@ -1652,75 +1652,75 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 55:
-      HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
+      HASH_GUARD_LITSTR(0x4CEC6AA30E43D437LL, NAMSTR(s_sys_ss0e43d437, "setMaxLineLen")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         return (t_setmaxlinelen(a0));
       }
       break;
     case 56:
-      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
         return (t_next());
       }
-      HASH_GUARD(0x0890F9052322E838LL, fstat) {
+      HASH_GUARD_LITSTR(0x0890F9052322E838LL, NAMSTR(s_sys_ss2322e838, "fstat")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
       }
       break;
     case 63:
-      HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+      HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss3e9ddbc1, "getPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
-      HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+      HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss062b6dc1, "getFileInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
       }
       break;
     case 67:
-      HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
+      HASH_GUARD_LITSTR(0x5ACCF9166CD9D043LL, NAMSTR(s_sys_ss6cd9d043, "ftruncate")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         return (t_ftruncate(a0));
       }
-      HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
+      HASH_GUARD_LITSTR(0x794FAFD4412AEFC3LL, NAMSTR(s_sys_ss412aefc3, "eof")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
       }
       break;
     case 68:
-      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
         return (t_valid());
       }
       break;
     case 69:
-      HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+      HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss25d241c5, "setInfoClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 73:
-      HASH_GUARD(0x4282E0231F600049LL, fseek) {
+      HASH_GUARD_LITSTR(0x4282E0231F600049LL, NAMSTR(s_sys_ss1f600049, "fseek")) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         return (t_fseek(a0, a1));
       }
       break;
     case 74:
-      HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+      HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ss3cd2604a, "getInode")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 77:
-      HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d, "getFilename")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 78:
-      HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
+      HASH_GUARD_LITSTR(0x7E978C38D741664ELL, NAMSTR(s_sys_ss28be99b2, "fgetcsv")) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         if (count <= 0) return (t_fgetcsv());
         if (count == 1) return (t_fgetcsv(a0));
@@ -1729,13 +1729,13 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 79:
-      HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+      HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss16bfe3b1, "isReadable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 80:
-      HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
+      HASH_GUARD_LITSTR(0x3A335010F905ACD0LL, NAMSTR(s_sys_ss06fa5330, "setCsvControl")) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         if (count <= 0) return (t_setcsvcontrol());
         if (count == 1) return (t_setcsvcontrol(a0));
@@ -1744,31 +1744,31 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 81:
-      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
         return (t_key());
       }
       break;
     case 88:
-      HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+      HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ss72c51c58, "isLink")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 90:
-      HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
+      HASH_GUARD_LITSTR(0x25F68E7910FE9CDALL, NAMSTR(s_sys_ss10fe9cda, "getMaxLineLen")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
       }
       break;
     case 92:
-      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
         return (t_current());
       }
       break;
     case 95:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count < 1 || count > 4) return throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
         if (count <= 1) return (t___construct(a0), null);
         if (count == 2) return (t___construct(a0, a1), null);
@@ -1777,80 +1777,80 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
       }
       break;
     case 97:
-      HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
+      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
         return (t_getflags());
       }
       break;
     case 98:
-      HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
+      HASH_GUARD_LITSTR(0x6FE9F691E4A6D962LL, NAMSTR(s_sys_ss1b59269e, "getCsvControl")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
       }
       break;
     case 99:
-      HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+      HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss47b9c59d, "isWritable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 101:
-      HASH_GUARD(0x05D72365192CE465LL, fwrite) {
+      HASH_GUARD_LITSTR(0x05D72365192CE465LL, NAMSTR(s_sys_ss192ce465, "fwrite")) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         return (t_fwrite(a0, a1));
       }
       break;
     case 103:
-      HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+      HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss24e95019, "getPathInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
-      HASH_GUARD(0x7EF5445C77054C67LL, seek) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
         return (t_seek(a0));
       }
       break;
     case 106:
-      HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+      HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss2565d86a, "getGroup")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
-      HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+      HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss6d03a6ea, "getSize")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
-      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 115:
-      HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
+      HASH_GUARD_LITSTR(0x7AE1BE187F18FDF3LL, NAMSTR(s_sys_ss7f18fdf3, "fgets")) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
       }
       break;
     case 116:
-      HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+      HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss366d118c, "getMTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 120:
-      HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+      HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss3c26db08, "getPathname")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 122:
-      HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+      HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ss2a0ccb7a, "isExecutable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 125:
-      HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+      HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss37a06e7d, "getPerms")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
@@ -2803,7 +2803,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
-      HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
+      HASH_GUARD_LITSTR(0x09637D7CA2E33F00LL, NAMSTR(s_sys_ss5d1cc100, "fgetc")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
@@ -2817,7 +2817,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 6:
-      HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+      HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ss44934786, "getRealPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
@@ -2829,7 +2829,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         return (t_getrealpath());
       }
-      HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
+      HASH_GUARD_LITSTR(0x44CE4DB1CE7E9F86LL, NAMSTR(s_sys_ss3181607a, "flock")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2849,7 +2849,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         return (t_flock(a0, ref(a1)));
       }
-      HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+      HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
@@ -2863,7 +2863,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 8:
-      HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+      HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss371013f8, "isDir")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
@@ -2877,7 +2877,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 10:
-      HASH_GUARD(0x2FC3A6941D522E0ALL, setflags) {
+      HASH_GUARD_LITSTR(0x2FC3A6941D522E0ALL, NAMSTR(s_sys_ss1d522e0a, "setFlags")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2895,7 +2895,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 14:
-      HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+      HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss52b41b72, "getOwner")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
@@ -2909,7 +2909,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 15:
-      HASH_GUARD(0x732EC1BDA8EC520FLL, getchildren) {
+      HASH_GUARD_LITSTR(0x732EC1BDA8EC520FLL, NAMSTR(s_sys_ss5713adf1, "getChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getChildren", 0, 1);
@@ -2923,7 +2923,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
@@ -2937,7 +2937,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 21:
-      HASH_GUARD(0x40044334DA397C15LL, haschildren) {
+      HASH_GUARD_LITSTR(0x40044334DA397C15LL, NAMSTR(s_sys_ss25c683eb, "hasChildren")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::hasChildren", 0, 1);
@@ -2951,7 +2951,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 26:
-      HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
+      HASH_GUARD_LITSTR(0x2B7CAC006AF27F9ALL, NAMSTR(s_sys_ss6af27f9a, "fflush")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
@@ -2965,7 +2965,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 27:
-      HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
+      HASH_GUARD_LITSTR(0x5B33B55D4B7E339BLL, NAMSTR(s_sys_ss4b7e339b, "fpassthru")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
@@ -2979,7 +2979,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 28:
-      HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+      HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss6731e29c, "getBasename")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2998,7 +2998,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 29:
-      HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+      HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ss60465f1d, "isFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
@@ -3012,7 +3012,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 30:
-      HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
+      HASH_GUARD_LITSTR(0x3E4E7C561D3A541ELL, NAMSTR(s_sys_ss1d3a541e, "fgetss")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3030,7 +3030,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 31:
-      HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+      HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ss4aac3a61, "getATime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
@@ -3044,7 +3044,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 35:
-      HASH_GUARD(0x044B276686B77923LL, fscanf) {
+      HASH_GUARD_LITSTR(0x044B276686B77923LL, NAMSTR(s_sys_ss794886dd, "fscanf")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3062,7 +3062,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 37:
-      HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+      HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5633b25b, "setFileClass")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3081,7 +3081,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 43:
-      HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+      HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss48aaec55, "getLinkTarget")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
@@ -3095,7 +3095,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 45:
-      HASH_GUARD(0x1C1216F2B7C16CADLL, ftell) {
+      HASH_GUARD_LITSTR(0x1C1216F2B7C16CADLL, NAMSTR(s_sys_ss483e9353, "ftell")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
@@ -3109,7 +3109,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 47:
-      HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+      HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss5d0078af, "getCTime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
@@ -3123,7 +3123,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 53:
-      HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+      HASH_GUARD_LITSTR(0x337DEC2D48BDFE35LL, NAMSTR(s_sys_ss48bdfe35, "openFile")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -3152,7 +3152,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 55:
-      HASH_GUARD(0x4CEC6AA30E43D437LL, setmaxlinelen) {
+      HASH_GUARD_LITSTR(0x4CEC6AA30E43D437LL, NAMSTR(s_sys_ss0e43d437, "setMaxLineLen")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3170,7 +3170,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 56:
-      HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
+      HASH_GUARD_LITSTR(0x3C6D50F3BB8102B8LL, NAMSTR(s_sys_ss447efd48, "next")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
@@ -3182,7 +3182,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         return (t_next());
       }
-      HASH_GUARD(0x0890F9052322E838LL, fstat) {
+      HASH_GUARD_LITSTR(0x0890F9052322E838LL, NAMSTR(s_sys_ss2322e838, "fstat")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
@@ -3196,7 +3196,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 63:
-      HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+      HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss3e9ddbc1, "getPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
@@ -3208,7 +3208,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         return (t_getpath());
       }
-      HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+      HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss062b6dc1, "getFileInfo")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3227,7 +3227,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 67:
-      HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
+      HASH_GUARD_LITSTR(0x5ACCF9166CD9D043LL, NAMSTR(s_sys_ss6cd9d043, "ftruncate")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3243,7 +3243,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         return (t_ftruncate(a0));
       }
-      HASH_GUARD(0x794FAFD4412AEFC3LL, eof) {
+      HASH_GUARD_LITSTR(0x794FAFD4412AEFC3LL, NAMSTR(s_sys_ss412aefc3, "eof")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
@@ -3257,7 +3257,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 68:
-      HASH_GUARD(0x6413CB5154808C44LL, valid) {
+      HASH_GUARD_LITSTR(0x6413CB5154808C44LL, NAMSTR(s_sys_ss54808c44, "valid")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::valid", 0, 1);
@@ -3271,7 +3271,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 69:
-      HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+      HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss25d241c5, "setInfoClass")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3290,7 +3290,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 73:
-      HASH_GUARD(0x4282E0231F600049LL, fseek) {
+      HASH_GUARD_LITSTR(0x4282E0231F600049LL, NAMSTR(s_sys_ss1f600049, "fseek")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3312,7 +3312,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 74:
-      HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+      HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ss3cd2604a, "getInode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
@@ -3326,7 +3326,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 77:
-      HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d, "getFilename")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
@@ -3340,7 +3340,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 78:
-      HASH_GUARD(0x7E978C38D741664ELL, fgetcsv) {
+      HASH_GUARD_LITSTR(0x7E978C38D741664ELL, NAMSTR(s_sys_ss28be99b2, "fgetcsv")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -3369,7 +3369,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 79:
-      HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+      HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss16bfe3b1, "isReadable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
@@ -3383,7 +3383,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 80:
-      HASH_GUARD(0x3A335010F905ACD0LL, setcsvcontrol) {
+      HASH_GUARD_LITSTR(0x3A335010F905ACD0LL, NAMSTR(s_sys_ss06fa5330, "setCsvControl")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -3412,7 +3412,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 81:
-      HASH_GUARD(0x56EDB60C824E8C51LL, key) {
+      HASH_GUARD_LITSTR(0x56EDB60C824E8C51LL, NAMSTR(s_sys_ss7db173af, "key")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::key", 0, 1);
@@ -3426,7 +3426,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 88:
-      HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+      HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ss72c51c58, "isLink")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
@@ -3440,7 +3440,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 90:
-      HASH_GUARD(0x25F68E7910FE9CDALL, getmaxlinelen) {
+      HASH_GUARD_LITSTR(0x25F68E7910FE9CDALL, NAMSTR(s_sys_ss10fe9cda, "getMaxLineLen")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
@@ -3454,7 +3454,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 92:
-      HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
+      HASH_GUARD_LITSTR(0x5B3A4A72846B21DCLL, NAMSTR(s_sys_ss7b94de24, "current")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::current", 0, 1);
@@ -3468,7 +3468,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 95:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -3501,7 +3501,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 97:
-      HASH_GUARD(0x27E7DBA875AD17E1LL, getflags) {
+      HASH_GUARD_LITSTR(0x27E7DBA875AD17E1LL, NAMSTR(s_sys_ss75ad17e1, "getFlags")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getFlags", 0, 1);
@@ -3515,7 +3515,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 98:
-      HASH_GUARD(0x6FE9F691E4A6D962LL, getcsvcontrol) {
+      HASH_GUARD_LITSTR(0x6FE9F691E4A6D962LL, NAMSTR(s_sys_ss1b59269e, "getCsvControl")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
@@ -3529,7 +3529,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 99:
-      HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+      HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss47b9c59d, "isWritable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
@@ -3543,7 +3543,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 101:
-      HASH_GUARD(0x05D72365192CE465LL, fwrite) {
+      HASH_GUARD_LITSTR(0x05D72365192CE465LL, NAMSTR(s_sys_ss192ce465, "fwrite")) {
         Variant a0;
         Variant a1;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -3565,7 +3565,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 103:
-      HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+      HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss24e95019, "getPathInfo")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3582,7 +3582,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         if (count <= 0) return (t_getpathinfo());
         else return (t_getpathinfo(a0));
       }
-      HASH_GUARD(0x7EF5445C77054C67LL, seek) {
+      HASH_GUARD_LITSTR(0x7EF5445C77054C67LL, NAMSTR(s_sys_ss77054c67, "seek")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -3600,7 +3600,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 106:
-      HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+      HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss2565d86a, "getGroup")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
@@ -3612,7 +3612,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         return (t_getgroup());
       }
-      HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+      HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss6d03a6ea, "getSize")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
@@ -3624,7 +3624,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         }
         return (t_getsize());
       }
-      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
@@ -3638,7 +3638,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 115:
-      HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
+      HASH_GUARD_LITSTR(0x7AE1BE187F18FDF3LL, NAMSTR(s_sys_ss7f18fdf3, "fgets")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
@@ -3652,7 +3652,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 116:
-      HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+      HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss366d118c, "getMTime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
@@ -3666,7 +3666,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 120:
-      HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+      HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss3c26db08, "getPathname")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
@@ -3680,7 +3680,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 122:
-      HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+      HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ss2a0ccb7a, "isExecutable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
@@ -3694,7 +3694,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
       }
       break;
     case 125:
-      HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+      HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss37a06e7d, "getPerms")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
@@ -3731,7 +3731,7 @@ void c_splfileobject::init() {
   c_splfileinfo::init();
 }
 /* SRC: classes/splfile.php line 391 */
-void c_splfileobject::t___construct(Variant v_filename, Variant v_open_mode //  = "r"
+void c_splfileobject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss122506fb, "r")
 , Variant v_use_include_path //  = false
 , Variant v_context //  = null
 ) {
@@ -3763,9 +3763,9 @@ String c_splfileobject::t_fgetc() {
   return x_hphp_splfileobject_fgetc(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 481 */
-Variant c_splfileobject::t_fgetcsv(CVarRef v_delimiter //  = ","
-, CVarRef v_enclosure //  = "\""
-, CVarRef v_escape //  = "\\"
+Variant c_splfileobject::t_fgetcsv(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
+, CVarRef v_enclosure //  = NAMSTR(s_sys_ss228ee909, "\"")
+, CVarRef v_escape //  = NAMSTR(s_sys_ss2a618761, "\\")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetcsv);
   return x_hphp_splfileobject_fgetcsv(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
@@ -3866,9 +3866,9 @@ Variant c_splfileobject::t_seek(CVarRef v_line_pos) {
   return (x_hphp_splfileobject_seek(GET_THIS(), toInt64(v_line_pos)), null);
 } /* function */
 /* SRC: classes/splfile.php line 806 */
-Variant c_splfileobject::t_setcsvcontrol(CVarRef v_delimiter //  = ","
-, CVarRef v_enclosure //  = "\""
-, CVarRef v_escape //  = "\\"
+Variant c_splfileobject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
+, CVarRef v_enclosure //  = NAMSTR(s_sys_ss228ee909, "\"")
+, CVarRef v_escape //  = NAMSTR(s_sys_ss2a618761, "\\")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setCsvControl);
   return (x_hphp_splfileobject_setcsvcontrol(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape)), null);
@@ -4260,7 +4260,7 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
-      HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+      HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss25d241c5, "setInfoClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4272,59 +4272,59 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 6:
-      HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+      HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ss44934786, "getRealPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
-      HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+      HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
-      HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+      HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss371013f8, "isDir")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
-      HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+      HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ss3cd2604a, "getInode")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 13:
-      HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d, "getFilename")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 14:
-      HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+      HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss52b41b72, "getOwner")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
-      HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+      HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss16bfe3b1, "isReadable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 24:
-      HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+      HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ss72c51c58, "isLink")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 28:
-      HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+      HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss6731e29c, "getBasename")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4336,13 +4336,13 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 29:
-      HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+      HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ss60465f1d, "isFile")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
@@ -4351,19 +4351,19 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           return (t___construct(arg0), null);
         }
       }
-      HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+      HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ss4aac3a61, "getATime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
-      HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+      HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss47b9c59d, "isWritable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 37:
-      HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+      HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5633b25b, "setFileClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4375,7 +4375,7 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 39:
-      HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+      HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss24e95019, "getPathInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4387,35 +4387,35 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 42:
-      HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+      HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss2565d86a, "getGroup")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
-      HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+      HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss6d03a6ea, "getSize")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 43:
-      HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+      HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss48aaec55, "getLinkTarget")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
-      HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+      HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss5d0078af, "getCTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 52:
-      HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+      HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss366d118c, "getMTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 53:
-      HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+      HASH_GUARD_LITSTR(0x337DEC2D48BDFE35LL, NAMSTR(s_sys_ss48bdfe35, "openFile")) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         {
           ArrayData *ad(params.get());
@@ -4431,29 +4431,29 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
       }
       break;
     case 56:
-      HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+      HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss3c26db08, "getPathname")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 58:
-      HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+      HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ss2a0ccb7a, "isExecutable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 61:
-      HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+      HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss37a06e7d, "getPerms")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 63:
-      HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+      HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss3e9ddbc1, "getPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
-      HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+      HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss062b6dc1, "getFileInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         {
           ArrayData *ad(params.get());
@@ -4658,137 +4658,137 @@ Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s,
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
-      HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+      HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss25d241c5, "setInfoClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
         if (count <= 0) return (t_setinfoclass());
         return (t_setinfoclass(a0));
       }
       break;
     case 6:
-      HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+      HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ss44934786, "getRealPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
         return (t_getrealpath());
       }
-      HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+      HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
         return (t_gettype());
       }
       break;
     case 8:
-      HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+      HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss371013f8, "isDir")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
         return (t_isdir());
       }
       break;
     case 10:
-      HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+      HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ss3cd2604a, "getInode")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
         return (t_getinode());
       }
       break;
     case 13:
-      HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d, "getFilename")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
         return (t_getfilename());
       }
       break;
     case 14:
-      HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+      HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss52b41b72, "getOwner")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
         return (t_getowner());
       }
       break;
     case 15:
-      HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+      HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss16bfe3b1, "isReadable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
         return (t_isreadable());
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
         return (t___tostring());
       }
       break;
     case 24:
-      HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+      HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ss72c51c58, "isLink")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
         return (t_islink());
       }
       break;
     case 28:
-      HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+      HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss6731e29c, "getBasename")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getBasename", 1, 1);
         if (count <= 0) return (t_getbasename());
         return (t_getbasename(a0));
       }
       break;
     case 29:
-      HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+      HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ss60465f1d, "isFile")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
         return (t_isfile());
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count != 1) return throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
-      HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+      HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ss4aac3a61, "getATime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
         return (t_getatime());
       }
       break;
     case 35:
-      HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+      HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss47b9c59d, "isWritable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
         return (t_iswritable());
       }
       break;
     case 37:
-      HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+      HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5633b25b, "setFileClass")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
         if (count <= 0) return (t_setfileclass());
         return (t_setfileclass(a0));
       }
       break;
     case 39:
-      HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+      HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss24e95019, "getPathInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getPathInfo", 1, 1);
         if (count <= 0) return (t_getpathinfo());
         return (t_getpathinfo(a0));
       }
       break;
     case 42:
-      HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+      HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss2565d86a, "getGroup")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
         return (t_getgroup());
       }
-      HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+      HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss6d03a6ea, "getSize")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
         return (t_getsize());
       }
       break;
     case 43:
-      HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+      HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss48aaec55, "getLinkTarget")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
         return (t_getlinktarget());
       }
       break;
     case 47:
-      HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+      HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss5d0078af, "getCTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
         return (t_getctime());
       }
       break;
     case 52:
-      HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+      HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss366d118c, "getMTime")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
         return (t_getmtime());
       }
       break;
     case 53:
-      HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+      HASH_GUARD_LITSTR(0x337DEC2D48BDFE35LL, NAMSTR(s_sys_ss48bdfe35, "openFile")) {
         if (count > 3) return throw_toomany_arguments("SplFileInfo::openFile", 3, 1);
         if (count <= 0) return (t_openfile());
         if (count == 1) return (t_openfile(a0));
@@ -4797,29 +4797,29 @@ Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s,
       }
       break;
     case 56:
-      HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+      HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss3c26db08, "getPathname")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
         return (t_getpathname());
       }
       break;
     case 58:
-      HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+      HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ss2a0ccb7a, "isExecutable")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
         return (t_isexecutable());
       }
       break;
     case 61:
-      HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+      HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss37a06e7d, "getPerms")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
         return (t_getperms());
       }
       break;
     case 63:
-      HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+      HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss3e9ddbc1, "getPath")) {
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
         return (t_getpath());
       }
-      HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+      HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss062b6dc1, "getFileInfo")) {
         if (count > 1) return throw_toomany_arguments("SplFileInfo::getFileInfo", 1, 1);
         if (count <= 0) return (t_getfileinfo());
         return (t_getfileinfo(a0));
@@ -5288,7 +5288,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
-      HASH_GUARD(0x5676046725D241C5LL, setinfoclass) {
+      HASH_GUARD_LITSTR(0x5676046725D241C5LL, NAMSTR(s_sys_ss25d241c5, "setInfoClass")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5307,7 +5307,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 6:
-      HASH_GUARD(0x6B2EAD4A44934786LL, getrealpath) {
+      HASH_GUARD_LITSTR(0x6B2EAD4A44934786LL, NAMSTR(s_sys_ss44934786, "getRealPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getRealPath", 0, 1);
@@ -5319,7 +5319,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         }
         return (t_getrealpath());
       }
-      HASH_GUARD(0x1D3B08AA0AF50F06LL, gettype) {
+      HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getType", 0, 1);
@@ -5333,7 +5333,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 8:
-      HASH_GUARD(0x1ADA46FCC8EFEC08LL, isdir) {
+      HASH_GUARD_LITSTR(0x1ADA46FCC8EFEC08LL, NAMSTR(s_sys_ss371013f8, "isDir")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isDir", 0, 1);
@@ -5347,7 +5347,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 10:
-      HASH_GUARD(0x01A800A73CD2604ALL, getinode) {
+      HASH_GUARD_LITSTR(0x01A800A73CD2604ALL, NAMSTR(s_sys_ss3cd2604a, "getInode")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getInode", 0, 1);
@@ -5361,7 +5361,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 13:
-      HASH_GUARD(0x1930CE336D39474DLL, getfilename) {
+      HASH_GUARD_LITSTR(0x1930CE336D39474DLL, NAMSTR(s_sys_ss6d39474d, "getFilename")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getFilename", 0, 1);
@@ -5375,7 +5375,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 14:
-      HASH_GUARD(0x32ABF385AD4BE48ELL, getowner) {
+      HASH_GUARD_LITSTR(0x32ABF385AD4BE48ELL, NAMSTR(s_sys_ss52b41b72, "getOwner")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getOwner", 0, 1);
@@ -5389,7 +5389,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 15:
-      HASH_GUARD(0x569FC7D8E9401C4FLL, isreadable) {
+      HASH_GUARD_LITSTR(0x569FC7D8E9401C4FLL, NAMSTR(s_sys_ss16bfe3b1, "isReadable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isReadable", 0, 1);
@@ -5403,7 +5403,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 19:
-      HASH_GUARD(0x642C2D2994B34A13LL, __tostring) {
+      HASH_GUARD_LITSTR(0x642C2D2994B34A13LL, NAMSTR(s_sys_ss6b4cb5ed, "__toString")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::__toString", 0, 1);
@@ -5417,7 +5417,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 24:
-      HASH_GUARD(0x1D5801BB72C51C58LL, islink) {
+      HASH_GUARD_LITSTR(0x1D5801BB72C51C58LL, NAMSTR(s_sys_ss72c51c58, "isLink")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isLink", 0, 1);
@@ -5431,7 +5431,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 28:
-      HASH_GUARD(0x572E108C6731E29CLL, getbasename) {
+      HASH_GUARD_LITSTR(0x572E108C6731E29CLL, NAMSTR(s_sys_ss6731e29c, "getBasename")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5450,7 +5450,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 29:
-      HASH_GUARD(0x4C43532D60465F1DLL, isfile) {
+      HASH_GUARD_LITSTR(0x4C43532D60465F1DLL, NAMSTR(s_sys_ss60465f1d, "isFile")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isFile", 0, 1);
@@ -5464,7 +5464,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 31:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5480,7 +5480,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         }
         return (t___construct(a0), null);
       }
-      HASH_GUARD(0x4BC19906B553C59FLL, getatime) {
+      HASH_GUARD_LITSTR(0x4BC19906B553C59FLL, NAMSTR(s_sys_ss4aac3a61, "getATime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getATime", 0, 1);
@@ -5494,7 +5494,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 35:
-      HASH_GUARD(0x638F2A56B8463A63LL, iswritable) {
+      HASH_GUARD_LITSTR(0x638F2A56B8463A63LL, NAMSTR(s_sys_ss47b9c59d, "isWritable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isWritable", 0, 1);
@@ -5508,7 +5508,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 37:
-      HASH_GUARD(0x5948407CA9CC4DA5LL, setfileclass) {
+      HASH_GUARD_LITSTR(0x5948407CA9CC4DA5LL, NAMSTR(s_sys_ss5633b25b, "setFileClass")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5527,7 +5527,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 39:
-      HASH_GUARD(0x00DCC39EDB16AFE7LL, getpathinfo) {
+      HASH_GUARD_LITSTR(0x00DCC39EDB16AFE7LL, NAMSTR(s_sys_ss24e95019, "getPathInfo")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5546,7 +5546,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 42:
-      HASH_GUARD(0x0F9EDEC32565D86ALL, getgroup) {
+      HASH_GUARD_LITSTR(0x0F9EDEC32565D86ALL, NAMSTR(s_sys_ss2565d86a, "getGroup")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getGroup", 0, 1);
@@ -5558,7 +5558,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         }
         return (t_getgroup());
       }
-      HASH_GUARD(0x6615B5496D03A6EALL, getsize) {
+      HASH_GUARD_LITSTR(0x6615B5496D03A6EALL, NAMSTR(s_sys_ss6d03a6ea, "getSize")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getSize", 0, 1);
@@ -5572,7 +5572,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 43:
-      HASH_GUARD(0x0D6276BAB75513ABLL, getlinktarget) {
+      HASH_GUARD_LITSTR(0x0D6276BAB75513ABLL, NAMSTR(s_sys_ss48aaec55, "getLinkTarget")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getLinkTarget", 0, 1);
@@ -5586,7 +5586,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 47:
-      HASH_GUARD(0x5640A4755D0078AFLL, getctime) {
+      HASH_GUARD_LITSTR(0x5640A4755D0078AFLL, NAMSTR(s_sys_ss5d0078af, "getCTime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getCTime", 0, 1);
@@ -5600,7 +5600,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 52:
-      HASH_GUARD(0x265BDC54C992EE74LL, getmtime) {
+      HASH_GUARD_LITSTR(0x265BDC54C992EE74LL, NAMSTR(s_sys_ss366d118c, "getMTime")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getMTime", 0, 1);
@@ -5614,7 +5614,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 53:
-      HASH_GUARD(0x337DEC2D48BDFE35LL, openfile) {
+      HASH_GUARD_LITSTR(0x337DEC2D48BDFE35LL, NAMSTR(s_sys_ss48bdfe35, "openFile")) {
         Variant a0;
         Variant a1;
         Variant a2;
@@ -5643,7 +5643,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 56:
-      HASH_GUARD(0x25070641C3D924F8LL, getpathname) {
+      HASH_GUARD_LITSTR(0x25070641C3D924F8LL, NAMSTR(s_sys_ss3c26db08, "getPathname")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPathname", 0, 1);
@@ -5657,7 +5657,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 58:
-      HASH_GUARD(0x3786834B2A0CCB7ALL, isexecutable) {
+      HASH_GUARD_LITSTR(0x3786834B2A0CCB7ALL, NAMSTR(s_sys_ss2a0ccb7a, "isExecutable")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::isExecutable", 0, 1);
@@ -5671,7 +5671,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 61:
-      HASH_GUARD(0x4351578037A06E7DLL, getperms) {
+      HASH_GUARD_LITSTR(0x4351578037A06E7DLL, NAMSTR(s_sys_ss37a06e7d, "getPerms")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPerms", 0, 1);
@@ -5685,7 +5685,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
       }
       break;
     case 63:
-      HASH_GUARD(0x04C642C6C162243FLL, getpath) {
+      HASH_GUARD_LITSTR(0x04C642C6C162243FLL, NAMSTR(s_sys_ss3e9ddbc1, "getPath")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("SplFileInfo::getPath", 0, 1);
@@ -5697,7 +5697,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         }
         return (t_getpath());
       }
-      HASH_GUARD(0x7D50FA42F9D4923FLL, getfileinfo) {
+      HASH_GUARD_LITSTR(0x7D50FA42F9D4923FLL, NAMSTR(s_sys_ss062b6dc1, "getFileInfo")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -5755,13 +5755,13 @@ String c_splfileinfo::t_getfilename() {
   return x_hphp_splfileinfo_getfilename(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 52 */
-Object c_splfileinfo::t_getfileinfo(CVarRef v_class_name //  = ""
+Object c_splfileinfo::t_getfileinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getFileInfo);
   return x_hphp_splfileinfo_getfileinfo(GET_THIS(), toString(v_class_name));
 } /* function */
 /* SRC: classes/splfile.php line 67 */
-String c_splfileinfo::t_getbasename(CVarRef v_suffix //  = ""
+String c_splfileinfo::t_getbasename(CVarRef v_suffix //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getBasename);
   return x_hphp_splfileinfo_getbasename(GET_THIS(), toString(v_suffix));
@@ -5772,7 +5772,7 @@ String c_splfileinfo::t_getpathname() {
   return x_hphp_splfileinfo_getpathname(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 94 */
-Object c_splfileinfo::t_getpathinfo(CVarRef v_class_name //  = ""
+Object c_splfileinfo::t_getpathinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPathInfo);
   return x_hphp_splfileinfo_getpathinfo(GET_THIS(), toString(v_class_name));
@@ -5868,7 +5868,7 @@ String c_splfileinfo::t___tostring() {
   return x_hphp_splfileinfo___tostring(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 337 */
-Object c_splfileinfo::t_openfile(CVarRef v_mode //  = "r"
+Object c_splfileinfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss122506fb, "r")
 , CVarRef v_use_include_path //  = false
 , CVarRef v_context //  = null_variant
 ) {
@@ -5876,13 +5876,13 @@ Object c_splfileinfo::t_openfile(CVarRef v_mode //  = "r"
   return x_hphp_splfileinfo_openfile(GET_THIS(), toString(v_mode), toBoolean(v_use_include_path), v_context);
 } /* function */
 /* SRC: classes/splfile.php line 355 */
-Variant c_splfileinfo::t_setfileclass(CVarRef v_class_name //  = "SplFileObject"
+Variant c_splfileinfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5da6122e, "SplFileObject")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setFileClass);
   return (x_hphp_splfileinfo_setfileclass(GET_THIS(), toString(v_class_name)), null);
 } /* function */
 /* SRC: classes/splfile.php line 371 */
-Variant c_splfileinfo::t_setinfoclass(CVarRef v_class_name //  = "SplFileInfo"
+Variant c_splfileinfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss016dc059, "SplFileInfo")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setInfoClass);
   return (x_hphp_splfileinfo_setinfoclass(GET_THIS(), toString(v_class_name)), null);

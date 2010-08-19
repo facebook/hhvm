@@ -26,6 +26,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // 1. Static Strings 
+extern StaticString s_sys_ss00000000;
 
 // 2. Constants
 extern const int64 k_PATHINFO_BASENAME;

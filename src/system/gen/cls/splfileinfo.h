@@ -74,10 +74,10 @@ class c_splfileinfo : public ExtObjectData {
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t_getpath();
   public: String t_getfilename();
-  public: Object t_getfileinfo(CVarRef v_class_name = "");
-  public: String t_getbasename(CVarRef v_suffix = "");
+  public: Object t_getfileinfo(CVarRef v_class_name = NAMSTR(s_sys_ss00000000, ""));
+  public: String t_getbasename(CVarRef v_suffix = NAMSTR(s_sys_ss00000000, ""));
   public: String t_getpathname();
-  public: Object t_getpathinfo(CVarRef v_class_name = "");
+  public: Object t_getpathinfo(CVarRef v_class_name = NAMSTR(s_sys_ss00000000, ""));
   public: int64 t_getperms();
   public: int64 t_getinode();
   public: int64 t_getsize();
@@ -96,9 +96,9 @@ class c_splfileinfo : public ExtObjectData {
   public: String t_getlinktarget();
   public: Variant t_getrealpath();
   public: String t___tostring();
-  public: Object t_openfile(CVarRef v_mode = "r", CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
-  public: Variant t_setfileclass(CVarRef v_class_name = "SplFileObject");
-  public: Variant t_setinfoclass(CVarRef v_class_name = "SplFileInfo");
+  public: Object t_openfile(CVarRef v_mode = NAMSTR(s_sys_ss122506fb, "r"), CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
+  public: Variant t_setfileclass(CVarRef v_class_name = NAMSTR(s_sys_ss5da6122e, "SplFileObject"));
+  public: Variant t_setinfoclass(CVarRef v_class_name = NAMSTR(s_sys_ss016dc059, "SplFileInfo"));
   public: Variant m_rsrc;
 };
 extern struct ObjectStaticCallbacks cw_splfileinfo;

@@ -415,7 +415,8 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
 int CodeGenerator::checkLiteralString(const std::string &str, int &index,
                                       AnalysisResultPtr ar) {
   if (Option::PrecomputeLiteralStrings &&
-      getOutput() != CodeGenerator::SystemCPP &&
+      (getOutput() != CodeGenerator::SystemCPP ||
+       Option::UseNamedLiteralString) &&
       getContext() != CodeGenerator::CppConstantsDecl &&
       getContext() != CodeGenerator::CppClassConstantsImpl) {
     int stringId = ar->getLiteralStringId(str, index);

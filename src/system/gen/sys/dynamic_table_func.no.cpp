@@ -19,6 +19,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
+#include <sys/literal_strings.h>
 
 
 using namespace std;

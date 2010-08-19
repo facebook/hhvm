@@ -539,7 +539,7 @@ private:
   void outputHexBuffer(CodeGenerator &cg, const char *name,
                        const char *buf, int len);
   void outputCPPLiteralStringPrecomputation();
-  void outputCPPNamedLiteralStrings();
+  void outputCPPNamedLiteralStrings(bool genStatic, const std::string &file);
   void outputCPPSepExtensionMake();
   void outputCPPSepExtensionIncludes(CodeGenerator &cg);
 

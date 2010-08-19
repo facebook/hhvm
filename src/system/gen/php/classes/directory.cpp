@@ -56,8 +56,8 @@ Variant &c_directory::os_lval(const char *s, int64 hash) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
 void c_directory::o_getArray(Array &props) const {
-  if (isInitialized(m_path)) props.set("path", m_path.isReferenced() ? ref(m_path) : m_path, 0x1429F792A6880074LL, true);
-  if (isInitialized(m_handle)) props.set("handle", m_handle.isReferenced() ? ref(m_handle) : m_handle, 0x5C4CA333F4541532LL, true);
+  if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ss5977ff8c, "path"), m_path.isReferenced() ? ref(m_path) : m_path, 0x1429F792A6880074LL, true);
+  if (isInitialized(m_handle)) props.set(NAMSTR(s_sys_ss0babeace, "handle"), m_handle.isReferenced() ? ref(m_handle) : m_handle, 0x5C4CA333F4541532LL, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
@@ -76,12 +76,12 @@ Variant c_directory::o_getPublic(CStrRef s, int64 hash, bool error) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_RETURN_STRING(0x1429F792A6880074LL, m_path,
-                         "path", 4);
+      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, s_sys_ss5977ff8c, m_path,
+                         4);
       break;
     case 2:
-      HASH_RETURN_STRING(0x5C4CA333F4541532LL, m_handle,
-                         "handle", 6);
+      HASH_RETURN_NAMSTR(0x5C4CA333F4541532LL, s_sys_ss0babeace, m_handle,
+                         6);
       break;
     default:
       break;
@@ -158,12 +158,12 @@ Variant& c_directory::o_lvalPublic(CStrRef s, int64 hash) {
   if (hash < 0) hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_RETURN_STRING(0x1429F792A6880074LL, m_path,
-                         "path", 4);
+      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, s_sys_ss5977ff8c, m_path,
+                         4);
       break;
     case 2:
-      HASH_RETURN_STRING(0x5C4CA333F4541532LL, m_handle,
-                         "handle", 6);
+      HASH_RETURN_NAMSTR(0x5C4CA333F4541532LL, s_sys_ss0babeace, m_handle,
+                         6);
       break;
     default:
       break;
@@ -280,23 +280,23 @@ Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
-      HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
-      HASH_GUARD(0x1F479267E49EF301LL, read) {
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 2:
-      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 7:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         {
           ArrayData *ad(params.get());
@@ -348,23 +348,23 @@ Variant c_directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
-      HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
         return (t_close());
       }
-      HASH_GUARD(0x1F479267E49EF301LL, read) {
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
         return (t_read());
       }
       break;
     case 2:
-      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
         return (t_rewind());
       }
       break;
     case 7:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         if (count != 1) return throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
         return (t___construct(a0), null);
       }
@@ -456,7 +456,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
-      HASH_GUARD(0x78AE97BFBEBF5341LL, close) {
+      HASH_GUARD_LITSTR(0x78AE97BFBEBF5341LL, NAMSTR(s_sys_ss4140acbf, "close")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
@@ -468,7 +468,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         }
         return (t_close());
       }
-      HASH_GUARD(0x1F479267E49EF301LL, read) {
+      HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Directory::read", 0, 1);
@@ -482,7 +482,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 2:
-      HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
+      HASH_GUARD_LITSTR(0x1670096FDE27AF6ALL, NAMSTR(s_sys_ss21d85096, "rewind")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
         if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
@@ -496,7 +496,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
       }
       break;
     case 7:
-      HASH_GUARD(0x0D31D0AC229C615FLL, __construct) {
+      HASH_GUARD_LITSTR(0x0D31D0AC229C615FLL, NAMSTR(s_sys_ss229c615f, "__construct")) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

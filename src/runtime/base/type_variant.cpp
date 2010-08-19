@@ -1798,10 +1798,36 @@ bool Variant::same(CVarRef v2) const {
       break;
     }
     break;
-  case LiteralString:
+  case LiteralString: {
+    switch (v2.getType()) {
+    case LiteralString: {
+      StringData sd1(getLiteralString());
+      StringData sd2(v2.getLiteralString());
+      return sd1.same(&sd2);
+    }
+    case KindOfStaticString:
+    case KindOfString: {
+      StringData sd1(getLiteralString());
+      return sd1.same(v2.getStringData());
+    }
+    default:
+      return false;
+    }
+  }
   case KindOfStaticString:
-  case KindOfString:
-    return v2.isString() && equal(v2);
+  case KindOfString: {
+    switch (v2.getType()) {
+    case LiteralString: {
+      StringData sd2(v2.getLiteralString());
+      return getStringData()->same(&sd2);
+    }
+    case KindOfStaticString:
+    case KindOfString:
+      return getStringData()->same(v2.getStringData());
+    default:
+      return false;
+    }
+  }
   case KindOfArray:
     if (v2.is(KindOfArray)) {
       return toArray().same(v2.toArray());

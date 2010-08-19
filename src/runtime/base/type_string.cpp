@@ -406,7 +406,7 @@ bool String::same(litstr v2) const {
 
 bool String::same(CStrRef v2) const {
   if (m_px == NULL && v2.get() == NULL) return true;
-  if (m_px && v2.get()) return equal(v2);
+  if (m_px && v2.get()) return m_px->same(v2.get());
   return false;
 }
 
@@ -423,7 +423,6 @@ bool String::equal(litstr v2) const {
 }
 
 bool String::equal(CStrRef v2) const {
-  if (size() != v2.size()) return false;
   if (m_px == NULL && v2.get() == NULL) return true;
   if (m_px == NULL) return v2.empty();
   if (v2.get() == NULL) return empty();

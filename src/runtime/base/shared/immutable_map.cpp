@@ -31,7 +31,7 @@ ImmutableMap::~ImmutableMap() {
 }
 
 static string_data_hash g_hash;
-static string_data_equal g_equal;
+static string_data_same g_same;
 
 void ImmutableMap::add(ThreadSharedVariant *key, ThreadSharedVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
@@ -57,7 +57,7 @@ int ImmutableMap::indexOf(StringData* key) {
   for (int bucket = m_hash[hash_pos]; bucket != -1;
        bucket = m_buckets[bucket].next) {
     if (m_buckets[bucket].key->is(KindOfString) &&
-        g_equal(m_buckets[bucket].key->getStringData(), key)) {
+        g_same(m_buckets[bucket].key->getStringData(), key)) {
       return bucket;
     }
   }

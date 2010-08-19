@@ -330,21 +330,21 @@ struct string_data_hash {
   }
 };
 
-struct string_data_equal {
+struct string_data_same {
   bool operator()(const StringData *s1, const StringData *s2) const {
     ASSERT(s1 && s2);
-    return s1->equal(s2);
+    return s1->same(s2);
   }
 };
 
-struct string_data_iequal {
+struct string_data_isame {
   bool operator()(const StringData *s1, const StringData *s2) const {
     ASSERT(s1 && s2);
-    return s1->iequal(s2);
+    return s1->isame(s2);
   }
 };
 
-typedef hphp_hash_set<StringData *, string_data_hash, string_data_equal>
+typedef hphp_hash_set<StringData *, string_data_hash, string_data_same>
   StringDataSet;
 
 struct hphp_string_hash {
@@ -353,23 +353,23 @@ struct hphp_string_hash {
   }
 };
 
-struct hphp_string_equal {
+struct hphp_string_same {
   bool operator()(CStrRef s1, CStrRef s2) const {
-    return s1->equal(s2.get());
+    return s1->same(s2.get());
   }
 };
 
-struct hphp_string_iequal {
+struct hphp_string_isame {
   bool operator()(CStrRef s1, CStrRef s2) const {
-    return s1->iequal(s2.get());
+    return s1->isame(s2.get());
   }
 };
 
-typedef hphp_hash_set<String, hphp_string_hash, hphp_string_iequal> StringISet;
+typedef hphp_hash_set<String, hphp_string_hash, hphp_string_isame> StringISet;
 
 template<typename T>
 class StringIMap :
-  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_iequal> { };
+  public hphp_hash_map<String, T, hphp_string_hash, hphp_string_isame> { };
 
 /**
  * A StaticString can be co-accessed by multiple threads, therefore they are

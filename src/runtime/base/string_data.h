@@ -171,7 +171,7 @@ class StringData {
     return m_hash;
   }
 
-  bool equal(const StringData *s) const {
+  bool same(const StringData *s) const {
     ASSERT(s);
     int len = size();
     if (s->size() != len) return false;
@@ -179,7 +179,7 @@ class StringData {
     return !memcmp(data(), s->data(), len);
   }
 
-  bool iequal(const StringData *s) const {
+  bool isame(const StringData *s) const {
     ASSERT(s);
     int len = size();
     if (s->size() != len) return false;

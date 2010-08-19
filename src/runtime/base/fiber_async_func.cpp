@@ -120,7 +120,8 @@ public:
       }
       m_function = m_function.fiberMarshal(m_refMap);
       m_params = m_params.fiberMarshal(m_refMap);
-      m_global_variables = get_global_variables();
+      ThreadInfo::s_threadInfo->m_globals =
+        m_global_variables = get_global_variables();
       fiber_marshal_global_state(m_global_variables,
                                  m_unmarshaled_global_variables, m_refMap);
 

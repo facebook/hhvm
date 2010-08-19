@@ -745,7 +745,8 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
     cg_printf("Variant r;\n");
 
     cg_printf(FMC);
-    cg_printf("method = methodIndexLookupReverse(methodIndex);\n");
+    cg_printf("method = g_bypassMILR ? method : "
+              "methodIndexLookupReverse(methodIndex);\n");
     cg_printf("#endif\n");
     cg_printf("if (eval_invoke_static_method_hook(r, s, method, params, "
         "foundClass)) return r;\n");
@@ -768,7 +769,8 @@ void ClassScope::outputCPPInvokeStaticMethodImpl
     cg_indentEnd("");
     cg_indentBegin("} else {\n");
     cg_printf(FMC);
-    cg_printf("method = methodIndexLookupReverse(methodIndex);\n");
+    cg_printf("method = g_bypassMILR ? method : "
+              "methodIndexLookupReverse(methodIndex);\n");
     cg_printf("#endif\n");
     cg_printf("raise_warning(\"call_user_func to non-existent class's method"
         " %%s::%%s\", s, method);\n");

@@ -401,7 +401,7 @@ Variant ObjectData::o_invoke(MethodIndex methodIndex, const char *s,
                              bool fatal /* = true */) {
   if (RuntimeOption::FastMethodCall) {
     // can only be called with a valid methodIndex
-    s = methodIndexLookupReverse(methodIndex);
+    s = g_bypassMILR ? s : methodIndexLookupReverse(methodIndex);
   }
   return doRootCall(s, params, fatal);
 }

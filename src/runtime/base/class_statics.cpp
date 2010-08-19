@@ -55,7 +55,7 @@ Variant ClassStatics::os_invoke(const char *c, MethodIndex methodIndex,
   } else {
     if (RuntimeOption::FastMethodCall) {
       // only call with known methodIndex, must succeed
-      s = methodIndexLookupReverse(methodIndex);
+      s = g_bypassMILR ? s : methodIndexLookupReverse(methodIndex);
     }
     raise_warning("call_user_func to non-existent method %s::%s",
                     c, s);

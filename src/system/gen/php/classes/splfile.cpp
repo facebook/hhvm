@@ -244,7 +244,7 @@ void c_splfileobject::cloneSet(c_splfileobject *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1157,7 +1157,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1865,14 +1865,14 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject
 Variant c_splfileobject::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject
 Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -3714,7 +3714,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   return c_splfileinfo::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_splfileobject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -4038,7 +4038,7 @@ void c_splfileinfo::cloneSet(c_splfileinfo *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4473,7 +4473,7 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4835,14 +4835,14 @@ Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileinfo
 Variant c_splfileinfo::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileinfo
 Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -5722,7 +5722,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_splfileinfo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif

@@ -1920,7 +1920,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     outputCPPDynamicTablesHeader(cg, true, false);
     cg.printSection("Class Invoke Tables");
-    MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests
+    MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests(?)
     if (system) {
       // make available to user apps and tests, temporary
       cg_printf(FMC);
@@ -3867,14 +3867,6 @@ AnalysisResult::getOrAddMethodSlot(const std::string & mname) {
   return &((*method).second);
 }
 
-// Used only during table gen
-MethodSlot*
-AnalysisResult::getMethodSlotUpdate(const std::string & mname) {
-  StringToMethodSlotMap::iterator method = stringToMethodSlotMap.find(mname);
-  assert (method != stringToMethodSlotMap.end()) ;
-  return &((*method).second);
-}
-
 ostream& operator << (ostream &cout, const MethodSlot& m) {
   return m.operator<<(cout);
 }
@@ -3900,6 +3892,14 @@ struct CoalesceOrder {
   }
 };
 
+// Used only during table gen
+MethodSlot*
+AnalysisResult::getMethodSlotUpdate(const std::string & mname) {
+  StringToMethodSlotMap::iterator method = stringToMethodSlotMap.find(mname);
+  assert (method != stringToMethodSlotMap.end()) ;
+  return &((*method).second);
+}
+
 const MethodSlot* errorMethodSlot(NULL);
 
 void MethodSlot::genMethodSlot(AnalysisResultPtr ar) {
@@ -3914,8 +3914,9 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
     cls->collectMethods(ar, funcs);
     vector<MethodSlot *> methodsProcessed;
     methodsProcessed.reserve(funcs.size());
-    string mname;
-    BOOST_FOREACH(tie(mname, tuples::ignore), funcs) {
+    FunctionScopePtr fsp;
+    BOOST_FOREACH(tie(tuples::ignore, fsp), funcs) {
+      string mname (fsp->getOriginalName());
 #     if DEBUG_GMS
       printf ("process %s::%s\n", cls->getName().c_str(), mname.c_str());
 #     endif
@@ -4206,7 +4207,7 @@ void MethodSlot::emitMethodSlot(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   cg_printf("};\n");
 
-  map<unsigned int, const char *> serialNumIndex;
+  map<unsigned int, const char *> serialNumIndex; // serialNum -> methodName
   BOOST_FOREACH(StringToMethodSlotMap::value_type slot,
                 ar->stringToMethodSlotMap) {
     serialNumIndex[slot.second.m_serialNum] = slot.first.c_str();

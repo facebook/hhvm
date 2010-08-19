@@ -107,7 +107,7 @@ class FiberReferenceMap;
 
 enum DataType {
   /**
-   * Do not rearrange the order, we have type checks in the code such as 
+   * Do not rearrange the order, we have type checks in the code such as
    * "m_type <= KindOfStaticString".
    */
   KindOfNull    = 0,
@@ -251,6 +251,8 @@ private:
   ThreadInfo *m_info;
 };
 
+//////////////////////////////////
+// Fast Method Call
 struct MethodIndex {
   unsigned int m_callIndex:32;
   unsigned int m_overloadIndex:32;
@@ -295,6 +297,7 @@ inline MethodIndex methodIndexLookup(const char * methodName) {
   return methodIndex;
 }
 
+const bool g_bypassMILR = true;
 const char * methodIndexLookupReverse(MethodIndex methodIndex) ;
 
 ///////////////////////////////////////////////////////////////////////////////

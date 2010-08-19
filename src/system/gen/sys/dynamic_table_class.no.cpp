@@ -35,63 +35,63 @@ namespace HPHP {
 const unsigned methodIndexHMapSizeSys = 878;
 extern const MethodIndexHMap methodIndexHMapSys [];
 const MethodIndexHMap methodIndexHMapSys [methodIndexHMapSizeSys] = {
-Z, H(getarraycopy,14,1), Z, 
+Z, H(getArrayCopy,14,1), Z, 
 H(__destruct,35,1), Z, Z, 
-Z, Z, H(addcompletion,162,1), 
+Z, Z, H(addCompletion,162,1), 
 Z, H(insertdata,66,1), H(getserverstatus,207,1), 
-H(enddtdentity,410,1), H(haschildren,249,1), Z, 
-H(openfile,197,1), H(getmode,377,1), Z, 
+H(enddtdentity,410,1), H(hasChildren,249,1), Z, 
+H(openFile,197,1), H(getMode,377,1), Z, 
 Z, Z, H(getelementsbytagnamens,75,1), 
-Z, Z, H(setvalue,318,1), 
-H(getinterfacenames,271,1), Z, H(gettraceasstring,31,1), 
+Z, Z, H(setValue,318,1), 
+H(getInterfaceNames,271,1), Z, H(getTraceAsString,31,1), 
 H(closecursor,239,1), Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-H(isfinal,262,1), Z, Z, 
-Z, H(getclassnames,290,1), Z, 
-Z, H(getctime,184,1), Z, 
+H(isFinal,262,1), Z, Z, 
+Z, H(getClassNames,290,1), Z, 
+Z, H(getCTime,184,1), Z, 
 Z, H(rewind,9,1), H(startdtd,427,1), 
-H(setfileclass,178,1), H(getflags,22,1), Z, 
+H(setFileClass,178,1), H(getFlags,22,1), Z, 
 Z, Z, Z, 
-Z, H(isdestructor,306,1), H(normalize,57,1), 
+Z, H(isDestructor,306,1), H(normalize,57,1), 
 H(__getfunctions,339,1), H(loadhtml,78,1), Z, 
 H(xend,145,1), H(fwrite,366,1), H(startelement,412,1), 
-H(openblob,388,1), H(setflags,17,1), H(query,124,1), 
-H(tostring,378,1), H(getparentclass,269,1), H(asxml,326,1), 
+H(openblob,388,1), H(setFlags,17,1), H(query,124,1), 
+H(toString,378,1), H(getParentClass,269,1), H(asxml,326,1), 
 H(close,171,1), Z, H(createattributens,85,1), 
-Z, H(getinterfaces,284,1), H(registerphpfunctions,126,1), 
+Z, H(getInterfaces,284,1), H(registerphpfunctions,126,1), 
 H(escapestring,384,1), H(appendchild,50,1), H(endattribute,436,1), 
 H(registernamespace,127,1), H(seek,21,1), H(numcolumns,393,1), 
-H(__tostring,26,1), H(insertbefore,46,1), H(startdtdentity,404,1), 
+H(__toString,26,1), H(insertbefore,46,1), H(startdtdentity,404,1), 
 H(clonenode,52,1), H(endpi,426,1), H(setclass,349,1), 
 H(endelement,423,1), Z, H(enddtdelement,429,1), 
 Z, Z, Z, 
 H(setfetchmode,236,1), Z, H(fgetcsv,353,1), 
-H(arg,141,1), Z, H(getclosure,299,1), 
-H(hasmethod,260,1), H(relaxngvalidatesource,89,1), Z, 
-H(load,84,1), H(argrest,163,1), H(lasterrorcode,389,1), 
+H(arg,141,1), Z, H(getClosure,299,1), 
+H(hasMethod,260,1), H(relaxngvalidatesource,89,1), Z, 
+H(load,84,1), H(argRest,163,1), H(lasterrorcode,389,1), 
 Z, H(args,161,1), Z, 
 Z, Z, Z, 
 H(__get,62,1), Z, Z, 
 Z, Z, Z, 
-Z, H(getsubpathname,247,1), H(delete,214,1), 
-Z, H(getextensionname,268,1), Z, 
-Z, H(isinstantiable,283,1), H(getcolumnmeta,233,1), 
+Z, H(getSubPathname,247,1), H(delete,214,1), 
+Z, H(getExtensionName,268,1), Z, 
+Z, H(isInstantiable,283,1), H(getcolumnmeta,233,1), 
 Z, Z, Z, 
-H(setmaxlinelen,356,1), H(open,386,1), Z, 
-H(getdeclaringclass,303,1), H(createaggregate,385,1), H(addchild,329,1), 
+H(setMaxLineLen,356,1), H(open,386,1), Z, 
+H(getDeclaringClass,303,1), H(createaggregate,385,1), H(addchild,329,1), 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, Z, H(helpcmds,142,1), 
+Z, Z, H(helpCmds,142,1), 
 Z, Z, Z, 
-Z, Z, H(getlinktarget,180,1), 
+Z, Z, H(getLinkTarget,180,1), 
 Z, H(columntype,392,1), Z, 
 H(begintransaction,228,1), Z, Z, 
-H(getpath,185,1), H(fetchcolumn,232,1), Z, 
-H(getpathinfo,183,1), H(isconstructor,304,1), H(isinternal,286,1), 
+H(getPath,185,1), H(fetchcolumn,232,1), Z, 
+H(getPathInfo,183,1), H(isConstructor,304,1), H(isInternal,286,1), 
 Z, Z, Z, 
-Z, H(loadxml,92,1), H(helpsection,156,1), 
-Z, Z, H(issubclassof,277,1), 
+Z, H(loadxml,92,1), H(helpSection,156,1), 
+Z, Z, H(isSubclassOf,277,1), 
 Z, Z, Z, 
 Z, H(attributes,331,1), Z, 
 Z, Z, Z, 
@@ -101,201 +101,201 @@ H(issupported,63,1), H(substringdata,65,1), H(startcdata,431,1),
 Z, Z, H(bindcolumn,235,1), 
 Z, Z, Z, 
 Z, Z, H(createelementns,87,1), 
-H(addsoapheader,344,1), H(getversion,213,1), H(onclient,168,1), 
-H(getfileinfo,194,1), H(getconstant,273,1), Z, 
+H(addsoapheader,344,1), H(getversion,213,1), H(onClient,168,1), 
+H(getFileInfo,194,1), H(getConstant,273,1), Z, 
 H(gettimezone,132,1), H(startcomment,439,1), Z, 
 Z, Z, Z, 
 H(registerxpathnamespace,323,1), H(setattributens,108,1), H(hasfeature,119,1), 
 H(__sleep,231,1), H(hasattributens,106,1), H(prepare,229,1), 
 Z, Z, H(rollback,224,1), 
-H(outputmemory,402,1), H(gettrace,32,1), H(getattributens,109,1), 
+H(outputmemory,402,1), H(getTrace,32,1), H(getattributens,109,1), 
 Z, H(lookupnamespaceuri,49,1), Z, 
 H(sortwithsortkeys,34,1), H(c14n,55,1), H(geterrormessage,43,1), 
 Z, Z, Z, 
-H(setinfoclass,179,1), Z, Z, 
+H(setInfoClass,179,1), Z, Z, 
 Z, Z, Z, 
 Z, H(valid,3,1), Z, 
 H(invoke,298,1), H(__isset,330,1), H(savehtml,91,1), 
-H(getconstants,274,1), H(setattributenode,116,1), Z, 
+H(getConstants,274,1), H(setattributenode,116,1), Z, 
 Z, Z, Z, 
 H(fetcharray,394,1), H(getnameditem,120,1), Z, 
 Z, Z, H(writeelement,422,1), 
 Z, H(querysingle,390,1), Z, 
-H(getframe,159,1), H(getuserinfo,371,1), H(removeattribute,115,1), 
-H(getproperty,287,1), H(startdocument,403,1), H(getnameditemns,123,1), 
+H(getFrame,159,1), H(getUserInfo,371,1), H(removeattribute,115,1), 
+H(getProperty,287,1), H(startdocument,403,1), H(getnameditemns,123,1), 
 H(export,264,1), H(send,166,1), H(setidattributenode,113,1), 
-H(isfile,190,1), Z, Z, 
+H(isFile,190,1), Z, Z, 
 Z, Z, H(getlocale,42,1), 
-Z, Z, H(onserver,169,1), 
-Z, H(implementsinterface,270,1), Z, 
+Z, Z, H(onServer,169,1), 
+Z, H(implementsInterface,270,1), Z, 
 Z, H(getavailabledrivers,226,1), Z, 
 Z, Z, H(rowcount,240,1), 
-H(fault,348,1), H(execute,241,1), H(getextension,256,1), 
-H(replace,216,1), H(getmethods,251,1), H(setidattribute,112,1), 
+H(fault,348,1), H(execute,241,1), H(getExtension,256,1), 
+H(replace,216,1), H(getMethods,251,1), H(setidattribute,112,1), 
 H(getextendedstats,218,1), H(commit,225,1), Z, 
 Z, H(getdocnamespaces,327,1), Z, 
-Z, H(getlineno,45,1), H(hasproperty,278,1), 
+Z, H(getlineno,45,1), H(hasProperty,278,1), 
 Z, Z, H(debugdumpparams,246,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 H(setstrength,39,1), Z, Z, 
-H(gettype,199,1), Z, Z, 
+H(getType,199,1), Z, Z, 
 H(getname,139,1), H(lookupprefix,56,1), H(natsort,16,1), 
 H(item,121,1), H(format,128,1), H(settime,131,1), 
 H(schemavalidate,80,1), H(ksort,23,1), H(savehtmlfile,97,1), 
-H(createdocument,117,1), Z, H(getinneriterator,4,1), 
+H(createdocument,117,1), Z, H(getInnerIterator,4,1), 
 Z, Z, H(getiterator,122,1), 
 Z, Z, Z, 
-H(isabstract,285,1), H(__soapcall,336,1), H(read,172,1), 
+H(isAbstract,285,1), H(__soapcall,336,1), H(read,172,1), 
 H(eof,359,1), H(getnodepath,58,1), Z, 
-Z, H(onautocomplete,167,1), H(createprocessinginstruction,82,1), 
-H(getstaticproperties,280,1), H(writeattribute,407,1), H(hasattribute,105,1), 
+Z, H(onAutoComplete,167,1), H(createprocessinginstruction,82,1), 
+H(getStaticProperties,280,1), H(writeattribute,407,1), H(hasattribute,105,1), 
 Z, Z, Z, 
-Z, H(xpath,322,1), H(getmtime,192,1), 
-H(getdebuginfo,373,1), Z, Z, 
+Z, H(xpath,322,1), H(getMTime,192,1), 
+H(getDebugInfo,373,1), Z, Z, 
 H(quit,157,1), H(ftell,365,1), Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, H(getcallback,372,1), H(getbacktrace,375,1), 
-Z, Z, H(getstartline,272,1), 
+Z, H(getCallback,372,1), H(getBacktrace,375,1), 
+Z, Z, H(getStartLine,272,1), 
 Z, Z, Z, 
-H(isdefaultvalueavailable,307,1), H(createdocumentfragment,101,1), H(haschildnodes,64,1), 
-H(serialize,320,1), H(ispublic,305,1), Z, 
+H(isDefaultValueAvailable,307,1), H(createdocumentfragment,101,1), H(haschildnodes,64,1), 
+H(serialize,320,1), H(isPublic,305,1), Z, 
 Z, H(createcomment,99,1), Z, 
 Z, H(relaxngvalidate,77,1), H(setdate,129,1), 
-Z, H(getcommand,147,1), Z, 
+Z, H(getCommand,147,1), Z, 
 H(unserialize,319,1), Z, H(getattribute,33,1), 
 H(decrement,205,1), Z, Z, 
 Z, Z, Z, 
-Z, H(getfunctions,288,1), H(addserver,201,1), 
+Z, H(getFunctions,288,1), H(addserver,201,1), 
 H(listabbreviations,138,1), H(errorinfo,230,1), Z, 
 H(next,1,1), H(schemavalidatesource,76,1), Z, 
 Z, Z, Z, 
 H(writedtd,409,1), H(__wakeup,223,1), H(__getlastresponseheaders,340,1), 
 Z, Z, Z, 
-Z, H(getpathname,176,1), H(createtextnode,90,1), 
-H(getatime,195,1), H(removeattributens,110,1), H(getstats,206,1), 
-H(isdir,193,1), H(enddtdattlist,401,1), H(writedtdentity,425,1), 
+Z, H(getPathname,176,1), H(createtextnode,90,1), 
+H(getATime,195,1), H(removeattributens,110,1), H(getstats,206,1), 
+H(isDir,193,1), H(enddtdattlist,401,1), H(writedtdentity,425,1), 
 H(c14nfile,59,1), H(normalizedocument,100,1), H(text,438,1), 
 H(settimezone,134,1), H(importnode,88,1), H(modify,135,1), 
 H(__set,51,1), Z, Z, 
-H(getdoccomment,275,1), Z, H(finalize,396,1), 
-H(getcsvcontrol,355,1), H(loadextension,380,1), Z, 
+H(getDocComment,275,1), Z, H(finalize,396,1), 
+H(getCsvControl,355,1), H(loadextension,380,1), Z, 
 Z, Z, H(paramcount,397,1), 
 H(createelement,86,1), H(xinclude,95,1), H(error,144,1), 
 Z, H(fgets,363,1), Z, 
-Z, Z, H(newinstance,255,1), 
-H(columnname,391,1), H(lastinsertrowid,382,1), H(getgroup,177,1), 
-Z, H(getcurrentlocation,164,1), Z, 
+Z, Z, H(newInstance,255,1), 
+H(columnname,391,1), H(lastinsertrowid,382,1), H(getGroup,177,1), 
+Z, H(getCurrentLocation,164,1), Z, 
 Z, H(setindentstring,420,1), Z, 
 Z, Z, Z, 
 H(current,7,1), Z, Z, 
 Z, Z, H(test,279,1), 
-Z, Z, H(offsetset,13,1), 
+Z, Z, H(offsetSet,13,1), 
 Z, H(writecdata,415,1), Z, 
 H(contains,370,1), Z, H(attach,368,1), 
 Z, H(append,5,1), Z, 
 H(setattribute,41,1), Z, H(__call,8,1), 
 Z, H(createdocumenttype,118,1), H(nextrowset,234,1), 
-H(returnsreference,297,1), Z, Z, 
+H(returnsReference,297,1), Z, Z, 
 Z, Z, Z, 
-H(print,154,1), H(ispassedbyreference,314,1), Z, 
+H(print,154,1), H(isPassedByReference,314,1), Z, 
 Z, Z, H(getelementsbytagname,72,1), 
-H(isstatic,302,1), H(quote,227,1), H(getstaticvariables,294,1), 
-H(getfilename,189,1), H(offsetunset,12,1), Z, 
+H(isStatic,302,1), H(quote,227,1), H(getStaticVariables,294,1), 
+H(getFilename,189,1), H(offsetUnset,12,1), Z, 
 H(fflush,360,1), H(isdefaultnamespace,47,1), H(getattributenode,111,1), 
-H(isexecutable,196,1), H(sort,36,1), H(fseek,351,1), 
+H(isExecutable,196,1), H(sort,36,1), H(fseek,351,1), 
 Z, Z, Z, 
 Z, Z, H(savexml,81,1), 
 Z, Z, Z, 
-Z, H(isid,48,1), H(getperms,173,1), 
+Z, H(isid,48,1), H(getPerms,173,1), 
 Z, Z, H(count,15,1), 
-Z, H(offsetget,11,1), H(isprivate,300,1), 
+Z, H(offsetGet,11,1), H(isPrivate,300,1), 
 H(setobject,347,1), H(output,150,1), Z, 
 H(createfunction,381,1), Z, Z, 
 Z, H(add,212,1), Z, 
 H(appendxml,102,1), H(__getlastrequestheaders,338,1), H(pconnect,211,1), 
-H(flush,217,1), H(setstaticpropertyvalue,282,1), H(replacechild,53,1), 
+H(flush,217,1), H(setStaticPropertyValue,282,1), H(replacechild,53,1), 
 H(key,2,1), H(__getlastresponse,341,1), H(writeraw,424,1), 
 Z, Z, Z, 
-Z, H(islocal,170,1), Z, 
+Z, H(isLocal,170,1), Z, 
 Z, Z, Z, 
 H(increment,204,1), H(fgetc,361,1), H(startdtdattlist,430,1), 
-H(getmethod,267,1), Z, Z, 
+H(getMethod,267,1), Z, Z, 
 Z, Z, Z, 
-H(getfile,30,1), Z, Z, 
-Z, Z, H(getparameters,295,1), 
+H(getFile,30,1), Z, Z, 
+Z, Z, H(getParameters,295,1), 
 Z, Z, H(deletedata,69,1), 
-H(fpassthru,362,1), H(isarray,311,1), H(getmaxlinelen,357,1), 
+H(fpassthru,362,1), H(isArray,311,1), H(getMaxLineLen,357,1), 
 H(exec,221,1), H(setserverparams,203,1), Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-H(__setsoapheaders,334,1), Z, H(isdefault,316,1), 
+H(__setsoapheaders,334,1), Z, H(isDefault,316,1), 
 Z, H(issamenode,60,1), Z, 
-H(setindent,428,1), H(islink,187,1), Z, 
+H(setindent,428,1), H(isLink,187,1), Z, 
 H(writeattributens,418,1), Z, H(createattribute,94,1), 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, H(getclasses,291,1), H(set,202,1), 
-H(getendline,259,1), Z, H(setpersistence,345,1), 
-H(isnormalized,219,1), H(adduserinfo,374,1), Z, 
-H(get,210,1), H(removechild,61,1), H(setaccessible,317,1), 
+Z, H(getClasses,291,1), H(set,202,1), 
+H(getEndLine,259,1), Z, H(setpersistence,345,1), 
+H(isnormalized,219,1), H(addUserInfo,374,1), Z, 
+H(get,210,1), H(removechild,61,1), H(setAccessible,317,1), 
 Z, Z, Z, 
 Z, Z, H(pear_error,376,1), 
 Z, Z, H(columncount,237,1), 
 H(setcompressthreshold,209,1), Z, Z, 
 H(changes,387,1), Z, H(writecomment,406,1), 
 Z, Z, Z, 
-Z, Z, H(getinientries,289,1), 
-H(newinstanceargs,258,1), Z, Z, 
+Z, Z, H(getINIEntries,289,1), 
+H(newInstanceArgs,258,1), Z, Z, 
 Z, H(compare,44,1), Z, 
-Z, Z, H(getchildren,250,1), 
-H(isoptional,312,1), H(isuserdefined,254,1), H(allowsnull,309,1), 
+Z, Z, H(getChildren,250,1), 
+H(isOptional,312,1), H(isUserDefined,254,1), H(allowsNull,309,1), 
 Z, Z, H(ask,143,1), 
-H(save,93,1), H(startelementns,413,1), H(isinstance,261,1), 
+H(save,93,1), H(startelementns,413,1), H(isInstance,261,1), 
 H(endcomment,408,1), H(createentityreference,79,1), H(handle,346,1), 
-Z, H(getposition,310,1), Z, 
+Z, H(getPosition,310,1), Z, 
 H(enddtd,433,1), Z, Z, 
 Z, Z, Z, 
-Z, H(printframe,153,1), H(getconstructor,257,1), 
+Z, H(printFrame,153,1), H(getConstructor,257,1), 
 H(__construct,6,1), Z, H(__unset,325,1), 
-H(natcasesort,19,1), H(getowner,191,1), H(fetchall,243,1), 
-H(__dorequest,332,1), H(setcsvcontrol,354,1), H(getmessage,25,1), 
+H(natcasesort,19,1), H(getOwner,191,1), H(fetchall,243,1), 
+H(__dorequest,332,1), H(setCsvControl,354,1), H(getMessage,25,1), 
 H(asort,20,1), H(__setlocation,337,1), Z, 
 Z, Z, Z, 
 Z, Z, H(lasterrormsg,383,1), 
-Z, H(getnamespaces,324,1), H(getline,28,1), 
+Z, H(getnamespaces,324,1), H(getLine,28,1), 
 Z, Z, Z, 
-H(getseverity,200,1), Z, Z, 
+H(getSeverity,200,1), Z, Z, 
 Z, Z, Z, 
 H(setattributenodens,107,1), H(addattribute,321,1), H(fgetss,352,1), 
-H(getbasename,175,1), Z, Z, 
+H(getBasename,175,1), Z, Z, 
 H(startattribute,421,1), Z, Z, 
 Z, Z, Z, 
-H(isinterface,276,1), H(getattributenodens,104,1), Z, 
+H(isInterface,276,1), H(getattributenodens,104,1), Z, 
 H(bindparam,238,1), Z, Z, 
-H(isiterateable,252,1), H(argvalue,149,1), Z, 
-H(setisodate,133,1), H(hasconstant,266,1), Z, 
-H(getstacktrace,151,1), Z, H(addfunction,343,1), 
+H(isIterateable,252,1), H(argValue,149,1), Z, 
+H(setisodate,133,1), H(hasConstant,266,1), Z, 
+H(getStackTrace,151,1), Z, H(addfunction,343,1), 
 H(uksort,18,1), H(getelementbyid,98,1), Z, 
 H(code,155,1), H(getstrength,38,1), Z, 
 Z, Z, H(writepi,419,1), 
-H(registernodeclass,83,1), H(ftruncate,358,1), H(getnumberofrequiredparameters,292,1), 
-H(listidentifiers,137,1), H(invokeargs,296,1), H(helpbody,158,1), 
-H(getcode,27,1), Z, Z, 
+H(registernodeclass,83,1), H(ftruncate,358,1), H(getNumberOfRequiredParameters,292,1), 
+H(listidentifiers,137,1), H(invokeArgs,296,1), H(helpBody,158,1), 
+H(getCode,27,1), Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 H(fetch,245,1), H(gettransitions,136,1), H(writedtdattlist,432,1), 
 Z, H(lastinsertid,222,1), H(iswhitespaceinelementcontent,70,1), 
-H(__gettypes,342,1), H(isdot,198,1), H(isreadable,181,1), 
-Z, Z, H(getdefaultproperties,281,1), 
+H(__gettypes,342,1), H(isDot,198,1), H(isReadable,181,1), 
+Z, Z, H(getDefaultProperties,281,1), 
 H(connect,215,1), H(setidattributens,103,1), H(startpi,437,1), 
 Z, H(bindvalue,244,1), H(endcdata,405,1), 
-H(getsubpath,248,1), Z, H(__setcookie,335,1), 
+H(getSubPath,248,1), Z, H(__setcookie,335,1), 
 Z, Z, Z, 
-H(helptitle,146,1), Z, Z, 
-H(argcount,140,1), H(evaluate,125,1), H(startdtdelement,414,1), 
+H(helpTitle,146,1), Z, Z, 
+H(argCount,140,1), H(evaluate,125,1), H(startdtdelement,414,1), 
 H(hasattributes,54,1), H(writedtdelement,417,1), H(loadhtmlfile,96,1), 
 Z, Z, Z, 
 Z, Z, H(appenddata,67,1), 
@@ -303,29 +303,29 @@ Z, Z, Z,
 Z, H(removeattributenode,114,1), H(detach,369,1), 
 Z, H(splittext,71,1), H(__getlastrequest,333,1), 
 Z, Z, Z, 
-Z, Z, H(getstaticpropertyvalue,253,1), 
+Z, Z, H(getStaticPropertyValue,253,1), 
 Z, Z, H(clear,398,1), 
 Z, H(setoptimeout,208,1), H(geterrorcode,37,1), 
-H(validate,74,1), H(getdefaultvalue,313,1), Z, 
+H(validate,74,1), H(getDefaultValue,313,1), Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, H(reset,395,1), 
-H(getsize,188,1), Z, H(create,40,1), 
+H(getSize,188,1), Z, H(create,40,1), 
 Z, H(openuri,435,1), Z, 
-Z, H(getproperties,265,1), H(enddocument,416,1), 
+Z, H(getProperties,265,1), H(enddocument,416,1), 
 H(errorcode,220,1), Z, Z, 
-H(fullendelement,400,1), H(offsetexists,10,1), H(getrealpath,182,1), 
-H(fetchobject,242,1), H(getclass,308,1), H(getnumberofparameters,293,1), 
+H(fullendelement,400,1), H(offsetExists,10,1), H(getRealPath,182,1), 
+H(fetchobject,242,1), H(getClass,308,1), H(getNumberOfParameters,293,1), 
 H(fstat,367,1), H(flock,364,1), H(children,328,1), 
-H(fscanf,350,1), H(isprotected,301,1), H(iswritable,174,1), 
+H(fscanf,350,1), H(isProtected,301,1), H(isWritable,174,1), 
 H(uasort,24,1), Z, Z, 
-H(createcdatasection,73,1), H(getinode,186,1), Z, 
+H(createcdatasection,73,1), H(getInode,186,1), Z, 
 H(openmemory,434,1), Z, Z, 
-H(getvalue,315,1), Z, H(getoffset,130,1), 
+H(getValue,315,1), Z, H(getoffset,130,1), 
 Z, H(info,152,1), H(tutorial,148,1), 
 Z, H(help,160,1), Z, 
-H(writeelementns,399,1), Z, H(getmodifiers,263,1), 
+H(writeelementns,399,1), Z, H(getModifiers,263,1), 
 H(version,379,1), H(__init__,29,1), Z, 
 Z, H(wrap,165,1)};
 #undef M
@@ -358,13 +358,13 @@ const unsigned methodIndexReverseCallIndexSys[] = {0,
 };
 extern const char * methodIndexReverseIndexSys[];
 const char * methodIndexReverseIndexSys[] = {
-"next", "key", "valid", "getinneriterator", "append", 
-"__construct", "current", "__call", "rewind", "offsetexists", 
-"offsetget", "offsetunset", "offsetset", "getarraycopy", "count", 
-"natsort", "setflags", "uksort", "natcasesort", "asort", 
-"seek", "getflags", "ksort", "uasort", "getmessage", 
-"__tostring", "getcode", "getline", "__init__", "getfile", 
-"gettraceasstring", "gettrace", "getattribute", "sortwithsortkeys", "__destruct", 
+"next", "key", "valid", "getInnerIterator", "append", 
+"__construct", "current", "__call", "rewind", "offsetExists", 
+"offsetGet", "offsetUnset", "offsetSet", "getArrayCopy", "count", 
+"natsort", "setFlags", "uksort", "natcasesort", "asort", 
+"seek", "getFlags", "ksort", "uasort", "getMessage", 
+"__toString", "getCode", "getLine", "__init__", "getFile", 
+"getTraceAsString", "getTrace", "getattribute", "sortwithsortkeys", "__destruct", 
 "sort", "geterrorcode", "getstrength", "setstrength", "create", 
 "setattribute", "getlocale", "geterrormessage", "compare", "getlineno", 
 "insertbefore", "isdefaultnamespace", "isid", "lookupnamespaceuri", "appendchild", 
@@ -385,19 +385,19 @@ const char * methodIndexReverseIndexSys[] = {
 "item", "getiterator", "getnameditemns", "query", "evaluate", 
 "registerphpfunctions", "registernamespace", "format", "setdate", "getoffset", 
 "settime", "gettimezone", "setisodate", "settimezone", "modify", 
-"gettransitions", "listidentifiers", "listabbreviations", "getname", "argcount", 
-"arg", "helpcmds", "ask", "error", "xend", 
-"helptitle", "getcommand", "tutorial", "argvalue", "output", 
-"getstacktrace", "info", "printframe", "print", "code", 
-"helpsection", "quit", "helpbody", "getframe", "help", 
-"args", "addcompletion", "argrest", "getcurrentlocation", "wrap", 
-"send", "onautocomplete", "onclient", "onserver", "islocal", 
-"close", "read", "getperms", "iswritable", "getbasename", 
-"getpathname", "getgroup", "setfileclass", "setinfoclass", "getlinktarget", 
-"isreadable", "getrealpath", "getpathinfo", "getctime", "getpath", 
-"getinode", "islink", "getsize", "getfilename", "isfile", 
-"getowner", "getmtime", "isdir", "getfileinfo", "getatime", 
-"isexecutable", "openfile", "isdot", "gettype", "getseverity", 
+"gettransitions", "listidentifiers", "listabbreviations", "getname", "argCount", 
+"arg", "helpCmds", "ask", "error", "xend", 
+"helpTitle", "getCommand", "tutorial", "argValue", "output", 
+"getStackTrace", "info", "printFrame", "print", "code", 
+"helpSection", "quit", "helpBody", "getFrame", "help", 
+"args", "addCompletion", "argRest", "getCurrentLocation", "wrap", 
+"send", "onAutoComplete", "onClient", "onServer", "isLocal", 
+"close", "read", "getPerms", "isWritable", "getBasename", 
+"getPathname", "getGroup", "setFileClass", "setInfoClass", "getLinkTarget", 
+"isReadable", "getRealPath", "getPathInfo", "getCTime", "getPath", 
+"getInode", "isLink", "getSize", "getFilename", "isFile", 
+"getOwner", "getMTime", "isDir", "getFileInfo", "getATime", 
+"isExecutable", "openFile", "isDot", "getType", "getSeverity", 
 "addserver", "set", "setserverparams", "increment", "decrement", 
 "getstats", "getserverstatus", "setoptimeout", "setcompressthreshold", "get", 
 "pconnect", "add", "getversion", "delete", "connect", 
@@ -407,33 +407,33 @@ const char * methodIndexReverseIndexSys[] = {
 "__sleep", "fetchcolumn", "getcolumnmeta", "nextrowset", "bindcolumn", 
 "setfetchmode", "columncount", "bindparam", "closecursor", "rowcount", 
 "execute", "fetchobject", "fetchall", "bindvalue", "fetch", 
-"debugdumpparams", "getsubpathname", "getsubpath", "haschildren", "getchildren", 
-"getmethods", "isiterateable", "getstaticpropertyvalue", "isuserdefined", "newinstance", 
-"getextension", "getconstructor", "newinstanceargs", "getendline", "hasmethod", 
-"isinstance", "isfinal", "getmodifiers", "export", "getproperties", 
-"hasconstant", "getmethod", "getextensionname", "getparentclass", "implementsinterface", 
-"getinterfacenames", "getstartline", "getconstant", "getconstants", "getdoccomment", 
-"isinterface", "issubclassof", "hasproperty", "test", "getstaticproperties", 
-"getdefaultproperties", "setstaticpropertyvalue", "isinstantiable", "getinterfaces", "isabstract", 
-"isinternal", "getproperty", "getfunctions", "getinientries", "getclassnames", 
-"getclasses", "getnumberofrequiredparameters", "getnumberofparameters", "getstaticvariables", "getparameters", 
-"invokeargs", "returnsreference", "invoke", "getclosure", "isprivate", 
-"isprotected", "isstatic", "getdeclaringclass", "isconstructor", "ispublic", 
-"isdestructor", "isdefaultvalueavailable", "getclass", "allowsnull", "getposition", 
-"isarray", "isoptional", "getdefaultvalue", "ispassedbyreference", "getvalue", 
-"isdefault", "setaccessible", "setvalue", "unserialize", "serialize", 
+"debugdumpparams", "getSubPathname", "getSubPath", "hasChildren", "getChildren", 
+"getMethods", "isIterateable", "getStaticPropertyValue", "isUserDefined", "newInstance", 
+"getExtension", "getConstructor", "newInstanceArgs", "getEndLine", "hasMethod", 
+"isInstance", "isFinal", "getModifiers", "export", "getProperties", 
+"hasConstant", "getMethod", "getExtensionName", "getParentClass", "implementsInterface", 
+"getInterfaceNames", "getStartLine", "getConstant", "getConstants", "getDocComment", 
+"isInterface", "isSubclassOf", "hasProperty", "test", "getStaticProperties", 
+"getDefaultProperties", "setStaticPropertyValue", "isInstantiable", "getInterfaces", "isAbstract", 
+"isInternal", "getProperty", "getFunctions", "getINIEntries", "getClassNames", 
+"getClasses", "getNumberOfRequiredParameters", "getNumberOfParameters", "getStaticVariables", "getParameters", 
+"invokeArgs", "returnsReference", "invoke", "getClosure", "isPrivate", 
+"isProtected", "isStatic", "getDeclaringClass", "isConstructor", "isPublic", 
+"isDestructor", "isDefaultValueAvailable", "getClass", "allowsNull", "getPosition", 
+"isArray", "isOptional", "getDefaultValue", "isPassedByReference", "getValue", 
+"isDefault", "setAccessible", "setValue", "unserialize", "serialize", 
 "addattribute", "xpath", "registerxpathnamespace", "getnamespaces", "__unset", 
 "asxml", "getdocnamespaces", "children", "addchild", "__isset", 
 "attributes", "__dorequest", "__getlastrequest", "__setsoapheaders", "__setcookie", 
 "__soapcall", "__setlocation", "__getlastrequestheaders", "__getfunctions", "__getlastresponseheaders", 
 "__getlastresponse", "__gettypes", "addfunction", "addsoapheader", "setpersistence", 
 "handle", "setobject", "fault", "setclass", "fscanf", 
-"fseek", "fgetss", "fgetcsv", "setcsvcontrol", "getcsvcontrol", 
-"setmaxlinelen", "getmaxlinelen", "ftruncate", "eof", "fflush", 
+"fseek", "fgetss", "fgetcsv", "setCsvControl", "getCsvControl", 
+"setMaxLineLen", "getMaxLineLen", "ftruncate", "eof", "fflush", 
 "fgetc", "fpassthru", "fgets", "flock", "ftell", 
 "fwrite", "fstat", "attach", "detach", "contains", 
-"getuserinfo", "getcallback", "getdebuginfo", "adduserinfo", "getbacktrace", 
-"pear_error", "getmode", "tostring", "version", "loadextension", 
+"getUserInfo", "getCallback", "getDebugInfo", "addUserInfo", "getBacktrace", 
+"pear_error", "getMode", "toString", "version", "loadextension", 
 "createfunction", "lastinsertrowid", "lasterrormsg", "escapestring", "createaggregate", 
 "open", "changes", "openblob", "lasterrorcode", "querysingle", 
 "columnname", "columntype", "numcolumns", "fetcharray", "reset", 
@@ -446,7 +446,7 @@ const char * methodIndexReverseIndexSys[] = {
 "endpi", "startdtd", "setindent", "enddtdelement", "startdtdattlist", 
 "startcdata", "writedtdattlist", "enddtd", "openmemory", "openuri", 
 "endattribute", "startpi", "text", "startcomment"};
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 bool RuntimeOption::FastMethodCall = true;
 #else
 bool RuntimeOption::FastMethodCall = false;
@@ -634,7 +634,7 @@ void c_pdoexception::cloneSet(c_pdoexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
 Variant c_pdoexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -769,7 +769,7 @@ Variant c_pdoexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdoexception
 Variant c_pdoexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -905,14 +905,14 @@ Variant c_pdoexception::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdoexception
 Variant c_pdoexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdoexception
 Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -1206,7 +1206,7 @@ Variant c_pdoexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_pdoexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -1365,7 +1365,7 @@ void c_domdocumentfragment::cloneSet(c_domdocumentfragment *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1828,7 +1828,7 @@ Variant c_domdocumentfragment::o_invoke(MethodIndex methodIndex, const char *s, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2120,14 +2120,14 @@ Variant c_domdocumentfragment::o_invoke_few_args(MethodIndex methodIndex, const 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumentfragment
 Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -2977,7 +2977,7 @@ Variant c_domdocumentfragment::o_invoke_from_eval(const char *s, Eval::VariableE
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domdocumentfragment::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -3162,7 +3162,7 @@ Variant c_domtext::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
 Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3767,7 +3767,7 @@ Variant c_domtext::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domtext
 Variant c_domtext::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4131,14 +4131,14 @@ Variant c_domtext::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domtext
 Variant c_domtext::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domtext
 Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -5244,7 +5244,7 @@ Variant c_domtext::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   return c_domcharacterdata::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domtext::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -5432,7 +5432,7 @@ void c_debuggerclient::cloneSet(c_debuggerclient *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerclient
 Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x8c:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6023,7 +6023,7 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerclient
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerclient
 Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x8c:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6487,14 +6487,14 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerclient
 Variant c_debuggerclient::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerclient
 Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x8c:
@@ -7568,7 +7568,7 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_debuggerclient::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -7741,7 +7741,7 @@ void c_domcdatasection::cloneSet(c_domcdatasection *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
 Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8344,7 +8344,7 @@ Variant c_domcdatasection::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcdatasection
 Variant c_domcdatasection::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8706,14 +8706,14 @@ Variant c_domcdatasection::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcdatasection
 Variant c_domcdatasection::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcdatasection
 Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -9817,7 +9817,7 @@ Variant c_domcdatasection::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_domtext::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domcdatasection::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -9985,7 +9985,7 @@ void c_locale::cloneSet(c_locale *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_locale
 Variant c_locale::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10024,7 +10024,7 @@ Variant c_locale::o_invoke(MethodIndex methodIndex, const char *s, CArrRef param
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_locale
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_locale
 Variant c_locale::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10064,14 +10064,14 @@ Variant c_locale::o_invoke_few_args(MethodIndex methodIndex, const char *s, int6
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_locale
 Variant c_locale::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_locale
 Variant c_locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -10141,7 +10141,7 @@ Variant c_locale::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &e
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_locale::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -10303,7 +10303,7 @@ Variant c_domdocumenttype::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
 Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10746,7 +10746,7 @@ Variant c_domdocumenttype::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocumenttype
 Variant c_domdocumenttype::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -11028,14 +11028,14 @@ Variant c_domdocumenttype::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumenttype
 Variant c_domdocumenttype::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocumenttype
 Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -11851,7 +11851,7 @@ Variant c_domdocumenttype::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domdocumenttype::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -12030,7 +12030,7 @@ void c_sqlite3stmt::cloneSet(c_sqlite3stmt *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -12201,7 +12201,7 @@ Variant c_sqlite3stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -12331,14 +12331,14 @@ Variant c_sqlite3stmt::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3stmt
 Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -12674,7 +12674,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_sqlite3stmt::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -12836,7 +12836,7 @@ Variant c_domnodelist::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodelist
 Variant c_domnodelist::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -12953,7 +12953,7 @@ Variant c_domnodelist::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnodelist
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodelist
 Variant c_domnodelist::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -13039,14 +13039,14 @@ Variant c_domnodelist::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodelist
 Variant c_domnodelist::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodelist
 Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x79:
@@ -13258,7 +13258,7 @@ Variant c_domnodelist::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domnodelist::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -13443,7 +13443,7 @@ void c_normalizer::cloneSet(c_normalizer *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_normalizer
 Variant c_normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -13536,7 +13536,7 @@ Variant c_normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_normalizer
 Variant c_normalizer::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -13606,7 +13606,7 @@ Variant c_normalizer::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_normalizer
 Variant c_normalizer::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x39:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -13674,7 +13674,7 @@ Variant c_normalizer::os_invoke(const char *c, MethodIndex methodIndex, const ch
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_normalizer
 Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -13838,7 +13838,7 @@ Variant c_normalizer::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_normalizer::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x39:
@@ -14101,7 +14101,7 @@ Variant c_domcharacterdata::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
 Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -14662,7 +14662,7 @@ Variant c_domcharacterdata::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcharacterdata
 Variant c_domcharacterdata::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -15002,14 +15002,14 @@ Variant c_domcharacterdata::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcharacterdata
 Variant c_domcharacterdata::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcharacterdata
 Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -16043,7 +16043,7 @@ Variant c_domcharacterdata::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domcharacterdata::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -16216,7 +16216,7 @@ void c_domentityreference::cloneSet(c_domentityreference *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
 Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -16669,7 +16669,7 @@ Variant c_domentityreference::o_invoke(MethodIndex methodIndex, const char *s, C
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentityreference
 Variant c_domentityreference::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -16951,14 +16951,14 @@ Variant c_domentityreference::o_invoke_few_args(MethodIndex methodIndex, const c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentityreference
 Variant c_domentityreference::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentityreference
 Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -17782,7 +17782,7 @@ Variant c_domentityreference::o_invoke_from_eval(const char *s, Eval::VariableEn
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domentityreference::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -17941,7 +17941,7 @@ void c_simplexmlelementiterator::cloneSet(c_simplexmlelementiterator *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -18042,7 +18042,7 @@ Variant c_simplexmlelementiterator::o_invoke(MethodIndex methodIndex, const char
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelementiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -18144,14 +18144,14 @@ Variant c_simplexmlelementiterator::o_invoke_few_args(MethodIndex methodIndex, c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelementiterator
 Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -18363,7 +18363,7 @@ Variant c_simplexmlelementiterator::o_invoke_from_eval(const char *s, Eval::Vari
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_simplexmlelementiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -18579,7 +18579,7 @@ void c_datetimezone::cloneSet(c_datetimezone *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetimezone
 Variant c_datetimezone::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x88:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -18698,7 +18698,7 @@ Variant c_datetimezone::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_datetimezone
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetimezone
 Variant c_datetimezone::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x88:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -18798,7 +18798,7 @@ Variant c_datetimezone::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetimezone
 Variant c_datetimezone::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x89:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -18838,7 +18838,7 @@ Variant c_datetimezone::os_invoke(const char *c, MethodIndex methodIndex, const 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetimezone
 Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x88:
@@ -19064,7 +19064,7 @@ Variant c_datetimezone::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_datetimezone::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x89:
@@ -19288,7 +19288,7 @@ void c_domnodeiterator::cloneSet(c_domnodeiterator *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodeiterator
 Variant c_domnodeiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -19389,7 +19389,7 @@ Variant c_domnodeiterator::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnodeiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnodeiterator
 Variant c_domnodeiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -19491,14 +19491,14 @@ Variant c_domnodeiterator::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodeiterator
 Variant c_domnodeiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnodeiterator
 Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -19710,7 +19710,7 @@ Variant c_domnodeiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domnodeiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -19869,7 +19869,7 @@ void c_domimplementation::cloneSet(c_domimplementation *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domimplementation
 Variant c_domimplementation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x75:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -19994,7 +19994,7 @@ Variant c_domimplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domimplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domimplementation
 Variant c_domimplementation::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x75:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -20080,14 +20080,14 @@ Variant c_domimplementation::o_invoke_few_args(MethodIndex methodIndex, const ch
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domimplementation
 Variant c_domimplementation::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domimplementation
 Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x75:
@@ -20315,7 +20315,7 @@ Variant c_domimplementation::o_invoke_from_eval(const char *s, Eval::VariableEnv
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domimplementation::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -20539,7 +20539,7 @@ void c_soapheader::cloneSet(c_soapheader *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapheader
 Variant c_soapheader::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -20602,7 +20602,7 @@ Variant c_soapheader::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapheader
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapheader
 Variant c_soapheader::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -20648,14 +20648,14 @@ Variant c_soapheader::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapheader
 Variant c_soapheader::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapheader
 Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -20771,7 +20771,7 @@ Variant c_soapheader::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_soapheader::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -20933,7 +20933,7 @@ Variant c_domnotation::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
 Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -21376,7 +21376,7 @@ Variant c_domnotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnotation
 Variant c_domnotation::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -21658,14 +21658,14 @@ Variant c_domnotation::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnotation
 Variant c_domnotation::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnotation
 Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -22481,7 +22481,7 @@ Variant c_domnotation::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domnotation::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -22640,7 +22640,7 @@ void c_debuggerproxy::cloneSet(c_debuggerproxy *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerproxy
 Variant c_debuggerproxy::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xaa:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -22715,7 +22715,7 @@ Variant c_debuggerproxy::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerproxy
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_debuggerproxy
 Variant c_debuggerproxy::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xaa:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -22781,14 +22781,14 @@ Variant c_debuggerproxy::o_invoke_few_args(MethodIndex methodIndex, const char *
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerproxy
 Variant c_debuggerproxy::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_debuggerproxy
 Variant c_debuggerproxy::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xaa:
@@ -22924,7 +22924,7 @@ Variant c_debuggerproxy::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_debuggerproxy::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -23106,7 +23106,7 @@ void c_domcomment::cloneSet(c_domcomment *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
 Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -23679,7 +23679,7 @@ Variant c_domcomment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domcomment
 Variant c_domcomment::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -24021,14 +24021,14 @@ Variant c_domcomment::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcomment
 Variant c_domcomment::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domcomment
 Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -25072,7 +25072,7 @@ Variant c_domcomment::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   return c_domcharacterdata::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domcomment::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -25231,7 +25231,7 @@ void c_sqlite3::cloneSet(c_sqlite3 *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3
 Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdd:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -25596,7 +25596,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3
 Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdd:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -25840,14 +25840,14 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3
 Variant c_sqlite3::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3
 Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xdd:
@@ -26545,7 +26545,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_sqlite3::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -26736,7 +26736,7 @@ Variant c_domattr::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
 Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -27203,7 +27203,7 @@ Variant c_domattr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domattr
 Variant c_domattr::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -27497,14 +27497,14 @@ Variant c_domattr::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domattr
 Variant c_domattr::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domattr
 Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -28364,7 +28364,7 @@ Variant c_domattr::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domattr::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -28603,7 +28603,7 @@ void c_soapvar::cloneSet(c_soapvar *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapvar
 Variant c_soapvar::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -28670,7 +28670,7 @@ Variant c_soapvar::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapvar
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapvar
 Variant c_soapvar::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -28718,14 +28718,14 @@ Variant c_soapvar::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapvar
 Variant c_soapvar::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapvar
 Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -28851,7 +28851,7 @@ Variant c_soapvar::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_soapvar::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -29013,7 +29013,7 @@ Variant c_domnamednodemap::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnamednodemap
 Variant c_domnamednodemap::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -29176,7 +29176,7 @@ Variant c_domnamednodemap::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnamednodemap
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnamednodemap
 Variant c_domnamednodemap::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x79:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -29286,14 +29286,14 @@ Variant c_domnamednodemap::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnamednodemap
 Variant c_domnamednodemap::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnamednodemap
 Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x79:
@@ -29585,7 +29585,7 @@ Variant c_domnamednodemap::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domnamednodemap::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -29744,7 +29744,7 @@ void c_sqlite3result::cloneSet(c_sqlite3result *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3result
 Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -29889,7 +29889,7 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3result
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_sqlite3result
 Variant c_sqlite3result::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -30005,14 +30005,14 @@ Variant c_sqlite3result::o_invoke_few_args(MethodIndex methodIndex, const char *
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3result
 Variant c_sqlite3result::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_sqlite3result
 Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x187:
@@ -30278,7 +30278,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_sqlite3result::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -30514,7 +30514,7 @@ Variant c_simplexmlelement::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelement
 Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x141:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -31039,7 +31039,7 @@ Variant c_simplexmlelement::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelement
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_simplexmlelement
 Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x141:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -31359,14 +31359,14 @@ Variant c_simplexmlelement::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelement
 Variant c_simplexmlelement::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_simplexmlelement
 Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x141:
@@ -32300,7 +32300,7 @@ Variant c_simplexmlelement::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_simplexmlelement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -32459,7 +32459,7 @@ void c_memcache::cloneSet(c_memcache *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_memcache
 Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xc9:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -33050,7 +33050,7 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_memcache
 Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xc9:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -33388,14 +33388,14 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_memcache
 Variant c_memcache::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_memcache
 Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xc9:
@@ -34513,7 +34513,7 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_memcache::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -34704,7 +34704,7 @@ Variant c_domprocessinginstruction::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -35161,7 +35161,7 @@ Variant c_domprocessinginstruction::o_invoke(MethodIndex methodIndex, const char
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -35445,14 +35445,14 @@ Variant c_domprocessinginstruction::o_invoke_few_args(MethodIndex methodIndex, c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domprocessinginstruction
 Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -36286,7 +36286,7 @@ Variant c_domprocessinginstruction::o_invoke_from_eval(const char *s, Eval::Vari
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domprocessinginstruction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -36445,7 +36445,7 @@ void c_pdostatement::cloneSet(c_pdostatement *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdostatement
 Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -36984,7 +36984,7 @@ Variant c_pdostatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdostatement
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdostatement
 Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -37380,14 +37380,14 @@ Variant c_pdostatement::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdostatement
 Variant c_pdostatement::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdostatement
 Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -38443,7 +38443,7 @@ Variant c_pdostatement::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_pdostatement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -38634,7 +38634,7 @@ Variant c_soapclient::doCall(Variant v_name, Variant v_arguments, bool fatal) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapclient
 Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x14c:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -38921,7 +38921,7 @@ Variant c_soapclient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapclient
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapclient
 Variant c_soapclient::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x14c:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -39115,14 +39115,14 @@ Variant c_soapclient::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapclient
 Variant c_soapclient::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapclient
 Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x14c:
@@ -39682,7 +39682,7 @@ Variant c_soapclient::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_soapclient::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -39861,7 +39861,7 @@ void c_soapparam::cloneSet(c_soapparam *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapparam
 Variant c_soapparam::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -39912,7 +39912,7 @@ Variant c_soapparam::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapparam
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapparam
 Variant c_soapparam::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -39952,14 +39952,14 @@ Variant c_soapparam::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapparam
 Variant c_soapparam::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapparam
 Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -40045,7 +40045,7 @@ Variant c_soapparam::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_soapparam::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -40274,7 +40274,7 @@ void c_datetime::cloneSet(c_datetime *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetime
 Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x80:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -40499,7 +40499,7 @@ Variant c_datetime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_datetime
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_datetime
 Variant c_datetime::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x80:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -40641,14 +40641,14 @@ Variant c_datetime::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetime
 Variant c_datetime::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_datetime
 Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x80:
@@ -41060,7 +41060,7 @@ Variant c_datetime::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_datetime::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -41298,7 +41298,7 @@ void c_collator::cloneSet(c_collator *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_collator
 Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x21:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -41601,7 +41601,7 @@ Variant c_collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_collator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_collator
 Variant c_collator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x21:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -41791,7 +41791,7 @@ Variant c_collator::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_collator
 Variant c_collator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x28:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -41829,7 +41829,7 @@ Variant c_collator::os_invoke(const char *c, MethodIndex methodIndex, const char
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_collator
 Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x21:
@@ -42353,7 +42353,7 @@ Variant c_collator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_collator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x28:
@@ -42848,7 +42848,7 @@ void c_pdo::cloneSet(c_pdo *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdo
 Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdc:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -43173,7 +43173,7 @@ Variant c_pdo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pdo
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pdo
 Variant c_pdo::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xdc:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -43407,7 +43407,7 @@ Variant c_pdo::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 h
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdo
 Variant c_pdo::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xe2:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -43435,7 +43435,7 @@ Variant c_pdo::os_invoke(const char *c, MethodIndex methodIndex, const char *s, 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pdo
 Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xdc:
@@ -44051,7 +44051,7 @@ Variant c_pdo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env,
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_pdo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xe2:
@@ -44250,7 +44250,7 @@ Variant c_domentity::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
 Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -44693,7 +44693,7 @@ Variant c_domentity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domentity
 Variant c_domentity::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -44975,14 +44975,14 @@ Variant c_domentity::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentity
 Variant c_domentity::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domentity
 Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -45798,7 +45798,7 @@ Variant c_domentity::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domentity::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -45957,7 +45957,7 @@ void c_xmlwriter::cloneSet(c_xmlwriter *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_xmlwriter
 Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x18f:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -46864,7 +46864,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_xmlwriter
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_xmlwriter
 Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x18f:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -47436,14 +47436,14 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_xmlwriter
 Variant c_xmlwriter::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_xmlwriter
 Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x18f:
@@ -49165,7 +49165,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_xmlwriter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -49362,7 +49362,7 @@ void c_domexception::cloneSet(c_domexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
 Variant c_domexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -49513,7 +49513,7 @@ Variant c_domexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domexception
 Variant c_domexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -49653,14 +49653,14 @@ Variant c_domexception::o_invoke_few_args(MethodIndex methodIndex, const char *s
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domexception
 Variant c_domexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domexception
 Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -49974,7 +49974,7 @@ Variant c_domexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironm
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -50150,7 +50150,7 @@ Variant c_domxpath::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domxpath
 Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -50343,7 +50343,7 @@ Variant c_domxpath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domxpath
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domxpath
 Variant c_domxpath::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -50459,14 +50459,14 @@ Variant c_domxpath::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domxpath
 Variant c_domxpath::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domxpath
 Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -50796,7 +50796,7 @@ Variant c_domxpath::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domxpath::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -50984,7 +50984,7 @@ void c_soapserver::cloneSet(c_soapserver *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapserver
 Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x157:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -51221,7 +51221,7 @@ Variant c_soapserver::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapserver
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapserver
 Variant c_soapserver::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x157:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -51381,14 +51381,14 @@ Variant c_soapserver::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapserver
 Variant c_soapserver::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapserver
 Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x157:
@@ -51800,7 +51800,7 @@ Variant c_soapserver::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_soapserver::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -51962,7 +51962,7 @@ Variant c_domnode::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnode
 Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -52405,7 +52405,7 @@ Variant c_domnode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domnode
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domnode
 Variant c_domnode::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -52687,14 +52687,14 @@ Variant c_domnode::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnode
 Variant c_domnode::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domnode
 Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -53510,7 +53510,7 @@ Variant c_domnode::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domnode::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -53710,7 +53710,7 @@ Variant c_domdocument::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
 Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -54819,7 +54819,7 @@ Variant c_domdocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domdocument
 Variant c_domdocument::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -55471,14 +55471,14 @@ Variant c_domdocument::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocument
 Variant c_domdocument::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domdocument
 Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -57464,7 +57464,7 @@ Variant c_domdocument::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domdocument::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -57623,7 +57623,7 @@ void c_libxmlerror::cloneSet(c_libxmlerror *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_libxmlerror
 Variant c_libxmlerror::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -57662,7 +57662,7 @@ Variant c_libxmlerror::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_libxmlerror
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_libxmlerror
 Variant c_libxmlerror::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x23:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -57702,14 +57702,14 @@ Variant c_libxmlerror::o_invoke_few_args(MethodIndex methodIndex, const char *s,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_libxmlerror
 Variant c_libxmlerror::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_libxmlerror
 Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x23:
@@ -57779,7 +57779,7 @@ Variant c_libxmlerror::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_libxmlerror::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -58018,7 +58018,7 @@ void c_soapfault::cloneSet(c_soapfault *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
 Variant c_soapfault::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -58181,7 +58181,7 @@ Variant c_soapfault::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_soapfault
 Variant c_soapfault::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -58325,14 +58325,14 @@ Variant c_soapfault::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapfault
 Variant c_soapfault::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_soapfault
 Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -58682,7 +58682,7 @@ Variant c_soapfault::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_soapfault::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -58888,7 +58888,7 @@ Variant c_domelement::doGet(Variant v_name, bool error) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
 Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -59765,7 +59765,7 @@ Variant c_domelement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domelement
 Variant c_domelement::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x2d:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -60263,14 +60263,14 @@ Variant c_domelement::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domelement
 Variant c_domelement::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domelement
 Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x2d:
@@ -61854,7 +61854,7 @@ Variant c_domelement::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   return c_domnode::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domelement::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -62570,8 +62570,8 @@ Variant invoke_builtin_static_method(const char *s, MethodIndex methodIndex, con
   if (fatal) {
     return throw_missing_class(s);
   } else {
-#ifdef FMCGEN
-    method = methodIndexLookupReverse(methodIndex);
+#ifndef NOFMCGEN
+    method = g_bypassMILR ? method : methodIndexLookupReverse(methodIndex);
 #endif
     raise_warning("call_user_func to non-existent class's method %s::%s", s, method);
     return false;

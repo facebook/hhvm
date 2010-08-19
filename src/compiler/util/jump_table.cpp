@@ -28,7 +28,6 @@ JumpTableMethodIndex::JumpTableMethodIndex(CodeGenerator &cg,
                                            const vector<const char*> &keys)
   : m_cg(cg), m_ar(ar), m_keys(keys), m_iter(m_keys.begin()) {
   if (keys.empty()) return;
-  // FMC does dynamic case come through here and methodIndexLookupReverse?
   m_cg.indentBegin("switch (methodIndex.m_callIndex) {\n");
   if (ready()) {
     const MethodSlot* ms = m_ar->getMethodSlot(*m_iter);

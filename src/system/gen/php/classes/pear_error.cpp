@@ -248,7 +248,7 @@ void c_pear_error::cloneSet(c_pear_error *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x173:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -445,7 +445,7 @@ Variant c_pear_error::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_pear_error
 Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x173:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -605,14 +605,14 @@ Variant c_pear_error::o_invoke_few_args(MethodIndex methodIndex, const char *s, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pear_error
 Variant c_pear_error::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_pear_error
 Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x173:
@@ -1002,7 +1002,7 @@ Variant c_pear_error::o_invoke_from_eval(const char *s, Eval::VariableEnvironmen
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_pear_error::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif

@@ -300,7 +300,7 @@ void c_arrayiterator::cloneSet(c_arrayiterator *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_arrayiterator
 Variant c_arrayiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xe:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -679,7 +679,7 @@ Variant c_arrayiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_arrayiterator
 Variant c_arrayiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xe:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -955,14 +955,14 @@ Variant c_arrayiterator::o_invoke_few_args(MethodIndex methodIndex, const char *
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_arrayiterator
 Variant c_arrayiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_arrayiterator
 Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xe:
@@ -1684,7 +1684,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_arrayiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -2080,7 +2080,7 @@ Variant c_appenditerator::doCall(Variant v_name, Variant v_arguments, bool fatal
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_appenditerator
 Variant c_appenditerator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2225,7 +2225,7 @@ Variant c_appenditerator::o_invoke(MethodIndex methodIndex, const char *s, CArrR
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_appenditerator
 Variant c_appenditerator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2349,14 +2349,14 @@ Variant c_appenditerator::o_invoke_few_args(MethodIndex methodIndex, const char 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_appenditerator
 Variant c_appenditerator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_appenditerator
 Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -2646,7 +2646,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_appenditerator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -2690,24 +2690,24 @@ void c_appenditerator::t_rewind() {
   m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
   if (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
     {
-      o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
+      o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
     }
   }
 } /* function */
 /* SRC: classes/iterator.php line 985 */
 bool c_appenditerator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
-  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
+  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
 } /* function */
 /* SRC: classes/iterator.php line 998 */
 Variant c_appenditerator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
-  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* current */ MethodIndex(7, 1) /* current */ ,  "current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null)));
+  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* current */ MethodIndex(7, 1) /* current */ ,  "current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null)));
 } /* function */
 /* SRC: classes/iterator.php line 1016 */
 Variant c_appenditerator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
-  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* key */ MethodIndex(2, 1) /* key */ ,  "key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null)));
+  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* key */ MethodIndex(2, 1) /* key */ ,  "key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null)));
 } /* function */
 /* SRC: classes/iterator.php line 1030 */
 void c_appenditerator::t_next() {
@@ -2717,8 +2717,8 @@ void c_appenditerator::t_next() {
       return;
     }
   }
-  o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* next */ MethodIndex(1, 1) /* next */ ,  "next", 0x3C6D50F3BB8102B8LL, 0);
-  if (toBoolean(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
+  o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* next */ MethodIndex(1, 1) /* next */ ,  "next", 0x3C6D50F3BB8102B8LL, 0);
+  if (toBoolean(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
     {
       return;
     }
@@ -2729,8 +2729,8 @@ void c_appenditerator::t_next() {
     while (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
       LOOP_COUNTER_CHECK(1);
       {
-        o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
-        if (toBoolean(o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
+        o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
+        if (toBoolean(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
           {
             return;
           }
@@ -2745,7 +2745,7 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
     ArrayInit tmp1(2, true);
-    tmp1.set(0, o_root_invoke_few_args(/* getinneriterator */ MethodIndex(4, 1) /* getinneriterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0));
+    tmp1.set(0, o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0));
     tmp1.set(1, v_func);
     const Array &tmp2((Array(tmp1)));
     return x_call_user_func_array(tmp2, toArray(v_params));
@@ -2946,7 +2946,7 @@ void c_recursivedirectoryiterator::cloneSet(c_recursivedirectoryiterator *clone)
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3523,7 +3523,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4015,14 +4015,14 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -5224,7 +5224,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
   return c_directoryiterator::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_recursivedirectoryiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -5460,7 +5460,7 @@ void c_directoryiterator::cloneSet(c_directoryiterator *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
 Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5985,7 +5985,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
 Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6427,14 +6427,14 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directoryiterator
 Variant c_directoryiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directoryiterator
 Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -7514,7 +7514,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
   return c_splfileinfo::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_directoryiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -7785,7 +7785,7 @@ void c_recursiveiteratoriterator::cloneSet(c_recursiveiteratoriterator *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursiveiteratoriterator
 Variant c_recursiveiteratoriterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -7902,7 +7902,7 @@ Variant c_recursiveiteratoriterator::o_invoke(MethodIndex methodIndex, const cha
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursiveiteratoriterator
 Variant c_recursiveiteratoriterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8006,14 +8006,14 @@ Variant c_recursiveiteratoriterator::o_invoke_few_args(MethodIndex methodIndex, 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursiveiteratoriterator
 Variant c_recursiveiteratoriterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursiveiteratoriterator
 Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -8251,7 +8251,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_recursiveiteratoriterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -8408,7 +8408,7 @@ void c_filteriterator::cloneSet(c_filteriterator *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator
 Variant c_filteriterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
@@ -8416,7 +8416,7 @@ Variant c_filteriterator::o_invoke(MethodIndex methodIndex, const char *s, CArrR
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator
 Variant c_filteriterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
@@ -8425,21 +8425,21 @@ Variant c_filteriterator::o_invoke_few_args(MethodIndex methodIndex, const char 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_filteriterator
 Variant c_filteriterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_filteriterator
 Variant c_filteriterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_filteriterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif

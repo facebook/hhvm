@@ -230,7 +230,7 @@ void c_splobjectstorage::cloneSet(c_splobjectstorage *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
 Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -383,7 +383,7 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splobjectstorage
 Variant c_splobjectstorage::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -507,14 +507,14 @@ Variant c_splobjectstorage::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage
 Variant c_splobjectstorage::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splobjectstorage
 Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -804,7 +804,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_splobjectstorage::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif

@@ -58,7 +58,26 @@ class MethodSlot{
 };
 extern const MethodSlot *errorMethodSlot;
 
-typedef hphp_hash_map<const std::string, MethodSlot, string_hash>
+struct string_hash_i {
+  size_t operator()(const std::string &str) const {
+    // like __stl_hash_string(const char* __s)
+    unsigned long h = 0;
+    for (const char *s=str.c_str(); *s; ++s) {
+      char c = *s;
+      if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
+      h = 5 * h + c;
+    }
+    return size_t(h);
+  }
+};
+
+struct equal_to_i : public std::binary_function <std::string,std::string,bool> {
+  bool operator() (const std::string& x, const std::string& y) const {
+    return strcasecmp(x.c_str(), y.c_str()) == 0;
+  }
+};
+
+typedef hphp_hash_map<const std::string, MethodSlot, string_hash_i, equal_to_i>
       StringToMethodSlotMap;
 
 class CallIndexVectSet : public std::vector<MethodSet> {};

@@ -176,7 +176,7 @@ void c_reflectionfunctionabstract::cloneSet(c_reflectionfunctionabstract *clone)
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x124:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -343,7 +343,7 @@ Variant c_reflectionfunctionabstract::o_invoke(MethodIndex methodIndex, const ch
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x124:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -511,14 +511,14 @@ Variant c_reflectionfunctionabstract::o_invoke_few_args(MethodIndex methodIndex,
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x124:
@@ -892,7 +892,7 @@ Variant c_reflectionfunctionabstract::o_invoke_from_eval(const char *s, Eval::Va
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionfunctionabstract::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -1014,7 +1014,7 @@ int64 c_reflectionfunctionabstract::t_getnumberofrequiredparameters() {
       iter4.second(v_param);
       v_name = iter4.first();
       {
-        if (toBoolean(v_param. BIND_CLASS_DOT o_invoke_few_args(/* isoptional */ MethodIndex(312, 1) /* isoptional */ ,  "isOptional", 0x2D6EF48BBAB22735LL, 0))) {
+        if (toBoolean(v_param. BIND_CLASS_DOT o_invoke_few_args(/* isOptional */ MethodIndex(312, 1) /* isOptional */ ,  "isOptional", 0x2D6EF48BBAB22735LL, 0))) {
           {
             break;
           }
@@ -1164,7 +1164,7 @@ void c_reflectionobject::cloneSet(c_reflectionobject *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 Variant c_reflectionobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xfb:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1813,7 +1813,7 @@ Variant c_reflectionobject::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionobject
 Variant c_reflectionobject::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xfb:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2321,7 +2321,7 @@ Variant c_reflectionobject::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionobject
 Variant c_reflectionobject::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x108:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2361,7 +2361,7 @@ Variant c_reflectionobject::os_invoke(const char *c, MethodIndex methodIndex, co
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionobject
 Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xfb:
@@ -3639,7 +3639,7 @@ Variant c_reflectionobject::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_reflectionclass::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionobject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x108:
@@ -3830,7 +3830,7 @@ void c_reflectionexception::cloneSet(c_reflectionexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3971,7 +3971,7 @@ Variant c_reflectionexception::o_invoke(MethodIndex methodIndex, const char *s, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4101,14 +4101,14 @@ Variant c_reflectionexception::o_invoke_few_args(MethodIndex methodIndex, const 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionexception
 Variant c_reflectionexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionexception
 Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -4396,7 +4396,7 @@ Variant c_reflectionexception::o_invoke_from_eval(const char *s, Eval::VariableE
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -4702,7 +4702,7 @@ void c_reflectionclass::cloneSet(c_reflectionclass *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 Variant c_reflectionclass::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xfb:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5395,7 +5395,7 @@ Variant c_reflectionclass::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionclass
 Variant c_reflectionclass::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xfb:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5925,7 +5925,7 @@ Variant c_reflectionclass::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionclass
 Variant c_reflectionclass::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x108:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5965,7 +5965,7 @@ Variant c_reflectionclass::os_invoke(const char *c, MethodIndex methodIndex, con
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionclass
 Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xfb:
@@ -7321,7 +7321,7 @@ Variant c_reflectionclass::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionclass::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x108:
@@ -8006,7 +8006,7 @@ Variant c_reflectionclass::t_issubclassof(Variant v_cls) {
   }
   {
     const Object &tmp8((toObject(t_getparentclass())));
-    return wrap_variant(tmp8-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* issubclassof */ MethodIndex(277, 1) /* issubclassof */ ,  "isSubclassOf", 0x373333991926C97ELL, 1, v_cls));
+    return wrap_variant(tmp8-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* isSubclassOf */ MethodIndex(277, 1) /* isSubclassOf */ ,  "isSubclassOf", 0x373333991926C97ELL, 1, v_cls));
   }
 } /* function */
 /* SRC: classes/reflection.php line 1136 */
@@ -8023,7 +8023,7 @@ Variant c_reflectionclass::t_getstaticproperties() {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
-        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isstatic */ MethodIndex(302, 1) /* isstatic */ ,  "isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
+        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isStatic */ MethodIndex(302, 1) /* isStatic */ ,  "isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
           {
             {
               Variant tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
@@ -8067,7 +8067,7 @@ Variant c_reflectionclass::t_getdefaultproperties() {
       LOOP_COUNTER_CHECK(1);
       iter3->second(v_prop);
       {
-        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isdefault */ MethodIndex(316, 1) /* isdefault */ ,  "isDefault", 0x384A52597AB11F15LL, 0))) {
+        if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isDefault */ MethodIndex(316, 1) /* isDefault */ ,  "isDefault", 0x384A52597AB11F15LL, 0))) {
           {
             {
               Variant tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
@@ -8384,7 +8384,7 @@ void c_reflectionextension::cloneSet(c_reflectionextension *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 Variant c_reflectionextension::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8551,7 +8551,7 @@ Variant c_reflectionextension::o_invoke(MethodIndex methodIndex, const char *s, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionextension
 Variant c_reflectionextension::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8697,7 +8697,7 @@ Variant c_reflectionextension::o_invoke_few_args(MethodIndex methodIndex, const 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionextension
 Variant c_reflectionextension::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x108:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8737,7 +8737,7 @@ Variant c_reflectionextension::os_invoke(const char *c, MethodIndex methodIndex,
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionextension
 Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1a:
@@ -9081,7 +9081,7 @@ Variant c_reflectionextension::o_invoke_from_eval(const char *s, Eval::VariableE
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionextension::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x108:
@@ -9495,7 +9495,7 @@ void c_reflectionmethod::cloneSet(c_reflectionmethod *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x124:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9892,7 +9892,7 @@ Variant c_reflectionmethod::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x124:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10254,7 +10254,7 @@ Variant c_reflectionmethod::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
 Variant c_reflectionmethod::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x108:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10296,7 +10296,7 @@ Variant c_reflectionmethod::os_invoke(const char *c, MethodIndex methodIndex, co
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionmethod
 Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x124:
@@ -11158,7 +11158,7 @@ Variant c_reflectionmethod::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_reflectionfunctionabstract::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionmethod::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x108:
@@ -11253,7 +11253,7 @@ void c_reflectionmethod::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getmethod */ MethodIndex(267, 1) /* getmethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getMethod */ MethodIndex(267, 1) /* getMethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
         v_method = tmp2;
       }
       if (toBoolean(v_method)) {
@@ -11295,7 +11295,7 @@ Variant c_reflectionmethod::ti_export(const char* cls, Variant v_cls, CVarRef v_
     }
   }
   {
-    const Variant &tmp2((v_cls.o_invoke_few_args(/* getmethod */ MethodIndex(267, 1) /* getmethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
+    const Variant &tmp2((v_cls.o_invoke_few_args(/* getMethod */ MethodIndex(267, 1) /* getMethod */ ,  "getMethod", 0x0D81ECE253A3B5B6LL, 1, v_name)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));
@@ -11664,7 +11664,7 @@ void c_reflectionproperty::cloneSet(c_reflectionproperty *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 Variant c_reflectionproperty::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x12c:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -11907,7 +11907,7 @@ Variant c_reflectionproperty::o_invoke(MethodIndex methodIndex, const char *s, C
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionproperty
 Variant c_reflectionproperty::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x12c:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -12103,7 +12103,7 @@ Variant c_reflectionproperty::o_invoke_few_args(MethodIndex methodIndex, const c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionproperty
 Variant c_reflectionproperty::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x108:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -12145,7 +12145,7 @@ Variant c_reflectionproperty::os_invoke(const char *c, MethodIndex methodIndex, 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionproperty
 Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x12c:
@@ -12643,7 +12643,7 @@ Variant c_reflectionproperty::o_invoke_from_eval(const char *s, Eval::VariableEn
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionproperty::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x108:
@@ -12738,7 +12738,7 @@ void c_reflectionproperty::t___construct(Variant v_cls, Variant v_name) {
         }
       }
       {
-        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getproperty */ MethodIndex(287, 1) /* getproperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+        Variant tmp2((v_cls. BIND_CLASS_DOT o_invoke_few_args(/* getProperty */ MethodIndex(287, 1) /* getProperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
         v_prop = tmp2;
       }
       if (toBoolean(v_prop)) {
@@ -12780,7 +12780,7 @@ Variant c_reflectionproperty::ti_export(const char* cls, Variant v_cls, CVarRef 
     }
   }
   {
-    const Variant &tmp2((v_cls.o_invoke_few_args(/* getproperty */ MethodIndex(287, 1) /* getproperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
+    const Variant &tmp2((v_cls.o_invoke_few_args(/* getProperty */ MethodIndex(287, 1) /* getProperty */ ,  "getProperty", 0x0FD73627FB023047LL, 1, v_name)));
     v_obj = tmp2;
   }
   v_str = (toString(v_obj));
@@ -13052,7 +13052,7 @@ void c_reflectionfunction::cloneSet(c_reflectionfunction *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x124:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -13311,7 +13311,7 @@ Variant c_reflectionfunction::o_invoke(MethodIndex methodIndex, const char *s, C
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x124:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -13553,7 +13553,7 @@ Variant c_reflectionfunction::o_invoke_few_args(MethodIndex methodIndex, const c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
 Variant c_reflectionfunction::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x108:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -13593,7 +13593,7 @@ Variant c_reflectionfunction::os_invoke(const char *c, MethodIndex methodIndex, 
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionfunction
 Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x124:
@@ -14141,7 +14141,7 @@ Variant c_reflectionfunction::o_invoke_from_eval(const char *s, Eval::VariableEn
   return c_reflectionfunctionabstract::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionfunction::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x108:
@@ -14479,7 +14479,7 @@ void c_reflectionparameter::cloneSet(c_reflectionparameter *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 Variant c_reflectionparameter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -14674,7 +14674,7 @@ Variant c_reflectionparameter::o_invoke(MethodIndex methodIndex, const char *s, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_reflectionparameter
 Variant c_reflectionparameter::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1a:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -14844,7 +14844,7 @@ Variant c_reflectionparameter::o_invoke_few_args(MethodIndex methodIndex, const 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionparameter
 Variant c_reflectionparameter::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x108:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -14886,7 +14886,7 @@ Variant c_reflectionparameter::os_invoke(const char *c, MethodIndex methodIndex,
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_reflectionparameter
 Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1a:
@@ -15302,7 +15302,7 @@ Variant c_reflectionparameter::o_invoke_from_eval(const char *s, Eval::VariableE
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_reflectionparameter::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x108:
@@ -15388,7 +15388,7 @@ void c_reflectionparameter::t___construct(Variant v_func, Variant v_param) {
   if ((toBoolean(v_func) && toBoolean(v_param))) {
     {
       {
-        Variant tmp1((v_func. BIND_CLASS_DOT o_invoke_few_args(/* getparameters */ MethodIndex(295, 1) /* getparameters */ ,  "getParameters", 0x3E62225132C2A32DLL, 0)));
+        Variant tmp1((v_func. BIND_CLASS_DOT o_invoke_few_args(/* getParameters */ MethodIndex(295, 1) /* getParameters */ ,  "getParameters", 0x3E62225132C2A32DLL, 0)));
         v_params = tmp1;
       }
       {

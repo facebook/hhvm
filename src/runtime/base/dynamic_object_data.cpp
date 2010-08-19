@@ -187,7 +187,7 @@ Variant DynamicObjectData::o_invoke(MethodIndex methodIndex,
   } else {
     // FMC need test case
     if (RuntimeOption::FastMethodCall) {
-      s = methodIndexLookupReverse(methodIndex);
+      s = g_bypassMILR ? s : methodIndexLookupReverse(methodIndex);
     }
     return root->doCall(s, params, fatal);
   }

@@ -127,7 +127,7 @@ void c_unexpectedvalueexception::cloneSet(c_unexpectedvalueexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -268,7 +268,7 @@ Variant c_unexpectedvalueexception::o_invoke(MethodIndex methodIndex, const char
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -398,14 +398,14 @@ Variant c_unexpectedvalueexception::o_invoke_few_args(MethodIndex methodIndex, c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -693,7 +693,7 @@ Variant c_unexpectedvalueexception::o_invoke_from_eval(const char *s, Eval::Vari
   return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_unexpectedvalueexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -812,7 +812,7 @@ void c_overflowexception::cloneSet(c_overflowexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -953,7 +953,7 @@ Variant c_overflowexception::o_invoke(MethodIndex methodIndex, const char *s, CA
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1083,14 +1083,14 @@ Variant c_overflowexception::o_invoke_few_args(MethodIndex methodIndex, const ch
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
 Variant c_overflowexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_overflowexception
 Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -1378,7 +1378,7 @@ Variant c_overflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnv
   return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_overflowexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -1497,7 +1497,7 @@ void c_outofboundsexception::cloneSet(c_outofboundsexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1638,7 +1638,7 @@ Variant c_outofboundsexception::o_invoke(MethodIndex methodIndex, const char *s,
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1768,14 +1768,14 @@ Variant c_outofboundsexception::o_invoke_few_args(MethodIndex methodIndex, const
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
 Variant c_outofboundsexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofboundsexception
 Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -2063,7 +2063,7 @@ Variant c_outofboundsexception::o_invoke_from_eval(const char *s, Eval::Variable
   return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_outofboundsexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -2182,7 +2182,7 @@ void c_logicexception::cloneSet(c_logicexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2323,7 +2323,7 @@ Variant c_logicexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_logicexception
 Variant c_logicexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2453,14 +2453,14 @@ Variant c_logicexception::o_invoke_few_args(MethodIndex methodIndex, const char 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
 Variant c_logicexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_logicexception
 Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -2748,7 +2748,7 @@ Variant c_logicexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_logicexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -2867,7 +2867,7 @@ void c_rangeexception::cloneSet(c_rangeexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3008,7 +3008,7 @@ Variant c_rangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3138,14 +3138,14 @@ Variant c_rangeexception::o_invoke_few_args(MethodIndex methodIndex, const char 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
 Variant c_rangeexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_rangeexception
 Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -3433,7 +3433,7 @@ Variant c_rangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_rangeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -3552,7 +3552,7 @@ void c_invalidargumentexception::cloneSet(c_invalidargumentexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3693,7 +3693,7 @@ Variant c_invalidargumentexception::o_invoke(MethodIndex methodIndex, const char
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3823,14 +3823,14 @@ Variant c_invalidargumentexception::o_invoke_few_args(MethodIndex methodIndex, c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_invalidargumentexception
 Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -4118,7 +4118,7 @@ Variant c_invalidargumentexception::o_invoke_from_eval(const char *s, Eval::Vari
   return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_invalidargumentexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -4237,7 +4237,7 @@ void c_underflowexception::cloneSet(c_underflowexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4378,7 +4378,7 @@ Variant c_underflowexception::o_invoke(MethodIndex methodIndex, const char *s, C
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4508,14 +4508,14 @@ Variant c_underflowexception::o_invoke_few_args(MethodIndex methodIndex, const c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
 Variant c_underflowexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_underflowexception
 Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -4803,7 +4803,7 @@ Variant c_underflowexception::o_invoke_from_eval(const char *s, Eval::VariableEn
   return c_runtimeexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_underflowexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -4922,7 +4922,7 @@ void c_outofrangeexception::cloneSet(c_outofrangeexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5063,7 +5063,7 @@ Variant c_outofrangeexception::o_invoke(MethodIndex methodIndex, const char *s, 
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5193,14 +5193,14 @@ Variant c_outofrangeexception::o_invoke_few_args(MethodIndex methodIndex, const 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
 Variant c_outofrangeexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_outofrangeexception
 Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -5488,7 +5488,7 @@ Variant c_outofrangeexception::o_invoke_from_eval(const char *s, Eval::VariableE
   return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_outofrangeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -5607,7 +5607,7 @@ void c_badmethodcallexception::cloneSet(c_badmethodcallexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5748,7 +5748,7 @@ Variant c_badmethodcallexception::o_invoke(MethodIndex methodIndex, const char *
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5878,14 +5878,14 @@ Variant c_badmethodcallexception::o_invoke_few_args(MethodIndex methodIndex, con
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badmethodcallexception
 Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -6173,7 +6173,7 @@ Variant c_badmethodcallexception::o_invoke_from_eval(const char *s, Eval::Variab
   return c_badfunctioncallexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_badmethodcallexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -6292,7 +6292,7 @@ void c_runtimeexception::cloneSet(c_runtimeexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6433,7 +6433,7 @@ Variant c_runtimeexception::o_invoke(MethodIndex methodIndex, const char *s, CAr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6563,14 +6563,14 @@ Variant c_runtimeexception::o_invoke_few_args(MethodIndex methodIndex, const cha
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
 Variant c_runtimeexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_runtimeexception
 Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -6858,7 +6858,7 @@ Variant c_runtimeexception::o_invoke_from_eval(const char *s, Eval::VariableEnvi
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_runtimeexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -7181,7 +7181,7 @@ void c_exception::cloneSet(c_exception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -7322,7 +7322,7 @@ Variant c_exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_exception
 Variant c_exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -7452,14 +7452,14 @@ Variant c_exception::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_exception
 Variant c_exception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_exception
 Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -7747,7 +7747,7 @@ Variant c_exception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_exception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -8192,7 +8192,7 @@ void c_errorexception::cloneSet(c_errorexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8355,7 +8355,7 @@ Variant c_errorexception::o_invoke(MethodIndex methodIndex, const char *s, CArrR
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_errorexception
 Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8501,14 +8501,14 @@ Variant c_errorexception::o_invoke_few_args(MethodIndex methodIndex, const char 
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception
 Variant c_errorexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_errorexception
 Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -8852,7 +8852,7 @@ Variant c_errorexception::o_invoke_from_eval(const char *s, Eval::VariableEnviro
   return c_exception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_errorexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -9000,7 +9000,7 @@ void c_badfunctioncallexception::cloneSet(c_badfunctioncallexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9141,7 +9141,7 @@ Variant c_badfunctioncallexception::o_invoke(MethodIndex methodIndex, const char
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9271,14 +9271,14 @@ Variant c_badfunctioncallexception::o_invoke_few_args(MethodIndex methodIndex, c
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_badfunctioncallexception
 Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -9566,7 +9566,7 @@ Variant c_badfunctioncallexception::o_invoke_from_eval(const char *s, Eval::Vari
   return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_badfunctioncallexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -9685,7 +9685,7 @@ void c_lengthexception::cloneSet(c_lengthexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9826,7 +9826,7 @@ Variant c_lengthexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -9956,14 +9956,14 @@ Variant c_lengthexception::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
 Variant c_lengthexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_lengthexception
 Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -10251,7 +10251,7 @@ Variant c_lengthexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_lengthexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif
@@ -10370,7 +10370,7 @@ void c_domainexception::cloneSet(c_domainexception *clone) {
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10511,7 +10511,7 @@ Variant c_domainexception::o_invoke(MethodIndex methodIndex, const char *s, CArr
 #endif // OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_domainexception
 Variant c_domainexception::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x19:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -10641,14 +10641,14 @@ Variant c_domainexception::o_invoke_few_args(MethodIndex methodIndex, const char
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
 Variant c_domainexception::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifdef FMCGEN
+#ifndef NOFMCGEN
 #else
 #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_domainexception
 Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x19:
@@ -10936,7 +10936,7 @@ Variant c_domainexception::o_invoke_from_eval(const char *s, Eval::VariableEnvir
   return c_logicexception::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
 Variant c_domainexception::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifdef FMCGEN
+#ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
 #else
 #endif

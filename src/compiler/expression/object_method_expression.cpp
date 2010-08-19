@@ -376,7 +376,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf(")");
     } else {
       // FMC: test fail case , both of them
-      const MethodSlot *ms = ar->getOrAddMethodSlot(m_name);
+      const MethodSlot *ms = ar->getOrAddMethodSlot(m_origName);
       if (fewParams) {
         cg_printf("%s%sinvoke_few_args%s(%s \"%s\"",
                   Option::ObjectPrefix, isThis ? "root_" : "",

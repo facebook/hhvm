@@ -343,8 +343,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
                 // set to be dynamic
                 constants->setDynamic(ar, symbol);
               }
-            } else {
-              constants->setDynamic(ar, symbol);
             }
             break;
           }
@@ -636,7 +634,7 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
         case DefinedFunction: {
           ConstantTablePtr constants = ar->getConstants();
           // system constant
-          if (constants->isPresent(symbol) && !constants->isDynamic(symbol)) {
+          if (constants->isPresent(symbol)) {
             return CONSTANT("true");
           }
           // user constant

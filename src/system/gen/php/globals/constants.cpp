@@ -1992,6 +1992,8 @@ const int64 k_T_STRING_CAST = 293LL;
 Variant pm_php$globals$constants_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::globals/constants.php, pm_php$globals$constants_php);
   LVariableTable *gVariables __attribute__((__unused__)) = (LVariableTable *)g;
+  g->declareConstant("SID", g->k_SID, "");
+  g->declareConstant("SID", g->k_SID, "");
   return true;
 } /* function */
 

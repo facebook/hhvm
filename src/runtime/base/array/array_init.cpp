@@ -15,6 +15,7 @@
 */
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/array/zend_array.h>
+#include <runtime/base/array/hphp_array.h>
 #include <runtime/base/array/small_array.h>
 #include <runtime/base/runtime_option.h>
 
@@ -25,16 +26,29 @@ namespace HPHP {
 ArrayInit::ArrayInit(ssize_t n, bool isVector /* = false */,
                      bool keepRef /* = false */) : m_data(NULL) {
   if (n == 0) {
-    if (RuntimeOption::UseSmallArray && !keepRef) {
-      m_data = StaticEmptySmallArray::Get();
-    } else {
+    if (keepRef) {
       m_data = StaticEmptyZendArray::Get();
+    } else {
+      if (RuntimeOption::UseSmallArray) {
+        m_data = StaticEmptySmallArray::Get();
+      } else if (RuntimeOption::UseHphpArray) {
+        m_data = StaticEmptyHphpArray::Get();
+      } else {
+        m_data = StaticEmptyZendArray::Get();
+      }
     }
-  } else if (n <= SmallArray::SARR_SIZE && !keepRef &&
-             RuntimeOption::UseSmallArray) {
-    m_data = NEW(SmallArray)();
   } else {
-    m_data = NEW(ZendArray)(n);
+    if (keepRef) {
+      m_data = NEW(ZendArray)(n);
+    } else {
+      if (RuntimeOption::UseSmallArray && n <= SmallArray::SARR_SIZE) {
+        m_data = NEW(SmallArray)();
+      } else if (RuntimeOption::UseHphpArray) {
+        m_data = NEW(HphpArray)(n);
+      } else {
+        m_data = NEW(ZendArray)(n);
+      }
+    }
   }
 }
 

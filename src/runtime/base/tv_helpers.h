@@ -38,7 +38,7 @@ namespace HPHP {
 
 // Assumes 'tv' is live
 //
-// Assumes 'tv->m_type != KindOfVariant'
+// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type) && tv->m_type != KindOfVariant'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
 inline void tvDecRefCell(TypedValue* tv) {
   if (tv->m_data.pvar->decRefCount() == 0) {
@@ -97,6 +97,8 @@ inline void tvDecRefVar(TypedValue* tv) {
 }
 
 // Assumes 'tv' is live
+//
+// Assumes 'IS_REFCOUNTED_TYPE(tv->m_type)'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
 inline void tvDecRef(TypedValue* tv) {
   if (tv->m_data.pvar->decRefCount() == 0) {
@@ -157,6 +159,13 @@ inline void tvBox(TypedValue* tv) {
   innerCell->m_type = (tv)->m_type;
   tv->m_data.ptv = innerCell;
   tv->m_type = KindOfVariant;
+}
+
+// Assumes 'tv' is live
+//
+// Assumes 'IS_REFOUNTED_TYPE(tv->m_type)'
+inline void tvIncRef(TypedValue* tv) {
+  TV_INCREF(tv);
 }
 
 // Assumes 'tv' is live

@@ -117,6 +117,8 @@ bool isPowerOfTwo(int value);
  */
 int roundUpToPowerOfTwo(int value);
 
+std::string escapeStringForCpp(const std::string &name, bool* binary = NULL);
+
 /**
  * Duplicate a buffer of given size, null-terminate the result.
  */

@@ -639,13 +639,13 @@ Variant f_socket_select(Variant read, Variant write, Variant except,
   count = 0;
   int nfds = 0;
   if (!read.isNull()) {
-    sock_array_from_fd_set(read, fds, nfds, count, POLLIN);
+    sock_array_from_fd_set(read, fds, nfds, count, POLLIN|POLLERR);
   }
   if (!write.isNull()) {
-    sock_array_from_fd_set(write, fds, nfds, count, POLLOUT);
+    sock_array_from_fd_set(write, fds, nfds, count, POLLOUT|POLLERR);
   }
   if (!except.isNull()) {
-    sock_array_from_fd_set(except, fds, nfds, count, POLLPRI);
+    sock_array_from_fd_set(except, fds, nfds, count, POLLPRI|POLLERR);
   }
 
   free(fds);

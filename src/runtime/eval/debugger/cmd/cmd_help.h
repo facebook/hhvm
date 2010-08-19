@@ -26,6 +26,7 @@ DECLARE_BOOST_TYPES(CmdHelp);
 class CmdHelp : public DebuggerCommand {
 public:
   static void HelpAll(DebuggerClient *client);
+  static void HelpStarted(DebuggerClient *client);
 
 public:
   CmdHelp() : DebuggerCommand(KindOfHelp) {}

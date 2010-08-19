@@ -557,7 +557,7 @@ static int execute_program_impl(int argc, char **argv) {
      "start an HTTP server at specified port")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
      "start admin listerner at specified port")
-    ("debug-host", value<string>(&po.debug_host),
+    ("debug-host,h", value<string>(&po.debug_host),
      "connect to debugger server at specified address")
     ("debug-port", value<int>(&po.debug_port)->default_value(-1),
      "connect to debugger server at specified port")

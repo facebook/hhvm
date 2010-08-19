@@ -402,16 +402,26 @@ static void get_color(int tokid, int prev, int next,
   }
 }
 
+static void color_line_no(StringBuffer &sb, int line, int lineFocus,
+                          const char *color) {
+  if (line == lineFocus && DebuggerClient::HighlightBgColor) {
+    sb.append(Util::add_bgcolor(DebuggerClient::HighlightForeColor,
+                                DebuggerClient::HighlightBgColor));
+  } else {
+    sb.append(color);
+  }
+}
+
 static void append_line_no(StringBuffer &sb, const char *text,
-                           int &line, const char *color, const char *end,
-                           const char **palette =
+                           int &line, int lineFocus, const char *color,
+                           const char *end, const char **palette =
                            DebuggerClient::DefaultCodeColors) {
   const char *colorLineNo = palette[CodeColorLineNo * 2];
   const char *endLineNo = palette[CodeColorLineNo * 2 + 1];
 
   // beginning
   if (line && sb.empty()) {
-    if (colorLineNo) sb.append(colorLineNo);
+    if (colorLineNo) color_line_no(sb, line, lineFocus, colorLineNo);
     sb.printf(DebuggerClient::LineNoFormat, line);
     if (endLineNo) sb.append(endLineNo);
   }
@@ -419,7 +429,7 @@ static void append_line_no(StringBuffer &sb, const char *text,
   // ending
   if (text == NULL) {
     if (line) {
-      if (colorLineNo) sb.append(colorLineNo);
+      if (colorLineNo) color_line_no(sb, line, lineFocus, colorLineNo);
       sb.append("(END)\n");
       if (endLineNo) sb.append(endLineNo);
     }
@@ -435,11 +445,12 @@ static void append_line_no(StringBuffer &sb, const char *text,
     const char *p = begin;
     for (; *p; p++) {
       if (*p == '\n') {
+        ++line;
         sb.append(begin, p - begin);
         if (end) sb.append(end);
         sb.append('\n');
-        if (colorLineNo) sb.append(colorLineNo);
-        sb.printf(DebuggerClient::LineNoFormat, ++line);
+        if (colorLineNo) color_line_no(sb, line, lineFocus, colorLineNo);
+        sb.printf(DebuggerClient::LineNoFormat, line);
         if (endLineNo) sb.append(endLineNo);
         if (color) sb.append(color);
         begin = p + 1;
@@ -453,7 +464,8 @@ static void append_line_no(StringBuffer &sb, const char *text,
   if (end) sb.append(end);
 }
 
-String highlight_php(CStrRef source, int line) {
+String highlight_php(CStrRef source, int line /* = 0 */,
+                     int lineFocus /* = 0 */) {
   Lock lock(Eval::Parser::s_lock);
 
   const char *input = source.data();
@@ -494,13 +506,14 @@ String highlight_php(CStrRef source, int line) {
         res.append('$');
         offset = 1;
       }
-      append_line_no(res, text.c_str() + offset, line, color, end);
+      append_line_no(res, text.c_str() + offset, line, lineFocus, color, end);
     }
 
     if (!ahead_tokens.empty()) {
       for (unsigned int i = 0; i < ahead_tokens.size(); i++) {
         bool comment = ahead_tokens[i].first != 370 /* T_WHITESPACE */;
-        append_line_no(res, ahead_tokens[i].second.getText().c_str(), line,
+        append_line_no(res, ahead_tokens[i].second.getText().c_str(),
+                       line, lineFocus,
                        comment ? colorComment : NULL,
                        comment ? endComment : NULL);
       }
@@ -516,7 +529,7 @@ String highlight_php(CStrRef source, int line) {
     tokid = next;
   }
 
-  append_line_no(res, NULL, line, NULL, NULL);
+  append_line_no(res, NULL, line, lineFocus, NULL, NULL);
   return res.detach();
 }
 

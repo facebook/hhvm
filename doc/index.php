@@ -13,7 +13,7 @@ $topics =
         'Server Statistics' => 'server.stats',
       ),
       'Debugger' => array(
-        'Getting Started' => 'debugger_start',
+        'Getting Started' => 'debugger.start',
         'All Commands' => 'debugger.cmds',
         'Command A-Z' => 'debugger.refs',
       ),
@@ -135,7 +135,7 @@ function format_document($doc) {
   $doc = preg_replace('/((?:\n- [^\n]*(?:\n  [^\n]+)*)+)/',
                       "\n<ul>\\1</ul>\n", $doc);   // lists
   $doc = preg_replace('/\n- /', "\n<li>", $doc);   // list items
-  $doc = preg_replace('/((?:\n  [^\n]*)+)/',
+  $doc = preg_replace('/((?:\n(  |\t)[^\n]*)+)/',
                       "\n<pre>\\1</pre>\n", $doc); // code blocks
   $doc = preg_replace('/(<li>[^\n]*)\n<pre>(.*?)<\/pre>/s',
                       "\\1 \\2", $doc);            // fix list item's 2nd lines
@@ -159,7 +159,7 @@ function format_debugger_doc($doc) {
   $doc = preg_replace('/</', '&lt;', $doc);
   $doc = preg_replace('/ *(?:\xe2\x94\x80|\-){5,}(.*) '.
                       '(?:\xe2\x94\x80|\-){5,}/',
-                      '<h3>$1</h3>', $doc);
+                      '<h2>$1</h2>', $doc);
   $doc = preg_replace("/('\[.*?')/", '<b>$1</b>', $doc);
   $doc = preg_replace("/(\{.*?\})/", '<i>$1</i>', $doc);
   return format_document($doc);

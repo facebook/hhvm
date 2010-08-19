@@ -12,7 +12,8 @@
 // Preamble: C++ code inserted at beginning of ext_{name}.h
 
 DefinePreamble(<<<CPP
-#include <runtime/eval/debugger/debugger_client.h>#include <runtime/eval/debugger/debugger_proxy.h>
+#include <runtime/eval/debugger/debugger_client.h>
+#include <runtime/eval/debugger/debugger_proxy.h>
 CPP
 );
 
@@ -381,10 +382,22 @@ DefineFunction(
         'desc'   => "PHP source code to print.",
       ),
       array(
+        'name'   => "highlight_line",
+        'type'   => Int32,
+        'value'  => "0",
+        'desc'   => "Which line to focus or highlight.",
+      ),
+      array(
         'name'   => "start_line_no",
         'type'   => Int32,
         'value'  => "0",
         'desc'   => "Starting line number. 0 for no line no.",
+      ),
+      array(
+        'name'   => "end_line_no",
+        'type'   => Int32,
+        'value'  => "0",
+        'desc'   => "End line number. 0 for no end line no.",
       ),
     ),
   ));

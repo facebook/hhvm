@@ -139,9 +139,11 @@ void c_debuggerclient::t_error(int _argc, CStrRef format,
   m_client->error(format_string(m_client, _argc, format, _argv));
 }
 
-void c_debuggerclient::t_code(CStrRef source, int start_line_no /* = 0 */) {
+void c_debuggerclient::t_code(CStrRef source, int highlight_line /* = 0 */,
+                              int start_line_no /* = 0 */,
+                              int end_line_no /* = 0 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(debuggerclient, debuggerclient::code);
-  m_client->code(source, start_line_no);
+  m_client->code(source, highlight_line, start_line_no, end_line_no);
 }
 
 Variant c_debuggerclient::t_ask(int _argc, CStrRef format,

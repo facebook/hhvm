@@ -53,7 +53,11 @@ enum CodeColor {
   CodeColorLineNo
 };
 
-String highlight_php(CStrRef source, int line);
+/**
+ * "line", starting line number, or 0 for no line number display.
+ * "lineFocus", the line to highlight, with gray background.
+ */
+String highlight_php(CStrRef source, int line = 0, int lineFocus = 0);
 
 extern const char *PHP_KEYWORDS[];
 

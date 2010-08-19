@@ -30,6 +30,7 @@ namespace HPHP { namespace Util {
 #define ANSI_COLOR_MAGENTA        "\033[22;35m"
 #define ANSI_COLOR_CYAN           "\033[22;36m"
 #define ANSI_COLOR_GRAY           "\033[22;37m"
+
 #define ANSI_COLOR_DARK_GRAY      "\033[01;30m"
 #define ANSI_COLOR_LIGHT_RED      "\033[01;31m"
 #define ANSI_COLOR_LIGHT_GREEN    "\033[01;32m"
@@ -39,13 +40,25 @@ namespace HPHP { namespace Util {
 #define ANSI_COLOR_LIGHT_CYAN     "\033[01;36m"
 #define ANSI_COLOR_WHITE          "\033[01;37m"
 
+#define ANSI_BGCOLOR_BLACK        ";40m"
+#define ANSI_BGCOLOR_RED          ";41m"
+#define ANSI_BGCOLOR_GREEN        ";42m"
+#define ANSI_BGCOLOR_BROWN        ";43m"
+#define ANSI_BGCOLOR_BLUE         ";44m"
+#define ANSI_BGCOLOR_MAGENTA      ";45m"
+#define ANSI_BGCOLOR_CYAN         ";46m"
+#define ANSI_BGCOLOR_GRAY         ";47m"
+
 #define ANSI_COLOR_END            "\033[0m"
 
 extern const char *s_stdout_color;
 extern const char *s_stderr_color;
 
-const char *get_color_by_name(const char *name);
 void get_supported_colors(std::vector<std::string> &names);
+
+const char *get_color_by_name(const char *name);
+const char *get_bgcolor_by_name(const char *name);
+std::string add_bgcolor(const char *color, const char *bgcolor);
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

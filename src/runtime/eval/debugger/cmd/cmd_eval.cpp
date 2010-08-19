@@ -37,7 +37,7 @@ bool CmdEval::onClient(DebuggerClient *client) {
 }
 
 bool CmdEval::onServer(DebuggerProxy *proxy) {
-  DebuggerProxy::ExecutePHP(m_body, m_output);
+  DebuggerProxy::ExecutePHP(m_body, m_output, !proxy->isLocal());
   return proxy->send(this);
 }
 

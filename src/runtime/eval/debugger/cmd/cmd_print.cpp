@@ -277,7 +277,7 @@ bool CmdPrint::onClient(DebuggerClient *client) {
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
   m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                    m_output);
+                                    m_output, !proxy->isLocal());
   return proxy->send(this);
 }
 

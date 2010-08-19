@@ -1,5 +1,5 @@
 
-    ─────────────────────────── Abort Command ───────────────────────────
+    --------------------------- Abort Command ---------------------------
 
     [a]bort              aborts current PHP code input
 
@@ -9,41 +9,41 @@ ad-hoc PHP code to evaluate. In other words, it only works when you see
 continuation prompt like ">>>>".
 
 
-    ─────────────────────────── Break Command ───────────────────────────
+    --------------------------- Break Command ---------------------------
 
     [b]reak              breaks at current line of code
     [b]reak {exp}        breaks at matching location
     [b]reak [s]tart      breaks at start of web request
-      {url}              
+      {url}
     [b]reak [e]nd        breaks at end of web request
-      {url}              
+      {url}
     [b]reak [p]sp        breaks at end of psp
-      {url}              
+      {url}
 
     [b]reak [r]egex      breaks at matching regex pattern
-      {above}            
+      {above}
     [b]reak [o]nce       breaks just once then disables it
-      {above}            
+      {above}
 
     [b]reak {above}      breaks if condition meets
-      if {php}           
+      if {php}
     [b]reak {above}      breaks and evaluates an expression
-      && {php}           
+      && {php}
 
     [b]reak [l]ist       lists all breakpoints
     [b]reak [c]lear      clears the n-th breakpoint on list
-      {index}            
+      {index}
     [b]reak [c]lear      clears all breakpoints
-      [a]ll              
+      [a]ll
     [b]reak [c]lear      clears current breakpoint
     [b]reak [t]oggle     toggles the n-th breakpoint on list
-      {index}            
+      {index}
     [b]reak [t]oggle     toggles all breakpoints
-      [a]ll              
+      [a]ll
     [b]reak [t]oggle     toggles current breakpoint
 
 
-    ────────────────────────── Where to break? ──────────────────────────
+    -------------------------- Where to break? --------------------------
 
 There are many ways to specify a source file location to set a
 breakpoint, but it's ONE single string without whitespaces. The complete
@@ -97,7 +97,7 @@ This may match FeedStory::onLoad(), FeedFilter::onclick(), etc.. Note
 that it uses PCRE format, not shell format. So you will have to use ".*"
 instead of just "*" for wildcard match.
 
-    ──────────────────────── Special Breakpoints ────────────────────────
+    ------------------------ Special Breakpoints ------------------------
 
 There are special breakpoints that can only be set by names:
 
@@ -112,7 +112,7 @@ web request, but BEFORE post-send processing (psp). "psp" is at END of
 psp, not beginning. To set a breakpoint at beginning of psp, use "end",
 because end of a request is the same as beginning of psp.
 
-    ────────────── Conditional Breakpoints and Watchpoints ──────────────
+    -------------- Conditional Breakpoints and Watchpoints --------------
 
 Every breakpoint can specify a condition, which is an arbitrary PHP
 expression that will be evaulated to TRUE or FALSE. When TRUE, it will
@@ -124,7 +124,7 @@ returns. This is useful to watch variables at breakpoints. For example,
 
 So every time it breaks at mypage.php line 123, it will print out $a.
 
-    ───────────────────── Breakpoint States and List ─────────────────────
+    --------------------- Breakpoint States and List ---------------------
 
 Every breakpoint has 3 states: ALWAYS, ONCE, DISABLED. Without keyword
 "once", a breakpoint is in ALWAYS state. ONCE breakpoints will turn into
@@ -138,17 +138,17 @@ breakpoints and their states will remain the same when switching to
 different machines, sandboxes and threads.
 
 
-    ────────────────────────── Continue Command ──────────────────────────
+    -------------------------- Continue Command --------------------------
 
     [c]ontinue           continues program execution
-      {count=1}          
+      {count=1}
 
 
 Use this command at break to resume program execution. Specify a count
 to repeat the same command many times.
 
 
-    ──────────────────────────── Down Command ────────────────────────────
+    ---------------------------- Down Command ----------------------------
 
     [d]own {num=1}       moves to inner frames (callees) on stacktrace
 
@@ -158,23 +158,23 @@ current frame. By default it moves down by one level. Specify a number
 to move down several levels a time.
 
 
-    ───────────────────────── Exception Command ─────────────────────────
+    ------------------------- Exception Command -------------------------
 
     [e]xception {cls}    breaks if class of exception throws
     [e]xception          breaks if class of exception throws
-      {ns}::{cls}        
+      {ns}::{cls}
     [e]xception          breaks only if url also matches
-      {above}@{url}      
+      {above}@{url}
 
     [e]xception          breaks at matching regex pattern
-      [r]egex {above}    
+      [r]egex {above}
     [e]xception          breaks just once then disables it
-      [o]nce  {above}    
+      [o]nce  {above}
 
     [e]xception          breaks if condition meets
-      {above} if {php}   
+      {above} if {php}
     [e]xception          breaks and evaluates an expression
-      {above} && {php}   
+      {above} && {php}
 
 
 Exception command is similar to '[b]reak' command, except it's used to
@@ -192,7 +192,7 @@ An exception breakpoint can be listed, cleared or toggled with '[b]reak'
 commands.
 
 
-    ─────────────────────────── Frame Command ───────────────────────────
+    --------------------------- Frame Command ---------------------------
 
     [f]rame {index}      jumps to one particular frame
 
@@ -202,7 +202,7 @@ back to the most recent frame or the innermost frame. Use 'f 999' or
 some big number to jump to the outermost frame.
 
 
-    ─────────────────────────── Global Command ───────────────────────────
+    --------------------------- Global Command ---------------------------
 
     [g]lobal             lists all global variables
     [g]lobal {text}      full-text search global variables
@@ -214,11 +214,15 @@ text in their names or values. The search is case-insensitive and
 string-based.
 
 
-    ──────────────────────────── Help Command ────────────────────────────
+    ---------------------------- Help Command ----------------------------
 
+    [h]elp [s]tart       displays material for getting started
     [h]elp [t]utorial    changing tutorial modes
-      on|off|auto        
+      on|off|auto
 
+
+Please read "Getting Started" material with '[h]elp [s]tart' for first
+time use to get yourself familiar with basics.
 
 Tutorial mode displays extra information when something didn't work as
 you expected. "auto" mode will display the same information just once.
@@ -229,28 +233,28 @@ To get detailed information of a command, type '{cmd} [h]elp' or '{cmd}
 ?' or 'help {cmd}' or '? {cmd}'.
 
 
-    ──────────────────────────── Info Command ────────────────────────────
+    ---------------------------- Info Command ----------------------------
 
     info                 displays current function's info
     info {cls}           displays declaration of this class
     info {function}      displays declaration of this function
     info                 displays declaration of this method
-      {cls::method}      
+      {cls::method}
     info                 displays declaration of this constant
-      {cls::constant}    
+      {cls::constant}
     info                 displays declaration of this property
-      {cls::$property}   
+      {cls::$property}
 
 
 Use this command to display declaration of a symbol.
 
 
-    ──────────────────────────── Jump Command ────────────────────────────
+    ---------------------------- Jump Command ----------------------------
 
     [j]ump               jumps over one expression
     [j]ump {line}        goto the specified line
     [j]ump               goto the specified line
-      {file}:{line}      
+      {file}:{line}
     [j]ump {label}       goto the specified label
 
 
@@ -261,7 +265,7 @@ evaluating it. This may be useful to not throw an exception when breaks
 at a throw, for example.
 
 
-    ────────────────────────── Constant Command ──────────────────────────
+    -------------------------- Constant Command --------------------------
 
     [k]onstant           lists all constants
     [k]onstant {text}    full-text search constants
@@ -273,19 +277,19 @@ that contain the text in their names or values. The search is
 case-insensitive and string-based.
 
 
-    ──────────────────────────── List Command ────────────────────────────
+    ---------------------------- List Command ----------------------------
 
     list                 displays current block of source code
     list {line}          displays code around specified line
     list                 displays specified block of source code
-      {line1}-{line2}    
+      {line1}-{line2}
     list {line1}-        displays code starting with the line
     list -{line2}        displays code ending with the line
     list {file}          displays beginning lines of the file
     list                 displays code around specified file:line
-      {file}:{line}      
+      {file}:{line}
     list                 displays specified block in the file
-      {file}:{l1}-{l2}   
+      {file}:{l1}-{l2}
     list {file}:{l1}-    displays specified block in the file
     list {file}:-{l2}    displays specified block in the file
 
@@ -297,22 +301,22 @@ the file, it will fall back to local files.
 Hit return to display more lines of code after current display.
 
 
-    ────────────────────────── Machine Command ──────────────────────────
+    -------------------------- Machine Command --------------------------
 
     [m]achine            debugging remote server natively
-      [c]onnect {host}   
+      [c]onnect {host}
     [m]achine            debugging remote server natively
-      [c]onnect          
-      {host}:{port}      
+      [c]onnect
+      {host}:{port}
     [m]achine [r]pc      debugging remote server with RPC
-      {host}             
+      {host}
     [m]achine [r]pc      debugging remote server with RPC
-      {host}:{port}      
+      {host}:{port}
     [m]achine            debugging local script
-      [d]isconnect       
+      [d]isconnect
     [m]achine [l]ist     list all sandboxes
     [m]achine            attach to a sandbox
-      [a]ttach {index}   
+      [a]ttach {index}
 
 
 Use this command to switch between different machines or sandboxes.
@@ -346,7 +350,7 @@ may move some of them to remote server, if they rely on machine specific
 information.
 
 
-    ──────────────────────────── Next Command ────────────────────────────
+    ---------------------------- Next Command ----------------------------
 
     [n]ext {count=1}     steps over lines of code
 
@@ -355,7 +359,7 @@ Use this command at break to step over lines of code. Specify a count to
 step over more than one line of code.
 
 
-    ──────────────────────────── Out Command ────────────────────────────
+    ---------------------------- Out Command ----------------------------
 
     [o]ut {count=1}      steps out function calls
 
@@ -364,28 +368,28 @@ Use this command at break to step out function calls. Specify a count to
 step out more than one level of function calls.
 
 
-    ─────────────────────────── Print Command ───────────────────────────
+    --------------------------- Print Command ---------------------------
 
     [p]rint {php}        prints result of PHP code
     [p]rint x {php}      prints hex encoded string or number
     [p]rint [h]ex        prints hex encoded string or number
-      {php}              
+      {php}
     [p]rint [o]ct        prints octal encoded string or number
-      {php}              
+      {php}
     [p]rint [d]ec        prints as signed integer
-      {php}              
+      {php}
     [p]rint              prints as unsigned integer
-      [u]nsigned {php}   
+      [u]nsigned {php}
     [p]rint [t]ime       converts between time and timestamp
-      {php}              
+      {php}
 
     [p]rint [a]lways     adds a watch expression at break
-      {above}            
+      {above}
     [p]rint [l]ist       lists watch expressions
     [p]rint [c]lear      clears a watch expression
-      {index}            
+      {index}
     [p]rint [c]lear      clears all watch expressions
-      [a]ll              
+      [a]ll
 
 
 Prints result of an expression in certain format. If '[a]lways' is
@@ -394,7 +398,7 @@ either at a breakpoint or caused by step commands, these expressions
 will be evaluated and printed out.
 
 
-    ──────────────────────────── Quit Command ────────────────────────────
+    ---------------------------- Quit Command ----------------------------
 
     [q]uit               quits this program
 
@@ -403,20 +407,154 @@ After you type this command, you will not see me anymore.
 
 Program help exited normally.
 
-    ──────────────────────────── Step Command ────────────────────────────
-
-    [s]tep {count=1}     steps into lines of code
+    ------------------- Getting Started with Debugger -------------------
 
 
-Use this command at break to step into lines of code. Specify a count to
-step more than once.
+1. Quick Overview
+
+(1) from A to Z
+
+All built-in debugger commands are un-ambiguous with their first
+letters. Therefore, a single letter is sufficient to issue the command.
+
+(2) tab, tab, tab
+
+Use TAB to auto-complete.
+
+(3) help
+
+Use "help" to read more about command details.
+
+(4) info and list
+
+Use "info" and "list" commands to read more about source code.
 
 
-    ──────────────────────────── Help Command ────────────────────────────
+2. Debugging local script
 
+The command to run a script normally looks like this,
+
+  ./hphpi -f myscript.php
+
+Simply add "-m debug" to run the script in debugger,
+
+  ./hphpi -m debug -f myscript.php
+
+Once started, set breakpoints like this,
+
+  hphpd> break myscript.php:10
+  hphpd> break foo()
+
+Then let it run, until it hits the breakpoints,
+
+  hphpd> run
+
+At breakpoints, examine variables or evaluate expressions,
+
+  hphpd> variable
+  hphpd> print $a
+  hphpd> =$a
+  hphpd> <?php print $a; ?>
+  hphpd> <?php
+   ..... print $a;
+   ..... ?>
+
+Optionally, modify variables like this,
+
+  hphpd> $a = 10
+  hphpd> <?php $a = 10; ?>
+  hphpd> <?php
+   ..... $a = 10;
+   ..... ?>
+
+Then let it continue, until it hits more breakpoints,
+
+  hphpd> continue
+
+Finally, quit debugger,
+
+  hphpd> quit
+
+
+3. Debugging sandbox
+
+Connect to an HPHPi server from command line,
+
+  ./hphpi -m debug --debug-host mymachine.com
+
+Or, connect from within debugger,
+
+  hphpd> machine connect mymachine.com
+
+This will try to attach to a default sandbox on that machine.
+"Attaching" means it will only debug web requests hitting that sandbox.
+To switch to a different sandbox,
+
+  mymachine> machine list
+  mymachine> machine attach 2
+
+In remote debugging mode, a breakpoint can be specific about an URL,
+
+  mymachine> break myscript.php:10@index.php
+  mymachine> break foo()@index.php
+
+You may connect to more than one machine and breakpoints will be shared
+by all of them.
+
+
+4. Understanding dummy sandbox
+
+When a web request hits a breakpoint, debugger will run in a "Web
+Request" thread. Use "thread" command to display this information,
+
+  mymachine> thread
+
+What will debugger use when there is no web request thread that's
+active, but we need to set a breakpoint? We created so-called "dummy
+sandbox", purely for taking debugger commands when there is no active
+web request. When there is no active request, hit Ctrl-C to break
+debugger, and use "thread" to display dummy sandbox thread's
+information.
+
+  Ctrl-C
+  mymachine> thread
+
+In dummy sandbox, a PHP file can be pre-loaded, so that we can "info"
+functions and classes and execute certain code. This file is specified
+on server side by
+
+  Eval.Debugger.StartupDocument = scripts/startup.php
+
+Dummy sandbox will always use currently attached sandbox's PHP files.
+When files are modified, simply reload them by
+
+  mymachine> continue
+  Ctrl-C
+
+
+5. Colors and Configuration
+
+By default, it will use emacs colors for dark background. To change
+them, run debugger at least once, then look for ~/.hphpd.hdf file.
+Replace "Code" node with,
+
+  Color {
+    Code : Color.Palette.vim
+  }
+
+Or, specify your own colors in different places of the configuration
+file.
+
+
+    ---------------------------- Help Command ----------------------------
+
+    [h]elp [s]tart       displays material for getting started
     [h]elp [t]utorial    changing tutorial modes
-      on|off|auto        
+      on|off|auto
 
+
+Please read "Getting Started" material with '[h]elp [s]tart' for first
+time use to get yourself familiar with basics.
 
 Tutorial mode displays extra information when something didn't work as
 you expected. "auto" mode will display the same information just once.
@@ -427,7 +565,7 @@ To get detailed information of a command, type '{cmd} [h]elp' or '{cmd}
 ?' or 'help {cmd}' or '? {cmd}'.
 
 
-    ───────────────────────────── Up Command ─────────────────────────────
+    ----------------------------- Up Command -----------------------------
 
     [u]p {num=1}         moves to outer frames (callers) on stacktrace
 
@@ -437,7 +575,7 @@ current frame. By default it moves up by one level. Specify a number to
 move up several levels a time.
 
 
-    ────────────────────────── Variable Command ──────────────────────────
+    -------------------------- Variable Command --------------------------
 
     [v]ariable           lists all local variables on stack
     [v]ariable {text}    full-text search local variables
@@ -453,7 +591,7 @@ either in their names or values. The search is case-insensitive and
 string-based.
 
 
-    ─────────────────────────── Where Command ───────────────────────────
+    --------------------------- Where Command ---------------------------
 
     [w]here              displays current stacktrace
     [w]here {num}        displays number of innermost frames
@@ -465,7 +603,7 @@ Use '[f]rame {index}' to jump to one particular frame. At any frame, use
 '[v]ariable' command to display all local variables.
 
 
-    ────────────────────────── Extended Command ──────────────────────────
+    -------------------------- Extended Command --------------------------
 
 x {cmd} {arg1} {arg2} ...    invoke specified command
 x{cmd} {arg1} {arg2} ...     invoke specified command
@@ -477,7 +615,7 @@ where {cmd} can be:
 
 Type 'x [h]elp|? {cmd} to read their usages.
 
-    ─────────────────────── User Extended Command ───────────────────────
+    ----------------------- User Extended Command -----------------------
 
 y {cmd} {arg1} {arg2} ...    invoke specified command
 y{cmd} {arg1} {arg2} ...     invoke specified command
@@ -496,17 +634,17 @@ DebuggerCommand and calling hphpd_install_user_command(). For example
       return true;
     }
   }
-  
+
   hphpd_install_user_command('hello', 'MyCommand');
 
 Type '[i]nfo DebuggerCommand' for complete DebuggerCommand interface.
 Type '[i]nfo DebuggerClient' for complete DebuggerClient interface that
 you can use when implementing those $client callbacks. Type '[i]nfo
 DebuggerProxy' for complete DebuggerProxy interface that you can use
-when implementing those $proxy callbacks. 
+when implementing those $proxy callbacks.
 
 
-    ──────────────────────────── Zend Command ────────────────────────────
+    ---------------------------- Zend Command ----------------------------
 
     [z]end               running the most recent code snippet in Zend PHP
 
@@ -518,7 +656,7 @@ note that only the most recent block of code you manually typed in was
 evaluated, not any earlier ones, nor the ones from a PHP file.
 
 
-    ─────────────────────────── Macro Command ───────────────────────────
+    --------------------------- Macro Command ---------------------------
 
     & [s]tart            starts recording of default macro
     & [s]tart {name}     starts recording of a named macro
@@ -540,7 +678,7 @@ files or perform certain debugging environment setup.
 The space between & and command is not needed. '&s' works as well.
 
 
-    ─────────────────────────── Shell Command ───────────────────────────
+    --------------------------- Shell Command ---------------------------
 
 ! {cmd} {arg1} {arg2} ...    remotely executes shell command
 

@@ -608,7 +608,7 @@ bool BreakPointInfo::checkClause() {
       }
     }
     String output;
-    Variant ret = DebuggerProxy::ExecutePHP(m_php, output);
+    Variant ret = DebuggerProxy::ExecutePHP(m_php, output, false);
     if (m_check) {
       return ret.toBoolean();
     }

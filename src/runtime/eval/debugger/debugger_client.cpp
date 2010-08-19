@@ -36,6 +36,8 @@
 using namespace std;
 using namespace HPHP::Util::TextArt;
 
+#define PHP_WORD_BREAK_CHARACTERS " \t\n\"\\'`@>=:;,.|{[()]}+-*/%^!~&"
+
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -82,7 +84,7 @@ public:
     DebuggerClient::AdjustScreenMetrics();
 
     rl_attempted_completion_function = debugger_completion;
-    rl_basic_word_break_characters = " ";
+    rl_basic_word_break_characters = PHP_WORD_BREAK_CHARACTERS;
 
     rl_catch_signals = 0;
     signal(SIGINT, debugger_signal_handler);
@@ -115,7 +117,6 @@ public:
   void animate() {
     m_line = rl_line_buffer;
     while (m_waiting) {
-      frame('|'); frame('/'); frame('-'); frame('\\');
       frame('|'); frame('/'); frame('-'); frame('\\');
       rl_replace_line(m_line.c_str(), 1);
       rl_redisplay();
@@ -153,6 +154,8 @@ const char *DebuggerClient::InfoColor     = NULL;
 const char *DebuggerClient::OutputColor   = NULL;
 const char *DebuggerClient::ErrorColor    = NULL;
 const char *DebuggerClient::ItemNameColor = NULL;
+const char *DebuggerClient::HighlightForeColor = NULL;
+const char *DebuggerClient::HighlightBgColor = NULL;
 
 const char *DebuggerClient::DefaultCodeColors[] = {
   /* None        */ NULL, NULL,
@@ -174,6 +177,9 @@ void DebuggerClient::LoadColors(Hdf hdf) {
   ErrorColor    = LoadColor(hdf["Error"],    "RED");
   ItemNameColor = LoadColor(hdf["ItemName"], "GRAY");
 
+  HighlightForeColor = LoadColor(hdf["HighlightForeground"], "RED");
+  HighlightBgColor = LoadBgColor(hdf["HighlightBackground"], "GRAY");
+
   Hdf code = hdf["Code"];
   LoadCodeColor(CodeColorKeyword,      code["Keyword"],      "CYAN");
   LoadCodeColor(CodeColorComment,      code["Comment"],      "RED");
@@ -193,6 +199,17 @@ const char *DebuggerClient::LoadColor(Hdf hdf, const char *defaultName) {
   if (color == NULL) {
     Logger::Error("Bad color name %s", name);
     color = Util::get_color_by_name(defaultName);
+  }
+  return color;
+}
+
+const char *DebuggerClient::LoadBgColor(Hdf hdf, const char *defaultName) {
+  const char *name = hdf.get(defaultName);
+  hdf = name;  // for starter
+  const char *color = Util::get_bgcolor_by_name(name);
+  if (color == NULL) {
+    Logger::Error("Bad color name %s", name);
+    color = Util::get_bgcolor_by_name(defaultName);
   }
   return color;
 }
@@ -337,13 +354,13 @@ bool DebuggerClient::connect(const std::string &host, int port) {
 }
 
 bool DebuggerClient::connectRPC(const std::string &host, int port) {
-  m_rpcHost = "rpc:" + host;
   ASSERT(!m_machines.empty());
   DMachineInfoPtr local = m_machines[0];
   ASSERT(local->m_name == LocalPrompt);
   local->m_rpcHost = host;
   local->m_rpcPort = port;
   switchMachine(local);
+  m_rpcHost = "rpc:" + host;
   return !local->m_interrupting;
 }
 
@@ -435,6 +452,11 @@ void DebuggerClient::start(const std::string &host, int port,
                            const std::string &extension,
                            const StringVec &cmds) {
   loadConfig();
+  if (!cmds.empty()) {
+    UseColor = false;
+    s_use_utf8 = false;
+    NoPrompt = true;
+  }
 
   if (!NoPrompt) {
     info("Welcome to HipHop Debugger!");
@@ -464,9 +486,6 @@ void DebuggerClient::run() {
     m_macroPlaying->m_cmds = m_quickCmds;
     m_macroPlaying->m_cmds.push_back("q");
     m_macroPlaying->m_index = 0;
-
-    UseColor = false;
-    NoPrompt = true;
   }
 
   hphp_session_init();
@@ -492,13 +511,32 @@ void DebuggerClient::updateLiveLists() {
 }
 
 void DebuggerClient::phpCompletion(const char *text) {
-  if (*text && text[strlen(text) - 1] == '(') {
-    string token = text;
-    token.resize(token.size() - 1);
-    rl_save_prompt();
-    rl_message("\n%s%s\n", "prototype of ", token.c_str());
-    rl_restore_prompt();
-    return;
+  const char *p0 = rl_line_buffer;
+  int len = strlen(p0);
+  if (len) {
+    const char *pLast = p0 + len - 1;
+    while (isspace(*pLast)) --pLast;
+    if (*pLast-- == '(') {
+      while (isspace(*pLast)) --pLast;
+      const char *p = pLast;
+      while (p >= p0 && (isalnum(*p) || *p == '_')) --p;
+      if (pLast > p) {
+        string cls;
+        string func(p + 1, pLast - p);
+        if (p > text && *p-- == ':' && *p-- == ':') {
+          pLast = p;
+          while (p >= text && (isalnum(*p) || *p == '_')) --p;
+          if (pLast > p) {
+            cls = string(p + 1, pLast - p);
+          }
+        }
+
+        rl_save_prompt();
+        String output = CmdInfo::GetProtoType(this, cls, func);
+        rl_message("\n%s\n", output.data());
+        rl_restore_prompt();
+      }
+    }
   }
 
   // generic bare word that can be any of these
@@ -582,6 +620,11 @@ char *DebuggerClient::getCompletion(const std::vector<const char *> &items,
   return NULL;
 }
 
+static char first_non_whitespace(const char *s) {
+  while (isspace(*s)) s++;
+  return *s;
+}
+
 char *DebuggerClient::getCompletion(const char *text, int state) {
   if (state == 0) {
     m_acLen = strlen(text);
@@ -591,7 +634,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
     m_acStrings.clear();
     m_acItems.clear();
     if (m_inputState == TakingCommand) {
-      if (m_command.empty()) {
+      if (!first_non_whitespace(rl_line_buffer)) {
         addCompletion(GetCommands());
         addCompletion("=");
         addCompletion("$");
@@ -602,6 +645,18 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
         if (cmd) {
           DebuggerCommandPtr deleter(cmd);
           cmd->list(this);
+        } else {
+          switch (first_non_whitespace(rl_line_buffer)) {
+            case '<':
+              if (strncasecmp(m_command.substr(0, 5).c_str(), "<?php", 5)) {
+                break;
+              }
+            case '=':
+            case '$': {
+              phpCompletion(text);
+              break;
+            }
+          }
         }
       }
     } else {
@@ -804,18 +859,18 @@ bool DebuggerClient::console() {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-void DebuggerClient::code(CStrRef source, int line1 /* = 0 */,
+void DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
                           int line2 /* = 0 */) {
   if (line1 == 0 && line2 == 0) {
     String prepended = "<?php\n";
     prepended += source;
-    String highlighted = highlight_php(prepended, 0);
+    String highlighted = highlight_php(prepended, 0, lineFocus);
     int pos = highlighted.find("\n");
     print("%s", highlighted.data() + pos + 1);
     return;
   }
 
-  String highlighted = highlight_php(source, 1);
+  String highlighted = highlight_php(source, 1, lineFocus);
   int line = 1;
   const char *begin = highlighted.data();
   StringBuffer sb;
@@ -956,12 +1011,15 @@ void DebuggerClient::helpCmds(const std::vector<const char *> &cmds) {
     Array lines1 = StringUtil::Explode(cmd, "\n").toArray();
     Array lines2 = StringUtil::Explode(desc, "\n").toArray();
     for (int n = 0; n < lines1.size() || n < lines2.size(); n++) {
-      sb.append("    ");
-      if (n) sb.append("  ");
-      sb.append(StringUtil::Pad(lines1[n], leftMax));
-      if (n == 0) sb.append("  ");
-      sb.append("  ");
-      sb.append(lines2[n].toString());
+      StringBuffer line;
+      line.append("    ");
+      if (n) line.append("  ");
+      line.append(StringUtil::Pad(lines1[n], leftMax));
+      if (n == 0) line.append("  ");
+      line.append("  ");
+      line.append(lines2[n].toString());
+
+      sb.append(StringUtil::Trim(line.detach(), StringUtil::TrimRight));
       sb.append("\n");
     }
   }
@@ -1321,6 +1379,7 @@ bool DebuggerClient::processEval() {
   m_runState = Running;
   CmdEval().onClient(this);
   m_inputState = TakingCommand;
+  m_acLiveListsDirty = true;
   return true;
 }
 
@@ -1372,10 +1431,12 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
   return DThreadInfoPtr();
 }
 
-void DebuggerClient::getListLocation(std::string &file, int &line) {
+void DebuggerClient::getListLocation(std::string &file, int &line,
+                                     int &lineFocus) {
   if (m_listFile.empty() && m_breakpoint) {
     m_listFile = m_breakpoint->m_file;
     m_listLine = m_breakpoint->m_line1;
+    lineFocus = m_breakpoint->m_line1;
     if (m_listLine) {
       m_listLine -= CodeBlockSize / 2;
       if (m_listLine < 0) {
@@ -1426,8 +1487,14 @@ void DebuggerClient::moveToFrame(int index) {
   if (m_frame < 0) {
     m_frame = 0;
   }
-  if (m_stacktrace.exists(m_frame)) {
-    printFrame(m_frame, m_stacktrace[m_frame]);
+  CArrRef frame = m_stacktrace[m_frame];
+  if (!frame.isNull()) {
+    String file = frame["file"];
+    int line = frame["line"].toInt32();
+    if (!file.empty() && line) {
+      setListLocation(file.data(), line);
+    }
+    printFrame(m_frame, frame);
   }
 }
 

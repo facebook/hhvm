@@ -55,14 +55,14 @@ bool CmdUser::help(DebuggerClient *client) {
     "      return true;\n"
     "    }\n"
     "  }\n"
-    "  \n"
+    "\n"
     "  hphpd_install_user_command('hello', 'MyCommand');\n"
     "\n"
     "Type '[i]nfo DebuggerCommand' for complete DebuggerCommand interface. "
     "Type '[i]nfo DebuggerClient' for complete DebuggerClient interface that "
     "you can use when implementing those $client callbacks. "
     "Type '[i]nfo DebuggerProxy' for complete DebuggerProxy interface that "
-    "you can use when implementing those $proxy callbacks. "
+    "you can use when implementing those $proxy callbacks."
   );
   return true;
 }

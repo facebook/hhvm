@@ -152,6 +152,31 @@ void CmdInfo::UpdateLiveLists(DebuggerClient *client) {
   client->setLiveLists(res->m_acLiveLists);
 }
 
+String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
+                             const std::string &func) {
+  CmdInfo cmd;
+  cmd.m_type = KindOfFunction;
+  if (cls.empty()) {
+    cmd.m_symbol = String(func);
+  } else {
+    cmd.m_symbol = String(func) + "::" + String(cls);
+  }
+  CmdInfoPtr res = client->xend<CmdInfo>(&cmd);
+  Array info = res->m_info;
+  if (!info.empty()) {
+    info = info[0];
+    if (info.exists("params")) {
+      StringBuffer sb;
+      sb.printf("<?php function %s%s(%s);\n",
+                info["ref"].toBoolean() ? "&" : "",
+                info["name"].toString().data(),
+                GetParams(info["params"], info["varg"]).data());
+      return sb.detach();
+    }
+  }
+  return String();
+}
+
 bool CmdInfo::onServer(DebuggerProxy *proxy) {
   if (m_type == KindOfLiveLists) {
     m_acLiveLists = DebuggerClient::CreateNewLiveLists();
@@ -228,8 +253,8 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
   }
 }
 
-void CmdInfo::PrintHeader(StringBuffer &sb, CArrRef info,
-                          const char *type) {
+void CmdInfo::PrintHeader(DebuggerClient *client, StringBuffer &sb,
+                          CArrRef info, const char *type) {
   if (!info["internal"].toBoolean()) {
     String file = info["file"].toString();
     int line = info["line1"].toInt32();
@@ -239,6 +264,7 @@ void CmdInfo::PrintHeader(StringBuffer &sb, CArrRef info,
       sb.printf("// defined in %s\n", file.data());
     } else {
       sb.printf("// defined on line %d of %s\n", line, file.data());
+      client->setListLocation(file.data(), line - 1);
     }
   }
 
@@ -361,7 +387,7 @@ bool CmdInfo::TryMethod(StringBuffer &sb, CArrRef info,
 void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol) {
   if (info.exists("params")) {
-    PrintHeader(sb, info, "function");
+    PrintHeader(client, sb, info, "function");
     sb.printf("function %s%s(%s);\n",
               info["ref"].toBoolean() ? "&" : "",
               info["name"].toString().data(),
@@ -378,7 +404,7 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
     client->info("Specified symbol cannot be found. Here the whole class:\n");
   }
 
-  PrintHeader(sb, info, "class");
+  PrintHeader(client, sb, info, "class");
 
   StringBuffer parents;
   String parent = info["parent"].toString();

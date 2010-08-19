@@ -43,11 +43,14 @@ public:
   static const char *OutputColor;
   static const char *ErrorColor;
   static const char *ItemNameColor;
+  static const char *HighlightForeColor;
+  static const char *HighlightBgColor;
   static const char *DefaultCodeColors[];
 
 public:
   static void LoadColors(Hdf hdf);
   static const char *LoadColor(Hdf hdf, const char *defaultName);
+  static const char *LoadBgColor(Hdf hdf, const char *defaultName);
   static void LoadCodeColor(CodeColor index, Hdf hdf, const char *defaultName);
 
   /**
@@ -138,7 +141,7 @@ public:
   void output (CStrRef s);
   void error  (CStrRef s);
 
-  void code(CStrRef source, int line1 = 0, int line2 = 0);
+  void code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0);
   char ask(const char *fmt, ...);
 
   std::string wrap(const std::string &s);
@@ -210,7 +213,7 @@ public:
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
   void setCurrentLocation(int64 threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
-  void getListLocation(std::string &file, int &line);
+  void getListLocation(std::string &file, int &line, int &lineFocus);
   void setListLocation(const std::string &file, int line);
 
   /**

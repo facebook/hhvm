@@ -1,11 +1,11 @@
 
-    ────────────────────────── Session Commands ──────────────────────────
+    -------------------------- Session Commands --------------------------
 
     [m]achine            connects to an HPHPi server
     [t]hread             switches between different threads
     [q]uit               quits debugger
 
-    ──────────────────────── Program Flow Control ────────────────────────
+    ------------------------ Program Flow Control ------------------------
 
     [b]reak              sets/clears/displays breakpoints
     [e]xception          catches/clears exceptions
@@ -17,7 +17,7 @@
     [o]ut      *         steps out a function call
     [j]ump               jumps to specified line of code for execution
 
-    ────────────────────────── Display Commands ──────────────────────────
+    -------------------------- Display Commands --------------------------
 
     [p]rint              prints a variable's value
     [w]here              displays stacktrace
@@ -28,7 +28,7 @@
     [g]lobal             lists all global variables
     [k]onstant           lists all constants
 
-    ──────────────────────── Evaluation Commands ────────────────────────
+    ------------------------ Evaluation Commands ------------------------
 
     =                    prints right-hand-side's value
     ${name}=             assigns a value to left-hand-side
@@ -37,14 +37,14 @@
     [a]bort              aborts input of a block of PHP code
     [z]end               evaluates the last snippet in Zend PHP
 
-    ─────────────────── Documentation and Source Code ───────────────────
+    ------------------- Documentation and Source Code -------------------
 
     [i]nfo               displays documentations and other information
     [l]ist     *         displays source codes
     [h]elp               displays this help
     ?                    displays this help
 
-    ──────────────────── Shell and Extended Commands ────────────────────
+    -------------------- Shell and Extended Commands --------------------
 
     ! {cmd}              executes a shell command
     & {cmd}              records and replays macros

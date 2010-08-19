@@ -26,6 +26,8 @@ DECLARE_BOOST_TYPES(CmdInfo);
 class CmdInfo : public DebuggerCommand {
 public:
   static void UpdateLiveLists(DebuggerClient *client);
+  static String GetProtoType(DebuggerClient *client, const std::string &cls,
+                             const std::string &func);
 
 public:
   CmdInfo() : DebuggerCommand(KindOfInfo) {}
@@ -53,21 +55,22 @@ private:
   Array  m_info;
   DebuggerClient::LiveListsPtr m_acLiveLists;
 
-  String GetParams(CArrRef params, bool varg, bool detailed = false);
-  String GetModifier(CArrRef info, const char *name);
+  static String GetParams(CArrRef params, bool varg, bool detailed = false);
+  static String GetModifier(CArrRef info, const char *name);
 
-  String FindSubSymbol(CArrRef symbols, const std::string &symbol);
+  static String FindSubSymbol(CArrRef symbols, const std::string &symbol);
 
-  bool TryConstant(StringBuffer &sb, CArrRef info,
-                   const std::string &subsymbol);
-  bool TryProperty(StringBuffer &sb, CArrRef info,
-                   const std::string &subsymbol);
-  bool TryMethod(StringBuffer &sb, CArrRef info, std::string subsymbol);
+  static bool TryConstant(StringBuffer &sb, CArrRef info,
+                          const std::string &subsymbol);
+  static bool TryProperty(StringBuffer &sb, CArrRef info,
+                          const std::string &subsymbol);
+  static bool TryMethod(StringBuffer &sb, CArrRef info, std::string subsymbol);
 
-  void PrintDocComments(StringBuffer &sb, CArrRef info);
-  void PrintHeader(StringBuffer &sb, CArrRef info, const char *type);
-  void PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
-                 const std::string &subsymbol);
+  static void PrintDocComments(StringBuffer &sb, CArrRef info);
+  static void PrintHeader(DebuggerClient *client, StringBuffer &sb,
+                          CArrRef info, const char *type);
+  static void PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
+                        const std::string &subsymbol);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

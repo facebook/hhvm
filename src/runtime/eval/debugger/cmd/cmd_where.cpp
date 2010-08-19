@@ -65,7 +65,7 @@ bool CmdWhere::onClient(DebuggerClient *client) {
 
   Array st = fetchStackTrace(client);
   if (st.empty()) {
-    client->info("(no stacktrace to display)");
+    client->info("(no stacktrace to display or in global scope)");
   } else if (client->argCount() == 0) {
     int i = 0;
     for (ArrayIter iter(st); iter; ++iter) {

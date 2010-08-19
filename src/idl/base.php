@@ -532,15 +532,16 @@ function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
                                $static = false, $class = false) {
   fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
           typename($func['return']), $method ? ($static ? "ti" : "t") : "f",
-          $func['name']);
+          strtolower($func['name']));
   generateFuncArgsCPPHeader($func, $f, $forceref, $static);
   fprintf($f, ";\n");
 
   if ($static && $method) {
-    fprintf($f, '  public: static %s t_%s', typename($func['return']), $func['name']);
+    fprintf($f, '  public: static %s t_%s', typename($func['return']),
+            strtolower($func['name']));
     // for the actual static call there is no class name needed
     generateFuncArgsCPPHeader($func, $f, $forceref, false);
-    fprintf($f, " {\n    return ti_%s(\"%s\"", $func['name'],
+    fprintf($f, " {\n    return ti_%s(\"%s\"", strtolower($func['name']),
             strtolower($class['name']));
     generateFuncArgsCall($func, $f, $forceref);
     fprintf($f, ");\n  }\n");
@@ -551,7 +552,8 @@ function generateFuncProfileHeader($func, $f) {
   $var_arg = ($func['flags'] & VarArgsMask);
   $args = $func['args'];
 
-  fprintf($f, 'inline %s x_%s', typename($func['return']), $func['name']);
+  fprintf($f, 'inline %s x_%s', typename($func['return']),
+          strtolower($func['name']));
   generateFuncArgsCPPHeader($func, $f, null);
   fprintf($f, " {\n");
 
@@ -563,7 +565,7 @@ function generateFuncProfileHeader($func, $f) {
   if (typename($func['return']) !== 'void') {
     fprintf($f, "return ");
   }
-  fprintf($f, "f_%s(", $func['name']);
+  fprintf($f, "f_%s(", strtolower($func['name']));
 
   if ($var_arg) fprintf($f, '_argc, ');
   for ($i = 0; $i < count($args); $i++) {
@@ -732,7 +734,8 @@ function generateFuncCPPImplementation($func, $f) {
   $output = '';
   $need_ret = false;
 
-  fprintf($f, '%s f_%s(', typename($func['return']), $func['name']);
+  fprintf($f, '%s f_%s(', typename($func['return']),
+          strtolower($func['name']));
   $var_arg = ($func['flags'] & VarArgsMask);
   if ($var_arg) fprintf($f, 'int _argc, ');
   $params = "";
@@ -784,7 +787,7 @@ function replaceParams($filename, $header) {
     $var_arg = ($func['flags'] & VarArgsMask);
     $args = $func['args'];
 
-    $search = '\w+\s+f_'.$func['name'].'\s*\(\s*';
+    $search = '\w+\s+f_'.strtolower($func['name']).'\s*\(\s*';
     if ($var_arg) $search .= '\w+\s+\w+,\s*';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];
@@ -810,11 +813,12 @@ function replaceParams($filename, $header) {
     }
     $search .= '\)';
 
-    $replace = typename($func['return']).' f_'.$func['name'].'(';
+    $replace = typename($func['return']).' f_'.strtolower($func['name']).'(';
     if ($var_arg) $replace .= 'int _argc, ';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];
-      $replace .= param_typename($arg['type'], idx($arg, 'ref')).' '.$arg['name'];
+      $replace .= param_typename($arg['type'],
+                                 idx($arg, 'ref')).' '.$arg['name'];
       if (isset($arg['default'])) {
         if ($header) {
           $replace .= ' = '.addcslashes($arg['default'], '\\');

@@ -46,6 +46,19 @@ const char *get_color_by_name(const char *name) {
   return NULL;
 }
 
+const char *get_bgcolor_by_name(const char *name) {
+  string upper = toUpper(name);
+  if (upper == "BLACK"         ) return  ANSI_BGCOLOR_BLACK;
+  if (upper == "RED"           ) return  ANSI_BGCOLOR_RED;
+  if (upper == "GREEN"         ) return  ANSI_BGCOLOR_GREEN;
+  if (upper == "BROWN"         ) return  ANSI_BGCOLOR_BROWN;
+  if (upper == "BLUE"          ) return  ANSI_BGCOLOR_BLUE;
+  if (upper == "MAGENTA"       ) return  ANSI_BGCOLOR_MAGENTA;
+  if (upper == "CYAN"          ) return  ANSI_BGCOLOR_CYAN;
+  if (upper == "GRAY"          ) return  ANSI_BGCOLOR_GRAY;
+  return NULL;
+}
+
 void get_supported_colors(std::vector<std::string> &names) {
   names.push_back(toLower("BLACK"         ));
   names.push_back(toLower("RED"           ));
@@ -63,6 +76,14 @@ void get_supported_colors(std::vector<std::string> &names) {
   names.push_back(toLower("LIGHT_MAGENTA" ));
   names.push_back(toLower("LIGHT_CYAN"    ));
   names.push_back(toLower("WHITE"         ));
+}
+
+std::string add_bgcolor(const char *color, const char *bgcolor) {
+  ASSERT(color && *color && color[strlen(color) - 1] == 'm');
+  ASSERT(bgcolor && *bgcolor);
+
+  string ret = color;
+  return ret.substr(0, ret.length() - 1) + bgcolor;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

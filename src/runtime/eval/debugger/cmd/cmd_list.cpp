@@ -74,11 +74,12 @@ bool CmdList::onClient(DebuggerClient *client) {
     return help(client);
   }
 
+  int line = 0;
   m_line1 = m_line2 = 0;
   if (client->argCount() == 1) {
     string arg = client->argValue(1);
     if (DebuggerClient::IsValidNumber(arg)) {
-      int line = atoi(arg.c_str());
+      line = atoi(arg.c_str());
       if (line <= 0) {
         client->error("A line number has to be a positive integer.");
         return help(client);
@@ -147,10 +148,10 @@ bool CmdList::onClient(DebuggerClient *client) {
   }
 
   if (m_file.empty()) {
-    int line;
-    client->getListLocation(m_file, line);
+    int linePrev = 0;
+    client->getListLocation(m_file, linePrev, line);
     if (m_line1 == 0 && m_line2 == 0) {
-      m_line1 = line + 1;
+      m_line1 = linePrev + 1;
       m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
     }
     if (m_file.empty()) {
@@ -169,7 +170,7 @@ bool CmdList::onClient(DebuggerClient *client) {
 
   CmdListPtr res = client->xend<CmdList>(this);
   if (res->m_code.isString()) {
-    client->code(res->m_code, m_line1, m_line2);
+    client->code(res->m_code, line, m_line1, m_line2);
     client->setListLocation(m_file, m_line2);
   } else {
     client->error("Unable to read specified source file location.");

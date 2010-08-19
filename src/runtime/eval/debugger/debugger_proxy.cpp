@@ -484,14 +484,17 @@ static void append_stderr(const char *header, const char *msg,
   }
 }
 
-Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output) {
+Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
+                                  bool log) {
   DECLARE_THREAD_INFO
   // using "_" as filename
   FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain)
   Variant ret;
   StringBuffer sb;
   g_context->setStdout(append_stdout, &sb);
-  Logger::SetThreadHook(append_stderr, &sb);
+  if (log) {
+    Logger::SetThreadHook(append_stderr, &sb);
+  }
   try {
     ret = eval(get_variable_table(), Object(),
                String(php.c_str(), php.size(), AttachLiteral), false);
@@ -503,7 +506,9 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output) {
     sb.append(Debugger::ColorStderr(String("(unknown exception was thrown")));
   }
   g_context->setStdout(NULL, NULL);
-  Logger::SetThreadHook(NULL, NULL);
+  if (log) {
+    Logger::SetThreadHook(NULL, NULL);
+  }
   output = sb.detach();
   return ret;
 }

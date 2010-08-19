@@ -5195,14 +5195,18 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       break;
     case 0x9b:
       if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_code(arg0), null);
           CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_code(arg0, arg1), null);
+          if (count == 2) return (t_code(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_code(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_code(arg0, arg1, arg2, arg3), null);
         }
       }
       break;
@@ -5560,14 +5564,18 @@ Variant c_debuggerclient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
       break;
     case 57:
       HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss7a853247, "code")) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_code(arg0), null);
           CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_code(arg0, arg1), null);
+          if (count == 2) return (t_code(arg0, arg1), null);
+          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          if (count == 3) return (t_code(arg0, arg1, arg2), null);
+          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          return (t_code(arg0, arg1, arg2, arg3), null);
         }
       }
       break;
@@ -5751,9 +5759,11 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       break;
     case 0x9b:
       if (methodIndex.m_overloadIndex == 0x1) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
         if (count <= 1) return (t_code(a0), null);
-        return (t_code(a0, a1), null);
+        if (count == 2) return (t_code(a0, a1), null);
+        if (count == 3) return (t_code(a0, a1, a2), null);
+        return (t_code(a0, a1, a2, a3), null);
       }
       break;
     case 0x9c:
@@ -6024,9 +6034,11 @@ Variant c_debuggerclient::o_invoke_few_args(MethodIndex methodIndex, const char 
       break;
     case 57:
       HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss7a853247, "code")) {
-        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
         if (count <= 1) return (t_code(a0), null);
-        return (t_code(a0, a1), null);
+        if (count == 2) return (t_code(a0, a1), null);
+        if (count == 3) return (t_code(a0, a1, a2), null);
+        return (t_code(a0, a1, a2, a3), null);
       }
       break;
     case 58:
@@ -6392,9 +6404,11 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
+        Variant a2;
+        Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -6403,12 +6417,20 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
           if (it == params.end()) break;
           a1 = (*it)->eval(env);
           it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
         if (count <= 1) return (t_code(a0), null);
-        else return (t_code(a0, a1), null);
+        else if (count == 2) return (t_code(a0, a1), null);
+        else if (count == 3) return (t_code(a0, a1, a2), null);
+        else return (t_code(a0, a1, a2, a3), null);
       }
       break;
     case 0x9c:
@@ -7059,9 +7081,11 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
       HASH_GUARD_LITSTR(0x58C72230857ACDB9LL, NAMSTR(s_sys_ss7a853247, "code")) {
         Variant a0;
         Variant a1;
+        Variant a2;
+        Variant a3;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count < 1 || count > 2) return throw_wrong_arguments("code", count, 1, 2, 1);
+        if (count < 1 || count > 4) return throw_wrong_arguments("code", count, 1, 4, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
@@ -7070,12 +7094,20 @@ Variant c_debuggerclient::o_invoke_from_eval(const char *s, Eval::VariableEnviro
           if (it == params.end()) break;
           a1 = (*it)->eval(env);
           it++;
+          if (it == params.end()) break;
+          a2 = (*it)->eval(env);
+          it++;
+          if (it == params.end()) break;
+          a3 = (*it)->eval(env);
+          it++;
         } while(false);
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
         if (count <= 1) return (t_code(a0), null);
-        else return (t_code(a0, a1), null);
+        else if (count == 2) return (t_code(a0, a1), null);
+        else if (count == 3) return (t_code(a0, a1, a2), null);
+        else return (t_code(a0, a1, a2, a3), null);
       }
       break;
     case 58:

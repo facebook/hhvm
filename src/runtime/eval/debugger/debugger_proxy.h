@@ -42,7 +42,7 @@ public:
 
   static std::string MakePHP(const std::string &php);
   static std::string MakePHPReturn(const std::string &php);
-  static Variant ExecutePHP(const std::string &php, String &output);
+  static Variant ExecutePHP(const std::string &php, String &output, bool log);
   static DThreadInfoPtr CreateThreadInfo(const std::string &desc);
 
 public:

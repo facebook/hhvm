@@ -23,7 +23,6 @@
 #include <runtime/base/base_includes.h>
 #include <runtime/eval/debugger/debugger_client.h>
 #include <runtime/eval/debugger/debugger_proxy.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -93,7 +92,7 @@ class c_debuggerclient : public ExtObjectData {
   public: void t_info(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: void t_output(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: void t_error(int _argc, CStrRef format, CArrRef _argv = null_array);
-  public: void t_code(CStrRef source, int start_line_no = 0);
+  public: void t_code(CStrRef source, int highlight_line = 0, int start_line_no = 0, int end_line_no = 0);
   public: Variant t_ask(int _argc, CStrRef format, CArrRef _argv = null_array);
   public: String t_wrap(CStrRef str);
   public: void t_helptitle(CStrRef str);

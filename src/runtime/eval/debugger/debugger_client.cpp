@@ -634,7 +634,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
     m_acStrings.clear();
     m_acItems.clear();
     if (m_inputState == TakingCommand) {
-      if (!first_non_whitespace(rl_line_buffer)) {
+      if (m_command.empty()) {
         addCompletion(GetCommands());
         addCompletion("=");
         addCompletion("$");
@@ -795,13 +795,11 @@ bool DebuggerClient::console() {
         m_macroPlaying.reset();
       }
     }
-    String deleter;
     if (line == NULL) {
       line = readline(getPrompt().c_str());
       if (line == NULL) {
         return false;
       }
-      deleter = String(line, AttachString);
     } else if (!NoPrompt) {
       print("%s%s", getPrompt().c_str(), line);
     }

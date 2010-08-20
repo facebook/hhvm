@@ -94,6 +94,9 @@ public:
   static void ResetStaticClassName(ThreadInfo *info);
   static void SetCallingObject(ThreadInfo* info, ObjectData *obj);
 
+  static bool IsGlobalScope();
+  static bool IsGlobalScope(FrameInjection *frame);
+
   class StaticClassNameHelper {
   public:
     StaticClassNameHelper(ThreadInfo *info, CStrRef cls) : m_info(info) {

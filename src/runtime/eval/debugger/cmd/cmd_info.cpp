@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/debugger/cmd/cmd_info.h>
+#include <runtime/eval/debugger/cmd/cmd_variable.h>
 #include <runtime/eval/runtime/eval_frame_injection.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/ext/ext_reflection.h>
@@ -190,27 +191,15 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
 
     FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
     if (frame) {
-      Array variables, globals;
-      EvalFrameInjection *eframe1 = dynamic_cast<EvalFrameInjection*>(frame);
-      if (eframe1) {
-        variables = eframe1->getEnv().getDefinedVariables();
-        variables.remove("GLOBALS");
+      bool global;
+      Array variables = CmdVariable::GetLocalVariables(frame, global);
+      if (!global) {
+        variables += CmdVariable::GetGlobalVariables();
       }
-      // get outermost frame
-      while (frame->getPrev()) frame = frame->getPrev();
-      EvalFrameInjection *eframe2 = dynamic_cast<EvalFrameInjection*>(frame);
-      if (eframe2 && eframe2 != eframe1) {
-        globals = eframe2->getEnv().getDefinedVariables();
-        globals.remove("GLOBALS");
-      }
-
       vector<String> &vars =
         (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];
-      vars.reserve(variables.size() + globals.size());
+      vars.reserve(variables.size());
       for (ArrayIter iter(variables); iter; ++iter) {
-        vars.push_back(String("$") + iter.second().toString());
-      }
-      for (ArrayIter iter(globals); iter; ++iter) {
         vars.push_back(String("$") + iter.second().toString());
       }
     }

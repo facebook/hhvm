@@ -166,6 +166,20 @@ int FrameInjection::GetLine(bool skip /* = false */) {
   return -1;
 }
 
+bool FrameInjection::IsGlobalScope() {
+  return IsGlobalScope(ThreadInfo::s_threadInfo->m_top);
+}
+
+bool FrameInjection::IsGlobalScope(FrameInjection *frame) {
+  while (frame) {
+    if ((frame->m_flags & PseudoMain) == 0) {
+      return false;
+    }
+    frame = frame->getPrev();
+  }
+  return true;
+}
+
 String FrameInjection::getFileName() {
   if (m_flags & PseudoMain) {
     return m_name + 10;

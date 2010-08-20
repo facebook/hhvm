@@ -25,6 +25,8 @@ namespace HPHP { namespace Eval {
 DECLARE_BOOST_TYPES(CmdVariable);
 class CmdVariable : public DebuggerCommand {
 public:
+  static Array GetGlobalVariables();
+  static Array GetLocalVariables(FrameInjection* frame, bool &global);
   static void PrintVariables(DebuggerClient *client, CArrRef variables,
                              bool global, CStrRef text);
 

@@ -71,17 +71,7 @@ bool CmdGlobal::onClient(DebuggerClient *client) {
 }
 
 bool CmdGlobal::onServer(DebuggerProxy *proxy) {
-  FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
-  if (frame) {
-    // get outermost frame
-    while (frame->getPrev()) frame = frame->getPrev();
-
-    EvalFrameInjection *eframe = dynamic_cast<EvalFrameInjection*>(frame);
-    if (eframe) {
-      m_globals = eframe->getEnv().getDefinedVariables();
-      m_globals.remove("GLOBALS");
-    }
-  }
+  m_globals = CmdVariable::GetGlobalVariables();
   return proxy->send(this);
 }
 

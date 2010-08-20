@@ -662,7 +662,6 @@ static int execute_program_impl(int argc, char **argv) {
       RuntimeOption::EnableDebugger = true;
       Eval::Debugger::StartClient(po.debug_host, po.debug_port,
                                   po.debug_extension, po.debug_cmds);
-      Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
 
       string file = po.file;
       StringVecPtr client_args; bool restarting = false;
@@ -672,6 +671,7 @@ static int execute_program_impl(int argc, char **argv) {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
           // even if it's empty, still need to call for warmup
           hphp_invoke_simple(po.debug_extension);
+          Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
           if (!restarting) {
             Eval::Debugger::InterruptSessionStarted(new_argv[0]);
           }

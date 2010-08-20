@@ -5861,6 +5861,10 @@ bool TestCodeRun::TestCompilation() {
        "}"
        "var_dump(foo(true));"
        "var_dump(foo(false));");
+
+  MVCR("<?php "
+       "call_user_func_array(array('Normalizer','normalize'),array('bar'));");
+
   return true;
 }
 

@@ -1592,7 +1592,8 @@ SimpleFunctionCallPtr SimpleFunctionCall::getFunctionCallForCallUserFunc(
         }
         if (cls->isRedeclaring()) {
           cls = ar->findExactClass(sclass);
-        } else if (!cls->isVolatile() && !ar->checkClassPresent(sclass)) {
+        } else if (!cls->isVolatile() && cls->isUserClass() &&
+                   !ar->checkClassPresent(sclass)) {
           cls->setVolatile();
         }
         if (!cls) {

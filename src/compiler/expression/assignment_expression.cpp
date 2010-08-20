@@ -166,15 +166,7 @@ void AssignmentExpression::setNthKid(int n, ConstructPtr cp) {
   }
 }
 
-ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
-  ar->preOptimize(m_variable);
-  ar->preOptimize(m_value);
-  return ExpressionPtr();
-}
-
-ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
-  ar->postOptimize(m_variable);
-  ar->postOptimize(m_value);
+ExpressionPtr AssignmentExpression::optimize(AnalysisResultPtr ar) {
   if (m_variable->is(Expression::KindOfSimpleVariable)) {
     SimpleVariablePtr var =
       dynamic_pointer_cast<SimpleVariable>(m_variable);
@@ -187,6 +179,23 @@ ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
     }
   }
   return ExpressionPtr();
+}
+
+ExpressionPtr AssignmentExpression::preOptimize(AnalysisResultPtr ar) {
+  ar->preOptimize(m_variable);
+  ar->preOptimize(m_value);
+  if (Option::EliminateDeadCode &&
+      ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
+    // otherwise used & needed flags may not be up to date yet
+    return optimize(ar);
+  }
+  return ExpressionPtr();
+}
+
+ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
+  ar->postOptimize(m_variable);
+  ar->postOptimize(m_value);
+  return optimize(ar);
 }
 
 TypePtr AssignmentExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,

@@ -67,7 +67,8 @@ public:
     AccessorEffect = 0x100,      // could contain a getter/setter
     CreateEffect = 0x200,        // could cause the creation of an array
                                  // element or an object property
-    UnknownEffect = 0x3ff        // anything might happen
+    OtherEffect = 0x400,         // something else
+    UnknownEffect = 0x7ff        // any of the above
   };
 
   LocationPtr getLocation() { return m_loc;}

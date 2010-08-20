@@ -214,6 +214,9 @@ public:
   bool checkUnused(const std::string &name);
   void addNeeded(const std::string &name);
   void clearUsed();
+  void addStaticVariable(const std::string &name, AnalysisResultPtr ar,
+                         bool member = false);
+
 
   /**
    * Set all variables to variants, since l-dynamic value was used.
@@ -336,9 +339,6 @@ private:
   bool m_allVariants;
 
   bool isGlobalTable(AnalysisResultPtr ar) const;
-
-  void addStaticVariable(const std::string &name, AnalysisResultPtr ar,
-                         bool member = false);
 
   virtual TypePtr setType(AnalysisResultPtr ar, const std::string &name,
                           TypePtr type, bool coerce);

@@ -1364,7 +1364,10 @@ void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
   if (func->isReferenceVariableArgument()) {
     info->setRefVarArg(func->getMaxParamCount());
   }
+  VariableTablePtr variables = func->getVariables();
   for (int i = 0; i < func->getMaxParamCount(); i++) {
     if (func->isRefParam(i)) info->setRefParam(i);
+    variables->addParam(func->getParamName(i),
+                        TypePtr(), AnalysisResultPtr(), ConstructPtr());
   }
 }

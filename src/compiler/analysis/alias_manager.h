@@ -44,6 +44,20 @@ class BucketMapEntry {
   size_t size() { return m_num; }
   void stash(size_t from, ExpressionPtrList &to);
   void import(ExpressionPtrList &from);
+  void erase(ExpressionPtrList::reverse_iterator rit,
+             ExpressionPtrList::reverse_iterator &end) {
+    // the base of a reverse iterator points one beyond
+    // the element the reverse iterator points to, so
+    // decrement it...
+    ExpressionPtrList::iterator it(--rit.base());
+    // erasing an element /can/ invalidate the end
+    // reverse_iterator, so fix it if necessary
+    if (end.base() == it) end = rit;
+    m_exprs.erase(it);
+    // rit is still valid, and now (magically) points at
+    // the next element... no need to return a new iterator.
+    m_num--;
+  }
  private:
   ExpressionPtrList     m_exprs;
   std::vector<size_t>   m_stack;
@@ -94,7 +108,7 @@ class AliasManager {
  private:
   enum { MaxBuckets = 0x10000 };
   enum { FallThrough, CondBranch, Branch, Converge };
-  enum { SameAccess, InterfAccess, DisjointAccess };
+  enum { SameAccess, InterfAccess, DisjointAccess, NotAccess };
   struct CondStackElem {
     CondStackElem(size_t s = 0) : m_size(s), m_exprs() {}
     size_t              m_size;
@@ -129,6 +143,14 @@ class AliasManager {
   void add(BucketMapEntry &em, ExpressionPtr e);
 
   int testAccesses(ExpressionPtr e1, ExpressionPtr e2);
+  void cleanInterf(ExpressionPtr rv,
+                   ExpressionPtrList::reverse_iterator it,
+                   ExpressionPtrList::reverse_iterator &end,
+                   int depth);
+  void killLocals();
+  bool okToKill(ExpressionPtr ep, bool killRef);
+  int checkInterf(ExpressionPtr rv, ExpressionPtr e, bool &isLoad,
+                  int &depth, int &effects);
   int findInterf(ExpressionPtr rv, bool isLoad, ExpressionPtr &rep);
   void applyAssign(ExpressionPtr lhs, ExpressionPtr rhs);
 

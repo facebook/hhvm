@@ -293,7 +293,8 @@ TypePtr VariableTable::addParam(const string &name, TypePtr type,
     int index = m_parameters.size();
     m_parameters[name] = index;
   }
-  return add(name, type, false, ar, construct, ModifierExpressionPtr());
+  return type ?
+    add(name, type, false, ar, construct, ModifierExpressionPtr()) : type;
 }
 
 void VariableTable::addStaticVariable(const string &name,

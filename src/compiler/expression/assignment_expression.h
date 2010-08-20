@@ -47,7 +47,7 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
 private:
-  ExpressionPtr makeIdCall(AnalysisResultPtr ar);
+  ExpressionPtr optimize(AnalysisResultPtr ar);
 
   ExpressionPtr m_variable;
   ExpressionPtr m_value;

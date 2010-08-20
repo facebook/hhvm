@@ -32,6 +32,7 @@ public:
   static std::string SourceRoot;
 
 public:
+  FileCache() : m_fd(-1), m_size(0), m_addr(NULL) {}
   ~FileCache();
 
   /**
@@ -45,6 +46,8 @@ public:
    * Reading data.
    */
   void load(const char *filename, bool onDemandUncompress);
+  void loadMmap(const char *filename);
+  void adviseOutMemory();
   bool fileExists(const char *name, bool isRelative = true) const;
   bool dirExists(const char *name, bool isRelative = true) const;
   bool exists(const char *name, bool isRelative = true) const;
@@ -61,6 +64,9 @@ private:
   typedef __gnu_cxx::hash_map<std::string, Buffer, string_hash> FileMap;
 
   FileMap m_files;
+  int m_fd;
+  int m_size;
+  void *m_addr;
 
   void writeDirectories(const char *name);
 

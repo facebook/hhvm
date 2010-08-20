@@ -145,6 +145,7 @@ public:
   static bool EnableStaticContentCache;
   static bool EnableStaticContentFromDisk;
   static bool EnableOnDemandUncompress;
+  static bool EnableStaticContentMMap;
 
   static std::string RTTIDirectory;
   static bool EnableCliRTTI;

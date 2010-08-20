@@ -176,6 +176,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
           str.assign(data, len, AttachString);
         }
         sendStaticContent(transport, data, len, st.st_mtime, compressed, path);
+        StaticContentCache::TheFileCache->adviseOutMemory();
         ServerStats::LogPage(path, 200);
         return;
       }

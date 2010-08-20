@@ -18,6 +18,8 @@
 #include "exception.h"
 #include "compression.h"
 #include "util.h"
+#include "logger.h"
+#include <sys/mman.h>
 
 using namespace std;
 
@@ -37,6 +39,14 @@ static bool read_bytes(FILE *f, char *buf, int len) {
   }
   return nread;
 }
+static bool read_bytes(char *&ptr, char *end, char *buf, int len) {
+  if (ptr + len <= end) {
+    memcpy(buf, ptr, len);
+    ptr += len;
+    return len;
+  }
+  return false;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -50,6 +60,12 @@ FileCache::~FileCache() {
     if (buffer.cdata) {
       free(buffer.cdata);
     }
+  }
+  if (m_fd != -1) {
+    assert(m_addr != NULL);
+    assert(m_size > 0);
+    munmap(m_addr, m_size);
+    close(m_fd);
   }
 }
 
@@ -169,11 +185,13 @@ void FileCache::save(const char *filename) {
       fwrite(&buffer.clen, sizeof(int), 1, f);
       ASSERT(buffer.cdata);
       fwrite(buffer.cdata, buffer.clen, 1, f);
+      fwrite("\0", 1, 1, f);
     } else {
       fwrite(&buffer.len, sizeof(int), 1, f);
       if (buffer.len > 0) {
         ASSERT(buffer.data);
         fwrite(buffer.data, buffer.len, 1, f);
+        fwrite("\0", 1, 1, f);
       }
     }
   }
@@ -223,10 +241,10 @@ void FileCache::load(const char *filename, bool onDemandUncompress) {
 
     if (len > 0) {
       buffer.data = (char *)malloc(len + 1);
-      if (!read_bytes(f, buffer.data, len)) {
+      if (!read_bytes(f, buffer.data, len + 1)) {
         throw Exception("Bad data in archive %s", filename);
       }
-      buffer.data[len] = '\0';
+      assert(buffer.data[len] == '\0');
       if (c) {
         if (onDemandUncompress) {
           buffer.clen = buffer.len;
@@ -248,6 +266,87 @@ void FileCache::load(const char *filename, bool onDemandUncompress) {
       }
     }
   }
+}
+
+void FileCache::adviseOutMemory() {
+  if (posix_madvise(m_addr, m_size, POSIX_MADV_DONTNEED)) {
+    Logger::Error("posix_madvise failed: %s",
+                  Util::safe_strerror(errno).c_str());
+  }
+}
+
+void FileCache::loadMmap(const char *filename) {
+  ASSERT(filename && *filename);
+
+  struct stat sbuf;
+  if (stat(filename, &sbuf) == -1) {
+    throw Exception("Unable to stat %s: %s", filename,
+                    Util::safe_strerror(errno).c_str());
+  }
+  m_fd = open(filename, O_RDONLY);
+  if (m_fd == -1) {
+    throw Exception("Unable to open %s: %s", filename,
+                    Util::safe_strerror(errno).c_str());
+  }
+
+  m_addr = mmap(NULL, sbuf.st_size, PROT_READ, MAP_PRIVATE, m_fd, 0);
+  if (m_addr == (void *)-1) {
+    close(m_fd);
+    throw Exception("Unable to mmap %s: %s", filename,
+                    Util::safe_strerror(errno).c_str());
+  }
+  m_size = sbuf.st_size;
+  char *p = (char *)m_addr;
+  char *e = p + m_size;
+  while (p < e) {
+    short name_len = -1;
+
+    if (!read_bytes(p, e, (char *)(&name_len), (int)sizeof(short)) ||
+        name_len <= 0) {
+      throw Exception("Bad file name length in archive %s", filename);
+    }
+    char *name = (char *)malloc(name_len + 1);
+    if (!read_bytes(p, e, name, name_len)) {
+      free(name);
+      throw Exception("Bad file name in archive %s", filename);
+    }
+    name[name_len] = '\0';
+    string file(name, name_len);
+    free(name);
+    if (exists(file.c_str())) {
+      throw Exception("Same file %s appeared twice in %s", file.c_str(),
+                      filename);
+    }
+
+    char c; int len;
+    if (!read_bytes(p, e, (char*)&c, 1) ||
+        !read_bytes(p, e, (char*)&len, sizeof(int))) {
+      throw Exception("Bad data length in archive %s", filename);
+    }
+
+    Buffer &buffer = m_files[file];
+    buffer.len = len;
+    buffer.data = NULL;
+    buffer.clen = -1;
+    buffer.cdata = NULL;
+
+    if (len > 0) {
+      if (p + len >= e) {
+        throw Exception("Bad data in archive %s", filename);
+      }
+      buffer.data = p;
+      p += len;
+      assert(*p == '\0');
+      p++;
+      if (c) {
+        buffer.clen = buffer.len;
+        buffer.cdata = buffer.data;
+        buffer.len = -1;
+        buffer.data = NULL;
+      }
+    }
+  }
+  adviseOutMemory();
 }
 
 bool FileCache::fileExists(const char *name,

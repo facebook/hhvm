@@ -904,6 +904,10 @@ static Variant php_mysql_do_query_general(CStrRef query, CVarRef link_id,
     mysql_result = mysql_use_result(conn);
   }
   if (!mysql_result) {
+    if (mysql_field_count(conn) > 0) {
+      raise_warning("Unable to save result set");
+      return false;
+    }
     return true;
   }
 

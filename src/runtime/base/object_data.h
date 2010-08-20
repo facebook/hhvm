@@ -126,10 +126,10 @@ class ObjectData : public Countable {
   virtual const
     Eval::MethodStatement *getMethodStatement(const char* name) const;
 
-  static Variant os_getInit(const char *s, int64 hash);
+  static Variant os_getInit(CStrRef s);
   // static methods and properties
-  static Variant os_get(const char *s, int64 hash);
-  static Variant &os_lval(const char *s, int64 hash);
+  static Variant os_get(CStrRef s);
+  static Variant &os_lval(CStrRef s);
   static Variant os_invoke(const char *c, MethodIndex, const char *s,
                            CArrRef params, int64 hash, bool fatal = true);
   static Variant os_invoke_mil(const char *c, const char *s,
@@ -147,27 +147,17 @@ class ObjectData : public Countable {
   virtual Array o_toArray() const;
   virtual Array o_toIterArray(CStrRef context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
-  bool o_exists(CStrRef s, int64 hash, CStrRef context = null_string) const;
-  virtual bool o_exists(CStrRef prop, int64 phash,
-                        const char *context, int64 hash) const;
-  virtual bool o_existsPublic(CStrRef s, int64 hash) const;
-  Variant o_get(CStrRef s, int64 hash, bool error = true,
-                CStrRef context = null_string);
-  virtual Variant o_get(CStrRef prop, int64 phash, bool error,
-                        const char *context, int64 hash);
-  virtual Variant o_getPublic(CStrRef s, int64 hash, bool error = true);
-  Variant o_getUnchecked(CStrRef s, int64 hash, CStrRef context = null_string);
-  virtual Variant o_getUnchecked(CStrRef prop, int64 phash,
-                                 const char *context, int64 hash);
-  Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false,
-                CStrRef context = null_string);
-  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,
-                        const char *context, int64 hash);
-  virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit);
-  Variant &o_lval(CStrRef s, int64 hash, CStrRef context = null_string);
-  virtual Variant &o_lval(CStrRef prop, int64 phash,
-                          const char *context, int64 hash);
-  virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
+  virtual bool o_exists(CStrRef s, CStrRef context = null_string) const;
+  virtual bool o_existsPublic(CStrRef s) const;
+  virtual Variant o_get(CStrRef s, bool error = true,
+                        CStrRef context = null_string);
+  virtual Variant o_getPublic(CStrRef s, bool error = true);
+  virtual Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
+  virtual Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
+                        CStrRef context = null_string);
+  virtual Variant o_setPublic(CStrRef s, CVarRef v, bool forInit);
+  virtual Variant &o_lval(CStrRef s, CStrRef context = null_string);
+  virtual Variant &o_lvalPublic(CStrRef s);
 
   virtual void o_setArray(CArrRef properties);
   virtual void o_getArray(Array &props) const {}
@@ -178,7 +168,7 @@ class ObjectData : public Countable {
    * This is used for deciding what property_exists() returns and whether or
    * not this property should be part of an iteration in foreach ($obj as ...)
    */
-  bool o_propExists(CStrRef s, int64 hash = -1, CStrRef context = null_string);
+  bool o_propExists(CStrRef s, CStrRef context = null_string);
 
   static Object FromArray(ArrayData *properties);
 
@@ -245,10 +235,8 @@ class ObjectData : public Countable {
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
 
   virtual Variant doGet(Variant v_name, bool error);
-  virtual bool doIsSet(CStrRef prop, int64 phash,
-                       CStrRef context = null_string);
-  virtual bool doEmpty(CStrRef prop, int64 phash,
-                       CStrRef context = null_string);
+  virtual bool doIsSet(CStrRef prop, CStrRef context = null_string);
+  virtual bool doEmpty(CStrRef prop, CStrRef context = null_string);
   // magic methods
   // __construct is handled in a special way
   virtual Variant t___destruct();
@@ -312,9 +300,9 @@ protected: ObjectData *root;
 
 // Callback structure for functions related to static methods
 struct ObjectStaticCallbacks {
-  Variant (*os_getInit)(const char *s, int64 hash);
-  Variant (*os_get)(const char *s, int64 hash);
-  Variant &(*os_lval)(const char *s, int64 hash);
+  Variant (*os_getInit)(CStrRef s);
+  Variant (*os_get)(CStrRef s);
+  Variant &(*os_lval)(CStrRef s);
   Variant (*os_invoke)(const char *c, MethodIndex, const char *s,
                            CArrRef params, int64 hash, bool fatal);
   Variant (*os_constant)(const char *s);

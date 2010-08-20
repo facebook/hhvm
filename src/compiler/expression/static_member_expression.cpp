@@ -350,7 +350,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
       }
     }
     m_exp->outputCPP(cg, ar);
-    cg_printf(", -1)");
+    cg_printf(")");
   }
 
   if (volatileCheck) {

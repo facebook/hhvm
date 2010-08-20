@@ -672,7 +672,7 @@ void binary_serialize_spec(CObjRef zthis, PHPOutputTransport& transport,
     // thrift type
     int8_t ttype = fieldspec.rvalAt(s_type, -1).toByte();
 
-    Variant prop = zthis->o_get(varname, -1);
+    Variant prop = zthis->o_get(varname);
     if (!prop.isNull()) {
       transport.writeI8(ttype);
       transport.writeI16(fieldno);

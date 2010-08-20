@@ -57,31 +57,30 @@ bool Object::more(CObjRef v2) const {
   return m_px != v2.m_px && toArray().more(v2.toArray());
 }
 
-Variant Object::o_get(CStrRef propName, int64 hash /* = -1 */,
-                      bool error /* = true */,
+Variant Object::o_get(CStrRef propName, bool error /* = true */,
                       CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->o_get(propName, hash, error, context);
+  return m_px->o_get(propName, error, context);
 }
 
-ObjectOffset Object::o_lval(CStrRef propName, int64 hash /* = -1 */,
+ObjectOffset Object::o_lval(CStrRef propName,
                             CStrRef context /* = null_string */) {
   if (!m_px) {
     operator=(NEW(c_stdclass)());
   }
-  return ObjectOffset(m_px, propName, hash, context);
+  return ObjectOffset(m_px, propName, context);
 }
 
-bool Object::doIsSet(CStrRef propName, int64 hash,
+bool Object::doIsSet(CStrRef propName,
                      CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->doIsSet(propName, hash, context);
+  return m_px->doIsSet(propName, context);
 }
 
-bool Object::doEmpty(CStrRef propName, int64 hash,
+bool Object::doEmpty(CStrRef propName,
                      CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->doEmpty(propName, hash, context);
+  return m_px->doEmpty(propName, context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

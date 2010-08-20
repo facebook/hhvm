@@ -30,32 +30,32 @@ namespace HPHP {
 /* preface finishes */
 /* SRC: classes/iterator.php line 326 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_arrayiterator
-Variant c_arrayiterator::os_getInit(const char *s, int64 hash) {
+Variant c_arrayiterator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
-  if (hash < 0) hash = hash_string(s);
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_RETURN(0x7D2126D089B92EA5LL,
-                  null, "arr");
+      HASH_RETURN_NAMSTR(0x7D2126D089B92EA5LL, NAMSTR(s_sys_ss7646d15b, "arr"),
+                         null, 3);
       break;
     case 3:
-      HASH_RETURN(0x7401482B86AFCBFBLL,
-                  null, "flags");
+      HASH_RETURN_NAMSTR(0x7401482B86AFCBFBLL, NAMSTR(s_sys_ss79503405, "flags"),
+                         null, 5);
       break;
     default:
       break;
   }
-  return c_ObjectData::os_getInit(s, hash);
+  return c_ObjectData::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_arrayiterator
-Variant c_arrayiterator::os_get(const char *s, int64 hash) {
-  return c_ObjectData::os_get(s, hash);
+Variant c_arrayiterator::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
-Variant &c_arrayiterator::os_lval(const char *s, int64 hash) {
-  return c_ObjectData::os_lval(s, hash);
+Variant &c_arrayiterator::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
@@ -73,27 +73,27 @@ void c_arrayiterator::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_arrayiterator
-Variant c_arrayiterator::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+Variant c_arrayiterator::o_get(CStrRef prop, bool error, CStrRef context) {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x3D5870E53BF89873LL, ArrayIterator) { return o_getPrivate(prop, phash, error); }
+      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_getPrivate(prop, error); }
       break;
     default:
       break;
   }
-  return o_getPublic(prop, phash, error);
+  return o_getPublic(prop, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_arrayiterator
-Variant c_arrayiterator::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_ObjectData::o_getPublic(s, hash, error);
+Variant c_arrayiterator::o_getPublic(CStrRef s, bool error) {
+  return c_ObjectData::o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_arrayiterator
-Variant c_arrayiterator::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = s->hash();
+Variant c_arrayiterator::o_getPrivate(CStrRef s, bool error) {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
       HASH_RETURN_NAMSTR(0x7D2126D089B92EA5LL, s_sys_ss7646d15b, m_arr,
@@ -106,31 +106,31 @@ Variant c_arrayiterator::o_getPrivate(CStrRef s, int64 hash, bool error) {
     default:
       break;
   }
-  return o_getPublic(s, hash, error);
+  return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_arrayiterator
-bool c_arrayiterator::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+bool c_arrayiterator::o_exists(CStrRef prop, CStrRef context) const {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x3D5870E53BF89873LL, ArrayIterator) { return o_existsPrivate(prop, phash); }
+      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_existsPrivate(prop); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop, phash);
+  return o_existsPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_arrayiterator
-bool c_arrayiterator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
+bool c_arrayiterator::o_existsPublic(CStrRef s) const {
+  return c_ObjectData::o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_arrayiterator
-bool c_arrayiterator::o_existsPrivate(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = s->hash();
+bool c_arrayiterator::o_existsPrivate(CStrRef s) const {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
       HASH_EXISTS_STRING(0x7D2126D089B92EA5LL, "arr", 3);
@@ -141,31 +141,31 @@ bool c_arrayiterator::o_existsPrivate(CStrRef s, int64 hash) const {
     default:
       break;
   }
-  return o_existsPublic(s, hash);
+  return o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_arrayiterator
-Variant c_arrayiterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+Variant c_arrayiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x3D5870E53BF89873LL, ArrayIterator) { return o_setPrivate(prop, phash, v, forInit); }
+      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_setPrivate(prop, v, forInit); }
       break;
     default:
       break;
   }
-  return o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_arrayiterator
-Variant c_arrayiterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+Variant c_arrayiterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_ObjectData::o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_arrayiterator
-Variant c_arrayiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = s->hash();
+Variant c_arrayiterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
       HASH_SET_STRING(0x7D2126D089B92EA5LL, m_arr,
@@ -178,31 +178,31 @@ Variant c_arrayiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool for
     default:
       break;
   }
-  return o_setPublic(s, hash, v, forInit);
+  return o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_arrayiterator
-Variant& c_arrayiterator::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+Variant& c_arrayiterator::o_lval(CStrRef prop, CStrRef context) {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD(0x3D5870E53BF89873LL, ArrayIterator) { return o_lvalPrivate(prop, phash); }
+      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_lvalPrivate(prop); }
       break;
     default:
       break;
   }
-  return o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_arrayiterator
-Variant& c_arrayiterator::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_ObjectData::o_lvalPublic(s, hash);
+Variant& c_arrayiterator::o_lvalPublic(CStrRef s) {
+  return c_ObjectData::o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_arrayiterator
-Variant& c_arrayiterator::o_lvalPrivate(CStrRef s, int64 hash) {
-  if (hash < 0) hash = s->hash();
+Variant& c_arrayiterator::o_lvalPrivate(CStrRef s) {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
       HASH_RETURN_NAMSTR(0x7D2126D089B92EA5LL, s_sys_ss7646d15b, m_arr,
@@ -215,7 +215,7 @@ Variant& c_arrayiterator::o_lvalPrivate(CStrRef s, int64 hash) {
     default:
       break;
   }
-  return o_lvalPublic(s, hash);
+  return o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_arrayiterator
@@ -1859,28 +1859,28 @@ bool c_arrayiterator::t_valid() {
 } /* function */
 /* SRC: classes/iterator.php line 923 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_appenditerator
-Variant c_appenditerator::os_getInit(const char *s, int64 hash) {
+Variant c_appenditerator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
-  if (hash < 0) hash = hash_string(s);
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_RETURN(0x60EA38C41F14FF71LL,
-                  null, "iterators");
+      HASH_RETURN_NAMSTR(0x60EA38C41F14FF71LL, NAMSTR(s_sys_ss1f14ff71, "iterators"),
+                         null, 9);
       break;
     default:
       break;
   }
-  return c_ObjectData::os_getInit(s, hash);
+  return c_ObjectData::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_appenditerator
-Variant c_appenditerator::os_get(const char *s, int64 hash) {
-  return c_ObjectData::os_get(s, hash);
+Variant c_appenditerator::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
-Variant &c_appenditerator::os_lval(const char *s, int64 hash) {
-  return c_ObjectData::os_lval(s, hash);
+Variant &c_appenditerator::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
@@ -1896,27 +1896,27 @@ void c_appenditerator::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_appenditerator
-Variant c_appenditerator::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+Variant c_appenditerator::o_get(CStrRef prop, bool error, CStrRef context) {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_GUARD(0x2E363D51549781C8LL, AppendIterator) { return o_getPrivate(prop, phash, error); }
+      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_getPrivate(prop, error); }
       break;
     default:
       break;
   }
-  return o_getPublic(prop, phash, error);
+  return o_getPublic(prop, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_appenditerator
-Variant c_appenditerator::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_ObjectData::o_getPublic(s, hash, error);
+Variant c_appenditerator::o_getPublic(CStrRef s, bool error) {
+  return c_ObjectData::o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_appenditerator
-Variant c_appenditerator::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = s->hash();
+Variant c_appenditerator::o_getPrivate(CStrRef s, bool error) {
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_RETURN_NAMSTR(0x60EA38C41F14FF71LL, s_sys_ss1f14ff71, m_iterators,
@@ -1925,31 +1925,31 @@ Variant c_appenditerator::o_getPrivate(CStrRef s, int64 hash, bool error) {
     default:
       break;
   }
-  return o_getPublic(s, hash, error);
+  return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_appenditerator
-bool c_appenditerator::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+bool c_appenditerator::o_exists(CStrRef prop, CStrRef context) const {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_GUARD(0x2E363D51549781C8LL, AppendIterator) { return o_existsPrivate(prop, phash); }
+      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_existsPrivate(prop); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop, phash);
+  return o_existsPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_appenditerator
-bool c_appenditerator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
+bool c_appenditerator::o_existsPublic(CStrRef s) const {
+  return c_ObjectData::o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_appenditerator
-bool c_appenditerator::o_existsPrivate(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = s->hash();
+bool c_appenditerator::o_existsPrivate(CStrRef s) const {
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_EXISTS_STRING(0x60EA38C41F14FF71LL, "iterators", 9);
@@ -1957,31 +1957,31 @@ bool c_appenditerator::o_existsPrivate(CStrRef s, int64 hash) const {
     default:
       break;
   }
-  return o_existsPublic(s, hash);
+  return o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_appenditerator
-Variant c_appenditerator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+Variant c_appenditerator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_GUARD(0x2E363D51549781C8LL, AppendIterator) { return o_setPrivate(prop, phash, v, forInit); }
+      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_setPrivate(prop, v, forInit); }
       break;
     default:
       break;
   }
-  return o_setPublic(prop, phash, v, forInit);
+  return o_setPublic(prop, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_appenditerator
-Variant c_appenditerator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+Variant c_appenditerator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_ObjectData::o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_appenditerator
-Variant c_appenditerator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = s->hash();
+Variant c_appenditerator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_SET_STRING(0x60EA38C41F14FF71LL, m_iterators,
@@ -1990,31 +1990,31 @@ Variant c_appenditerator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool fo
     default:
       break;
   }
-  return o_setPublic(s, hash, v, forInit);
+  return o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_appenditerator
-Variant& c_appenditerator::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  const char *s = context;
-  if (hash < 0) hash = hash_string(s);
+Variant& c_appenditerator::o_lval(CStrRef prop, CStrRef context) {
+  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_GUARD(0x2E363D51549781C8LL, AppendIterator) { return o_lvalPrivate(prop, phash); }
+      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_lvalPrivate(prop); }
       break;
     default:
       break;
   }
-  return o_lvalPublic(prop, phash);
+  return o_lvalPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_appenditerator
-Variant& c_appenditerator::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_ObjectData::o_lvalPublic(s, hash);
+Variant& c_appenditerator::o_lvalPublic(CStrRef s) {
+  return c_ObjectData::o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_appenditerator
-Variant& c_appenditerator::o_lvalPrivate(CStrRef s, int64 hash) {
-  if (hash < 0) hash = s->hash();
+Variant& c_appenditerator::o_lvalPrivate(CStrRef s) {
+  int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
       HASH_RETURN_NAMSTR(0x60EA38C41F14FF71LL, s_sys_ss1f14ff71, m_iterators,
@@ -2023,7 +2023,7 @@ Variant& c_appenditerator::o_lvalPrivate(CStrRef s, int64 hash) {
     default:
       break;
   }
-  return o_lvalPublic(s, hash);
+  return o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_appenditerator
@@ -2759,18 +2759,18 @@ const int64 q_recursivedirectoryiterator_KEY_AS_PATHNAME = 0LL;
 const int64 q_recursivedirectoryiterator_KEY_AS_FILENAME = 256LL;
 const int64 q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY = 272LL;
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::os_getInit(const char *s, int64 hash) {
-  return c_directoryiterator::os_getInit(s, hash);
+Variant c_recursivedirectoryiterator::os_getInit(CStrRef s) {
+  return c_directoryiterator::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::os_get(const char *s, int64 hash) {
-  return c_directoryiterator::os_get(s, hash);
+Variant c_recursivedirectoryiterator::os_get(CStrRef s) {
+  return c_directoryiterator::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursivedirectoryiterator
-Variant &c_recursivedirectoryiterator::os_lval(const char *s, int64 hash) {
-  return c_directoryiterator::os_lval(s, hash);
+Variant &c_recursivedirectoryiterator::os_lval(CStrRef s) {
+  return c_directoryiterator::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_recursivedirectoryiterator
@@ -2784,63 +2784,63 @@ void c_recursivedirectoryiterator::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+Variant c_recursivedirectoryiterator::o_get(CStrRef prop, bool error, CStrRef context) {
+  return o_getPublic(prop, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_directoryiterator::o_getPublic(s, hash, error);
+Variant c_recursivedirectoryiterator::o_getPublic(CStrRef s, bool error) {
+  return c_directoryiterator::o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+Variant c_recursivedirectoryiterator::o_getPrivate(CStrRef s, bool error) {
+  return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_recursivedirectoryiterator
-bool c_recursivedirectoryiterator::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+bool c_recursivedirectoryiterator::o_exists(CStrRef prop, CStrRef context) const {
+  return o_existsPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursivedirectoryiterator
-bool c_recursivedirectoryiterator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_directoryiterator::o_existsPublic(s, hash);
+bool c_recursivedirectoryiterator::o_existsPublic(CStrRef s) const {
+  return c_directoryiterator::o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursivedirectoryiterator
-bool c_recursivedirectoryiterator::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
+bool c_recursivedirectoryiterator::o_existsPrivate(CStrRef s) const {
+  return o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
+Variant c_recursivedirectoryiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+  return o_setPublic(prop, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_directoryiterator::o_setPublic(s, hash, v, forInit);
+Variant c_recursivedirectoryiterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_directoryiterator::o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
+Variant c_recursivedirectoryiterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+  return o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_recursivedirectoryiterator
-Variant& c_recursivedirectoryiterator::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
+Variant& c_recursivedirectoryiterator::o_lval(CStrRef prop, CStrRef context) {
+  return o_lvalPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursivedirectoryiterator
-Variant& c_recursivedirectoryiterator::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_directoryiterator::o_lvalPublic(s, hash);
+Variant& c_recursivedirectoryiterator::o_lvalPublic(CStrRef s) {
+  return c_directoryiterator::o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursivedirectoryiterator
-Variant& c_recursivedirectoryiterator::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
+Variant& c_recursivedirectoryiterator::o_lvalPrivate(CStrRef s) {
+  return o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_recursivedirectoryiterator
@@ -5312,18 +5312,18 @@ String c_recursivedirectoryiterator::t_getsubpathname() {
 } /* function */
 /* SRC: classes/iterator.php line 645 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directoryiterator
-Variant c_directoryiterator::os_getInit(const char *s, int64 hash) {
-  return c_splfileinfo::os_getInit(s, hash);
+Variant c_directoryiterator::os_getInit(CStrRef s) {
+  return c_splfileinfo::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_directoryiterator
-Variant c_directoryiterator::os_get(const char *s, int64 hash) {
-  return c_splfileinfo::os_get(s, hash);
+Variant c_directoryiterator::os_get(CStrRef s) {
+  return c_splfileinfo::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directoryiterator
-Variant &c_directoryiterator::os_lval(const char *s, int64 hash) {
-  return c_splfileinfo::os_lval(s, hash);
+Variant &c_directoryiterator::os_lval(CStrRef s) {
+  return c_splfileinfo::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directoryiterator
@@ -5337,63 +5337,63 @@ void c_directoryiterator::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_directoryiterator
-Variant c_directoryiterator::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+Variant c_directoryiterator::o_get(CStrRef prop, bool error, CStrRef context) {
+  return o_getPublic(prop, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directoryiterator
-Variant c_directoryiterator::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_splfileinfo::o_getPublic(s, hash, error);
+Variant c_directoryiterator::o_getPublic(CStrRef s, bool error) {
+  return c_splfileinfo::o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directoryiterator
-Variant c_directoryiterator::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+Variant c_directoryiterator::o_getPrivate(CStrRef s, bool error) {
+  return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_directoryiterator
-bool c_directoryiterator::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+bool c_directoryiterator::o_exists(CStrRef prop, CStrRef context) const {
+  return o_existsPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directoryiterator
-bool c_directoryiterator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_splfileinfo::o_existsPublic(s, hash);
+bool c_directoryiterator::o_existsPublic(CStrRef s) const {
+  return c_splfileinfo::o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directoryiterator
-bool c_directoryiterator::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
+bool c_directoryiterator::o_existsPrivate(CStrRef s) const {
+  return o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_directoryiterator
-Variant c_directoryiterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
+Variant c_directoryiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+  return o_setPublic(prop, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directoryiterator
-Variant c_directoryiterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_splfileinfo::o_setPublic(s, hash, v, forInit);
+Variant c_directoryiterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_splfileinfo::o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directoryiterator
-Variant c_directoryiterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
+Variant c_directoryiterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+  return o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_directoryiterator
-Variant& c_directoryiterator::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
+Variant& c_directoryiterator::o_lval(CStrRef prop, CStrRef context) {
+  return o_lvalPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directoryiterator
-Variant& c_directoryiterator::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_splfileinfo::o_lvalPublic(s, hash);
+Variant& c_directoryiterator::o_lvalPublic(CStrRef s) {
+  return c_splfileinfo::o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directoryiterator
-Variant& c_directoryiterator::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
+Variant& c_directoryiterator::o_lvalPrivate(CStrRef s) {
+  return o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_directoryiterator
@@ -7590,18 +7590,18 @@ const int64 q_recursiveiteratoriterator_SELF_FIRST = 1LL;
 const int64 q_recursiveiteratoriterator_CHILD_FIRST = 2LL;
 const int64 q_recursiveiteratoriterator_CATCH_GET_CHILD = 16LL;
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::os_getInit(const char *s, int64 hash) {
-  return c_ObjectData::os_getInit(s, hash);
+Variant c_recursiveiteratoriterator::os_getInit(CStrRef s) {
+  return c_ObjectData::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::os_get(const char *s, int64 hash) {
-  return c_ObjectData::os_get(s, hash);
+Variant c_recursiveiteratoriterator::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursiveiteratoriterator
-Variant &c_recursiveiteratoriterator::os_lval(const char *s, int64 hash) {
-  return c_ObjectData::os_lval(s, hash);
+Variant &c_recursiveiteratoriterator::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator
@@ -7615,63 +7615,63 @@ void c_recursiveiteratoriterator::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+Variant c_recursiveiteratoriterator::o_get(CStrRef prop, bool error, CStrRef context) {
+  return o_getPublic(prop, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_ObjectData::o_getPublic(s, hash, error);
+Variant c_recursiveiteratoriterator::o_getPublic(CStrRef s, bool error) {
+  return c_ObjectData::o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+Variant c_recursiveiteratoriterator::o_getPrivate(CStrRef s, bool error) {
+  return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_recursiveiteratoriterator
-bool c_recursiveiteratoriterator::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+bool c_recursiveiteratoriterator::o_exists(CStrRef prop, CStrRef context) const {
+  return o_existsPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursiveiteratoriterator
-bool c_recursiveiteratoriterator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
+bool c_recursiveiteratoriterator::o_existsPublic(CStrRef s) const {
+  return c_ObjectData::o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursiveiteratoriterator
-bool c_recursiveiteratoriterator::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
+bool c_recursiveiteratoriterator::o_existsPrivate(CStrRef s) const {
+  return o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
+Variant c_recursiveiteratoriterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+  return o_setPublic(prop, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+Variant c_recursiveiteratoriterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_ObjectData::o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
+Variant c_recursiveiteratoriterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+  return o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_recursiveiteratoriterator
-Variant& c_recursiveiteratoriterator::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
+Variant& c_recursiveiteratoriterator::o_lval(CStrRef prop, CStrRef context) {
+  return o_lvalPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursiveiteratoriterator
-Variant& c_recursiveiteratoriterator::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_ObjectData::o_lvalPublic(s, hash);
+Variant& c_recursiveiteratoriterator::o_lvalPublic(CStrRef s) {
+  return c_ObjectData::o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursiveiteratoriterator
-Variant& c_recursiveiteratoriterator::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
+Variant& c_recursiveiteratoriterator::o_lvalPrivate(CStrRef s) {
+  return o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_recursiveiteratoriterator
@@ -8307,18 +8307,18 @@ bool c_recursiveiteratoriterator::t_valid() {
 } /* function */
 /* SRC: classes/iterator.php line 888 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator
-Variant c_filteriterator::os_getInit(const char *s, int64 hash) {
-  return c_ObjectData::os_getInit(s, hash);
+Variant c_filteriterator::os_getInit(CStrRef s) {
+  return c_ObjectData::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_filteriterator
-Variant c_filteriterator::os_get(const char *s, int64 hash) {
-  return c_ObjectData::os_get(s, hash);
+Variant c_filteriterator::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_filteriterator
-Variant &c_filteriterator::os_lval(const char *s, int64 hash) {
-  return c_ObjectData::os_lval(s, hash);
+Variant &c_filteriterator::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_filteriterator
@@ -8332,63 +8332,63 @@ void c_filteriterator::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_filteriterator
-Variant c_filteriterator::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+Variant c_filteriterator::o_get(CStrRef prop, bool error, CStrRef context) {
+  return o_getPublic(prop, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_filteriterator
-Variant c_filteriterator::o_getPublic(CStrRef s, int64 hash, bool error) {
-  return c_ObjectData::o_getPublic(s, hash, error);
+Variant c_filteriterator::o_getPublic(CStrRef s, bool error) {
+  return c_ObjectData::o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_filteriterator
-Variant c_filteriterator::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+Variant c_filteriterator::o_getPrivate(CStrRef s, bool error) {
+  return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_filteriterator
-bool c_filteriterator::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+bool c_filteriterator::o_exists(CStrRef prop, CStrRef context) const {
+  return o_existsPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_filteriterator
-bool c_filteriterator::o_existsPublic(CStrRef s, int64 hash) const {
-  return c_ObjectData::o_existsPublic(s, hash);
+bool c_filteriterator::o_existsPublic(CStrRef s) const {
+  return c_ObjectData::o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_filteriterator
-bool c_filteriterator::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
+bool c_filteriterator::o_existsPrivate(CStrRef s) const {
+  return o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_filteriterator
-Variant c_filteriterator::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
+Variant c_filteriterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+  return o_setPublic(prop, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_filteriterator
-Variant c_filteriterator::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+Variant c_filteriterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_ObjectData::o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_filteriterator
-Variant c_filteriterator::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
+Variant c_filteriterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+  return o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_filteriterator
-Variant& c_filteriterator::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
+Variant& c_filteriterator::o_lval(CStrRef prop, CStrRef context) {
+  return o_lvalPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_filteriterator
-Variant& c_filteriterator::o_lvalPublic(CStrRef s, int64 hash) {
-  return c_ObjectData::o_lvalPublic(s, hash);
+Variant& c_filteriterator::o_lvalPublic(CStrRef s) {
+  return c_ObjectData::o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_filteriterator
-Variant& c_filteriterator::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
+Variant& c_filteriterator::o_lvalPrivate(CStrRef s) {
+  return o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_filteriterator

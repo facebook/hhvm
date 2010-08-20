@@ -1393,7 +1393,6 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
   for (unsigned int i = 0; i < m_symbols.size(); i++) {
     const string &name = m_symbols[i];
     string formatted = cg.formatLabel(name);
-    string escaped = cg.escapeLabel(name);
     if (isStatic(name)) continue;
     if (getFinalType(name)->is(Type::KindOfVariant)) {
       if (!dynamicObject || isPrivate(name)) {
@@ -1403,13 +1402,12 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
                   Option::PropertyPrefix, formatted.c_str(),
                   Option::PropertyPrefix, formatted.c_str());
       } else {
-        cg_printf("clone->o_set(\"%s\", -1, "
-                  "o_get(\"%s\", -1).isReferenced() ? "
-                  "ref(o_get(\"%s\", -1)) : o_get(\"%s\",-1));\n",
-                  escaped.c_str(),
-                  escaped.c_str(),
-                  escaped.c_str(),
-                  escaped.c_str());
+        cg_printf("Variant v%d = o_get(", i);
+        cg_printString(name, ar);
+        cg_printf(");\n");
+        cg_printf("clone->o_set(");
+        cg_printString(name, ar);
+        cg_printf(", v%d.isReferenced() ? ref(v%d) : v%d);\n", i, i, i);
       }
     } else {
       cg_printf("clone->%s%s = %s%s;\n",
@@ -1436,40 +1434,40 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   // Statics
   bool gdec = false;
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_%s", cls);
-  cg_indentBegin("Variant %s%s::%sgetInit(const char *s, int64 hash) {\n",
+  cg_indentBegin("Variant %s%s::%sgetInit(CStrRef s) {\n",
                  Option::ClassPrefix, cls, Option::ObjectStaticPrefix);
-  if (!outputCPPJumpTable(cg, ar, NULL, false, false, EitherStatic,
+  if (!outputCPPJumpTable(cg, ar, NULL, true, false, EitherStatic,
                           JumpReturnInit, EitherPrivate, &gdec)) {
     m_emptyJumpTables.insert(JumpTableClassStaticGetInit);
   }
   if (!gdec && dynamicObject == 1) cg.printDeclareGlobals();
-  cg_printf("return %s%s%s%s%sgetInit(s, hash);\n", gl, cprefix,
+  cg_printf("return %s%s%s%s%sgetInit(s);\n", gl, cprefix,
              parent, op, Option::ObjectStaticPrefix);
   cg_indentEnd("}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_%s", cls);
 
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_GET_%s", cls);
-  cg_indentBegin("Variant %s%s::%sget(const char *s, int64 hash) {\n",
+  cg_indentBegin("Variant %s%s::%sget(CStrRef s) {\n",
                  Option::ClassPrefix, cls, Option::ObjectStaticPrefix);
-  if (!outputCPPJumpTable(cg, ar, Option::StaticPropertyPrefix, false,
-                          false, Static, JumpReturn, NonPrivate, &gdec)) {
+  if (!outputCPPJumpTable(cg, ar, Option::StaticPropertyPrefix, true, false,
+                          Static, JumpReturnString, NonPrivate, &gdec)) {
     m_emptyJumpTables.insert(JumpTableClassStaticGet);
   }
   if (!gdec && dynamicObject == 1) cg.printDeclareGlobals();
-  cg_printf("return %s%s%s%s%sget(s, hash);\n", gl, cprefix,
+  cg_printf("return %s%s%s%s%sget(s);\n", gl, cprefix,
             parent, op, Option::ObjectStaticPrefix);
   cg_indentEnd("}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_GET_%s", cls);
 
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_%s", cls);
-  cg_indentBegin("Variant &%s%s::%slval(const char *s, int64 hash) {\n",
+  cg_indentBegin("Variant &%s%s::%slval(CStrRef s) {\n",
                  Option::ClassPrefix, cls, Option::ObjectStaticPrefix);
-  if (!outputCPPJumpTable(cg, ar, Option::StaticPropertyPrefix, false,
-                          true, Static, JumpReturn, NonPrivate, &gdec)) {
+  if (!outputCPPJumpTable(cg, ar, Option::StaticPropertyPrefix, true, true,
+                          Static, JumpReturnString, NonPrivate, &gdec)) {
     m_emptyJumpTables.insert(JumpTableClassStaticLval);
   }
   if (!gdec && dynamicObject == 1) cg.printDeclareGlobals();
-  cg_printf("return %s%s%s%s%slval(s, hash);\n", gl, cprefix,
+  cg_printf("return %s%s%s%s%slval(s);\n", gl, cprefix,
             parent, op, Option::ObjectStaticPrefix);
   cg_indentEnd("}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_%s", cls);
@@ -1576,17 +1574,18 @@ bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
   } while (cls && !cls->isRedeclaring()); // allow current class to be redec
   if (classes.empty()) return false;
 
-  cg_printf("const char *s = context;\n");
-  for (JumpTable jt(cg, classes, true, true, false); jt.ready(); jt.next()) {
+  cg_printf("CStrRef s = context.isNull() ? "
+            "FrameInjection::GetClassName(false) : context;\n");
+  for (JumpTable jt(cg, classes, true, false, true); jt.ready(); jt.next()) {
     const char *name = jt.key();
     if (!strcasecmp(name, ar->getClassScope()->getOriginalName().c_str())) {
-      cg_printf("HASH_GUARD(0x%016llXLL, %s) { return %s%sPrivate(prop, "
-          "phash%s); }\n",
-          hash_string_i(name), name, Option::ObjectPrefix, op, args);
+      cg_printf("HASH_GUARD_STRING(0x%016llXLL, %s) "
+                "{ return %s%sPrivate(prop%s); }\n",
+          hash_string(name), name, Option::ObjectPrefix, op, args);
     } else {
-      cg_printf("HASH_GUARD(0x%016llXLL, %s) { return %s%s::%s%sPrivate(prop, "
-          "phash%s); }\n",
-          hash_string_i(name), name, Option::ClassPrefix,
+      cg_printf("HASH_GUARD_STRING(0x%016llXLL, %s) "
+                "{ return %s%s::%s%sPrivate(prop%s); }\n",
+          hash_string(name), name, Option::ClassPrefix,
           Util::toLower(name).c_str(), Option::ObjectPrefix, op, args);
     }
   }
@@ -1600,18 +1599,17 @@ void VariableTable::outputCPPPropertyOp
  bool varOnly,  ClassScope::Derivation dynamicObject, JumpTableName jtname) {
 
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_%s_%s", op, cls);
-  cg_indentBegin("%s %s%s::%s%s(CStrRef prop, int64 phash%s, "
-      "const char *context, int64 hash)%s {\n", ret, Option::ClassPrefix,
+  cg_indentBegin("%s %s%s::%s%s(CStrRef prop%s, CStrRef context)%s {\n",
+      ret, Option::ClassPrefix,
       cls, Option::ObjectPrefix, op, argsDec, cnst ? " const" : "");
   if (!outputCPPPrivateSelector(cg, ar, op, args)) {
     m_emptyJumpTables.insert(jtname);
   }
   if (!dynamicObject) {
-    cg_printf("return %s%sPublic(prop, phash%s);\n",
+    cg_printf("return %s%sPublic(prop%s);\n",
               Option::ObjectPrefix, op, args);
   } else {
-    cg_printf("return DynamicObjectData::%s%s"
-              "(prop, phash%s, context, hash);\n",
+    cg_printf("return DynamicObjectData::%s%s(prop%s, context);\n",
               Option::ObjectPrefix, op, args);
   }
   cg_indentEnd("}\n");
@@ -1619,35 +1617,35 @@ void VariableTable::outputCPPPropertyOp
 
   if (!dynamicObject) {
     cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_%s_PUBLIC_%s", op, cls);
-    cg_indentBegin("%s %s%s::%s%sPublic(CStrRef s, int64 hash%s)%s {\n",
+    cg_indentBegin("%s %s%s::%s%sPublic(CStrRef s%s)%s {\n",
                    ret, Option::ClassPrefix, cls,
                    Option::ObjectPrefix, op, argsDec, cnst ? " const" : "");
-    if (!outputCPPJumpTable(cg, ar, Option::PropertyPrefix, false, varOnly,
+    if (!outputCPPJumpTable(cg, ar, Option::PropertyPrefix, true, varOnly,
                             NonStatic, type)) {
       // offset 1 based on enum order
       m_emptyJumpTables.insert((JumpTableName)(jtname + 1));
     }
-    cg_printf("return %s%s::%s%sPublic(s, hash%s);\n",
+    cg_printf("return %s%s::%s%sPublic(s%s);\n",
               Option::ClassPrefix, parent, Option::ObjectPrefix, op, args);
     cg_indentEnd("}\n");
     cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_%s_PUBLIC_%s", op, cls);
   }
 
   cg.ifdefBegin(false, "OMIT_JUMP_TABLE_CLASS_%s_PRIVATE_%s", op, cls);
-  cg_indentBegin("%s %s%s::%s%sPrivate(CStrRef s, int64 hash%s)%s {\n",
+  cg_indentBegin("%s %s%s::%s%sPrivate(CStrRef s%s)%s {\n",
                  ret, Option::ClassPrefix, cls, Option::ObjectPrefix, op,
                  argsDec, cnst ? " const" : "");
-  if (!outputCPPJumpTable(cg, ar, Option::PropertyPrefix, false, varOnly,
+  if (!outputCPPJumpTable(cg, ar, Option::PropertyPrefix, true, varOnly,
                           NonStatic, type, Private)) {
     // offset 2 based on enum order
     m_emptyJumpTables.insert((JumpTableName)(jtname + 2));
   }
   if (!dynamicObject) {
     // Fall back to public
-    cg_printf("return %s%sPublic(s, hash%s);\n",
+    cg_printf("return %s%sPublic(s%s);\n",
               Option::ObjectPrefix, op, args);
   } else {
-    cg_printf("return DynamicObjectData::%s%s(s, hash%s, \"\", -1);\n",
+    cg_printf("return DynamicObjectData::%s%s(s%s, empty_string);\n",
               Option::ObjectPrefix, op, args);
   }
   cg_indentEnd("}\n");
@@ -1696,7 +1694,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
 
   bool useString = (type == JumpExists) || (type == JumpSet) ||
                    (type == JumpReturnString) ||
-                   (type == JumpInitializedString);
+                   (type == JumpInitializedString) || (type == JumpReturnInit);
 
   for (JumpTable jt(cg, strings, false, !defineHash, useString); jt.ready();
        jt.next()) {
@@ -1716,14 +1714,10 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
                symbol_prefix != Option::PropertyPrefix) {
       varName = string("g->") + varName;
     }
-    const char *priv = "";
-    //if (isPrivate(name) && !isStatic(name)) {
-      //priv = "_PRIV";
-    //}
     switch (type) {
     case VariableTable::JumpExists:
-      cg_printf("HASH_EXISTS_STRING%s(0x%016llXLL, \"%s\", %d);\n",
-                priv, hash_string(name), cg.escapeLabel(name).c_str(),
+      cg_printf("HASH_EXISTS_STRING(0x%016llXLL, \"%s\", %d);\n",
+                hash_string(name), cg.escapeLabel(name).c_str(),
                 strlen(name));
       break;
     case VariableTable::JumpReturn:
@@ -1732,8 +1726,8 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       cg_printf("            \"%s\");\n", cg.escapeLabel(name).c_str());
       break;
     case VariableTable::JumpSet:
-      cg_printf("HASH_SET_STRING%s(0x%016llXLL, %s,\n",
-          priv, hash_string(name), varName.c_str());
+      cg_printf("HASH_SET_STRING(0x%016llXLL, %s,\n",
+                hash_string(name), varName.c_str());
       cg_printf("                \"%s\", %d);\n",
                 cg.escapeLabel(name).c_str(), strlen(name));
       break;
@@ -1778,18 +1772,18 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       int stringId = cg.checkLiteralString(name, index, ar);
       if (stringId >= 0) {
         if (index == -1) {
-          cg_printf("HASH_RETURN_LITSTR%s(0x%016llXLL, %d, %s,\n",
-              priv, hash_string(name), stringId, varName.c_str());
+          cg_printf("HASH_RETURN_LITSTR(0x%016llXLL, %d, %s,\n",
+                    hash_string(name), stringId, varName.c_str());
         } else {
           assert(index >= 0);
           string lisnam = ar->getLiteralStringName(stringId, index);
-          cg_printf("HASH_RETURN_NAMSTR%s(0x%016llXLL, %s, %s,\n",
-              priv, hash_string(name), lisnam.c_str(), varName.c_str());
+          cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, %s, %s,\n",
+                    hash_string(name), lisnam.c_str(), varName.c_str());
         }
         cg_printf("                   %d);\n", strlen(name));
       } else {
-        cg_printf("HASH_RETURN_STRING%s(0x%016llXLL, %s,\n",
-            priv, hash_string(name), varName.c_str());
+        cg_printf("HASH_RETURN_STRING(0x%016llXLL, %s,\n",
+                  hash_string(name), varName.c_str());
         cg_printf("                   \"%s\", %d);\n",
                   cg.escapeLabel(name).c_str(), strlen(name));
       }
@@ -1799,13 +1793,15 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       ExpressionPtr value =
         dynamic_pointer_cast<Expression>(getClassInitVal(name));
       if (value) {
-        cg_printf("HASH_RETURN(0x%016llXLL,\n", hash_string(name));
-        cg_printf("            ");
+        cg_printf("HASH_RETURN_NAMSTR(0x%016llXLL, ", hash_string(name));
+        cg_printString(name, ar);
+        cg_printf(",\n");
+        cg_printf("                   ");
         CodeGenerator::Context oldContext = cg.getContext();
         cg.setContext(CodeGenerator::CppStaticInitializer);
         value->outputCPP(cg, ar);
         cg.setContext(oldContext);
-        cg_printf(", \"%s\");\n", cg.escapeLabel(name).c_str());
+        cg_printf(", %d);\n", strlen(name));
       }
       break;
     }

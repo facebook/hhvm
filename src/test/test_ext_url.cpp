@@ -123,8 +123,8 @@ bool TestExtUrl::test_http_build_query() {
   }
   {
     Object obj(NEW(c_stdclass)());
-    obj->o_set("foo", -1, "bar");
-    obj->o_set("baz", -1, "boom");
+    obj->o_set("foo", "bar");
+    obj->o_set("baz", "boom");
     VS(f_http_build_query(obj), "foo=bar&baz=boom");
   }
   return Count(true);

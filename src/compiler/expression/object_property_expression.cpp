@@ -400,11 +400,10 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
           // if $val is a class static variable (static $val), then $val
           // cannot be declared as a class variable (var $val), $this->val
           // refers to a non-static class variable and has to use get/lval.
-          uint64 hash = hash_string(propName);
           if (useGetThis) cg_printf("GET_THIS_DOT()");
           cg_printf("%s(", func.c_str());
           cg_printString(propName, ar);
-          cg_printf(", 0x%016llXLL%s%s)", hash, error, context);
+          cg_printf("%s%s)", error, context);
         }
       } else {
         if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
@@ -432,10 +431,9 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       } else {
         if (useGetThis) cg_printf("GET_THIS_DOT()");
       }
-      uint64 hash = hash_string(propName);
       cg_printf("%s(", func.c_str());
       cg_printString(propName, ar);
-      cg_printf(", 0x%016llXLL%s%s)", hash, error, context);
+      cg_printf("%s%s)", error, context);
     }
   } else {
     if (!bThis) {
@@ -455,7 +453,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     }
     cg_printf("%s(", func.c_str());
     m_property->outputCPP(cg, ar);
-    cg_printf(", -1LL%s%s)", error, context);
+    cg_printf("%s%s)", error, context);
   }
 }
 

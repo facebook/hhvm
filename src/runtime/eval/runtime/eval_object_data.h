@@ -44,19 +44,15 @@ public:
   virtual Array o_toArray() const;
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
-  virtual bool o_exists(CStrRef prop, int64 phash,
-      const char *context, int64 hash) const;
-  virtual Variant o_get(CStrRef prop, int64 phash, bool error,
-      const char *context, int64 hash);
-  virtual Variant o_getUnchecked(CStrRef prop, int64 phash,
-      const char *context, int64 hash);
-  virtual Variant &o_lval(CStrRef prop, int64 phash,
-      const char *context, int64 hash);
-  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit,
-      const char *context, int64 hash);
+  virtual bool o_exists(CStrRef prop, CStrRef context = null_string) const;
+  virtual Variant o_get(CStrRef prop, bool error = true,
+                        CStrRef context = null_string);
+  virtual Variant o_getUnchecked(CStrRef prop, CStrRef context = null_string);
+  virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string);
+  virtual Variant o_set(CStrRef prop, CVarRef v, bool forInit = false,
+                        CStrRef context = null_string);
   void o_setPrivate(const char *cls, const char *s, int64 hash, CVarRef v);
 
-  DECLARE_INSTANCE_PROP_WRAPPER_OPS
 
    // methods
   virtual CStrRef o_getClassName() const;

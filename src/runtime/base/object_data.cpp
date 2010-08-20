@@ -77,16 +77,16 @@ void ObjectData::bindThis(ThreadInfo *info) {
 ///////////////////////////////////////////////////////////////////////////////
 // static methods and properties
 
-Variant ObjectData::os_getInit(const char *s, int64 hash) {
-  throw FatalErrorException("unknown property %s", s);
+Variant ObjectData::os_getInit(CStrRef s) {
+  throw FatalErrorException("unknown property %s", s.c_str());
 }
 
-Variant ObjectData::os_get(const char *s, int64 hash) {
-  throw FatalErrorException("unknown static property %s", s);
+Variant ObjectData::os_get(CStrRef s) {
+  throw FatalErrorException("unknown static property %s", s.c_str());
 }
 
-Variant &ObjectData::os_lval(const char *s, int64 hash) {
-  throw FatalErrorException("unknown static property %s", s);
+Variant &ObjectData::os_lval(CStrRef s) {
+  throw FatalErrorException("unknown static property %s", s.c_str());
 }
 
 Variant ObjectData::os_invoke(const char *c, MethodIndex methodIndex,
@@ -136,53 +136,29 @@ ObjectData::os_invoke_from_eval(const char *c, const char *s,
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-bool ObjectData::o_exists(CStrRef propName, int64 hash,
+bool ObjectData::o_exists(CStrRef propName,
                           CStrRef context /* = null_string */) const {
-  StringData *sd;
-  if (context.isNull()) {
-    sd = FrameInjection::GetClassName(false).get();
-  } else {
-    sd = context.get();
-  }
-  ASSERT(sd && sd->data());
-  return o_exists(propName, hash, sd->data(), sd->hash());
+  return o_existsPublic(propName);
 }
 
-bool ObjectData::o_exists(CStrRef propName, int64 phash,
-                          const char *context, int64 hash) const {
-  return o_existsPublic(propName, phash);
-}
-
-bool ObjectData::o_existsPublic(CStrRef propName, int64 hash) const {
+bool ObjectData::o_existsPublic(CStrRef propName) const {
   return propName.size() > 0 && o_properties &&
          // object properties are always strings
-         o_properties->exists(propName, hash, true);
+         o_properties->exists(propName, -1, true);
 }
 
-Variant ObjectData::o_get(CStrRef propName, int64 hash,
-    bool error /* = true */, CStrRef context /* = null_string */) {
-  StringData *sd;
-  if (context.isNull()) {
-    sd = FrameInjection::GetClassName(false).get();
-  } else {
-    sd = context.get();
-  }
-  ASSERT(sd && sd->data());
-  return o_get(propName, hash, error, sd->data(), sd->hash());
+Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
+                          CStrRef context /* = null_string */) {
+  return o_getPublic(propName, error);
 }
 
-Variant ObjectData::o_get(CStrRef propName, int64 phash, bool error,
-    const char *context, int64 hash) {
-  return o_getPublic(propName, phash, error);
-}
 
-Variant ObjectData::o_getPublic(CStrRef propName, int64 hash,
-    bool error /* = true */) {
+Variant ObjectData::o_getPublic(CStrRef propName, bool error /* = true */) {
   if (propName.size() == 0) {
     return null;
   }
-  if (o_properties && o_properties->exists(propName, hash, true)) {
-    return o_properties->rvalAt(propName, hash, false, true);
+  if (o_properties && o_properties->exists(propName, -1, true)) {
+    return o_properties->rvalAt(propName, -1, false, true);
   }
   if (getAttribute(InGet)) {
     return ObjectData::doGet(propName, error);
@@ -192,42 +168,19 @@ Variant ObjectData::o_getPublic(CStrRef propName, int64 hash,
   }
 }
 
-Variant ObjectData::o_getUnchecked(CStrRef propName, int64 hash,
-    CStrRef context /* = null_string */) {
-  StringData *sd;
-  if (context.isNull()) {
-    sd = FrameInjection::GetClassName(false).get();
-  } else {
-    sd = context.get();
-  }
-  ASSERT(sd && sd->data());
-  return o_getUnchecked(propName, hash, sd->data(), sd->hash());
+Variant ObjectData::o_getUnchecked(CStrRef propName,
+                                   CStrRef context /* = null_string */) {
+  return o_get(propName, true, context);
 }
 
-Variant ObjectData::o_getUnchecked(CStrRef propName, int64 phash,
-    const char *context, int64 hash) {
-  return o_get(propName, phash, true, context, hash);
+Variant ObjectData::o_set(CStrRef propName, CVarRef v,
+                          bool forInit /* = false */,
+                          CStrRef context /* = null_string */) {
+  return o_setPublic(propName, v, forInit);
 }
 
-Variant ObjectData::o_set(CStrRef propName, int64 hash, CVarRef v,
-    bool forInit /* = false */, CStrRef context /* = null_string */) {
-  StringData *sd;
-  if (context.isNull()) {
-    sd = FrameInjection::GetClassName(false).get();
-  } else {
-    sd = context.get();
-  }
-  ASSERT(sd && sd->data());
-  return o_set(propName, hash, v, forInit, sd->data(), sd->hash());
-}
-
-Variant ObjectData::o_set(CStrRef propName, int64 phash, CVarRef v,
-    bool forInit, const char *context, int64 hash) {
-  return o_setPublic(propName, phash, v, forInit);
-}
-
-Variant ObjectData::o_setPublic(CStrRef propName, int64 hash, CVarRef v,
-    bool forInit /* = false */) {
+Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
+                                bool forInit /* = false */) {
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
   }
@@ -248,11 +201,11 @@ void ObjectData::o_setArray(CArrRef properties) {
       if (valueRef) {
         CVarRef secondRef = iter.secondRef();
         if (secondRef.isReferenced()) {
-          o_setPublic(key, -1, ref(secondRef), false);
+          o_setPublic(key, ref(secondRef), false);
           continue;
         }
       }
-      o_setPublic(key, -1, iter.second(), false);
+      o_setPublic(key, iter.second(), false);
     }
   }
 }
@@ -266,33 +219,21 @@ Object ObjectData::FromArray(ArrayData *properties) {
 }
 
 CVarRef ObjectData::set(CStrRef s, CVarRef v) {
-  o_set(s, -1, v);
+  o_set(s, v);
   return v;
 }
 
-Variant &ObjectData::o_lval(CStrRef propName, int64 hash,
-    CStrRef context /* = null_string */) {
-  StringData *sd;
-  if (context.isNull()) {
-    sd = FrameInjection::GetClassName(false).get();
-  } else {
-    sd = context.get();
-  }
-  ASSERT(sd && sd->data());
-  return o_lval(propName, hash, sd->data(), sd->hash());
+Variant &ObjectData::o_lval(CStrRef propName,
+                            CStrRef context /* = null_string */) {
+  return o_lvalPublic(propName);
 }
 
-Variant &ObjectData::o_lval(CStrRef propName, int64 phash,
-    const char *context, int64 hash) {
-  return o_lvalPublic(propName, phash);
-}
-
-Variant &ObjectData::o_lvalPublic(CStrRef propName, int64 hash) {
+Variant &ObjectData::o_lvalPublic(CStrRef propName) {
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
   }
   if (o_properties) {
-    return o_properties->lvalAt(propName, hash, false, true);
+    return o_properties->lvalAt(propName, -1, false, true);
   }
   return ___lval(propName);
 }
@@ -387,14 +328,14 @@ Array ObjectData::o_toIterArray(CStrRef context,
     default:
       ASSERT(false);
     }
-    if (visible && o_propExists(prop->name, -1, context)) {
+    if (visible && o_propExists(prop->name, context)) {
       if (getRef) {
-        Variant &ov = o_lval(prop->name, -1, context);
+        Variant &ov = o_lval(prop->name, context);
         Variant &av = ret.lvalAt(prop->name, -1, false, true);
         av = ref(ov);
       } else {
-        ret.set(prop->name, o_getUnchecked(prop->name, -1,
-                                           prop->owner->getName(), -1));
+        ret.set(prop->name, o_getUnchecked(prop->name,
+                                           prop->owner->getName()));
       }
     }
     dynamics.remove(prop->name);
@@ -753,14 +694,14 @@ void ObjectData::serialize(VariableSerializer *serializer) const {
         Array props = ret.toArray();
         for (ArrayIter iter(props); iter; ++iter) {
           String name = iter.second().toString();
-          if (o_exists(name, -1, o_getClassName())) {
+          if (o_exists(name, o_getClassName())) {
             ClassInfo::PropertyInfo *p = cls->getPropertyInfo(name);
             String propName = name;
             if (p && (p->attribute & ClassInfo::IsPrivate)) {
               propName = concat4(s_zero, o_getClassName(), s_zero, name);
             }
             wanted.set(propName, const_cast<ObjectData*>(this)->
-                       o_getUnchecked(name, -1, o_getClassName()));
+                       o_getUnchecked(name, o_getClassName()));
           } else {
             raise_warning("\"%s\" returned as member variable from "
                           "__sleep() but does not exist", name.data());
@@ -817,18 +758,16 @@ Variant ObjectData::doGet(Variant v_name, bool error) {
   return null_variant;
 }
 
-bool ObjectData::doIsSet(CStrRef prop, int64 phash,
-                         CStrRef context) {
-  if (o_exists(prop, phash, context)) {
-    return !o_get(prop, phash, false, context).isNull();
+bool ObjectData::doIsSet(CStrRef prop, CStrRef context) {
+  if (o_exists(prop, context)) {
+    return !o_get(prop, false, context).isNull();
   }
   return t___isset(prop);
 }
 
-bool ObjectData::doEmpty(CStrRef prop, int64 phash,
-                         CStrRef context) {
-  if (o_exists(prop, phash, context)) {
-    return empty(o_get(prop, phash, false, context));
+bool ObjectData::doEmpty(CStrRef prop, CStrRef context) {
+  if (o_exists(prop, context)) {
+    return empty(o_get(prop, false, context));
   }
   return !t___isset(prop) || empty(t___get(prop));
 }
@@ -881,20 +820,19 @@ bool ObjectData::t___isset(Variant v_name) {
 
 Variant ObjectData::t___unset(Variant v_name) {
   String sname = v_name.toString();
-  unset(o_lval(sname, -1));
+  unset(o_lval(sname));
   if (o_properties && o_properties->exists(sname, -1, true)) {
     o_properties->weakRemove(sname, -1, true);
   }
   return null;
 }
 
-bool ObjectData::o_propExists(CStrRef s, int64 hash /* = -1 */,
-                              CStrRef context /* = null_string */) {
+bool ObjectData::o_propExists(CStrRef s, CStrRef context /* = null_string */) {
   // Exists and the value is not null or it is null but also initialized.
   // Can't just do isInitialized because type inferred properties may not
   // be in the o_lval table.
-  return o_exists(s, hash, context) && (!o_get(s, hash, context).isNull() ||
-      o_lval(s, hash, context).isInitialized());
+  return o_exists(s, context) && (!o_get(s, context).isNull() ||
+      o_lval(s, context).isInitialized());
 }
 
 Variant ObjectData::t___sleep() {

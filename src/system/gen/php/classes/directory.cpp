@@ -26,32 +26,32 @@ namespace HPHP {
 /* preface finishes */
 /* SRC: classes/directory.php line 3 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directory
-Variant c_directory::os_getInit(const char *s, int64 hash) {
+Variant c_directory::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
-  if (hash < 0) hash = hash_string(s);
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_RETURN(0x1429F792A6880074LL,
-                  null, "path");
+      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, NAMSTR(s_sys_ss5977ff8c, "path"),
+                         null, 4);
       break;
     case 2:
-      HASH_RETURN(0x5C4CA333F4541532LL,
-                  null, "handle");
+      HASH_RETURN_NAMSTR(0x5C4CA333F4541532LL, NAMSTR(s_sys_ss0babeace, "handle"),
+                         null, 6);
       break;
     default:
       break;
   }
-  return c_ObjectData::os_getInit(s, hash);
+  return c_ObjectData::os_getInit(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_directory
-Variant c_directory::os_get(const char *s, int64 hash) {
-  return c_ObjectData::os_get(s, hash);
+Variant c_directory::os_get(CStrRef s) {
+  return c_ObjectData::os_get(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directory
-Variant &c_directory::os_lval(const char *s, int64 hash) {
-  return c_ObjectData::os_lval(s, hash);
+Variant &c_directory::os_lval(CStrRef s) {
+  return c_ObjectData::os_lval(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
@@ -67,13 +67,13 @@ void c_directory::o_setArray(CArrRef props) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_get_directory
-Variant c_directory::o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash) {
-  return o_getPublic(prop, phash, error);
+Variant c_directory::o_get(CStrRef prop, bool error, CStrRef context) {
+  return o_getPublic(prop, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directory
-Variant c_directory::o_getPublic(CStrRef s, int64 hash, bool error) {
-  if (hash < 0) hash = s->hash();
+Variant c_directory::o_getPublic(CStrRef s, bool error) {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_RETURN_NAMSTR(0x1429F792A6880074LL, s_sys_ss5977ff8c, m_path,
@@ -86,22 +86,22 @@ Variant c_directory::o_getPublic(CStrRef s, int64 hash, bool error) {
     default:
       break;
   }
-  return c_ObjectData::o_getPublic(s, hash, error);
+  return c_ObjectData::o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directory
-Variant c_directory::o_getPrivate(CStrRef s, int64 hash, bool error) {
-  return o_getPublic(s, hash, error);
+Variant c_directory::o_getPrivate(CStrRef s, bool error) {
+  return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_directory
-bool c_directory::o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const {
-  return o_existsPublic(prop, phash);
+bool c_directory::o_exists(CStrRef prop, CStrRef context) const {
+  return o_existsPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directory
-bool c_directory::o_existsPublic(CStrRef s, int64 hash) const {
-  if (hash < 0) hash = s->hash();
+bool c_directory::o_existsPublic(CStrRef s) const {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_EXISTS_STRING(0x1429F792A6880074LL, "path", 4);
@@ -112,22 +112,22 @@ bool c_directory::o_existsPublic(CStrRef s, int64 hash) const {
     default:
       break;
   }
-  return c_ObjectData::o_existsPublic(s, hash);
+  return c_ObjectData::o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directory
-bool c_directory::o_existsPrivate(CStrRef s, int64 hash) const {
-  return o_existsPublic(s, hash);
+bool c_directory::o_existsPrivate(CStrRef s) const {
+  return o_existsPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_set_directory
-Variant c_directory::o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash) {
-  return o_setPublic(prop, phash, v, forInit);
+Variant c_directory::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+  return o_setPublic(prop, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directory
-Variant c_directory::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  if (hash < 0) hash = s->hash();
+Variant c_directory::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_SET_STRING(0x1429F792A6880074LL, m_path,
@@ -140,22 +140,22 @@ Variant c_directory::o_setPublic(CStrRef s, int64 hash, CVarRef v, bool forInit)
     default:
       break;
   }
-  return c_ObjectData::o_setPublic(s, hash, v, forInit);
+  return c_ObjectData::o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directory
-Variant c_directory::o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit) {
-  return o_setPublic(s, hash, v, forInit);
+Variant c_directory::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+  return o_setPublic(s, v, forInit);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_directory
-Variant& c_directory::o_lval(CStrRef prop, int64 phash, const char *context, int64 hash) {
-  return o_lvalPublic(prop, phash);
+Variant& c_directory::o_lval(CStrRef prop, CStrRef context) {
+  return o_lvalPublic(prop);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directory
-Variant& c_directory::o_lvalPublic(CStrRef s, int64 hash) {
-  if (hash < 0) hash = s->hash();
+Variant& c_directory::o_lvalPublic(CStrRef s) {
+  int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
       HASH_RETURN_NAMSTR(0x1429F792A6880074LL, s_sys_ss5977ff8c, m_path,
@@ -168,12 +168,12 @@ Variant& c_directory::o_lvalPublic(CStrRef s, int64 hash) {
     default:
       break;
   }
-  return c_ObjectData::o_lvalPublic(s, hash);
+  return c_ObjectData::o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directory
-Variant& c_directory::o_lvalPrivate(CStrRef s, int64 hash) {
-  return o_lvalPublic(s, hash);
+Variant& c_directory::o_lvalPrivate(CStrRef s) {
+  return o_lvalPublic(s);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_directory

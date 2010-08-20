@@ -284,17 +284,17 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
     cg_printf("static void os_static_initializer();\n");
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassStaticGetInit)) {
-    cg_printf("static Variant os_getInit(const char *s, int64 hash);\n");
+    cg_printf("static Variant os_getInit(CStrRef s);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_%s 1\n", clsName);
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassStaticGet)) {
-    cg_printf("static Variant os_get(const char *s, int64 hash);\n");
+    cg_printf("static Variant os_get(CStrRef s);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_GET_%s 1\n", clsName);
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassStaticLval)) {
-    cg_printf("static Variant &os_lval(const char *s, int64 hash);\n");
+    cg_printf("static Variant &os_lval(CStrRef s);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_%s 1\n", clsName);
   }
@@ -319,63 +319,49 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   }
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassExists)) {
-    cg_printf("bool o_exists(CStrRef s, int64 hash, "
-              "CStrRef context = null_string) const\n"
-              "{ return ObjectData::o_exists(s, hash, context); }\n");
-    cg_printf("virtual bool o_exists(CStrRef prop, int64 phash, "
-              "const char *context, int64 hash) const;\n");
+    cg_printf("virtual bool o_exists(CStrRef s, "
+              "CStrRef context = null_string) const;\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_exists_%s 1\n", clsName);
   }
   if (variables->hasNonStaticPrivate()) {
-    cg_printf("bool o_existsPrivate(CStrRef s, int64 hash) const;\n");
+    cg_printf("bool o_existsPrivate(CStrRef s) const;\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_%s 1\n", clsName);
   }
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassGet)) {
-    cg_printf("Variant o_get(CStrRef s, int64 hash, bool error = true, "
-              "CStrRef context = null_string)\n"
-              "{ return ObjectData::o_get(s, hash, error, context); }\n");
-    cg_printf("virtual Variant o_get(CStrRef prop, int64 phash, bool error, "
-              "const char *context, int64 hash);\n");
+    cg_printf("virtual Variant o_get(CStrRef s, bool error = true, "
+              "CStrRef context = null_string);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_get_%s 1\n", clsName);
   }
   if (variables->hasNonStaticPrivate()) {
-    cg_printf("Variant o_getPrivate(CStrRef s, int64 hash, "
-              "bool error = true);\n");
+    cg_printf("Variant o_getPrivate(CStrRef s, bool error = true);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_%s 1\n", clsName);
   }
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassSet)) {
-    cg_printf("Variant o_set(CStrRef s, int64 hash, CVarRef v, "
-              "bool forInit = false, CStrRef context = null_string)\n"
-              "{ return ObjectData::o_set(s, hash, v, forInit, context); }\n");
-    cg_printf("virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, "
-              "bool forInit, const char *context, int64 hash);\n");
+    cg_printf("virtual Variant o_set(CStrRef s, CVarRef v, "
+              "bool forInit = false, CStrRef context = null_string);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_set_%s 1\n", clsName);
   }
   if (variables->hasNonStaticPrivate()) {
-    cg_printf("Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, "
-              "bool forInit);\n");
+    cg_printf("Variant o_setPrivate(CStrRef s, CVarRef v, bool forInit);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_%s 1\n", clsName);
   }
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassLval)) {
-    cg_printf("Variant &o_lval(CStrRef s, int64 hash, "
-              "CStrRef context = null_string)\n"
-              "{ return ObjectData::o_lval(s, hash, context); }\n");
-    cg_printf("virtual Variant &o_lval(CStrRef prop, int64 phash, "
-              "const char *context, int64 hash);\n");
+    cg_printf("virtual Variant &o_lval(CStrRef s, "
+              "CStrRef context = null_string);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_lval_%s 1\n", clsName);
   }
   if (variables->hasNonStaticPrivate()) {
-    cg_printf("Variant &o_lvalPrivate(CStrRef s, int64 hash);\n");
+    cg_printf("Variant &o_lvalPrivate(CStrRef s);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_%s 1\n", clsName);
   }
@@ -383,24 +369,23 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   cg.printSection("DECLARE_INSTANCE_PUBLIC_PROP_OPS");
   cg_printf("public:\n");
   if (variables->hasJumpTable(VariableTable::JumpTableClassExistsPublic)) {
-    cg_printf("virtual bool o_existsPublic(CStrRef s, int64 hash) const;\n");
+    cg_printf("virtual bool o_existsPublic(CStrRef s) const;\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_%s 1\n", clsName);
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassGetPublic)) {
-    cg_printf("virtual Variant o_getPublic(CStrRef s, int64 hash,\n");
-    cg_printf("                            bool error = true);\n");
+    cg_printf("virtual Variant o_getPublic(CStrRef s, bool error = true);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_%s 1\n", clsName);
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassSetPublic)) {
-    cg_printf("virtual Variant o_setPublic(CStrRef s, int64 hash,\n");
+    cg_printf("virtual Variant o_setPublic(CStrRef s,\n");
     cg_printf("                            CVarRef v, bool forInit);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_%s 1\n", clsName);
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassLvalPublic)) {
-    cg_printf("virtual Variant &o_lvalPublic(CStrRef s, int64 hash);\n");
+    cg_printf("virtual Variant &o_lvalPublic(CStrRef s);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_%s 1\n", clsName);
   }
@@ -658,19 +643,19 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("%s%s() : ClassStatics(%d) {}\n",
                   Option::ClassStaticsPrefix, clsName,
                   classScope->getRedeclaringId());
-        cg_indentBegin("Variant %sgetInit(const char *s, int64 hash = -1) {\n",
+        cg_indentBegin("Variant %sgetInit(CStrRef s) {\n",
                        Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sgetInit(s, hash);\n", Option::ClassPrefix,
+        cg_printf("return %s%s::%sgetInit(s);\n", Option::ClassPrefix,
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
-        cg_indentBegin("Variant %sget(const char *s, int64 hash = -1) {\n",
+        cg_indentBegin("Variant %sget(CStrRef s) {\n",
                        Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%sget(s, hash);\n", Option::ClassPrefix,
+        cg_printf("return %s%s::%sget(s);\n", Option::ClassPrefix,
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
-        cg_indentBegin("Variant &%slval(const char* s, int64 hash = -1) {\n",
+        cg_indentBegin("Variant &%slval(CStrRef s) {\n",
                   Option::ObjectStaticPrefix);
-        cg_printf("return %s%s::%slval(s, hash);\n", Option::ClassPrefix,
+        cg_printf("return %s%s::%slval(s);\n", Option::ClassPrefix,
                   clsName, Option::ObjectStaticPrefix);
         cg_indentEnd("}\n");
         cg_indentBegin("Variant %sinvoke(const char *c, "

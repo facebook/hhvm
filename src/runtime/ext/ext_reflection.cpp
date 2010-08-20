@@ -333,12 +333,12 @@ Object f_hphp_create_object(CStrRef name, CArrRef params) {
 }
 
 Variant f_hphp_get_property(CObjRef obj, CStrRef cls, CStrRef prop) {
-  return obj->o_get(prop.data(), -1);
+  return obj->o_get(prop);
 }
 
 void f_hphp_set_property(CObjRef obj, CStrRef cls, CStrRef prop,
                          CVarRef value) {
-  obj->o_set(prop.data(), -1, value);
+  obj->o_set(prop, value);
 }
 
 Variant f_hphp_get_static_property(CStrRef cls, CStrRef prop) {

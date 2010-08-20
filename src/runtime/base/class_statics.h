@@ -39,12 +39,12 @@ public:
     return m_redecId;
   }
 
-  virtual Variant os_getInit(const char *s, int64 hash = -1);
-  virtual Variant os_get(const char *s, int64 hash = -1);
-  virtual Variant &os_lval(const char *s, int64 hash = -1);
+  virtual Variant os_getInit(CStrRef s);
+  virtual Variant os_get(CStrRef s);
+  virtual Variant &os_lval(CStrRef s);
   virtual Variant os_invoke(const char *c, MethodIndex methodIndex,
-                            const char *s,
-                            CArrRef params, int64 hash = -1, bool fatal = true);
+                            const char *s, CArrRef params, int64 hash = -1,
+                            bool fatal = true);
   virtual Variant os_invoke_mil(const char *c,
                                 const char *s,
                                 CArrRef params, int64 hash = -1,

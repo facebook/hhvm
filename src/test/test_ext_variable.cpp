@@ -315,7 +315,7 @@ bool TestExtVariable::test_debug_zval_dump() {
 
 bool TestExtVariable::test_serialize() {
   Object obj(NEW(c_stdclass)());
-  obj->o_set("name", -1, "value");
+  obj->o_set("name", "value");
   VS(f_serialize(obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
 
   Variant v = CREATE_MAP3("a","apple","b",2,"c",CREATE_VECTOR3(1,"y",3));

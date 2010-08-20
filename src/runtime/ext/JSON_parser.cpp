@@ -419,9 +419,9 @@ static void object_set(Variant &var, StringBuffer &key, Variant &value,
   String data = key.detach();
   if (!assoc) {
     if (data.empty()) {
-      var.toObject()->o_set("_empty_", -1, ref(value));
+      var.toObject()->o_set("_empty_", ref(value));
     } else {
-      var.toObject()->o_set(data, -1, ref(value));
+      var.toObject()->o_set(data, ref(value));
     }
   } else {
     var.set(data, ref(value));

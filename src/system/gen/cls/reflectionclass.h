@@ -33,7 +33,7 @@ class c_reflectionclass : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static Variant os_getInit(const char *s, int64 hash);
+  static Variant os_getInit(CStrRef s);
 #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionclass 1
 #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionclass 1
   static Variant os_constant(const char *s);
@@ -42,31 +42,22 @@ class c_reflectionclass : public ExtObjectData {
   public:
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
-  bool o_exists(CStrRef s, int64 hash, CStrRef context = null_string) const
-{ return ObjectData::o_exists(s, hash, context); }
-    virtual bool o_exists(CStrRef prop, int64 phash, const char *context, int64 hash) const;
-  bool o_existsPrivate(CStrRef s, int64 hash) const;
-  Variant o_get(CStrRef s, int64 hash, bool error = true, CStrRef context = null_string)
-{ return ObjectData::o_get(s, hash, error, context); }
-    virtual Variant o_get(CStrRef prop, int64 phash, bool error, const char *context, int64 hash);
-  Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);
-  Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false, CStrRef context = null_string)
-{ return ObjectData::o_set(s, hash, v, forInit, context); }
-    virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v, bool forInit, const char *context, int64 hash);
-  Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit);
-  Variant &o_lval(CStrRef s, int64 hash, CStrRef context = null_string)
-{ return ObjectData::o_lval(s, hash, context); }
-    virtual Variant &o_lval(CStrRef prop, int64 phash, const char *context, int64 hash);
-  Variant &o_lvalPrivate(CStrRef s, int64 hash);
+  virtual bool o_exists(CStrRef s, CStrRef context = null_string) const;
+  bool o_existsPrivate(CStrRef s) const;
+  virtual Variant o_get(CStrRef s, bool error = true, CStrRef context = null_string);
+  Variant o_getPrivate(CStrRef s, bool error = true);
+  virtual Variant o_set(CStrRef s, CVarRef v, bool forInit = false, CStrRef context = null_string);
+  Variant o_setPrivate(CStrRef s, CVarRef v, bool forInit);
+  virtual Variant &o_lval(CStrRef s, CStrRef context = null_string);
+  Variant &o_lvalPrivate(CStrRef s);
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  virtual bool o_existsPublic(CStrRef s, int64 hash) const;
-  virtual Variant o_getPublic(CStrRef s, int64 hash,
-                              bool error = true);
-  virtual Variant o_setPublic(CStrRef s, int64 hash,
+  virtual bool o_existsPublic(CStrRef s) const;
+  virtual Variant o_getPublic(CStrRef s, bool error = true);
+  virtual Variant o_setPublic(CStrRef s,
                               CVarRef v, bool forInit);
-  virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
+  virtual Variant &o_lvalPublic(CStrRef s);
 
   // DECLARE_COMMON_INVOKE
   static Variant os_invoke(const char *c, MethodIndex methodIndex,

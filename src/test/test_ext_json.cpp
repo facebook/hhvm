@@ -62,9 +62,9 @@ bool TestExtJson::test_json_decode() {
 
   Object obj = f_json_decode("{\"a\":1,\"b\":2.3,\"3\":\"test\"}");
   Object obj2((NEW(c_stdclass)())->create());
-  obj2->o_set("a", -1, 1);
-  obj2->o_set("b", -1, 2.3);
-  obj2->o_set("3", -1, "test");
+  obj2->o_set("a", 1);
+  obj2->o_set("b", 2.3);
+  obj2->o_set("3", "test");
   VS(obj.toArray(), obj2.toArray());
 
   obj = f_json_decode("[\"a\",1,true,false,null]");

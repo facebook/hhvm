@@ -218,8 +218,9 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         ExpressionPtr value = assignment->getValue();
         value->outputCPPBegin(cg, ar);
         if (derivFromRedec) {
-          cg_printf("%sset(\"%s\",-1, ", Option::ObjectPrefix,
-                    var->getName().c_str());
+          cg_printf("%sset(", Option::ObjectPrefix);
+          cg_printString(var->getName(), ar);
+          cg_printf(", ");
           value->outputCPP(cg, ar);
           cg_printf(")");
         } else {
@@ -231,8 +232,9 @@ void ClassVariable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         var = dynamic_pointer_cast<SimpleVariable>(exp);
         if (derivFromRedec) {
-          cg_printf("%sset(\"%s\",-1, null);\n", Option::ObjectPrefix,
-                    var->getName().c_str());
+          cg_printf("%sset(", Option::ObjectPrefix);
+          cg_printString(var->getName(), ar);
+          cg_printf(", null);\n");
         } else  {
           type = scope->getVariables()->getFinalType(var->getName());
           const char *initializer = type->getCPPInitializer();

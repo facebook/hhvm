@@ -1356,8 +1356,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function,
       sparam = fault->details[0];
 
       if (detail.isObject() && sparam->element) {
-        Variant prop = detail.toObject()->o_get(sparam->element->name.c_str(),
-                                                -1);
+        Variant prop = detail.toObject()->o_get(sparam->element->name.c_str());
         if (!prop.isNull()) {
           detail = prop;
         }
@@ -2694,7 +2693,7 @@ Variant c_soapclient::t___setcookie(String name,
   INSTANCE_METHOD_INJECTION_BUILTIN(soapclient, soapclient::__setcookie);
   if (!value.isNull()) {
     m_cookies.set(name, CREATE_VECTOR1(value));
-  } else if (o_exists("_cookies", -1)) {
+  } else if (o_exists("_cookies")) {
     m_cookies.remove(name);
   }
   return null;

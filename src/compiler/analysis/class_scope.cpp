@@ -836,7 +836,7 @@ void ClassScope::outputCPPGetStaticPropertyImpl
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
             system ? "_builtin" : "");
-  cg.printf("if (cwo) return cwo->os_get(prop, -1);\n");
+  cg.printf("if (cwo) return cwo->os_get(prop);\n");
   cg.indentEnd("}\n");
 
   if (!system) {
@@ -862,7 +862,7 @@ void ClassScope::outputCPPGetStaticPropertyImpl
   cg.printf("const ObjectStaticCallbacks * cwo = "
             "get%s_object_static_callbacks(s);\n",
             system ? "_builtin" : "");
-  cg.printf("if (cwo) return &cwo->os_lval(prop, -1);\n");
+  cg.printf("if (cwo) return &cwo->os_lval(prop);\n");
   cg.indentEnd("}\n");
 
   if (!system) {

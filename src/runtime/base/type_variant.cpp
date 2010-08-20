@@ -1647,7 +1647,7 @@ Object Variant::toObject() const {
   case KindOfString:
     {
       c_stdclass *obj = NEW(c_stdclass)();
-      obj->o_lval(s_scalar, -1) = *this;
+      obj->o_lval(s_scalar) = *this;
       return obj;
     }
   case KindOfArray:   return m_data.parr->toObject();
@@ -2358,13 +2358,12 @@ Variant Variant::refvalAtImpl(CStrRef key, int64 prehash /* = -1 */,
   }
 }
 
-Variant Variant::o_get(CStrRef propName, int64 prehash /* = -1 */,
-                       bool error /* = true */,
+Variant Variant::o_get(CStrRef propName, bool error /* = true */,
                        CStrRef context /* = null_string */) const {
   if (m_type == KindOfObject) {
-    return m_data.pobj->o_get(propName, prehash, error, context);
+    return m_data.pobj->o_get(propName, error, context);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_get(propName, prehash, error, context);
+    return m_data.pvar->o_get(propName, error, context);
   } else if (error) {
     raise_notice("Trying to get property of non-object");
   }
@@ -2586,22 +2585,22 @@ Variant Variant::o_root_invoke_few_args_mil(const char *s, int64 hash,
 }
 
 
-ObjectOffset Variant::o_lval(CStrRef propName, int64 prehash /*= -1 */,
+ObjectOffset Variant::o_lval(CStrRef propName,
                              CStrRef context /* = null_string */) {
   if (m_type == KindOfObject) {
-    return Object(m_data.pobj).o_lval(propName, prehash, context);
+    return Object(m_data.pobj).o_lval(propName, context);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_lval(propName, prehash, context);
+    return m_data.pvar->o_lval(propName, context);
   } else if (isObjectConvertable()) {
     set(Object(NEW(c_stdclass)()));
-    return Object(m_data.pobj).o_lval(propName, prehash, context);
+    return Object(m_data.pobj).o_lval(propName, context);
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
     // Return an ObjectOffset blackhole
     Variant ret;
     ret.set(Object(NEW(c_stdclass)()));
-    return Object(ret.m_data.pobj).o_lval(propName, prehash, context);
+    return Object(ret.m_data.pobj).o_lval(propName, context);
   }
 }
 
@@ -3171,7 +3170,7 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
         obj = create_object(clsName.data(), Array::Create(), false);
       } catch (ClassNotFoundException &e) {
         obj = create_object("__PHP_Incomplete_Class", Array::Create(), false);
-        obj->o_set("__PHP_Incomplete_Class_Name", -1, clsName);
+        obj->o_set("__PHP_Incomplete_Class_Name", clsName);
       }
       operator=(obj);
       int64 size;
@@ -3200,10 +3199,10 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
           }
           Variant &value = subLen != 0 ?
             (key.charAt(1) == '*' ?
-             obj->o_lval(key.substr(subLen), -1, clsName) :
-             obj->o_lval(key.substr(subLen), -1,
+             obj->o_lval(key.substr(subLen), clsName) :
+             obj->o_lval(key.substr(subLen),
                          String(key.data() + 1, subLen - 2, AttachLiteral)))
-            : obj->o_lval(key, -1);
+            : obj->o_lval(key);
           value.unserialize(unserializer);
         }
       }
@@ -3279,10 +3278,10 @@ Variant Variant::share(bool save) const {
     if (save) {
       // we have to return an object so to remember its type
       c_stdclass *obj = NEW(c_stdclass)();
-      obj->o_set(s_s, -1, f_serialize(*this));
+      obj->o_set(s_s, f_serialize(*this));
       return obj;
     } else {
-      return f_unserialize(m_data.pobj->o_get(s_s, -1));
+      return f_unserialize(m_data.pobj->o_get(s_s));
     }
     break;
   default:

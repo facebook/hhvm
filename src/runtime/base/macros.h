@@ -115,53 +115,33 @@ namespace HPHP {
 #define DECLARE_STATIC_PROP_OPS                                         \
   public:                                                               \
   static void os_static_initializer();                                  \
-  static Variant os_getInit(const char *s, int64 hash);                 \
-  static Variant os_get(const char *s, int64 hash);                     \
-  static Variant &os_lval(const char *s, int64 hash);                   \
+  static Variant os_getInit(CStrRef s);                                 \
+  static Variant os_get(CStrRef s);                                     \
+  static Variant &os_lval(CStrRef s);                                   \
   static Variant os_constant(const char *s);                            \
-
-#define DECLARE_INSTANCE_PROP_WRAPPER_OPS                               \
-  public:                                                               \
-  bool o_exists(CStrRef s, int64 hash, CStrRef context = null_string)   \
-      const { return ObjectData::o_exists(s, hash, context); }          \
-  Variant o_get(CStrRef s, int64 hash, bool error = true,               \
-                CStrRef context = null_string) {                        \
-    return ObjectData::o_get(s, hash, error, context);                  \
-  }                                                                     \
-  Variant o_set(CStrRef s, int64 hash, CVarRef v, bool forInit = false, \
-                CStrRef context = null_string) {                        \
-    return ObjectData::o_set(s, hash, v, forInit, context);             \
-  }                                                                     \
-  Variant &o_lval(CStrRef s, int64 hash, CStrRef context = null_string) \
-      { return ObjectData::o_lval(s, hash, context); }                  \
 
 #define DECLARE_INSTANCE_PROP_OPS                                       \
   public:                                                               \
-  virtual bool o_exists(CStrRef prop, int64 phash,                      \
-                        const char *context, int64 hash) const;         \
-  bool o_existsPrivate(CStrRef s, int64 hash) const;                    \
+  virtual bool o_exists(CStrRef prop,                                   \
+                        CStrRef context = null_string) const;           \
+  bool o_existsPrivate(CStrRef s) const;                                \
   virtual void o_getArray(Array &props) const;                          \
   virtual void o_setArray(CArrRef props);                               \
-  virtual Variant o_get(CStrRef prop, int64 phash, bool error,          \
-                        const char *context, int64 hash);               \
-  Variant o_getPrivate(CStrRef s, int64 hash, bool error = true);       \
-  virtual Variant o_set(CStrRef prop, int64 phash, CVarRef v,           \
-                        bool forInit,                                   \
-                        const char *context, int64 hash);               \
-  Variant o_setPrivate(CStrRef s, int64 hash, CVarRef v, bool forInit); \
-  virtual Variant &o_lval(CStrRef prop, int64 phash,                    \
-                          const char *context, int64 hash);             \
-  Variant &o_lvalPrivate(CStrRef s, int64 hash);                        \
-  DECLARE_INSTANCE_PROP_WRAPPER_OPS
+  virtual Variant o_get(CStrRef prop, bool error = true,                \
+                        CStrRef context = null_string);                 \
+  Variant o_getPrivate(CStrRef s, bool error = true);                   \
+  virtual Variant o_set(CStrRef prop, CVarRef v, bool forInit = false,  \
+                        CStrRef context = null_string);                 \
+  Variant o_setPrivate(CStrRef s, CVarRef v, bool forInit);             \
+  virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string); \
+  Variant &o_lvalPrivate(CStrRef s);                                    \
 
 #define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
   public:                                                               \
-  virtual bool o_existsPublic(CStrRef s, int64 hash) const;             \
-  virtual Variant o_getPublic(CStrRef s, int64 hash,                    \
-                              bool error = true);                       \
-  virtual Variant o_setPublic(CStrRef s, int64 hash, CVarRef v,         \
-                              bool forInit);                            \
-  virtual Variant &o_lvalPublic(CStrRef s, int64 hash);                 \
+  virtual bool o_existsPublic(CStrRef s) const;                         \
+  virtual Variant o_getPublic(CStrRef s, bool error = true);            \
+  virtual Variant o_setPublic(CStrRef s, CVarRef v, bool forInit);      \
+  virtual Variant &o_lvalPublic(CStrRef s);                             \
 
 #define DECLARE_COMMON_INVOKES                                          \
   static Variant os_invoke(const char *c, MethodIndex methodIndex,      \
@@ -249,6 +229,8 @@ namespace HPHP {
   if (hash == code && !strcasecmp(s, #f))
 #define HASH_GUARD_LITSTR(code, str)                                    \
   if (hash == code && (str.data() == s || !strcasecmp(s, str.data())))
+#define HASH_GUARD_STRING(code, f)                                      \
+  if (hash == code && !strcasecmp(s.data(), #f))
 #define HASH_EXISTS_STRING(code, str, len)                              \
   if (hash == code && s.length() == len &&                              \
       memcmp(s.data(), str, len) == 0) return true
@@ -331,10 +313,10 @@ do { \
     return CLASS_CHECK(g->cwo_ ## f)
 #define HASH_GET_CLASS_VAR_INIT(code, f)                                \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return cw_ ## f.os_getInit(var, -1)
+    return cw_ ## f.os_getInit(var)
 #define HASH_GET_CLASS_VAR_INIT_VOLATILE(code, f)                       \
   if (hash == code && !strcasecmp(s, #f))                               \
-    return CLASS_CHECK(cw_ ## f.os_getInit(var, -1))
+    return CLASS_CHECK(cw_ ## f.os_getInit(var))
 #define HASH_GET_CLASS_VAR_INIT_REDECLARED(code, f)                     \
   if (hash == code && !strcasecmp(s, #f))                               \
     return CLASS_CHECK(g->cso_ ## f->os_getInit(var))

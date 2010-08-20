@@ -45,8 +45,8 @@ void ClassVariable::set(VariableEnvironment &env, EvalObjectData *self) const {
     Variant val(m_value ? m_value->eval(env) : null_variant);
     if (m_modifiers & ClassStatement::Private) {
       self->o_setPrivate(m_cls->name().c_str(), m_name.c_str(), m_hash, val);
-    } else if (!self->o_exists(m_name.c_str(), m_hash)) {
-      self->o_set(m_name.c_str(), m_hash, val, true);
+    } else if (!self->o_exists(m_name.c_str())) {
+      self->o_set(m_name.c_str(), val, true);
     }
   }
 }

@@ -1306,7 +1306,7 @@ static Variant php_mbfl_convert(CVarRef var,
     Object obj = var.toObject();
     Array items = var.toArray();
     for (ArrayIter iter(items); iter; ++iter) {
-      obj->o_set(iter.first().toString(), -1,
+      obj->o_set(iter.first().toString(),
                  php_mbfl_convert(iter.second().toString().data(), convd,
                                   string, result));
     }

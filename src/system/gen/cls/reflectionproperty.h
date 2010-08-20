@@ -33,7 +33,7 @@ class c_reflectionproperty : public ExtObjectData {
 
   // DECLARE_STATIC_PROP_OPS
   public:
-  static Variant os_getInit(const char *s, int64 hash);
+  static Variant os_getInit(CStrRef s);
 #define OMIT_JUMP_TABLE_CLASS_STATIC_GET_reflectionproperty 1
 #define OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_reflectionproperty 1
   static Variant os_constant(const char *s);
@@ -53,12 +53,11 @@ class c_reflectionproperty : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  virtual bool o_existsPublic(CStrRef s, int64 hash) const;
-  virtual Variant o_getPublic(CStrRef s, int64 hash,
-                              bool error = true);
-  virtual Variant o_setPublic(CStrRef s, int64 hash,
+  virtual bool o_existsPublic(CStrRef s) const;
+  virtual Variant o_getPublic(CStrRef s, bool error = true);
+  virtual Variant o_setPublic(CStrRef s,
                               CVarRef v, bool forInit);
-  virtual Variant &o_lvalPublic(CStrRef s, int64 hash);
+  virtual Variant &o_lvalPublic(CStrRef s);
 
   // DECLARE_COMMON_INVOKE
   static Variant os_invoke(const char *c, MethodIndex methodIndex,

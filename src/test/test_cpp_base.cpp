@@ -901,15 +901,15 @@ bool TestCppBase::TestMemoryManager() {
     // Circular reference between two objects.
     {
       Object obj(NEW(c_stdclass)());
-      obj->o_set("a", -1, obj);
-      obj->o_set("f", -1, Object(NEW(PlainFile)()));
+      obj->o_set("a", obj);
+      obj->o_set("f", Object(NEW(PlainFile)()));
     }
     {
       Object obj1(NEW(c_stdclass)());
       Object obj2(NEW(c_stdclass)());
-      obj1->o_set("a", -1, obj2);
-      obj2->o_set("a", -1, obj1);
-      obj1->o_set("f", -1, Object(NEW(PlainFile)()));
+      obj1->o_set("a", obj2);
+      obj2->o_set("a", obj1);
+      obj1->o_set("f", Object(NEW(PlainFile)()));
     }
 
     // dangling APC variables inside circular arrays

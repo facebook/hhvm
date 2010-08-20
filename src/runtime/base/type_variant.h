@@ -625,10 +625,9 @@ class Variant {
 
   Variant &bindClass(ThreadInfo *info) const;
 
-  Variant o_get(CStrRef propName, int64 prehash = -1,
-                bool error = true, CStrRef context = null_string) const;
-  ObjectOffset o_lval(CStrRef propName, int64 prehash = -1,
-                      CStrRef context = null_string);
+  Variant o_get(CStrRef propName, bool error = true,
+                CStrRef context = null_string) const;
+  ObjectOffset o_lval(CStrRef propName, CStrRef context = null_string);
 
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
   Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);

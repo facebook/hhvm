@@ -1158,12 +1158,12 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
 
 static Object create_libxmlerror(xmlError &error) {
   Object ret(NEW(c_libxmlerror)());
-  ret->o_set("level",   -1, error.level);
-  ret->o_set("code",    -1, error.code);
-  ret->o_set("column",  -1, error.int2);
-  ret->o_set("message", -1, String(error.message, CopyString));
-  ret->o_set("file",    -1, String(error.file, CopyString));
-  ret->o_set("line",    -1, error.line);
+  ret->o_set("level",   error.level);
+  ret->o_set("code",    error.code);
+  ret->o_set("column",  error.int2);
+  ret->o_set("message", String(error.message, CopyString));
+  ret->o_set("file",    String(error.file, CopyString));
+  ret->o_set("line",    error.line);
   return ret;
 }
 

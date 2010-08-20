@@ -1149,20 +1149,21 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, CVarRef data, int style,
 
 static bool get_zval_property(Variant &object, const char* name,
                               Variant *ret = NULL) {
+  String sname(name);
   if (object.isObject()) {
     Object obj = object.toObject();
-    if (!obj->o_exists(name, -1)) {
+    if (!obj->o_exists(sname)) {
       return false;
     }
-    if (ret) *ret = ref(obj->o_lval(name, -1));
+    if (ret) *ret = ref(obj->o_lval(sname));
     return true;
   }
   if (object.isArray()) {
     Array arr = object.toArray();
-    if (!arr.exists(name)) {
+    if (!arr.exists(sname)) {
       return false;
     }
-    if (ret) *ret = ref(object.lvalAt(name));
+    if (ret) *ret = ref(object.lvalAt(sname));
     return true;
   }
   return false;
@@ -1233,7 +1234,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     node = node->next;
   }
   if (any) {
-    ret.toObject()->o_set(name ? name : "any", -1, any);
+    ret.toObject()->o_set(name ? name : "any", any);
   }
 }
 

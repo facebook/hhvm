@@ -33,6 +33,7 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(SimpleCounter, s_counter);
 
 void SimpleCounter::requestInit() {
   m_counters.clear();
+  m_stacks.clear();
 }
 
 bool SimpleCounter::Comparer::operator()(const string &s1, const string &s2) {

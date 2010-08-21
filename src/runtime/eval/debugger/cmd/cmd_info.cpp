@@ -168,7 +168,7 @@ String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
     info = info[0];
     if (info.exists("params")) {
       StringBuffer sb;
-      sb.printf("<?php function %s%s(%s);\n",
+      sb.printf("function %s%s(%s);\n",
                 info["ref"].toBoolean() ? "&" : "",
                 info["name"].toString().data(),
                 GetParams(info["params"], info["varg"]).data());
@@ -190,18 +190,16 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
       &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassConstants]);
 
     FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
-    if (frame) {
-      bool global;
-      Array variables = CmdVariable::GetLocalVariables(frame, global);
-      if (!global) {
-        variables += CmdVariable::GetGlobalVariables();
-      }
-      vector<String> &vars =
-        (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];
-      vars.reserve(variables.size());
-      for (ArrayIter iter(variables); iter; ++iter) {
-        vars.push_back(String("$") + iter.second().toString());
-      }
+    bool global;
+    Array variables = CmdVariable::GetLocalVariables(frame, global);
+    if (!global) {
+      variables += CmdVariable::GetGlobalVariables();
+    }
+    vector<String> &vars =
+      (*m_acLiveLists)[DebuggerClient::AutoCompleteVariables];
+    vars.reserve(variables.size());
+    for (ArrayIter iter(variables); iter; ++iter) {
+      vars.push_back(String("$") + iter.first().toString());
     }
 
     return proxy->send(this);

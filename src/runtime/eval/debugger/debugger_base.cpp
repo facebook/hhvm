@@ -464,6 +464,15 @@ static void append_line_no(StringBuffer &sb, const char *text,
   if (end) sb.append(end);
 }
 
+String highlight_code(CStrRef source, int line /* = 0 */,
+                      int lineFocus /* = 0 */) {
+  String prepended = "<?php\n";
+  prepended += source;
+  String highlighted = highlight_php(prepended, line, lineFocus);
+  int pos = highlighted.find("\n");
+  return highlighted.substr(pos + 1);
+}
+
 String highlight_php(CStrRef source, int line /* = 0 */,
                      int lineFocus /* = 0 */) {
   Lock lock(Eval::Parser::s_lock);

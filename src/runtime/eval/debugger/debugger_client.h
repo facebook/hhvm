@@ -243,7 +243,6 @@ public:
   void addCompletion(const char **list);
   void addCompletion(const char *name);
   void addCompletion(const std::vector<String> &items);
-  void phpCompletion(const char *text);
   void setLiveLists(LiveListsPtr liveLists) { m_acLiveLists = liveLists;}
 
   /**
@@ -290,6 +289,7 @@ private:
   std::vector<String> m_acItems;
   bool m_acLiveListsDirty;
   LiveListsPtr m_acLiveLists;
+  bool m_acProtoTypePrompted;
 
   std::string m_line;
   std::string m_command;
@@ -337,6 +337,7 @@ private:
   DebuggerCommand *createCommand();
 
   void updateLiveLists();
+  void promptFunctionPrototype();
   char *getCompletion(const std::vector<String> &items,
                       const char *text);
   char *getCompletion(const std::vector<const char *> &items,

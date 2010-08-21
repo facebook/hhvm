@@ -127,9 +127,11 @@ Array CmdVariable::GetGlobalVariables() {
 
 Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
   Array ret;
-  if (!frame || (global = FrameInjection::IsGlobalScope(frame))) {
+  if (!frame || FrameInjection::IsGlobalScope(frame)) {
+    global = true;
     ret = GetGlobalVariables();
   } else {
+    global = false;
     EvalFrameInjection *eframe = dynamic_cast<EvalFrameInjection*>(frame);
     if (eframe) {
       ret = eframe->getEnv().getDefinedVariables();

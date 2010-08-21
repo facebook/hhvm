@@ -36,7 +36,7 @@
 using namespace std;
 using namespace HPHP::Util::TextArt;
 
-#define PHP_WORD_BREAK_CHARACTERS " \t\n\"\\'`@>=:;,.|{[()]}+-*/%^!~&"
+#define PHP_WORD_BREAK_CHARACTERS " \t\n\"\\'`@>=:;,|{[()]}+*%^!~&"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -64,6 +64,9 @@ void DebuggerClient::onSignal(int sig) {
   if (m_inputState == TakingInterrupt) {
     info("Pausing program execution, please wait...");
     m_signum = CmdSignal::SignalBreak;
+  } else {
+    rl_replace_line("", 0);
+    rl_redisplay();
   }
 }
 
@@ -510,37 +513,36 @@ void DebuggerClient::updateLiveLists() {
   m_acLiveListsDirty = false;
 }
 
-void DebuggerClient::phpCompletion(const char *text) {
+void DebuggerClient::promptFunctionPrototype() {
+  if (m_acProtoTypePrompted) return;
+  m_acProtoTypePrompted = true;
+
   const char *p0 = rl_line_buffer;
   int len = strlen(p0);
-  if (len) {
-    const char *pLast = p0 + len - 1;
-    while (isspace(*pLast)) --pLast;
-    if (*pLast-- == '(') {
-      while (isspace(*pLast)) --pLast;
-      const char *p = pLast;
-      while (p >= p0 && (isalnum(*p) || *p == '_')) --p;
-      if (pLast > p) {
-        string cls;
-        string func(p + 1, pLast - p);
-        if (p > text && *p-- == ':' && *p-- == ':') {
-          pLast = p;
-          while (p >= text && (isalnum(*p) || *p == '_')) --p;
-          if (pLast > p) {
-            cls = string(p + 1, pLast - p);
-          }
-        }
+  if (len < 2) return;
 
-        rl_save_prompt();
-        String output = CmdInfo::GetProtoType(this, cls, func);
-        rl_message("\n%s\n", output.data());
-        rl_restore_prompt();
-      }
+  const char *pLast = p0 + len - 1;
+  while (pLast > p0 && isspace(*pLast)) --pLast;
+  if (pLast == p0 || *pLast-- != '(') return;
+  while (pLast > p0 && isspace(*pLast)) --pLast;
+
+  const char *p = pLast;
+  while (p >= p0 && (isalnum(*p) || *p == '_')) --p;
+  if (p == pLast) return;
+
+  string cls;
+  string func(p + 1, pLast - p);
+  if (p > p0 && *p-- == ':' && *p-- == ':') {
+    pLast = p;
+    while (p >= p0 && (isalnum(*p) || *p == '_')) --p;
+    if (pLast > p) {
+      cls = string(p + 1, pLast - p);
     }
   }
 
-  // generic bare word that can be any of these
-  addCompletion(AutoCompleteCode);
+  String output = highlight_code(CmdInfo::GetProtoType(this, cls, func));
+  print("\n%s", output.data());
+  rl_forced_update_display();
 }
 
 bool DebuggerClient::setCompletion(const char *text, int start, int end) {
@@ -578,9 +580,9 @@ void DebuggerClient::addCompletion(AutoComplete type) {
     m_acLists.push_back((const char **)type);
   }
 
-  if (type == AutoCompleteVariables) {
-    addCompletion("$this");
-    addCompletion("$this->");
+  if (type == AutoCompleteFunctions || type == AutoCompleteClassMethods) {
+    rl_completion_suppress_append = 1;
+    promptFunctionPrototype();
   }
 }
 
@@ -621,7 +623,7 @@ char *DebuggerClient::getCompletion(const std::vector<const char *> &items,
 }
 
 static char first_non_whitespace(const char *s) {
-  while (isspace(*s)) s++;
+  while (*s && isspace(*s)) s++;
   return *s;
 }
 
@@ -633,30 +635,33 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
     m_acLists.clear();
     m_acStrings.clear();
     m_acItems.clear();
+    m_acProtoTypePrompted = false;
     if (m_inputState == TakingCommand) {
-      if (m_command.empty()) {
-        addCompletion(GetCommands());
-        addCompletion("=");
-        addCompletion("$");
-        addCompletion("<?php");
-        addCompletion("?>");
-      } else {
-        DebuggerCommand *cmd = createCommand();
-        if (cmd) {
-          DebuggerCommandPtr deleter(cmd);
-          cmd->list(this);
-        } else {
-          switch (first_non_whitespace(rl_line_buffer)) {
-            case '<':
-              if (strncasecmp(m_command.substr(0, 5).c_str(), "<?php", 5)) {
-                break;
-              }
-            case '=':
-            case '$': {
-              phpCompletion(text);
-              break;
+      switch (first_non_whitespace(rl_line_buffer)) {
+        case '<':
+          if (strncasecmp(m_command.substr(0, 5).c_str(), "<?php", 5)) {
+            addCompletion("<?php");
+            break;
+          }
+        case '=':
+        case '$': {
+          addCompletion(AutoCompleteCode);
+          break;
+        }
+        default: {
+          if (m_command.empty()) {
+            addCompletion(GetCommands());
+            addCompletion("=");
+            addCompletion("<?php");
+            addCompletion("?>");
+          } else {
+            DebuggerCommand *cmd = createCommand();
+            if (cmd) {
+              DebuggerCommandPtr deleter(cmd);
+              cmd->list(this);
             }
           }
+          break;
         }
       }
     } else {
@@ -664,7 +669,7 @@ char *DebuggerClient::getCompletion(const char *text, int state) {
       if (!*rl_line_buffer) {
         addCompletion("?>"); // so we tab, we're done
       } else {
-        phpCompletion(text); // context-sensitive help with PHP
+        addCompletion(AutoCompleteCode);
       }
     }
   }
@@ -860,11 +865,7 @@ bool DebuggerClient::console() {
 void DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
                           int line2 /* = 0 */) {
   if (line1 == 0 && line2 == 0) {
-    String prepended = "<?php\n";
-    prepended += source;
-    String highlighted = highlight_php(prepended, 0, lineFocus);
-    int pos = highlighted.find("\n");
-    print("%s", highlighted.data() + pos + 1);
+    print(highlight_code(source, 0, lineFocus));
     return;
   }
 

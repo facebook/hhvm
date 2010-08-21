@@ -155,7 +155,12 @@ bool CmdList::onClient(DebuggerClient *client) {
       m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
     }
     if (m_file.empty()) {
-      client->error("There is no current source file.");
+      string code = client->getCode();
+      if (code.empty()) {
+        client->error("There is no current source file.");
+        return true;
+      }
+      client->print(highlight_php(code));
       return true;
     }
   }

@@ -130,19 +130,19 @@ void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
 }
 
 void CmdPrint::list(DebuggerClient *client) {
+  if (client->arg(1, "clear")) {
+    client->addCompletion("all");
+    return;
+  }
+  client->addCompletion(DebuggerClient::AutoCompleteCode);
+
   if (client->argCount() == 0) {
     client->addCompletion(Formats);
     client->addCompletion("always");
     client->addCompletion("list");
     client->addCompletion("clear");
-    client->addCompletion(DebuggerClient::AutoCompleteCode);
-  } else if (client->argCount() == 1) {
-    if (client->arg(1, "always")) {
-      client->addCompletion(Formats);
-      client->addCompletion(DebuggerClient::AutoCompleteCode);
-    } else if (client->arg(1, "clear")) {
-      client->addCompletion("all");
-    }
+  } else if (client->argCount() == 1 && client->arg(1, "always")) {
+    client->addCompletion(Formats);
   }
 }
 

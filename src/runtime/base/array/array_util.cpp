@@ -18,7 +18,7 @@
 #include <runtime/base/string_util.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_error.h>
-#include <algorithm>
+#include <runtime/ext/ext_math.h>
 #include <runtime/ext/ext_json.h>
 
 using namespace std;
@@ -523,6 +523,21 @@ Variant ArrayUtil::Reverse(CArrRef input, bool preserve_keys /* = false */) {
   return ret;
 }
 
+static void php_array_data_shuffle(std::vector<ssize_t> &indices) {
+  int n_elems = indices.size();
+  if (n_elems > 1) {
+    int n_left = n_elems;
+    while (--n_left) {
+      int rnd_idx = f_rand(0, n_left);
+      if (rnd_idx != n_left) {
+        ssize_t temp = indices[n_left];
+        indices[n_left] = indices[rnd_idx];
+        indices[rnd_idx] = temp;
+      }
+    }
+  }
+}
+
 Variant ArrayUtil::Shuffle(CArrRef input) {
   int count = input.size();
   if (count == 0) {
@@ -535,7 +550,7 @@ Variant ArrayUtil::Shuffle(CArrRef input) {
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }
-  random_shuffle(indices.begin(), indices.end());
+  php_array_data_shuffle(indices);
 
   Array ret = Array::Create();
   for (int i = 0; i < count; i++) {
@@ -557,7 +572,7 @@ Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }
-  random_shuffle(indices.begin(), indices.end());
+  php_array_data_shuffle(indices);
 
   if (num_req == 1) {
     return input->getKey(indices[0]);
@@ -583,7 +598,7 @@ Variant ArrayUtil::RandomValues(CArrRef input, int num_req /* = 1 */) {
        pos = input->iter_advance(pos)) {
     indices.push_back(pos);
   }
-  random_shuffle(indices.begin(), indices.end());
+  php_array_data_shuffle(indices);
 
   if (num_req == 1) {
     return input->getValue(indices[0]);

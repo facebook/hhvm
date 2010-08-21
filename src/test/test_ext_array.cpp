@@ -17,6 +17,7 @@
 #include <test/test_ext_array.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/ext/ext_array.h>
+#include <runtime/ext/ext_math.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -1073,22 +1074,14 @@ bool TestExtArray::test_compact() {
 }
 
 bool TestExtArray::test_shuffle() {
-  Variant numbers = f_range(1, 20);
+  Variant numbers = f_range(1, 4);
+  f_srand(5);
   f_shuffle(ref(numbers));
   Array numArr = numbers.toArray();
-  VS(numArr.size(), 20);
-  int i = 1;
-  int count = 0;
-  for (ArrayIter iter(numArr); iter; ++iter, ++i) {
-    int num = iter.second().toInt32();
-    VERIFY(num >= 1);
-    VERIFY(num <= 20);
-    if (num != i) count++;
-
-    VERIFY(iter.first().toInt64() == i - 1);
-  }
-  VERIFY(count > 0); // well, small chance to fail here
-
+  VS(numArr[0], 3);
+  VS(numArr[1], 4);
+  VS(numArr[2], 1);
+  VS(numArr[3], 2);
   return Count(true);
 }
 

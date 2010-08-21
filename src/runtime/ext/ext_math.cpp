@@ -173,6 +173,7 @@ Numeric f_pow(CVarRef base, CVarRef exp) {
 static bool s_rand_is_seeded = false;
 
 void f_srand(CVarRef seed /* = null_variant */) {
+  s_rand_is_seeded = true;
   if (seed.isNull()) {
     return srand(GENERATE_SEED());
   }

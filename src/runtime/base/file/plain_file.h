@@ -66,6 +66,16 @@ protected:
 };
 
 /**
+ * This is wrapper for fds that cannot be closed.
+ */
+class BuiltinFile : public PlainFile {
+public:
+  BuiltinFile(FILE *stream) : PlainFile(stream) {}
+  virtual ~BuiltinFile();
+  virtual bool close();
+};
+
+/**
  * A request-local wrapper for the three standard files:
  * STDIN, STDOUT, and STDERR.
  */

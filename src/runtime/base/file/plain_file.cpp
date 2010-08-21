@@ -173,10 +173,23 @@ bool PlainFile::truncate(int64 size) {
 ///////////////////////////////////////////////////////////////////////////////
 // BuiltinFiles
 
+BuiltinFile::~BuiltinFile() {
+  m_closed = true;
+  m_stream = NULL;
+  m_fd = -1;
+}
+
+bool BuiltinFile::close() {
+  m_closed = true;
+  m_stream = NULL;
+  m_fd = -1;
+  File::closeImpl();
+  return true;
+}
+
 IMPLEMENT_REQUEST_LOCAL(BuiltinFiles, g_builtin_files);
 
 void BuiltinFiles::requestInit() {
-  // Ensure STDIN, STDOUT, and STDERR are the first 3 resources.
   GetSTDIN();
   GetSTDOUT();
   GetSTDERR();
@@ -190,21 +203,30 @@ void BuiltinFiles::requestShutdown() {
 
 CVarRef BuiltinFiles::GetSTDIN() {
   if (g_builtin_files->m_stdin.isNull()) {
-    g_builtin_files->m_stdin = NEW(PlainFile)(stdin);
+    BuiltinFile *f = NEW(BuiltinFile)(stdin);
+    g_builtin_files->m_stdin = f;
+    f->o_setId(1);
+    ASSERT(f->o_getId() == 1);
   }
   return g_builtin_files->m_stdin;
 }
 
 CVarRef BuiltinFiles::GetSTDOUT() {
   if (g_builtin_files->m_stdout.isNull()) {
-    g_builtin_files->m_stdout = NEW(PlainFile)(stdout);
+    BuiltinFile *f = NEW(BuiltinFile)(stdout);
+    g_builtin_files->m_stdout = f;
+    f->o_setId(2);
+    ASSERT(f->o_getId() == 2);
   }
   return g_builtin_files->m_stdout;
 }
 
 CVarRef BuiltinFiles::GetSTDERR() {
   if (g_builtin_files->m_stderr.isNull()) {
-    g_builtin_files->m_stderr = NEW(PlainFile)(stderr);
+    BuiltinFile *f = NEW(BuiltinFile)(stderr);
+    g_builtin_files->m_stderr = f;
+    f->o_setId(3);
+    ASSERT(f->o_getId() == 3);
   }
   return g_builtin_files->m_stderr;
 }

@@ -25,14 +25,23 @@ namespace HPHP {
 static IMPLEMENT_THREAD_LOCAL(int, os_max_resource_id);
 
 ResourceData::ResourceData() : ObjectData(true) {
-  o_id = ++(*os_max_resource_id.get());
+  int &pmax = *os_max_resource_id;
+  if (pmax < 3) pmax = 3; // reserving 1, 2, 3 for STDIN, STDOUT, STDERR
+  o_id = ++pmax;
+}
+
+void ResourceData::o_setId(int id) {
+  ASSERT(id >= 1 && id <= 3); // only for STDIN, STDOUT, STDERR
+  int &pmax = *os_max_resource_id;
+  if (o_id != id) {
+    if (o_id == pmax) --pmax;
+    o_id = id;
+  }
 }
 
 ResourceData::~ResourceData() {
-  int *pmax = os_max_resource_id.get();
-  if (o_id == *pmax) {
-    --(*pmax);
-  }
+  int &pmax = *os_max_resource_id;
+  if (o_id == pmax) --pmax;
   o_id = -1;
 }
 

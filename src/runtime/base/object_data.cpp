@@ -40,7 +40,7 @@ static IMPLEMENT_THREAD_LOCAL(int, os_max_id);
 ObjectData::ObjectData(bool isResource /* = false */)
     : o_properties(NULL), o_attribute(0) {
   if (!isResource) {
-    o_id = ++(*os_max_id.get());
+    o_id = ++(*os_max_id);
   }
 }
 
@@ -48,10 +48,8 @@ ObjectData::~ObjectData() {
   if (o_properties) {
     o_properties->release();
   }
-  int *pmax = os_max_id.get();
-  if (o_id && o_id == *pmax) {
-    --(*pmax);
-  }
+  int &pmax = *os_max_id;
+  if (o_id == pmax) --pmax;
 }
 
 void ObjectData::

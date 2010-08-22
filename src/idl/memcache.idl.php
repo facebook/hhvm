@@ -717,7 +717,7 @@ DefineFunction(
     'desc'   => "Memcache::connect() establishes a connection to the memcached server. The connection, which was opened using Memcache::connect() will be automatically closed at the end of script execution. Also you can close it with Memcache::close(). Also you can use memcache_connect() function.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => null,
+      'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
@@ -752,7 +752,7 @@ DefineFunction(
     'desc'   => "Memcache::pconnect() is similar to Memcache::connect() with the difference, that the connection it establishes is persistent. This connection is not closed after the end of script execution and by Memcache::close() function. Also you can use memcache_pconnect() function.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => null,
+      'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(

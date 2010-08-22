@@ -32242,13 +32242,13 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_pconnect(arg0), null);
+          if (count <= 1) return (t_pconnect(arg0));
           CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 2) return (t_pconnect(arg0, arg1), null);
+          if (count == 2) return (t_pconnect(arg0, arg1));
           CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_pconnect(arg0, arg1, arg2), null);
+          if (count == 3) return (t_pconnect(arg0, arg1, arg2));
           CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_pconnect(arg0, arg1, arg2, arg3), null);
+          return (t_pconnect(arg0, arg1, arg2, arg3));
         }
       }
       break;
@@ -32278,13 +32278,13 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_connect(arg0), null);
+          if (count <= 1) return (t_connect(arg0));
           CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 2) return (t_connect(arg0, arg1), null);
+          if (count == 2) return (t_connect(arg0, arg1));
           CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_connect(arg0, arg1, arg2), null);
+          if (count == 3) return (t_connect(arg0, arg1, arg2));
           CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_connect(arg0, arg1, arg2, arg3), null);
+          return (t_connect(arg0, arg1, arg2, arg3));
         }
       }
       break;
@@ -32564,13 +32564,13 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_pconnect(arg0), null);
+          if (count <= 1) return (t_pconnect(arg0));
           CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 2) return (t_pconnect(arg0, arg1), null);
+          if (count == 2) return (t_pconnect(arg0, arg1));
           CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_pconnect(arg0, arg1, arg2), null);
+          if (count == 3) return (t_pconnect(arg0, arg1, arg2));
           CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_pconnect(arg0, arg1, arg2, arg3), null);
+          return (t_pconnect(arg0, arg1, arg2, arg3));
         }
       }
       break;
@@ -32614,13 +32614,13 @@ Variant c_memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          if (count <= 1) return (t_connect(arg0), null);
+          if (count <= 1) return (t_connect(arg0));
           CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 2) return (t_connect(arg0, arg1), null);
+          if (count == 2) return (t_connect(arg0, arg1));
           CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_connect(arg0, arg1, arg2), null);
+          if (count == 3) return (t_connect(arg0, arg1, arg2));
           CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_connect(arg0, arg1, arg2, arg3), null);
+          return (t_connect(arg0, arg1, arg2, arg3));
         }
       }
       break;
@@ -32744,10 +32744,10 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
     case 0xd3:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
-        if (count <= 1) return (t_pconnect(a0), null);
-        if (count == 2) return (t_pconnect(a0, a1), null);
-        if (count == 3) return (t_pconnect(a0, a1, a2), null);
-        return (t_pconnect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_pconnect(a0));
+        if (count == 2) return (t_pconnect(a0, a1));
+        if (count == 3) return (t_pconnect(a0, a1, a2));
+        return (t_pconnect(a0, a1, a2, a3));
       }
       break;
     case 0xd5:
@@ -32766,10 +32766,10 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
     case 0xd7:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
-        if (count <= 1) return (t_connect(a0), null);
-        if (count == 2) return (t_connect(a0, a1), null);
-        if (count == 3) return (t_connect(a0, a1, a2), null);
-        return (t_connect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_connect(a0));
+        if (count == 2) return (t_connect(a0, a1));
+        if (count == 3) return (t_connect(a0, a1, a2));
+        return (t_connect(a0, a1, a2, a3));
       }
       break;
     case 0xd9:
@@ -32928,10 +32928,10 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
     case 57:
       HASH_GUARD_LITSTR(0x742B441E13CD7279LL, NAMSTR(s_sys_ss13cd7279, "pconnect")) {
         if (count < 1 || count > 4) return throw_wrong_arguments("pconnect", count, 1, 4, 1);
-        if (count <= 1) return (t_pconnect(a0), null);
-        if (count == 2) return (t_pconnect(a0, a1), null);
-        if (count == 3) return (t_pconnect(a0, a1, a2), null);
-        return (t_pconnect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_pconnect(a0));
+        if (count == 2) return (t_pconnect(a0, a1));
+        if (count == 3) return (t_pconnect(a0, a1, a2));
+        return (t_pconnect(a0, a1, a2, a3));
       }
       break;
     case 58:
@@ -32955,10 +32955,10 @@ Variant c_memcache::o_invoke_few_args(MethodIndex methodIndex, const char *s, in
     case 62:
       HASH_GUARD_LITSTR(0x7032C660AD16D7FELL, NAMSTR(s_sys_ss52e92802, "connect")) {
         if (count < 1 || count > 4) return throw_wrong_arguments("connect", count, 1, 4, 1);
-        if (count <= 1) return (t_connect(a0), null);
-        if (count == 2) return (t_connect(a0, a1), null);
-        if (count == 3) return (t_connect(a0, a1, a2), null);
-        return (t_connect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_connect(a0));
+        if (count == 2) return (t_connect(a0, a1));
+        if (count == 3) return (t_connect(a0, a1, a2));
+        return (t_connect(a0, a1, a2, a3));
       }
       break;
     default:
@@ -33377,10 +33377,10 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        if (count <= 1) return (t_pconnect(a0), null);
-        else if (count == 2) return (t_pconnect(a0, a1), null);
-        else if (count == 3) return (t_pconnect(a0, a1, a2), null);
-        else return (t_pconnect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_pconnect(a0));
+        else if (count == 2) return (t_pconnect(a0, a1));
+        else if (count == 3) return (t_pconnect(a0, a1, a2));
+        else return (t_pconnect(a0, a1, a2, a3));
       }
       break;
     case 0xd5:
@@ -33447,10 +33447,10 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        if (count <= 1) return (t_connect(a0), null);
-        else if (count == 2) return (t_connect(a0, a1), null);
-        else if (count == 3) return (t_connect(a0, a1, a2), null);
-        else return (t_connect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_connect(a0));
+        else if (count == 2) return (t_connect(a0, a1));
+        else if (count == 3) return (t_connect(a0, a1, a2));
+        else return (t_connect(a0, a1, a2, a3));
       }
       break;
     case 0xd9:
@@ -33988,10 +33988,10 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        if (count <= 1) return (t_pconnect(a0), null);
-        else if (count == 2) return (t_pconnect(a0, a1), null);
-        else if (count == 3) return (t_pconnect(a0, a1, a2), null);
-        else return (t_pconnect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_pconnect(a0));
+        else if (count == 2) return (t_pconnect(a0, a1));
+        else if (count == 3) return (t_pconnect(a0, a1, a2));
+        else return (t_pconnect(a0, a1, a2, a3));
       }
       break;
     case 58:
@@ -34083,10 +34083,10 @@ Variant c_memcache::o_invoke_from_eval(const char *s, Eval::VariableEnvironment 
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        if (count <= 1) return (t_connect(a0), null);
-        else if (count == 2) return (t_connect(a0, a1), null);
-        else if (count == 3) return (t_connect(a0, a1, a2), null);
-        else return (t_connect(a0, a1, a2, a3), null);
+        if (count <= 1) return (t_connect(a0));
+        else if (count == 2) return (t_connect(a0, a1));
+        else if (count == 3) return (t_connect(a0, a1, a2));
+        else return (t_connect(a0, a1, a2, a3));
       }
       break;
     default:

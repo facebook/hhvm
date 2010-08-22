@@ -108,7 +108,7 @@ void c_memcache::t___construct() {
   return;
 }
 
-void c_memcache::t_connect(CStrRef host, int port /*= 0*/,
+bool c_memcache::t_connect(CStrRef host, int port /*= 0*/,
                            int timeout /*= 0*/,
                            int timeoutms /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(memcache, memcache::connect);
@@ -120,13 +120,10 @@ void c_memcache::t_connect(CStrRef host, int port /*= 0*/,
     ret = memcached_server_add(&m_memcache, host.c_str(), port);
   }
 
-  if (ret == MEMCACHED_SUCCESS) {
-    return;
-  }
-
+  return (ret == MEMCACHED_SUCCESS);
 }
 
-void c_memcache::t_pconnect(CStrRef host, int port /*= 0*/,
+bool c_memcache::t_pconnect(CStrRef host, int port /*= 0*/,
                             int timeout /*= 0*/,
                             int timeoutms /*= 0*/) {
   INSTANCE_METHOD_INJECTION_BUILTIN(memcache, memcache::pconnect);

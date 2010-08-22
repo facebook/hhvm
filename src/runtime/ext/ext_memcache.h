@@ -82,9 +82,9 @@ class c_memcache : public ExtObjectData {
   public: c_memcache();
   public: ~c_memcache();
   public: void t___construct();
-  public: void t_connect(CStrRef host, int port = 0, int timeout = 0,
+  public: bool t_connect(CStrRef host, int port = 0, int timeout = 0,
                          int timeoutms = 0);
-  public: void t_pconnect(CStrRef host, int port = 0, int timeout = 0,
+  public: bool t_pconnect(CStrRef host, int port = 0, int timeout = 0,
                           int timeoutms = 0);
   public: bool t_add(CStrRef key, CVarRef var, int flag = 0, int expire = 0);
   public: bool t_set(CStrRef key, CVarRef var, int flag = 0, int expire = 0);

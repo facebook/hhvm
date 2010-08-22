@@ -34,11 +34,11 @@ ENDIF()
 
 SET(CMAKE_MODULE_PATH "${HPHP_HOME}/CMake" ${CMAKE_MODULE_PATH})
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 include(HPHPFunctions)
 include(CheckFunctionExists)
 include(HPHPSetup)
-
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 if ("${PROGRAM_NAME}" STREQUAL "")
 	set(PROGRAM_NAME program)

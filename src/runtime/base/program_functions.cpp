@@ -69,22 +69,22 @@ namespace HPHP {
 // helpers
 
 struct ProgramOptions {
-  string mode;
-  string config;
-  StringVec confStrings;
-  int    port;
-  int    admin_port;
-  string debug_host;
-  int    debug_port;
-  string debug_extension;
-  StringVec debug_cmds;
-  string user;
-  string file;
-  int    count;
-  bool   noSafeAccessCheck;
-  StringVec args;
-  string buildId;
-  int    xhprofFlags;
+  string     mode;
+  string     config;
+  StringVec  confStrings;
+  int        port;
+  int        admin_port;
+  string     debug_host;
+  int        debug_port;
+  string     debug_extension;
+  StringVec  debug_cmds;
+  string     user;
+  string     file;
+  int        count;
+  bool       noSafeAccessCheck;
+  StringVec  args;
+  string     buildId;
+  int        xhprofFlags;
 };
 
 class StartTime {
@@ -670,8 +670,12 @@ static int execute_program_impl(int argc, char **argv) {
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
-          // even if it's empty, still need to call for warmup
-          hphp_invoke_simple(po.debug_extension);
+          if (po.debug_extension.empty()) {
+            // even if it's empty, still need to call for warmup
+            hphp_invoke_simple(" "); // so not to run the 1st file if compiled
+          } else {
+            hphp_invoke_simple(po.debug_extension);
+          }
           Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
           if (!restarting) {
             Eval::Debugger::InterruptSessionStarted(new_argv[0]);

@@ -292,6 +292,7 @@ case-insensitive and string-based.
       {file}:{l1}-{l2}
     list {file}:{l1}-    displays specified block in the file
     list {file}:-{l2}    displays specified block in the file
+    list {directory}     sets PHP source root directory
 
 
 Use list command to display PHP source code. In remote debugging, this
@@ -299,6 +300,11 @@ is displaying source code on server side. When server side cannot find
 the file, it will fall back to local files.
 
 Hit return to display more lines of code after current display.
+
+When a directory name is specified, this will be set to root directory
+for resolving relative paths of PHP files. Files with absolute paths
+will not be affected by this setting. This directory will be stored in
+configuration file for future sessions as well.
 
 
     -------------------------- Machine Command --------------------------

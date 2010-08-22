@@ -488,7 +488,8 @@ inline void echo(CStrRef s) {
 
 String get_source_filename(litstr path);
 
-inline void throw_exception(CObjRef v) { throw v;}
+void throw_exception(CObjRef e);
+bool set_line(int line);
 
 ///////////////////////////////////////////////////////////////////////////////
 // isset/unset

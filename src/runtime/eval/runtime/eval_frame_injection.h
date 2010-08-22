@@ -43,7 +43,6 @@ public:
 
   virtual String getFileName();
   virtual Array getArgs();
-  static bool SetLine(const Construct *c);
 
   VariableEnvironment &getEnv() { return m_env;}
 
@@ -52,7 +51,7 @@ private:
   const char *m_file;
 };
 
-#define SET_LINE_EXPR EvalFrameInjection::SetLine(this)
+#define SET_LINE_EXPR set_line(m_loc.line1)
 #define SET_LINE      if (!SET_LINE_EXPR) return Variant::lvalBlackHole();
 #define SET_LINE_VOID if (!SET_LINE_EXPR) return;
 

@@ -1419,7 +1419,7 @@ void AnalysisResult::recordClassSource(const std::string &clsname,
   string file; int line;
   if (loc) {
     file = loc->file;
-    line = loc->line0;
+    line = loc->line1 ? loc->line1 : loc->line0;
   } else {
     file = filename;
     line = 0;
@@ -1433,7 +1433,7 @@ void AnalysisResult::recordFunctionSource(const std::string &funcname,
   string file; int line;
   if (loc) {
     file = loc->file;
-    line = loc->line0;
+    line = loc->line1;
   } else {
     file = filename;
     line = 0;
@@ -1490,7 +1490,7 @@ void AnalysisResult::outputCPPNameMaps() {
     for (set<pair<string, int> >::const_iterator iterInner =
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\", \"%d\",\n", iter->first.c_str(),
+      cg_printf("\"%s\", \"%s\", (const char *)%d,\n", iter->first.c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }
@@ -1505,7 +1505,7 @@ void AnalysisResult::outputCPPNameMaps() {
     for (set<pair<string, int> >::const_iterator iterInner =
            iter->second.begin();
          iterInner != iter->second.end(); ++iterInner) {
-      cg_printf("\"%s\", \"%s\", \"%d\",\n", iter->first.c_str(),
+      cg_printf("\"%s\", \"%s\", (const char *)%d,\n", iter->first.c_str(),
                 iterInner->first.c_str(), iterInner->second);
     }
   }

@@ -432,7 +432,12 @@ do { \
 #define FRAME_INJECTION(c, n) FrameInjection fi(info, c, #n);
 #define FRAME_INJECTION_FLAGS(c, n, f) FrameInjection fi(info, c, #n, NULL, f);
 #define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, c, #n, this);
+
+#ifdef ENABLE_FULL_SETLINE
+#define LINE(n, e) (set_line(n), e)
+#else
 #define LINE(n, e) (fi.setLine(n), e)
+#endif
 
 // Get global variables from thread info.
 #define DECLARE_GLOBAL_VARIABLES_INJECTION(g)       \

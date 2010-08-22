@@ -20,6 +20,7 @@
 #include <runtime/eval/debugger/cmd/cmd_jump.h>
 #include <runtime/eval/debugger/cmd/cmd_signal.h>
 #include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/eval/eval.h>
@@ -496,8 +497,21 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
     Logger::SetThreadHook(append_stderr, &sb);
   }
   try {
-    ret = eval(get_variable_table(), Object(),
-               String(php.c_str(), php.size(), AttachLiteral), false);
+    LVariableTable *vars = get_variable_table();
+    FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
+    if (frame) {
+      frame = frame->getPrev(); // skipping our "_" artificial frame
+      if (frame) {
+        EvalFrameInjection *eframe = dynamic_cast<EvalFrameInjection*>(frame);
+        if (eframe) {
+          vars = &eframe->getEnv();
+        }
+      }
+    }
+
+    String code(php.c_str(), php.size(), AttachLiteral);
+    ret = eval(vars, Object(), code, false);
+
   } catch (Exception &e) {
     sb.append(Debugger::ColorStderr(String(e.what())));
   } catch (Object &e) {

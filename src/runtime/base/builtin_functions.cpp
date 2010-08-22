@@ -20,6 +20,8 @@
 #include <runtime/base/variable_unserializer.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/eval/debugger/debugger.h>
+#include <runtime/eval/runtime/code_coverage.h>
 #include <runtime/ext/ext_process.h>
 #include <util/logger.h>
 #include <util/util.h>
@@ -799,6 +801,42 @@ Variant invoke_static_method_bind_mil(CStrRef s,
   }
   return invoke_static_method_bind(s, methodIndex, method, params, fatal);
 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// debugger and code coverage instrumentation
+
+void throw_exception(CObjRef e) {
+  if (RuntimeOption::EnableDebugger) {
+    ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+    if (ti->m_reqInjectionData.debugger) {
+      Eval::InterruptSite site(ti->m_top, e);
+      Eval::Debugger::InterruptException(site);
+      if (site.isJumping()) {
+        return;
+      }
+    }
+  }
+  throw e;
+}
+
+bool set_line(int line) {
+  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  FrameInjection *frame = ti->m_top;
+  if (frame) {
+    frame->setLine(line);
+    if (RuntimeOption::EnableDebugger && ti->m_reqInjectionData.debugger) {
+      Eval::InterruptSite site(frame);
+      Eval::Debugger::InterruptFileLine(site);
+      if (site.isJumping()) {
+        return false;
+      }
+    }
+    if (RuntimeOption::RecordCodeCoverage) {
+      Eval::CodeCoverage::Record(frame->getFileName().data(), line, line);
+    }
+  }
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

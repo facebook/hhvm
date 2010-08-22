@@ -148,6 +148,7 @@ const char *DebuggerClient::LineNoFormat = "%4d ";
 const char *DebuggerClient::LocalPrompt = "hphpd";
 const char *DebuggerClient::ConfigFileName = ".hphpd.hdf";
 const char *DebuggerClient::HistoryFileName = ".hphpd.history";
+std::string DebuggerClient::SourceRoot;
 
 bool DebuggerClient::UseColor = true;
 bool DebuggerClient::NoPrompt = false;
@@ -1433,8 +1434,7 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
 void DebuggerClient::getListLocation(std::string &file, int &line,
                                      int &lineFocus) {
   if (m_listFile.empty() && m_breakpoint) {
-    m_listFile = m_breakpoint->m_file;
-    m_listLine = m_breakpoint->m_line1;
+    setListLocation(m_breakpoint->m_file, m_breakpoint->m_line1);
     lineFocus = m_breakpoint->m_line1;
     if (m_listLine) {
       m_listLine -= CodeBlockSize / 2;
@@ -1450,6 +1450,21 @@ void DebuggerClient::getListLocation(std::string &file, int &line,
 void DebuggerClient::setListLocation(const std::string &file, int line) {
   m_listFile = file;
   m_listLine = line;
+
+  if (!m_listFile.empty() && m_listFile[0] != '/' && !SourceRoot.empty()) {
+    if (SourceRoot[SourceRoot.size() - 1] != '/') {
+      SourceRoot += "/";
+    }
+    m_listFile = SourceRoot + m_listFile;
+  }
+}
+
+void DebuggerClient::setSourceRoot(const std::string &sourceRoot) {
+  m_config["SourceRoot"] = SourceRoot = sourceRoot;
+  saveConfig();
+
+  // apply change right away
+  setListLocation(m_listFile, m_listLine);
 }
 
 void DebuggerClient::setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints) {
@@ -1642,6 +1657,8 @@ void DebuggerClient::loadConfig() {
     macro->load(node);
     m_macros.push_back(macro);
   }
+
+  SourceRoot = m_config["SourceRoot"].getString();
 
   saveConfig(); // so to generate a starter for people
 }

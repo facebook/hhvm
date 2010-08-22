@@ -15,11 +15,7 @@
 */
 #include <runtime/eval/runtime/eval_frame_injection.h>
 #include <runtime/eval/runtime/variable_environment.h>
-#include <runtime/eval/ast/construct.h>
 #include <runtime/eval/parser/parser.h>
-#include <runtime/eval/runtime/code_coverage.h>
-#include <runtime/eval/debugger/debugger.h>
-#include <runtime/base/runtime_option.h>
 
 namespace HPHP {
 namespace Eval {
@@ -31,27 +27,6 @@ String EvalFrameInjection::getFileName() {
 
 Array EvalFrameInjection::getArgs() {
   return m_env.getParams();
-}
-
-bool EvalFrameInjection::SetLine(const Construct *c) {
-  ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
-  FrameInjection *frame = ti->m_top;
-  if (!frame) return true;
-
-  int line1 = c->loc()->line1;
-  frame->setLine(line1);
-  if (RuntimeOption::EnableDebugger && ti->m_reqInjectionData.debugger) {
-    InterruptSite site(frame);
-    Debugger::InterruptFileLine(site);
-    if (site.isJumping()) {
-      return false;
-    }
-  }
-  if (RuntimeOption::RecordCodeCoverage) {
-    int line0 = c->loc()->line1; // TODO: fix parser to record line0
-    CodeCoverage::Record(c->loc()->file, line0, line1);
-  }
-  return true;
 }
 
 EvalFrameInjection::EvalStaticClassNameHelper::EvalStaticClassNameHelper

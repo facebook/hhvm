@@ -56,6 +56,7 @@ bool CmdList::help(DebuggerClient *client) {
     "list {file}:{l1}-{l2}",  "displays specified block in the file",
     "list {file}:{l1}-",      "displays specified block in the file",
     "list {file}:-{l2}",      "displays specified block in the file",
+    "list {directory}",       "sets PHP source root directory",
     NULL
   );
   client->helpBody(
@@ -63,7 +64,12 @@ bool CmdList::help(DebuggerClient *client) {
     "is displaying source code on server side. When server side cannot find "
     "the file, it will fall back to local files.\n"
     "\n"
-    "Hit return to display more lines of code after current display."
+    "Hit return to display more lines of code after current display.\n"
+    "\n"
+    "When a directory name is specified, this will be set to root directory "
+    "for resolving relative paths of PHP files. Files with absolute paths "
+    "will not be affected by this setting. This directory will be stored "
+    "in configuration file for future sessions as well."
   );
   return true;
 }
@@ -161,6 +167,14 @@ bool CmdList::onClient(DebuggerClient *client) {
         return true;
       }
       client->print(highlight_php(code));
+      return true;
+    }
+  } else {
+    struct stat sb;
+    stat(m_file.c_str(), &sb);
+    if ((sb.st_mode & S_IFMT) == S_IFDIR) {
+      client->setSourceRoot(m_file);
+      client->info("PHP source root directory is set to %s", m_file.c_str());
       return true;
     }
   }

@@ -35,6 +35,7 @@ public:
   static const char *LocalPrompt;
   static const char *ConfigFileName;
   static const char *HistoryFileName;
+  static std::string SourceRoot;
 
   static bool UseColor;
   static bool NoPrompt;
@@ -215,6 +216,7 @@ public:
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
   void getListLocation(std::string &file, int &line, int &lineFocus);
   void setListLocation(const std::string &file, int line);
+  void setSourceRoot(const std::string &sourceRoot);
 
   /**
    * Watch expressions.

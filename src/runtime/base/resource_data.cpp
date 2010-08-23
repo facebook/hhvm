@@ -41,7 +41,9 @@ void ResourceData::o_setId(int id) {
 
 ResourceData::~ResourceData() {
   int &pmax = *os_max_resource_id;
-  if (o_id == pmax) --pmax;
+  if (o_id && o_id == pmax) {
+    --pmax;
+  }
   o_id = -1;
 }
 

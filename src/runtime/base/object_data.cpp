@@ -49,7 +49,9 @@ ObjectData::~ObjectData() {
     o_properties->release();
   }
   int &pmax = *os_max_id;
-  if (o_id == pmax) --pmax;
+  if (o_id && o_id == pmax) {
+    --pmax;
+  }
 }
 
 void ObjectData::

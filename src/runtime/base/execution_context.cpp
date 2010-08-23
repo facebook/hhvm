@@ -833,27 +833,32 @@ Variant Silencer::disable(CVarRef v) {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Fast Method Call
-MethodIndexMap methodIndexMap;
-extern const MethodIndex methodIndexMapInit[] ;
-extern const char * methodIndexMapInitName[] ;
-static unsigned int maxCallIndex = 0;
 
-void MethodIndexMap::addEntry(const char * methodName, MethodIndex mi) {
-  insert(
-    std::pair<const char*,const MethodIndex>(methodName, mi));
-  methodIndexReverseMap.insert(
-    std::pair<const MethodIndex, const char *>(mi, methodName));
+static bool g_methodIndexUseSys ;
+void MethodIndexHMap::initialize(bool useSystem) {
+  g_methodIndexUseSys = useSystem;
 }
 
-void MethodIndexMap::initialize()  {
-  const MethodIndex *mip=methodIndexMapInit;
-  for (const char **name=methodIndexMapInitName; *name; name++, mip++) {
-    maxCallIndex = std::max(maxCallIndex, mip->m_callIndex);
-    addEntry(*name, *mip);
+MethodIndex MethodIndexHMap::methodIndexExists(const char * methodName) {
+  const MethodIndexHMap *map =
+    g_methodIndexUseSys ? methodIndexHMapSys : methodIndexHMap;
+  unsigned size =
+    g_methodIndexUseSys ? methodIndexHMapSizeSys : methodIndexHMapSize;
+  unsigned hash = (unsigned)(hash_string_i(methodName) % size);
+  while (map[hash].name && strcasecmp(map[hash].name, methodName)!=0) {
+    hash = hash ? hash - 1 : size - 1;
   }
-  methodIndexReverseMap.insert(
-    std::pair<const MethodIndex, const char *>(
-      MethodIndex::fail(),"<Nonexistant method>"));
+  if (!map[hash].name) return MethodIndex::fail();
+  return map[hash].methodIndex;
+}
+
+const char * methodIndexLookupReverse(MethodIndex methodIndex) {
+  const unsigned *callIndex = g_methodIndexUseSys
+    ? methodIndexReverseCallIndexSys : methodIndexReverseCallIndex;
+  const char **map = g_methodIndexUseSys
+    ?  methodIndexReverseIndexSys : methodIndexReverseIndex;
+  unsigned callIndexOffset = callIndex[methodIndex.m_callIndex - 1];
+  return map[methodIndex.m_overloadIndex + callIndexOffset - 1];
 }
 
 ///////////////////////////////////////////////////////////////////////////////

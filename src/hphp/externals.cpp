@@ -109,6 +109,13 @@ Variant invoke_from_eval(const char *function, VariableEnvironment &env,
 extern const MethodIndex methodIndexMapInit[];
 const MethodIndex methodIndexMapInit[] = {MethodIndex(0,0)};
 const char * methodIndexMapInitName[] = {NULL};
+extern const MethodIndex methodIndexMapInitSys[];
+extern const MethodIndex methodIndexMapInitNameSys[];
+
+const unsigned methodIndexHMapSize = 0;
+const MethodIndexHMap methodIndexHMap[] = {MethodIndexHMap()};
+const unsigned methodIndexReverseCallIndex[] = {0};
+const char * methodIndexReverseIndex[] = {0};
 
 const ObjectStaticCallbacks * get_object_static_callbacks(const char *s) {
   return NULL;

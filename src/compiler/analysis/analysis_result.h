@@ -569,6 +569,7 @@ private:
   }
 
   StringToMethodSlotMap stringToMethodSlotMap;
+  CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
   friend class MethodSlot;
   public:
   const MethodSlot* getMethodSlot(const std::string & mname) const ;

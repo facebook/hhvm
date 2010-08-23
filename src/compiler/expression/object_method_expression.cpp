@@ -395,7 +395,7 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       } else {
         cg_printf("%s%sinvoke%s(%s \"%s\"",
                   Option::ObjectPrefix, isThis ? "root_" : "",
-                  (ms->isError() ? "_mil(" : ""),
+                  (ms->isError() ? "_mil" : ""),
                   ms->runObjParam().c_str(), m_origName.c_str());
         cg_printf(", ");
         if (m_params && m_params->getCount()) {

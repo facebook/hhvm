@@ -36,6 +36,12 @@ extern const MethodIndex methodIndexMapInit[];
 const MethodIndex methodIndexMapInit[] = {MethodIndex(0,0)};
 const char * methodIndexMapInitName[] = {NULL};
 
+
+const unsigned methodIndexHMapSize = 0;
+const MethodIndexHMap methodIndexHMap[] = {MethodIndexHMap()};
+const unsigned methodIndexReverseCallIndex[] = {0};
+const char * methodIndexReverseIndex[] = {0};
+
 // Used by test_ext_preg
 static String test_preg_rep(CStrRef a, CStrRef b, CStrRef c) {
   return concat(f_strtoupper(c), a);

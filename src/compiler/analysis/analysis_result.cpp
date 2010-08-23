@@ -1920,8 +1920,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
     outputCPPDynamicTablesHeader(cg, true, false);
     cg.printSection("Class Invoke Tables");
-    if (!system) MethodSlot::emitMethodSlot(cg, ar); // FMC broken for IDL tests
-    else {
+    MethodSlot::emitMethodSlot(cg, ar, system); // FMC broken for IDL tests
+    if (system) {
       // make available to user apps and tests, temporary
       cg_printf(FMC);
       cg_printf("bool RuntimeOption::FastMethodCall = true;\n");
@@ -3861,10 +3861,8 @@ AnalysisResult::getOrAddMethodSlot(const std::string & mname) {
     //Logger::Warning ("Method %s referenced but not defined.", mname.c_str());
     getCodeError()->record(CodeError::UndefinedMethod, ConstructPtr(),
                            ConstructPtr(), mname.c_str());
-    pair<StringToMethodSlotMap::iterator, bool> ret =
-      stringToMethodSlotMap.insert(
-          (pair<string, MethodSlot>(mname, MethodSlot(mname, 0))));
-    method = ret.first;
+    // too late to add to stringToMethodSlotMap, getMethodSlot already done
+    return errorMethodSlot;
   };
   return &((*method).second);
 }
@@ -3957,8 +3955,6 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
   // and an interference graph of methods names that must have a different
   // callIndex
 
-  CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
-
   ar->stringToMethodSlotMap.clear();
   string cname;
   ClassScopePtr cls;
@@ -4022,9 +4018,9 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
       // already assigned from a different class
       if (methodSlot->m_callIndex) continue;
 
-      unsigned int callIndex = callIndexVectSet.size() + 1;
-      callIndexVectSet.resize(callIndex);
-      MethodSet& methodsAtCallIndex = callIndexVectSet.back();
+      unsigned int callIndex = ar->callIndexVectSet.size() + 1;
+      ar->callIndexVectSet.resize(callIndex);
+      MethodSet& methodsAtCallIndex = ar->callIndexVectSet.back();
       methodsAtCallIndex.insert(methodSlot->m_serialNum);
       methodSlot->m_overloadIndex = 1;
       methodSlot->m_callIndex = callIndex;
@@ -4032,7 +4028,7 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
     }
   }
 
-  unsigned int maxSystemMethodCallIndex = callIndexVectSet.size();
+  unsigned int maxSystemMethodCallIndex = ar->callIndexVectSet.size();
 
   // assign m_callIndex & m_overloadIndex IDs for user classes
   map<string, unsigned int> classMax, classMin;
@@ -4067,8 +4063,8 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
       MethodSet& conflictingMethods (methodSlot->conflictingMethods);
       // start scanning up for a unconflicted callIndex
       MethodSet* methodsAtCallIndex;
-      for (;callIndex <= callIndexVectSet.size(); ++callIndex) {
-        methodsAtCallIndex = &callIndexVectSet[callIndex-1];
+      for (;callIndex <= ar->callIndexVectSet.size(); ++callIndex) {
+        methodsAtCallIndex = &ar->callIndexVectSet[callIndex-1];
         bool conflict = false;
         // intersect methods used at this index with conflicting methods
         for (MethodSet::iterator i = methodsAtCallIndex->begin(),
@@ -4084,9 +4080,9 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
         // callIndex==1 is {"fun1", "fun4"},
         // so fun3 can't have callIndex==1
       }
-      if (callIndex >= callIndexVectSet.size()) {
-        callIndexVectSet.resize(callIndex);
-        methodsAtCallIndex = &callIndexVectSet[callIndex-1];
+      if (callIndex >= ar->callIndexVectSet.size()) {
+        ar->callIndexVectSet.resize(callIndex);
+        methodsAtCallIndex = &ar->callIndexVectSet[callIndex-1];
       }
       methodsAtCallIndex->insert(methodSlot->m_serialNum);
       methodSlot->m_overloadIndex = methodsAtCallIndex->size();
@@ -4105,7 +4101,7 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
   cout << "stringToMethodSlotMap" << endl;
   cout << ar->stringToMethodSlotMap;
   cout << "callIndexVectSet" << endl;
-  cout << callIndexVectSet;
+  cout << ar->callIndexVectSet;
 
   cout << "max indices : number of functions" << endl;
   ClassScopePtrVec clsvec;
@@ -4126,27 +4122,110 @@ static void buildMethodSlotsAndConflict(AnalysisResultPtr ar,
   }
 # endif
 }
-void MethodSlot::emitMethodSlot(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf("extern MethodIndexMap methodIndexMap;\n");
+void MethodSlot::emitMethodSlot(CodeGenerator &cg, AnalysisResultPtr ar,
+                                bool system) {
   cg_printf("#define M(x, y) MethodIndex(x, y)\n");
-  cg_printf("extern const MethodIndex methodIndexMapInit[];\n");
-  cg_printf("const MethodIndex methodIndexMapInit[]= {");
-  int linebreak = 0;
+  const char * sysTable = system ? "Sys" : "";
+
+  // predefined, statically constructed, hash table for quick startup,
+  // and hopefully fast lookup
+  // methodIndexHMap[name]->MethodIndex
+  // this uses linear probing since it's difficult to construct a hash bucket
+  // chain statically.
+  unsigned tableSize = ar->stringToMethodSlotMap.size() * 2;
+  struct MethodIndexHMap {
+    MethodIndexHMap() : name(NULL), methodIndex(0,0) {}
+    MethodIndexHMap(const char *name, unsigned callIndex,
+                    unsigned overloadIndex)
+      : name(name), methodIndex(callIndex, overloadIndex) {}
+    const char *name;
+    MethodIndex methodIndex;
+  };
+  MethodIndexHMap methodIndexHMap [tableSize];
+
   BOOST_FOREACH(StringToMethodSlotMap::value_type slot,
                 ar->stringToMethodSlotMap) {
-    cg_printf("M(%d,%d),%s", slot.second.getCallIndex(),
-              slot.second.getOverloadIndex(),
-              ( (++linebreak & 3) == 0)?"\n":"");
+    ASSERT(!slot.second.isFail());
+    const char *name = slot.first.c_str();
+    unsigned hash = (unsigned)(hash_string_i(name) % tableSize);
+    while (methodIndexHMap[hash].name) {
+      hash = hash ? hash - 1 : tableSize - 1;
+    }
+    methodIndexHMap[hash] = MethodIndexHMap(name,
+                                            slot.second.getCallIndex(),
+                                            slot.second.getOverloadIndex());
   }
-  cg_printf("MethodIndex(0, 0)};\n");
+
+  cg_printf("#define H(x,y,z) MethodIndexHMap(#x,MethodIndex(y,z))\n");
+  cg_printf("#define Z MethodIndexHMap(0,MethodIndex(0,0))\n");
+  cg_printf("const unsigned methodIndexHMapSize%s = %u;\n",
+            sysTable, tableSize);
+  cg_printf("extern const MethodIndexHMap methodIndexHMap%s [];\n", sysTable);
+  cg_printf("const MethodIndexHMap methodIndexHMap%s [methodIndexHMapSize%s] "
+            "= {\n", sysTable, sysTable);
+  int wrap=0;
+  for (unsigned i=0; i<tableSize; ++i)  {
+    if (methodIndexHMap[i].name) {
+      cg_printf ("H(%s,%d,%d)",
+                 methodIndexHMap[i].name,
+                 methodIndexHMap[i].methodIndex.m_callIndex,
+                 methodIndexHMap[i].methodIndex.m_overloadIndex);
+    } else {
+      cg_printf ("Z");
+    }
+    if (i < tableSize - 1 ) cg_printf (", ");
+    if (++wrap == 3) {
+      cg_printf ("\n");
+      wrap=0;
+    }
+  }
+  cg_printf ("};\n");
   cg_printf("#undef M\n");
-  cg_printf("const char * methodIndexMapInitName[]= {");
-  linebreak = 0;
+  cg_printf("#undef H\n");
+  cg_printf("#undef Z\n");
+
+  // reverse map, MethodIndex -> name
+  unsigned mapSize = ar->callIndexVectSet.size();
+  unsigned maxOverload = 0;
+  // linearize all MethodIndex's, e.g. MI(1,1), MI(1,2), MI(1,3), MI(2,1)
+  // methodIndexReverseIndex[methodIndexReverseCallIndex[
+  //    methodIndex.getCallIndex()] + methodIndex.getOverloadIndex()] =
+  //        methodSlot.getName()
+  cg_printf("extern const unsigned methodIndexReverseCallIndex%s[];\n",
+            sysTable);
+  cg_printf("const unsigned methodIndexReverseCallIndex%s[] = {0, \n",
+            sysTable);
+  for (unsigned i=1; i<mapSize; ++i) {
+    maxOverload += ar->callIndexVectSet[i - 1].size();
+    cg_printf("%u", maxOverload);
+    if (i < mapSize - 1 ) cg_printf (",");
+    if (++wrap == 20) {
+      cg_printf ("\n");
+      wrap = 0;
+    }
+  }
+  cg_printf("};\n");
+
+  map<unsigned int, const char *> serialNumIndex;
   BOOST_FOREACH(StringToMethodSlotMap::value_type slot,
                 ar->stringToMethodSlotMap) {
-    cg_printf("\"%s\",%s", slot.first.c_str(),
-        ( (++linebreak & 3) == 0)?"\n":"");
+    serialNumIndex[slot.second.m_serialNum] = slot.first.c_str();
   }
-  cg_printf("NULL};\n");
+
+  wrap = 0;
+  cg_printf("extern const char * methodIndexReverseIndex%s[];\n", sysTable);
+  cg_printf("const char * methodIndexReverseIndex%s[] = {\n", sysTable);
+  for (unsigned callIndex=0; callIndex<mapSize; ++callIndex) {
+    MethodSet& methodsAtCallIndex (ar->callIndexVectSet[callIndex]);
+    BOOST_FOREACH(int serialNum, methodsAtCallIndex) {
+      cg_printf("\"%s\"", serialNumIndex[serialNum]);
+      if (callIndex < mapSize - 1 ) cg_printf(", ");
+      if (++wrap == 5) {
+        cg_printf ("\n");
+        wrap = 0;
+      }
+    }
+  }
+  cg_printf("};\n");
 }
 }

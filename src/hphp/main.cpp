@@ -796,7 +796,7 @@ int cppTarget(const ProgramOptions &po, AnalysisResultPtr ar,
     ar->postOptimize();
   }
   ar->analyzeProgramFinal();
-  MethodSlot::genMethodSlot(ar);
+  //MethodSlot::genMethodSlot(ar);
 
   {
     Timer timer(Timer::WallTime, "creating CPP files");

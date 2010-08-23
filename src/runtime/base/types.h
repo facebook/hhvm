@@ -269,40 +269,37 @@ struct MethodIndex {
   MethodIndex() {}
 };
 
-struct MethodIndexHash {
-  size_t operator()(MethodIndex mi) const { return (size_t) mi.val(); }
+struct MethodIndexHMap {
+  MethodIndexHMap() : name(NULL), methodIndex(0,0) {}
+  MethodIndexHMap(const char *name, MethodIndex methodIndex)
+    : name(name), methodIndex(methodIndex) {}
+  const char* name;
+  MethodIndex methodIndex;
+  static MethodIndex methodIndexExists(const char * methodName);
+  static void initialize(bool useSystem);
 };
 
-class MethodIndexMap : public hphp_const_char_imap<MethodIndex> {
-  public:
-  void initialize();
-  typedef hphp_hash_map<const MethodIndex, const char *, MethodIndexHash >
-    MethodIndexReverseMap;
-  MethodIndexReverseMap methodIndexReverseMap;
-  private:
-  void addEntry(const char * methodName, MethodIndex mi) ;
-};
-extern MethodIndexMap methodIndexMap;
+extern const unsigned methodIndexHMapSize;
+extern const MethodIndexHMap methodIndexHMap[];
+extern const unsigned methodIndexReverseCallIndex[];
+extern const char * methodIndexReverseIndex[];
+
+extern const unsigned methodIndexHMapSizeSys;
+extern const MethodIndexHMap methodIndexHMapSys[];
+extern const unsigned methodIndexReverseCallIndexSys[];
+extern const char * methodIndexReverseIndexSys[];
 
 inline MethodIndex methodIndexExists(const char * methodName) {
-  MethodIndexMap::const_iterator i = methodIndexMap.find(methodName);
-  if (i == methodIndexMap.end()) return MethodIndex::fail();
-  return (*i).second;
+  return MethodIndexHMap::methodIndexExists(methodName);
 }
 
 inline MethodIndex methodIndexLookup(const char * methodName) {
-  MethodIndex ret = methodIndexExists(methodName);
-  MethodIndexMap::const_iterator i = methodIndexMap.find(methodName);
-  ASSERT(i != methodIndexMap.end()); // only for testing
-  return (*i).second;
+  MethodIndex methodIndex = MethodIndexHMap::methodIndexExists(methodName);
+  ASSERT(!methodIndex.isFail());
+  return methodIndex;
 }
 
-inline const char * methodIndexLookupReverse(MethodIndex methodIndex) {
-  MethodIndexMap::MethodIndexReverseMap::const_iterator i =
-     methodIndexMap.methodIndexReverseMap.find(methodIndex);
-  ASSERT(i != methodIndexMap.methodIndexReverseMap.end());
-  return (*i).second;
-}
+const char * methodIndexLookupReverse(MethodIndex methodIndex) ;
 
 ///////////////////////////////////////////////////////////////////////////////
 }

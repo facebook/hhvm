@@ -36,9 +36,11 @@ class MethodSlot{
     : m_name(name), m_serialNum(serialNum), m_callIndex(0), m_overloadIndex(0)
     { }
 
+  std::string getName() const { return m_name; }
   unsigned int getCallIndex() const { return m_callIndex; }
   unsigned int getOverloadIndex() const { return m_overloadIndex; }
   bool isError() const { return m_serialNum == 0; }
+  bool isFail() const { return m_callIndex== 0 || m_overloadIndex == 0; }
   std::string runObj() const; // e.g. MethodIndex(2, 3)
   std::string runObjParam() const; // e.g. "MethodIndex(2, 3) /* getId */, "
   bool operator>(const MethodSlot *y) const {
@@ -46,7 +48,7 @@ class MethodSlot{
   }
 
   static void genMethodSlot(AnalysisResultPtr) ;
-  static void emitMethodSlot(CodeGenerator &, AnalysisResultPtr) ;
+  static void emitMethodSlot(CodeGenerator &, AnalysisResultPtr, bool isSystem);
 
   std::ostream& operator<< (std::ostream&) const;
   std::ostream& dump() const { return operator<<(std::cout); }

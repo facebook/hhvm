@@ -47,6 +47,7 @@ int main(int argc, char **argv) {
   }
 
   hphp_process_init();
+  MethodIndexHMap::initialize(true /* use system map */);
   Test test;
   return test.RunTests(suite, which, set) ? 0 : -1;
 }

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/types.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/execution_context.h>
@@ -647,7 +648,7 @@ static int execute_program_impl(int argc, char **argv) {
     }
   }
 
-  methodIndexMap.initialize();
+  MethodIndexHMap::initialize(false);
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {
     RuntimeOption::ExecutionMode = "cli";
 

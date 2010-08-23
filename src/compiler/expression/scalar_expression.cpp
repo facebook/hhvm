@@ -331,8 +331,9 @@ std::string ScalarExpression::getLiteralString() const {
 
 std::string ScalarExpression::getIdentifier() const {
   if (isLiteralString()) {
-    if (IsIdentifier(m_value)) {
-      return m_value;
+    std::string id = getLiteralString();
+    if (IsIdentifier(id)) {
+      return id;
     }
   }
   return "";

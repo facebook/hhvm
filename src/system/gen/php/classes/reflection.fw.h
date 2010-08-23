@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
 extern StaticString s_sys_ss77c51ddf;
 extern StaticString s_sys_ss446ed36e;
 extern StaticString s_sys_ss7730b079;
@@ -162,9 +162,12 @@ extern StaticString s_sys_ss5f12d619;
 extern StaticString s_sys_ss1fe107ad;
 extern StaticString s_sys_ss009c2796;
 
-// 2. Constants
+// 2. Static Arrays
+extern StaticArray s_sys_sa00000000;
 
-// 3. Classes
+// 3. Constants
+
+// 4. Classes
 FORWARD_DECLARE_CLASS(reflectionfunctionabstract);
 FORWARD_DECLARE_CLASS(reflectionobject);
 FORWARD_DECLARE_GENERIC_INTERFACE(reflector);

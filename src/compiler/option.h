@@ -144,6 +144,7 @@ public:
   static bool SeparateCompilation;
   static bool SeparateCompLib;
   static bool UseNamedLiteralString;
+  static bool UseNamedScalarArray;
 
   /**
    * CodeGenerator options for PHP.

@@ -280,7 +280,9 @@ public:
   static void outputCPPArguments(ExpressionListPtr params,
                                  CodeGenerator &cg, AnalysisResultPtr ar,
                                  int extraArg, bool variableArgument,
-                                 int extraArgArrayId = -1);
+                                 int extraArgArrayId = -1,
+                                 int extraArgArrayHash = -1,
+                                 int extraArgArrayIndex = -1);
 
   /**
    * Only generate arguments that have effects. This is for keeping those

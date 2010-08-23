@@ -25,11 +25,13 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
 
-// 2. Constants
+// 2. Static Arrays
 
-// 3. Classes
+// 3. Constants
+
+// 4. Classes
 FORWARD_DECLARE_CLASS(stdclass);
 FORWARD_DECLARE_CLASS(__php_incomplete_class);
 

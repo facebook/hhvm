@@ -2667,7 +2667,7 @@ void c_appenditerator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
   {
-    p_arrayiterator tmp1((p_arrayiterator((NEWOBJ(c_arrayiterator)())->create(SystemScalarArrays::ssa_[0]))));
+    p_arrayiterator tmp1((p_arrayiterator((NEWOBJ(c_arrayiterator)())->create(s_sys_sa00000000))));
     m_iterators = tmp1;
   }
   gasInCtor(oldInCtor);

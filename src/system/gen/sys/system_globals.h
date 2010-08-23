@@ -92,6 +92,7 @@ public:
 class SystemScalarArrays {
 public:
   static void initialize();
+  static void initializeNamed();
 
   static StaticArray ssa_[1];
 };

@@ -77,6 +77,8 @@ protected:
   // Extra arguments form an array, to which the scalar array optimization
   // should also apply.
   int m_argArrayId;
+  int m_argArrayHash;
+  int m_argArrayIndex;
   void optimizeArgArray(AnalysisResultPtr ar);
 
   void markRefParams(FunctionScopePtr func, const std::string &name,

@@ -966,7 +966,7 @@ Array c_reflectionfunctionabstract::t_getparameters() {
   Variant v_info;
   p_reflectionparameter v_param;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss5646283f, "params"), 0x6A67A10AA9B9D7C1LL, true, true);
@@ -7706,7 +7706,7 @@ Array c_reflectionclass::t_getmethods(CVarRef v_filter //  = 65535LL
   Variant v__;
   p_reflectionmethod v_m;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     const Variant &tmp1((t_fetch(NAMSTR(s_sys_ss68683632, "methods"))));
     v_methods = tmp1;
@@ -7780,7 +7780,7 @@ Array c_reflectionclass::t_getproperties() {
   Primitive v_name = 0;
   Variant v__;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_ss749653da, "properties"));
@@ -7835,7 +7835,7 @@ Variant c_reflectionclass::t_getinterfaces() {
   Variant v__;
   p_reflectionclass v_cls;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
@@ -7871,7 +7871,7 @@ Array c_reflectionclass::t_getinterfacenames() {
   Variant v__;
   p_reflectionclass v_cls;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
@@ -8015,7 +8015,7 @@ Variant c_reflectionclass::t_getstaticproperties() {
   Variant v_ret;
   Variant v_prop;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
@@ -8059,7 +8059,7 @@ Variant c_reflectionclass::t_getdefaultproperties() {
   Variant v_ret;
   Variant v_prop;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = t_getproperties();
@@ -9222,7 +9222,7 @@ Array c_reflectionextension::t_getclassnames() {
   Array v_ret;
   Variant v_cls;
 
-  v_ret = SystemScalarArrays::ssa_[0];
+  v_ret = s_sys_sa00000000;
   {
     LOOP_COUNTER(1);
     Variant map2 = m_info.rvalAt(NAMSTR(s_sys_ss251b7f2b, "classes"), 0x3EF49BB8DAE480D5LL, true, true);

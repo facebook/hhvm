@@ -37,7 +37,7 @@ Variant c_splobjectstorage::os_getInit(CStrRef s) {
       break;
     case 3:
       HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, NAMSTR(s_sys_ss7e2b6dc3, "storage"),
-                         SystemScalarArrays::ssa_[0], 7);
+                         s_sys_sa00000000, 7);
       break;
     default:
       break;
@@ -818,7 +818,7 @@ struct ObjectStaticCallbacks cw_splobjectstorage = {
   c_splobjectstorage::os_constant,
 };
 void c_splobjectstorage::init() {
-  m_storage = SystemScalarArrays::ssa_[0];
+  m_storage = s_sys_sa00000000;
   m_index = 0LL;
 }
 /* SRC: classes/splobjectstorage.php line 24 */

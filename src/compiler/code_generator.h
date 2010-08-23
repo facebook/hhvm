@@ -199,7 +199,6 @@ public:
                          AnalysisResultPtr ar);
   void printString(const std::string &str, AnalysisResultPtr ar,
                    bool stringWrapper = true, bool check = true);
-
 private:
   std::string m_filename;
   Stream m_curStream;

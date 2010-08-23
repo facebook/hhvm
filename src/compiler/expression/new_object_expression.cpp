@@ -195,7 +195,8 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
     }
 
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                      m_variableArgument, m_argArrayId);
+                                      m_variableArgument, m_argArrayId,
+                                      m_argArrayHash, m_argArrayIndex);
     if (m_receiverTemp.empty()) {
       cg_printf("))");
       if (outsideClass) {

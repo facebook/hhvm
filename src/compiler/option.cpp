@@ -141,6 +141,7 @@ int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
 bool Option::UseNamedLiteralString = true;
+bool Option::UseNamedScalarArray = true;
 int Option::LiteralStringFileCount = 50;
 bool Option::AnalyzePerfectVirtuals = true;
 
@@ -339,6 +340,10 @@ void Option::Load(Hdf &config) {
   if (LiteralStringFileCount <= 0) LiteralStringFileCount = 1;
   ScalarArrayOverflowLimit = config["ScalarArrayOverflowLimit"].getInt32(2000);
   if (ScalarArrayOverflowLimit <= 0) ScalarArrayOverflowLimit = 2000;
+  if (UseNamedScalarArray) {
+    ScalarArrayOptimization = true;
+    ScalarArrayCompression = true;
+  }
   EnableXHP = config["EnableXHP"].getBool();
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);

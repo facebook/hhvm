@@ -184,11 +184,15 @@ public:
   /**
    * Scalar array handling.
    */
-  int registerScalarArray(ExpressionPtr pairs);
+  int registerScalarArray(ExpressionPtr pairs, int &hash, int &index);
+  int checkScalarArray(const std::string &text, int &index);
+  int getScalarArrayId(const std::string &text);
+  void outputCPPNamedScalarArrays(const std::string &file);
 
   void setInsideScalarArray(bool flag);
   bool getInsideScalarArray();
   std::string getScalarArrayCompressedText();
+  std::string getScalarArrayName(int hash, int index);
 
   /**
    * Force all class variables to be variants, since l-val or reference
@@ -221,6 +225,7 @@ public:
   void outputCPPScalarArrayDecl(CodeGenerator &cg);
   void outputCPPScalarArrayImpl(CodeGenerator &cg);
   void outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount, int part);
+  void outputCPPScalarArrayId(CodeGenerator &cg, int id, int hash, int index);
   void outputCPPClassStaticInitializerFlags(CodeGenerator &cg,
                                             bool constructor);
   void outputCPPClassDeclaredFlags(CodeGenerator &cg);
@@ -411,6 +416,7 @@ private:
   int m_optCounter;
 
   std::map<std::string, int> m_scalarArrays;
+  std::map<int, std::vector<std::string> > m_namedScalarArrays;
   int m_scalarArraysCounter;
   std::vector<ExpressionPtr> m_scalarArrayIds;
   std::map<std::string, int> m_paramRTTIs;

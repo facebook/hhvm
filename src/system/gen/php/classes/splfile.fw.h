@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
 extern StaticString s_sys_ss00000000;
 extern StaticString s_sys_ss228ee909;
 extern StaticString s_sys_ss2d8b6f3b;
@@ -90,9 +90,11 @@ extern StaticString s_sys_ss25d241c5;
 extern StaticString s_sys_ss0e43d437;
 extern StaticString s_sys_ss54808c44;
 
-// 2. Constants
+// 2. Static Arrays
 
-// 3. Classes
+// 3. Constants
+
+// 4. Classes
 FORWARD_DECLARE_CLASS(splfileobject);
 extern const int64 q_splfileobject_DROP_NEW_LINE;
 extern const int64 q_splfileobject_READ_AHEAD;

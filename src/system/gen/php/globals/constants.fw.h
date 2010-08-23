@@ -25,10 +25,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
 extern StaticString s_sys_ss00000000;
 
-// 2. Constants
+// 2. Static Arrays
+
+// 3. Constants
 extern const int64 k_PATHINFO_BASENAME;
 extern const int64 k_OPENSSL_VERSION_NUMBER;
 extern const int64 k_CURLOPT_HEADERFUNCTION;
@@ -1995,7 +1997,7 @@ extern const int64 k_T_ELSEIF;
 extern const int64 k_T_STRING_CAST;
 
 
-// 3. Classes
+// 4. Classes
 
 ///////////////////////////////////////////////////////////////////////////////
 }

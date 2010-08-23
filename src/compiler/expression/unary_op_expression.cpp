@@ -610,22 +610,18 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       (getContext() & (RefValue|LValue)) == 0 &&
       !ar->getInsideScalarArray()) {
     int id = -1;
+    int hash = -1;
+    int index = -1;
     if (m_exp) {
       ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
       if (pairs && pairs->isScalarArrayPairs()) {
-        id = ar->registerScalarArray(m_exp);
+        id = ar->registerScalarArray(m_exp, hash, index);
       }
     } else {
-      id = ar->registerScalarArray(m_exp); // empty array
+      id = ar->registerScalarArray(m_exp, hash, index); // empty array
     }
     if (id != -1) {
-      if (cg.getOutput() == CodeGenerator::SystemCPP) {
-        cg_printf("SystemScalarArrays::%s[%d]",
-                  Option::SystemScalarArrayName, id);
-      } else {
-        cg_printf("ScalarArrays::%s[%d]",
-                  Option::ScalarArrayName, id);
-      }
+      ar->outputCPPScalarArrayId(cg, id, hash, index);
       return;
     }
   }

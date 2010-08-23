@@ -109,6 +109,12 @@ public:
   std::set<std::string> &getUsedLiteralStrings() {
     return m_usedLiteralStrings;
   }
+  void addUsedScalarArray(std::string s) {
+    m_usedScalarArrays.insert(s);
+  }
+  std::set<std::string> &getUsedScalarArrays() {
+    return m_usedScalarArrays;
+  }
 
   /**
    * For separate compilation
@@ -205,6 +211,7 @@ private:
   std::set<std::string> m_usedConsts;
   std::set<std::string> m_usedIncludesInline;
   std::set<std::string> m_usedLiteralStrings;
+  std::set<std::string> m_usedScalarArrays;
   std::string m_pseudoMainName;
   std::set<std::string> m_pseudoMainVariables;
 

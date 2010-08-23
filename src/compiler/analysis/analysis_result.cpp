@@ -862,7 +862,12 @@ void AnalysisResult::postOptimize(int maxPass /* = 100 */) {
 ///////////////////////////////////////////////////////////////////////////////
 // code generation functions
 
-int AnalysisResult::registerScalarArray(ExpressionPtr pairs) {
+int AnalysisResult::registerScalarArray(ExpressionPtr pairs, int &hash,
+                                        int &index) {
+  int id = -1;
+  hash = -1;
+  index = -1;
+  bool found = false;
   if (!Option::ScalarArrayOptimization || m_insideScalarArray) {
     return -1;
   }
@@ -874,11 +879,125 @@ int AnalysisResult::registerScalarArray(ExpressionPtr pairs) {
     text = pairs->getText(false, true);
   }
   std::map<std::string, int>::const_iterator iter = m_scalarArrays.find(text);
-  if (iter != m_scalarArrays.end()) return iter->second;
-  int id = m_scalarArraysCounter++;
-  m_scalarArrays[text] = id;
-  m_scalarArrayIds.push_back(pairs);
+  if (iter != m_scalarArrays.end()) {
+    id = iter->second;
+    found = true;
+  } else {
+    id = m_scalarArraysCounter++;
+    m_scalarArrays[text] = id;
+    m_scalarArrayIds.push_back(pairs);
+  }
+  if (Option::UseNamedScalarArray) {
+    hash = hash_string(text.data(), text.size());
+    if (hash < 0) hash = -hash;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    unsigned int i = 0;
+    for (; i < strings.size(); i++) {
+      if (strings[i] == text) break;
+    }
+    if (i == strings.size()) {
+      assert(!found);
+      strings.push_back(text);
+    }
+    index = i;
+    getFileScope()->addUsedScalarArray(text);
+  }
   return id;
+}
+
+int AnalysisResult::checkScalarArray(const string &text, int &index) {
+  assert(Option::ScalarArrayOptimization && Option::UseNamedScalarArray);
+  int hash = hash_string(text.data(), text.size());
+  if (hash < 0) hash = -hash;
+  vector<string> &strings = m_namedScalarArrays[hash];
+  unsigned int i = 0;
+  for (; i < strings.size(); i++) {
+    if (strings[i] == text) break;
+  }
+  assert(i < strings.size());
+  index = i;
+  return hash;
+}
+
+int AnalysisResult::getScalarArrayId(const string &text) {
+  std::map<std::string, int>::const_iterator iter = m_scalarArrays.find(text);
+  assert(iter != m_scalarArrays.end());
+  return iter->second;
+}
+
+void AnalysisResult::outputCPPNamedScalarArrays(const std::string &file) {
+  AnalysisResultPtr ar = shared_from_this();
+  string filename = file + ".h";
+  ofstream f(filename.c_str());
+  CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
+
+  cg_printf("\n");
+  if (Option::SystemGen) {
+    cg_printf("#ifndef __GENERATED_gen_sys_scalar_arrays_h__\n");
+    cg_printf("#define __GENERATED_gen_sys_scalar_arrays_h__\n");
+  } else {
+    cg_printf("#ifndef __GENERATED_sys_scalar_arrays_h__\n");
+    cg_printf("#define __GENERATED_sys_scalar_arrays_h__\n");
+  }
+  cg_printInclude("<runtime/base/hphp.h>");
+  if (!Option::SystemGen) {
+    cg_printInclude("<sys/global_variables.h>");
+  }
+  cg_printf("\n");
+  cg.namespaceBegin();
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarArrayName(hash, i);
+      cg_printf("extern StaticArray %s;\n", name.c_str());
+    }
+  }
+  cg.namespaceEnd();
+  if (Option::SystemGen) {
+    cg_printf("#endif // __GENERATED_gen_sys_scalar_arrays_h__\n");
+  } else {
+    cg_printf("#endif // __GENERATED_sys_scalar_arrays_h__\n");
+  }
+  f.close();
+
+  filename = file + ".no.cpp";
+  f.open(filename.c_str());
+  cg_printf("\n");
+  cg_printInclude("\"scalar_arrays.h\"");
+  cg_printf("\n");
+  cg.namespaceBegin();
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarArrayName(hash, i);
+      cg_printf("StaticArray %s;\n", name.c_str());
+    }
+  }
+  cg_printf("\n");
+  const char *clsname =
+    Option::SystemGen ? "SystemScalarArrays" : "ScalarArrays";
+  const char *prefix = Option::SystemGen ? Option::SystemScalarArrayName :
+    Option::ScalarArrayName;
+  cg_indentBegin("void %s::initializeNamed() {\n", clsname);
+  for (map<int, vector<string> >::const_iterator it =
+       m_namedScalarArrays.begin(); it != m_namedScalarArrays.end();
+       it++) {
+    int hash = it->first;
+    vector<string> &strings = m_namedScalarArrays[hash];
+    for (unsigned int i = 0; i < strings.size(); i++) {
+      string name = getScalarArrayName(hash, i);
+      int id = getScalarArrayId(strings[i]);
+      cg_printf("%s = %s[%d];\n", name.c_str(), prefix, id);
+    }
+  }
+  cg_indentEnd("}\n");
+  cg.namespaceEnd();
 }
 
 bool AnalysisResult::getInsideScalarArray() {
@@ -1226,6 +1345,11 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
         "literal_strings";
       outputCPPNamedLiteralStrings(false, file);
     }
+    if (Option::UseNamedScalarArray) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "scalar_arrays";
+      outputCPPNamedScalarArrays(file);
+    }
   } else if (Option::GenerateCPPMain) {
     outputCPPGlobalDeclarations();
     outputCPPMain();
@@ -1240,6 +1364,11 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
       outputCPPNamedLiteralStrings(false, file);
     } else if (Option::PrecomputeLiteralStrings) {
       outputCPPLiteralStringPrecomputation();
+    }
+    if (Option::UseNamedScalarArray) {
+      string file = m_outputPath + "/" + Option::SystemFilePrefix +
+        "scalar_arrays";
+      outputCPPNamedScalarArrays(file);
     }
     outputCPPGlobalState();
     outputCPPFiberGlobalState();
@@ -2478,6 +2607,28 @@ void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
   }
 }
 
+string AnalysisResult::getScalarArrayName(int hash, int index) {
+  assert(index >= 0);
+  string name(Option::SystemGen ? "s_sys_sa" : "s_sa");
+  name += boost::str(boost::format("%08x") % hash);
+  if (index > 0) name += ("_" + lexical_cast<string>(index));
+  return name;
+}
+
+void AnalysisResult::outputCPPScalarArrayId(CodeGenerator &cg, int id,
+                                            int hash, int index) {
+  if (Option::UseNamedScalarArray) {
+    string name = getScalarArrayName(hash, index);
+    cg_printf("%s", name.c_str());
+    return;
+  }
+  if (cg.getOutput() == CodeGenerator::SystemCPP) {
+    cg_printf("SystemScalarArrays::%s[%d]", Option::SystemScalarArrayName, id);
+    return;
+  }
+  cg_printf("ScalarArrays::%s[%d]", Option::ScalarArrayName, id);
+}
+
 void AnalysisResult::outputCPPGlobalDeclarations() {
   string filename = string(Option::SystemFilePrefix) + "global_variables.h";
 
@@ -2670,8 +2821,10 @@ void AnalysisResult::outputCPPScalarArrays(CodeGenerator &cg, int fileCount,
         cg_printf("ArrayUtil::InitScalarArrays(%s, %d, sa_cdata, %d);\n",
                   prefix, m_scalarArrayIds.size(),
                   m_scalarArrayCompressedTextSize);
+        cg_printf("%s::initializeNamed();\n", clsname);
       } else {
         outputCPPScalarArrayInit(cg, 1, 0);
+        cg_printf("%s::initializeNamed();\n", clsname);
       }
     }
     cg_indentEnd("}\n");
@@ -3804,6 +3957,7 @@ void AnalysisResult::outputCPPSepExtensionImpl(const std::string &filename) {
   cg.namespaceEnd();
   fTable.close();
   outputCPPNamedLiteralStrings(true, litstrFile);
+  if (m_scalarArrays.size()) assert(false);
 }
 
 //

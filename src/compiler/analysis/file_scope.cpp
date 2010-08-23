@@ -363,7 +363,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   }
 
   cg.namespaceBegin();
-  cg.printSection("1. Static Strings ", false);
+  cg.printSection("1. Static Strings", false);
   string str;
   BOOST_FOREACH(str, m_usedLiteralStrings) {
     int index = -1;
@@ -373,14 +373,23 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
     cg_printf("extern StaticString %s;\n", lisnam.c_str());
   }
   cg_printf("\n");
-  cg.printSection("2. Constants", false);
+  cg.printSection("2. Static Arrays", false);
+  BOOST_FOREACH(str, m_usedScalarArrays) {
+    int index = -1;
+    int hash = ar->checkScalarArray(str, index);
+    assert(hash != -1 && index != -1);
+    string name = ar->getScalarArrayName(hash, index);
+    cg_printf("extern StaticArray %s;\n", name.c_str());
+  }
+  cg_printf("\n");
+  cg.printSection("3. Constants", false);
   if (cg.getOutput() != CodeGenerator::MonoCPP) {
     getConstants()->outputCPP(cg, ar);
   } else {
     cg_printf("// (omitted in MonoCPP mode)\n");
   }
 
-  cg.printSection("3. Classes");
+  cg.printSection("4. Classes");
   for (StringToClassScopePtrVecMap::iterator it = m_classes.begin();
        it != m_classes.end(); ++it) {
     BOOST_FOREACH(ClassScopePtr cls, it->second) {

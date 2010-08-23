@@ -803,6 +803,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
   }
   cg_indentBegin("public:\n");
   cg_printf("static void initialize();\n");
+  cg_printf("static void initializeNamed();\n");
   if (cg.getOutput() != CodeGenerator::SystemCPP &&
       Option::ScalarArrayFileCount > 1) {
     for (int i = 0; i < Option::ScalarArrayFileCount; i++) {

@@ -730,7 +730,10 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
                                        CodeGenerator &cg,
                                        AnalysisResultPtr ar, int extraArg,
                                        bool variableArgument,
-                                       int extraArgArrayId /* = -1 */) {
+                                       int extraArgArrayId /* = -1 */,
+                                       int extraArgArrayHash /* = -1 */,
+                                       int extraArgArrayIndex /* = -1 */) {
+
   int paramCount = params ? params->getOutputCount() : 0;
   ASSERT(extraArg <= paramCount);
   int iMax = paramCount - extraArg;
@@ -750,13 +753,9 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
     if (i > 0) cg_printf(extra ? "." : ", ");
     if (!extra && (i == iMax || extraArg < 0)) {
       if (extraArgArrayId != -1) {
-        if (cg.getOutput() == CodeGenerator::SystemCPP) {
-          cg_printf("SystemScalarArrays::%s[%d]",
-                    Option::SystemScalarArrayName, extraArgArrayId);
-        } else {
-          cg_printf("ScalarArrays::%s[%d]",
-                    Option::ScalarArrayName, extraArgArrayId);
-        }
+        assert(extraArgArrayHash != -1 && extraArgArrayIndex != -1);
+        ar->outputCPPScalarArrayId(cg, extraArgArrayId, extraArgArrayHash,
+                                   extraArgArrayIndex);
         break;
       }
       extra = true;

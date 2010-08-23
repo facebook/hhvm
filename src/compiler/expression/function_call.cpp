@@ -42,7 +42,7 @@ FunctionCall::FunctionCall
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
     m_redeclaredClass(false), m_derivedFromRedeclaring(false),
-    m_argArrayId(-1) {
+    m_argArrayId(-1), m_argArrayHash(-1), m_argArrayIndex(-1) {
 
   if (m_nameExp &&
       m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
@@ -282,6 +282,7 @@ void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {
                                 Expression::KindOfArrayPairExpression,
                                 ExpressionPtr(), param, false)));
     }
-    m_argArrayId = ar->registerScalarArray(argArrayPairs);
+    m_argArrayId =
+      ar->registerScalarArray(argArrayPairs, m_argArrayHash, m_argArrayIndex);
   }
 }

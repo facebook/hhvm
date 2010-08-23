@@ -26,6 +26,7 @@ StaticArray SystemScalarArrays::ssa_[1];
 
 void SystemScalarArrays::initialize() {
   ssa_[0] = StaticArray(ArrayData::Create());
+  SystemScalarArrays::initializeNamed();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

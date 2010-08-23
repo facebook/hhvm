@@ -1146,7 +1146,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
     }
     FunctionScope::outputCPPArguments(m_params, cg, ar, m_extraArg,
-                                      m_variableArgument, m_argArrayId);
+                                      m_variableArgument, m_argArrayId,
+                                      m_argArrayHash, m_argArrayIndex);
   } else {
     bool skipParams = false;
     needHash = true;

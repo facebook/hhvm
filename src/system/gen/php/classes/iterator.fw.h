@@ -25,7 +25,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-// 1. Static Strings 
+// 1. Static Strings
 extern StaticString s_sys_ss5b908ab0;
 extern StaticString s_sys_ss00ce7919;
 extern StaticString s_sys_ss4f67744c;
@@ -92,9 +92,12 @@ extern StaticString s_sys_ss02b6fd60;
 extern StaticString s_sys_ss58e4193c;
 extern StaticString s_sys_ss54808c44;
 
-// 2. Constants
+// 2. Static Arrays
+extern StaticArray s_sys_sa00000000;
 
-// 3. Classes
+// 3. Constants
+
+// 4. Classes
 FORWARD_DECLARE_GENERIC_INTERFACE(outeriterator);
 FORWARD_DECLARE_GENERIC_INTERFACE(serializable);
 FORWARD_DECLARE_GENERIC_INTERFACE(traversable);

@@ -336,17 +336,27 @@ bool SharedStoreStats::snapshot(const char *filename, std::string& keySample) {
       nkey[MAX_KEY_LEN] = '\0';
       if (strcmp(nkey, nkeySample) != 0) continue;
     }
+    if (!iter->second->isValid) continue;
     if (first) first = false;
     else out << ",\n";
     out << "  \"" << iter->first << "\": {\n";
     writeEntryInt(out, "TotalSize", iter->second->totalSize, 2);
+    writeEntryInt(out, "Prime", (int64)iter->second->isPrime, 2);
     writeEntryInt(out, "TTL", iter->second->ttl, 2);
     writeEntryInt(out, "KeySize", iter->second->keySize, 2);
     writeEntryInt(out, "DataSize", iter->second->var.dataTotalSize, 2);
+    writeEntryInt(out, "StoreCount", iter->second->storeCount, 2);
+    writeEntryInt(out, "SinceLastStore", now - iter->second->lastStoreTime, 2);
+    writeEntryInt(out, "DeleteCount", iter->second->deleteCount, 2);
+    if (iter->second->deleteCount > 0) {
+      writeEntryInt(out, "SinceLastDelete", now - iter->second->lastDeleteTime,
+                    2);
+    }
     if (RuntimeOption::EnableAPCFetchStats) {
-      writeEntryInt(out, "GetCount", iter->second->getCount, 2);
-      if (iter->second->getCount > 0) {
-        writeEntryInt(out, "StaleTime", now - iter->second->lastGetTime, 2);
+      writeEntryInt(out, "FetchCount", iter->second->fetchCount, 2);
+      if (iter->second->fetchCount > 0) {
+        writeEntryInt(out, "SinceLastFetch", now - iter->second->lastFetchTime,
+                      2);
       }
     }
     writeEntryInt(out, "VariantCount", iter->second->var.variantCount, 2);
@@ -415,8 +425,14 @@ void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
     StatsMap::iterator iter = s_detailMap.find((char*)key->data());
     if (iter != s_detailMap.end()) {
       svp = iter->second;
-      s_detailMap.erase(iter);
-      // svp will be deleted later
+      ASSERT(svp->isValid);
+      if (!replace) {
+        svp->isValid = false;
+        svp->deleteCount++;
+        svp->lastDeleteTime = time(NULL);
+      }
+    } else {
+      ASSERT(false);
     }
   }
 
@@ -427,13 +443,12 @@ void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
       svp->calcInd(key, var);
     }
     group->removeFromGroup(svp);
+  } else {
+    ASSERT(false);
   }
 
   // svp is either pulled or calculated, remove from global here
   remove(svp, replace);
-
-  // svp is pulled from s_detailMap, delete here.
-  if (svp != &svpLocal) delete svp;
 
   unlock();
 }
@@ -443,14 +458,16 @@ void SharedStoreStats::onGet(StringData *key, SharedVariant *var) {
   StatsMap::iterator iter = s_detailMap.find((char*)key->data());
   if (iter != s_detailMap.end()) {
     SharedValueProfile *svpInd = iter->second;
-    svpInd->lastGetTime= time(NULL);
-    svpInd->getCount++;
+    svpInd->lastFetchTime = time(NULL);
+    svpInd->fetchCount++;
+  } else {
+    ASSERT(false);
   }
   unlock();
 }
 
 void SharedStoreStats::onStore(StringData *key, SharedVariant *var,
-                               int64 ttl) {
+                               int64 ttl, bool prime) {
   char normalizedKey[MAX_KEY_LEN + 1];
   normalizeKey(key->data(), normalizedKey, MAX_KEY_LEN);
   normalizedKey[MAX_KEY_LEN] = '\0';
@@ -478,7 +495,22 @@ void SharedStoreStats::onStore(StringData *key, SharedVariant *var,
   group->addToGroup(svpInd);
 
   if (RuntimeOption::EnableAPCSizeDetail) {
-    s_detailMap[svpInd->key] = svpInd;
+    iter = s_detailMap.find(svpInd->key);
+    if (iter == s_detailMap.end()) {
+      s_detailMap[svpInd->key] = svpInd;
+    } else {
+      SharedValueProfile *existing = iter->second;
+      // update size but keep other stats
+      existing->totalSize = svpInd->totalSize;
+      existing->keySize = svpInd->keySize;
+      existing->var = svpInd->var;
+      delete svpInd;
+      svpInd = existing;
+    }
+    svpInd->isValid = true;
+    svpInd->storeCount++;
+    svpInd->lastStoreTime = time(NULL);
+    if (prime) svpInd->isPrime = true;
   } else {
     delete svpInd;
   }

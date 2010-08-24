@@ -966,7 +966,7 @@ bool ConcurrentTableSharedStore::store(CStrRef key, CVarRef val, int64 ttl,
     sval->set(var, ttl);
     expiry = sval->expiry;
     if (RuntimeOption::EnableAPCSizeStats) {
-      SharedStoreStats::onStore(key.get(), var, ttl);
+      SharedStoreStats::onStore(key.get(), var, ttl, false);
     }
   }
   if (RuntimeOption::ApcExpireOnSets) {
@@ -1065,7 +1065,7 @@ void ConcurrentTableSharedStore::prime
     if (RuntimeOption::EnableAPCSizeStats &&
         RuntimeOption::APCSizeCountPrime) {
       StringData sd(copy);
-      SharedStoreStats::onStore(&sd, item.value, 0);
+      SharedStoreStats::onStore(&sd, item.value, 0, true);
     }
   }
 }

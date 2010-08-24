@@ -28,12 +28,18 @@ private:
   void init() {
     key = NULL;
     isGroup = false;
+    isPrime = false;
+    isValid = false;
     totalSize = 0;
     keySize = 0;
     keyCount = 0;
     ttl = 0;
-    getCount = 0;
-    lastGetTime = 0;
+    fetchCount = 0;
+    lastFetchTime = 0;
+    storeCount = 0;
+    lastStoreTime = 0;
+    deleteCount = 0;
+    lastDeleteTime = 0;
   }
 
 public:
@@ -42,14 +48,21 @@ public:
   int64 totalSize;
   int32 keySize;
   bool isGroup;
+  bool isPrime;
+  bool isValid;
   int32 keyCount; // valid only for group
   int64 ttl; // valid for both, for group key stats, it's average
   // Also treat no ttl as 48-hrs.
 
   // getCount and lastGetTime only valid for individual (so that we don't need
   // normalize the key for every get)
-  int64 getCount;
-  time_t lastGetTime;
+  int64 fetchCount;
+  time_t lastFetchTime;
+  int64 storeCount;
+  time_t lastStoreTime;
+  int64 deleteCount;
+  time_t lastDeleteTime;
+
 
   SharedValueProfile() {
     // For temporary use only
@@ -74,7 +87,8 @@ public:
 class SharedStoreStats {
 public:
   static void onClear();
-  static void onStore(StringData *key, SharedVariant *var, int64 ttl);
+  static void onStore(StringData *key, SharedVariant *var, int64 ttl,
+                      bool prime);
   static void onDelete(StringData *key, SharedVariant *var, bool replace);
   static void onGet(StringData *key, SharedVariant *var);
   static void resetStats() {

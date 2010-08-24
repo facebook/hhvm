@@ -264,6 +264,7 @@ bool TestExtStream::test_stream_get_meta_data() {
   Variant line = f_fgets(client);
   Variant meta = f_stream_get_meta_data(client);
   VS(meta["timed_out"], true);
+  VS(meta["blocked"], false);
 
   return Count(true);
 }

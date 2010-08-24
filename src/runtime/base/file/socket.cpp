@@ -155,6 +155,7 @@ bool Socket::eof() {
 Array Socket::getMetaData() {
   Array ret = File::getMetaData();
   ret.set("timed_out", m_timedOut);
+  ret.set("blocked", (bool)(fcntl(m_fd, F_GETFL, 0) & O_NONBLOCK));
   return ret;
 }
 

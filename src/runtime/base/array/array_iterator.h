@@ -83,7 +83,8 @@ private:
 struct FullPos {
   ssize_t primary;
   ssize_t secondary;
-  FullPos() : primary(0), secondary(0) {}
+  ArrayData * container;
+  FullPos() : primary(0), secondary(0), container(NULL) {}
 };
 
 /**
@@ -94,20 +95,20 @@ struct FullPos {
  */
 class MutableArrayIter : public Countable {
 public:
-  MutableArrayIter(const Variant *var, Variant *key, Variant &val);
-  MutableArrayIter(ArrayData *data, Variant *key, Variant &val);
+  MutableArrayIter(const Variant* var, Variant* key, Variant& val);
+  MutableArrayIter(ArrayData* data, Variant* key, Variant& val);
   ~MutableArrayIter();
   void release() { delete this;}
   bool advance();
 
 private:
-  const Variant *m_var;
-  ArrayData *m_data;
-  Variant *m_key;
-  Variant &m_val;
+  const Variant* m_var;
+  ArrayData* m_data;
+  Variant* m_key;
+  Variant& m_val;
   FullPos m_pos;
   int size();
-  ArrayData *getData();
+  ArrayData* getData();
 };
 typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
 

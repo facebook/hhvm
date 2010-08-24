@@ -173,11 +173,22 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 ///////////////////////////////////////////////////////////////////////////////
 // MutableArrayIter related functions
 
+void ArrayData::newFullPos(FullPos &pos) {
+  ASSERT(pos.container == NULL);
+  pos.container = (ArrayData*)this;
+  getFullPos(pos);
+}
 void ArrayData::getFullPos(FullPos &pos) {
+  ASSERT(pos.container == (ArrayData*)this);
   pos.primary = ArrayData::invalid_index;
 }
 bool ArrayData::setFullPos(const FullPos &pos) {
+  ASSERT(pos.container == (ArrayData*)this);
   return false;
+}
+void ArrayData::freeFullPos(FullPos &pos) {
+  ASSERT(pos.container == (ArrayData*)this);
+  pos.container = NULL;
 }
 CVarRef ArrayData::currentRef() {
   if (m_pos >= 0 && m_pos < size()) {

@@ -851,7 +851,6 @@ ArrayData *SmallArray::prepend(CVarRef v, bool copy) {
   if (m_nNumOfElements == 0) {
     b.h = 0;
     m_nListTail = p;
-    m_pos = p;
     m_nNumOfElements = 1;
     m_nNextFreeElement = 1;
   } else {
@@ -859,6 +858,9 @@ ArrayData *SmallArray::prepend(CVarRef v, bool copy) {
     // Rewrite numeric keys to start from 0.
     renumber();
   }
+  // To match PHP-like semantics, the prepend operation resets the array's
+  // internal iterator
+  m_pos = (ssize_t)m_nListHead;
   return NULL;
 }
 
@@ -963,6 +965,9 @@ ArrayData *SmallArray::pop(Variant &value) {
     m_nNextFreeElement--;
   }
   erase(&b);
+  // To match PHP-like semantics, the pop operation resets the array's
+  // internal iterator
+  m_pos = (ssize_t)m_nListHead;
   return NULL;
 }
 
@@ -983,6 +988,9 @@ ArrayData *SmallArray::dequeue(Variant &value) {
   value = b.data;
   erase(&b);
   renumber();
+  // To match PHP-like semantics, the dequeue operation resets the array's
+  // internal iterator
+  m_pos = (ssize_t)m_nListHead;
   return NULL;
 }
 

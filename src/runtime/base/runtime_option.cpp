@@ -56,6 +56,7 @@ bool RuntimeOption::ThrowTooManyArguments = false;
 bool RuntimeOption::WarnTooManyArguments = false;
 bool RuntimeOption::ThrowMissingArguments = false;
 bool RuntimeOption::ThrowInvalidArguments = false;
+bool RuntimeOption::FatalOnWeirdForEach = true;
 bool RuntimeOption::AssertActive = false;
 bool RuntimeOption::AssertWarning = false;
 int RuntimeOption::NoticeFrequency = 1;
@@ -445,6 +446,7 @@ void RuntimeOption::Load(Hdf &config) {
     WarnTooManyArguments = error["WarnTooManyArguments"].getBool();
     ThrowMissingArguments = error["ThrowMissingArguments"].getBool();
     ThrowInvalidArguments = error["ThrowInvalidArguments"].getBool();
+    FatalOnWeirdForEach = error["FatalOnWeirdForEach"].getBool(true);
     AssertActive = error["AssertActive"].getBool();
     AssertWarning = error["AssertWarning"].getBool();
     NoticeFrequency = error["NoticeFrequency"].getInt32(1);

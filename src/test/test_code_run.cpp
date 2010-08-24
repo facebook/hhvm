@@ -391,6 +391,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestLocale);
   RUN_TEST(TestArray);
   RUN_TEST(TestArrayInit);
+  RUN_TEST(TestArrayCopy);
   RUN_TEST(TestArrayEscalation);
   RUN_TEST(TestArrayOffset);
   RUN_TEST(TestArrayAccess);
@@ -1432,6 +1433,154 @@ bool TestCodeRun::TestArrayInit() {
   return true;
 }
 
+bool TestCodeRun::TestArrayCopy() {
+  MVCR("<?php function h1() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  unset($y[2]);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h1();\n");
+
+  MVCR("<?php function h2() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  $y[] = 4;\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h2();\n");
+
+  MVCR("<?php function h3() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  array_pop($y);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h3();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   bool(false)
+   *   int(1)
+   *
+   * The difference in behavior is intentional. Under Zend PHP, the first call
+   * to current triggers an array copy, and because the original array's
+   * internal iterator points past the end, the copy's internal iterator is
+   * reset. This behavior exposes information to user code about when array
+   * copies are triggered.
+   *
+   * Under HPHP, we always leave the internal iterator intact when making an
+   * array copy. The advantage here is that we do not expose information about
+   * when array copies are triggered to user code.
+   */
+  MVCRO("<?php function h4() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  end($x);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  unset($y[2]);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h4();\n"
+       ,
+       "bool(false)\n"
+       "bool(false)\n"
+       );
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   bool(false)
+   *   int(1)
+   *
+   * The difference in behavior is intentional. Under Zend PHP, when 4 is
+   * appended to $y, it triggers an array copy which resets $y's internal
+   * iterator. This is why current($y) returns 1.
+   *
+   * Under HPHP, when 4 is appended to $y, it triggers an array copy. However,
+   * $y's internal iterator is not reset; it continues to point past the last
+   * element. Then when the append operation actually executes, it updates the
+   * internal iterator to point to the newly appended element. For more info
+   * see the h4 testcase.
+   */
+  MVCRO("<?php function h5() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  end($x);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  $y[] = 4;\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h5();\n"
+       ,
+       "bool(false)\n"
+       "int(4)\n"
+       );
+
+  MVCR("<?php function h6() {\n"
+       "  $x = array(1,2,3,4);\n"
+       "  end($x);\n"
+       "  next($x);\n"
+       "  $y = $x;\n"
+       "  array_pop($y);\n"
+       "  var_dump(current($x));\n"
+       "  var_dump(current($y));\n"
+       "}\n"
+       "h6();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   int(0)
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. For more info see testcase h4.
+   */
+  MVCRO("<?php function h7() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  end($arr);\n"
+       "  next($arr);\n"
+       "  $arr2 = $arr;\n"
+       "  var_dump(current($arr));\n"
+       "  var_dump(current($arr2));\n"
+       "}\n"
+       "h7();\n"
+       ,
+       "bool(false)\n"
+       "bool(false)\n"
+       );
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   int(0)
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. For more info see testcase h4.
+   */
+  MVCRO("<?php function h8() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  end($arr);\n"
+       "  next($arr);\n"
+       "  $arr2 = $arr;\n"
+       "  var_dump(current($arr2));\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "h8();\n"
+       ,
+       "bool(false)\n"
+       "bool(false)\n"
+       );
+
+  return true;
+}
+
+
 bool TestCodeRun::TestScalarArray() {
   MVCR("<?php "
       "$a1 = array();"
@@ -1919,7 +2068,38 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "f2();\n");
 
-  MVCR("<?php\n"
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=a val=1
+   *   key=b val=2
+   *   key=c val=333
+   *   array(6) {
+   *     ["a"]=>
+   *     int(1)
+   *     ["b"]=>
+   *     int(2)
+   *     ["d"]=>
+   *     int(4)
+   *     ["e"]=>
+   *     int(5)
+   *     ["f"]=>
+   *     int(6)
+   *     ["c"]=>
+   *     &int(333)
+   *   }
+   *
+   * The difference in behavior is intentional. Under PHP, when the next
+   * element is unset inside a foreach by reference loop, a heuristic is used
+   * to figure out which element should be visited next. In this specific
+   * example, the loop resumes at key 'c', skipping over keys 'd', 'e', and
+   * 'f'.
+   *
+   * Under HPHP, when the next element is unset inside a foreach by loop, the
+   * loop's iterator is appropriately updated. HPHP successfully upholds the
+   * invariant that a foreach by refererence loop that exhausts the array will
+   * visit every element that has not been deleted exactly once.
+   */
+  MVCRO("<?php\n"
        "function f3() {\n"
        "  $i = 0;\n"
        "  $foo = array('a'=>1, 'b'=>2, 'c'=>3, 'd'=>4, 'e'=>5, 'f'=>6);\n"
@@ -1938,9 +2118,30 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "  var_dump($foo);\n"
        "}\n"
-       "f3();\n");
+       "f3();\n"
+       ,
+       "key=a val=1\n"
+       "key=b val=2\n"
+       "key=d val=4\n"
+       "key=e val=5\n"
+       "key=f val=6\n"
+       "key=c val=333\n"
+       "array(6) {\n"
+       "  [\"a\"]=>\n"
+       "  int(1)\n"
+       "  [\"b\"]=>\n"
+       "  int(2)\n"
+       "  [\"d\"]=>\n"
+       "  int(4)\n"
+       "  [\"e\"]=>\n"
+       "  int(5)\n"
+       "  [\"f\"]=>\n"
+       "  int(6)\n"
+       "  [\"c\"]=>\n"
+       "  &int(333)\n"
+       "}\n"
+       );
 
-/* dangling pointers in iterator
   MVCR("<?php\n"
        "function f4() {\n"
        "  $i = 0;\n"
@@ -1962,30 +2163,70 @@ bool TestCodeRun::TestArrayForEach() {
        "  var_dump($foo);\n"
        "}\n"
        "f4();\n");
-*/
 
-  MVCR("<?php\n"
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=f val=3
+   *   key()=e current()=1
+   *   key=e val=1
+   *   key()=d current()=5
+   *   key=d val=9
+   *   key()=0s0 current()=0
+   *   key=0s0 val=0
+   *   key()=1s1 current()=1
+   *   key=1s1 val=1
+   *   key()=2s2 current()=2
+   *   key=2s2 val=2
+   *   key()=3s3 current()=3
+   *   key=3s3 val=3
+   *   key()=4s4 current()=4
+   *   ...
+   *
+   * The difference in behavior is intentional. For more info, see testcase h3.
+   */
+  MVCRO("<?php\n"
        "function f5() {\n"
        "  $i = 0;\n"
        "  $foo = array('f'=>3, 'e'=>1, 'd'=>5, 'a'=>6, 'b'=>2, 'c'=>4);\n"
        "  $a = 0;\n"
        "  foreach ($foo as $key => &$val) {\n"
-       "    if ($val <= 10)\n"
-       "      echo \"key=$key val=$val\\n\";\n"
+       "    echo \"key=$key val=$val\\n\";\n"
        "    if ($key == 'e' && $a == 0) {\n"
        "      $a = 1;\n"
        "      unset($foo['e']);\n"
        "      unset($foo['d']);\n"
        "      $foo['d'] = 9;\n"
-       "      for ($i = 0; $i < 10000; ++$i)\n"
-       "        $foo[$i . 's' . $i] = $i;\n"
+       "      for ($j = 0; $j < 10000; ++$j)\n"
+       "        $foo[$j . 's' . $j] = $j;\n"
        "    }\n"
        "    ++$i;\n"
        "    if ($i >= 20)\n"
        "      break;\n"
        "  }\n"
        "}\n"
-       "f5();\n");
+       "f5();\n"
+       ,
+       "key=f val=3\n"
+       "key=e val=1\n"
+       "key=a val=6\n"
+       "key=b val=2\n"
+       "key=c val=4\n"
+       "key=d val=9\n"
+       "key=0s0 val=0\n"
+       "key=1s1 val=1\n"
+       "key=2s2 val=2\n"
+       "key=3s3 val=3\n"
+       "key=4s4 val=4\n"
+       "key=5s5 val=5\n"
+       "key=6s6 val=6\n"
+       "key=7s7 val=7\n"
+       "key=8s8 val=8\n"
+       "key=9s9 val=9\n"
+       "key=10s10 val=10\n"
+       "key=11s11 val=11\n"
+       "key=12s12 val=12\n"
+       "key=13s13 val=13\n"
+       );
 
   MVCR("<?php\n"
        "function f6() {\n"
@@ -1993,16 +2234,14 @@ bool TestCodeRun::TestArrayForEach() {
        "  $foo = array('f'=>3, 'e'=>1, 'd'=>5, 'a'=>6, 'b'=>2, 'c'=>4);\n"
        "  $a = 0;\n"
        "  foreach ($foo as $key => &$val) {\n"
-       "    if ($val <= 10)\n"
-       "      echo \"key=$key val=$val\\n\";\n"
        "    if ($key == 'e' && $a == 0) {\n"
        "      $a = 1;\n"
        "      unset($foo['e']);\n"
        "      unset($foo['d']);\n"
        "      $bar['e'] = 8;\n"
        "      $foo['d'] = 9;\n"
-       "      for ($i = 0; $i < 10000; ++$i)\n"
-       "        $foo[$i . 's' . $i] = $i;\n"
+       "      for ($j = 0; $j < 10000; ++$j)\n"
+       "        $foo[$j . 's' . $j] = $j;\n"
        "    }\n"
        "    ++$i;\n"
        "    if ($i >= 20)\n"
@@ -2011,7 +2250,22 @@ bool TestCodeRun::TestArrayForEach() {
        "}\n"
        "f6();\n");
 
-  MVCR("<?php\n"
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=0 value=0
+   *   key=1 value=1
+   *   key=2 value=0
+   *   key=3 value=1
+   *
+   * The difference in behavior is intentional. Under PHP, a foreach by
+   * reference loop will not visit an element that is appended to the array
+   * during the iteration for the last element in the array.
+   *
+   * Under HPHP, a foreach by reference loop will always visit an element that
+   * is appended to the array during any iteration, provided that the element
+   * is not deleted and the loop does not exit early.
+   */
+  MVCRO("<?php\n"
        "function f7() {\n"
        "  $i = 0;\n"
        "  $bar = array();\n"
@@ -2028,9 +2282,30 @@ bool TestCodeRun::TestArrayForEach() {
        "      break;\n"
        "  }\n"
        "}\n"
-       "f7();\n");
+       "f7();\n"
+       ,
+       "key=0 value=0\n"
+       "key=1 value=1\n"
+       "key=2 value=0\n"
+       "key=3 value=1\n"
+       "key=4 value=0\n"
+       "key=5 value=1\n"
+       "key=6 value=0\n"
+       "key=7 value=1\n"
+       "key=8 value=0\n"
+       "key=9 value=1\n"
+       "key=10 value=0\n"
+       "key=11 value=1\n"
+       "key=12 value=0\n"
+       "key=13 value=1\n"
+       "key=14 value=0\n"
+       "key=15 value=1\n"
+       "key=16 value=0\n"
+       "key=17 value=1\n"
+       "key=18 value=0\n"
+       "key=19 value=1\n"
+       );
 
-/* dangling pointers in iterator
   MVCR("<?php\n"
        "function f8() {\n"
        "  $i = 0;\n"
@@ -2051,7 +2326,6 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "}\n"
        "f8();\n");
-*/
 
   MVCR("<?php\n"
        "function f9() {\n"
@@ -2076,6 +2350,315 @@ bool TestCodeRun::TestArrayForEach() {
        "  }\n"
        "}\n"
        "f9();\n");
+
+  /**
+   * XXX Note that this test clobbers the array inside the foreach by reference
+   * loop. When UseSmallArray=true, this causes a fatal error to be thrown
+   * saying "SmallArray should have been escalated". We may need to change
+   * MutableArrayIter to check if the array needs to be escalated at the
+   * beginning of each iteration.
+   */
+  MVCR("<?php function g1() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      $arr = array(4,5,6,7);\n"
+       "     }\n"
+       "  }\n"
+       "}\n"
+       "g1();\n");
+
+  MVCR("<?php function g2() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      $old = $arr;\n"
+       "      $arr = array(4,5,6,7);\n"
+       "    } else if ($v == 6) {\n"
+       "      $arr = $old;\n"
+       "      unset($old);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g2();\n");
+
+  MVCR("<?php function g3() {\n"
+       "  $arr2 = array(0,1,2,3);\n"
+       "  $arr = $arr2;\n"
+       "  $b = true;\n"
+       "  $b2 = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      $arr = array(4,5,6,7);\n"
+       "    } else if ($b2 && $v == 6) {\n"
+       "      $b2 = false;\n"
+       "      $arr = $arr2;\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g3();\n");
+
+  MVCR("<?php function g4() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_push($arr, 4);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g4();\n");
+
+  MVCR("<?php function g5() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $arr2 = $arr;\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_push($arr, 4);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g5();\n");
+
+  MVCR("<?php function g6() {\n"
+       "  $arr = array(0,'a'=>1,2,'b'=>3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $k => &$v) {\n"
+       "    echo \"key=$k val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_pop($arr);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g6();\n");
+
+  MVCR("<?php function g7() {\n"
+       "  $arr = array(0,'a'=>1,2,'b'=>3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $k => &$v) {\n"
+       "    echo \"key=$k val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      unset($arr[1]); \n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g7();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   key=0 val=0
+   *   key=a val=1
+   *   key=0 val=0
+   *   key=a val=1
+   *   key=b val=3
+   *
+   * The difference in behavior is intentional. Under PHP, after the next
+   * element is unset inside the foreach by reference loop and the array_pop
+   * operation is performed, a heuristic is used to determine which element
+   * should be visited next. If this specific example, the loop chooses to
+   * resume at key '0'.
+   *
+   * Under HPHP, when the next element is unset inside a foreach by loop, the
+   * loop's iterator is appropriately updated. Likewise, the loop's iterator
+   * remains intact after the array_pop operation. Thus, after the unset and
+   * the pop operation, HPHP resumes the loop at key 'b'.
+   */
+  MVCRO("<?php function g8() {\n"
+       "  $arr = array(0,'a'=>1,2,'b'=>3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $k => &$v) {\n"
+       "    echo \"key=$k val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      unset($arr[1]); \n"
+       "      array_pop($arr);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g8();\n"
+       ,
+       "key=0 val=0\n"
+       "key=a val=1\n"
+       "key=b val=3\n"
+       );
+
+  MVCR("<?php function g9() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_shift($arr);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g9();\n");
+
+  MVCR("<?php function g10() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as &$v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "    if ($b && $v == 1) {\n"
+       "      $b = false;\n"
+       "      array_unshift($arr, 4);\n"
+       "    }\n"
+       "  }\n"
+       "}\n"
+       "g10();\n");
+
+  MVCR("<?php function g11() {\n"
+       "  $arr = array(0,1,2,3);\n"
+       "  reset($arr);\n"
+       "  var_dump(current($arr));\n"
+       "  foreach ($arr as &$v) {\n"
+       "    var_dump(current($arr));\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "g11();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   val=0
+   *   val=1
+   *   val=2
+   *   val=3
+   *   val=4
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. Under PHP, foreach by value can
+   * in some cases modify the array's internal iterator without triggering an
+   * array copy. This can potentially expose information to user code about
+   * when array copies are triggered.
+   *
+   * Under HPHP, foreach by value will never modify the array's internal
+   * iterator. The advantage here is that we do not expose information about
+   * when array copies are triggered to user code.
+   *
+   * The PHP manual states the following:
+   *   foreach has some side effects on the array pointer. Don't rely on the
+   *   array pointer during or after the foreach without resetting it.
+   */
+  MVCRO("<?php function k1() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  foreach ($arr as $v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "k1();\n"
+       ,
+       "val=0\n"
+       "val=1\n"
+       "val=2\n"
+       "val=3\n"
+       "val=4\n"
+       "int(0)\n"
+       );
+
+  MVCR("<?php function k2() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  $arr2 = $arr;\n"
+       "  foreach ($arr as $v) {\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "  var_dump(current($arr2));\n"
+       "}\n"
+       "k2();\n");
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   val=0
+   *   val=1
+   *   val=2
+   *   val=3
+   *   val=4
+   *   int(0)
+   *   bool(false)
+   *
+   * The difference in behavior is intentional. For more info see testcase k1.
+   */
+  MVCRO("<?php function k3() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $v) {\n"
+       "    if ($b) {\n"
+       "      $b = false;\n"
+       "      $arr2 = $arr;\n"
+       "    }\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr));\n"
+       "  var_dump(current($arr2));\n"
+       "}\n"
+       "k3();\n"
+       ,
+       "val=0\n"
+       "val=1\n"
+       "val=2\n"
+       "val=3\n"
+       "val=4\n"
+       "int(0)\n"
+       "int(0)\n"
+       );
+
+  /**
+   * Zend PHP 5.2 outputs:
+   *   val=0
+   *   val=1
+   *   val=2
+   *   val=3
+   *   val=4
+   *   int(0)
+   *   bool(false)
+   *
+   * This behavior is intentional. For more info see testcase k1.
+   */
+  MVCRO("<?php function k4() {\n"
+       "  $arr = array(0,1,2,3,4);\n"
+       "  reset($arr);\n"
+       "  $b = true;\n"
+       "  foreach ($arr as $v) {\n"
+       "    if ($b) {\n"
+       "      $b = false;\n"
+       "      $arr2 = $arr;\n"
+       "    }\n"
+       "    echo \"val=$v\\n\";\n"
+       "  }\n"
+       "  var_dump(current($arr2));\n"
+       "  var_dump(current($arr));\n"
+       "}\n"
+       "k4();\n"
+       ,
+       "val=0\n"
+       "val=1\n"
+       "val=2\n"
+       "val=3\n"
+       "val=4\n"
+       "int(0)\n"
+       "int(0)\n"
+       );
 
   return true;
 }
@@ -11925,6 +12508,31 @@ bool TestCodeRun::TestExtArray() {
       "var_dump(array_chunk(array()));"
       "$a = array(1, 2);"
       "var_dump(asort($a, 100000));");
+  MVCR("<?php\n"
+      "function f(&$val,$key) {\n"
+      "  echo \"k=$key v=$val\\n\";\n"
+      "  $val = $val + 1;\n"
+      "}\n"
+      "$arr = array(0,1,2);\n"
+      "array_walk($arr,'f');\n"
+      "var_dump($arr);\n");
+  MVCR("<?php\n"
+      "function f($val,$key) {\n"
+      "  echo \"k=$key v=$val\\n\";\n"
+      "}\n"
+      "$arr = array(0,1,2);\n"
+      "array_walk($arr,'f');\n");
+  MVCR("<?php\n"
+      "$arr = array(0,1,2);\n"
+      "function f($val,$key) {\n"
+      "  global $arr;\n"
+      "  echo \"k=$key v=$val\\n\";\n"
+      "  if ($key == 0) {\n"
+      "    unset($arr[1]);\n"
+      "  }\n"
+      "}\n"
+      "array_walk($arr,'f');\n"
+      "var_dump($arr);\n");
 
   return true;
 }

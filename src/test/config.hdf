@@ -4,6 +4,10 @@ Log {
   RuntimeErrorReportingLevel = 0
 }
 
+ErrorHandling {
+  FatalOnWeirdForEach = false
+}
+
 Server {
   Port = 8080
   EnableMemoryManager = false

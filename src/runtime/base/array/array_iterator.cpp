@@ -97,7 +97,8 @@ MutableArrayIter::MutableArrayIter(const Variant *var ,Variant *key,
   ArrayData *data = getData();
   if (data) {
     data->reset();
-    data->getFullPos(m_pos);
+    data->newFullPos(m_pos);
+    ASSERT(m_pos.container == data);
   }
 }
 
@@ -108,11 +109,17 @@ MutableArrayIter::MutableArrayIter(ArrayData *data,Variant *key,
     // protect the data which may be owned by a C++ temp
     data->incRefCount();
     data->reset();
-    data->getFullPos(m_pos);
+    data->newFullPos(m_pos);
+    ASSERT(m_pos.container == data);
   }
 }
 
 MutableArrayIter::~MutableArrayIter() {
+  // free the iterator
+  if (m_pos.container != NULL) {
+    m_pos.container->freeFullPos(m_pos);
+    ASSERT(m_pos.container == NULL);
+  }
   // unprotect the data
   if (m_data && m_data->decRefCount() == 0) m_data->release();
 }
@@ -120,6 +127,20 @@ MutableArrayIter::~MutableArrayIter() {
 bool MutableArrayIter::advance() {
   ArrayData *data = m_var ? getData() : m_data;
   if (!data) return false;
+  // If the foreach loop's array changed since the previous iteration,
+  // we recover by creating a new strong iterator for the new array,
+  // starting with at the position indicated by the new array's internal
+  // pointer.
+  if (m_pos.container != data) {
+    // Free the current strong iterator if its valid
+    if (m_pos.container != NULL) {
+      m_pos.container->freeFullPos(m_pos);
+    }
+    // Create a new strong iterator for the new array
+    ASSERT(m_pos.container == NULL);
+    data->newFullPos(m_pos);
+  }
+  ASSERT(m_pos.container == data);
   if (!data->setFullPos(m_pos)) return false;
   CVarRef curr = data->currentRef();
   curr.setContagious();

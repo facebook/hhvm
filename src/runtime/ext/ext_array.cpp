@@ -341,28 +341,36 @@ int f_array_unshift(int _argc, Variant array, CVarRef var, CArrRef _argv /* = nu
   if (array.toArray()->isVectorData()) {
     if (!_argv.empty()) {
       for (ssize_t pos = _argv->iter_end(); pos != ArrayData::invalid_index;
-           pos = _argv->iter_rewind(pos)) {
+        pos = _argv->iter_rewind(pos)) {
         array.prepend(_argv->getValue(pos));
       }
     }
     array.prepend(var);
   } else {
-    Array newArray;
-    newArray.append(var);
-    if (!_argv.empty()) {
-      for (ssize_t pos = _argv->iter_begin(); pos != ArrayData::invalid_index;
-           pos = _argv->iter_advance(pos)) {
-        newArray.append(_argv->getValue(pos));
+    // XXX This is incorrect, because it does not preserve elements which are
+    // references
+    {
+      Array newArray;
+      newArray.append(var);
+      if (!_argv.empty()) {
+        for (ssize_t pos = _argv->iter_begin(); pos != ArrayData::invalid_index;
+             pos = _argv->iter_advance(pos)) {
+          newArray.append(_argv->getValue(pos));
+        }
       }
-    }
-    for (ArrayIter iter(array); iter; ++iter) {
-      if (iter.first().isInteger()) {
-        newArray.append(iter.second());
-      } else {
-        newArray.set(iter.first(), iter.second());
+      for (ArrayIter iter(array); iter; ++iter) {
+        if (iter.first().isInteger()) {
+          newArray.append(iter.second());
+        } else {
+          newArray.set(iter.first(), iter.second());
+        }
       }
+      array = newArray;
     }
-    array = newArray;
+    // Reset the array's internal pointer
+    if (array.is(KindOfArray)) {
+      array.array_iter_reset();
+    }
   }
   return array.toArray().size();
 }

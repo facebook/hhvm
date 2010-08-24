@@ -555,15 +555,16 @@ Variant Variant::dequeue() {
 
 void Variant::prepend(CVarRef v) {
   if (m_type == KindOfVariant) {
-    return m_data.pvar->prepend(v);
+    m_data.pvar->prepend(v);
+    return;
   }
   if (isNull()) {
     set(Array::Create());
   }
 
   if (is(KindOfArray)) {
-    ArrayData *oldArr = getArrayData();
-    ArrayData *newarr = oldArr->prepend(v, (oldArr->getCount() > 1));
+    ArrayData *arr = getArrayData();
+    ArrayData *newarr = arr->prepend(v, (arr->getCount() > 1));
     if (newarr) {
       set(newarr);
     }
@@ -642,14 +643,6 @@ Variant Variant::array_iter_key() const {
   }
   throw_bad_type_exception("expecting an array");
   return false;
-}
-
-Variant Variant::array_iter_value(ssize_t &pos) const {
-  if (is(KindOfArray)) {
-    return getArrayData()->value(pos);
-  }
-  throw_bad_type_exception("expecting an array");
-  return null_variant;
 }
 
 Variant Variant::array_iter_each() {

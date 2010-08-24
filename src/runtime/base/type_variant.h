@@ -796,7 +796,6 @@ class Variant {
   Variant array_iter_next();
   Variant array_iter_end();
   Variant array_iter_key() const;
-  Variant array_iter_value(ssize_t &pos) const;
   Variant array_iter_each();
 
   /**

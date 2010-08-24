@@ -54,6 +54,7 @@ public:
   static bool WarnTooManyArguments;
   static bool ThrowMissingArguments;
   static bool ThrowInvalidArguments;
+  static bool FatalOnWeirdForEach;
   static bool AssertActive;
   static bool AssertWarning;
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices

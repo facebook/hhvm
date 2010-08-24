@@ -195,8 +195,10 @@ class ArrayData : public Countable {
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
+  virtual void newFullPos(FullPos &pos);
   virtual void getFullPos(FullPos &pos);
   virtual bool setFullPos(const FullPos &pos);
+  virtual void freeFullPos(FullPos &pos);
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 

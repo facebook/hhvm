@@ -18,6 +18,7 @@
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/runtime_option.h>
 #include <runtime/base/runtime_error.h>
 #include <util/hash.h>
 #include <util/lock.h>
@@ -36,7 +37,8 @@ StaticEmptyZendArray StaticEmptyZendArray::s_theEmptyArray;
 
 ZendArray::ZendArray(uint nSize /* = 0 */) :
   m_nNumOfElements(0), m_nNextFreeElement(0),
-  m_pListHead(NULL), m_pListTail(NULL), m_arBuckets(NULL), m_linear(false) {
+  m_pListHead(NULL), m_pListTail(NULL), m_arBuckets(NULL), m_siPastEnd(0),
+  m_linear(0) {
 
   if (nSize >= 0x80000000) {
     m_nTableSize = 0x80000000; // prevent overflow
@@ -60,6 +62,11 @@ ZendArray::~ZendArray() {
   }
   if (!m_linear && m_arBuckets) {
     free(m_arBuckets);
+  }
+  // If there are any strong iterators pointing to this array, they need
+  // to be invalidated.
+  if (!m_strongIterators.empty()) {
+    freeStrongIterators();
   }
 }
 
@@ -458,6 +465,26 @@ ssize_t ZendArray::getIndex(CVarRef k, int64 prehash /* = -1 */) const {
   }                                                                     \
   if (m_pos == 0) {                                                     \
     m_pos = (ssize_t)(element);                                         \
+  }                                                                     \
+  /* If there could be any strong iterators that are past the end, */   \
+  /* we need to a pass and update these iterators to point to the */    \
+  /* newly added element. */                                            \
+  if (m_siPastEnd) {                                                    \
+    m_siPastEnd = 0;                                                    \
+    int sz = m_strongIterators.size();                                  \
+    bool shouldWarn = false;                                            \
+    for (int i = 0; i < sz; ++i) {                                      \
+      if (m_strongIterators[i]->primary == 0) {                         \
+        m_strongIterators[i]->primary = (ssize_t)(element);             \
+        shouldWarn = true;                                              \
+      }                                                                 \
+    }                                                                   \
+    if (shouldWarn) {                                                   \
+      raise_warning("An element was added to an array while a foreach " \
+                    "by reference loop was iterating over the last "    \
+                    "element of the array. This may lead to "           \
+                    "unexpeced results.");                              \
+    }                                                                   \
   }
 
 #define SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p)                   \
@@ -467,7 +494,7 @@ do {                                                                    \
     Bucket **t = (Bucket **)malloc(nbytes);                             \
     memcpy(t, m_arBuckets, nbytes);                                     \
     m_arBuckets = t;                                                    \
-    m_linear = false;                                                   \
+    m_linear = 0;                                                       \
   }                                                                     \
   m_arBuckets[nIndex] = (p);                                            \
 } while (0)
@@ -478,7 +505,7 @@ void ZendArray::resize() {
   // m_arBuckets any way.
   if (m_linear) {
     m_arBuckets = (Bucket **)malloc(curSize << 1);
-    m_linear = false;
+    m_linear = 0;
   } else {
     m_arBuckets = (Bucket **)realloc(m_arBuckets, curSize << 1);
   }
@@ -890,6 +917,7 @@ void ZendArray::erase(Bucket ** prev) {
   if (prev == NULL)
     return;
   Bucket * p = *prev;
+  bool nextElementUnsetInsideForeachByReference = false;
   if (p) {
     *prev = p->pNext;
     if (p->pListLast) {
@@ -908,9 +936,26 @@ void ZendArray::erase(Bucket ** prev) {
     if (m_pos == (ssize_t)p) {
       m_pos = (ssize_t)p->pListNext;
     }
+    int sz = m_strongIterators.size();
+    for (int i = 0; i < sz; ++i) {
+      if (m_strongIterators[i]->primary == (ssize_t)p) {
+        nextElementUnsetInsideForeachByReference = true;
+        m_strongIterators[i]->primary = (ssize_t)p->pListNext;
+        if (!(m_strongIterators[i]->primary)) {
+          // Record that there is a strong iterator out there
+          // that is past the end
+          m_siPastEnd = 1;
+        }
+      }
+    }
     m_nNumOfElements--;
 
     DELETE(Bucket)(p);
+  }
+  if (nextElementUnsetInsideForeachByReference) {
+    if (RuntimeOption::FatalOnWeirdForEach) {
+      raise_error("Cannot unset the next element inside foreach by reference");
+    }
   }
 }
 
@@ -920,7 +965,7 @@ void ZendArray::prepareBucketHeadsForWrite() {
     Bucket **t = (Bucket **)malloc(nbytes);
     memcpy(t, m_arBuckets, nbytes);
     m_arBuckets = t;
-    m_linear = false;
+    m_linear = 0;
   }
 }
 
@@ -1126,6 +1171,9 @@ ArrayData *ZendArray::pop(Variant &value) {
   } else {
     value = null;
   }
+  // To match PHP-like semantics, the prepend operation resets the array's
+  // internal iterator
+  m_pos = (ssize_t)m_pListHead;
   return NULL;
 }
 
@@ -1135,6 +1183,11 @@ ArrayData *ZendArray::dequeue(Variant &value) {
     a->dequeue(value);
     return a;
   }
+  // To match PHP-like semantics, we invalidate all strong iterators
+  // when an element is removed from the beginning of the array
+  if (!m_strongIterators.empty()) {
+    freeStrongIterators();
+  }
   if (m_pListHead) {
     value = m_pListHead->data;
     prepareBucketHeadsForWrite();
@@ -1143,6 +1196,9 @@ ArrayData *ZendArray::dequeue(Variant &value) {
   } else {
     value = null;
   }
+  // To match PHP-like semantics, the pop operation resets the array's
+  // internal iterator
+  m_pos = (ssize_t)m_pListHead;
   return NULL;
 }
 
@@ -1152,7 +1208,11 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
     a->prepend(v, false);
     return a;
   }
-
+  // To match PHP-like semantics, we invalidate all strong iterators
+  // when an element is added to the beginning of the array
+  if (!m_strongIterators.empty()) {
+    freeStrongIterators();
+  }
   nextInsert(v);
   if (m_nNumOfElements == 1) {
     return NULL; // only element in array, no need to move it.
@@ -1182,18 +1242,45 @@ ArrayData *ZendArray::prepend(CVarRef v, bool copy) {
 
   // Rewrite numeric keys to start from 0 and rehash
   renumber();
+
+  // To match PHP-like semantics, the prepend operation resets the array's
+  // internal iterator
+  m_pos = (ssize_t)m_pListHead;
+
   return NULL;
 }
 
 void ZendArray::renumber() {
   unsigned long i = 0;
-  for (Bucket *p = m_pListHead; p; p = p->pListNext) {
+  Bucket* p = m_pListHead;
+  for (; p; p = p->pListNext) {
     if (p->key == NULL) {
-      p->h = i++;
+      if (p->h != (int64)i) {
+        goto rehashNeeded;
+      }
+      ++i;
+    }
+  }
+  m_nNextFreeElement = i;
+  return;
+
+rehashNeeded:
+  for (; p; p = p->pListNext) {
+    if (p->key == NULL) {
+      p->h = i;
+      ++i;
     }
   }
   m_nNextFreeElement = i;
   rehash();
+}
+
+void ZendArray::freeStrongIterators() {
+  int sz = m_strongIterators.size();
+  for (int i = 0; i < sz; ++i) {
+    m_strongIterators[i]->container = NULL;
+  }
+  m_strongIterators.clear();
 }
 
 void ZendArray::onSetStatic() {
@@ -1205,35 +1292,58 @@ void ZendArray::onSetStatic() {
   }
 }
 
+void ZendArray::newFullPos(FullPos &pos) {
+  ASSERT(pos.container == NULL);
+  m_strongIterators.push(&pos);
+  pos.container = (ArrayData*)this;
+  getFullPos(pos);
+}
+
 void ZendArray::getFullPos(FullPos &pos) {
+  ASSERT(pos.container == (ArrayData*)this);
   pos.primary = m_pos;
-  if (m_pos) {
-    Bucket *p = reinterpret_cast<Bucket *>(m_pos);
-    pos.secondary = (ssize_t)p->h;
+  if (!pos.primary) {
+    // Record that there is a strong iterator out there
+    // that is past the end
+    m_siPastEnd = 1;
   }
 }
 
 bool ZendArray::setFullPos(const FullPos &pos) {
-  // If the Bucket* given by pos.primary is null, return false.
-  if (!pos.primary) {
-    m_pos = (ssize_t)NULL;
-    return false;
+  ASSERT(pos.container == (ArrayData*)this);
+  if (pos.primary) {
+    m_pos = pos.primary;
+    return true;
   }
-  // If the Bucket* matches the array's internal iterator, return true.
-  if (pos.primary == m_pos) return true;
-  // Search for the Bucket* in the bucket corresponding to the key given
-  // by pos.secondary. If the Bucket* is found, set m_pos to the Bucket*
-  // and return true.
-  for (Bucket *p = m_arBuckets[pos.secondary & m_nTableMask]; p;
-       p = p->pNext) {
-    if ((ssize_t)p == pos.primary) {
-      m_pos = (ssize_t)p;
-      return true;
+  return false;
+}
+
+void ZendArray::freeFullPos(FullPos &pos) {
+  ASSERT(pos.container == (ArrayData*)this);
+  int sz = m_strongIterators.size();
+  if (sz > 0) {
+    // Common case: pos is at the end of the list
+    if (m_strongIterators[sz-1] == &pos) {
+      m_strongIterators.pop();
+      pos.container = NULL;
+      return;
+    }
+    // Unusual case: somehow the strong iterator for an foreach loop
+    // was freed before a strong iterator from a nested foreach loop,
+    // so do a linear search for pos
+    for (int k = sz-2; k >= 0; --k) {
+      if (m_strongIterators[k] == &pos) {
+        // Swap pos with the last element in the list and then pop
+        m_strongIterators[k] = m_strongIterators[sz-1];
+        m_strongIterators.pop();
+        pos.container = NULL;
+        return;
+      }
     }
   }
-  // If the Bucket* could not be found, fall back to using m_pos. Return
-  // true is m_pos is not null, false otherwise.
-  return m_pos;
+  // If the strong iterator list was empty or if pos could not be
+  // found in the strong iterator list, then we are in a bad state
+  ASSERT(false);
 }
 
 CVarRef ZendArray::currentRef() {
@@ -1258,12 +1368,14 @@ bool ZendArray::calculate(int &size) {
 
 void ZendArray::backup(LinearAllocator &allocator) {
   allocator.backup((const char*)m_arBuckets, m_nTableSize * sizeof(Bucket *));
+  ASSERT(m_strongIterators.empty());
 }
 
 void ZendArray::restore(const char *&data) {
   m_arBuckets = (Bucket**)data;
   data += m_nTableSize * sizeof(Bucket *);
-  m_linear = true;
+  m_linear = 1;
+  m_strongIterators.m_data = NULL;
 }
 
 void ZendArray::sweep() {
@@ -1271,6 +1383,7 @@ void ZendArray::sweep() {
     free(m_arBuckets);
     m_arBuckets = NULL;
   }
+  m_strongIterators.clear();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

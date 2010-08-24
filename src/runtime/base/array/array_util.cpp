@@ -644,9 +644,11 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
                      PointerSet *seen /* = NULL */,
                      CVarRef userdata /* = null_variant */) {
   ASSERT(walk_function);
-  input.escalate(); // so we can safely take secondRef()
-  for (ArrayIter iter(input); iter; ++iter) {
-    CVarRef v = iter.secondRef();
+
+  Variant k;
+  Variant v;
+  input.escalate(true);
+  for (MutableArrayIterPtr iter = input.begin(&k, v); iter->advance(); ) {
     if (recursive && v.is(KindOfArray)) {
       ASSERT(seen);
       Array arr = v.toArray();
@@ -661,7 +663,7 @@ void ArrayUtil::Walk(Variant input, PFUNC_WALK walk_function,
 
       Walk(arr, walk_function, data, recursive, seen, userdata);
     } else {
-      walk_function(ref(v), iter.first(), userdata, data);
+      walk_function(ref(v), k, userdata, data);
     }
   }
 }

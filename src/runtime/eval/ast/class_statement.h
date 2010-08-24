@@ -150,7 +150,9 @@ protected:
   const MethodStatement* findParentMethod(const char* name,
       bool interface) const;
   const ClassInfo *getBuiltinParentInfo() const;
-
+  void abstractMethodCheck(hphp_const_char_imap<const char*> &abstracts,
+      bool ifaces) const;
+  void recursiveParentCheck(std::set<const ClassStatement*> &seen) const;
 };
 
 class ClassStatementMarker : public Statement {

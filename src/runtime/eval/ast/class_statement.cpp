@@ -741,7 +741,10 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                                 "(%s)",
                                 name().c_str(), parent->name().c_str());
     }
-
+    if (parent) {
+      set<const ClassStatement *> seen;
+      recursiveParentCheck(seen);
+    }
     // checking against parent methods
     if (parent || !m_basesVec.empty()) {
       bool iface = getModifiers() & Interface;
@@ -788,6 +791,9 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
           }
         }
       }
+      // Check for multiple abstract function declarations
+      hphp_const_char_imap<const char*> abstracts;
+      abstractMethodCheck(abstracts, true);
     }
     cls = this;
   }
@@ -829,11 +835,76 @@ const MethodStatement* ClassStatement::findParentMethod(const char* name,
   return NULL;
 }
 
+void ClassStatement::abstractMethodCheck(
+    hphp_const_char_imap<const char*> &abstracts, bool ifaces) const {
+  bool iface = getModifiers() & Interface;
+  if (iface || getModifiers() & Abstract)  {
+    for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
+        it != m_methodsVec.end(); ++it) {
+      if (iface || (*it)->getModifiers() & Abstract) {
+        hphp_const_char_imap<const char*>::const_iterator ait =
+          abstracts.find((*it)->name().c_str());
+        if (ait != abstracts.end() && ait->second != name().c_str()) {
+          raise_error("Can't inherit abstract function %s::%s (previously "
+              "declared abstract in %s)", name().c_str(), ait->first,
+              ait->second);
+        }
+        abstracts[(*it)->name().c_str()] = name().c_str();
+      }
+    }
+  }
+  const ClassStatement *parent = parentStatement();
+  if (parent && parent->getModifiers() & Abstract) {
+    // No builtin abstract classes
+    // Only recurse into abstract parents since other parents don't
+    // contribute abstract methods
+    parent->abstractMethodCheck(abstracts, false);
+  }
+  if (ifaces) {
+    for (vector<string>::const_iterator it = m_basesVec.begin();
+        it != m_basesVec.end(); ++it) {
+      const ClassStatement *iface = RequestEvalState::findClass(it->c_str());
+      if (iface) {
+        iface->abstractMethodCheck(abstracts, false);
+      } else {
+        // may be built in
+        const ClassInfo *ici = ClassInfo::FindInterface(it->c_str());
+        if (ici) {
+          const ClassInfo::MethodVec &meths = ici->getMethodsVec();
+          for (ClassInfo::MethodVec::const_iterator mit = meths.begin();
+              mit != meths.end(); ++mit) {
+            hphp_const_char_imap<const char*>::const_iterator ait =
+              abstracts.find((*mit)->name);
+            if (ait != abstracts.end() && ait->second != ici->getName()) {
+              raise_error("Can't inherit abstract function %s::%s (previously "
+                  "declared abstract in %s)", it->c_str(), (*mit)->name,
+                  ait->second);
+            }
+            abstracts[(*mit)->name] = ici->getName();
+          }
+        }
+      }
+    }
+  }
+}
 const ClassInfo *ClassStatement::getBuiltinParentInfo() const {
   const ClassStatement *parent = parentStatement();
   if (parent) return parent->getBuiltinParentInfo();
   if (!m_parent.empty()) return ClassInfo::FindClass(m_parent.c_str());
   return NULL;
+}
+
+void ClassStatement::recursiveParentCheck(
+    std::set<const ClassStatement*> &seen) const {
+  if (seen.find(this) != seen.end()) {
+    raise_error("%s is defined as its own parent", name().c_str());
+  } else {
+    seen.insert(this);
+  }
+  const ClassStatement *parent = parentStatement();
+  if (parent) {
+    parent->recursiveParentCheck(seen);
+  }
 }
 
 ClassStatementMarkerPtr ClassStatement::getMarker() const {

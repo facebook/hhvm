@@ -22,15 +22,15 @@
 
 // Assumes 'tv' is live
 //
-// Assumes 'tv.m_type > LiteralString'
+// Assumes 'tv.m_type > KindOfStaticString'
 #ifdef FAST_REFCOUNT_FOR_VARIANT
 #define TV_INCREF(tv) { \
-  ASSERT((tv)->m_type > LiteralString); \
+  ASSERT((tv)->m_type > KindOfStaticString); \
   (tv)->m_data.pstr->incRefCount(); \
 }
 #else
 #define TV_INCREF(tv) { \
-  ASSERT((tv)->m_type > LiteralString); \
+  ASSERT((tv)->m_type > KindOfStaticString); \
   if ((tv)->m_type == KindOfString) { \
     (tv)->m_data.pstr->incRefCount(); \
   } else { \
@@ -58,7 +58,7 @@
   TypedValue* innerCell = (tv)->m_data.ptv; \
   (tv)->m_data.num = innerCell->m_data.num; \
   (tv)->m_type = innerCell->m_type; \
-  if ((tv)->m_type > LiteralString) { \
+  if ((tv)->m_type > KindOfStaticString) { \
     TV_INCREF(tv); \
   } \
   ASSERT(innerCell->_count > 0); \
@@ -69,14 +69,14 @@
 #define TV_READ_CELL(fr, to) { \
   if ((fr)->m_type != KindOfVariant) { \
     memcpy((void*)(to), (void*)(fr), sizeof(TypedValue)); \
-    if ((to)->m_type > LiteralString) { \
+    if ((to)->m_type > KindOfStaticString) { \
       TV_INCREF(to); \
     } \
   } else { \
     (to)->m_data.num = (fr)->m_data.ptv->m_data.num; \
     (to)->_count = 0; \
     (to)->m_type = (fr)->m_data.ptv->m_type; \
-    if ((to)->m_type > LiteralString) { \
+    if ((to)->m_type > KindOfStaticString) { \
       TV_INCREF(to); \
     } \
   } \
@@ -88,7 +88,7 @@
   (to)->m_data.num = (fr)->m_data.num; \
   (to)->_count = 0; \
   (to)->m_type = (fr)->m_type; \
-  if ((to)->m_type > LiteralString) { \
+  if ((to)->m_type > KindOfStaticString) { \
     TV_INCREF(to); \
   } \
 }
@@ -109,7 +109,7 @@
   (to)->m_data.num = (fr)->m_data.num; \
   (to)->_count = 0; \
   (to)->m_type = (fr)->m_type; \
-  if ((to)->m_type > LiteralString) { \
+  if ((to)->m_type > KindOfStaticString) { \
     TV_INCREF(to); \
   } \
 }

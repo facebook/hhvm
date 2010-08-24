@@ -56,8 +56,7 @@ void RTTIInfo::translate_rtti(const char *rttiDirectory) {
     if (m_profData[i][getDataTypeIndex(KindOfDouble)]) {
       printf(" d/%u", m_profData[i][getDataTypeIndex(KindOfDouble)]);
     }
-    int totalStr = m_profData[i][getDataTypeIndex(LiteralString)] +
-                   m_profData[i][getDataTypeIndex(KindOfStaticString)] +
+    int totalStr = m_profData[i][getDataTypeIndex(KindOfStaticString)] +
                    m_profData[i][getDataTypeIndex(KindOfString)];
     if (totalStr) printf(" s/%u", totalStr);
     if (m_profData[i][getDataTypeIndex(KindOfArray)]) {

@@ -450,15 +450,6 @@ Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
     return m_px->get(key.m_data.num, prehash, error);
   case KindOfDouble:
     return m_px->get((int64)key.m_data.dbl, prehash, error);
-  case LiteralString: {
-    String skey = key.toString();
-    int64 n;
-    if (skey.get()->isStrictlyInteger(n)) {
-      return m_px->get(n, prehash, error);
-    } else {
-      return m_px->get(skey, prehash, error);
-    }
-  }
   case KindOfStaticString:
   case KindOfString: {
     int64 n;

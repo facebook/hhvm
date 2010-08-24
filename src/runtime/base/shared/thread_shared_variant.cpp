@@ -54,7 +54,6 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
       m_data.dbl = source.toDouble();
       break;
     }
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     {
@@ -259,11 +258,6 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
     if (getIsVector()) return -1;
     StringData *sd = key.getStringData();
     return m_data.map->indexOf(sd);
-  }
-  case LiteralString: {
-    if (getIsVector()) return -1;
-    StringData sd(key.getLiteralString(), AttachLiteral);
-    return m_data.map->indexOf(&sd);
   }
   default:
     // No other types are legitimate keys

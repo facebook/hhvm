@@ -91,9 +91,7 @@ class FiberReferenceMap;
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * LiteralString is separated from non-literal ones (KindOfString), because
- * they deserve separate treatment for better optimizations. This means a lot
- * of functions may elect to take "litstr" separately from "String" class.
+ * Many functions may elect to take "litstr" separately from "String" class.
  * This code specialization helps speed a lot by not instantiating a String
  * object to box an otherwise literal value. This also means, though not
  * obviously thus dangerous not to know, whenever a function takes a parameter
@@ -109,9 +107,8 @@ class FiberReferenceMap;
 
 enum DataType {
   /**
-   * Do not rearrange the order, we have check such as m_type <= LiteralString.
-   * The integer values for KindOfNull, KindOfBoolean, etc. were chosen
-   * deliberately to make the GET_VARIANT_METHOD macro as fast as possible.
+   * Do not rearrange the order, we have type checks in the code such as 
+   * "m_type <= KindOfStaticString".
    */
   KindOfNull    = 0,
   KindOfBoolean = 1,
@@ -121,13 +118,12 @@ enum DataType {
   KindOfInt64   = 5,
   KindOfDouble  = 6,
   KindOfStaticString  = 7,
-  LiteralString = 8,
-  KindOfString  = 9,
-  KindOfArray   = 10,
-  KindOfObject  = 11,
-  KindOfVariant = 12,
+  KindOfString  = 8,
+  KindOfArray   = 9,
+  KindOfObject  = 10,
+  KindOfVariant = 11,
 
-  MaxNumDataTypes = 13, // marker, not a valid type
+  MaxNumDataTypes = 12, // marker, not a valid type
 };
 
 inline int getDataTypeIndex(DataType t) {

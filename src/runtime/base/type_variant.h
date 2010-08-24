@@ -96,7 +96,7 @@ class Variant {
   void destruct();
 
   // g++ does not inline !isPrimitive()
-  ~Variant() { if (m_type > LiteralString) destruct(); }
+  ~Variant() { if (m_type > KindOfStaticString) destruct(); }
 
   void reset(); // only for special memory sweeping!
 
@@ -114,8 +114,8 @@ class Variant {
   Variant(uint64  v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(long    v) : _count(0), m_type(KindOfInt64  ) { m_data.num = v;}
   Variant(double  v) : _count(0), m_type(KindOfDouble ) { m_data.dbl = v;}
-  Variant(litstr  v) : _count(0), m_type(LiteralString) { m_data.str = v;}
 
+  Variant(litstr  v);
   Variant(const std::string & v);
   Variant(const StaticString & v);
 
@@ -136,7 +136,7 @@ class Variant {
    * Break bindings and set to null.
    */
   void unset() {
-    if (m_type > LiteralString) destruct();
+    if (m_type > KindOfStaticString) destruct();
     m_data.num = 1;
     m_type = KindOfNull;
   }
@@ -206,9 +206,7 @@ class Variant {
   }
   bool isString() const {
     DataType type = getType();
-    return type == LiteralString ||
-           type == KindOfStaticString ||
-           type == KindOfString;
+    return type == KindOfStaticString || type == KindOfString;
   }
   bool isInteger() const;
   bool isNumeric(bool checkString = false) const;
@@ -812,10 +810,6 @@ class Variant {
     ASSERT(getType() == KindOfDouble);
     return m_type == KindOfVariant ? &m_data.pvar->m_data.dbl : &m_data.dbl;
   }
-  litstr getLiteralString() const {
-    ASSERT(getType() == LiteralString);
-    return m_type == KindOfVariant ? m_data.pvar->m_data.str : m_data.str;
-  }
   StringData *getStringData() const {
     ASSERT(getType() == KindOfString || getType() == KindOfStaticString);
     return m_type == KindOfVariant ? m_data.pvar->m_data.pstr : m_data.pstr;
@@ -867,11 +861,10 @@ class Variant {
  private:
   mutable DataType m_type;
 
-  bool isPrimitive() const { return m_type <= LiteralString; }
+  bool isPrimitive() const { return m_type <= KindOfStaticString; }
   bool isObjectConvertable() {
     return isNull() ||
            (is(KindOfBoolean) && !toBoolean()) ||
-           (is(LiteralString) && !*getLiteralString()) ||
            (is(KindOfString) && getStringData()->empty()) ||
            (is(KindOfStaticString) && getStringData()->empty());
   }
@@ -892,8 +885,6 @@ class Variant {
   CVarRef set(CArrRef v) { return set(v.get()); }
   CVarRef set(CObjRef v) { return set(v.get()); }
 
-  void escalateString() const;
-
   template<typename T>
   CVarRef set(const SmartObject<T> &v) {
     return set(v.get());
@@ -902,7 +893,7 @@ class Variant {
   // Internal helper for weakly binding a variable. m_type should be viewed
   // as KindOfNull and for complex types the old data already released.
   void bind(CVarRef v) {
-    if (v.m_type <= LiteralString) {
+    if (v.m_type <= KindOfStaticString) {
       m_type = v.m_type;
       /* drop uninitialized flag */
       m_data.num = m_type == KindOfNull ? 0 : v.m_data.num;
@@ -981,7 +972,7 @@ class Variant {
     ASSERT(v != this);
     if (v) {
       v->incRefCount(); // in case destruct() triggers deletion of v
-      if (m_type > LiteralString) destruct();
+      if (m_type > KindOfStaticString) destruct();
       m_type = KindOfVariant;
       m_data.pvar = v;
     } else {

@@ -371,7 +371,6 @@ DataType ArrayUtil::Sum(CArrRef input, int64 *isum, double *dsum) {
       goto DOUBLE;
     }
     case KindOfStaticString:
-    case LiteralString:
     case KindOfString: {
       String s = entry.toString();
       int64 ti;
@@ -418,7 +417,6 @@ DataType ArrayUtil::Product(CArrRef input, int64 *iprod, double *dprod) {
       goto DOUBLE;
     }
     case KindOfStaticString:
-    case LiteralString:
     case KindOfString: {
       String s = entry.toString();
       int64 ti;

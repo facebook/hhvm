@@ -822,8 +822,6 @@ ArrayData *ZendArray::lval(CVarRef k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   if (k.isNumeric()) {
     return lval(k.toInt64(), ret, copy, prehash, checkExist);
-  } if (k.is(LiteralString)) {
-    return lval(k.getLiteralString(), ret, copy, prehash, checkExist);
   } else {
     return lval(k.toString(), ret, copy, prehash, checkExist);
   }
@@ -871,14 +869,6 @@ ArrayData *ZendArray::set(CVarRef k, CVarRef v, bool copy,
       return a;
     }
     update(k.toInt64(), v);
-    return NULL;
-  } else if (k.is(LiteralString)) {
-    if (copy) {
-      ZendArray *a = copyImpl();
-      a->update(k.getLiteralString(), prehash, v);
-      return a;
-    }
-    update(k.getLiteralString(), prehash, v);
     return NULL;
   } else {
     String sk = k.toString();

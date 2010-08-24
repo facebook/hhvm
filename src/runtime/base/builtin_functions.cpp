@@ -301,7 +301,6 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
   case KindOfInt32:
   case KindOfInt64:   otype = "int";         break;
   case KindOfDouble:  otype = "double";      break;
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:  otype = "string";      break;
   case KindOfArray:   otype = "array";       break;

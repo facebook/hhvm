@@ -32,8 +32,7 @@ String f_gettype(CVarRef v) {
   case KindOfInt32:
   case KindOfInt64:   return "integer";
   case KindOfDouble:  return "double";
-  case LiteralString:
-  case KindOfStaticString:  return "string";
+  case KindOfStaticString:
   case KindOfString:  return "string";
   case KindOfArray:   return "array";
   case KindOfObject:  return "object";

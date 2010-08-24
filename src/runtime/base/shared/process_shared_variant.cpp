@@ -55,7 +55,6 @@ ProcessSharedVariant::ProcessSharedVariant(CVarRef source,
       m_data.dbl = source.toDouble();
       break;
     }
-  case LiteralString:
   case KindOfStaticString:
   case KindOfString:
     {
@@ -273,12 +272,8 @@ ProcessSharedVariant::lookup(CVarRef key) {
   ProcessSharedVariantToIntMap::const_iterator it;
   if (key.isString()) {
     SharedMemoryString ks;
-    if (key.is(KindOfString) || key.is(KindOfStaticString)) {
-      StringData* sd = key.getStringData();
-      ks = SharedMemoryString(sd->data(), sd->size());
-    } else {
-      ks = SharedMemoryString(key.getLiteralString());
-    }
+    StringData* sd = key.getStringData();
+    ks = SharedMemoryString(sd->data(), sd->size());
     ProcessSharedVariant svk(ks);
     it = map().find(&svk);
   } else {

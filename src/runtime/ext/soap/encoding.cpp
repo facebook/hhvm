@@ -231,8 +231,6 @@ encodeStatic s_defaultEncoding[] = {
    to_zval_long, to_xml_long},
   {KindOfDouble, XSD_FLOAT_STRING, XSD_NAMESPACE,
    to_zval_double, to_xml_double},
-  {LiteralString, XSD_STRING_STRING, XSD_NAMESPACE,
-   to_zval_string, to_xml_string},
   {KindOfStaticString, XSD_STRING_STRING, XSD_NAMESPACE,
    to_zval_string, to_xml_string},
   {KindOfString, XSD_STRING_STRING, XSD_NAMESPACE,
@@ -3239,8 +3237,7 @@ static encodePtr get_array_type(xmlNodePtr node, CVarRef array,
       cur_ns = NULL;
     } else {
       cur_type = tmp.getType();
-      if (cur_type == LiteralString ||
-          cur_type == KindOfStaticString) {
+      if (cur_type == KindOfStaticString) {
         cur_type = KindOfString;
       }
       cur_stype = NULL;

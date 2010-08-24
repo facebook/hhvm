@@ -63,7 +63,6 @@ ScalarExpression::ScalarExpression
   switch (value.getType()) {
   case KindOfStaticString:
   case KindOfString:
-  case LiteralString:
     m_type = T_STRING;
     break;
   case KindOfByte:

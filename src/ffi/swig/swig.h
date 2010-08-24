@@ -162,7 +162,6 @@ int hphpGetType(HPHP::HphpSession *s, HPHP::Variant *v) {
     return TypeInt;
   case HPHP::KindOfDouble:
     return TypeDouble;
-  case HPHP::LiteralString:
   case HPHP::KindOfStaticString:
   case HPHP::KindOfString:
     return TypeString;

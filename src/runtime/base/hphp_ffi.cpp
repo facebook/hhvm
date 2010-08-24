@@ -63,7 +63,6 @@ int hphp_ffi_exportVariant(CVarRef v, void** result) {
     *result = u.p;
     return 3;
   }
-  case LiteralString: *result = (void*)v.getLiteralString(); return 4;
   case KindOfStaticString: {
     StringData *sd = v.getStringData();
     *result = (void*)sd;

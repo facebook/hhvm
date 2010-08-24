@@ -599,8 +599,6 @@ ArrayData *SmallArray::lval(CVarRef k, Variant *&ret, bool copy,
                             bool checkExist /* = false */) {
   if (k.isNumeric()) {
     return lval(k.toInt64(), ret, copy, prehash, checkExist);
-  } else if (k.is(LiteralString)) {
-    return lval(k.getLiteralString(), ret, copy, prehash, checkExist);
   } else {
     return lval(k.toString(), ret, copy, prehash, checkExist);
   }
@@ -702,9 +700,6 @@ ArrayData *SmallArray::set(CVarRef k, CVarRef v, bool copy,
                            int64 prehash /* = -1 */) {
   if (k.isNumeric()) {
     return set(k.toInt64(), v, copy, prehash);
-  }
-  if (k.is(LiteralString)) {
-    return set(k.getLiteralString(), v, copy, prehash);
   }
   return set(k.toString(), v, copy, prehash);
 }
@@ -945,9 +940,6 @@ ArrayData *SmallArray::remove(CStrRef k, bool copy, int64 prehash /* = -1 */) {
 ArrayData *SmallArray::remove(CVarRef k, bool copy, int64 prehash /* = -1 */) {
   if (k.isNumeric()) {
     return remove(k.toInt64(), copy, prehash);
-  }
-  if (k.is(LiteralString)) {
-    return remove(k.getLiteralString(), copy, prehash);
   }
   return remove(k.toString(), copy, prehash);
 }

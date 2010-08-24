@@ -99,7 +99,6 @@ const char *BuiltinSymbols::SystemClasses[] = {
   "exception",
   "arrayaccess",
   "iterator",
-  "pear_error",
   "reflection",
   "splobjectstorage",
   "directory",

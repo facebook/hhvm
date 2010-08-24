@@ -26,7 +26,6 @@ SystemGlobals::SystemGlobals() : dummy(false),
   run_pm_php$classes$directory_php(false),
   run_pm_php$classes$exception_php(false),
   run_pm_php$classes$iterator_php(false),
-  run_pm_php$classes$pear_error_php(false),
   run_pm_php$classes$reflection_php(false),
   run_pm_php$classes$splfile_php(false),
   run_pm_php$classes$splobjectstorage_php(false),
@@ -49,7 +48,6 @@ void SystemGlobals::initialize() {
   pm_php$classes$directory_php(false);
   pm_php$classes$exception_php(false);
   pm_php$classes$iterator_php(false);
-  pm_php$classes$pear_error_php(false);
   pm_php$classes$reflection_php(false);
   pm_php$classes$splfile_php(false);
   pm_php$classes$splobjectstorage_php(false);

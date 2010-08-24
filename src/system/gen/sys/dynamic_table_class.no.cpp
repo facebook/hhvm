@@ -32,330 +32,324 @@ namespace HPHP {
 #define M(x, y) MethodIndex(x, y)
 #define H(x,y,z) MethodIndexHMap(#x,MethodIndex(y,z))
 #define Z MethodIndexHMap(0,MethodIndex(0,0))
-const unsigned methodIndexHMapSizeSys = 878;
+const unsigned methodIndexHMapSizeSys = 862;
 extern const MethodIndexHMap methodIndexHMapSys [];
 const MethodIndexHMap methodIndexHMapSys [methodIndexHMapSizeSys] = {
-Z, H(getArrayCopy,14,1), Z, 
-H(__destruct,35,1), Z, Z, 
-Z, Z, H(addCompletion,162,1), 
-Z, H(insertdata,66,1), H(getserverstatus,207,1), 
-H(enddtdentity,410,1), H(hasChildren,249,1), Z, 
-H(openFile,197,1), H(getMode,377,1), Z, 
-Z, Z, H(getelementsbytagnamens,75,1), 
-Z, Z, H(setValue,318,1), 
-H(getInterfaceNames,271,1), Z, H(getTraceAsString,31,1), 
-H(closecursor,239,1), Z, Z, 
+H(help,160,1), H(getValue,315,1), H(setcompressthreshold,209,1), 
+Z, H(natcasesort,19,1), Z, 
+Z, H(getPerms,173,1), Z, 
+H(fgets,363,1), Z, Z, 
+H(__get,62,1), H(getStackTrace,151,1), Z, 
+Z, H(debugdumpparams,246,1), H(isWritable,174,1), 
+Z, H(getNumberOfRequiredParameters,292,1), H(asxml,326,1), 
+H(getFilename,189,1), Z, Z, 
+H(createcdatasection,73,1), H(getFlags,22,1), H(escapestring,376,1), 
+H(getCode,27,1), Z, H(isStatic,302,1), 
+H(setCsvControl,354,1), Z, Z, 
+Z, Z, Z, 
+Z, Z, H(getEndLine,259,1), 
+H(onAutoComplete,167,1), Z, H(delete,214,1), 
+H(openuri,427,1), H(endpi,418,1), Z, 
+H(getINIEntries,289,1), H(__init__,29,1), Z, 
+Z, H(setattributenodens,107,1), Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-H(isFinal,262,1), Z, Z, 
-Z, H(getClassNames,290,1), Z, 
-Z, H(getCTime,184,1), Z, 
-Z, H(rewind,9,1), H(startdtd,427,1), 
-H(setFileClass,178,1), H(getFlags,22,1), Z, 
+H(__toString,26,1), Z, Z, 
+Z, Z, H(hasMethod,260,1), 
+H(isPrivate,300,1), H(setisodate,133,1), Z, 
 Z, Z, Z, 
-Z, H(isDestructor,306,1), H(normalize,57,1), 
-H(__getfunctions,339,1), H(loadhtml,78,1), Z, 
-H(xend,145,1), H(fwrite,366,1), H(startelement,412,1), 
-H(openblob,388,1), H(setFlags,17,1), H(query,124,1), 
-H(toString,378,1), H(getParentClass,269,1), H(asxml,326,1), 
-H(close,171,1), Z, H(createattributens,85,1), 
-Z, H(getInterfaces,284,1), H(registerphpfunctions,126,1), 
-H(escapestring,384,1), H(appendchild,50,1), H(endattribute,436,1), 
-H(registernamespace,127,1), H(seek,21,1), H(numcolumns,393,1), 
-H(__toString,26,1), H(insertbefore,46,1), H(startdtdentity,404,1), 
-H(clonenode,52,1), H(endpi,426,1), H(setclass,349,1), 
-H(endelement,423,1), Z, H(enddtdelement,429,1), 
-Z, Z, Z, 
-H(setfetchmode,236,1), Z, H(fgetcsv,353,1), 
-H(arg,141,1), Z, H(getClosure,299,1), 
-H(hasMethod,260,1), H(relaxngvalidatesource,89,1), Z, 
-H(load,84,1), H(argRest,163,1), H(lasterrorcode,389,1), 
-Z, H(args,161,1), Z, 
-Z, Z, Z, 
-H(__get,62,1), Z, Z, 
-Z, Z, Z, 
-Z, H(getSubPathname,247,1), H(delete,214,1), 
-Z, H(getExtensionName,268,1), Z, 
-Z, H(isInstantiable,283,1), H(getcolumnmeta,233,1), 
-Z, Z, Z, 
-H(setMaxLineLen,356,1), H(open,386,1), Z, 
-H(getDeclaringClass,303,1), H(createaggregate,385,1), H(addchild,329,1), 
+H(startdtdentity,396,1), Z, Z, 
+H(replacedata,68,1), Z, H(append,5,1), 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, Z, H(helpCmds,142,1), 
 Z, Z, Z, 
-Z, Z, H(getLinkTarget,180,1), 
-Z, H(columntype,392,1), Z, 
-H(begintransaction,228,1), Z, Z, 
-H(getPath,185,1), H(fetchcolumn,232,1), Z, 
-H(getPathInfo,183,1), H(isConstructor,304,1), H(isInternal,286,1), 
+Z, H(__setlocation,337,1), H(uksort,18,1), 
+H(__getfunctions,339,1), Z, H(isSubclassOf,277,1), 
+H(quote,227,1), Z, Z, 
+H(implementsInterface,270,1), Z, Z, 
+H(isExecutable,196,1), Z, H(getCsvControl,355,1), 
+Z, Z, H(openFile,197,1), 
 Z, Z, Z, 
-Z, H(loadxml,92,1), H(helpSection,156,1), 
-Z, Z, H(isSubclassOf,277,1), 
+Z, H(isIterateable,252,1), Z, 
+H(schemavalidate,80,1), Z, Z, 
+H(getLine,28,1), Z, Z, 
+Z, Z, H(isDot,198,1), 
+Z, H(getDeclaringClass,303,1), H(startelementns,405,1), 
+Z, Z, H(nextrowset,234,1), 
 Z, Z, Z, 
-Z, H(attributes,331,1), Z, 
+H(startcomment,431,1), H(eof,359,1), Z, 
+Z, Z, Z, 
+H(flock,364,1), Z, H(argValue,149,1), 
+Z, H(isProtected,301,1), Z, 
+H(getTrace,32,1), H(begintransaction,228,1), Z, 
+H(setindentstring,412,1), Z, H(isnormalized,219,1), 
+H(getDocComment,275,1), Z, H(args,161,1), 
+Z, Z, H(hasattributes,54,1), 
+H(argRest,163,1), H(getoffset,130,1), Z, 
+Z, Z, Z, 
+Z, Z, H(createdocumentfragment,101,1), 
+Z, Z, H(allowsNull,309,1), 
+H(fflush,360,1), H(fseek,351,1), H(getMessage,25,1), 
+Z, Z, Z, 
+H(setobject,347,1), H(argCount,140,1), H(getlineno,45,1), 
+Z, H(writeelementns,391,1), Z, 
+H(handle,346,1), H(xend,145,1), H(getMaxLineLen,357,1), 
+H(createelement,86,1), H(getavailabledrivers,226,1), Z, 
+H(startdtdattlist,422,1), H(getStartLine,272,1), H(getstats,206,1), 
+H(schemavalidatesource,76,1), H(writeattribute,399,1), H(getnameditem,120,1), 
+H(writedtdattlist,424,1), H(children,328,1), H(lastinsertid,222,1), 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, H(replacedata,68,1), H(startattributens,411,1), 
-H(issupported,63,1), H(substringdata,65,1), H(startcdata,431,1), 
-Z, Z, H(bindcolumn,235,1), 
+Z, H(registerphpfunctions,126,1), H(isAbstract,285,1), 
+H(getMethod,267,1), Z, H(isDir,193,1), 
 Z, Z, Z, 
-Z, Z, H(createelementns,87,1), 
-H(addsoapheader,344,1), H(getversion,213,1), H(onClient,168,1), 
-H(getFileInfo,194,1), H(getConstant,273,1), Z, 
-H(gettimezone,132,1), H(startcomment,439,1), Z, 
+Z, H(helpTitle,146,1), Z, 
+Z, H(getextendedstats,218,1), H(isOptional,312,1), 
+H(getMethods,251,1), Z, H(ask,143,1), 
 Z, Z, Z, 
-H(registerxpathnamespace,323,1), H(setattributens,108,1), H(hasfeature,119,1), 
-H(__sleep,231,1), H(hasattributens,106,1), H(prepare,229,1), 
-Z, Z, H(rollback,224,1), 
-H(outputmemory,402,1), H(getTrace,32,1), H(getattributens,109,1), 
-Z, H(lookupnamespaceuri,49,1), Z, 
-H(sortwithsortkeys,34,1), H(c14n,55,1), H(geterrormessage,43,1), 
 Z, Z, Z, 
-H(setInfoClass,179,1), Z, Z, 
+H(close,171,1), Z, Z, 
+Z, Z, H(writedtdelement,409,1), 
+H(setMaxLineLen,356,1), Z, Z, 
+H(send,166,1), Z, Z, 
 Z, Z, Z, 
-Z, H(valid,3,1), Z, 
-H(invoke,298,1), H(__isset,330,1), H(savehtml,91,1), 
-H(getConstants,274,1), H(setattributenode,116,1), Z, 
+H(appendchild,50,1), H(savehtmlfile,97,1), Z, 
+H(clear,390,1), H(asort,20,1), H(isDefault,316,1), 
+Z, Z, H(exec,221,1), 
+Z, Z, H(seek,21,1), 
+Z, H(__setsoapheaders,334,1), Z, 
 Z, Z, Z, 
-H(fetcharray,394,1), H(getnameditem,120,1), Z, 
-Z, Z, H(writeelement,422,1), 
-Z, H(querysingle,390,1), Z, 
-H(getFrame,159,1), H(getUserInfo,371,1), H(removeattribute,115,1), 
-H(getProperty,287,1), H(startdocument,403,1), H(getnameditemns,123,1), 
-H(export,264,1), H(send,166,1), H(setidattributenode,113,1), 
-H(isFile,190,1), Z, Z, 
+Z, H(__sleep,231,1), H(outputmemory,394,1), 
+H(helpCmds,142,1), H(writedtd,401,1), H(addCompletion,162,1), 
+H(enddtdentity,402,1), H(setattribute,41,1), H(getNumberOfParameters,293,1), 
+H(onClient,168,1), H(createattribute,94,1), H(onServer,169,1), 
+H(getTraceAsString,31,1), Z, Z, 
+Z, Z, Z, 
+Z, Z, Z, 
+H(getDefaultProperties,281,1), Z, Z, 
+H(__getlastrequest,333,1), H(wrap,165,1), H(removeattributens,110,1), 
+Z, H(getModifiers,263,1), H(savehtml,91,1), 
+H(sort,36,1), Z, H(add,212,1), 
+H(output,150,1), Z, Z, 
+Z, H(isLink,187,1), H(isDefaultValueAvailable,307,1), 
+Z, Z, Z, 
+H(fullendelement,392,1), H(registerxpathnamespace,323,1), H(isConstructor,304,1), 
+H(columncount,237,1), Z, H(getname,139,1), 
+H(serialize,320,1), Z, Z, 
+H(getParameters,295,1), Z, Z, 
+H(__getlastresponse,341,1), Z, Z, 
+Z, Z, Z, 
+H(code,155,1), H(loadxml,92,1), H(substringdata,65,1), 
+H(writecdata,407,1), H(getParentClass,269,1), Z, 
+Z, H(getChildren,250,1), H(getStaticProperties,280,1), 
+Z, Z, Z, 
+Z, H(error,144,1), Z, 
+Z, H(setidattributenode,113,1), Z, 
+Z, Z, H(getClasses,291,1), 
+Z, H(commit,225,1), H(normalize,57,1), 
+H(closecursor,239,1), H(__gettypes,342,1), H(importnode,88,1), 
+H(getnodepath,58,1), H(setpersistence,345,1), Z, 
+Z, H(endelement,415,1), Z, 
+H(getProperty,287,1), Z, H(print,154,1), 
+H(quit,157,1), Z, H(create,40,1), 
+H(getdocnamespaces,327,1), Z, Z, 
+Z, Z, Z, 
+Z, H(addchild,329,1), H(load,84,1), 
+H(offsetGet,11,1), H(endcomment,400,1), H(gettimezone,132,1), 
+H(columntype,384,1), H(errorcode,220,1), H(getLinkTarget,180,1), 
+H(hasConstant,266,1), H(fwrite,366,1), H(listabbreviations,138,1), 
+H(fetchcolumn,232,1), H(getstrength,38,1), H(getGroup,177,1), 
+H(getInode,186,1), Z, Z, 
+H(pconnect,211,1), Z, Z, 
+Z, Z, H(format,128,1), 
+H(text,430,1), H(createentityreference,79,1), H(isPassedByReference,314,1), 
+H(getDefaultValue,313,1), H(enddtdattlist,393,1), H(getType,199,1), 
+Z, H(__getlastrequestheaders,338,1), H(insertdata,66,1), 
+Z, H(getSubPathname,247,1), Z, 
+Z, Z, Z, 
 Z, Z, H(getlocale,42,1), 
-Z, Z, H(onServer,169,1), 
-Z, H(implementsInterface,270,1), Z, 
-Z, H(getavailabledrivers,226,1), Z, 
-Z, Z, H(rowcount,240,1), 
-H(fault,348,1), H(execute,241,1), H(getExtension,256,1), 
-H(replace,216,1), H(getMethods,251,1), H(setidattribute,112,1), 
-H(getextendedstats,218,1), H(commit,225,1), Z, 
-Z, H(getdocnamespaces,327,1), Z, 
-Z, H(getlineno,45,1), H(hasProperty,278,1), 
-Z, Z, H(debugdumpparams,246,1), 
-Z, Z, Z, 
-Z, Z, Z, 
-H(setstrength,39,1), Z, Z, 
-H(getType,199,1), Z, Z, 
-H(getname,139,1), H(lookupprefix,56,1), H(natsort,16,1), 
-H(item,121,1), H(format,128,1), H(settime,131,1), 
-H(schemavalidate,80,1), H(ksort,23,1), H(savehtmlfile,97,1), 
-H(createdocument,117,1), Z, H(getInnerIterator,4,1), 
-Z, Z, H(getiterator,122,1), 
-Z, Z, Z, 
-H(isAbstract,285,1), H(__soapcall,336,1), H(read,172,1), 
-H(eof,359,1), H(getnodepath,58,1), Z, 
-Z, H(onAutoComplete,167,1), H(createprocessinginstruction,82,1), 
-H(getStaticProperties,280,1), H(writeattribute,407,1), H(hasattribute,105,1), 
-Z, Z, Z, 
-Z, H(xpath,322,1), H(getMTime,192,1), 
-H(getDebugInfo,373,1), Z, Z, 
-H(quit,157,1), H(ftell,365,1), Z, 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, H(getCallback,372,1), H(getBacktrace,375,1), 
-Z, Z, H(getStartLine,272,1), 
-Z, Z, Z, 
-H(isDefaultValueAvailable,307,1), H(createdocumentfragment,101,1), H(haschildnodes,64,1), 
-H(serialize,320,1), H(isPublic,305,1), Z, 
-Z, H(createcomment,99,1), Z, 
-Z, H(relaxngvalidate,77,1), H(setdate,129,1), 
-Z, H(getCommand,147,1), Z, 
-H(unserialize,319,1), Z, H(getattribute,33,1), 
-H(decrement,205,1), Z, Z, 
-Z, Z, Z, 
-Z, H(getFunctions,288,1), H(addserver,201,1), 
-H(listabbreviations,138,1), H(errorinfo,230,1), Z, 
-H(next,1,1), H(schemavalidatesource,76,1), Z, 
-Z, Z, Z, 
-H(writedtd,409,1), H(__wakeup,223,1), H(__getlastresponseheaders,340,1), 
-Z, Z, Z, 
-Z, H(getPathname,176,1), H(createtextnode,90,1), 
-H(getATime,195,1), H(removeattributens,110,1), H(getstats,206,1), 
-H(isDir,193,1), H(enddtdattlist,401,1), H(writedtdentity,425,1), 
-H(c14nfile,59,1), H(normalizedocument,100,1), H(text,438,1), 
-H(settimezone,134,1), H(importnode,88,1), H(modify,135,1), 
-H(__set,51,1), Z, Z, 
-H(getDocComment,275,1), Z, H(finalize,396,1), 
-H(getCsvControl,355,1), H(loadextension,380,1), Z, 
-Z, Z, H(paramcount,397,1), 
-H(createelement,86,1), H(xinclude,95,1), H(error,144,1), 
-Z, H(fgets,363,1), Z, 
-Z, Z, H(newInstance,255,1), 
-H(columnname,391,1), H(lastinsertrowid,382,1), H(getGroup,177,1), 
-Z, H(getCurrentLocation,164,1), Z, 
-Z, H(setindentstring,420,1), Z, 
-Z, Z, Z, 
-H(current,7,1), Z, Z, 
-Z, Z, H(test,279,1), 
-Z, Z, H(offsetSet,13,1), 
-Z, H(writecdata,415,1), Z, 
-H(contains,370,1), Z, H(attach,368,1), 
-Z, H(append,5,1), Z, 
-H(setattribute,41,1), Z, H(__call,8,1), 
-Z, H(createdocumenttype,118,1), H(nextrowset,234,1), 
+H(setidattributens,103,1), Z, Z, 
+H(addsoapheader,344,1), H(isFile,190,1), Z, 
+Z, H(bindparam,238,1), H(execute,241,1), 
+H(startdocument,395,1), H(insertbefore,46,1), Z, 
+H(isArray,311,1), Z, H(rewind,9,1), 
 H(returnsReference,297,1), Z, Z, 
-Z, Z, Z, 
-H(print,154,1), H(isPassedByReference,314,1), Z, 
-Z, Z, H(getelementsbytagname,72,1), 
-H(isStatic,302,1), H(quote,227,1), H(getStaticVariables,294,1), 
-H(getFilename,189,1), H(offsetUnset,12,1), Z, 
-H(fflush,360,1), H(isdefaultnamespace,47,1), H(getattributenode,111,1), 
-H(isExecutable,196,1), H(sort,36,1), H(fseek,351,1), 
-Z, Z, Z, 
-Z, Z, H(savexml,81,1), 
-Z, Z, Z, 
-Z, H(isid,48,1), H(getPerms,173,1), 
-Z, Z, H(count,15,1), 
-Z, H(offsetGet,11,1), H(isPrivate,300,1), 
-H(setobject,347,1), H(output,150,1), Z, 
-H(createfunction,381,1), Z, Z, 
-Z, H(add,212,1), Z, 
-H(appendxml,102,1), H(__getlastrequestheaders,338,1), H(pconnect,211,1), 
-H(flush,217,1), H(setStaticPropertyValue,282,1), H(replacechild,53,1), 
-H(key,2,1), H(__getlastresponse,341,1), H(writeraw,424,1), 
-Z, Z, Z, 
-Z, H(isLocal,170,1), Z, 
-Z, Z, Z, 
-H(increment,204,1), H(fgetc,361,1), H(startdtdattlist,430,1), 
-H(getMethod,267,1), Z, Z, 
-Z, Z, Z, 
-H(getFile,30,1), Z, Z, 
-Z, Z, H(getParameters,295,1), 
+Z, H(flush,217,1), H(fault,348,1), 
 Z, Z, H(deletedata,69,1), 
-H(fpassthru,362,1), H(isArray,311,1), H(getMaxLineLen,357,1), 
-H(exec,221,1), H(setserverparams,203,1), Z, 
+Z, Z, H(attributes,331,1), 
+H(addattribute,321,1), H(__unset,325,1), H(ksort,23,1), 
+H(setserverparams,203,1), H(isPublic,305,1), H(getArrayCopy,14,1), 
+Z, Z, H(querysingle,382,1), 
+H(splittext,71,1), H(getInterfaceNames,271,1), H(getattributenode,111,1), 
+H(__call,8,1), H(getCurrentLocation,164,1), H(getClosure,299,1), 
+H(getelementsbytagname,72,1), H(getStaticPropertyValue,253,1), Z, 
+Z, H(test,279,1), Z, 
+H(startcdata,423,1), H(endcdata,397,1), Z, 
+H(getFunctions,288,1), H(setattributenode,116,1), H(xinclude,95,1), 
+H(removechild,61,1), H(getInnerIterator,4,1), Z, 
+Z, Z, Z, 
+Z, H(geterrorcode,37,1), H(isInstance,261,1), 
+H(contains,370,1), Z, Z, 
+Z, Z, Z, 
+Z, Z, H(uasort,24,1), 
+Z, Z, H(changes,379,1), 
+H(settimezone,134,1), Z, H(errorinfo,230,1), 
 Z, Z, Z, 
 Z, Z, Z, 
-H(__setsoapheaders,334,1), Z, H(isDefault,316,1), 
-Z, H(issamenode,60,1), Z, 
-H(setindent,428,1), H(isLink,187,1), Z, 
-H(writeattributens,418,1), Z, H(createattribute,94,1), 
-Z, Z, Z, 
-Z, Z, Z, 
-Z, H(getClasses,291,1), H(set,202,1), 
-H(getEndLine,259,1), Z, H(setpersistence,345,1), 
-H(isnormalized,219,1), H(addUserInfo,374,1), Z, 
-H(get,210,1), H(removechild,61,1), H(setAccessible,317,1), 
-Z, Z, Z, 
-Z, Z, H(pear_error,376,1), 
-Z, Z, H(columncount,237,1), 
-H(setcompressthreshold,209,1), Z, Z, 
-H(changes,387,1), Z, H(writecomment,406,1), 
-Z, Z, Z, 
-Z, Z, H(getINIEntries,289,1), 
-H(newInstanceArgs,258,1), Z, Z, 
+Z, H(version,371,1), H(writecomment,398,1), 
+H(evaluate,125,1), H(printFrame,153,1), Z, 
+H(bindvalue,244,1), H(fetch,245,1), H(fscanf,350,1), 
+H(hasChildren,249,1), H(fetchall,243,1), Z, 
+Z, H(writeattributens,410,1), Z, 
+Z, H(endattribute,428,1), Z, 
+Z, Z, H(writepi,411,1), 
+H(gettransitions,136,1), Z, Z, 
+Z, H(offsetSet,13,1), H(setattributens,108,1), 
+H(createelementns,87,1), H(info,152,1), H(export,264,1), 
+H(getClass,308,1), H(isdefaultnamespace,47,1), H(fpassthru,362,1), 
+H(fgetc,361,1), H(startdtd,419,1), Z, 
+H(getPathname,176,1), H(invokeArgs,296,1), H(startpi,429,1), 
+Z, H(appendxml,102,1), H(finalize,388,1), 
+Z, H(openmemory,426,1), Z, 
+H(relaxngvalidatesource,89,1), Z, Z, 
+H(modify,135,1), H(getATime,195,1), H(getattributens,109,1), 
+H(loadhtml,78,1), Z, Z, 
+Z, H(c14n,55,1), Z, 
+Z, H(getcolumnmeta,233,1), H(tutorial,148,1), 
+H(unserialize,319,1), Z, Z, 
+H(connect,215,1), Z, Z, 
+Z, H(item,121,1), H(createfunction,373,1), 
+Z, Z, H(fgetss,352,1), 
+Z, Z, H(setstrength,39,1), 
+H(__soapcall,336,1), H(enddtdelement,421,1), H(__getlastresponseheaders,340,1), 
+Z, H(enddtd,425,1), Z, 
+H(getProperties,265,1), H(setFileClass,178,1), Z, 
+H(isLocal,170,1), H(getOwner,191,1), H(current,7,1), 
+H(columnname,383,1), H(fetchobject,242,1), Z, 
+Z, Z, H(query,124,1), 
+H(setidattribute,112,1), H(addfunction,343,1), Z, 
+Z, H(getConstructor,257,1), H(sortwithsortkeys,34,1), 
+Z, H(c14nfile,59,1), Z, 
+Z, H(__wakeup,223,1), Z, 
+Z, H(createattributens,85,1), Z, 
+H(createcomment,99,1), Z, Z, 
+Z, Z, H(fstat,367,1), 
+H(startattributens,403,1), Z, Z, 
+H(startdtdelement,406,1), H(getserverstatus,207,1), Z, 
+Z, H(setAccessible,317,1), Z, 
+Z, H(removeattributenode,114,1), H(isDestructor,306,1), 
+H(__destruct,35,1), Z, H(openblob,380,1), 
+H(lasterrormsg,375,1), H(startattribute,413,1), H(clonenode,52,1), 
+Z, H(loadextension,372,1), Z, 
+Z, H(increment,204,1), H(open,378,1), 
 Z, H(compare,44,1), Z, 
-Z, Z, H(getChildren,250,1), 
-H(isOptional,312,1), H(isUserDefined,254,1), H(allowsNull,309,1), 
-Z, Z, H(ask,143,1), 
-H(save,93,1), H(startelementns,413,1), H(isInstance,261,1), 
-H(endcomment,408,1), H(createentityreference,79,1), H(handle,346,1), 
-Z, H(getPosition,310,1), Z, 
-H(enddtd,433,1), Z, Z, 
+H(createtextnode,90,1), H(setclass,349,1), H(isid,48,1), 
+Z, Z, H(iswhitespaceinelementcontent,70,1), 
+H(numcolumns,385,1), Z, Z, 
 Z, Z, Z, 
-Z, H(printFrame,153,1), H(getConstructor,257,1), 
-H(__construct,6,1), Z, H(__unset,325,1), 
-H(natcasesort,19,1), H(getOwner,191,1), H(fetchall,243,1), 
-H(__dorequest,332,1), H(setCsvControl,354,1), H(getMessage,25,1), 
-H(asort,20,1), H(__setlocation,337,1), Z, 
+Z, Z, H(getversion,213,1), 
+Z, Z, H(set,202,1), 
+H(getattributenodens,104,1), H(natsort,16,1), Z, 
+H(createdocumenttype,118,1), H(isInterface,276,1), H(setValue,318,1), 
 Z, Z, Z, 
-Z, Z, H(lasterrormsg,383,1), 
-Z, H(getnamespaces,324,1), H(getLine,28,1), 
+Z, H(getClassNames,290,1), H(getPathInfo,183,1), 
+H(issupported,63,1), H(getInterfaces,284,1), H(__isset,330,1), 
 Z, Z, Z, 
-H(getSeverity,200,1), Z, Z, 
+Z, Z, H(createaggregate,377,1), 
+H(getSubPath,248,1), Z, Z, 
+H(getPosition,310,1), Z, H(lookupnamespaceuri,49,1), 
+H(hasProperty,278,1), H(writeraw,416,1), H(getFileInfo,194,1), 
+H(rowcount,240,1), Z, H(get,210,1), 
 Z, Z, Z, 
-H(setattributenodens,107,1), H(addattribute,321,1), H(fgetss,352,1), 
+Z, Z, H(writedtdentity,417,1), 
+H(listidentifiers,137,1), Z, Z, 
+Z, Z, H(arg,141,1), 
+Z, Z, Z, 
+Z, H(createprocessinginstruction,82,1), H(offsetUnset,12,1), 
+H(getFile,30,1), H(newInstanceArgs,258,1), Z, 
+Z, Z, H(startelement,404,1), 
+H(loadhtmlfile,96,1), H(haschildnodes,64,1), Z, 
+H(save,93,1), H(getCommand,147,1), H(getSize,188,1), 
+H(fetcharray,386,1), Z, Z, 
+Z, Z, Z, 
+H(setdate,129,1), Z, Z, 
+H(isFinal,262,1), H(geterrormessage,43,1), Z, 
+Z, H(valid,3,1), H(issamenode,60,1), 
+H(isInstantiable,283,1), Z, Z, 
+H(getCTime,184,1), Z, Z, 
+H(relaxngvalidate,77,1), Z, Z, 
+Z, Z, H(isUserDefined,254,1), 
+H(ftell,365,1), H(newInstance,255,1), H(validate,74,1), 
+H(getConstants,274,1), H(setFlags,17,1), H(hasfeature,119,1), 
+H(setInfoClass,179,1), H(__set,51,1), H(bindcolumn,235,1), 
+H(ftruncate,358,1), Z, Z, 
+H(fgetcsv,353,1), Z, Z, 
+Z, H(settime,131,1), Z, 
 H(getBasename,175,1), Z, Z, 
-H(startattribute,421,1), Z, Z, 
 Z, Z, Z, 
-H(isInterface,276,1), H(getattributenodens,104,1), Z, 
-H(bindparam,238,1), Z, Z, 
-H(isIterateable,252,1), H(argValue,149,1), Z, 
-H(setisodate,133,1), H(hasConstant,266,1), Z, 
-H(getStackTrace,151,1), Z, H(addfunction,343,1), 
-H(uksort,18,1), H(getelementbyid,98,1), Z, 
-H(code,155,1), H(getstrength,38,1), Z, 
-Z, Z, H(writepi,419,1), 
-H(registernodeclass,83,1), H(ftruncate,358,1), H(getNumberOfRequiredParameters,292,1), 
-H(listidentifiers,137,1), H(invokeArgs,296,1), H(helpBody,158,1), 
-H(getCode,27,1), Z, Z, 
+H(getRealPath,182,1), H(read,172,1), Z, 
 Z, Z, Z, 
+Z, Z, H(getelementsbytagnamens,75,1), 
 Z, Z, Z, 
+H(reset,387,1), Z, Z, 
+H(helpSection,156,1), Z, H(hasattribute,105,1), 
+H(xpath,322,1), H(getSeverity,200,1), H(replacechild,53,1), 
+H(paramcount,389,1), H(appenddata,67,1), H(next,1,1), 
+H(writeelement,414,1), H(getelementbyid,98,1), H(hasattributens,106,1), 
+H(isInternal,286,1), Z, Z, 
+H(getattribute,33,1), H(lookupprefix,56,1), H(rollback,224,1), 
+H(removeattribute,115,1), Z, Z, 
+Z, H(enddocument,408,1), H(registernamespace,127,1), 
+Z, H(lastinsertrowid,374,1), H(isReadable,181,1), 
+H(getPath,185,1), H(__construct,6,1), Z, 
+H(__setcookie,335,1), Z, Z, 
+Z, Z, H(setoptimeout,208,1), 
+H(savexml,81,1), H(invoke,298,1), H(detach,369,1), 
 Z, Z, Z, 
-H(fetch,245,1), H(gettransitions,136,1), H(writedtdattlist,432,1), 
-Z, H(lastinsertid,222,1), H(iswhitespaceinelementcontent,70,1), 
-H(__gettypes,342,1), H(isDot,198,1), H(isReadable,181,1), 
-Z, Z, H(getDefaultProperties,281,1), 
-H(connect,215,1), H(setidattributens,103,1), H(startpi,437,1), 
-Z, H(bindvalue,244,1), H(endcdata,405,1), 
-H(getSubPath,248,1), Z, H(__setcookie,335,1), 
-Z, Z, Z, 
-H(helpTitle,146,1), Z, Z, 
-H(argCount,140,1), H(evaluate,125,1), H(startdtdelement,414,1), 
-H(hasattributes,54,1), H(writedtdelement,417,1), H(loadhtmlfile,96,1), 
-Z, Z, Z, 
-Z, Z, H(appenddata,67,1), 
-Z, Z, Z, 
-Z, H(removeattributenode,114,1), H(detach,369,1), 
-Z, H(splittext,71,1), H(__getlastrequest,333,1), 
-Z, Z, Z, 
-Z, Z, H(getStaticPropertyValue,253,1), 
-Z, Z, H(clear,398,1), 
-Z, H(setoptimeout,208,1), H(geterrorcode,37,1), 
-H(validate,74,1), H(getDefaultValue,313,1), Z, 
+Z, Z, H(__dorequest,332,1), 
+H(getnamespaces,324,1), Z, H(lasterrorcode,381,1), 
+H(key,2,1), H(decrement,205,1), H(getMTime,192,1), 
+H(normalizedocument,100,1), Z, H(getExtension,256,1), 
+H(helpBody,158,1), H(getConstant,273,1), H(registernodeclass,83,1), 
+H(setindent,420,1), H(getStaticVariables,294,1), H(getFrame,159,1), 
 Z, Z, Z, 
 Z, Z, Z, 
 Z, Z, Z, 
-Z, Z, H(reset,395,1), 
-H(getSize,188,1), Z, H(create,40,1), 
-Z, H(openuri,435,1), Z, 
-Z, H(getProperties,265,1), H(enddocument,416,1), 
-H(errorcode,220,1), Z, Z, 
-H(fullendelement,400,1), H(offsetExists,10,1), H(getRealPath,182,1), 
-H(fetchobject,242,1), H(getClass,308,1), H(getNumberOfParameters,293,1), 
-H(fstat,367,1), H(flock,364,1), H(children,328,1), 
-H(fscanf,350,1), H(isProtected,301,1), H(isWritable,174,1), 
-H(uasort,24,1), Z, Z, 
-H(createcdatasection,73,1), H(getInode,186,1), Z, 
-H(openmemory,434,1), Z, Z, 
-H(getValue,315,1), Z, H(getoffset,130,1), 
-Z, H(info,152,1), H(tutorial,148,1), 
-Z, H(help,160,1), Z, 
-H(writeelementns,399,1), Z, H(getModifiers,263,1), 
-H(version,379,1), H(__init__,29,1), Z, 
-Z, H(wrap,165,1)};
+Z, H(getiterator,122,1), Z, 
+Z, Z, Z, 
+Z, Z, H(replace,216,1), 
+Z, H(offsetExists,10,1), Z, 
+H(createdocument,117,1), H(getExtensionName,268,1), Z, 
+H(setStaticPropertyValue,282,1), H(addserver,201,1), H(getnameditemns,123,1), 
+H(setfetchmode,236,1), H(prepare,229,1), H(attach,368,1), 
+H(count,15,1)};
 #undef M
 #undef H
 #undef Z
 extern const unsigned methodIndexReverseCallIndexSys[];
 const unsigned methodIndexReverseCallIndexSys[] = {0, 
-1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
-19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,
-39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,
-59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,
-79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,
-99,100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,
-119,120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,
-139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,
-159,160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,
-179,180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,
-199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,
-219,220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,
-239,240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,
-259,260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,
-279,280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,
-299,300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,
-319,320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,
-339,340,341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,
-359,360,361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,
-379,380,381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,
-399,400,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,418,
-419,420,421,422,423,424,425,426,427,428,429,430,431,432,433,434,435,436,437,438
-};
+1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
+20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,
+40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,
+60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,
+80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,
+100,101,102,103,104,105,106,107,108,109,110,111,112,113,114,115,116,117,118,119,
+120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,
+140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159,
+160,161,162,163,164,165,166,167,168,169,170,171,172,173,174,175,176,177,178,179,
+180,181,182,183,184,185,186,187,188,189,190,191,192,193,194,195,196,197,198,199,
+200,201,202,203,204,205,206,207,208,209,210,211,212,213,214,215,216,217,218,219,
+220,221,222,223,224,225,226,227,228,229,230,231,232,233,234,235,236,237,238,239,
+240,241,242,243,244,245,246,247,248,249,250,251,252,253,254,255,256,257,258,259,
+260,261,262,263,264,265,266,267,268,269,270,271,272,273,274,275,276,277,278,279,
+280,281,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,298,299,
+300,301,302,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,
+320,321,322,323,324,325,326,327,328,329,330,331,332,333,334,335,336,337,338,339,
+340,341,342,343,344,345,346,347,348,349,350,351,352,353,354,355,356,357,358,359,
+360,361,362,363,364,365,366,367,368,369,370,371,372,373,374,375,376,377,378,379,
+380,381,382,383,384,385,386,387,388,389,390,391,392,393,394,395,396,397,398,399,
+400,401,402,403,404,405,406,407,408,409,410,411,412,413,414,415,416,417,418,419,
+420,421,422,423,424,425,426,427,428,429,430};
 extern const char * methodIndexReverseIndexSys[];
 const char * methodIndexReverseIndexSys[] = {
 "next", "key", "valid", "getInnerIterator", "append", 
@@ -432,20 +426,19 @@ const char * methodIndexReverseIndexSys[] = {
 "setMaxLineLen", "getMaxLineLen", "ftruncate", "eof", "fflush", 
 "fgetc", "fpassthru", "fgets", "flock", "ftell", 
 "fwrite", "fstat", "attach", "detach", "contains", 
-"getUserInfo", "getCallback", "getDebugInfo", "addUserInfo", "getBacktrace", 
-"pear_error", "getMode", "toString", "version", "loadextension", 
-"createfunction", "lastinsertrowid", "lasterrormsg", "escapestring", "createaggregate", 
-"open", "changes", "openblob", "lasterrorcode", "querysingle", 
-"columnname", "columntype", "numcolumns", "fetcharray", "reset", 
-"finalize", "paramcount", "clear", "writeelementns", "fullendelement", 
-"enddtdattlist", "outputmemory", "startdocument", "startdtdentity", "endcdata", 
-"writecomment", "writeattribute", "endcomment", "writedtd", "enddtdentity", 
-"startattributens", "startelement", "startelementns", "startdtdelement", "writecdata", 
-"enddocument", "writedtdelement", "writeattributens", "writepi", "setindentstring", 
-"startattribute", "writeelement", "endelement", "writeraw", "writedtdentity", 
-"endpi", "startdtd", "setindent", "enddtdelement", "startdtdattlist", 
-"startcdata", "writedtdattlist", "enddtd", "openmemory", "openuri", 
-"endattribute", "startpi", "text", "startcomment"};
+"version", "loadextension", "createfunction", "lastinsertrowid", "lasterrormsg", 
+"escapestring", "createaggregate", "open", "changes", "openblob", 
+"lasterrorcode", "querysingle", "columnname", "columntype", "numcolumns", 
+"fetcharray", "reset", "finalize", "paramcount", "clear", 
+"writeelementns", "fullendelement", "enddtdattlist", "outputmemory", "startdocument", 
+"startdtdentity", "endcdata", "writecomment", "writeattribute", "endcomment", 
+"writedtd", "enddtdentity", "startattributens", "startelement", "startelementns", 
+"startdtdelement", "writecdata", "enddocument", "writedtdelement", "writeattributens", 
+"writepi", "setindentstring", "startattribute", "writeelement", "endelement", 
+"writeraw", "writedtdentity", "endpi", "startdtd", "setindent", 
+"enddtdelement", "startdtdattlist", "startcdata", "writedtdattlist", "enddtd", 
+"openmemory", "openuri", "endattribute", "startpi", "text", 
+"startcomment"};
 #ifndef NOFMCGEN
 bool RuntimeOption::FastMethodCall = true;
 #else
@@ -472,7 +465,6 @@ extern struct ObjectStaticCallbacks cw_reflectionextension;
 extern struct ObjectStaticCallbacks cw_outofrangeexception;
 extern struct ObjectStaticCallbacks cw_reflectionmethod;
 extern struct ObjectStaticCallbacks cw_badmethodcallexception;
-extern struct ObjectStaticCallbacks cw_pear_error;
 extern struct ObjectStaticCallbacks cw_reflectionproperty;
 extern struct ObjectStaticCallbacks cw___php_incomplete_class;
 extern struct ObjectStaticCallbacks cw_runtimeexception;
@@ -12056,7 +12048,7 @@ Variant c_sqlite3stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
         return (t_close());
       }
       break;
-    case 0x18d:
+    case 0x185:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
         return (t_paramcount());
@@ -12083,13 +12075,13 @@ Variant c_sqlite3stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
         return (t_execute());
       }
       break;
-    case 0x18b:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
-    case 0x18e:
+    case 0x186:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("clear", 0, 1);
         return (t_clear());
@@ -12221,7 +12213,7 @@ Variant c_sqlite3stmt::o_invoke_few_args(MethodIndex methodIndex, const char *s,
         return (t_close());
       }
       break;
-    case 0x18d:
+    case 0x185:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("paramcount", 0, 1);
         return (t_paramcount());
@@ -12240,13 +12232,13 @@ Variant c_sqlite3stmt::o_invoke_few_args(MethodIndex methodIndex, const char *s,
         return (t_execute());
       }
       break;
-    case 0x18b:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
-    case 0x18e:
+    case 0x186:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("clear", 0, 1);
         return (t_clear());
@@ -12391,7 +12383,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         return (t_close());
       }
       break;
-    case 0x18d:
+    case 0x185:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -12446,7 +12438,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         return (t_execute());
       }
       break;
-    case 0x18b:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -12460,7 +12452,7 @@ Variant c_sqlite3stmt::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         return (t_reset());
       }
       break;
-    case 0x18e:
+    case 0x186:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -25244,13 +25236,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         }
       }
       break;
-    case 0x17b:
+    case 0x173:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("version", 0, 1);
         return (t_version());
       }
       break;
-    case 0x17c:
+    case 0x174:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
         {
@@ -25267,7 +25259,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         return (t___destruct());
       }
       break;
-    case 0x17d:
+    case 0x175:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
         {
@@ -25287,7 +25279,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         return (t___construct(), null);
       }
       break;
-    case 0x17e:
+    case 0x176:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
         return (t_lastinsertrowid());
@@ -25310,7 +25302,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         return (t_close());
       }
       break;
-    case 0x180:
+    case 0x178:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
         {
@@ -25321,13 +25313,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         }
       }
       break;
-    case 0x17f:
+    case 0x177:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         return (t_lasterrormsg());
       }
       break;
-    case 0x181:
+    case 0x179:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
         {
@@ -25342,7 +25334,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         }
       }
       break;
-    case 0x182:
+    case 0x17a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
         {
@@ -25357,13 +25349,13 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         }
       }
       break;
-    case 0x183:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("changes", 0, 1);
         return (t_changes());
       }
       break;
-    case 0x184:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
         {
@@ -25378,7 +25370,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         }
       }
       break;
-    case 0x185:
+    case 0x17d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
         return (t_lasterrorcode());
@@ -25395,7 +25387,7 @@ Variant c_sqlite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
         }
       }
       break;
-    case 0x186:
+    case 0x17e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
         {
@@ -25604,13 +25596,13 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
         return (t_exec(a0));
       }
       break;
-    case 0x17b:
+    case 0x173:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("version", 0, 1);
         return (t_version());
       }
       break;
-    case 0x17c:
+    case 0x174:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("loadextension", count, 1, 1, 1);
         return (t_loadextension(a0));
@@ -25622,7 +25614,7 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
         return (t___destruct());
       }
       break;
-    case 0x17d:
+    case 0x175:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 3) return throw_wrong_arguments("createfunction", count, 2, 3, 1);
         if (count <= 2) return (t_createfunction(a0, a1));
@@ -25635,7 +25627,7 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
         return (t___construct(), null);
       }
       break;
-    case 0x17e:
+    case 0x176:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lastinsertrowid", 0, 1);
         return (t_lastinsertrowid());
@@ -25653,26 +25645,26 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
         return (t_close());
       }
       break;
-    case 0x180:
+    case 0x178:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("escapestring", count, 1, 1, 1);
         return (t_escapestring(a0));
       }
       break;
-    case 0x17f:
+    case 0x177:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrormsg", 0, 1);
         return (t_lasterrormsg());
       }
       break;
-    case 0x181:
+    case 0x179:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("createaggregate", count, 3, 4, 1);
         if (count <= 3) return (t_createaggregate(a0, a1, a2));
         return (t_createaggregate(a0, a1, a2, a3));
       }
       break;
-    case 0x182:
+    case 0x17a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("open", count, 1, 3, 1);
         if (count <= 1) return (t_open(a0), null);
@@ -25680,20 +25672,20 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
         return (t_open(a0, a1, a2), null);
       }
       break;
-    case 0x183:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("changes", 0, 1);
         return (t_changes());
       }
       break;
-    case 0x184:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("openblob", count, 3, 4, 1);
         if (count <= 3) return (t_openblob(a0, a1, a2));
         return (t_openblob(a0, a1, a2, a3));
       }
       break;
-    case 0x185:
+    case 0x17d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("lasterrorcode", 0, 1);
         return (t_lasterrorcode());
@@ -25705,7 +25697,7 @@ Variant c_sqlite3::o_invoke_few_args(MethodIndex methodIndex, const char *s, int
         return (t_prepare(a0));
       }
       break;
-    case 0x186:
+    case 0x17e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("querysingle", count, 1, 2, 1);
         if (count <= 1) return (t_querysingle(a0));
@@ -25868,7 +25860,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_exec(a0));
       }
       break;
-    case 0x17b:
+    case 0x173:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -25882,7 +25874,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_version());
       }
       break;
-    case 0x17c:
+    case 0x174:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -25914,7 +25906,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t___destruct());
       }
       break;
-    case 0x17d:
+    case 0x175:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -25955,7 +25947,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t___construct(), null);
       }
       break;
-    case 0x17e:
+    case 0x176:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -26001,7 +25993,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_close());
       }
       break;
-    case 0x180:
+    case 0x178:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -26019,7 +26011,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_escapestring(a0));
       }
       break;
-    case 0x17f:
+    case 0x177:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -26033,7 +26025,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_lasterrormsg());
       }
       break;
-    case 0x181:
+    case 0x179:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -26064,7 +26056,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         else return (t_createaggregate(a0, a1, a2, a3));
       }
       break;
-    case 0x182:
+    case 0x17a:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -26092,7 +26084,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         else return (t_open(a0, a1, a2), null);
       }
       break;
-    case 0x183:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -26106,7 +26098,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_changes());
       }
       break;
-    case 0x184:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -26137,7 +26129,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         else return (t_openblob(a0, a1, a2, a3));
       }
       break;
-    case 0x185:
+    case 0x17d:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -26169,7 +26161,7 @@ Variant c_sqlite3::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &
         return (t_prepare(a0));
       }
       break;
-    case 0x186:
+    case 0x17e:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -29746,7 +29738,7 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
   int count __attribute__((__unused__)) = params.size();
 #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0x187:
+    case 0x17f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
         {
@@ -29757,7 +29749,7 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x188:
+    case 0x180:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
         {
@@ -29780,13 +29772,13 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t___construct(), null);
       }
       break;
-    case 0x189:
+    case 0x181:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
         return (t_numcolumns());
       }
       break;
-    case 0x18a:
+    case 0x182:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
         {
@@ -29798,13 +29790,13 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x18b:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
-    case 0x18c:
+    case 0x184:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
         return (t_finalize());
@@ -29891,13 +29883,13 @@ Variant c_sqlite3result::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
 Variant c_sqlite3result::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
 #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0x187:
+    case 0x17f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columnname", count, 1, 1, 1);
         return (t_columnname(a0));
       }
       break;
-    case 0x188:
+    case 0x180:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("columntype", count, 1, 1, 1);
         return (t_columntype(a0));
@@ -29915,26 +29907,26 @@ Variant c_sqlite3result::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t___construct(), null);
       }
       break;
-    case 0x189:
+    case 0x181:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("numcolumns", 0, 1);
         return (t_numcolumns());
       }
       break;
-    case 0x18a:
+    case 0x182:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("fetcharray", 1, 1);
         if (count <= 0) return (t_fetcharray());
         return (t_fetcharray(a0));
       }
       break;
-    case 0x18b:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("reset", 0, 1);
         return (t_reset());
       }
       break;
-    case 0x18c:
+    case 0x184:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("finalize", 0, 1);
         return (t_finalize());
@@ -30015,7 +30007,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
-    case 0x187:
+    case 0x17f:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -30033,7 +30025,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_columnname(a0));
       }
       break;
-    case 0x188:
+    case 0x180:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -30079,7 +30071,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t___construct(), null);
       }
       break;
-    case 0x189:
+    case 0x181:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -30093,7 +30085,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_numcolumns());
       }
       break;
-    case 0x18a:
+    case 0x182:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -30112,7 +30104,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         else return (t_fetcharray(a0));
       }
       break;
-    case 0x18b:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -30126,7 +30118,7 @@ Variant c_sqlite3result::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_reset());
       }
       break;
-    case 0x18c:
+    case 0x184:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -45959,7 +45951,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
   int count __attribute__((__unused__)) = params.size();
 #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0x18f:
+    case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
         {
@@ -45974,7 +45966,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x192:
+    case 0x18a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
         {
@@ -45986,19 +45978,19 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x191:
+    case 0x189:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
         return (t_enddtdattlist());
       }
       break;
-    case 0x190:
+    case 0x188:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
         return (t_fullendelement());
       }
       break;
-    case 0x193:
+    case 0x18b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
         {
@@ -46014,7 +46006,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x194:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
         {
@@ -46026,13 +46018,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x195:
+    case 0x18d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
         return (t_endcdata());
       }
       break;
-    case 0x196:
+    case 0x18e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
         {
@@ -46043,7 +46035,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x197:
+    case 0x18f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
         {
@@ -46055,7 +46047,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x198:
+    case 0x190:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
         return (t_endcomment());
@@ -46067,7 +46059,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         return (t___destruct());
       }
       break;
-    case 0x199:
+    case 0x191:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
         {
@@ -46090,13 +46082,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         return (t___construct(), null);
       }
       break;
-    case 0x19a:
+    case 0x192:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         return (t_enddtdentity());
       }
       break;
-    case 0x19b:
+    case 0x193:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
         {
@@ -46109,7 +46101,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x19c:
+    case 0x194:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
         {
@@ -46120,7 +46112,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x19d:
+    case 0x195:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
         {
@@ -46133,7 +46125,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x19e:
+    case 0x196:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
         {
@@ -46144,13 +46136,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a0:
+    case 0x198:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
         return (t_enddocument());
       }
       break;
-    case 0x19f:
+    case 0x197:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
         {
@@ -46161,7 +46153,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a1:
+    case 0x199:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
         {
@@ -46173,7 +46165,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a2:
+    case 0x19a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
         {
@@ -46187,7 +46179,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a3:
+    case 0x19b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
         {
@@ -46199,7 +46191,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a4:
+    case 0x19c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
         {
@@ -46210,7 +46202,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a5:
+    case 0x19d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
         {
@@ -46221,7 +46213,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a6:
+    case 0x19e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
         {
@@ -46234,13 +46226,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a7:
+    case 0x19f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
         return (t_endelement());
       }
       break;
-    case 0x1a8:
+    case 0x1a0:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
         {
@@ -46251,7 +46243,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1a9:
+    case 0x1a1:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
         {
@@ -46271,13 +46263,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1aa:
+    case 0x1a2:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
         return (t_endpi());
       }
       break;
-    case 0x1ab:
+    case 0x1a3:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
         {
@@ -46292,7 +46284,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1ac:
+    case 0x1a4:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
         {
@@ -46303,13 +46295,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1ad:
+    case 0x1a5:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
         return (t_enddtdelement());
       }
       break;
-    case 0x1ae:
+    case 0x1a6:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
         {
@@ -46320,13 +46312,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1af:
+    case 0x1a7:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
         return (t_startcdata());
       }
       break;
-    case 0x1b0:
+    case 0x1a8:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
         {
@@ -46338,13 +46330,13 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1b1:
+    case 0x1a9:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
         return (t_enddtd());
       }
       break;
-    case 0x1b3:
+    case 0x1ab:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
         {
@@ -46355,19 +46347,19 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1b2:
+    case 0x1aa:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
         return (t_openmemory());
       }
       break;
-    case 0x1b4:
+    case 0x1ac:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
         return (t_endattribute());
       }
       break;
-    case 0x1b5:
+    case 0x1ad:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
         {
@@ -46378,7 +46370,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1b6:
+    case 0x1ae:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
         {
@@ -46401,7 +46393,7 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
         }
       }
       break;
-    case 0x1b7:
+    case 0x1af:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
         return (t_startcomment());
@@ -46866,33 +46858,33 @@ Variant c_xmlwriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
 Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
 #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
-    case 0x18f:
+    case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 3 || count > 4) return throw_wrong_arguments("writeelementns", count, 3, 4, 1);
         if (count <= 3) return (t_writeelementns(a0, a1, a2));
         return (t_writeelementns(a0, a1, a2, a3));
       }
       break;
-    case 0x192:
+    case 0x18a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 1) return throw_toomany_arguments("outputmemory", 1, 1);
         if (count <= 0) return (t_outputmemory());
         return (t_outputmemory(a0));
       }
       break;
-    case 0x191:
+    case 0x189:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdattlist", 0, 1);
         return (t_enddtdattlist());
       }
       break;
-    case 0x190:
+    case 0x188:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("fullendelement", 0, 1);
         return (t_fullendelement());
       }
       break;
-    case 0x193:
+    case 0x18b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("startdocument", 3, 1);
         if (count <= 0) return (t_startdocument());
@@ -46901,31 +46893,31 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t_startdocument(a0, a1, a2));
       }
       break;
-    case 0x194:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("startdtdentity", count, 2, 2, 1);
         return (t_startdtdentity(a0, a1));
       }
       break;
-    case 0x195:
+    case 0x18d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcdata", 0, 1);
         return (t_endcdata());
       }
       break;
-    case 0x196:
+    case 0x18e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecomment", count, 1, 1, 1);
         return (t_writecomment(a0));
       }
       break;
-    case 0x197:
+    case 0x18f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writeattribute", count, 2, 2, 1);
         return (t_writeattribute(a0, a1));
       }
       break;
-    case 0x198:
+    case 0x190:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endcomment", 0, 1);
         return (t_endcomment());
@@ -46937,7 +46929,7 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t___destruct());
       }
       break;
-    case 0x199:
+    case 0x191:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 4) return throw_wrong_arguments("writedtd", count, 1, 4, 1);
         if (count <= 1) return (t_writedtd(a0));
@@ -46952,98 +46944,98 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t___construct(), null);
       }
       break;
-    case 0x19a:
+    case 0x192:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdentity", 0, 1);
         return (t_enddtdentity());
       }
       break;
-    case 0x19b:
+    case 0x193:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startattributens", count, 3, 3, 1);
         return (t_startattributens(a0, a1, a2));
       }
       break;
-    case 0x19c:
+    case 0x194:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startelement", count, 1, 1, 1);
         return (t_startelement(a0));
       }
       break;
-    case 0x19d:
+    case 0x195:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 3) return throw_wrong_arguments("startelementns", count, 3, 3, 1);
         return (t_startelementns(a0, a1, a2));
       }
       break;
-    case 0x19e:
+    case 0x196:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdelement", count, 1, 1, 1);
         return (t_startdtdelement(a0));
       }
       break;
-    case 0x1a0:
+    case 0x198:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddocument", 0, 1);
         return (t_enddocument());
       }
       break;
-    case 0x19f:
+    case 0x197:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writecdata", count, 1, 1, 1);
         return (t_writecdata(a0));
       }
       break;
-    case 0x1a1:
+    case 0x199:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdelement", count, 2, 2, 1);
         return (t_writedtdelement(a0, a1));
       }
       break;
-    case 0x1a2:
+    case 0x19a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 4) return throw_wrong_arguments("writeattributens", count, 4, 4, 1);
         return (t_writeattributens(a0, a1, a2, a3));
       }
       break;
-    case 0x1a3:
+    case 0x19b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writepi", count, 2, 2, 1);
         return (t_writepi(a0, a1));
       }
       break;
-    case 0x1a4:
+    case 0x19c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindentstring", count, 1, 1, 1);
         return (t_setindentstring(a0));
       }
       break;
-    case 0x1a5:
+    case 0x19d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startattribute", count, 1, 1, 1);
         return (t_startattribute(a0));
       }
       break;
-    case 0x1a6:
+    case 0x19e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 2) return throw_wrong_arguments("writeelement", count, 1, 2, 1);
         if (count <= 1) return (t_writeelement(a0));
         return (t_writeelement(a0, a1));
       }
       break;
-    case 0x1a7:
+    case 0x19f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endelement", 0, 1);
         return (t_endelement());
       }
       break;
-    case 0x1a8:
+    case 0x1a0:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("writeraw", count, 1, 1, 1);
         return (t_writeraw(a0));
       }
       break;
-    case 0x1a9:
+    case 0x1a1:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 2 || count > 6) return throw_wrong_arguments("writedtdentity", count, 2, 6, 1);
         if (count <= 2) return (t_writedtdentity(a0, a1));
@@ -47053,13 +47045,13 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t_writedtdentity(a0, a1, a2, a3, a4, a5));
       }
       break;
-    case 0x1aa:
+    case 0x1a2:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endpi", 0, 1);
         return (t_endpi());
       }
       break;
-    case 0x1ab:
+    case 0x1a3:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count < 1 || count > 3) return throw_wrong_arguments("startdtd", count, 1, 3, 1);
         if (count <= 1) return (t_startdtd(a0));
@@ -47067,67 +47059,67 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t_startdtd(a0, a1, a2));
       }
       break;
-    case 0x1ac:
+    case 0x1a4:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("setindent", count, 1, 1, 1);
         return (t_setindent(a0));
       }
       break;
-    case 0x1ad:
+    case 0x1a5:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtdelement", 0, 1);
         return (t_enddtdelement());
       }
       break;
-    case 0x1ae:
+    case 0x1a6:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startdtdattlist", count, 1, 1, 1);
         return (t_startdtdattlist(a0));
       }
       break;
-    case 0x1af:
+    case 0x1a7:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcdata", 0, 1);
         return (t_startcdata());
       }
       break;
-    case 0x1b0:
+    case 0x1a8:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("writedtdattlist", count, 2, 2, 1);
         return (t_writedtdattlist(a0, a1));
       }
       break;
-    case 0x1b1:
+    case 0x1a9:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("enddtd", 0, 1);
         return (t_enddtd());
       }
       break;
-    case 0x1b3:
+    case 0x1ab:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("openuri", count, 1, 1, 1);
         return (t_openuri(a0));
       }
       break;
-    case 0x1b2:
+    case 0x1aa:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("openmemory", 0, 1);
         return (t_openmemory());
       }
       break;
-    case 0x1b4:
+    case 0x1ac:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("endattribute", 0, 1);
         return (t_endattribute());
       }
       break;
-    case 0x1b5:
+    case 0x1ad:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("startpi", count, 1, 1, 1);
         return (t_startpi(a0));
       }
       break;
-    case 0x1b6:
+    case 0x1ae:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("text", count, 1, 1, 1);
         return (t_text(a0));
@@ -47140,7 +47132,7 @@ Variant c_xmlwriter::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
         return (t_flush(a0));
       }
       break;
-    case 0x1b7:
+    case 0x1af:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("startcomment", 0, 1);
         return (t_startcomment());
@@ -47446,7 +47438,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
 #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
-    case 0x18f:
+    case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47477,7 +47469,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else return (t_writeelementns(a0, a1, a2, a3));
       }
       break;
-    case 0x192:
+    case 0x18a:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47496,7 +47488,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else return (t_outputmemory(a0));
       }
       break;
-    case 0x191:
+    case 0x189:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47510,7 +47502,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_enddtdattlist());
       }
       break;
-    case 0x190:
+    case 0x188:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47524,7 +47516,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_fullendelement());
       }
       break;
-    case 0x193:
+    case 0x18b:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47553,7 +47545,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else return (t_startdocument(a0, a1, a2));
       }
       break;
-    case 0x194:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47575,7 +47567,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startdtdentity(a0, a1));
       }
       break;
-    case 0x195:
+    case 0x18d:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47589,7 +47581,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_endcdata());
       }
       break;
-    case 0x196:
+    case 0x18e:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47607,7 +47599,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writecomment(a0));
       }
       break;
-    case 0x197:
+    case 0x18f:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47629,7 +47621,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writeattribute(a0, a1));
       }
       break;
-    case 0x198:
+    case 0x190:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47657,7 +47649,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t___destruct());
       }
       break;
-    case 0x199:
+    case 0x191:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47704,7 +47696,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t___construct(), null);
       }
       break;
-    case 0x19a:
+    case 0x192:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47718,7 +47710,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_enddtdentity());
       }
       break;
-    case 0x19b:
+    case 0x193:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47744,7 +47736,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startattributens(a0, a1, a2));
       }
       break;
-    case 0x19c:
+    case 0x194:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47762,7 +47754,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startelement(a0));
       }
       break;
-    case 0x19d:
+    case 0x195:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47788,7 +47780,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startelementns(a0, a1, a2));
       }
       break;
-    case 0x19e:
+    case 0x196:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47806,7 +47798,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startdtdelement(a0));
       }
       break;
-    case 0x1a0:
+    case 0x198:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47820,7 +47812,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_enddocument());
       }
       break;
-    case 0x19f:
+    case 0x197:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47838,7 +47830,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writecdata(a0));
       }
       break;
-    case 0x1a1:
+    case 0x199:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47860,7 +47852,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writedtdelement(a0, a1));
       }
       break;
-    case 0x1a2:
+    case 0x19a:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47890,7 +47882,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writeattributens(a0, a1, a2, a3));
       }
       break;
-    case 0x1a3:
+    case 0x19b:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47912,7 +47904,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writepi(a0, a1));
       }
       break;
-    case 0x1a4:
+    case 0x19c:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47930,7 +47922,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_setindentstring(a0));
       }
       break;
-    case 0x1a5:
+    case 0x19d:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -47948,7 +47940,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startattribute(a0));
       }
       break;
-    case 0x1a6:
+    case 0x19e:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -47971,7 +47963,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else return (t_writeelement(a0, a1));
       }
       break;
-    case 0x1a7:
+    case 0x19f:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -47985,7 +47977,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_endelement());
       }
       break;
-    case 0x1a8:
+    case 0x1a0:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48003,7 +47995,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writeraw(a0));
       }
       break;
-    case 0x1a9:
+    case 0x1a1:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -48045,7 +48037,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else return (t_writedtdentity(a0, a1, a2, a3, a4, a5));
       }
       break;
-    case 0x1aa:
+    case 0x1a2:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -48059,7 +48051,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_endpi());
       }
       break;
-    case 0x1ab:
+    case 0x1a3:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -48087,7 +48079,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else return (t_startdtd(a0, a1, a2));
       }
       break;
-    case 0x1ac:
+    case 0x1a4:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48105,7 +48097,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_setindent(a0));
       }
       break;
-    case 0x1ad:
+    case 0x1a5:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -48119,7 +48111,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_enddtdelement());
       }
       break;
-    case 0x1ae:
+    case 0x1a6:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48137,7 +48129,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startdtdattlist(a0));
       }
       break;
-    case 0x1af:
+    case 0x1a7:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -48151,7 +48143,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startcdata());
       }
       break;
-    case 0x1b0:
+    case 0x1a8:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -48173,7 +48165,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_writedtdattlist(a0, a1));
       }
       break;
-    case 0x1b1:
+    case 0x1a9:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -48187,7 +48179,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_enddtd());
       }
       break;
-    case 0x1b3:
+    case 0x1ab:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48205,7 +48197,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_openuri(a0));
       }
       break;
-    case 0x1b2:
+    case 0x1aa:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -48219,7 +48211,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_openmemory());
       }
       break;
-    case 0x1b4:
+    case 0x1ac:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -48233,7 +48225,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_endattribute());
       }
       break;
-    case 0x1b5:
+    case 0x1ad:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48251,7 +48243,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         return (t_startpi(a0));
       }
       break;
-    case 0x1b6:
+    case 0x1ae:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48288,7 +48280,7 @@ Variant c_xmlwriter::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         else return (t_flush(a0));
       }
       break;
-    case 0x1b7:
+    case 0x1af:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -62017,9 +62009,6 @@ Variant get_builtin_class_var_init(const char *s, const char *var) {
       HASH_GET_CLASS_VAR_INIT(0x6576EACCCE24D694LL, __php_incomplete_class);
       HASH_GET_CLASS_VAR_INIT(0x47D93E6F80B66A94LL, exception);
       break;
-    case 152:
-      HASH_GET_CLASS_VAR_INIT(0x3CEBA108A1BAB998LL, pear_error);
-      break;
     case 167:
       HASH_GET_CLASS_VAR_INIT(0x71089C29FE923FA7LL, splfileinfo);
       break;
@@ -62251,9 +62240,6 @@ Object create_builtin_object(const char *s, CArrRef params, bool init /* = true 
       HASH_CREATE_OBJECT(0x6576EACCCE24D694LL, __php_incomplete_class);
       HASH_CREATE_OBJECT(0x47D93E6F80B66A94LL, exception);
       break;
-    case 152:
-      HASH_CREATE_OBJECT(0x3CEBA108A1BAB998LL, pear_error);
-      break;
     case 167:
       HASH_CREATE_OBJECT(0x71089C29FE923FA7LL, splfileinfo);
       break;
@@ -62484,9 +62470,6 @@ Variant invoke_builtin_static_method(const char *s, MethodIndex methodIndex, con
       HASH_INVOKE_STATIC_METHOD(0x6FFDF8DF15CABE94LL, domcdatasection, methodIndex);
       HASH_INVOKE_STATIC_METHOD(0x6576EACCCE24D694LL, __php_incomplete_class, methodIndex);
       HASH_INVOKE_STATIC_METHOD(0x47D93E6F80B66A94LL, exception, methodIndex);
-      break;
-    case 152:
-      HASH_INVOKE_STATIC_METHOD(0x3CEBA108A1BAB998LL, pear_error, methodIndex);
       break;
     case 167:
       HASH_INVOKE_STATIC_METHOD(0x71089C29FE923FA7LL, splfileinfo, methodIndex);
@@ -62740,9 +62723,6 @@ const ObjectStaticCallbacks * get_builtin_object_static_callbacks(const char *s)
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x6FFDF8DF15CABE94LL, domcdatasection);
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x6576EACCCE24D694LL, __php_incomplete_class);
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x47D93E6F80B66A94LL, exception);
-      break;
-    case 152:
-      HASH_GET_OBJECT_STATIC_CALLBACKS(0x3CEBA108A1BAB998LL, pear_error);
       break;
     case 167:
       HASH_GET_OBJECT_STATIC_CALLBACKS(0x71089C29FE923FA7LL, splfileinfo);

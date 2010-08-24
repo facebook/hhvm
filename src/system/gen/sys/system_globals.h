@@ -23,7 +23,6 @@
 #include <php/classes/directory.h>
 #include <php/classes/exception.h>
 #include <php/classes/iterator.h>
-#include <php/classes/pear_error.h>
 #include <php/classes/reflection.h>
 #include <php/classes/splfile.h>
 #include <php/classes/splobjectstorage.h>
@@ -75,7 +74,6 @@ public:
   bool run_pm_php$classes$directory_php;
   bool run_pm_php$classes$exception_php;
   bool run_pm_php$classes$iterator_php;
-  bool run_pm_php$classes$pear_error_php;
   bool run_pm_php$classes$reflection_php;
   bool run_pm_php$classes$splfile_php;
   bool run_pm_php$classes$splobjectstorage_php;

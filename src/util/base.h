@@ -160,7 +160,11 @@ typedef std::vector<StringPairVec> StringPairVecVec;
 ///////////////////////////////////////////////////////////////////////////////
 // boost
 
-#ifndef DECLARE_BOOST_TYPES
+// Let us always use hphp's definition of DECLARE_BOOST_TYPES, esp. when it is
+// used as an external library.
+#ifdef DECLARE_BOOST_TYPES
+#undef DECLARE_BOOST_TYPES
+#endif
 
 #define DECLARE_BOOST_TYPES(classname)                                  \
   class classname;                                                      \
@@ -177,8 +181,6 @@ typedef std::vector<StringPairVec> StringPairVecVec;
     string_hash> StringTo ## classname ## PtrVecMap;                    \
   typedef __gnu_cxx::hash_map<std::string, classname ## PtrSet,         \
     string_hash> StringTo ## classname ## PtrSetMap;                    \
-
-#endif
 
 typedef boost::shared_ptr<FILE> FilePtr;
 

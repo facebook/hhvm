@@ -19,9 +19,6 @@
 #include <runtime/ext/ext_function.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/zend/zend_collator.h>
-#include <unicode/ucol.h> // icu
-#include <unicode/uclean.h> // icu
-#include <unicode/putil.h> // icu
 
 #define SORT_REGULAR            0
 #define SORT_STRING             1

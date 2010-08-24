@@ -30,6 +30,8 @@
 # include <byteswap.h>
 #endif
 
+#if !defined(htonll) && !defined(ntohll)
+
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 # if defined(__FREEBSD__)
 #  define htonll(x) bswap64(x)
@@ -44,6 +46,8 @@
 #else
 #define htonll(x) (x)
 #define ntohll(x) (x)
+#endif
+
 #endif
 
 namespace HPHP {

@@ -21,7 +21,6 @@
 #include <runtime/base/base_includes.h>
 #include <runtime/base/array/array_util.h>
 #include <runtime/base/zend/zend_collator.h>
-#include <unicode/ucol.h> // icu
 
 namespace HPHP {
 

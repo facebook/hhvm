@@ -18,6 +18,8 @@
 #include "ext_icu.h"
 #include <unicode/translit.h>
 
+using namespace U_ICU_NAMESPACE;
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

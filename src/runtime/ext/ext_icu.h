@@ -22,6 +22,11 @@
 
 #include <runtime/base/base_includes.h>
 
+// Avoid dragging in the icu namespace.
+#ifndef U_USING_ICU_NAMESPACE
+#define U_USING_ICU_NAMESPACE 0
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

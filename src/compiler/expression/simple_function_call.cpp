@@ -1154,7 +1154,6 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
     if (!m_class && m_className.empty()) {
       if (!m_dynamicInvoke && m_redeclared) {
         if (canInvokeFewArgs()) {
-          // FMC unaddressed, need test case
           cg_printf("%s->%s%s_few_args(", cg.getGlobals(ar),
                     Option::InvokePrefix, cg.formatLabel(m_name).c_str());
           int left = Option::InvokeFewArgsCount;
@@ -1189,7 +1188,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         cg_printf("invoke(\"%s\", ", cg.escapeLabel(m_name).c_str());
       }
     } else {
-      // FMC: test fail case
+      // e.g. A::foo()
       const MethodSlot *ms = ar->getOrAddMethodSlot(m_name);
       bool inObj = m_parentClass && ar->getClassScope() &&
         !ar->getFunctionScope()->isStatic();
@@ -1233,7 +1232,6 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
           }
           cg_printf("), ");
         } else {
-          // FMC test this
           cg_printf("invoke_static_method%s(",
                   (ms->isError() ? "_mil" : ""));
         }
@@ -1254,12 +1252,6 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       }
       if (needHash) {
         if (!m_class && m_className.empty()) {
-      // FMC need to test m_redeclared, might not be valid here any more
-      // need to assert that eval style invoke was generated at least
-      // original clause had two checks, verify !m_className.empty() case.
-      // Merge lost my change, need to figure this out all over again.
-      // Maybe just this: needHash = !(m_redeclared && !dynamicInvoke);
-
           needHash = !(m_redeclared && !m_dynamicInvoke);
         } else {
           needHash = m_validClass || m_redeclaredClass;

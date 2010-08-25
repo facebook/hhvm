@@ -246,10 +246,10 @@ void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
                  "const Eval::FunctionCallExpression *caller, int64 hash, "
                  "bool fatal) {\n",
                  system ? "_builtin" : "");
-    // FMC verify this case
   if (generate) {
     if (needGlobals) cg.printDeclareGlobals();
 
+    // builtin functions (not methods)
     for (JumpTable fit(cg, funcs, true, true, false); fit.ready();
          fit.next()) {
       const char *name = fit.key();

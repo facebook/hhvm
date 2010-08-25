@@ -376,7 +376,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                         m_argArrayHash, m_argArrayIndex);
       cg_printf(")");
     } else {
-      // FMC: test fail case , both of them
       const MethodSlot *ms = ar->getOrAddMethodSlot(m_origName);
       if (fewParams) {
         cg_printf("%s%sinvoke_few_args%s(%s \"%s\"",
@@ -410,7 +409,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
     }
   } else {
     if (fewParams) {
-      // FMC must verify the fail case
       cg_printf("%s%sinvoke_few_args_mil(",
                 Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);
@@ -423,7 +421,6 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       }
       cg_printf(")");
     } else {
-      // FMC must verify the fail case
       cg_printf("%s%sinvoke_mil(",
           Option::ObjectPrefix, isThis ? "root_" : "");
       m_nameExp->outputCPP(cg, ar);

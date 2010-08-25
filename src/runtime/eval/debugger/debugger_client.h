@@ -142,7 +142,8 @@ public:
   void output (CStrRef s);
   void error  (CStrRef s);
 
-  void code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0);
+  void code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
+            int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
   char ask(const char *fmt, ...);
 
   std::string wrap(const std::string &s);
@@ -214,7 +215,8 @@ public:
   void setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints);
   void setCurrentLocation(int64 threadId, BreakPointInfoPtr breakpoint);
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
-  void getListLocation(std::string &file, int &line, int &lineFocus);
+  void getListLocation(std::string &file, int &line, int &lineFocus0,
+                       int &charFocus0, int &lineFocus1, int &charFocus1);
   void setListLocation(const std::string &file, int line);
   void setSourceRoot(const std::string &sourceRoot);
 

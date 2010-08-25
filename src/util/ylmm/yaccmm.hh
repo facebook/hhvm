@@ -209,6 +209,7 @@ namespace
 #define YYLLOC_DEFAULT(current, rhs, n)  \
   current.first((rhs)[1]);               \
   current.last((rhs)[n]);                \
+  _parser->where_rule(current);
 
 //____________________________________________________________________
 /** Scanner interface function (without locations).

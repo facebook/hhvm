@@ -38,6 +38,8 @@ class VariableEnvironment;
 class Location {
 public:
   const char *file;
+  int line0;
+  int char0;
   int line1;
   int char1;
   String toString() const;

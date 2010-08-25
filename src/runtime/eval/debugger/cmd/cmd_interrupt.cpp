@@ -34,7 +34,10 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
   if (m_site) {
     thrift.write(true);
     thrift.write(m_site->getFile());
-    thrift.write(m_site->getLine());
+    thrift.write(m_site->getLine0());
+    thrift.write(m_site->getChar0());
+    thrift.write(m_site->getLine1());
+    thrift.write(m_site->getChar1());
     thrift.write(m_site->getNamespace());
     thrift.write(m_site->getClass());
     thrift.write(m_site->getFunction());
@@ -63,6 +66,9 @@ void CmdInterrupt::recvImpl(DebuggerThriftBuffer &thrift) {
   if (site) {
     thrift.read(m_bpi->m_file);
     thrift.read(m_bpi->m_line1);
+    thrift.read(m_bpi->m_char1);
+    thrift.read(m_bpi->m_line2);
+    thrift.read(m_bpi->m_char2);
     DFunctionInfoPtr func(new DFunctionInfo());
     thrift.read(func->m_namespace);
     thrift.read(func->m_class);
@@ -265,7 +271,7 @@ std::string CmdInterrupt::getFileLine() const {
     if (m_site->getFile()) {
       ret = m_site->getFile();
     }
-    ret += ":" + lexical_cast<string>(m_site->getLine());
+    ret += ":" + lexical_cast<string>(m_site->getLine0());
   }
   return ret;
 }

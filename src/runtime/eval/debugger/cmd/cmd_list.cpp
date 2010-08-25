@@ -153,9 +153,14 @@ bool CmdList::onClient(DebuggerClient *client) {
     }
   }
 
+  int charFocus0 = 0;
+  int lineFocus1 = 0;
+  int charFocus1 = 0;
+
   if (m_file.empty()) {
     int linePrev = 0;
-    client->getListLocation(m_file, linePrev, line);
+    client->getListLocation(m_file, linePrev, line, charFocus0, lineFocus1,
+                            charFocus1);
     if (m_line1 == 0 && m_line2 == 0) {
       m_line1 = linePrev + 1;
       m_line2 = m_line1 + DebuggerClient::CodeBlockSize;
@@ -189,7 +194,8 @@ bool CmdList::onClient(DebuggerClient *client) {
 
   CmdListPtr res = client->xend<CmdList>(this);
   if (res->m_code.isString()) {
-    client->code(res->m_code, line, m_line1, m_line2);
+    client->code(res->m_code, line, m_line1, m_line2, charFocus0, lineFocus1,
+                 charFocus1);
     client->setListLocation(m_file, m_line2);
   } else {
     client->error("Unable to read specified source file location.");

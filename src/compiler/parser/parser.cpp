@@ -116,7 +116,6 @@ StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
 Parser::Parser(Scanner &s, const char *fileName, int fileSize,
                AnalysisResultPtr ar)
   : m_scanner(s), m_ar(ar) {
-  _location = &m_location;
   m_messenger.error_stream(m_err);
   m_messenger.message_stream(m_msg);
   messenger(m_messenger);
@@ -174,19 +173,19 @@ const char *Parser::file() {
 }
 
 int Parser::line0() {
-  return m_location.first_line();
+  return _rule_location.first_line();
 }
 
 int Parser::char0() {
-  return m_location.first_column();
+  return _rule_location.first_column();
 }
 
 int Parser::line1() {
-  return m_location.last_line();
+  return _rule_location.last_line();
 }
 
 int Parser::char1() {
-  return m_location.last_column();
+  return _rule_location.last_column();
 }
 
 int Parser::scan(void *arg /* = NULL */) {

@@ -178,7 +178,7 @@ bool BreakPointInfo::match(InterruptType interrupt, InterruptSite &site) {
       case BreakPointReached:
         return
           Match(site.getFile(), site.getFileLen(), m_file, m_regex, false) &&
-          checkLines(site.getLine()) && checkStack(site) &&
+          checkLines(site.getLine0()) && checkStack(site) &&
           checkUrl(site.url()) && checkFrame(site.getFrame()) && checkClause();
       default:
         break;

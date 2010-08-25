@@ -209,6 +209,7 @@ namespace ylmm
   protected:
     typedef parser_base<Lock> base_type;
     token_type* _token;		/** Address of the current token */
+    location_type  _rule_location; /** Matching rule's location. */
     location_type* _location;	/** The current location. */
   public:
     /** Do-nothing CTOR. */
@@ -245,6 +246,14 @@ namespace ylmm
     /** Set the address of the location information
 	@param loc the address of the location information  */
     void where_addr(location_type* loc) { _location = loc; }
+    /** Set the rule's location information
+	@param loc the location information  */
+    void where_rule(location_type &loc) {
+      if (loc.first_line()) {
+        _rule_location.first(loc.first_line(), loc.first_column());
+      }
+      _rule_location.last(loc.last_line(), loc.last_column());
+    }
     //@}
 
     //@{

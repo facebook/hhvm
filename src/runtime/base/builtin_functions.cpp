@@ -819,20 +819,21 @@ void throw_exception(CObjRef e) {
   throw e;
 }
 
-bool set_line(int line) {
+bool set_line(int line0, int char0 /* = 0 */, int line1 /* = 0 */,
+              int char1 /* = 0 */) {
   ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
   FrameInjection *frame = ti->m_top;
   if (frame) {
-    frame->setLine(line);
+    frame->setLine(line0);
     if (RuntimeOption::EnableDebugger && ti->m_reqInjectionData.debugger) {
-      Eval::InterruptSite site(frame);
+      Eval::InterruptSite site(frame, Object(), char0, line1, char1);
       Eval::Debugger::InterruptFileLine(site);
       if (site.isJumping()) {
         return false;
       }
     }
     if (RuntimeOption::RecordCodeCoverage) {
-      Eval::CodeCoverage::Record(frame->getFileName().data(), line, line);
+      Eval::CodeCoverage::Record(frame->getFileName().data(), line0, line1);
     }
   }
   return true;

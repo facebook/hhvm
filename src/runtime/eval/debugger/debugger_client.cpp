@@ -36,7 +36,7 @@
 using namespace std;
 using namespace HPHP::Util::TextArt;
 
-#define PHP_WORD_BREAK_CHARACTERS " \t\n\"\\'`@>=:;,|{[()]}+*%^!~&"
+#define PHP_WORD_BREAK_CHARACTERS " \t\n\"\\'`@=;,|{[()]}+*%^!~&"
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
@@ -864,13 +864,16 @@ bool DebuggerClient::console() {
 // output functions
 
 void DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
-                          int line2 /* = 0 */) {
+                          int line2 /* = 0 */, int charFocus0 /* = 0 */,
+                          int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   if (line1 == 0 && line2 == 0) {
-    print(highlight_code(source, 0, lineFocus));
+    print(highlight_code(source, 0, lineFocus, charFocus0,
+                         lineFocus1, charFocus1));
     return;
   }
 
-  String highlighted = highlight_php(source, 1, lineFocus);
+  String highlighted = highlight_php(source, 1, lineFocus, charFocus0,
+                                     lineFocus1, charFocus1);
   int line = 1;
   const char *begin = highlighted.data();
   StringBuffer sb;
@@ -1432,10 +1435,15 @@ DThreadInfoPtr DebuggerClient::getThread(int index) const {
 }
 
 void DebuggerClient::getListLocation(std::string &file, int &line,
-                                     int &lineFocus) {
+                                     int &lineFocus0, int &charFocus0,
+                                     int &lineFocus1, int &charFocus1) {
+  lineFocus0 = charFocus0 = lineFocus1 = charFocus1 = 0;
   if (m_listFile.empty() && m_breakpoint) {
     setListLocation(m_breakpoint->m_file, m_breakpoint->m_line1);
-    lineFocus = m_breakpoint->m_line1;
+    lineFocus0 = m_breakpoint->m_line1;
+    charFocus0 = m_breakpoint->m_char1;
+    lineFocus1 = m_breakpoint->m_line2;
+    charFocus1 = m_breakpoint->m_char2;
     if (m_listLine) {
       m_listLine -= CodeBlockSize / 2;
       if (m_listLine < 0) {

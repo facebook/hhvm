@@ -21,7 +21,6 @@
 
 #include <runtime/eval/parser/parser_defines.h>
 #include <util/ylmm/basic_parser.hh>
-#include <util/ylmm/basic_location.hh>
 #include <runtime/eval/parser/scanner.h>
 #include <runtime/eval/base/eval_base.h>
 
@@ -167,7 +166,6 @@ public:
   bool haveFunc() const;
   FunctionStatementPtr peekFunc() const;
 private:
-  ylmm::basic_location m_location;
   std::ostringstream m_err;
   std::ostringstream m_msg;
   ylmm::basic_messenger<ylmm::basic_lock> m_messenger;

@@ -10,7 +10,7 @@ lex.eval_.cpp: hphp.x hphp.tab.cpp
 
 hphp.tab.cpp: hphp.y Makefile
 	@echo "Generating parser code..."
-	$(V)bison -v -d -o $@ -p eval_ $<
+	$(V)bison --locations -v -d -o $@ -p eval_ $<
 	@perl -p -i -n -e "s/union/struct/" $@
 	@perl -p -i -n -e "s/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n/YYSTACK_ALLOC \(YYSTACK_BYTES \(yystacksize\)\);\n        memset(yyptr, 0, YYSTACK_BYTES (yystacksize));\n/" $@
 

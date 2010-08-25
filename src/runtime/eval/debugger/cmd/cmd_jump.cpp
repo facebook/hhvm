@@ -104,7 +104,7 @@ bool CmdJump::onServer(DebuggerProxy *proxy) {
 bool CmdJump::match(InterruptSite *site) {
   if (site) {
     if (m_line) {
-      if (m_line == site->getLine()) {
+      if (m_line == site->getLine0()) {
         const char *file = site->getFile();
         return BreakPointInfo::MatchFile(file, strlen(file), m_file);
       }

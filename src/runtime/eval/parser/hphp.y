@@ -7,7 +7,7 @@ using namespace HPHP::Eval;
 #define YYSTYPE Token
 #define YYSTYPE_IS_TRIVIAL 1
 #define YLMM_PARSER_CLASS Parser
-#define YLMM_LEX_STATIC
+#define YLMM_LEX_STATIC_LOCATION
 #define YYERROR_VERBOSE
 #define YYINITDEPTH 500
 #include <util/ylmm/yaccmm.hh>
@@ -145,7 +145,7 @@ top_statement:
 hphp_declare_list:
     hphp_declare_list ',' hphp_declare
                                        { $$.reset();}
-  | hphp_declare                     { $$.reset();}
+  | hphp_declare                       { $$.reset();}
 ;
 hphp_declare:
     '@' T_STRING                       { _p->addHphpSuppressError($2);}

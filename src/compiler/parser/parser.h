@@ -18,7 +18,6 @@
 #define __HPHP_PARSER_H__
 
 #include <util/ylmm/basic_parser.hh>
-#include <util/ylmm/basic_location.hh>
 #include <compiler/parser/scanner.h>
 #include <compiler/hphp.h>
 #include <compiler/construct.h>
@@ -150,7 +149,6 @@ namespace HPHP {
     void addHphpSuppressError(Token *error);
 
   private:
-    ylmm::basic_location m_location;
     std::ostringstream m_err;
     std::ostringstream m_msg;
     ylmm::basic_messenger<ylmm::basic_lock> m_messenger;

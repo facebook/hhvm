@@ -63,7 +63,8 @@ protected:
   /**
    * Translate a frame pointer to file name and line number pair.
    */
-  static bool Translate(void *bt, Frame * f, Dl_info&, void*) ;
+  static bool Translate(void *bt, Frame * f, Dl_info&, void*,
+                        void *bfds=NULL, unsigned bfd_size=0) ;
 
   /**
    * Run addr2line to translate a function pointer into function name and line
@@ -71,7 +72,8 @@ protected:
    */
 
   static bool Addr2line(const char *filename, const char *address,
-                        Frame* frame, void *addr2line_data);
+                        Frame* frame, void *addr2line_data,
+                        void* bfds, unsigned bfds_size);
 
 
   static const unsigned int MAXFRAME = 175;
@@ -180,7 +182,8 @@ private:
   /**
    * Translate a frame pointer to file name and line number pair.
    */
-  static bool Translate(int fd, void *bt, int frame_num) ;
+  static bool Translate(int fd, void *bt, int frame_num, void *,
+                        unsigned int bfds_size) ;
 
   /**
    * Demangle a function name.

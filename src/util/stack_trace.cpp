@@ -97,6 +97,29 @@ static void bt_handler(int sig) {
   // to terminate the process.
   raise(sig);
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// Types
+struct bfd_cache {
+  bfd_cache() : abfd(NULL) {}
+  bfd *abfd;
+  asymbol **syms;
+
+  ~bfd_cache() {
+    if (abfd) {
+      bfd_cache_close(abfd);
+      bfd_free_cached_info(abfd);
+      bfd_close_all_done(abfd);
+    }
+  }
+};
+
+static const int MaxKey = 100;
+struct NamedBfd {
+  bfd_cache bc;
+  char key [MaxKey] ;
+};
+
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
@@ -214,12 +237,19 @@ const std::string &StackTrace::toString() const {
 }
 
 void StackTraceNoHeap::printStackTrace(int fd) const {
+
   int frame = 0;
+  // m_btpointers_cnt must be an upper bound on the number of filenames
+  // then *2 for tolerable hash table behavior
+  unsigned int bfds_size = m_btpointers_cnt * 2;
+  NamedBfd bfds[bfds_size];
+  for (unsigned int i = 0; i < bfds_size; i++) bfds[i].key[0]='\0';
   for (unsigned int i = 0; i < m_btpointers_cnt; i++) {
-    if (Translate(fd, m_btpointers[i], frame)) {
+    if (Translate(fd, m_btpointers[i], frame, bfds, bfds_size)) {
       frame++;
     }
   }
+  // ~bfds[i].bc here (unlike the heap case)
 }
 
 void StackTrace::get(FramePtrVec &frames) const {
@@ -302,7 +332,8 @@ struct addr2line_data {
 
 
 bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
-                               Dl_info &dlInfo, void* data) {
+                               Dl_info &dlInfo, void* data,
+                               void *bfds, unsigned bfds_size) {
   char sframe[32];
   snprintf(sframe, sizeof(sframe), "%p", frame);
 
@@ -316,14 +347,14 @@ bool StackTraceBase::Translate(void *frame, StackTraceBase::Frame * f,
   if (dlInfo.dli_fname) {
 
     // 1st attempt without offsetting base address
-    if (!Addr2line(dlInfo.dli_fname, sframe, f, data) &&
+    if (!Addr2line(dlInfo.dli_fname, sframe, f, data, bfds, bfds_size) &&
         dlInfo.dli_fname && strstr(dlInfo.dli_fname,".so")) {
       // offset shared lib's base address
       frame = (char*)frame - (size_t)dlInfo.dli_fbase;
       snprintf(sframe, sizeof(sframe), "%p", frame);
 
       // Use addr2line to get line number info.
-      Addr2line(dlInfo.dli_fname, sframe, f, data);
+      Addr2line(dlInfo.dli_fname, sframe, f, data, bfds, bfds_size);
     }
   }
   return true;
@@ -353,12 +384,14 @@ StackTrace::FramePtr StackTrace::Translate(void *frame) {
   return f;
 }
 
-bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num) {
+bool StackTraceNoHeap::Translate(int fd, void *frame, int frame_num,
+                                 void *bfds, unsigned bfds_size) {
   // frame pointer offset in previous frame
   Dl_info dlInfo;
   addr2line_data adata;
   Frame f(frame);
-  if (!StackTraceBase::Translate(frame, &f, dlInfo, &adata))  {
+  if (!StackTraceBase::Translate(frame, &f, dlInfo, &adata, bfds,
+                                 bfds_size))  {
     return false;
   }
 
@@ -447,66 +480,81 @@ static bool translate_addresses(bfd *abfd, const char *addr,
 // We cache opened bfd file pointers that in turn cached frame pointer lookup
 // tables.
 
-struct bfd_cache {
-  bfd *abfd;
-  asymbol **syms;
 
-  ~bfd_cache() {
-    if (abfd) {
-      bfd_cache_close(abfd);
-      bfd_free_cached_info(abfd);
-      bfd_close_all_done(abfd);
-    }
-  }
-};
 typedef boost::shared_ptr<bfd_cache> bfd_cache_ptr;
 typedef __gnu_cxx::hash_map<std::string, bfd_cache_ptr, string_hash> bfdMap;
 static Mutex s_bfdMutex;
 static bfdMap s_bfds;
 
-static const int maxFilenames = 100;
-static bfd_cache_ptr bfdSlots[maxFilenames];
+static bool fill_bfd_cache(const char *filename, bfd_cache *p) {
+  bfd *abfd = bfd_openr(filename, NULL); // hard to avoid heap here!
+  if (!abfd) return true;
+  p->abfd = abfd;
+  p->syms = NULL;
+  char **match;
+  if (bfd_check_format(abfd, bfd_archive) ||
+      !bfd_check_format_matches(abfd, bfd_object, &match) ||
+      !slurp_symtab(&p->syms, abfd)) {
+    bfd_close(abfd);
+    return true;
+  }
+  return false;
+}
 
 static bfd_cache_ptr get_bfd_cache(const char *filename) {
   bfdMap::const_iterator iter = s_bfds.find(filename);
-//hash_string(filename);
   if (iter != s_bfds.end()) {
     return iter->second;
   }
-  bfd_cache_ptr p(new bfd_cache()); // FIXME
-  bfd *abfd = bfd_openr(filename, NULL);
-  if (abfd) {
-    p->abfd = abfd;
-    p->syms = NULL;
-    char **match;
-    if (bfd_check_format(abfd, bfd_archive) ||
-        !bfd_check_format_matches(abfd, bfd_object, &match) ||
-        !slurp_symtab(&p->syms, abfd)) {
-      bfd_close(abfd);
-      p.reset();
-    }
-  } else {
+  bfd_cache_ptr p(new bfd_cache());
+  if (fill_bfd_cache(filename, p.get())) {
     p.reset();
   }
-  s_bfds[filename] = p;//  ****
+  s_bfds[filename] = p;
+  return p;
+}
+
+static bfd_cache * get_bfd_cache(const char *filename, NamedBfd* bfds,
+                                   int bfds_size) {
+  int probe = hash_string(filename) % bfds_size;
+  // match on the end of filename instead of the beginning, if necessary
+  int tooLong = strlen(filename) - MaxKey;
+  if (tooLong > 0) filename += tooLong;
+  while (bfds[probe].key[0]
+         && strncmp(filename, bfds[probe].key, MaxKey) != 0) {
+     probe = probe ? probe-1 : bfds_size-1;
+  }
+  bfd_cache *p = &bfds[probe].bc;
+  if (bfds[probe].key[0]) return p;
+  // accept the rare collision on keys (requires probe collision too)
+  strncpy(bfds[probe].key, filename, MaxKey);
+  fill_bfd_cache(filename, p);
   return p;
 }
 
 bool StackTraceBase::Addr2line(const char *filename, const char *address,
-                           Frame *frame, void *adata) {
+                           Frame *frame, void *adata,
+                           void *bfds, unsigned bfds_size) {
   Lock lock(s_bfdMutex);
   addr2line_data *data = reinterpret_cast<addr2line_data*>(adata);
-  //bfd_cache p;
-  //get_bfd_cache(filename, &p);
-  bfd_cache_ptr p = get_bfd_cache(filename);
-  if (!p) return false;
-
-
   data->filename = NULL;
   data->functionname = NULL;
   data->line = 0;
-  data->syms = p->syms;
-  bool ret = translate_addresses(p->abfd, address, data);
+  bool ret;
+
+  if (!bfds) {
+    bfd_cache_ptr p = get_bfd_cache(filename);
+    if (!p) return false;
+    data->syms = p->syms;
+    ret = translate_addresses(p->abfd, address, data);
+  } else {
+    // don't let bfd_cache_ptr malloc behind the scenes in this case
+    bfd_cache *q = get_bfd_cache(filename, (NamedBfd*)bfds, bfds_size);
+    if (!q) return false;
+    data->syms = q->syms;
+    ret = translate_addresses(q->abfd, address, data);
+  }
+
   if (ret) {
     frame->lineno = data->line;
   }

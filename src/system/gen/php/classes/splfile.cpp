@@ -3793,7 +3793,7 @@ int64 c_splfileobject::t_fpassthru() {
 /* SRC: classes/splfile.php line 578 */
 Variant c_splfileobject::t_fscanf(CVarRef v_format) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fscanf);
-  return invoke("hphp_splfileobject_fscanf", Array(ArrayInit(1, true).setRef(0, toInt64(GET_THIS())).create()), 0x6DB71D850799D76ELL);
+  return invoke("hphp_splfileobject_fscanf", Array(ArrayInit(1, true).setRef(toInt64(GET_THIS())).create()), 0x6DB71D850799D76ELL);
 } /* function */
 /* SRC: classes/splfile.php line 604 */
 int64 c_splfileobject::t_fseek(CVarRef v_offset, CVarRef v_whence) {

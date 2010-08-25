@@ -38,14 +38,14 @@ bool TestLogger::initializeRun() {
   hostname = buf;
 
   ArrayInit data(8, false);
-  data.set(0, "startedTime",  time(NULL));
-  data.set(1, "stillRunning", true);
-  data.set(2, "hostname",     hostname);
-  data.set(3, "username",     getpwuid(getuid())->pw_name);
-  data.set(4, "repository",   getRepoRoot());
-  data.set(5, "svnRevision",  getSVNRevision());
-  data.set(6, "gitRevision",  getGitRevision());
-  data.set(7, "tags",         CREATE_VECTOR2("hphp", "c++"));
+  data.set("startedTime",  time(NULL));
+  data.set("stillRunning", true);
+  data.set("hostname",     hostname);
+  data.set("username",     getpwuid(getuid())->pw_name);
+  data.set("repository",   getRepoRoot());
+  data.set("svnRevision",  getSVNRevision());
+  data.set("gitRevision",  getGitRevision());
+  data.set("tags",         CREATE_VECTOR2("hphp", "c++"));
 
   Array dataArr(data.create());
 

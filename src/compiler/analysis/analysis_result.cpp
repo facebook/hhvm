@@ -2583,14 +2583,6 @@ void AnalysisResult::outputCPPScalarArrayInit(CodeGenerator &cg, int fileCount,
             name->outputCPP(cg, ar);
             cg_printf(", ");
             value->outputCPP(cg, ar);
-            ScalarExpressionPtr sc =
-              dynamic_pointer_cast<ScalarExpression>(name);
-            if (sc) {
-              int64 hash = sc->getHash();
-              if (hash >= 0) {
-                cg_printf(", 0x%016llXLL", hash);
-              }
-            }
             cg_printf(");");
           } else {
             cg_printf("%s[%d].append(", prefix, exp.id);

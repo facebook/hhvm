@@ -79,19 +79,17 @@ inline bool empty(CArrRef v) { return !toBoolean(v);}
 inline bool empty(CObjRef v) { return !toBoolean(v);}
 inline bool empty(CVarRef v) { return !toBoolean(v);}
 
-bool empty(CVarRef v, bool    offset, int64 prehash = -1);
-bool empty(CVarRef v, char    offset, int64 prehash = -1);
-bool empty(CVarRef v, short   offset, int64 prehash = -1);
-bool empty(CVarRef v, int     offset, int64 prehash = -1);
-bool empty(CVarRef v, int64   offset, int64 prehash = -1);
-bool empty(CVarRef v, double  offset, int64 prehash = -1);
-bool empty(CVarRef v, CArrRef offset, int64 prehash = -1);
-bool empty(CVarRef v, CObjRef offset, int64 prehash = -1);
-bool empty(CVarRef v, CVarRef offset, int64 prehash = -1);
-bool empty(CVarRef v, litstr  offset, int64 prehash = -1,
-           bool isString = false);
-bool empty(CVarRef v, CStrRef offset, int64 prehash = -1,
-           bool isString = false);
+bool empty(CVarRef v, bool    offset);
+bool empty(CVarRef v, char    offset);
+bool empty(CVarRef v, short   offset);
+bool empty(CVarRef v, int     offset);
+bool empty(CVarRef v, int64   offset);
+bool empty(CVarRef v, double  offset);
+bool empty(CVarRef v, CArrRef offset);
+bool empty(CVarRef v, CObjRef offset);
+bool empty(CVarRef v, CVarRef offset);
+bool empty(CVarRef v, litstr  offset, bool isString = false);
+bool empty(CVarRef v, CStrRef offset, bool isString = false);
 
 inline char toByte(bool    v) { return v ? 1 : 0;}
 inline char toByte(char    v) { return v;}
@@ -500,19 +498,17 @@ String getUndefinedConstant(CStrRef name);
 
 inline bool isset(CVarRef v) { return !v.isNull();}
 inline bool isset(CObjRef v) { return !v.isNull();}
-bool isset(CVarRef v, bool    offset, int64 prehash = -1);
-bool isset(CVarRef v, char    offset, int64 prehash = -1);
-bool isset(CVarRef v, short   offset, int64 prehash = -1);
-bool isset(CVarRef v, int     offset, int64 prehash = -1);
-bool isset(CVarRef v, int64   offset, int64 prehash = -1);
-bool isset(CVarRef v, double  offset, int64 prehash = -1);
-bool isset(CVarRef v, CArrRef offset, int64 prehash = -1);
-bool isset(CVarRef v, CObjRef offset, int64 prehash = -1);
-bool isset(CVarRef v, CVarRef offset, int64 prehash = -1);
-bool isset(CVarRef v, litstr  offset, int64 prehash = -1,
-           bool isString = false);
-bool isset(CVarRef v, CStrRef offset, int64 prehash = -1,
-           bool isString = false);
+bool isset(CVarRef v, bool    offset);
+bool isset(CVarRef v, char    offset);
+bool isset(CVarRef v, short   offset);
+bool isset(CVarRef v, int     offset);
+bool isset(CVarRef v, int64   offset);
+bool isset(CVarRef v, double  offset);
+bool isset(CVarRef v, CArrRef offset);
+bool isset(CVarRef v, CObjRef offset);
+bool isset(CVarRef v, CVarRef offset);
+bool isset(CVarRef v, litstr  offset, bool isString = false);
+bool isset(CVarRef v, CStrRef offset, bool isString = false);
 
 inline Variant unset(Variant &v)               { v.unset();   return null;}
 inline Variant unset(const ObjectOffset &v)    { v.unset();   return null;}
@@ -548,13 +544,13 @@ inline String  &lval(const StringOffset  &v) { return v.lval();}
 inline Variant &lval(const ObjectOffset  &v) { return v.lval();}
 
 template<class T>
-Variant &unsetLval(Variant &v, const T &key, int64 prehash = -1) {
+Variant &unsetLval(Variant &v, const T &key) {
   if (v.isNull()) {
     return v;
   }
   if (v.is(KindOfArray)) {
-    if (v.toArray().exists(key, prehash)) {
-      return v.lvalAt(key, prehash);
+    if (v.toArray().exists(key)) {
+      return v.lvalAt(key);
     }
     return Variant::lvalBlackHole();
   }
@@ -562,9 +558,9 @@ Variant &unsetLval(Variant &v, const T &key, int64 prehash = -1) {
 }
 
 template<class T>
-Variant &unsetLval(Array &v, const T &key, int64 prehash = -1) {
-  if (!v.isNull() && v.exists(key, prehash)) {
-    return v.lvalAt(key, prehash);
+Variant &unsetLval(Array &v, const T &key) {
+  if (!v.isNull() && v.exists(key)) {
+    return v.lvalAt(key);
   }
   return Variant::lvalBlackHole();
 }

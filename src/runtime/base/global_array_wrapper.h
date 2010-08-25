@@ -51,43 +51,39 @@ public:
   }
   virtual bool supportValueRef() const { return true; }
 
-  virtual bool exists(int64   k, int64 prehash = -1) const {
-    return exists(Variant(k), prehash);
+  virtual bool exists(int64   k) const {
+    return exists(Variant(k));
   }
-  virtual bool exists(litstr  k, int64 prehash = -1) const {
-    return exists(Variant(k), prehash);
+  virtual bool exists(litstr  k) const {
+    return exists(Variant(k));
   }
-  virtual bool exists(CStrRef k, int64 prehash = -1) const {
-    return exists(Variant(k), prehash);
+  virtual bool exists(CStrRef k) const {
+    return exists(Variant(k));
   }
-  virtual bool exists(CVarRef k, int64 prehash = -1) const {
+  virtual bool exists(CVarRef k) const {
     return m_globals->exists(k.toString().data());
   }
   virtual bool idxExists(ssize_t idx) const {
     return idx < size();
   }
 
-  virtual Variant get(int64   k, int64 prehash = -1,
-                      bool error = false) const {
-    return get(Variant(k), prehash);
+  virtual Variant get(int64   k, bool error = false) const {
+    return get(Variant(k));
   }
-  virtual Variant get(litstr  k, int64 prehash = -1,
-                      bool error = false) const {
-    if (exists(k, prehash)) {
+  virtual Variant get(litstr  k, bool error = false) const {
+    if (exists(k)) {
       return m_globals->get(k);
     }
     return Variant();
   }
-  virtual Variant get(CStrRef k, int64 prehash = -1,
-                      bool error = false) const {
-    if (exists(k, prehash)) {
+  virtual Variant get(CStrRef k, bool error = false) const {
+    if (exists(k)) {
       return m_globals->get(k);
     }
     return Variant();
   }
-  virtual Variant get(CVarRef k, int64 prehash = -1,
-                      bool error = false) const {
-    if (exists(k, prehash)) {
+  virtual Variant get(CVarRef k, bool error = false) const {
+    if (exists(k)) {
       return m_globals->get(k);
     }
     return Variant();
@@ -101,74 +97,72 @@ public:
     }
   }
 
-  virtual ssize_t getIndex(int64 k, int64 prehash = -1) const {
-    return m_globals->getIndex(toString(k), prehash);
+  virtual ssize_t getIndex(int64 k) const {
+    String s = toString(k);
+    return m_globals->getIndex(s.data(), s->hash());
   }
-  virtual ssize_t getIndex(litstr k, int64 prehash = -1) const {
-    return m_globals->getIndex(k, prehash);
+  virtual ssize_t getIndex(litstr k) const {
+    String s(k, AttachLiteral);
+    return m_globals->getIndex(k, s->hash());
   }
-  virtual ssize_t getIndex(CStrRef k, int64 prehash = -1) const {
-    return m_globals->getIndex(k.data(), prehash);
+  virtual ssize_t getIndex(CStrRef k) const {
+    return m_globals->getIndex(k.data(), k->hash());
   }
-  virtual ssize_t getIndex(CVarRef k, int64 prehash = -1) const;
+  virtual ssize_t getIndex(CVarRef k) const;
 
   virtual ArrayData *lval(Variant *&ret, bool copy) {
     ret = &m_globals->lval();
     return NULL;
   }
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) {
+                          bool checkExist = false) {
     return lval(Variant(k), ret, copy);
   }
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) {
+                          bool checkExist = false) {
     ret = &m_globals->get(k);
     return NULL;
   }
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) {
+                          bool checkExist = false) {
     ret = &m_globals->get(k);
     return NULL;
   }
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) {
+                          bool checkExist = false) {
     ret = &m_globals->get(k);
     return NULL;
   }
 
-  virtual ArrayData *set(int64   k, CVarRef v,
-                         bool copy, int64 prehash = -1) {
-    set(Variant(k), v, copy, prehash);
+  virtual ArrayData *set(int64   k, CVarRef v, bool copy) {
+    set(Variant(k), v, copy);
     return NULL;
   }
-  virtual ArrayData *set(litstr  k, CVarRef v,
-                         bool copy, int64 prehash = -1) {
+  virtual ArrayData *set(litstr  k, CVarRef v, bool copy) {
     m_globals->get(k) = v;
     return NULL;
   }
-  virtual ArrayData *set(CStrRef k, CVarRef v,
-                         bool copy, int64 prehash = -1) {
+  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) {
     m_globals->get(k) = v;
     return NULL;
   }
-  virtual ArrayData *set(CVarRef k, CVarRef v,
-                         bool copy, int64 prehash = -1) {
+  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) {
     m_globals->get(k) = v;
     return NULL;
   }
 
-  virtual ArrayData *remove(int64   k, bool copy, int64 prehash /* = -1 */) {
-    return remove(Variant(k), copy, prehash);
+  virtual ArrayData *remove(int64   k, bool copy) {
+    return remove(Variant(k), copy);
   }
-  virtual ArrayData *remove(litstr  k, bool copy, int64 prehash /* = -1 */) {
+  virtual ArrayData *remove(litstr  k, bool copy) {
     unset(m_globals->get(k));
     return NULL;
   }
-  virtual ArrayData *remove(CStrRef k, bool copy, int64 prehash /* = -1 */) {
+  virtual ArrayData *remove(CStrRef k, bool copy) {
     unset(m_globals->get(k));
     return NULL;
   }
-  virtual ArrayData *remove(CVarRef k, bool copy, int64 prehash /* = -1 */) {
+  virtual ArrayData *remove(CVarRef k, bool copy) {
     unset(m_globals->get(k));
     return NULL;
   }

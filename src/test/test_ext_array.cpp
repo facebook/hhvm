@@ -233,8 +233,8 @@ bool TestExtArray::test_array_fill() {
 
 bool TestExtArray::test_array_filter() {
   Array array1 = CREATE_MAP5("a", 1, "b", 2, "c", 3, "d", 4, "e", 5);
-  Array array2(ArrayInit(7, true).set(0, 6).set(1, 7).set(2, 8).set(3, 9).
-                                  set(4, 10).set(5, 11).set(6, 12).create());
+  Array array2(ArrayInit(7, true).set(6).set(7).set(8).set(9).
+                                  set(10).set(11).set(12).create());
 
   VS(f_print_r(f_array_filter(array1, "odd"), true),
      "Array\n"
@@ -386,14 +386,14 @@ bool TestExtArray::test_array_merge_recursive() {
   }
   {
     Array ar1(ArrayInit(2, false).
-              set(0, "color", CREATE_MAP1("favorite", "red")).
+              set("color", CREATE_MAP1("favorite", "red")).
               set(1, 5).
               create());
 
-    Array ar2(ArrayInit(2, false).set(0, 10).
-              set(1, "color", Array(ArrayInit(2, false).
-                                    set(0, "favorite", "green").
-                                    set(1, "blue").create())).
+    Array ar2(ArrayInit(2, false).set(10).
+              set("color", Array(ArrayInit(2, false).
+                                 set("favorite", "green").
+                                 set("blue").create())).
               create());
 
     Array result = f_array_merge_recursive(2, ar1, CREATE_VECTOR1(ar2));
@@ -421,12 +421,12 @@ bool TestExtArray::test_array_merge_recursive() {
 
 bool TestExtArray::test_array_merge() {
   {
-    Array array1(ArrayInit(3, false).set(0, "color", "red").
-                                     set(1, 2).set(2, 4).create());
-    Array array2(ArrayInit(5, false).set(0, "a").set(1, "b").
-                                     set(2, "color", "green").
-                                     set(3, "shape", "trapezoid").
-                                     set(4, 4).create());
+    Array array1(ArrayInit(3, false).set("color", "red").
+                                     set(2).set(4).create());
+    Array array2(ArrayInit(5, false).set("a").set("b").
+                                     set("color", "green").
+                                     set("shape", "trapezoid").
+                                     set(4).create());
     Array result = f_array_merge(2, array1, CREATE_VECTOR1(array2));
     VS(f_print_r(result, true),
        "Array\n"
@@ -506,14 +506,14 @@ bool TestExtArray::test_array_merge() {
 
 bool TestExtArray::test_array_replace_recursive() {
   Array ar1(ArrayInit(2, false).
-            set(0, "color", CREATE_MAP1("favorite", "red")).
-            set(1, 5).create());
+            set("color", CREATE_MAP1("favorite", "red")).
+            set(5).create());
 
   Array ar2(ArrayInit(2, false).
-            set(0, 10).
-            set(1, "color", Array(ArrayInit(2, false).
-                                  set(0, "favorite", "green").
-                                  set(1, "blue").create())).
+            set(10).
+            set("color", Array(ArrayInit(2, false).
+                               set("favorite", "green").
+                               set("blue").create())).
             create());
 
   Array result = f_array_replace_recursive(2, ar1, CREATE_VECTOR1(ar2));
@@ -533,12 +533,12 @@ bool TestExtArray::test_array_replace_recursive() {
 
 bool TestExtArray::test_array_replace() {
   {
-    Array array1(ArrayInit(3, false).set(0, "color", "red").
-                                     set(1, 2).set(2, 4).create());
-    Array array2(ArrayInit(5, false).set(0, "a").set(1, "b").
-                                     set(2, "color", "green").
-                                     set(3, "shape", "trapezoid").
-                                     set(4, 4).create());
+    Array array1(ArrayInit(3, false).set("color", "red").
+                                     set(2).set(4).create());
+    Array array2(ArrayInit(5, false).set("a").set("b").
+                                     set("color", "green").
+                                     set("shape", "trapezoid").
+                                     set(4).create());
     Array result = f_array_replace(2, array1, CREATE_VECTOR1(array2));
     VS(f_print_r(result, true),
        "Array\n"
@@ -681,8 +681,8 @@ bool TestExtArray::test_array_pad() {
      CREATE_VECTOR5(12, 10, 9, 0, 0));
 
   VS(f_array_pad(input, -7, -1),
-     Array(ArrayInit(7, true).set(0, -1).set(1, -1).set(2, -1).set(3, -1).
-                              set(4, 12).set(5, 10).set(6, 9).create()));
+     Array(ArrayInit(7, true).set(-1).set(-1).set(-1).set(-1).
+                              set(12).set(10).set(9).create()));
 
   VS(f_array_pad(input, 2, "noop"), input);
 
@@ -967,8 +967,8 @@ bool TestExtArray::test_array_sum() {
 bool TestExtArray::test_array_unique() {
   {
     Array input(ArrayInit(5, false).
-                set(0, "a", "green").set(1, "red").set(2, "b", "green").
-                set(3, "blue").set(4, "red").create());
+                set("a", "green").set("red").set("b", "green").
+                set("blue").set("red").create());
     Array result = f_array_unique(input);
     VS(f_print_r(result, true),
        "Array\n"
@@ -979,8 +979,8 @@ bool TestExtArray::test_array_unique() {
        ")\n");
   }
   {
-    Array input(ArrayInit(6, true).set(0, 4).set(1, "4").set(2, "3").
-                                   set(3, 4).set(4, 3).set(5, "3").create());
+    Array input(ArrayInit(6, true).set(4).set("4").set("3").
+                                   set(4).set(3).set("3").create());
     Array result = f_array_unique(input);
     VS(f_print_r(result, true),
        "Array\n"
@@ -1346,10 +1346,10 @@ bool TestExtArray::test_range() {
 }
 
 bool TestExtArray::test_array_diff() {
-  Array array1(ArrayInit(4, false).set(0, "a", "green").set(1, "red").
-                                   set(2, "blue").set(3, "red").create());
-  Array array2(ArrayInit(3, false).set(0, "b", "green").set(1, "yellow").
-                                   set(2, "red").create());
+  Array array1(ArrayInit(4, false).set("a", "green").set("red").
+                                   set("blue").set("red").create());
+  Array array2(ArrayInit(3, false).set("b", "green").set("yellow").
+                                   set("red").create());
   Array result = f_array_diff(2, array1, array2);
   VS(f_print_r(result, true),
      "Array\n"
@@ -1381,13 +1381,13 @@ bool TestExtArray::test_array_udiff() {
 
 bool TestExtArray::test_array_diff_assoc() {
   {
-    Array array1(ArrayInit(4, false).set(0, "a", "green").
-                                     set(1, "b", "brown").
-                                     set(2, "c", "blue").
-                                     set(3, "red").create());
-    Array array2(ArrayInit(3, false).set(0, "a", "green").
-                                     set(1, "yellow").
-                                     set(2, "red").create());
+    Array array1(ArrayInit(4, false).set("a", "green").
+                                     set("b", "brown").
+                                     set("c", "blue").
+                                     set("red").create());
+    Array array2(ArrayInit(3, false).set("a", "green").
+                                     set("yellow").
+                                     set("red").create());
     Array result = f_array_diff_assoc(2, array1, array2);
     VS(f_print_r(result, true),
        "Array\n"
@@ -1413,13 +1413,13 @@ bool TestExtArray::test_array_diff_assoc() {
 
 bool TestExtArray::test_array_diff_uassoc() {
   {
-    Array array1(ArrayInit(4, false).set(0, "a", "green").
-                                     set(1, "b", "brown").
-                                     set(2, "c", "blue").
-                                     set(3, "red").create());
-    Array array2(ArrayInit(3, false).set(0, "a", "green").
-                                     set(1, "yellow").
-                                     set(2, "red").create());
+    Array array1(ArrayInit(4, false).set("a", "green").
+                                     set("b", "brown").
+                                     set("c", "blue").
+                                     set("red").create());
+    Array array2(ArrayInit(3, false).set("a", "green").
+                                     set("yellow").
+                                     set("red").create());
     Array result = f_array_diff_uassoc(3, array1, array2, "comp_func");
     VS(f_print_r(result, true),
        "Array\n"
@@ -1480,26 +1480,26 @@ bool TestExtArray::test_array_diff_ukey() {
 }
 
 bool TestExtArray::test_array_intersect() {
-  Array array1(ArrayInit(3, false).set(0, "a", "green").
-                                   set(1, "red").
-                                   set(2, "blue").create());
-  Array array2(ArrayInit(3, false).set(0, "b", "green").
-                                   set(1, "yellow").
-                                   set(2, "red").create());
+  Array array1(ArrayInit(3, false).set("a", "green").
+                                   set("red").
+                                   set("blue").create());
+  Array array2(ArrayInit(3, false).set("b", "green").
+                                   set("yellow").
+                                   set("red").create());
   VS(f_array_intersect(2, array1, array2),
      CREATE_MAP2("a", "green", "0", "red"));
   return Count(true);
 }
 
 bool TestExtArray::test_array_uintersect() {
-  Array array1(ArrayInit(4, false).set(0, "a", "green").
-                                   set(1, "b", "brown").
-                                   set(2, "c", "blue").
-                                   set(3, "red").create());
-  Array array2(ArrayInit(4, false).set(0, "a", "GREEN").
-                                   set(1, "B", "brown").
-                                   set(2, "yellow").
-                                   set(3, "red").create());
+  Array array1(ArrayInit(4, false).set("a", "green").
+                                   set("b", "brown").
+                                   set("c", "blue").
+                                   set("red").create());
+  Array array2(ArrayInit(4, false).set("a", "GREEN").
+                                   set("B", "brown").
+                                   set("yellow").
+                                   set("red").create());
   VS(f_print_r(f_array_uintersect(3, array1, array2, "strcasecmp"), true),
      "Array\n"
      "(\n"
@@ -1512,54 +1512,54 @@ bool TestExtArray::test_array_uintersect() {
 }
 
 bool TestExtArray::test_array_intersect_assoc() {
-  Array array1(ArrayInit(4, false).set(0, "a", "green").
-                                   set(1, "b", "brown").
-                                   set(2, "c", "blue").
-                                   set(3, "red").create());
-  Array array2(ArrayInit(3, false).set(0, "a", "green").
-                                   set(1, "yellow").
-                                   set(2, "red").create());
+  Array array1(ArrayInit(4, false).set("a", "green").
+                                   set("b", "brown").
+                                   set("c", "blue").
+                                   set("red").create());
+  Array array2(ArrayInit(3, false).set("a", "green").
+                                   set("yellow").
+                                   set("red").create());
   VS(f_array_intersect_assoc(2, array1, array2), CREATE_MAP1("a", "green"));
   return Count(true);
 }
 
 bool TestExtArray::test_array_intersect_uassoc() {
-  Array array1(ArrayInit(4, false).set(0, "a", "green").
-                                   set(1, "b", "brown").
-                                   set(2, "c", "blue").
-                                   set(3, "red").create());
-  Array array2(ArrayInit(4, false).set(0, "a", "GREEN").
-                                   set(1, "B", "brown").
-                                   set(2, "yellow").
-                                   set(3, "red").create());
+  Array array1(ArrayInit(4, false).set("a", "green").
+                                   set("b", "brown").
+                                   set("c", "blue").
+                                   set("red").create());
+  Array array2(ArrayInit(4, false).set("a", "GREEN").
+                                   set("B", "brown").
+                                   set("yellow").
+                                   set("red").create());
   VS(f_array_intersect_uassoc(3, array1, array2, "strcasecmp"),
      CREATE_MAP1("b", "brown"));
   return Count(true);
 }
 
 bool TestExtArray::test_array_uintersect_assoc() {
-  Array array1(ArrayInit(4, false).set(0, "a", "green").
-                                   set(1, "b", "brown").
-                                   set(2, "c", "blue").
-                                   set(3, "red").create());
-  Array array2(ArrayInit(4, false).set(0, "a", "GREEN").
-                                   set(1, "B", "brown").
-                                   set(2, "yellow").
-                                   set(3, "red").create());
+  Array array1(ArrayInit(4, false).set("a", "green").
+                                   set("b", "brown").
+                                   set("c", "blue").
+                                   set("red").create());
+  Array array2(ArrayInit(4, false).set("a", "GREEN").
+                                   set("B", "brown").
+                                   set("yellow").
+                                   set("red").create());
   VS(f_array_uintersect_assoc(3, array1, array2, "strcasecmp"),
      CREATE_MAP1("a", "green"));
   return Count(true);
 }
 
 bool TestExtArray::test_array_uintersect_uassoc() {
-  Array array1(ArrayInit(4, false).set(0, "a", "green").
-                                   set(1, "b", "brown").
-                                   set(2, "c", "blue").
-                                   set(3, "red").create());
-  Array array2(ArrayInit(4, false).set(0, "a", "GREEN").
-                                   set(1, "B", "brown").
-                                   set(2, "yellow").
-                                   set(3, "red").create());
+  Array array1(ArrayInit(4, false).set("a", "green").
+                                   set("b", "brown").
+                                   set("c", "blue").
+                                   set("red").create());
+  Array array2(ArrayInit(4, false).set("a", "GREEN").
+                                   set("B", "brown").
+                                   set("yellow").
+                                   set("red").create());
   VS(f_array_uintersect_uassoc(4, array1, array2, "strcasecmp", "strcasecmp"),
      CREATE_MAP2("a", "green", "b", "brown"));
   return Count(true);

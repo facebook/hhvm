@@ -16,7 +16,6 @@
 
 #include <compiler/expression/array_pair_expression.h>
 #include <compiler/expression/scalar_expression.h>
-#include <util/hash.h>
 
 using namespace HPHP;
 using namespace boost;
@@ -156,14 +155,7 @@ void ArrayPairExpression::outputCPPImpl(CodeGenerator &cg,
   }
   m_value->outputCPP(cg, ar);
   if (m_name) {
-    ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(m_name);
-    if (sc) {
-      int64 hash = sc->getHash();
-      if (hash >= 0) {
-        cg_printf(", 0x%016llXLL", hash);
-      }
-      if (keyConverted) cg_printf(", true");
-    }
+    if (keyConverted) cg_printf(", true");
   }
 }
 
@@ -183,14 +175,7 @@ void ArrayPairExpression::outputCPPControlledEval(CodeGenerator &cg,
     cg_printf("%s%d", Option::EvalOrderTempPrefix, temp);
   }
   if (m_name) {
-    ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(m_name);
-    if (sc) {
-      int64 hash = sc->getHash();
-      if (hash >= 0) {
-        cg_printf(", 0x%016llXLL", hash);
-      }
-      if (keyConverted) cg_printf(", true");
-    }
+    if (keyConverted) cg_printf(", true");
   }
 }
 

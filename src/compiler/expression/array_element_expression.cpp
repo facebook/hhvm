@@ -384,19 +384,6 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
       }
       m_offset->outputCPP(cg, ar);
       if (!type || !type->is(Type::KindOfString)) {
-        bool prehashed = false;
-        ScalarExpressionPtr sc =
-          dynamic_pointer_cast<ScalarExpression>(m_offset);
-        if (sc) {
-          int64 hash = sc->getHash();
-          if (hash >= 0) {
-            cg_printf(", 0x%016llXLL", hash);
-            prehashed = true;
-          }
-        }
-        if (!prehashed) {
-          cg_printf(", -1");
-        }
         if (rvalAt) {
           if (!hasContext(ExistContext)) {
             cg_printf(", true"); // raise undefined index error
@@ -411,6 +398,8 @@ void ArrayElementExpression::outputCPPImpl(CodeGenerator &cg,
             cg_printf(", false");
           }
         }
+        ScalarExpressionPtr sc =
+          dynamic_pointer_cast<ScalarExpression>(m_offset);
         if (!hasContext(UnsetContext) && sc && sc->isLiteralString()) {
           String s(sc->getLiteralString());
           int64 n;
@@ -452,10 +441,6 @@ void ArrayElementExpression::outputCPPExistTest(CodeGenerator &cg,
     ScalarExpressionPtr sc =
       dynamic_pointer_cast<ScalarExpression>(m_offset);
     if (sc) {
-      int64 hash = sc->getHash();
-      if (hash >= 0) {
-        cg_printf(", 0x%016llXLL", hash);
-      }
       if (sc->isLiteralString()) {
         String s(sc->getLiteralString());
         int64 n;
@@ -494,12 +479,6 @@ void ArrayElementExpression::outputCPPUnset(CodeGenerator &cg,
     m_offset->outputCPP(cg, ar);
     ScalarExpressionPtr sc =
       dynamic_pointer_cast<ScalarExpression>(m_offset);
-    if (sc) {
-      int64 hash = sc->getHash();
-      if (hash >= 0) {
-        cg_printf(", 0x%016llXLL", hash);
-      }
-    }
     cg_printf(")");
   }
 }

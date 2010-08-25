@@ -261,7 +261,7 @@ void ProcessSharedVariant::loadElems(ArrayData *&elems,
   ArrayInit ai(count, false, keepRef);
   for (uint i = 0; i < count; i++) {
     SharedVariant *k = getPtr(ks[i]);
-    ai.set(i, k->toLocal(), sharedMap.getValue(i), -1, true);
+    ai.set(k->toLocal(), sharedMap.getValue(i), true);
   }
   elems = ai.create();
   if (elems->isStatic()) elems = elems->copy();

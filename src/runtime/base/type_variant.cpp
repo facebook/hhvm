@@ -1956,7 +1956,7 @@ void Variant::callOffsetUnset(CVarRef key) {
 
 #define IMPLEMENT_RVAL_INTEGRAL                                         \
   if (m_type == KindOfArray) {                                          \
-    return m_data.parr->get((int64)offset, prehash, error);             \
+    return m_data.parr->get((int64)offset, error);                      \
   }                                                                     \
   switch (m_type) {                                                     \
     case KindOfStaticString:                                            \
@@ -1966,7 +1966,7 @@ void Variant::callOffsetUnset(CVarRef key) {
       return getArrayAccess()->o_invoke(s_offsetGet,                    \
                                         Array::Create(offset));         \
     case KindOfVariant:                                                 \
-      return m_data.pvar->rvalAt(offset, prehash, error);               \
+      return m_data.pvar->rvalAt(offset, error);                        \
     case KindOfNull:                                                    \
       break;                                                            \
     default:                                                            \
@@ -1977,17 +1977,14 @@ void Variant::callOffsetUnset(CVarRef key) {
   }                                                                     \
   return null_variant;
 
-Variant Variant::rvalAt(bool offset, int64 prehash /* = -1 */,
-    bool error /* = false */) const {
+Variant Variant::rvalAt(bool offset, bool error /* = false */) const {
   IMPLEMENT_RVAL_INTEGRAL
 }
-Variant Variant::rvalAt(double offset, int64 prehash /* = -1 */,
-    bool error /* = false */) const {
+Variant Variant::rvalAt(double offset, bool error /* = false */) const {
   IMPLEMENT_RVAL_INTEGRAL
 }
 
-Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
-                              bool error /* = false */) const {
+Variant Variant::rvalAtHelper(int64 offset, bool error /* = false */) const {
   switch (m_type) {
   case KindOfStaticString:
   case KindOfString:
@@ -1995,7 +1992,7 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error);
+    return m_data.pvar->rvalAt(offset, error);
   case KindOfNull:
     break;
   default:
@@ -2007,17 +2004,16 @@ Variant Variant::rvalAtHelper(int64 offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
-                        bool error /* = false */,
+Variant Variant::rvalAt(litstr offset, bool error /* = false */,
                         bool isString /* = false */) const {
   if (m_type == KindOfArray) {
-    if (isString) return m_data.parr->get(offset, prehash, error);
+    if (isString) return m_data.parr->get(offset, error);
     int64 n;
     int len = strlen(offset);
     if (!is_strictly_integer(offset, len, n)) {
-      return m_data.parr->get(offset, prehash, error);
+      return m_data.parr->get(offset, error);
     } else {
-      return m_data.parr->get(n, prehash, error);
+      return m_data.parr->get(n, error);
     }
   }
   switch (m_type) {
@@ -2027,7 +2023,7 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error);
+    return m_data.pvar->rvalAt(offset, error);
   case KindOfNull:
     break;
   default:
@@ -2039,17 +2035,16 @@ Variant Variant::rvalAt(litstr offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
-                        bool error /* = false */,
+Variant Variant::rvalAt(CStrRef offset, bool error /* = false */,
                         bool isString /* = false */) const {
   if (m_type == KindOfArray) {
-    if (isString) return m_data.parr->get(offset, prehash, error);
-    if (offset.isNull()) return m_data.parr->get(empty_string, -1, error);
+    if (isString) return m_data.parr->get(offset, error);
+    if (offset.isNull()) return m_data.parr->get(empty_string, error);
     int64 n;
     if (!offset->isStrictlyInteger(n)) {
-      return m_data.parr->get(offset, prehash, error);
+      return m_data.parr->get(offset, error);
     } else {
-      return m_data.parr->get(n, prehash, error);
+      return m_data.parr->get(n, error);
     }
   }
   switch (m_type) {
@@ -2059,7 +2054,7 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error, isString);
+    return m_data.pvar->rvalAt(offset, error, isString);
   case KindOfNull:
     break;
   default:
@@ -2071,28 +2066,27 @@ Variant Variant::rvalAt(CStrRef offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
-                        bool error /* = false */) const {
+Variant Variant::rvalAt(CVarRef offset, bool error /* = false */) const {
   if (m_type == KindOfArray) {
     // Fast path for KindOfArray
     switch (offset.m_type) {
     case KindOfNull:
-      return m_data.parr->get(empty_string, prehash, error);
+      return m_data.parr->get(empty_string, error);
     case KindOfBoolean:
     case KindOfByte:
     case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
-      return m_data.parr->get(offset.m_data.num, prehash, error);
+      return m_data.parr->get(offset.m_data.num, error);
     case KindOfDouble:
-      return m_data.parr->get((int64)offset.m_data.dbl, prehash, error);
+      return m_data.parr->get((int64)offset.m_data.dbl, error);
     case KindOfStaticString:
     case KindOfString: {
       int64 n;
       if (offset.m_data.pstr->isStrictlyInteger(n)) {
-        return m_data.parr->get(n, prehash, error);
+        return m_data.parr->get(n, error);
       } else {
-        return m_data.parr->get(String(offset.m_data.pstr), prehash, error);
+        return m_data.parr->get(String(offset.m_data.pstr), error);
       }
     }
     case KindOfArray:
@@ -2100,12 +2094,12 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
       break;
     case KindOfObject:
       if (offset.isResource()) {
-        return m_data.parr->get(offset.toInt64(), prehash, error);
+        return m_data.parr->get(offset.toInt64(), error);
       }
       throw_bad_type_exception("Invalid type used as key");
       break;
     case KindOfVariant:
-      return rvalAt(*(offset.m_data.pvar), prehash, error);
+      return rvalAt(*(offset.m_data.pvar), error);
     default:
       ASSERT(false);
       break;
@@ -2119,7 +2113,7 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
-    return m_data.pvar->rvalAt(offset, prehash, error);
+    return m_data.pvar->rvalAt(offset, error);
   case KindOfNull:
     break;
   default:
@@ -2131,54 +2125,46 @@ Variant Variant::rvalAt(CVarRef offset, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant &Variant::lvalAt(bool    key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(bool    key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(char    key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(char    key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(short   key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(short   key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(int     key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl(key, prehash, checkExist);
+Variant &Variant::lvalAt(int     key, bool    checkExist /* = false */) {
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(int64   key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
+Variant &Variant::lvalAt(int64   key, bool    checkExist /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated =
-      arr->lval(key, ret, arr->getCount() > 1, prehash, checkExist);
+      arr->lval(key, ret, arr->getCount() > 1, checkExist);
     if (escalated) {
       set(escalated);
     }
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(key, prehash, checkExist);
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(double  key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */) {
-  return lvalAtImpl((int64)key, prehash, checkExist);
+Variant &Variant::lvalAt(double  key, bool    checkExist /* = false */) {
+  return lvalAtImpl((int64)key, checkExist);
 }
-Variant &Variant::lvalAt(litstr  key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */,
+Variant &Variant::lvalAt(litstr  key, bool    checkExist /* = false */,
                          bool    isString /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated;
     if (isString) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1, prehash,
-                            checkExist);
+      escalated = arr->lval(key, ret, arr->getCount() > 1, checkExist);
     } else {
       escalated = arr->lval(String(key).toKey(), ret, arr->getCount() > 1,
-                            prehash, checkExist);
+                            checkExist);
     }
     if (escalated) {
       set(escalated);
@@ -2186,21 +2172,18 @@ Variant &Variant::lvalAt(litstr  key, int64 prehash /* = -1 */,
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(key, prehash, checkExist);
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(CStrRef key, int64 prehash /* = -1 */,
-                         bool    checkExist /* = false */,
+Variant &Variant::lvalAt(CStrRef key, bool    checkExist /* = false */,
                          bool    isString /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated;
     if (isString) {
-      escalated = arr->lval(key, ret, arr->getCount() > 1, prehash,
-                            checkExist);
+      escalated = arr->lval(key, ret, arr->getCount() > 1, checkExist);
     } else {
-      escalated = arr->lval(key.toKey(), ret, arr->getCount() > 1, prehash,
-                            checkExist);
+      escalated = arr->lval(key.toKey(), ret, arr->getCount() > 1, checkExist);
     }
     if (escalated) {
       set(escalated);
@@ -2208,22 +2191,21 @@ Variant &Variant::lvalAt(CStrRef key, int64 prehash /* = -1 */,
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(key, prehash, checkExist);
+  return lvalAtImpl(key, checkExist);
 }
-Variant &Variant::lvalAt(CVarRef k, int64 prehash /* = -1 */,
-                         bool checkExist /* = false */) {
+Variant &Variant::lvalAt(CVarRef k, bool checkExist /* = false */) {
   if (m_type == KindOfArray) {
     Variant *ret = NULL;
     ArrayData *arr = m_data.parr;
     ArrayData *escalated = arr->lval(k.toKey(), ret, arr->getCount() > 1,
-        prehash, checkExist);
+        checkExist);
     if (escalated) {
       set(escalated);
     }
     ASSERT(ret);
     return *ret;
   }
-  return lvalAtImpl(k, prehash, checkExist);
+  return lvalAtImpl(k, checkExist);
 }
 
 Variant &Variant::lvalInvalid() {
@@ -2237,45 +2219,42 @@ Variant &Variant::lvalBlackHole() {
   return bh;
 }
 
-Variant Variant::refvalAt(bool    key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(bool    key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(char    key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(char    key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(short   key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(short   key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(int     key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(int     key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(int64   key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(int64   key) {
+  return refvalAtImpl(key);
 }
-Variant Variant::refvalAt(double  key, int64 prehash /* = -1 */) {
-  return refvalAtImpl((int64)key, prehash);
+Variant Variant::refvalAt(double  key) {
+  return refvalAtImpl((int64)key);
 }
-Variant Variant::refvalAt(litstr  key, int64 prehash /* = -1 */,
-                          bool isString /* = false */) {
-  return refvalAtImpl(key, prehash, isString);
+Variant Variant::refvalAt(litstr  key, bool isString /* = false */) {
+  return refvalAtImpl(key, isString);
 }
-Variant Variant::refvalAt(CStrRef key, int64 prehash /* = -1 */,
-                          bool isString /* = false */) {
-  return refvalAtImpl(key, prehash, isString);
+Variant Variant::refvalAt(CStrRef key, bool isString /* = false */) {
+  return refvalAtImpl(key, isString);
 }
-Variant Variant::refvalAt(CVarRef key, int64 prehash /* = -1 */) {
-  return refvalAtImpl(key, prehash);
+Variant Variant::refvalAt(CVarRef key) {
+  return refvalAtImpl(key);
 }
 
-Variant Variant::refvalAtImpl(CStrRef key, int64 prehash /* = -1 */,
-                              bool isString /* = false */) {
+Variant Variant::refvalAtImpl(CStrRef key, bool isString /* = false */) {
   if (m_type == KindOfVariant) {
-    return m_data.pvar->refvalAtImpl(key, prehash, isString);
+    return m_data.pvar->refvalAtImpl(key, isString);
   }
   if (is(KindOfArray) || isObjectConvertable()) {
-    return ref(lvalAt(key, prehash, false, isString));
+    return ref(lvalAt(key, false, isString));
   } else {
-    return rvalAt(key, prehash, isString);
+    return rvalAt(key, isString);
   }
 }
 
@@ -2531,8 +2510,7 @@ ObjectOffset Variant::o_lval(CStrRef propName,
       escalate();                                                       \
     }                                                                   \
     ArrayData *escalated =                                              \
-      m_data.parr->set(ToKey(key), v, (m_data.parr->getCount() > 1),    \
-                       prehash);                                        \
+      m_data.parr->set(ToKey(key), v, (m_data.parr->getCount() > 1));   \
     if (escalated) {                                                    \
       set(escalated);                                                   \
     }                                                                   \
@@ -2579,8 +2557,7 @@ check_array:                                                            \
     Variant *cv = NULL;                                                 \
     ASSERT(!v.isContagious());                                          \
     ArrayData *escalated =                                              \
-      m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1),  \
-          prehash);                                                     \
+      m_data.parr->lval(ToKey(key), cv, (m_data.parr->getCount() > 1)); \
     if (escalated) {                                                    \
       set(escalated);                                                   \
     }                                                                   \
@@ -2645,60 +2622,52 @@ check_array:                                                            \
   }                                                                     \
   return v;                                                             \
 
-CVarRef Variant::set(bool key, CVarRef v, int64 prehash /* = -1 */) {
+CVarRef Variant::set(bool key, CVarRef v) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(int64 key, CVarRef v, int64 prehash /* = -1 */) {
+CVarRef Variant::set(int64 key, CVarRef v) {
   IMPLEMENT_SETAT;
 }
-CVarRef Variant::set(double  key, CVarRef v, int64 prehash /* = -1 */) {
-  IMPLEMENT_SETAT;
-}
-
-CVarRef Variant::set(litstr key, CVarRef v, int64 prehash /* = -1 */,
-                     bool isString /* = false */) {
+CVarRef Variant::set(double  key, CVarRef v) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(CStrRef key, CVarRef v, int64 prehash /* = -1 */,
-                     bool isString /* = false */) {
+CVarRef Variant::set(litstr key, CVarRef v, bool isString /* = false */) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::set(CVarRef key, CVarRef v, int64 prehash /* = -1 */) {
+CVarRef Variant::set(CStrRef key, CVarRef v, bool isString /* = false */) {
   IMPLEMENT_SETAT;
 }
 
-CVarRef Variant::setOpEqual(int op, bool key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::set(CVarRef key, CVarRef v) {
+  IMPLEMENT_SETAT;
+}
+
+CVarRef Variant::setOpEqual(int op, bool key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
-CVarRef Variant::setOpEqual(int op, int64 key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::setOpEqual(int op, int64 key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
-CVarRef Variant::setOpEqual(int op, double  key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::setOpEqual(int op, double  key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
 CVarRef Variant::setOpEqual(int op, litstr key, CVarRef v,
-                            int64 prehash /* = -1 */,
                             bool isString /* = false */) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
 CVarRef Variant::setOpEqual(int op, CStrRef key, CVarRef v,
-                            int64 prehash /* = -1 */,
                             bool isString /* = false */) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
-CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v,
-                            int64 prehash /* = -1 */) {
+CVarRef Variant::setOpEqual(int op, CVarRef key, CVarRef v) {
   IMPLEMENT_SETAT_OPEQUAL;
 }
 
@@ -2839,19 +2808,19 @@ check_array:
   return v;
 }
 
-void Variant::remove(CVarRef key, int64 prehash /* = -1 */) {
+void Variant::remove(CVarRef key) {
   switch(key.getType()) {
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    removeImpl(key.toInt64(), prehash);
+    removeImpl(key.toInt64());
     return;
   default:
     break;
   }
   // Trouble cases: Array, Object
-  removeImpl(key, prehash);
+  removeImpl(key);
 }
 
 void Variant::setStatic() const {

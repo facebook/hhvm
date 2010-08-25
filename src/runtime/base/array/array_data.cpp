@@ -43,7 +43,7 @@ ArrayData *ArrayData::Create(CVarRef value) {
 ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
   ArrayInit init(1, false);
   // There is no toKey() call on name.
-  init.set(0, name, value, -1, true);
+  init.set(name, value, true);
   return init.create();
 }
 

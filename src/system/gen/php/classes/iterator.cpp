@@ -60,8 +60,8 @@ Variant &c_arrayiterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
 void c_arrayiterator::o_getArray(Array &props) const {
-  if (isInitialized(m_arr)) props.set(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, 0x5CE2959000CE7919LL, true);
-  if (isInitialized(m_flags)) props.set(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, 0x5E9F5A2C4F67744CLL, true);
+  if (isInitialized(m_arr)) props.set(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
+  if (isInitialized(m_flags)) props.set(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
@@ -1784,7 +1784,7 @@ bool c_arrayiterator::t_offsetexists(CVarRef v_index) {
 /* SRC: classes/iterator.php line 507 */
 Variant c_arrayiterator::t_offsetget(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
-  return m_arr.rvalAt(v_index, -1, true);
+  return m_arr.rvalAt(v_index, true);
 } /* function */
 /* SRC: classes/iterator.php line 507 */
 Variant &c_arrayiterator::___offsetget_lval(Variant v_index) {
@@ -1850,7 +1850,7 @@ bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
 /* SRC: classes/iterator.php line 620 */
 bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uksort);
-  return toBoolean(invoke("uksort", Array(ArrayInit(1, true).setRef(0, v_cmp_function).create()), 0x4842AF70A71BE6C4LL));
+  return toBoolean(invoke("uksort", Array(ArrayInit(1, true).setRef(v_cmp_function).create()), 0x4842AF70A71BE6C4LL));
 } /* function */
 /* SRC: classes/iterator.php line 632 */
 bool c_arrayiterator::t_valid() {
@@ -1885,7 +1885,7 @@ Variant &c_appenditerator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
 void c_appenditerator::o_getArray(Array &props) const {
-  if (isInitialized(m_iterators)) props.set(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, 0x54D9D502A46F7550LL, true);
+  if (isInitialized(m_iterators)) props.set(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
@@ -2745,8 +2745,8 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
     ArrayInit tmp1(2, true);
-    tmp1.set(0, o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0));
-    tmp1.set(1, v_func);
+    tmp1.set(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0));
+    tmp1.set(v_func);
     const Array &tmp2((Array(tmp1)));
     return x_call_user_func_array(tmp2, toArray(v_params));
   }
@@ -5278,7 +5278,7 @@ Variant c_recursivedirectoryiterator::t_rewind() {
 /* SRC: classes/iterator.php line 812 */
 Variant c_recursivedirectoryiterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::seek);
-  return (invoke("hphp_recursivedirectoryiterator_seek", Array(ArrayInit(1, true).setRef(0, GET_THIS()).create()), 0x09A98E99D51E8C2BLL), null);
+  return (invoke("hphp_recursivedirectoryiterator_seek", Array(ArrayInit(1, true).setRef(GET_THIS()).create()), 0x09A98E99D51E8C2BLL), null);
 } /* function */
 /* SRC: classes/iterator.php line 816 */
 String c_recursivedirectoryiterator::t___tostring() {

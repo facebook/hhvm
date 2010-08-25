@@ -52,68 +52,64 @@ public:
     return v ? getLocal(v) : null;
   }
 
-  bool exists(int64 k, int64 prehash = -1) const {
-    return exists(Variant(k), prehash);
+  bool exists(int64 k) const {
+    return exists(Variant(k));
   }
-  bool exists(litstr k, int64 prehash = -1) const {
-    return exists(Variant(k), prehash);
+  bool exists(litstr k) const {
+    return exists(Variant(k));
   }
-  bool exists(CStrRef k, int64 prehash = -1) const {
-    return exists(Variant(k), prehash);
+  bool exists(CStrRef k) const {
+    return exists(Variant(k));
   }
-  bool exists(CVarRef k, int64 prehash = -1) const;
+  bool exists(CVarRef k) const;
 
   bool idxExists(ssize_t idx) const {
     return idx < size();
   }
 
-  Variant get(int64 k, int64 prehash = -1, bool error = false) const {
-    return get(Variant(k), prehash, error);
+  Variant get(int64 k, bool error = false) const {
+    return get(Variant(k), error);
   }
-  Variant get(litstr k, int64 prehash = -1, bool error = false) const {
-    return get(Variant(k), prehash, error);
+  Variant get(litstr k, bool error = false) const {
+    return get(Variant(k), error);
   }
-  Variant get(CStrRef k, int64 prehash = -1, bool error = false) const {
-    return get(Variant(k), prehash, error);
+  Variant get(CStrRef k, bool error = false) const {
+    return get(Variant(k), error);
   }
-  Variant get(CVarRef k, int64 prehash = -1, bool error = false) const;
+  Variant get(CVarRef k, bool error = false) const;
 
-  ssize_t getIndex(int64 k, int64 prehash = -1) const {
-    return getIndex(Variant(k), prehash);
+  ssize_t getIndex(int64 k) const {
+    return getIndex(Variant(k));
   }
-  ssize_t getIndex(litstr k, int64 prehash = -1) const {
-    return getIndex(Variant(k), prehash);
+  ssize_t getIndex(litstr k) const {
+    return getIndex(Variant(k));
   }
-  ssize_t getIndex(CStrRef k, int64 prehash = -1) const {
-    return getIndex(Variant(k), prehash);
+  ssize_t getIndex(CStrRef k) const {
+    return getIndex(Variant(k));
   }
-  ssize_t getIndex(CVarRef k, int64 prehash = -1) const {
+  ssize_t getIndex(CVarRef k) const {
     return m_arr->getIndex(k);
   }
 
   ArrayData *lval(Variant *&ret, bool copy);
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
 
-  ArrayData *set(int64   k, CVarRef v,
-                 bool copy, int64 prehash = -1);
-  ArrayData *set(litstr  k, CVarRef v,
-                 bool copy, int64 prehash = -1);
-  ArrayData *set(CStrRef k, CVarRef v,
-                 bool copy, int64 prehash = -1);
-  ArrayData *set(CVarRef k, CVarRef v,
-                 bool copy, int64 prehash = -1);
+  ArrayData *set(int64   k, CVarRef v, bool copy);
+  ArrayData *set(litstr  k, CVarRef v, bool copy);
+  ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  ArrayData *set(CVarRef k, CVarRef v, bool copy);
 
-  ArrayData *remove(int64   k, bool copy, int64 prehash = -1);
-  ArrayData *remove(litstr  k, bool copy, int64 prehash = -1);
-  ArrayData *remove(CStrRef k, bool copy, int64 prehash = -1);
-  ArrayData *remove(CVarRef k, bool copy, int64 prehash = -1);
+  ArrayData *remove(int64   k, bool copy);
+  ArrayData *remove(litstr  k, bool copy);
+  ArrayData *remove(CStrRef k, bool copy);
+  ArrayData *remove(CVarRef k, bool copy);
 
   ArrayData *copy() const;
 

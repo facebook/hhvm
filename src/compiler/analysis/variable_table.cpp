@@ -1062,7 +1062,7 @@ void VariableTable::outputCPPGlobalVariablesGetIndex(CodeGenerator &cg,
   if (!outputCPPJumpTable(cg, ar, NULL, false, true, EitherStatic, JumpIndex)) {
     m_emptyJumpTables.insert(JumpTableGlobalGetIndex);
   }
-  cg_printf("return m_px ? (m_px->getIndex(s, hash) + %d) : %d;\n",
+  cg_printf("return m_px ? (m_px->getIndex(s) + %d) : %d;\n",
             m_symbols.size(), ArrayData::invalid_index);
   cg_indentEnd("}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_GLOBAL_GETINDEX");
@@ -1297,7 +1297,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
       m_emptyJumpTables.insert(JumpTableLocalGetImpl);
     }
     // Valid variable names cannot be numerical.
-    cg_printf("return rvalAt(s, hash, false, true);\n");
+    cg_printf("return rvalAt(s, false, true);\n");
     cg_indentEnd("}\n");
 
     if (getAttribute(ContainsCompact)) {
@@ -1490,28 +1490,24 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     if (dynamicObject && !priv) continue;
     const char *s = m_symbols[i].c_str();
     string prop(m_symbols[i]);
-    int64 prehash = hash_string(prop.c_str(), prop.length());
     if (!isStatic(s)) {
       empty = false;
       if (priv) {
         ClassScope clsScope = dynamic_cast<ClassScope &>(m_blockScope);
         prop = '\0' + clsScope.getOriginalName() + '\0' + prop;
-        prehash = hash_string(prop.c_str(), prop.length());
       }
       if (getFinalType(s)->is(Type::KindOfVariant)) {
         cg_printf("if (isInitialized(%s%s)) props.set(",
                   Option::PropertyPrefix, s);
         cg_printString(prop, ar);
         cg_printf(", %s%s.isReferenced() ? ref(%s%s) : %s%s, "
-                  "0x%016llXLL, true);\n",
+                  "true);\n",
                   Option::PropertyPrefix, s, Option::PropertyPrefix, s,
-                  Option::PropertyPrefix, s,
-                  prehash);
+                  Option::PropertyPrefix, s);
       } else {
         cg_printf("props.set(");
         cg_printString(prop, ar);
-        cg_printf(", %s%s, 0x%016llXLL, true);\n",
-                  Option::PropertyPrefix, s, prehash);
+        cg_printf(", %s%s, true);\n", Option::PropertyPrefix, s);
       }
     }
   }

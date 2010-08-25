@@ -6918,11 +6918,11 @@ Variant &c_exception::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
 void c_exception::o_getArray(Array &props) const {
-  if (isInitialized(m_message)) props.set(NAMSTR(s_sys_ss6b362b85, "message"), m_message.isReferenced() ? ref(m_message) : m_message, 0x0247CDBB94C9D47BLL, true);
-  if (isInitialized(m_code)) props.set(NAMSTR(s_sys_ss7a853247, "code"), m_code.isReferenced() ? ref(m_code) : m_code, 0x58C72230857ACDB9LL, true);
-  if (isInitialized(m_file)) props.set(NAMSTR(s_sys_ss70cc2eb1, "file"), m_file.isReferenced() ? ref(m_file) : m_file, 0x7863294A8F33D14FLL, true);
-  if (isInitialized(m_line)) props.set(NAMSTR(s_sys_ss30737366, "line"), m_line.isReferenced() ? ref(m_line) : m_line, 0x04AB35CACF8C8C9ALL, true);
-  if (isInitialized(m_trace)) props.set(NAMSTR(s_sys_ss2cf0a747, "trace"), m_trace.isReferenced() ? ref(m_trace) : m_trace, 0x3CCB986B2CF0A747LL, true);
+  if (isInitialized(m_message)) props.set(NAMSTR(s_sys_ss6b362b85, "message"), m_message.isReferenced() ? ref(m_message) : m_message, true);
+  if (isInitialized(m_code)) props.set(NAMSTR(s_sys_ss7a853247, "code"), m_code.isReferenced() ? ref(m_code) : m_code, true);
+  if (isInitialized(m_file)) props.set(NAMSTR(s_sys_ss70cc2eb1, "file"), m_file.isReferenced() ? ref(m_file) : m_file, true);
+  if (isInitialized(m_line)) props.set(NAMSTR(s_sys_ss30737366, "line"), m_line.isReferenced() ? ref(m_line) : m_line, true);
+  if (isInitialized(m_trace)) props.set(NAMSTR(s_sys_ss2cf0a747, "trace"), m_trace.isReferenced() ? ref(m_trace) : m_trace, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_exception
@@ -7784,23 +7784,23 @@ void c_exception::t___init__() {
       LOOP_COUNTER_CHECK(2);
       {
         {
-          Variant tmp3((m_trace.rvalAt(0LL, 0x77CFA1EEF01BCA90LL, true)));
+          Variant tmp3((m_trace.rvalAt(0LL, true)));
           v_top = tmp3;
         }
         {
           bool tmp4;
           {
-            bool tmp5 = (empty(v_top, NAMSTR(s_sys_ss1f74c210, "class"), 0x2E3A246D1F74C210LL, true));
+            bool tmp5 = (empty(v_top, NAMSTR(s_sys_ss1f74c210, "class"), true));
             if (!tmp5) {
-              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), 0x7356F680A745A524LL, true, true)), NAMSTR(s_sys_ss55f425c0, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), 0x7356F680A745A524LL, true, true)), NAMSTR(s_sys_ss229c615f, "__construct")))));
+              bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)), NAMSTR(s_sys_ss55f425c0, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)), NAMSTR(s_sys_ss229c615f, "__construct")))));
               if (tmp6) {
-                String tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), 0x7356F680A745A524LL, true, true))));
-                String tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), 0x2E3A246D1F74C210LL, true, true))));
+                String tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true))));
+                String tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
                 tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
               }
               tmp5 = (tmp6);
             }
-            tmp4 = ((tmp5 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), 0x2E3A246D1F74C210LL, true, true)), NAMSTR(s_sys_ss7f49956c, "exception"))) && !(x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), 0x2E3A246D1F74C210LL, true, true), NAMSTR(s_sys_ss7f49956c, "exception"))))));
+            tmp4 = ((tmp5 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), NAMSTR(s_sys_ss7f49956c, "exception"))) && !(x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true), NAMSTR(s_sys_ss7f49956c, "exception"))))));
           }
           if (tmp4) {
             {
@@ -7815,15 +7815,15 @@ void c_exception::t___init__() {
       }
     }
   }
-  if (isset(v_frame, NAMSTR(s_sys_ss70cc2eb1, "file"), 0x7863294A8F33D14FLL, true)) {
+  if (isset(v_frame, NAMSTR(s_sys_ss70cc2eb1, "file"), true)) {
     {
-      Variant tmp10((v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), 0x7863294A8F33D14FLL, true, true)));
+      Variant tmp10((v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), true, true)));
       m_file = tmp10;
     }
   }
-  if (isset(v_frame, NAMSTR(s_sys_ss30737366, "line"), 0x04AB35CACF8C8C9ALL, true)) {
+  if (isset(v_frame, NAMSTR(s_sys_ss30737366, "line"), true)) {
     {
-      Variant tmp11((v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), 0x04AB35CACF8C8C9ALL, true, true)));
+      Variant tmp11((v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), true, true)));
       m_line = tmp11;
     }
   }
@@ -7889,20 +7889,20 @@ String c_exception::t_gettraceasstring() {
             tmp4_buf.append("#", 1);
             tmp4_buf.append(toString(v_i));
             tmp4_buf.append(" ", 1);
-            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), 0x7863294A8F33D14FLL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), true, true)));
             tmp4_buf.append("(", 1);
-            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), 0x04AB35CACF8C8C9ALL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), true, true)));
             tmp4_buf.append("): ", 3);
             Variant tmp5;
-            if (isset(v_frame, NAMSTR(s_sys_ss1f74c210, "class"), 0x2E3A246D1F74C210LL, true)) {
-              String tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), 0x2E3A246D1F74C210LL, true, true))));
-              String tmp7((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1fe107ad, "type"), 0x7B5ABDA0E01EF853LL, true, true))));
+            if (isset(v_frame, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
+              String tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+              String tmp7((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1fe107ad, "type"), true, true))));
               tmp5 = (concat(tmp6, tmp7));
             } else {
               tmp5 = (NAMSTR(s_sys_ss00000000, ""));
             }
             tmp4_buf.append(toString(tmp5));
-            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), 0x7356F680A745A524LL, true, true)));
+            tmp4_buf.append(toString(v_frame.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)));
             tmp4_buf.append("()\n", 3);
             CStrRef tmp4(tmp4_buf.detach());
             tmp_sbuf_v_s.add(tmp4);
@@ -7949,7 +7949,7 @@ Variant &c_errorexception::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception
 void c_errorexception::o_getArray(Array &props) const {
-  if (isInitialized(m_severity)) props.set(NAMSTR(s_sys_ss05a0ea07, "severity"), m_severity.isReferenced() ? ref(m_severity) : m_severity, 0x4FDAA620FA5F15F9LL, true);
+  if (isInitialized(m_severity)) props.set(NAMSTR(s_sys_ss05a0ea07, "severity"), m_severity.isReferenced() ? ref(m_severity) : m_severity, true);
   c_exception::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_errorexception

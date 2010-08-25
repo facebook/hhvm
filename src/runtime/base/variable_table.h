@@ -48,7 +48,7 @@ class RVariableTable : public Array {
    */
   virtual bool exists(CStrRef s) const {
     // Integers are never valid variable names.
-    return Array::exists(s, -1, true);
+    return Array::exists(s, true);
   }
 
   /**
@@ -82,7 +82,7 @@ class LVariableTable : public Array {
    * entry per variable.
    */
   virtual bool exists(CStrRef s) const {
-    return Array::exists(s, -1, true);
+    return Array::exists(s, true);
   }
 
   /**

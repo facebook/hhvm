@@ -27,7 +27,7 @@ Variant &LVariableTable::getImpl(CStrRef s) {
     m_px = ArrayInit(0, false, true).create();
     m_px->incRefCount();
   }
-  return lvalAt(s, -1, false, true);
+  return lvalAt(s, false, true);
 }
 
 Array RVariableTable::getDefinedVars() const {

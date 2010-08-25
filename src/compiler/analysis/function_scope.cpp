@@ -698,7 +698,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
       isRef = param->isRef();
       if (aggregateParams) {
-        cg_printf("set%s(%d, v_%s", isRef ? "Ref" : "", i,
+        cg_printf("set%s(v_%s", isRef ? "Ref" : "",
                                     param->getName().c_str());
       } else {
         cg_printf("%sv_%s%s",
@@ -708,7 +708,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     } else {
       isRef = isRefParam(i);
       if (aggregateParams) {
-        cg_printf("set%s(%d, a%d", isRef ? "Ref" : "", i, i);
+        cg_printf("set%s(a%d", isRef ? "Ref" : "", i);
       } else {
         cg_printf("%sa%d%s",
                   isRef ? "ref(" : "", i, isRef ? ")" : "");
@@ -767,7 +767,7 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
       bool needRef = param->hasContext(Expression::RefValue) &&
                      !param->hasContext(Expression::NoRefWrapper) &&
                      param->isRefable();
-      cg_printf("set%s(%d, ", needRef ? "Ref" : "", i - firstExtra);
+      cg_printf("set%s(", needRef ? "Ref" : "");
       if (needRef) {
         // The parameter itself shouldn't be wrapped with ref() any more.
         param->setContext(Expression::NoRefWrapper);

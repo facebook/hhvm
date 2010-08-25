@@ -58,46 +58,46 @@ public:
   virtual Variant value(ssize_t &pos) const;
   virtual Variant each();
 
-  virtual bool exists(int64   k, int64 prehash = -1) const;
-  virtual bool exists(litstr  k, int64 prehash = -1) const;
-  virtual bool exists(CStrRef k, int64 prehash = -1) const;
-  virtual bool exists(CVarRef k, int64 prehash = -1) const;
+  virtual bool exists(int64   k) const;
+  virtual bool exists(litstr  k) const;
+  virtual bool exists(CStrRef k) const;
+  virtual bool exists(CVarRef k) const;
 
   virtual bool idxExists(ssize_t idx) const;
 
-  virtual Variant get(int64   k, int64 prehash = -1, bool error = false) const;
-  virtual Variant get(litstr  k, int64 prehash = -1, bool error = false) const;
-  virtual Variant get(CStrRef k, int64 prehash = -1, bool error = false) const;
-  virtual Variant get(CVarRef k, int64 prehash = -1, bool error = false) const;
+  virtual Variant get(int64   k, bool error = false) const;
+  virtual Variant get(litstr  k, bool error = false) const;
+  virtual Variant get(CStrRef k, bool error = false) const;
+  virtual Variant get(CVarRef k, bool error = false) const;
 
   virtual void load(CVarRef k, Variant &v) const;
 
   Variant fetch(CStrRef k) const;
 
-  virtual ssize_t getIndex(int64 k, int64 prehash = -1) const;
-  virtual ssize_t getIndex(litstr k, int64 prehash = -1) const;
-  virtual ssize_t getIndex(CStrRef k, int64 prehash = -1) const;
-  virtual ssize_t getIndex(CVarRef k, int64 prehash = -1) const;
+  virtual ssize_t getIndex(int64 k) const;
+  virtual ssize_t getIndex(litstr k) const;
+  virtual ssize_t getIndex(CStrRef k) const;
+  virtual ssize_t getIndex(CVarRef k) const;
 
   virtual ArrayData *lval(Variant *&ret, bool copy);
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false);
+                          bool checkExist = false);
 
-  virtual ArrayData *set(int64   k, CVarRef v, bool copy, int64 prehash = -1);
-  virtual ArrayData *set(litstr  k, CVarRef v, bool copy, int64 prehash = -1);
-  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy, int64 prehash = -1);
-  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy, int64 prehash = -1);
+  virtual ArrayData *set(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *set(litstr  k, CVarRef v, bool copy);
+  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy);
 
-  virtual ArrayData *remove(int64   k, bool copy, int64 prehash = -1);
-  virtual ArrayData *remove(litstr  k, bool copy, int64 prehash = -1);
-  virtual ArrayData *remove(CStrRef k, bool copy, int64 prehash = -1);
-  virtual ArrayData *remove(CVarRef k, bool copy, int64 prehash = -1);
+  virtual ArrayData *remove(int64   k, bool copy);
+  virtual ArrayData *remove(litstr  k, bool copy);
+  virtual ArrayData *remove(CStrRef k, bool copy);
+  virtual ArrayData *remove(CVarRef k, bool copy);
 
   virtual ArrayData *copy() const;
   virtual ArrayData *append(CVarRef v, bool copy);
@@ -148,26 +148,21 @@ private:
   char             m_linear;
 
   Bucket *find(int64 h) const;
-  Bucket *find(const char *k, int len, int64 prehash = -1,
-               int64 *h = NULL) const;
+  Bucket *find(const char *k, int len, int64 prehash) const;
 
   Bucket ** findForErase(int64 h) const;
-  Bucket ** findForErase(const char *k, int len, int64 prehash = -1,
-                         int64 *h = NULL) const;
+  Bucket ** findForErase(const char *k, int len, int64 prehash) const;
   Bucket ** findForErase(Bucket * bucketPtr) const;
 
   bool nextInsert(CVarRef data);
   bool addLval(int64 h, Variant **pDest, bool doFind = true);
-  bool addLval(litstr key, int len, int64 h, Variant **pDest,
-               bool doFind = true);
   bool addLval(StringData *key, int64 h, Variant **pDest, bool doFind = true);
   bool add(int64 h, CVarRef data);
-  bool add(litstr key, int64 h, CVarRef data);
-  bool add(StringData *key, int64 h, CVarRef data);
+  bool add(StringData *key, CVarRef data);
 
   bool update(int64 h, CVarRef data);
-  bool update(litstr key, int64 h, CVarRef data);
-  bool update(StringData *key, int64 h, CVarRef data);
+  bool update(litstr key, CVarRef data);
+  bool update(StringData *key, CVarRef data);
 
   void erase(Bucket ** prev);
   ZendArray *copyImpl() const;

@@ -56,8 +56,8 @@ Variant &c_directory::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
 void c_directory::o_getArray(Array &props) const {
-  if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ss5977ff8c, "path"), m_path.isReferenced() ? ref(m_path) : m_path, 0x1429F792A6880074LL, true);
-  if (isInitialized(m_handle)) props.set(NAMSTR(s_sys_ss0babeace, "handle"), m_handle.isReferenced() ? ref(m_handle) : m_handle, 0x5C4CA333F4541532LL, true);
+  if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ss5977ff8c, "path"), m_path.isReferenced() ? ref(m_path) : m_path, true);
+  if (isInitialized(m_handle)) props.set(NAMSTR(s_sys_ss0babeace, "handle"), m_handle.isReferenced() ? ref(m_handle) : m_handle, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_directory

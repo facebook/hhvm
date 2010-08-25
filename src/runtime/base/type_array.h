@@ -215,17 +215,15 @@ class Array : public SmartPtr<ArrayData> {
   /**
    * Offset
    */
-  Variant rvalAt(bool key, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(char key, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(short key, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(int key, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(int64 key, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(double key, int64 prehash = -1, bool error = false) const;
-  Variant rvalAt(litstr key, int64 prehash = -1, bool error = false,
-                 bool isString = false) const;
-  Variant rvalAt(CStrRef key, int64 prehash = -1, bool error = false,
-                 bool isString = false) const;
-  Variant rvalAt(CVarRef key, int64 prehash = -1, bool error = false) const;
+  Variant rvalAt(bool key, bool error = false) const;
+  Variant rvalAt(char key, bool error = false) const;
+  Variant rvalAt(short key, bool error = false) const;
+  Variant rvalAt(int key, bool error = false) const;
+  Variant rvalAt(int64 key, bool error = false) const;
+  Variant rvalAt(double key, bool error = false) const;
+  Variant rvalAt(litstr key, bool error = false, bool isString = false) const;
+  Variant rvalAt(CStrRef key, bool error = false, bool isString = false) const;
+  Variant rvalAt(CVarRef key, bool error = false) const;
 
   const Variant operator[](bool    key) const;
   const Variant operator[](char    key) const;
@@ -272,138 +270,134 @@ class Array : public SmartPtr<ArrayData> {
 
   Variant &lvalAt();
 
-  Variant &lvalAt(bool    key, int64 prehash = -1, bool checkExist = false) {
-    return lvalAtImpl(key, prehash, checkExist);
+  Variant &lvalAt(bool    key, bool checkExist = false) {
+    return lvalAtImpl(key, checkExist);
   }
-  Variant &lvalAt(char    key, int64 prehash = -1, bool checkExist = false) {
-    return lvalAtImpl(key, prehash, checkExist);
+  Variant &lvalAt(char    key, bool checkExist = false) {
+    return lvalAtImpl(key, checkExist);
   }
-  Variant &lvalAt(short   key, int64 prehash = -1, bool checkExist = false) {
-    return lvalAtImpl(key, prehash, checkExist);
+  Variant &lvalAt(short   key, bool checkExist = false) {
+    return lvalAtImpl(key, checkExist);
   }
-  Variant &lvalAt(int     key, int64 prehash = -1, bool checkExist = false) {
-    return lvalAtImpl(key, prehash, checkExist);
+  Variant &lvalAt(int     key, bool checkExist = false) {
+    return lvalAtImpl(key, checkExist);
   }
-  Variant &lvalAt(int64   key, int64 prehash = -1, bool checkExist = false) {
-    return lvalAtImpl(key, prehash, checkExist);
+  Variant &lvalAt(int64   key, bool checkExist = false) {
+    return lvalAtImpl(key, checkExist);
   }
-  Variant &lvalAt(double  key, int64 prehash = -1, bool checkExist = false) {
-    return lvalAtImpl((int64)key, prehash, checkExist);
+  Variant &lvalAt(double  key, bool checkExist = false) {
+    return lvalAtImpl((int64)key, checkExist);
   }
-  Variant &lvalAt(litstr  key, int64 prehash = -1, bool checkExist = false,
-                  bool    isString = false);
-  Variant &lvalAt(CStrRef key, int64 prehash = -1, bool checkExist = false,
-                  bool    isString = false);
-  Variant &lvalAt(CVarRef key, int64 prehash = -1, bool checkExist = false);
+  Variant &lvalAt(litstr  key, bool checkExist = false, bool isString = false);
+  Variant &lvalAt(CStrRef key, bool checkExist = false, bool isString = false);
+  Variant &lvalAt(CVarRef key, bool checkExist = false);
 
   // defined in type_variant.h
   template<typename T>
-  CVarRef setImpl(const T &key, CVarRef v, int64 prehash);
+  CVarRef setImpl(const T &key, CVarRef v);
 
-  CVarRef set(bool    key, CVarRef v, int64 prehash = -1) {
-    return setImpl(key ? 1LL : 0LL, v, prehash);
+  CVarRef set(bool    key, CVarRef v) {
+    return setImpl(key ? 1LL : 0LL, v);
   }
-  CVarRef set(char    key, CVarRef v, int64 prehash = -1) {
-    return setImpl((int64)key, v, prehash);
+  CVarRef set(char    key, CVarRef v) {
+    return setImpl((int64)key, v);
   }
-  CVarRef set(short   key, CVarRef v, int64 prehash = -1) {
-    return setImpl((int64)key, v, prehash);
+  CVarRef set(short   key, CVarRef v) {
+    return setImpl((int64)key, v);
   }
-  CVarRef set(int     key, CVarRef v, int64 prehash = -1) {
-    return setImpl((int64)key, v, prehash);
+  CVarRef set(int     key, CVarRef v) {
+    return setImpl((int64)key, v);
   }
-  CVarRef set(int64   key, CVarRef v, int64 prehash = -1) {
-    return setImpl(key, v, prehash);
+  CVarRef set(int64   key, CVarRef v) {
+    return setImpl(key, v);
   }
-  CVarRef set(double  key, CVarRef v, int64 prehash = -1) {
-    return setImpl((int64)key, v, prehash);
+  CVarRef set(double  key, CVarRef v) {
+    return setImpl((int64)key, v);
   }
 
-  CVarRef set(litstr  key, CVarRef v, int64 prehash = -1,
-              bool isString = false);
-  CVarRef set(CStrRef key, CVarRef v, int64 prehash = -1,
-              bool isString = false);
+  CVarRef set(litstr  key, CVarRef v, bool isString = false);
+  CVarRef set(CStrRef key, CVarRef v, bool isString = false);
 
-  CVarRef set(CVarRef key, CVarRef v, int64 prehash = -1);
+  CVarRef set(CVarRef key, CVarRef v);
 
   // defined in type_variant.h
   template<typename T>
-  Variant refvalAt(const T &key, int64 prehash = -1);
+  Variant refvalAt(const T &key);
 
-  Variant refvalAt(CStrRef key, int64 prehash = -1, bool isString = false);
+  Variant refvalAt(CStrRef key, bool isString = false);
 
   /**
    * Membership functions.
    */
   template<typename T>
-    bool existsImpl(const T &key, int64 prehash) const {
-    if (m_px) return m_px->exists(key, prehash);
+    bool existsImpl(const T &key) const {
+    if (m_px) return m_px->exists(key);
     return false;
   }
-  bool exists(bool    key, int64 prehash = -1) const {
-    return existsImpl(key ? 1LL : 0LL, prehash);
+  bool exists(bool    key) const {
+    return existsImpl(key ? 1LL : 0LL);
   }
-  bool exists(char    key, int64 prehash = -1) const {
-    return existsImpl((int64)key, prehash);
+  bool exists(char    key) const {
+    return existsImpl((int64)key);
   }
-  bool exists(short   key, int64 prehash = -1) const {
-    return existsImpl((int64)key, prehash);
+  bool exists(short   key) const {
+    return existsImpl((int64)key);
   }
-  bool exists(int     key, int64 prehash = -1) const {
-    return existsImpl((int64)key, prehash);
+  bool exists(int     key) const {
+    return existsImpl((int64)key);
   }
-  bool exists(int64   key, int64 prehash = -1) const {
-    return existsImpl(key, prehash);
+  bool exists(int64   key) const {
+    return existsImpl(key);
   }
-  bool exists(double  key, int64 prehash = -1) const {
-    return existsImpl((int64)key, prehash);
+  bool exists(double  key) const {
+    return existsImpl((int64)key);
   }
-  bool exists(litstr  key, int64 prehash = -1, bool isString = false) const;
-  bool exists(CStrRef key, int64 prehash = -1, bool isString = false) const;
-  bool exists(CVarRef key, int64 prehash = -1) const;
+  bool exists(litstr  key, bool isString = false) const;
+  bool exists(CStrRef key, bool isString = false) const;
+  bool exists(CVarRef key) const;
 
   template<typename T>
-  void removeImpl(const T &key, int64 prehash) {
+  void removeImpl(const T &key) {
     if (m_px) {
       ArrayData *escalated =
-        m_px->remove(key, (m_px->getCount() > 1), prehash);
+        m_px->remove(key, (m_px->getCount() > 1));
       if (escalated) {
         SmartPtr<ArrayData>::operator=(escalated);
       }
     }
   }
-  void remove(bool    key, int64 prehash = -1) {
-    removeImpl(key ? 1LL : 0LL, prehash);
+  void remove(bool    key) {
+    removeImpl(key ? 1LL : 0LL);
   }
-  void remove(char    key, int64 prehash = -1) {
-    removeImpl((int64)key, prehash);
+  void remove(char    key) {
+    removeImpl((int64)key);
   }
-  void remove(short   key, int64 prehash = -1) {
-    removeImpl((int64)key, prehash);
+  void remove(short   key) {
+    removeImpl((int64)key);
   }
-  void remove(int     key, int64 prehash = -1) {
-    removeImpl((int64)key, prehash);
+  void remove(int     key) {
+    removeImpl((int64)key);
   }
-  void remove(int64   key, int64 prehash = -1) {
-    removeImpl(key, prehash);
+  void remove(int64   key) {
+    removeImpl(key);
   }
-  void remove(double  key, int64 prehash = -1) {
-    removeImpl((int64)key, prehash);
+  void remove(double  key) {
+    removeImpl((int64)key);
   }
-  void remove(litstr  key, int64 prehash = -1, bool isString = false);
-  void remove(CStrRef key, int64 prehash = -1, bool isString = false);
-  void remove(CVarRef key, int64 prehash = -1);
+  void remove(litstr  key, bool isString = false);
+  void remove(CStrRef key, bool isString = false);
+  void remove(CVarRef key);
 
-  void weakRemove(litstr  key, int64 prehash = -1, bool isString = false) {
-    if (m_px) remove(key, prehash, isString);
+  void weakRemove(litstr  key, bool isString = false) {
+    if (m_px) remove(key, isString);
   }
-  void weakRemove(CStrRef key, int64 prehash = -1, bool isString = false) {
-    if (m_px) remove(key, prehash, isString);
+  void weakRemove(CStrRef key, bool isString = false) {
+    if (m_px) remove(key, isString);
   }
 
   template<typename T>
-  void weakRemove(const T &key, int64 prehash = -1) {
-    if (m_px) remove(key, prehash);
+  void weakRemove(const T &key) {
+    if (m_px) remove(key);
   }
 
   void removeAll();
@@ -453,14 +447,13 @@ class Array : public SmartPtr<ArrayData> {
                  PFUNC_CMP value_cmp_function, const void *value_data) const;
 
   template<typename T>
-  Variant &lvalAtImpl(const T &key, int64 prehash = -1,
-                      bool checkExist = false) {
+  Variant &lvalAtImpl(const T &key, bool checkExist = false) {
     if (!m_px) {
       SmartPtr<ArrayData>::operator=(ArrayData::Create());
     }
     Variant *ret = NULL;
     ArrayData *escalated =
-      m_px->lval(key, ret, m_px->getCount() > 1, prehash, checkExist);
+      m_px->lval(key, ret, m_px->getCount() > 1, checkExist);
     if (escalated) {
       SmartPtr<ArrayData>::operator=(escalated);
     }

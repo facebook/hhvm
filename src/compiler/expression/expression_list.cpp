@@ -157,14 +157,14 @@ bool ExpressionList::getScalarValue(Variant &value) {
         Variant v;
         bool ret = val->getScalarValue(v);
         if (!ret) ASSERT(false);
-        init.set(i, v);
+        init.set(v);
       } else {
         Variant n;
         Variant v;
         bool ret1 = name->getScalarValue(n);
         bool ret2 = val->getScalarValue(v);
         if (!(ret1 && ret2)) return ExpressionPtr();
-        init.set(i, n, v);
+        init.set(n, v);
       }
     }
     value = Array(init.create());
@@ -507,11 +507,11 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         ArrayPairExpressionPtr ap =
           dynamic_pointer_cast<ArrayPairExpression>(exp);
         if (ap->isRef()) {
-          cg_printf("setRef(%d, ", i);
+          cg_printf("setRef(");
           // The value itself shouldn't be wrapped with ref() any more.
           ap->getValue()->setContext(NoRefWrapper);
         } else {
-          cg_printf("set(%d, ", i);
+          cg_printf("set(");
         }
         exp->outputCPP(cg, ar);
         cg_printf(")");

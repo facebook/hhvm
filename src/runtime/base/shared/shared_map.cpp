@@ -30,12 +30,11 @@ SharedMap::SharedMap(SharedVariant* source)
 }
 
 
-bool SharedMap::exists(CVarRef k, int64 prehash /* = -1*/) const {
+bool SharedMap::exists(CVarRef k) const {
   return m_arr->exists(k);
 }
 
-Variant SharedMap::get(CVarRef k, int64 prehash /* = -1 */,
-                       bool error /* = false */) const {
+Variant SharedMap::get(CVarRef k, bool error /* = false */) const {
   SharedVariant *sv = m_arr->get(k);
   if (sv) return getLocal(sv);
   if (error) {
@@ -54,10 +53,9 @@ ArrayData *SharedMap::lval(Variant *&ret, bool copy) {
   return escalated;
 }
 ArrayData *SharedMap::lval(int64 k, Variant *&ret, bool copy,
-                           int64 prehash /* = -1 */,
                            bool checkExist /* = false */) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lval(k, ret, false, prehash);
+  ArrayData *ee = escalated->lval(k, ret, false);
   if (ee) {
     escalated->release();
     return ee;
@@ -65,10 +63,9 @@ ArrayData *SharedMap::lval(int64 k, Variant *&ret, bool copy,
   return escalated;
 }
 ArrayData *SharedMap::lval(litstr k, Variant *&ret, bool copy,
-                           int64 prehash /* = -1 */,
                            bool checkExist /* = false */) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lval(k, ret, false, prehash);
+  ArrayData *ee = escalated->lval(k, ret, false);
   if (ee) {
     escalated->release();
     return ee;
@@ -76,10 +73,9 @@ ArrayData *SharedMap::lval(litstr k, Variant *&ret, bool copy,
   return escalated;
 }
 ArrayData *SharedMap::lval(CStrRef k, Variant *&ret, bool copy,
-                           int64 prehash /* = -1 */,
                            bool checkExist /* = false */) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lval(k, ret, false, prehash);
+  ArrayData *ee = escalated->lval(k, ret, false);
   if (ee) {
     escalated->release();
     return ee;
@@ -87,10 +83,9 @@ ArrayData *SharedMap::lval(CStrRef k, Variant *&ret, bool copy,
   return escalated;
 }
 ArrayData *SharedMap::lval(CVarRef k, Variant *&ret, bool copy,
-                           int64 prehash /* = -1 */,
                            bool checkExist /* = false */) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->lval(k, ret, false, prehash);
+  ArrayData *ee = escalated->lval(k, ret, false);
   if (ee) {
     escalated->release();
     return ee;
@@ -98,36 +93,36 @@ ArrayData *SharedMap::lval(CVarRef k, Variant *&ret, bool copy,
   return escalated;
 }
 
-ArrayData *SharedMap::set(int64 k, CVarRef v, bool copy, int64 prehash) {
+ArrayData *SharedMap::set(int64 k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->set(k, v, false, prehash);
+  ArrayData *ee = escalated->set(k, v, false);
   if (ee) {
     escalated->release();
     return ee;
   }
   return escalated;
 }
-ArrayData *SharedMap::set(litstr k, CVarRef v, bool copy, int64 prehash) {
+ArrayData *SharedMap::set(litstr k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->set(k, v, false, prehash);
+  ArrayData *ee = escalated->set(k, v, false);
   if (ee) {
     escalated->release();
     return ee;
   }
   return escalated;
 }
-ArrayData *SharedMap::set(CStrRef k, CVarRef v, bool copy, int64 prehash) {
+ArrayData *SharedMap::set(CStrRef k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->set(k, v, false, prehash);
+  ArrayData *ee = escalated->set(k, v, false);
   if (ee) {
     escalated->release();
     return ee;
   }
   return escalated;
 }
-ArrayData *SharedMap::set(CVarRef k, CVarRef v, bool copy, int64 prehash) {
+ArrayData *SharedMap::set(CVarRef k, CVarRef v, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->set(k, v, false, prehash);
+  ArrayData *ee = escalated->set(k, v, false);
   if (ee) {
     escalated->release();
     return ee;
@@ -135,36 +130,36 @@ ArrayData *SharedMap::set(CVarRef k, CVarRef v, bool copy, int64 prehash) {
   return escalated;
 }
 
-ArrayData *SharedMap::remove(int64 k, bool copy, int64 prehash /* = -1 */) {
+ArrayData *SharedMap::remove(int64 k, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->remove(k, false, prehash);
+  ArrayData *ee = escalated->remove(k, false);
   if (ee) {
     escalated->release();
     return ee;
   }
   return escalated;
 }
-ArrayData *SharedMap::remove(litstr k, bool copy, int64 prehash /* = -1 */) {
+ArrayData *SharedMap::remove(litstr k, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->remove(k, false, prehash);
+  ArrayData *ee = escalated->remove(k, false);
   if (ee) {
     escalated->release();
     return ee;
   }
   return escalated;
 }
-ArrayData *SharedMap::remove(CStrRef k, bool copy, int64 prehash /* = -1 */) {
+ArrayData *SharedMap::remove(CStrRef k, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->remove(k, false, prehash);
+  ArrayData *ee = escalated->remove(k, false);
   if (ee) {
     escalated->release();
     return ee;
   }
   return escalated;
 }
-ArrayData *SharedMap::remove(CVarRef k, bool copy, int64 prehash /* = -1 */) {
+ArrayData *SharedMap::remove(CVarRef k, bool copy) {
   ArrayData *escalated = escalate();
-  ArrayData *ee = escalated->remove(k, false, prehash);
+  ArrayData *ee = escalated->remove(k, false);
   if (ee) {
     escalated->release();
     return ee;

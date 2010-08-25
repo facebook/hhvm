@@ -289,10 +289,10 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
   ArrayInit ai(count, getIsVector(), keepRef);
   for (uint i = 0; i < count; i++) {
     if (getIsVector()) {
-      ai.set(i, (int64)i, sharedMap.getValue(i), -1, true);
+      ai.set((int64)i, sharedMap.getValue(i), true);
     } else {
-      ai.set(i, m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
-             -1, true);
+      ai.set(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
+             true);
     }
   }
   elems = ai.create();

@@ -20,13 +20,13 @@ namespace HPHP {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-ssize_t GlobalArrayWrapper::getIndex(CVarRef k,
-                                     int64 prehash /* = -1*/) const {
+ssize_t GlobalArrayWrapper::getIndex(CVarRef k) const {
   if (k.isInteger()) {
-    return ((Array*)m_globals)->get()->getIndex(k.toInt64(), prehash) +
+    return ((Array*)m_globals)->get()->getIndex(k.toInt64()) +
       m_globals->size();
   }
-  return m_globals->getIndex(k.toString().data(), prehash);
+  String s = k.toString();
+  return m_globals->getIndex(s.data(), s->hash());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

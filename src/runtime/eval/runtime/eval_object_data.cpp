@@ -103,8 +103,8 @@ Array EvalObjectData::o_toArray() const {
 bool EvalObjectData::o_exists(CStrRef s,
                               CStrRef context /* = null_string */) const {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  return (m_privates.exists(c, -1, true) &&
-          m_privates.rvalAt(c, -1, false, true).getArrayData()
+  return (m_privates.exists(c, true) &&
+          m_privates.rvalAt(c, false, true).getArrayData()
               ->exists(s)) ||
          DynamicObjectData::o_exists(s, c);
 }
@@ -141,9 +141,9 @@ void EvalObjectData::o_setArray(CArrRef props) {
 Variant EvalObjectData::o_get(CStrRef s, bool error /* = true */,
                               CStrRef context /* = null_string */) {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  Variant priv = m_privates.rvalAt(c, -1, false, true);
+  Variant priv = m_privates.rvalAt(c, false, true);
   if (priv.is(KindOfArray) && priv.getArrayData()->exists(s)) {
-    return priv.rvalAt(s, -1, false, true);
+    return priv.rvalAt(s, false, true);
   }
   int mods;
   if (!m_cls.getClass()->attemptPropertyAccess(s, c, mods)) {
@@ -159,9 +159,9 @@ Variant EvalObjectData::o_get(CStrRef s, bool error /* = true */,
 Variant EvalObjectData::o_getUnchecked(CStrRef s,
                                        CStrRef context /* = null_string */) {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  Variant priv = m_privates.rvalAt(c, -1, false, true);
+  Variant priv = m_privates.rvalAt(c, false, true);
   if (priv.is(KindOfArray) && priv.getArrayData()->exists(s)) {
-    return priv.rvalAt(s, -1, false, true);
+    return priv.rvalAt(s, false, true);
   }
   return DynamicObjectData::o_get(s, true, c);
 }
@@ -170,10 +170,10 @@ Variant EvalObjectData::o_getUnchecked(CStrRef s,
 Variant &EvalObjectData::o_lval(CStrRef s,
                                 CStrRef context /* = null_string */) {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  if (m_privates.exists(c, -1, true)) {
-    Variant &priv = m_privates.lvalAt(c, -1, false, true);
+  if (m_privates.exists(c, true)) {
+    Variant &priv = m_privates.lvalAt(c, false, true);
     if (priv.getArrayData()->exists(s)) {
-      return priv.lvalAt(s, -1, false, true);
+      return priv.lvalAt(s, false, true);
     }
   }
   int mods;
@@ -186,10 +186,10 @@ Variant &EvalObjectData::o_lval(CStrRef s,
 Variant EvalObjectData::o_set(CStrRef s, CVarRef v, bool forInit /* = false */,
                               CStrRef context /* = null_string */) {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  if (m_privates.exists(c, -1, true)) {
-    Variant &priv = m_privates.lvalAt(c, -1, false, true);
+  if (m_privates.exists(c, true)) {
+    Variant &priv = m_privates.lvalAt(c, false, true);
     if (priv.is(KindOfArray) && priv.getArrayData()->exists(s)) {
-      return priv.set(s, v, -1, true);
+      return priv.set(s, v, true);
     }
   }
   int mods;

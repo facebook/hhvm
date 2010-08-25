@@ -70,7 +70,6 @@ Variant f_apc_fetch(CVarRef key, Variant success /* = null */,
     bool tmp = false;
     Array keys = key.toArray();
     ArrayInit init(keys.size(), false);
-    int i = 0;
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
@@ -80,7 +79,7 @@ Variant f_apc_fetch(CVarRef key, Variant success /* = null */,
       String strKey = k.toString();
       if (s_apc_store[cache_id].get(strKey, v)) {
         tmp = true;
-        init.set(i++, strKey, v, -1, true);
+        init.set(strKey, v, true);
       }
     }
     success = tmp;
@@ -107,14 +106,13 @@ Variant f_apc_delete(CVarRef key, int64 cache_id /* = 0 */) {
   if (key.is(KindOfArray)) {
     Array keys = key.toArray();
     ArrayInit init(keys.size(), true);
-    int i = 0;
     for (ArrayIter iter(keys); iter; ++iter) {
       Variant k = iter.second();
       if (!k.isString()) {
         raise_warning("apc key is not a string");
-        init.set(i++, k);
+        init.set(k);
       } else if (!s_apc_store[cache_id].erase(k.toString())) {
-        init.set(i++, k);
+        init.set(k);
       }
     }
     return init.create();

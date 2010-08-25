@@ -993,12 +993,6 @@ bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
   if (off) {
     ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(off);
     if (sc) {
-      int64 hash = sc->getHash();
-      if (hash >= 0) {
-        cg_printf(", 0x%016llXLL", hash);
-      } else {
-        cg_printf(", -1");
-      }
       if (sc->isLiteralString()) {
         String s(sc->getLiteralString());
         int64 n;

@@ -92,14 +92,14 @@ bool Test::logTestResults(std::string name, std::string details, int pass,
   }
 
   ArrayInit data(8, false);
-  data.set(0, "type",         "hphp");
-  data.set(1, "name",         name);
-  data.set(2, "contacts",     null_array);
-  data.set(3, "endedTime",    time(NULL));
-  data.set(4, "durationSecs", mseconds / 1000.0);
-  data.set(5, "status",       status);
-  data.set(6, "summary",      std::string(summary));
-  data.set(7, "details",      details);
+  data.set("type",         "hphp");
+  data.set("name",         name);
+  data.set("contacts",     null_array);
+  data.set("endedTime",    time(NULL));
+  data.set("durationSecs", mseconds / 1000.0);
+  data.set("status",       status);
+  data.set("summary",      std::string(summary));
+  data.set("details",      details);
 
   if (!logger.logTest(Array(data.create()))) {
     printf("WARNING: Logging %s failed\n", name.c_str());

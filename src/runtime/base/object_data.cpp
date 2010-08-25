@@ -144,7 +144,7 @@ bool ObjectData::o_exists(CStrRef propName,
 bool ObjectData::o_existsPublic(CStrRef propName) const {
   return propName.size() > 0 && o_properties &&
          // object properties are always strings
-         o_properties->exists(propName, -1, true);
+         o_properties->exists(propName, true);
 }
 
 Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
@@ -157,8 +157,8 @@ Variant ObjectData::o_getPublic(CStrRef propName, bool error /* = true */) {
   if (propName.size() == 0) {
     return null;
   }
-  if (o_properties && o_properties->exists(propName, -1, true)) {
-    return o_properties->rvalAt(propName, -1, false, true);
+  if (o_properties && o_properties->exists(propName, true)) {
+    return o_properties->rvalAt(propName, false, true);
   }
   if (getAttribute(InGet)) {
     return ObjectData::doGet(propName, error);
@@ -233,7 +233,7 @@ Variant &ObjectData::o_lvalPublic(CStrRef propName) {
     throw EmptyObjectPropertyException();
   }
   if (o_properties) {
-    return o_properties->lvalAt(propName, -1, false, true);
+    return o_properties->lvalAt(propName, false, true);
   }
   return ___lval(propName);
 }
@@ -331,7 +331,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
     if (visible && o_propExists(prop->name, context)) {
       if (getRef) {
         Variant &ov = o_lval(prop->name, context);
-        Variant &av = ret.lvalAt(prop->name, -1, false, true);
+        Variant &av = ret.lvalAt(prop->name, false, true);
         av = ref(ov);
       } else {
         ret.set(prop->name, o_getUnchecked(prop->name,
@@ -347,7 +347,7 @@ Array ObjectData::o_toIterArray(CStrRef context,
         String key = iter.first().toString();
         if (dynamics->exists(key)) {
           CVarRef value = iter.secondRef();
-          Variant &av = ret.lvalAt(key, -1, false, true);
+          Variant &av = ret.lvalAt(key, false, true);
           av = ref(value);
         }
       }
@@ -476,58 +476,58 @@ Variant ObjectData::o_invoke_few_args(MethodIndex methodIndex, const char *s,
     return ObjectData::o_invoke(methodIndex, s, Array(), hash);
   }
   case 1: {
-    Array params(ArrayInit(1, true).set(0, a0).create());
+    Array params(ArrayInit(1, true).set(a0).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 2: {
-    Array params(ArrayInit(2, true).set(0, a0).set(1, a1).create());
+    Array params(ArrayInit(2, true).set(a0).set(a1).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 3: {
-    Array params(ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
+    Array params(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
-    Array params(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).create());
+    Array params(ArrayInit(4, true).set(a0).set(a1).set(a2).
+                                    set(a3).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 5: {
-    Array params(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).create());
+    Array params(ArrayInit(5, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 6: {
-    Array params(ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).create());
+    Array params(ArrayInit(6, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
   case 7: {
-    Array params(ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).create());
+    Array params(ArrayInit(7, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 8: {
-    Array params(ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).create());
+    Array params(ArrayInit(8, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 9: {
-    Array params(ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).set(8, a8).create());
+    Array params(ArrayInit(9, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).set(a8).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
   case 10: {
-    Array params(ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
-                                     set(3, a3).set(4, a4).set(5, a5).
-                                     set(6, a6).set(7, a7).set(8, a8).
-                                     set(9, a9).create());
+    Array params(ArrayInit(10, true).set(a0).set(a1).set(a2).
+                                     set(a3).set(a4).set(a5).
+                                     set(a6).set(a7).set(a8).
+                                     set(a9).create());
     return ObjectData::o_invoke(methodIndex, s, params, hash);
   }
 #endif
@@ -543,49 +543,49 @@ Array ObjectData::collectArgs(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
     return Array();
   }
   case 1: {
-    return Array (ArrayInit(1, true).set(0, a0).create());
+    return Array(ArrayInit(1, true).set(a0).create());
   }
   case 2: {
-    return Array (ArrayInit(2, true).set(0, a0).set(1, a1).create());
+    return Array(ArrayInit(2, true).set(a0).set(a1).create());
   }
   case 3: {
-    return Array (ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
+    return Array(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
-    return Array (ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).create());
+    return Array(ArrayInit(4, true).set(a0).set(a1).set(a2).
+                                    set(a3).create());
   }
   case 5: {
-    return Array(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).create());
+    return Array(ArrayInit(5, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).create());
   }
   case 6: {
-    return Array (ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).create());
+    return Array(ArrayInit(6, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).create());
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
   case 7: {
-    return Array (ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).create());
+    return Array(ArrayInit(7, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).create());
   }
   case 8: {
-    return Array (ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).create());
+    return Array(ArrayInit(8, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).create());
   }
   case 9: {
-    return Array (ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).set(8, a8).create());
+    return Array(ArrayInit(9, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).set(a8).create());
   }
   case 10: {
-    return Array (ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
-                                     set(3, a3).set(4, a4).set(5, a5).
-                                     set(6, a6).set(7, a7).set(8, a8).
-                                     set(9, a9).create());
+    return Array(ArrayInit(10, true).set(a0).set(a1).set(a2).
+                                     set(a3).set(a4).set(a5).
+                                     set(a6).set(a7).set(a8).
+                                     set(a9).create());
   }
 #endif
   default:
@@ -791,9 +791,9 @@ Variant ObjectData::t___set(Variant v_name, Variant v_value) {
     o_properties = NEW(Array)();
   }
   if (v_value.isReferenced()) {
-    o_properties->set(v_name, ref(v_value), -1, true);
+    o_properties->set(v_name, ref(v_value), true);
   } else {
-    o_properties->set(v_name, v_value, -1, true);
+    o_properties->set(v_name, v_value, true);
   }
   return null;
 }
@@ -809,7 +809,7 @@ Variant &ObjectData::___lval(Variant v_name) {
     // element in properties array
     o_properties = NEW(Array)();
   }
-  return o_properties->lvalAt(v_name, -1, false, true);
+  return o_properties->lvalAt(v_name, false, true);
 }
 Variant &ObjectData::___offsetget_lval(Variant v_name) {
   return ___lval(v_name);
@@ -821,8 +821,8 @@ bool ObjectData::t___isset(Variant v_name) {
 Variant ObjectData::t___unset(Variant v_name) {
   String sname = v_name.toString();
   unset(o_lval(sname));
-  if (o_properties && o_properties->exists(sname, -1, true)) {
-    o_properties->weakRemove(sname, -1, true);
+  if (o_properties && o_properties->exists(sname, true)) {
+    o_properties->weakRemove(sname, true);
   }
   return null;
 }

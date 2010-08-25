@@ -118,23 +118,23 @@ class ArrayData : public Countable {
   /**
    * Testing whether a key exists.
    */
-  virtual bool exists(int64   k, int64 prehash = -1) const = 0;
-  virtual bool exists(litstr  k, int64 prehash = -1) const = 0;
-  virtual bool exists(CStrRef k, int64 prehash = -1) const = 0;
-  virtual bool exists(CVarRef k, int64 prehash = -1) const = 0;
+  virtual bool exists(int64   k) const = 0;
+  virtual bool exists(litstr  k) const = 0;
+  virtual bool exists(CStrRef k) const = 0;
+  virtual bool exists(CVarRef k) const = 0;
 
   virtual bool idxExists(ssize_t idx) const = 0;
 
   /**
    * Getting value at specified key.
    */
-  virtual Variant get(int64   k, int64 prehash = -1,
+  virtual Variant get(int64   k,
                       bool error = false) const = 0;
-  virtual Variant get(litstr  k, int64 prehash = -1,
+  virtual Variant get(litstr  k,
                       bool error = false) const = 0;
-  virtual Variant get(CStrRef k, int64 prehash = -1,
+  virtual Variant get(CStrRef k,
                       bool error = false) const = 0;
-  virtual Variant get(CVarRef k, int64 prehash = -1,
+  virtual Variant get(CVarRef k,
                       bool error = false) const = 0;
 
   /**
@@ -147,10 +147,10 @@ class ArrayData : public Countable {
    * Get the numeric index for a key. Only these need to be
    * in ArrayData.
    */
-  virtual ssize_t getIndex(int64 k, int64 prehash = -1) const = 0;
-  virtual ssize_t getIndex(litstr k, int64 prehash = -1) const = 0;
-  virtual ssize_t getIndex(CStrRef k, int64 prehash = -1) const = 0;
-  virtual ssize_t getIndex(CVarRef k, int64 prehash = -1) const = 0;
+  virtual ssize_t getIndex(int64 k) const = 0;
+  virtual ssize_t getIndex(litstr k) const = 0;
+  virtual ssize_t getIndex(CStrRef k) const = 0;
+  virtual ssize_t getIndex(CVarRef k) const = 0;
 
   /**
    * Getting l-value (that Variant pointer) at specified key. Return NULL if
@@ -158,37 +158,33 @@ class ArrayData : public Countable {
    */
   virtual ArrayData *lval(Variant *&ret, bool copy) = 0;
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          int64 prehash = -1, bool checkExist = false) = 0;
+                          bool checkExist = false) = 0;
 
   /**
    * Setting a value at specified key. If "copy" is true, make a copy first
    * then set the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *set(int64   k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *set(litstr  k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *set(CStrRef k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *set(CVarRef k, CVarRef v,
-                         bool copy, int64 prehash = -1) = 0;
+  virtual ArrayData *set(int64   k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(litstr  k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) = 0;
+  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) = 0;
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first
    * then remove the value. Return NULL if escalation is not needed, or an
    * escalated array data.
    */
-  virtual ArrayData *remove(int64   k, bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *remove(litstr  k, bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *remove(CStrRef k, bool copy, int64 prehash = -1) = 0;
-  virtual ArrayData *remove(CVarRef k, bool copy, int64 prehash = -1) = 0;
+  virtual ArrayData *remove(int64   k, bool copy) = 0;
+  virtual ArrayData *remove(litstr  k, bool copy) = 0;
+  virtual ArrayData *remove(CStrRef k, bool copy) = 0;
+  virtual ArrayData *remove(CVarRef k, bool copy) = 0;
 
   virtual ssize_t iter_begin() const;
   virtual ssize_t iter_end() const;

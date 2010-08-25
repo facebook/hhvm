@@ -102,8 +102,8 @@ Variant DynamicObjectData::o_get(CStrRef propName, bool error /* = true */,
       return null;
     }
     // property names are definitely strings
-    if (o_properties && o_properties->exists(propName, -1, true)) {
-      return o_properties->rvalAt(propName, -1, false, true);
+    if (o_properties && o_properties->exists(propName, true)) {
+      return o_properties->rvalAt(propName, false, true);
     }
     if (root->getAttribute(InGet)) {
       return ObjectData::doGet(propName, error);
@@ -138,8 +138,8 @@ Variant DynamicObjectData::o_set(CStrRef propName, CVarRef v,
     if (propName.size() == 0) {
       throw EmptyObjectPropertyException();
     }
-    if (o_properties && o_properties->exists(propName, -1, true)) {
-      o_properties->set(propName, v, -1, true);
+    if (o_properties && o_properties->exists(propName, true)) {
+      o_properties->set(propName, v, true);
       return v;
     }
     if (forInit || root->getAttribute(InSet)) {
@@ -156,8 +156,8 @@ Variant &DynamicObjectData::o_lval(CStrRef propName,
   if (!parent.isNull()) {
     return parent->o_lval(propName, context);
   } else {
-    if (o_properties && o_properties->exists(propName, -1, true)) {
-      return o_properties->lvalAt(propName, -1, false, true);
+    if (o_properties && o_properties->exists(propName, true)) {
+      return o_properties->lvalAt(propName, false, true);
     }
     return root->___lval(propName);
   }

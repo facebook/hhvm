@@ -59,8 +59,7 @@ Array Globals::getDynamicConstants() const {
 }
 
 bool Globals::function_exists(CStrRef name) {
-  return m_volatileFunctions.exists(Util::toLower(name.data()).c_str(),
-                                    name->hash(), true);
+  return m_volatileFunctions.exists(Util::toLower(name.data()).c_str(), true);
 }
 
 bool Globals::class_exists(const char *name) {
@@ -82,7 +81,7 @@ CVarRef Globals::getRefByIdx(ssize_t pos, Variant& k) {
   throw FatalErrorException("bad code generation");
 }
 ssize_t Globals::getIndex(const char* s, int64 prehash) const {
-  return Array::get()->getIndex(s, prehash);
+  return Array::get()->getIndex(s);
 }
 ssize_t Globals::size() const {
   return staticSize() + Array::size();

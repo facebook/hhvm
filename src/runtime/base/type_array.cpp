@@ -368,95 +368,86 @@ void Array::escalate(bool mutableIteration /* = false */) {
 ///////////////////////////////////////////////////////////////////////////////
 // offset functions
 
-Variant Array::rvalAt(bool key, int64 prehash /* = -1 */,
-                      bool error /* = false*/) const {
-  if (m_px) return m_px->get(key ? 1LL : 0LL, prehash, error);
+Variant Array::rvalAt(bool key, bool error /* = false*/) const {
+  if (m_px) return m_px->get(key ? 1LL : 0LL, error);
   return null_variant;
 }
 
-Variant Array::rvalAt(char key, int64 prehash /* = -1 */,
-                      bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, prehash, error);
+Variant Array::rvalAt(char key, bool error /* = false */) const {
+  if (m_px) return m_px->get((int64)key, error);
   return null_variant;
 }
 
-Variant Array::rvalAt(short key, int64 prehash /* = -1 */,
-                      bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, prehash, error);
+Variant Array::rvalAt(short key, bool error /* = false */) const {
+  if (m_px) return m_px->get((int64)key, error);
   return null_variant;
 }
 
-Variant Array::rvalAt(int key, int64 prehash /* = -1 */,
-                      bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, prehash, error);
+Variant Array::rvalAt(int key, bool error /* = false */) const {
+  if (m_px) return m_px->get((int64)key, error);
   return null_variant;
 }
 
-Variant Array::rvalAt(int64 key, int64 prehash /* = -1 */,
-                      bool error /* = false */) const {
-  if (m_px) return m_px->get(key, prehash, error);
+Variant Array::rvalAt(int64 key, bool error /* = false */) const {
+  if (m_px) return m_px->get(key, error);
   return null_variant;
 }
 
-Variant Array::rvalAt(double key, int64 prehash /* = -1 */,
-                      bool error /* = false */) const {
-  if (m_px) return m_px->get((int64)key, prehash, error);
+Variant Array::rvalAt(double key, bool error /* = false */) const {
+  if (m_px) return m_px->get((int64)key, error);
   return null_variant;
 }
 
-Variant Array::rvalAt(litstr key, int64 prehash /* = -1 */,
-                      bool error /* = false */,
+Variant Array::rvalAt(litstr key, bool error /* = false */,
                       bool isString /* = false */) const {
   if (m_px) {
-    if (isString) return m_px->get(key, prehash, error);
+    if (isString) return m_px->get(key, error);
     int64 n;
     int len = strlen(key);
     if (!is_strictly_integer(key, len, n)) {
-      return m_px->get(key, prehash, error);
+      return m_px->get(key, error);
     } else {
-      return m_px->get(n, prehash, error);
+      return m_px->get(n, error);
     }
   }
   return null_variant;
 }
 
-Variant Array::rvalAt(CStrRef key, int64 prehash /* = -1 */,
-                      bool error /* = false */,
+Variant Array::rvalAt(CStrRef key, bool error /* = false */,
                       bool isString /* = false */) const {
   if (m_px) {
-    if (isString) return m_px->get(key, prehash, error);
-    if (key.isNull()) return m_px->get(empty_string, -1, error);
+    if (isString) return m_px->get(key, error);
+    if (key.isNull()) return m_px->get(empty_string, error);
     int64 n;
     if (!key->isStrictlyInteger(n)) {
-      return m_px->get(key, prehash, error);
+      return m_px->get(key, error);
     } else {
-      return m_px->get(n, prehash, error);
+      return m_px->get(n, error);
     }
   }
   return null_variant;
 }
 
-Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
-                      bool error /* = false*/) const {
+Variant Array::rvalAt(CVarRef key, bool error /* = false*/) const {
   if (!m_px) return null_variant;
   switch (key.m_type) {
   case KindOfNull:
-    return m_px->get(empty_string, prehash, error);
+    return m_px->get(empty_string, error);
   case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    return m_px->get(key.m_data.num, prehash, error);
+    return m_px->get(key.m_data.num, error);
   case KindOfDouble:
-    return m_px->get((int64)key.m_data.dbl, prehash, error);
+    return m_px->get((int64)key.m_data.dbl, error);
   case KindOfStaticString:
   case KindOfString: {
     int64 n;
     if (key.m_data.pstr->isStrictlyInteger(n)) {
-      return m_px->get(n, prehash, error);
+      return m_px->get(n, error);
     } else {
-      return m_px->get(String(key.m_data.pstr), prehash, error);
+      return m_px->get(String(key.m_data.pstr), error);
     }
   }
   case KindOfArray:
@@ -464,12 +455,12 @@ Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
     break;
   case KindOfObject:
     if (key.isResource()) {
-      return m_px->get(key.toInt64(), prehash, error);
+      return m_px->get(key.toInt64(), error);
     }
     throw_bad_type_exception("Invalid type used as key");
     break;
   case KindOfVariant:
-    return rvalAt(*(key.m_data.pvar), prehash, error);
+    return rvalAt(*(key.m_data.pvar), error);
   default:
     ASSERT(false);
     break;
@@ -477,51 +468,45 @@ Variant Array::rvalAt(CVarRef key, int64 prehash /* = -1 */,
   return null_variant;
 }
 
-Variant &Array::lvalAt(litstr  key, int64 prehash /* = -1 */,
-                       bool checkExist /* = false */,
+Variant &Array::lvalAt(litstr  key, bool checkExist /* = false */,
                        bool isString /* = false */) {
-  if (isString) return lvalAtImpl(String(key), prehash, checkExist);
-  return lvalAtImpl(String(key).toKey(), prehash, checkExist);
+  if (isString) return lvalAtImpl(String(key), checkExist);
+  return lvalAtImpl(String(key).toKey(), checkExist);
 }
-Variant &Array::lvalAt(CStrRef key, int64 prehash /* = -1 */,
-                       bool checkExist /* = false */,
+Variant &Array::lvalAt(CStrRef key, bool checkExist /* = false */,
                        bool isString /* = false */) {
-  if (isString) return lvalAtImpl(key, prehash, checkExist);
-  return lvalAtImpl(key.toKey(), prehash, checkExist);
+  if (isString) return lvalAtImpl(key, checkExist);
+  return lvalAtImpl(key.toKey(), checkExist);
 }
-Variant &Array::lvalAt(CVarRef key, int64 prehash /* = -1 */,
-                       bool checkExist /* = false */) {
+Variant &Array::lvalAt(CVarRef key, bool checkExist /* = false */) {
   Variant k(key.toKey());
   if (!k.isNull()) {
-    return lvalAtImpl(k, prehash, checkExist);
+    return lvalAtImpl(k, checkExist);
   }
   return Variant::lvalBlackHole();
 }
 
-CVarRef Array::set(litstr  key, CVarRef v, int64 prehash /* = -1 */,
-                   bool isString /* = false */) {
-  if (isString) return setImpl(String(key), v, prehash);
-  return setImpl(String(key).toKey(), v, prehash);
+CVarRef Array::set(litstr  key, CVarRef v, bool isString /* = false */) {
+  if (isString) return setImpl(String(key), v);
+  return setImpl(String(key).toKey(), v);
 }
-CVarRef Array::set(CStrRef key, CVarRef v, int64 prehash /* = -1 */,
-                   bool isString /* = false */) {
-  if (isString) return setImpl(key, v, prehash);
-  return setImpl(key.toKey(), v, prehash);
+CVarRef Array::set(CStrRef key, CVarRef v, bool isString /* = false */) {
+  if (isString) return setImpl(key, v);
+  return setImpl(key.toKey(), v);
 }
 
-CVarRef Array::set(CVarRef key, CVarRef v, int64 prehash /* = -1 */) {
+CVarRef Array::set(CVarRef key, CVarRef v) {
   if (key.getRawType() == KindOfInt64)
-    return setImpl(key.getNumData(), v, prehash);
+    return setImpl(key.getNumData(), v);
   Variant k(key.toKey());
   if (!k.isNull()) {
-    return setImpl(k, v, prehash);
+    return setImpl(k, v);
   }
   return null_variant;
 }
 
-Variant Array::refvalAt(CStrRef key, int64 prehash /* = -1 */,
-                        bool isString /* = false */) {
-  return ref(lvalAt(key, prehash, false, isString));
+Variant Array::refvalAt(CStrRef key, bool isString /* = false */) {
+  return ref(lvalAt(key, false, isString));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -574,68 +559,64 @@ Array Array::values() const {
   return ret;
 }
 
-bool Array::exists(litstr key, int64 prehash /* = -1 */,
-                   bool isString /* = false */) const {
-  if (isString) return existsImpl(key, prehash);
-  return existsImpl(String(key).toKey(), prehash);
+bool Array::exists(litstr key, bool isString /* = false */) const {
+  if (isString) return existsImpl(key);
+  return existsImpl(String(key).toKey());
 }
 
-bool Array::exists(CStrRef key, int64 prehash /* = -1 */,
-                   bool isString /* = false */) const {
-  if (isString) return existsImpl(key, prehash);
-  return existsImpl(key.toKey(), prehash);
+bool Array::exists(CStrRef key, bool isString /* = false */) const {
+  if (isString) return existsImpl(key);
+  return existsImpl(key.toKey());
 }
 
-bool Array::exists(CVarRef key, int64 prehash /* = -1 */) const {
+bool Array::exists(CVarRef key) const {
   switch(key.getType()) {
   case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    return existsImpl(key.toInt64(), prehash);
+    return existsImpl(key.toInt64());
   default:
     break;
   }
   Variant k(key.toKey());
   if (!k.isNull()) {
-    return existsImpl(k, prehash);
+    return existsImpl(k);
   }
   return false;
 }
 
-void Array::remove(litstr  key, int64 prehash /* = -1 */,
-                   bool isString /* = false */) {
+void Array::remove(litstr  key, bool isString /* = false */) {
   if (isString) {
-    removeImpl(key, prehash);
+    removeImpl(key);
   } else {
-    removeImpl(String(key).toKey(), prehash);
+    removeImpl(String(key).toKey());
   }
 }
-void Array::remove(CStrRef key, int64 prehash /* = -1 */,
-                   bool isString /* = false */) {
+void Array::remove(CStrRef key, bool isString /* = false */) {
   if (isString) {
-    removeImpl(key, prehash);
+    removeImpl(key);
   } else {
-    removeImpl(key.toKey(), prehash);
+    removeImpl(key.toKey());
   }
 }
 
-void Array::remove(CVarRef key, int64 prehash /* = -1 */) {
+void Array::remove(CVarRef key) {
   switch(key.getType()) {
   case KindOfBoolean:
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    removeImpl(key.toInt64(), prehash);
+    removeImpl(key.toInt64());
     return;
   default:
     break;
   }
   Variant k(key.toKey());
   if (!k.isNull()) {
-    removeImpl(k, prehash);
+    removeImpl(k);
   }
 }
 
@@ -759,7 +740,7 @@ void Array::unserialize(VariableUnserializer *unserializer) {
     for (int64 i = 0; i < size; i++) {
       Variant key(unserializer->unserializeKey());
       Variant &value =
-        key.isString() ? lvalAt(key.toString(), -1, false, true)
+        key.isString() ? lvalAt(key.toString(), false, true)
                        : lvalAt(key);
       value.unserialize(unserializer);
     }

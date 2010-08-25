@@ -455,48 +455,46 @@ String concat_assign(ObjectOffset v1, CStrRef s2) {
   return s1;
 }
 
-bool empty(CVarRef v, bool    offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, bool    offset) {
+  return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, char    offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, char    offset) {
+  return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, short   offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, short   offset) {
+  return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, int     offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, int     offset) {
+  return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, int64   offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, int64   offset) {
+  return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, double  offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, double  offset) {
+  return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, CArrRef offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, CArrRef offset) {
+  return empty(v, Variant(offset));
 }
-bool empty(CVarRef v, CObjRef offset, int64 prehash /* = -1 */) {
-  return empty(v, Variant(offset), prehash);
+bool empty(CVarRef v, CObjRef offset) {
+  return empty(v, Variant(offset));
 }
 
-bool empty(CVarRef v, litstr offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool empty(CVarRef v, litstr offset, bool isString /* = false */) {
   if (!v.isArray()) {
-    return empty(v, Variant(offset), prehash);
+    return empty(v, Variant(offset));
   }
-  return !toBoolean(v.rvalAt(offset, prehash, false, isString));
+  return !toBoolean(v.rvalAt(offset, false, isString));
 }
 
-bool empty(CVarRef v, CStrRef offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool empty(CVarRef v, CStrRef offset, bool isString /* = false */) {
   if (!v.isArray()) {
-    return empty(v, Variant(offset), prehash);
+    return empty(v, Variant(offset));
   }
-  return !toBoolean(v.rvalAt(offset, prehash, false, isString));
+  return !toBoolean(v.rvalAt(offset, false, isString));
 }
 
-bool empty(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
+bool empty(CVarRef v, CVarRef offset) {
   if (v.is(KindOfObject)) {
     if (!v.getArrayAccess()->o_invoke(s_offsetExists, Array::Create(offset))) {
       return true;
@@ -508,35 +506,35 @@ bool empty(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
       return true;
     }
   }
-  return !toBoolean(v.rvalAt(offset, prehash));
+  return !toBoolean(v.rvalAt(offset));
 }
 
-bool isset(CVarRef v, bool    offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, bool    offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, char    offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, char    offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, short   offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, short   offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, int     offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, int     offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, int64   offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, int64   offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, double  offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, double  offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, CArrRef offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, CArrRef offset) {
+  return isset(v, Variant(offset));
 }
-bool isset(CVarRef v, CObjRef offset, int64 prehash /* = -1 */) {
-  return isset(v, Variant(offset), prehash);
+bool isset(CVarRef v, CObjRef offset) {
+  return isset(v, Variant(offset));
 }
 
-bool isset(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
+bool isset(CVarRef v, CVarRef offset) {
   if (v.is(KindOfObject)) {
     return v.getArrayAccess()->o_invoke(s_offsetExists,
                                         Array::Create(offset), -1);
@@ -545,23 +543,21 @@ bool isset(CVarRef v, CVarRef offset, int64 prehash /* = -1 */) {
     int pos = offset.toInt32();
     return pos >= 0 && pos < v.toString().size();
   }
-  return isset(v.rvalAt(offset, prehash));
+  return isset(v.rvalAt(offset));
 }
 
-bool isset(CVarRef v, litstr offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool isset(CVarRef v, litstr offset, bool isString /* = false */) {
   if (v.is(KindOfObject) || v.isString()) {
-    return isset(v, Variant(offset), prehash);
+    return isset(v, Variant(offset));
   }
-  return isset(v.rvalAt(offset, prehash, false, isString));
+  return isset(v.rvalAt(offset, false, isString));
 }
 
-bool isset(CVarRef v, CStrRef offset, int64 prehash /* = -1 */,
-           bool isString /* = false */) {
+bool isset(CVarRef v, CStrRef offset, bool isString /* = false */) {
   if (v.is(KindOfObject) || v.isString()) {
-    return isset(v, Variant(offset), prehash);
+    return isset(v, Variant(offset));
   }
-  return isset(v.rvalAt(offset, prehash, false, isString));
+  return isset(v.rvalAt(offset, false, isString));
 }
 
 String get_source_filename(litstr path) {

@@ -253,17 +253,17 @@ bool TestExtMailparse::test_mailparse_msg_get_part() {
                      "from 66.178.40.49 by BAY116-DAV8.phx.gbl with DAV;");
     VS(info,
        Array(ArrayInit(11, false).
-             set(0, "headers", CREATE_MAP1("received", received)).
-             set(1, "starting-pos", 0).
-             set(2, "starting-pos-body", 200).
-             set(3, "ending-pos", 200).
-             set(4, "ending-pos-body", 200).
-             set(5, "line-count", 6).
-             set(6, "body-line-count", 0).
-             set(7, "charset", "us-ascii").
-             set(8, "transfer-encoding", "8bit").
-             set(9, "content-type", "text/plain").
-             set(10, "content-base", "/").
+             set("headers", CREATE_MAP1("received", received)).
+             set("starting-pos", 0).
+             set("starting-pos-body", 200).
+             set("ending-pos", 200).
+             set("ending-pos-body", 200).
+             set("line-count", 6).
+             set("body-line-count", 0).
+             set("charset", "us-ascii").
+             set("transfer-encoding", "8bit").
+             set("content-type", "text/plain").
+             set("content-base", "/").
              create()));
   }
 

@@ -64,11 +64,12 @@ private:
                           const std::string &subsymbol);
   static bool TryProperty(StringBuffer &sb, CArrRef info,
                           const std::string &subsymbol);
-  static bool TryMethod(StringBuffer &sb, CArrRef info, std::string subsymbol);
+  static bool TryMethod(DebuggerClient *client, StringBuffer &sb,
+                        CArrRef info, std::string subsymbol);
 
   static void PrintDocComments(StringBuffer &sb, CArrRef info);
   static void PrintHeader(DebuggerClient *client, StringBuffer &sb,
-                          CArrRef info, const char *type);
+                          CArrRef info);
   static void PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol);
 };

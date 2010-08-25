@@ -3251,7 +3251,8 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   cg_indentBegin("const char *g_class_map[] = {\n");
 
   // system functions
-  cg_printf("(const char *)ClassInfo::IsSystem, NULL, \"\",\n");
+  cg_printf("(const char *)ClassInfo::IsSystem, NULL, \"\","
+            " \"\", NULL, NULL,\n");
   cg_printf("NULL,\n"); // interfaces
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
@@ -3265,7 +3266,8 @@ void AnalysisResult::outputCPPClassMap(CodeGenerator &cg) {
   m_constants->outputCPPClassMap(cg, ar);
 
   // user functions
-  cg_printf("(const char *)ClassInfo::IsNothing, NULL, \"\",\n");
+  cg_printf("(const char *)ClassInfo::IsNothing, NULL, \"\","
+            " \"\", NULL, NULL,\n");
   cg_printf("NULL,\n"); // interfaces
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {

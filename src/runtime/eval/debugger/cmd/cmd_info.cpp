@@ -160,7 +160,7 @@ String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
   if (cls.empty()) {
     cmd.m_symbol = String(func);
   } else {
-    cmd.m_symbol = String(func) + "::" + String(cls);
+    cmd.m_symbol = String(cls) + "::" + String(func);
   }
   CmdInfoPtr res = client->xend<CmdInfo>(&cmd);
   Array info = res->m_info;
@@ -241,15 +241,21 @@ void CmdInfo::PrintDocComments(StringBuffer &sb, CArrRef info) {
 }
 
 void CmdInfo::PrintHeader(DebuggerClient *client, StringBuffer &sb,
-                          CArrRef info, const char *type) {
+                          CArrRef info) {
   if (!info["internal"].toBoolean()) {
     String file = info["file"].toString();
-    int line = info["line1"].toInt32();
-    if (file.empty() && line == 0) {
-      sb.printf("// (source unknown)\n", type);
-    } else if (line == 0) {
+    int line1 = info["line1"].toInt32();
+    int line2 = info["line2"].toInt32();
+    if (file.empty() && line1 == 0 && line2 == 0) {
+      sb.printf("// (source unknown)\n");
+    } else if (line1 == 0 && line2 == 0) {
       sb.printf("// defined in %s\n", file.data());
+    } else if (line1 && line2) {
+      sb.printf("// defined between line %d to %d of %s\n", line1, line2,
+                file.data());
+      client->setListLocation(file.data(), line1 - 1);
     } else {
+      int line = line1 ? line1 : line2;
       sb.printf("// defined on line %d of %s\n", line, file.data());
       client->setListLocation(file.data(), line - 1);
     }
@@ -348,7 +354,7 @@ bool CmdInfo::TryProperty(StringBuffer &sb, CArrRef info,
   return false;
 }
 
-bool CmdInfo::TryMethod(StringBuffer &sb, CArrRef info,
+bool CmdInfo::TryMethod(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                         std::string subsymbol) {
   if (subsymbol.size() > 2 && subsymbol.substr(subsymbol.size() - 2) == "()") {
     subsymbol = subsymbol.substr(0, subsymbol.size() - 2);
@@ -357,12 +363,13 @@ bool CmdInfo::TryMethod(StringBuffer &sb, CArrRef info,
   String key = FindSubSymbol(info["methods"], subsymbol);
   if (!key.isNull()) {
     Array func = info["methods"][key].toArray();
-    PrintDocComments(sb, func);
-    sb.printf("  %s %s%s%sfunction %s%s(%s);\n",
+    PrintHeader(client, sb, func);
+    sb.printf("%s %s%s%sfunction %s::%s%s(%s);\n",
               func["access"].toString().data(),
               GetModifier(func, "static").data(),
               GetModifier(func, "final").data(),
               GetModifier(func, "abstract").data(),
+              info["name"].toString().data(),
               func["ref"].toBoolean() ? "&" : "",
               func["name"].toString().data(),
               GetParams(func["params"], func["varg"], true).data());
@@ -374,7 +381,7 @@ bool CmdInfo::TryMethod(StringBuffer &sb, CArrRef info,
 void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
                         const std::string &subsymbol) {
   if (info.exists("params")) {
-    PrintHeader(client, sb, info, "function");
+    PrintHeader(client, sb, info);
     sb.printf("function %s%s(%s);\n",
               info["ref"].toBoolean() ? "&" : "",
               info["name"].toString().data(),
@@ -386,12 +393,12 @@ void CmdInfo::PrintInfo(DebuggerClient *client, StringBuffer &sb, CArrRef info,
   if (!subsymbol.empty()) {
     if (TryConstant(sb, info, subsymbol)) found = true;
     if (TryProperty(sb, info, subsymbol)) found = true;
-    if (TryMethod(sb, info, subsymbol)) found = true;
+    if (TryMethod(client, sb, info, subsymbol)) found = true;
     if (found) return;
     client->info("Specified symbol cannot be found. Here the whole class:\n");
   }
 
-  PrintHeader(client, sb, info, "class");
+  PrintHeader(client, sb, info);
 
   StringBuffer parents;
   String parent = info["parent"].toString();

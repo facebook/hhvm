@@ -97,6 +97,9 @@ public:
     std::vector<const ConstantInfo *> staticVariables;
 
     const char *docComment;
+    const char *file;
+    int line1;
+    int line2;
   };
 
   class PropertyInfo {
@@ -218,6 +221,9 @@ public:
   virtual ~ClassInfo() {}
 
   Attribute getAttribute() const { return getCurrent()->m_attribute;}
+  const char *getFile() const { return getCurrent()->m_file;}
+  int getLine1() const { return getCurrent()->m_line1;}
+  int getLine2() const { return getCurrent()->m_line2;}
   virtual const char *getName() const { return m_name;}
   const char *getDocComment() const { return m_docComment; }
   virtual const ClassInfo *getCurrent() const { return this; }
@@ -288,6 +294,9 @@ protected:
 
   Attribute m_attribute;
   const char *m_name;
+  const char *m_file;
+  int m_line1;
+  int m_line2;
   const char *m_docComment;
   mutable const ClassInfo *m_parentCache; // cache the found parent class
 

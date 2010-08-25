@@ -516,8 +516,12 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
       parent = m_parent;
     }
   }
-  cg_printf("(const char *)0x%04X, \"%s\", \"%s\",\n", attribute,
-            getOriginalName().c_str(), parent.c_str());
+  cg_printf("(const char *)0x%04X, \"%s\", \"%s\", \"%s\", (const char *)%d, "
+            "(const char *)%d,\n", attribute,
+            getOriginalName().c_str(), parent.c_str(),
+            m_stmt ? m_stmt->getLocation()->file : "",
+            m_stmt ? m_stmt->getLocation()->line0 : 0,
+            m_stmt ? m_stmt->getLocation()->line1 : 0);
 
   if (!m_docComment.empty()) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());

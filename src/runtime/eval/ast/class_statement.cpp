@@ -480,6 +480,9 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
 
   info.m_attribute = (ClassInfo::Attribute)attr;
   info.m_name = m_name.c_str();
+  info.m_file = m_loc.file;
+  info.m_line1 = m_loc.line0;
+  info.m_line2 = m_loc.line1;
   info.m_parentClass = m_parent.c_str();
   if (!m_docComment.empty()) {
     info.m_docComment = m_docComment.c_str();

@@ -828,6 +828,8 @@ void Parser::onMethod(Token &modifiers, Token &ref, Token &name,
   ASSERT(ms);
   popFunc();
   StatementListStatementPtr stmts = stmt->getStmtList();
+  ms->resetLoc(this);
+  if (stmts) stmts->resetLoc(this);
   ms->init(ref.num, params->params(), stmts, m_hasCallToGetArgs);
   cs->addMethod(ms);
 }

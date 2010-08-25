@@ -144,7 +144,7 @@ top_statement:
 hphp_declare_list:
     hphp_declare_list ',' hphp_declare
                                        { $$.reset();}
-  | hphp_declare                     { $$.reset();}
+  | hphp_declare                       { $$.reset();}
 ;
 hphp_declare:
     '@' T_STRING                       { _p->addHphpSuppressError(&$2);}

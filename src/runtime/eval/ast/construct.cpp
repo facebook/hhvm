@@ -26,6 +26,10 @@ Construct::Construct(CONSTRUCT_ARGS) : _count(0) {
   parser->getLocation(m_loc);
 }
 
+void Construct::resetLoc(Parser *parser) {
+  parser->getLocation(m_loc);
+}
+
 void Construct::release() {
   delete this;
 }

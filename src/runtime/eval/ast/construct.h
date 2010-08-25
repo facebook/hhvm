@@ -69,6 +69,7 @@ public:
     }
   }
   const Location *loc() const { return &m_loc; }
+  void resetLoc(Parser *parser);
   void dumpLoc() const;
 protected:
   Location m_loc;

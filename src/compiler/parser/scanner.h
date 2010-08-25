@@ -99,7 +99,11 @@ protected:
   std::string m_heredocLabel;
   int m_line;   // last token line
   int m_column; // last token column
+  int m_firstLine;   // last token line
+  int m_firstColumn; // last token column
   std::string m_docComment;
+
+  void incLoc(const char *yytext, int yyleng);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

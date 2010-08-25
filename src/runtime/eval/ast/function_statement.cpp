@@ -350,6 +350,9 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
   info.attribute = (ClassInfo::Attribute)attr;
 
   info.name = m_name.c_str();
+  info.file = m_loc.file;
+  info.line1 = m_loc.line0;
+  info.line2 = m_loc.line1;
   if (!m_docComment.empty()) {
     info.docComment = m_docComment.c_str();
   }

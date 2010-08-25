@@ -548,7 +548,7 @@ static int execute_program_impl(int argc, char **argv) {
     ("compiler-id", "display the git hash for the compiler id")
 #endif
     ("mode,m", value<string>(&po.mode)->default_value("run"),
-     "run | debug | server | daemon | replay | translate")
+     "run | debug (d) | server (s) | daemon | replay | translate (t)")
     ("config,c", value<string>(&po.config),
      "load specified config file")
     ("config-value,v", value<StringVec >(&po.confStrings)->composing(),
@@ -647,6 +647,10 @@ static int execute_program_impl(int argc, char **argv) {
       Logger::Output = fopen(RuntimeOption::LogFile.c_str(), "w");
     }
   }
+
+  if (po.mode == "d") po.mode = "debug";
+  if (po.mode == "s") po.mode = "server";
+  if (po.mode == "t") po.mode = "translate";
 
   MethodIndexHMap::initialize(false);
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {

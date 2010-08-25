@@ -64,7 +64,7 @@ Array ClassInfo::GetUserFunctions() {
   if (s_hook) {
     Array dyn = s_hook->getUserFunctions();
     if (!dyn.isNull()) {
-      ret += dyn;
+      ret.merge(dyn);
     }
   }
   return ret;
@@ -97,7 +97,7 @@ Array ClassInfo::GetClasses(bool declaredOnly) {
   if (s_hook) {
     Array dyn = s_hook->getClasses();
     if (!dyn.isNull()) {
-      ret += dyn;
+      ret.merge(dyn);
     }
   }
   return ret;
@@ -140,7 +140,7 @@ Array ClassInfo::GetInterfaces(bool declaredOnly) {
   if (s_hook) {
     Array dyn = s_hook->getInterfaces();
     if (!dyn.isNull()) {
-      ret += dyn;
+      ret.merge(dyn);
     }
   }
   return ret;
@@ -204,12 +204,12 @@ Array ClassInfo::GetConstants() {
   if (s_hook) {
     dyn = s_hook->getConstants();
     if (!dyn.isNull()) {
-      res += dyn;
+      res.merge(dyn);
     }
   }
   dyn = get_globals()->getDynamicConstants();
   if (!dyn.isNull()) {
-    res += dyn;
+    res.merge(dyn);
   }
   return res;
 }
@@ -471,8 +471,8 @@ ClassInfo::MethodInfo *ClassInfo::hasMethod(const char *name,
 }
 
 // internal function  className::methodName or callObject->methodName
-bool  ClassInfo::hasAccess(CStrRef className, CStrRef methodName,
-                           bool staticCall, bool hasCallObject) {
+bool ClassInfo::hasAccess(CStrRef className, CStrRef methodName,
+                          bool staticCall, bool hasCallObject) {
   const ClassInfo *clsInfo = ClassInfo::FindClass(className.c_str());
   if (!clsInfo || !clsInfo->isDeclared()) return false;
   ClassInfo *defClass;
@@ -599,6 +599,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
   m_attribute = (Attribute)(int64)(*p++);
   m_name = *p++;
   m_parent = *p++;
+  m_file = *p++;
+  m_line1 = (int)(int64)(*p++);
+  m_line2 = (int)(int64)(*p++);
 
   if (m_attribute & HasDocComment) {
     m_docComment = *p++;
@@ -616,6 +619,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     MethodInfo *method = new MethodInfo();
     method->attribute = (Attribute)(int64)(*p++);
     method->name = *p++;
+    method->file = *p++;
+    method->line1 = (int)(int64)(*p++);
+    method->line2 = (int)(int64)(*p++);
     method->invokeFn = (Variant (**)(const Array& params))*p++;
     method->invokeFailedFn = (Variant (*)(const Array& params))*p++;
     if (method->attribute & HasDocComment) {

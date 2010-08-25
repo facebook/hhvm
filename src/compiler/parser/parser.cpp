@@ -87,8 +87,6 @@ using namespace boost;
   cls##Ptr(new cls(getLocation(), Statement::KindOf##cls))
 #define NEW_STMT(cls, e...)                                     \
   cls##Ptr(new cls(getLocation(), Statement::KindOf##cls, ##e))
-#define NEW_STMT_POP_LOC(cls, e...)                             \
-  cls##Ptr(new cls(popLocation(), Statement::KindOf##cls, ##e))
 
 ///////////////////////////////////////////////////////////////////////////////
 // statics
@@ -545,7 +543,7 @@ void Parser::onFunction(Token *out, Token *ref, Token *name, Token *params,
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);
   }
-  FunctionStatementPtr func = NEW_STMT_POP_LOC
+  FunctionStatementPtr func = NEW_STMT
     (FunctionStatement, ref->num, name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp),
      dynamic_pointer_cast<StatementList>(stmt->stmt),
@@ -584,7 +582,7 @@ void Parser::onClass(Token *out, Token *type, Token *name, Token *base,
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  ClassStatementPtr cls = NEW_STMT_POP_LOC
+  ClassStatementPtr cls = NEW_STMT
     (ClassStatement, type->num, name->text(), base->text(),
      dynamic_pointer_cast<ExpressionList>(baseInterface->exp),
      popComment(), stmtList);
@@ -601,7 +599,7 @@ void Parser::onInterface(Token *out, Token *name, Token *base, Token *stmt) {
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  InterfaceStatementPtr intf = NEW_STMT_POP_LOC
+  InterfaceStatementPtr intf = NEW_STMT
     (InterfaceStatement, name->text(),
      dynamic_pointer_cast<ExpressionList>(base->exp), popComment(), stmtList);
   out->stmt = intf;
@@ -646,7 +644,7 @@ void Parser::onMethod(Token *out, Token *modifiers, Token *ref, Token *name,
     stmts = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
-  out->stmt = NEW_STMT_POP_LOC
+  out->stmt = NEW_STMT
     (MethodStatement, exp, ref->num, name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp), stmts,
      m_ar->getFileScope()->popAttribute(),

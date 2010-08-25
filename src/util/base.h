@@ -205,7 +205,9 @@ struct file_closer {
 
 ///////////////////////////////////////////////////////////////////////////////
 // Fast Method Call generation control,
-#ifdef FMCGEN
+// #ifndef NOFMCGEN - ON by default
+// #ifdef FMCGEN - OFF by default
+#ifndef NOFMCGEN
 #define FMC "#ifndef NOFMCGEN\n"
 #else
 #define FMC "#ifdef FMCGEN\n"

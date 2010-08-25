@@ -239,7 +239,7 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
         return (t_next(), null);
       }
       break;
-    case 0x171:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         {
@@ -250,7 +250,7 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
         }
       }
       break;
-    case 0x170:
+    case 0x17a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         {
@@ -279,7 +279,7 @@ Variant c_splobjectstorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
         return (t_valid());
       }
       break;
-    case 0x172:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         {
@@ -392,13 +392,13 @@ Variant c_splobjectstorage::o_invoke_few_args(MethodIndex methodIndex, const cha
         return (t_next(), null);
       }
       break;
-    case 0x171:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         return (t_detach(a0), null);
       }
       break;
-    case 0x170:
+    case 0x17a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         return (t_attach(a0), null);
@@ -422,7 +422,7 @@ Variant c_splobjectstorage::o_invoke_few_args(MethodIndex methodIndex, const cha
         return (t_valid());
       }
       break;
-    case 0x172:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         return (t_contains(a0));
@@ -532,7 +532,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_next(), null);
       }
       break;
-    case 0x171:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -550,7 +550,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_detach(a0), null);
       }
       break;
-    case 0x170:
+    case 0x17a:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -610,7 +610,7 @@ Variant c_splobjectstorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_valid());
       }
       break;
-    case 0x172:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();

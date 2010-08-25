@@ -20,6 +20,7 @@
 #include "iconv.inc"
 #include "icu.inc"
 #include "image.inc"
+#include "imagesprite.inc"
 #include "intl.inc"
 #include "ipc.inc"
 #include "iterator.inc"

@@ -45,8 +45,9 @@ public:
   /**
    * Reading data.
    */
-  void load(const char *filename, bool onDemandUncompress);
-  void loadMmap(const char *filename);
+  short getVersion(const char *filename);
+  void load(const char *filename, bool onDemandUncompress, short version);
+  void loadMmap(const char *filename, short version);
   void adviseOutMemory();
   bool fileExists(const char *name, bool isRelative = true) const;
   bool dirExists(const char *name, bool isRelative = true) const;

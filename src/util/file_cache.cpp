@@ -160,6 +160,9 @@ void FileCache::write(const char *name, const char *fullpath) {
   writeDirectories(name);
 }
 
+#define FILE_CACHE_VERSION_1 1
+#define CURRENT_FILE_CACHE_VERSION FILE_CACHE_VERSION_1
+
 void FileCache::save(const char *filename) {
   ASSERT(filename && *filename);
 
@@ -169,6 +172,11 @@ void FileCache::save(const char *filename) {
                     Util::safe_strerror(errno).c_str());
   }
 
+  // write an invalid length followed by a version number
+  short minus_one = -1;
+  short version = CURRENT_FILE_CACHE_VERSION;
+  fwrite(&minus_one, sizeof(minus_one), 1, f);
+  fwrite(&version, sizeof(version), 1, f);
   for (FileMap::const_iterator iter = m_files.begin(); iter != m_files.end();
        ++iter) {
     short name_len = iter->first.size();
@@ -199,7 +207,7 @@ void FileCache::save(const char *filename) {
   fclose(f);
 }
 
-void FileCache::load(const char *filename, bool onDemandUncompress) {
+short FileCache::getVersion(const char *filename) {
   ASSERT(filename && *filename);
 
   FILE *f = fopen(filename, "r");
@@ -208,6 +216,30 @@ void FileCache::load(const char *filename, bool onDemandUncompress) {
                     Util::safe_strerror(errno).c_str());
   }
 
+  short tag = -1;
+  short version = -1;
+  if (!read_bytes(f, (char*)&tag, sizeof(tag)) || tag > 0) return -1;
+  read_bytes(f, (char*)&version, sizeof(version));
+  fclose(f);
+  return version;
+}
+
+void FileCache::load(const char *filename, bool onDemandUncompress,
+                     short version) {
+  ASSERT(filename && *filename);
+
+  FILE *f = fopen(filename, "r");
+  if (f == NULL) {
+    throw Exception("Unable to open %s: %s", filename,
+                    Util::safe_strerror(errno).c_str());
+  }
+
+  if (version > 0) {
+    // skip the leading -1 and the version id
+    short tmp = -1;
+    read_bytes(f, (char*)&tmp, sizeof(tmp));
+    read_bytes(f, (char*)&tmp, sizeof(tmp));
+  }
   while (true) {
     short name_len;
     if (!read_bytes(f, (char*)&name_len, sizeof(short)) || name_len <= 0) {
@@ -241,10 +273,17 @@ void FileCache::load(const char *filename, bool onDemandUncompress) {
 
     if (len > 0) {
       buffer.data = (char *)malloc(len + 1);
-      if (!read_bytes(f, buffer.data, len + 1)) {
-        throw Exception("Bad data in archive %s", filename);
+      if (version > 0) {
+        if (!read_bytes(f, buffer.data, len + 1)) {
+          throw Exception("Bad data in archive %s", filename);
+        }
+        assert(buffer.data[len] == '\0');
+      } else {
+        if (!read_bytes(f, buffer.data, len)) {
+          throw Exception("Bad data in archive %s", filename);
+        }
+        buffer.data[len] = '\0';
       }
-      assert(buffer.data[len] == '\0');
       if (c) {
         if (onDemandUncompress) {
           buffer.clen = buffer.len;
@@ -266,6 +305,7 @@ void FileCache::load(const char *filename, bool onDemandUncompress) {
       }
     }
   }
+  fclose(f);
 }
 
 void FileCache::adviseOutMemory() {
@@ -275,8 +315,9 @@ void FileCache::adviseOutMemory() {
   }
 }
 
-void FileCache::loadMmap(const char *filename) {
+void FileCache::loadMmap(const char *filename, short version) {
   ASSERT(filename && *filename);
+  assert(version > 0);
 
   struct stat sbuf;
   if (stat(filename, &sbuf) == -1) {
@@ -298,6 +339,9 @@ void FileCache::loadMmap(const char *filename) {
   m_size = sbuf.st_size;
   char *p = (char *)m_addr;
   char *e = p + m_size;
+
+  // skip the leading -1 and the version id
+  p += sizeof(short) + sizeof(short);
   while (p < e) {
     short name_len = -1;
 

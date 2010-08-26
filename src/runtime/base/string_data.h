@@ -89,7 +89,8 @@ class StringData {
    */
   void destruct() const { if (!isStatic()) delete this; }
 
-  StringData() : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  StringData() : m_data(NULL), _count(0), m_len(0) {
+    m_hash = 0;
     #ifdef TAINTED
     m_tainting = default_tainting;
     m_tainted_metadata = NULL;

@@ -36,7 +36,9 @@ IMPLEMENT_SMART_ALLOCATION(StringData, SmartAllocatorImpl::NeedRestoreOnce);
 
 StringData::StringData(const char *data,
                        StringDataMode mode /* = AttachLiteral */)
-  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  : m_data(NULL), _count(0), m_len(0) {
+  m_hash = 0;
+
   #ifdef TAINTED
   m_tainting = default_tainting;
   m_tainted_metadata = NULL;
@@ -45,7 +47,8 @@ StringData::StringData(const char *data,
 }
 
 StringData::StringData(SharedVariant *shared)
-  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  : m_data(NULL), _count(0), m_len(0) {
+  m_hash = 0;
   #ifdef TAINTED
   m_tainting = default_tainting;
   m_tainted_metadata = NULL;
@@ -59,7 +62,8 @@ StringData::StringData(SharedVariant *shared)
 }
 
 StringData::StringData(const char *data, int len, StringDataMode mode)
-  : m_data(NULL), _count(0), m_len(0), m_shared(NULL) {
+  : m_data(NULL), _count(0), m_len(0) {
+  m_hash = 0;
   #ifdef TAINTED
   m_tainting = default_tainting;
   m_tainted_metadata = NULL;
@@ -97,7 +101,7 @@ void StringData::assign(const char *data, int len, StringDataMode mode) {
   }
 
   releaseData();
-  m_shared = NULL;
+  m_hash = 0;
   m_len = len;
   if (m_len) {
     switch (mode) {

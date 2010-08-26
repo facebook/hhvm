@@ -80,7 +80,6 @@ class ObjectOffset;
  */
 class ArrayIter;
 class MutableArrayIter;
-class ArrayElement;
 
 struct FullPos;
 

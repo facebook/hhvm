@@ -453,15 +453,14 @@ class_statement:
     variable_modifiers
     class_variable_declaration ';'     { _p->onClassVariable(&$$,&$1,&$2);}
   | class_constant_declaration ';'     { _p->onClassVariable(&$$,NULL,&$1);}
-  | method_modifiers T_FUNCTION
+  | method_modifiers
     is_reference T_STRING '('          { _p->onFunctionStart();}
-    parameter_list ')' method_body     { _p->onMethod(&$$,&$1,&$3,&$4,&$7,
-                                                      &$9);}
-  | T_HPHP_NOTE
-    method_modifiers T_FUNCTION
+    parameter_list ')' method_body     { _p->onMethod(&$$,&$1,&$2,&$3,&$6,
+                                                      &$8);}
+  | T_HPHP_NOTE method_modifiers
     is_reference T_STRING '('          { _p->onFunctionStart();}
-    parameter_list ')' method_body     { _p->onMethod(&$$,&$2,&$4,&$5,&$8,
-                                                      &$10);
+    parameter_list ')' method_body     { _p->onMethod(&$$,&$2,&$3,&$4,&$7,
+                                                      &$9);
                                          _p->onHphpNoteStatement(&$$,&$1,&$$);}
 ;
 method_body:
@@ -474,8 +473,9 @@ variable_modifiers:
   | T_VAR                              { $$.reset();}
 ;
 method_modifiers:
-    non_empty_member_modifiers         { $$ = $1;}
-  |                                    { $$.reset();}
+    non_empty_member_modifiers
+    T_FUNCTION                         { $$ = $1;}
+  | T_FUNCTION                         { $$.reset();}
 ;
 non_empty_member_modifiers:
     member_modifier                    { _p->onMemberModifier(&$$,NULL,&$1);}

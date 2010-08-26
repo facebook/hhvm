@@ -57,7 +57,7 @@ const char *g_class_map[] = {
   NULL,
   /* methods    */
   (const char *)ClassInfo::IsPublic, "xbox_process_message",
-  NULL, NULL, NULL, NULL,
+  METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsPublic, "test",        METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsPublic, "lower",       METHOD_INFO_EMPTY_ENTRY,
   (const char *)ClassInfo::IsPublic, "sumlen_step", METHOD_INFO_EMPTY_ENTRY,

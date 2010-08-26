@@ -141,7 +141,7 @@ void Construct::addHphpNote(const std::string &s) {
 
 void Construct::printSource(CodeGenerator &cg) {
   if (m_loc) {
-    cg_printf("/* SRC: %s line %d */\n", m_loc->file, m_loc->line1);
+    cg_printf("/* SRC: %s line %d */\n", m_loc->file, m_loc->line0);
   }
 }
 

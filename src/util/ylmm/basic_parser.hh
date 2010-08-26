@@ -249,9 +249,7 @@ namespace ylmm
     /** Set the rule's location information
 	@param loc the location information  */
     void where_rule(location_type &loc) {
-      if (loc.first_line()) {
-        _rule_location.first(loc.first_line(), loc.first_column());
-      }
+      _rule_location.first(loc.first_line(), loc.first_column());
       _rule_location.last(loc.last_line(), loc.last_column());
     }
     //@}

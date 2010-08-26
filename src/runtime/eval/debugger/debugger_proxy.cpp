@@ -407,6 +407,7 @@ bool DebuggerProxy::breakByFlowControl(CmdInterrupt &cmd) {
             m_flow->setNegativeFrame(frame); // to avoid re-calculation
             break;
           }
+          frame = prev;
         }
       }
       if (over) {

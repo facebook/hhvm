@@ -206,10 +206,20 @@ namespace
 #ifdef YYLLOC_DEFAULT
 # undef YYLLOC_DEFAULT
 #endif
-#define YYLLOC_DEFAULT(current, rhs, n)  \
-  current.first((rhs)[1]);               \
-  current.last((rhs)[n]);                \
-  _parser->where_rule(current);
+#define YYRHSLOC(Rhs, K) ((Rhs)[K])
+#define YYLLOC_DEFAULT(Current, Rhs, N)                                 \
+  do                                                                    \
+    if (YYID (N)) {                                                     \
+      (Current).first(YYRHSLOC (Rhs, 1));                               \
+      (Current).last (YYRHSLOC (Rhs, N));                               \
+    } else {                                                            \
+      (Current).first(YYRHSLOC (Rhs, 0).last_line(),                    \
+                      YYRHSLOC (Rhs, 0).last_column());                 \
+      (Current).last (YYRHSLOC (Rhs, 0).last_line(),                    \
+                      YYRHSLOC (Rhs, 0).last_column());                 \
+    }                                                                   \
+  while (YYID (0));                                                     \
+  _parser->where_rule(Current);
 
 //____________________________________________________________________
 /** Scanner interface function (without locations).

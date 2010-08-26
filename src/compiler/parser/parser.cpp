@@ -156,16 +156,6 @@ std::string Parser::popComment() {
   return ret;
 }
 
-void Parser::pushLocation() {
-  m_locs.push_back(getLocation());
-}
-
-LocationPtr Parser::popLocation() {
-  LocationPtr ret = m_locs.back();
-  m_locs.pop_back();
-  return ret;
-}
-
 const char *Parser::file() {
   return m_fileName;
 }
@@ -534,7 +524,6 @@ void Parser::onClassConst(Token *out, Token *cls, Token *name) {
 
 void Parser::onFunctionStart() {
   m_ar->getFileScope()->pushAttribute();
-  pushLocation();
   pushComment();
 }
 
@@ -571,7 +560,6 @@ void Parser::onParam(Token *out, Token *params, Token *type, Token *var,
 }
 
 void Parser::onClassStart() {
-  pushLocation();
   pushComment();
 }
 
@@ -633,7 +621,7 @@ void Parser::onClassVariable(Token *out, Token *modifiers, Token *decl) {
 
 void Parser::onMethod(Token *out, Token *modifiers, Token *ref, Token *name,
                       Token *params, Token *stmt) {
-  ModifierExpressionPtr exp = modifiers->exp ?
+  ModifierExpressionPtr exp = (modifiers && modifiers->exp) ?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
 

@@ -250,7 +250,7 @@ void CmdInfo::PrintHeader(DebuggerClient *client, StringBuffer &sb,
       sb.printf("// (source unknown)\n");
     } else if (line1 == 0 && line2 == 0) {
       sb.printf("// defined in %s\n", file.data());
-    } else if (line1 && line2) {
+    } else if (line1 && line2 && line1 != line2) {
       sb.printf("// defined between line %d to %d of %s\n", line1, line2,
                 file.data());
       client->setListLocation(file.data(), line1 - 1);

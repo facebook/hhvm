@@ -45,8 +45,7 @@ void Token::setText(const char *text) {
 
 Scanner::Scanner(ylmm::basic_buffer* buf, bool bShortTags, bool bASPTags)
   : ylmm::basic_scanner<Token>(buf), m_shortTags(bShortTags),
-    m_aspTags(bASPTags), m_line(1), m_column(0), m_firstLine(0),
-    m_firstColumn(0) {
+    m_aspTags(bASPTags), m_line(1), m_column(0) {
   _current->auto_increment(true);
   m_messenger.error_stream(m_err);
   m_messenger.message_stream(m_msg);
@@ -57,20 +56,6 @@ Scanner::Scanner(ylmm::basic_buffer* buf, bool bShortTags, bool bASPTags)
 void Scanner::setToken(const char *rawText, int rawLeng,
                        const char *yytext, int yyleng) {
   _token.setTexts(rawText,rawLeng, yytext, yyleng);
-  incLoc(rawText, rawLeng);
-}
-
-void Scanner::incLoc(const char *yytext, int yyleng) {
-  m_firstLine = m_line;
-  m_firstColumn = m_column;
-  for (int i = 0; i < yyleng; i++) {
-    if (yytext[i] == '\n') {
-      m_line++;
-      m_column = 0;
-    } else {
-      m_column++;
-    }
-  }
 }
 
 void Scanner::setDocComment(const char *yytext, int yyleng) {
@@ -93,13 +78,24 @@ void Scanner::resetHeredoc() {
   m_heredocLabel.clear();
 }
 
-int Scanner::getNextToken(token_type& t, location_type& l)
-{
+int Scanner::getNextToken(token_type& t, location_type& l) {
   int tokid;
   bool done = false;
 
   do {
     tokid = next(t);
+    int line0 = m_line;
+    int char0 = m_column;
+    if (tokid != 0) { // not EOF
+      for (const char *s = t.rawtext().c_str(); *s; s++) {
+        if (*s == '\n') {
+          m_line++;
+          m_column = 0;
+        } else {
+          m_column++;
+        }
+      }
+    }
     switch (tokid) {
     case T_COMMENT:
     case T_DOC_COMMENT:
@@ -107,13 +103,13 @@ int Scanner::getNextToken(token_type& t, location_type& l)
     case T_WHITESPACE:
       break;
     default:
+      l.first_line(line0);
+      l.first_column(char0);
       done = true;
       break;
     }
   } while (!done);
 
-  l.first_line(m_firstLine);
-  l.first_column(m_firstColumn);
   l.last_line(m_line);
   l.last_column(m_column);
   return tokid;

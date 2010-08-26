@@ -37,6 +37,8 @@ typedef std::map<std::string, xmlNodePtr> xmlNodeMap;
 #define node_is_equal(node, name) node_is_equal_ex(node, name, NULL)
 #define attr_is_equal(node, name) attr_is_equal_ex(node, name, NULL)
 
+#define NS_STRING(ns) (ns.empty() ? NULL : BAD_CAST(ns.c_str()))
+
 xmlDocPtr soap_xmlParseFile(const char *filename);
 xmlDocPtr soap_xmlParseMemory(const void *buf, size_t size);
 

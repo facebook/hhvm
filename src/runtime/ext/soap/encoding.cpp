@@ -635,7 +635,7 @@ static Variant master_to_zval_int(encodePtr encode, xmlNodePtr data) {
       if (type_attr) {
         string ns, cptype;
         parse_namespace(type_attr->children->content, cptype, ns);
-        xmlNsPtr nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns.data()));
+        xmlNsPtr nsptr = xmlSearchNs(data->doc, data, NS_STRING(ns));
         string nscat;
         if (nsptr) {
           nscat = (char*)nsptr->href;
@@ -1177,7 +1177,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
       if (!any.isNull() && !any.isArray()) {
         Array arr = Array::Create();
         if (name) {
-          arr.set(name, any);
+          arr.set(String(name, CopyString), any);
         } else {
           arr.append(any);
         }
@@ -1221,7 +1221,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
             }
             el.append(val);
           } else {
-            any.set(name, val);
+            any.set(String(name, CopyString), val);
           }
         } else {
           any.append(val);
@@ -1232,7 +1232,7 @@ static void model_to_zval_any(Variant &ret, xmlNodePtr node) {
     node = node->next;
   }
   if (any) {
-    ret.toObject()->o_set(name ? name : "any", any);
+    ret.toObject()->o_set(name ? String(name, CopyString) : "any", any);
   }
 }
 
@@ -1412,6 +1412,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
           return ret;
         }
         redo_any = get_zval_property(ret, "any");
+        ret.toObject()->set("any", null);
       } else {
         if (soap_check_xml_ref(ret, data)) {
           return ret;
@@ -1432,9 +1433,7 @@ static Variant to_zval_object_ex(encodeTypePtr type, xmlNodePtr data,
       }
       model_to_zval_object(ret, sdlType->model, data, sdl);
       if (redo_any) {
-        if (!get_zval_property(ret, "any")) {
-          model_to_zval_any(ret, data->children);
-        }
+        model_to_zval_any(ret, data->children);
       }
     }
     if (!sdlType->attributes.empty()) {
@@ -2300,7 +2299,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
     xmlNsPtr nsptr;
     string type, ns;
     parse_namespace(attr->children->content, type, ns);
-    nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns.data()));
+    nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
 
     String stype(type);
     char *end = const_cast<char*>(strrchr(stype.data(), '['));
@@ -2319,7 +2318,7 @@ static Variant to_zval_array(encodeTypePtr type, xmlNodePtr data) {
     string type, ns;
     parse_namespace(attr->children->content, type, ns);
     xmlNsPtr nsptr;
-    nsptr = xmlSearchNs(attr->doc, attr->parent, BAD_CAST(ns.data()));
+    nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
     if (nsptr != NULL) {
       enc = get_encoder(SOAP_GLOBAL(sdl), (char*)nsptr->href, type.data());
     }
@@ -2623,7 +2622,7 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
     string ns, cptype;
     parse_namespace(type_name, cptype, ns);
 
-    xmlNsPtr nsptr = xmlSearchNs(data->doc, data, BAD_CAST(ns.data()));
+    xmlNsPtr nsptr = xmlSearchNs(data->doc, data, NS_STRING(ns));
     soapvar->m_stype = cptype;
     if (nsptr) {
       soapvar->m_ns = String((char*)nsptr->href, CopyString);

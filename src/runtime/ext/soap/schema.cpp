@@ -169,7 +169,7 @@ bool checkBaseAttribute(sdlPtr sdl, xmlNodePtr extType, sdlTypePtr cur_type,
   if (base) {
     string type, ns;
     parse_namespace(base->children->content, type, ns);
-    xmlNsPtr nsptr = xmlSearchNs(extType->doc, extType, BAD_CAST(ns.c_str()));
+    xmlNsPtr nsptr = xmlSearchNs(extType->doc, extType, NS_STRING(ns));
     if (nsptr) {
       cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href,
                                             BAD_CAST(type.c_str()));
@@ -426,8 +426,7 @@ static bool schema_list(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr listType,
   if (itemType) {
     string type, ns;
     parse_namespace(itemType->children->content, type, ns);
-    xmlNsPtr nsptr = xmlSearchNs(listType->doc, listType,
-                                 BAD_CAST(ns.c_str()));
+    xmlNsPtr nsptr = xmlSearchNs(listType->doc, listType, NS_STRING(ns));
     if (nsptr) {
       sdlTypePtr newType(new sdlType());
       newType->name = type;
@@ -492,7 +491,7 @@ static bool schema_union(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr unionType,
       }
 
       parse_namespace(BAD_CAST(start), type, ns);
-      nsptr = xmlSearchNs(unionType->doc, unionType, BAD_CAST(ns.c_str()));
+      nsptr = xmlSearchNs(unionType->doc, unionType, NS_STRING(ns));
       if (nsptr) {
         sdlTypePtr newType(new sdlType());
         newType->name = type;
@@ -948,8 +947,7 @@ static bool schema_group(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr groupType,
     if (ref) {
       string type, ns;
       parse_namespace(ref->children->content, type, ns);
-      xmlNsPtr nsptr = xmlSearchNs(groupType->doc, groupType,
-                                   BAD_CAST(ns.c_str()));
+      xmlNsPtr nsptr = xmlSearchNs(groupType->doc, groupType, NS_STRING(ns));
       if (nsptr) {
         key += (char*)nsptr->href;
         key += ':';
@@ -1330,8 +1328,7 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
     if (ref) {
       string type, ns;
       parse_namespace(ref->children->content, type, ns);
-      xmlNsPtr nsptr = xmlSearchNs(element->doc, element,
-                                   BAD_CAST(ns.c_str()));
+      xmlNsPtr nsptr = xmlSearchNs(element->doc, element, NS_STRING(ns));
       string nscat;
       if (nsptr) {
         nscat += (char*)nsptr->href;
@@ -1459,8 +1456,7 @@ static bool schema_element(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr element,
                           "attributes");
     }
     parse_namespace(type->children->content, cptype, str_ns);
-    xmlNsPtr nsptr = xmlSearchNs(element->doc, element,
-                                 BAD_CAST(str_ns.c_str()));
+    xmlNsPtr nsptr = xmlSearchNs(element->doc, element, NS_STRING(str_ns));
     if (nsptr) {
       cur_type->encode = get_create_encoder(sdl, cur_type, nsptr->href,
                                             BAD_CAST(cptype.c_str()));
@@ -1542,8 +1538,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
     if (ref) {
       string attr_name, ns;
       parse_namespace(ref->children->content, attr_name, ns);
-      xmlNsPtr nsptr = xmlSearchNs(attrType->doc, attrType,
-                                   BAD_CAST(ns.c_str()));
+      xmlNsPtr nsptr = xmlSearchNs(attrType->doc, attrType, NS_STRING(ns));
       if (nsptr) {
         key += (char*)nsptr->href;
         key += ':';
@@ -1591,8 +1586,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
     }
     string cptype, str_ns;
     parse_namespace(type->children->content, cptype, str_ns);
-    xmlNsPtr nsptr = xmlSearchNs(attrType->doc, attrType,
-                                 BAD_CAST(str_ns.c_str()));
+    xmlNsPtr nsptr = xmlSearchNs(attrType->doc, attrType, NS_STRING(str_ns));
     if (nsptr) {
       newAttr->encode = get_create_encoder(sdl, cur_type, nsptr->href,
                                            BAD_CAST(cptype.c_str()));
@@ -1643,8 +1637,7 @@ static bool schema_attribute(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrType,
         sdlExtraAttributePtr ext(new sdlExtraAttribute());
         string value, ns;
         parse_namespace(attr->children->content, value, ns);
-        xmlNsPtr nsptr = xmlSearchNs(attr->doc, attr->parent,
-                                     BAD_CAST(ns.c_str()));
+        xmlNsPtr nsptr = xmlSearchNs(attr->doc, attr->parent, NS_STRING(ns));
         if (nsptr) {
           ext->ns = (char*)nsptr->href;
           ext->val = value;
@@ -1748,8 +1741,7 @@ static bool schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns,
       sdlAttributePtr newAttr(new sdlAttribute());
       string group_name, ns;
       parse_namespace(ref->children->content, group_name, ns);
-      xmlNsPtr nsptr = xmlSearchNs(attrGroup->doc, attrGroup,
-                                   BAD_CAST(ns.c_str()));
+      xmlNsPtr nsptr = xmlSearchNs(attrGroup->doc, attrGroup, NS_STRING(ns));
       string key;
       if (nsptr) {
         key += (char*)nsptr->href;

@@ -27,7 +27,7 @@ encodePtr get_encoder_from_prefix(sdl *sdl, xmlNodePtr node,
                                   const xmlChar *type) {
   string ns, cptype;
   parse_namespace(type, cptype, ns);
-  xmlNsPtr nsptr = xmlSearchNs(node->doc, node, BAD_CAST(ns.c_str()));
+  xmlNsPtr nsptr = xmlSearchNs(node->doc, node, NS_STRING(ns));
   encodePtr enc;
   if (nsptr) {
     enc = get_encoder(sdl, (char*)nsptr->href, cptype.c_str());
@@ -45,7 +45,7 @@ static sdlTypePtr get_element(sdl *sdl, xmlNodePtr node, const xmlChar *type) {
   if (!sdl->elements.empty()) {
     string ns, cptype;
     parse_namespace(type, cptype, ns);
-    xmlNsPtr nsptr = xmlSearchNs(node->doc, node, BAD_CAST(ns.c_str()));
+    xmlNsPtr nsptr = xmlSearchNs(node->doc, node, NS_STRING(ns));
     if (nsptr) {
       string nscat = (char*)nsptr->href;
       nscat += ':';

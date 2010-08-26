@@ -107,8 +107,8 @@ class FiberReferenceMap;
 
 enum DataType {
   /**
-   * Do not rearrange the order, we have type checks in the code such as
-   * "m_type <= KindOfStaticString".
+   * Beware if you change the order, as we may have a few type checks in the
+   * code that depend on the order.
    */
   KindOfNull    = 0,
   KindOfBoolean = 1,
@@ -129,6 +129,9 @@ enum DataType {
 inline int getDataTypeIndex(DataType t) {
   return t;
 }
+
+// Helper macro for checking if a given type is refcounted
+#define IS_REFCOUNTED_TYPE(t) ((t) > KindOfStaticString)
 
 enum StringDataMode {
   AttachLiteral, // const char * points to a literal string

@@ -210,14 +210,14 @@ inline void tvSet(TypedValue * fr, TypedValue * to) {
   if (to->m_type == KindOfVariant) {
     to = to->m_data.ptv;
   }
-  if (to->m_type > KindOfStaticString) {
+  if (IS_REFCOUNTED_TYPE(to->m_type)) {
     tvDecRefCell(to);
   }
   to->m_data.num = fr->m_data.num;
   to->m_type = fr->m_type;
   // If we just copied a complex type, we need to bump
   // up the refcount
-  if (fr->m_type > KindOfStaticString) {
+  if (IS_REFCOUNTED_TYPE(fr->m_type)) {
     TV_INCREF(fr);
   }
 }

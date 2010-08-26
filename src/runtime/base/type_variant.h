@@ -96,7 +96,7 @@ class Variant {
   void destruct();
 
   // g++ does not inline !isPrimitive()
-  ~Variant() { if (m_type > KindOfStaticString) destruct(); }
+  ~Variant() { if (IS_REFCOUNTED_TYPE(m_type)) destruct(); }
 
   void reset(); // only for special memory sweeping!
 
@@ -136,7 +136,7 @@ class Variant {
    * Break bindings and set to null.
    */
   void unset() {
-    if (m_type > KindOfStaticString) destruct();
+    if (IS_REFCOUNTED_TYPE(m_type)) destruct();
     m_data.num = 1;
     m_type = KindOfNull;
   }
@@ -860,7 +860,7 @@ class Variant {
  private:
   mutable DataType m_type;
 
-  bool isPrimitive() const { return m_type <= KindOfStaticString; }
+  bool isPrimitive() const { return !IS_REFCOUNTED_TYPE(m_type); }
   bool isObjectConvertable() {
     return isNull() ||
            (is(KindOfBoolean) && !toBoolean()) ||
@@ -892,7 +892,7 @@ class Variant {
   // Internal helper for weakly binding a variable. m_type should be viewed
   // as KindOfNull and for complex types the old data already released.
   void bind(CVarRef v) {
-    if (v.m_type <= KindOfStaticString) {
+    if (!IS_REFCOUNTED_TYPE(v.m_type)) {
       m_type = v.m_type;
       /* drop uninitialized flag */
       m_data.num = m_type == KindOfNull ? 0 : v.m_data.num;
@@ -971,7 +971,7 @@ class Variant {
     ASSERT(v != this);
     if (v) {
       v->incRefCount(); // in case destruct() triggers deletion of v
-      if (m_type > KindOfStaticString) destruct();
+      if (IS_REFCOUNTED_TYPE(m_type)) destruct();
       m_type = KindOfVariant;
       m_data.pvar = v;
     } else {

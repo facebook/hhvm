@@ -502,14 +502,12 @@ ExpressionPtr Expression::MakeScalarExpression(AnalysisResultPtr ar,
     return MakeConstant(ar, loc, "null");
   } else if (value.isBoolean()) {
     return MakeConstant(ar, loc, value ? "true" : "false");
-  } else if (!value.isDouble() || finite(value.getDouble())) {
+  } else {
     return ScalarExpressionPtr
       (new ScalarExpression(loc,
                             Expression::KindOfScalarExpression,
                             value));
   }
-
-  return ExpressionPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

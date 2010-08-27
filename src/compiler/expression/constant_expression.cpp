@@ -76,9 +76,9 @@ bool ConstantExpression::getScalarValue(Variant &value) {
   if (isBoolean()) {
     value = getBooleanValue();
   } else if (m_name == "INF") {
-    return k_INF;
+    value = k_INF;
   } else if (m_name == "NAN") {
-    return k_NAN;
+    value = k_NAN;
   } else {
     value.unset();
   }

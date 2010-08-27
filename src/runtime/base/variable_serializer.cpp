@@ -176,6 +176,7 @@ void VariableSerializer::write(double v) {
     if (isnan(v)) {
       m_buf->append("NAN");
     } else if (isinf(v)) {
+      if (v < 0) m_buf->append('-');
       m_buf->append("INF");
     } else {
       char *buf;

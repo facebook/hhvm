@@ -395,8 +395,8 @@ bool AnalysisResult::isNonFinalClass(const std::string &className) {
   return m_nonFinalClasses.find(className) != m_nonFinalClasses.end();
 }
 
-bool AnalysisResult::needStaticArray(ClassScopePtr cls) {
-  return cls && isNonFinalClass(cls->getName());
+bool AnalysisResult::needStaticArray(ClassScopePtr cls, FunctionScopePtr func) {
+  return cls && isNonFinalClass(cls->getName()) && !func->isPrivate();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

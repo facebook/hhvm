@@ -318,7 +318,7 @@ public:
   bool isBaseSysRsrcClass(const std::string &className);
   void addNonFinal(const std::string &className);
   bool isNonFinalClass(const std::string &className);
-  bool needStaticArray(ClassScopePtr cls);
+  bool needStaticArray(ClassScopePtr cls, FunctionScopePtr func);
 
   /**
    * For function declaration parsing.

@@ -330,7 +330,7 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
                            bool checkError /* = true */) {
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(name, ar);
-    if (ar->needStaticArray(ar->getClassScope())) {
+    if (ar->needStaticArray(ar->getClassScope(), ar->getFunctionScope())) {
       forceVariant(ar, name);
     }
   } else if (getAttribute(InsideGlobalStatement)) {
@@ -726,7 +726,7 @@ void VariableTable::outputCPPGlobalVariablesHeader(CodeGenerator &cg,
     const string &id = iter->first;
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
-      if (ar->needStaticArray(sgi->cls)) {
+      if (ar->needStaticArray(sgi->cls, sgi->func)) {
         cg_printf("Variant %s%s%s;\n", Option::InitPrefix,
                   Option::StaticVariablePrefix, id.c_str());
       } else {
@@ -879,7 +879,7 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
     const string &id = iter->first;
     StaticGlobalInfoPtr sgi = iter->second;
     if (sgi->func) {
-      if (ar->needStaticArray(sgi->cls)) {
+      if (ar->needStaticArray(sgi->cls, sgi->func)) {
         cg_printf(",\n  %s%s%s()", Option::InitPrefix,
                   Option::StaticVariablePrefix, id.c_str());
       } else {
@@ -1140,7 +1140,7 @@ void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       TypePtr type = getFinalType(name);
       type->outputCPPDecl(cg, ar);
-      if (ar->needStaticArray(ar->getClassScope())) {
+      if (ar->needStaticArray(ar->getClassScope(), ar->getFunctionScope())) {
         const char *cname = ar->getFunctionScope()->isStatic() ? "cls" :
           "this->o_getClassName()";
         cg_printf(" &%s%s __attribute__((__unused__)) = "

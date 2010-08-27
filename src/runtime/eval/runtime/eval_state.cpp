@@ -320,6 +320,7 @@ getFunctionStatics(const FunctionStatement* func) {
 LVariableTable &RequestEvalState::
 getMethodStatics(const MethodStatement* func, const char* cls) {
   RequestEvalState *self = s_res.get();
+  if (func->getModifiers() & ClassStatement::Private) cls="";
   return self->m_methodStatics[func][cls];
 }
 

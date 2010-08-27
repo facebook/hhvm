@@ -553,7 +553,7 @@ int string_rfind(const char *input, int len, char ch, int pos,
       start = pos;
     }
 
-    for (int i = start; i > stop; i--) {
+    for (int i = start; i >= stop; i--) {
       if (input[i] == ch) {
         return i;
       }

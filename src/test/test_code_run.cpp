@@ -1190,11 +1190,18 @@ bool TestCodeRun::TestString() {
        "}"
        "var_dump(test6());");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X {"
        " static function g() {}"
        "};"
        "echo 'abc' . X::g() . 'efg';");
+
+  MVCR("<?php "
+       "$s = 'x';"
+       "var_dump(strrpos($s.'0', $s));"
+       "for ($i = -7; $i < 7; $i++) {"
+       "  echo $i,':';var_dump(strrpos('xabcay', 'a',$i));"
+       "}");
 
   return true;
 }

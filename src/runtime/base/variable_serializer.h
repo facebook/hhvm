@@ -41,6 +41,7 @@ public:
     VarExport,
     VarDump,
     DebugDump,
+    DebuggerDump,
     Serialize,
     JSON,
     APCSerialize,
@@ -49,7 +50,7 @@ public:
   /**
    * Constructor.
    */
-  VariableSerializer(Type type, int option = 0);
+  VariableSerializer(Type type, int option = 0, int maxRecur = 3);
 
   /**
    * Top level entry function called by f_ functions.

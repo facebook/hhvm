@@ -498,8 +498,8 @@ void ClassStatement::getInfo(ClassInfoEvaled &info) const {
        it != m_constants.end(); ++it) {
     ClassInfo::ConstantInfo *c = new ClassInfo::ConstantInfo;
     c->name = it->first.c_str();
-    c->value = it->second->eval(dv);
-    String sv = c->value.toString();
+    c->setValue(it->second->eval(dv));
+    String sv = c->getValue().toString();
     char* buf = new char[sv.size()+1];
     memcpy(buf, sv.data(), sv.size()+1);
     c->valueLen = sv.size();

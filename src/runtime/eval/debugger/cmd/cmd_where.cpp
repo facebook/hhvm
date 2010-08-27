@@ -66,7 +66,13 @@ bool CmdWhere::onClient(DebuggerClient *client) {
   Array st = fetchStackTrace(client);
   if (st.empty()) {
     client->info("(no stacktrace to display or in global scope)");
-  } else if (client->argCount() == 0) {
+    return true;
+  }
+
+  // so list command can default to current frame
+  client->moveToFrame(client->getFrame(), false);
+
+  if (client->argCount() == 0) {
     int i = 0;
     for (ArrayIter iter(st); iter; ++iter) {
       client->printFrame(i, iter.second());

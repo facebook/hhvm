@@ -251,6 +251,10 @@ bool CmdPrint::onClient(DebuggerClient *client) {
   bool watch = false;
   int index = 1;
   if (client->arg(1, "always")) {
+    if (client->argCount() == 1) {
+      client->error("'[p]rint [a]lways' needs an expression to watch.");
+      return true;
+    }
     watch = true;
     index++;
   } else if (client->arg(1, "list")) {

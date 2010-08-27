@@ -116,8 +116,18 @@ void Debugger::InterruptFileLine(InterruptSite &site) {
   Interrupt(BreakPointReached, NULL, &site);
 }
 
-void Debugger::InterruptException(InterruptSite &site) {
-  Interrupt(ExceptionThrown, NULL, &site);
+bool Debugger::InterruptException(CVarRef e) {
+  if (RuntimeOption::EnableDebugger) {
+    ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+    if (ti->m_reqInjectionData.debugger) {
+      Eval::InterruptSite site(ti->m_top, e);
+      Eval::Debugger::Interrupt(ExceptionThrown, NULL, &site);
+      if (site.isJumping()) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 void Debugger::Interrupt(int type, const char *program,

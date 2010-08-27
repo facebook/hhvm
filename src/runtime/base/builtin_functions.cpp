@@ -806,16 +806,7 @@ Variant invoke_static_method_bind_mil(CStrRef s,
 // debugger and code coverage instrumentation
 
 void throw_exception(CObjRef e) {
-  if (RuntimeOption::EnableDebugger) {
-    ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
-    if (ti->m_reqInjectionData.debugger) {
-      Eval::InterruptSite site(ti->m_top, e);
-      Eval::Debugger::InterruptException(site);
-      if (site.isJumping()) {
-        return;
-      }
-    }
-  }
+  if (!Eval::Debugger::InterruptException(e)) return;
   throw e;
 }
 

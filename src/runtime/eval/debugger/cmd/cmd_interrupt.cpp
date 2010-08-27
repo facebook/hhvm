@@ -41,11 +41,14 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
     thrift.write(m_site->getNamespace());
     thrift.write(m_site->getClass());
     thrift.write(m_site->getFunction());
-    Object e = m_site->getException();
+    Variant e = m_site->getException();
     if (e.isNull()) {
       thrift.write("");
+    } else if (e.isObject()) {
+      thrift.write(e.toObject()->o_getClassName());
     } else {
-      thrift.write(e->o_getClassName());
+      String ex(BreakPointInfo::ErrorClassName);
+      thrift.write(ex);
     }
     thrift.write(DebuggerClient::FormatVariable(e));
   } else {
@@ -112,6 +115,9 @@ std::string CmdInterrupt::desc() const {
       if (m_bpi) {
         if (m_interrupt == BreakPointReached) {
           return m_bpi->site();
+        }
+        if (m_bpi->m_exceptionClass == BreakPointInfo::ErrorClassName) {
+          return "An error occurred " + m_bpi->site();
         }
         return "Throwing " + m_bpi->m_exceptionClass + " " + m_bpi->site();
       }
@@ -189,13 +195,21 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
             toggled = true;
           }
           if (m_interrupt == BreakPointReached) {
-            client->info("Breakpoint %d reached %s", index + 1,
+            client->info("Breakpoint %d reached %s", bp->index(),
                          m_bpi->site().c_str());
           } else {
-            client->info("Breakpoint %d reached: Throwing %s %s", index + 1,
-                         m_bpi->m_exceptionClass.c_str(),
-                         m_bpi->site().c_str());
-            client->output(m_bpi->m_exceptionObject);
+            if (m_bpi->m_exceptionClass == BreakPointInfo::ErrorClassName) {
+              client->info("Breakpoint %d reached: An error occurred %s",
+                           bp->index(), m_bpi->site().c_str());
+              client->error("Error Message: %s",
+                            m_bpi->m_exceptionObject.c_str());
+            } else {
+              client->info("Breakpoint %d reached: Throwing %s %s",
+                           bp->index(),
+                           m_bpi->m_exceptionClass.c_str(),
+                           m_bpi->site().c_str());
+              client->output(m_bpi->m_exceptionObject);
+            }
           }
           if (!bpm->m_output.empty()) {
             client->print(bpm->m_output);

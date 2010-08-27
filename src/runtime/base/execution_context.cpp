@@ -29,6 +29,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/debug/backtrace.h>
 #include <runtime/base/server/server_stats.h>
+#include <runtime/eval/debugger/debugger.h>
 #include <util/logger.h>
 #include <util/process.h>
 #include <util/text_color.h>
@@ -558,11 +559,13 @@ void ExecutionContext::handleError(const std::string &msg,
     handled = callUserErrorHandler(ee, errnum, false);
   }
   if (mode == AlwaysThrow || (mode == ThrowIfUnhandled && !handled)) {
+    if (!Eval::Debugger::InterruptException(String(msg))) return;
     throw FatalErrorException(msg.c_str());
   }
   if (!handled &&
       (RuntimeOption::NoSilencer ||
        (getErrorReportingLevel() & errnum) != 0)) {
+    if (!Eval::Debugger::InterruptException(String(msg))) return;
     Logger::Log(prefix.c_str(), ee);
   }
 }

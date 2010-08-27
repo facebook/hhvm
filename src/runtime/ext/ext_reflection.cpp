@@ -251,7 +251,7 @@ Array f_hphp_get_class_info(CVarRef name) {
          iter != constants.end(); ++iter) {
       ClassInfo::ConstantInfo *info = *iter;
       if (info->valueText && *info->valueText) {
-        arr.set(info->name, info->value);
+        arr.set(info->name, info->getValue());
       } else {
         arr.set(info->name, get_class_constant(className.data(), info->name));
       }

@@ -24,6 +24,7 @@ namespace HPHP { namespace Eval {
 void CmdException::list(DebuggerClient *client) {
   if (client->argCount() == 0) {
     client->addCompletion(DebuggerClient::AutoCompleteClasses);
+    client->addCompletion("error");
     client->addCompletion("regex");
     client->addCompletion("once");
   } else if (client->arg(1, "regex") || client->arg(1, "once")) {
@@ -38,6 +39,7 @@ bool CmdException::help(DebuggerClient *client) {
   client->helpCmds(
     "[e]xception {cls}",            "breaks if class of exception throws",
     "[e]xception {ns}::{cls}",      "breaks if class of exception throws",
+    "[e]xception error",            "breaks on errors, warnings and notices",
     "[e]xception {above}@{url}",    "breaks only if url also matches",
     "",                             "",
     "[e]xception [r]egex {above}",  "breaks at matching regex pattern",
@@ -93,6 +95,7 @@ bool CmdException::onClient(DebuggerClient *client) {
       "\n"
       "These are the components in an exception {exp}:\n"
       "\n"
+      "\terror@{url}"
       "\t{namespace}::{cls}@{url}"
       "\n"
     );

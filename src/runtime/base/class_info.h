@@ -69,10 +69,20 @@ public:
     HasOptFunction         = (1 << 23)  //                  x
   };
 
-  struct ConstantInfo {
+  class ConstantInfo {
+  public:
+    ConstantInfo();
+
     const char *name;
     unsigned int valueLen;
     const char *valueText;
+    const ObjectStaticCallbacks *callbacks;
+
+    Variant getValue() const;
+    void setValue(CVarRef value);
+
+  private:
+    bool deferred;
     Variant value;
   };
 

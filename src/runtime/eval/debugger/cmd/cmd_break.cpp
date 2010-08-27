@@ -193,9 +193,9 @@ bool CmdBreak::help(DebuggerClient *client) {
 bool CmdBreak::processList(DebuggerClient *client) {
   m_breakpoints = client->getBreakPoints();
   for (int i = 0; i < (int)m_breakpoints->size(); i++) {
-    client->print("  %d\t%s  %s", i + 1,
-                  (*m_breakpoints)[i]->state(true).c_str(),
-                  (*m_breakpoints)[i]->desc().c_str());
+    BreakPointInfoPtr bpi = m_breakpoints->at(i);
+    client->print("  %d\t%s  %s", bpi->index(), bpi->state(true).c_str(),
+                  bpi->desc().c_str());
   }
   if (m_breakpoints->empty()) {
     client->tutorial(
@@ -244,7 +244,7 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
           action = "updated";
           bp->toggle();
         }
-        client->info("Breakpoint %d is %s %s", index + 1,
+        client->info("Breakpoint %d is %s %s", bp->index(),
                      action, bp->site().c_str());
         found = true;
       }
@@ -288,27 +288,34 @@ bool CmdBreak::processUpdate(DebuggerClient *client) {
     return true;
   }
 
-  int num = atoi(snum.c_str()) - 1;
-  if (num < 0 || num >= (int)m_breakpoints->size()) {
+  int index = -1;
+  int num = atoi(snum.c_str());
+  for (unsigned int i = 0; i < m_breakpoints->size(); i++) {
+    if (m_breakpoints->at(i)->index() == num) {
+      index = i;
+      break;
+    }
+  }
+  if (index < 0) {
     client->error("\"%s\" is not a valid breakpoint index. Choose one from "
                   "this list:", snum.c_str());
     processList(client);
     return true;
   }
 
-  BreakPointInfoPtr bpi = (*m_breakpoints)[num];
+  BreakPointInfoPtr bpi = (*m_breakpoints)[index];
   if (client->arg(1, "clear")) {
-    m_breakpoints->erase(m_breakpoints->begin() + num);
+    m_breakpoints->erase(m_breakpoints->begin() + index);
     m_body = "update";
     client->send(this);
-    client->info("Breakpoint %d cleared %s", num + 1,
+    client->info("Breakpoint %d cleared %s", bpi->index(),
                  bpi->desc().c_str());
   } else {
     ASSERT(client->arg(1, "toggle"));
     bpi->toggle();
     m_body = "update";
     client->send(this);
-    client->info("Breakpoint %d's state is changed to %s.", num + 1,
+    client->info("Breakpoint %d's state is changed to %s.", bpi->index(),
                  bpi->state(false).c_str());
   }
 
@@ -342,8 +349,7 @@ bool CmdBreak::validate(DebuggerClient *client, BreakPointInfoPtr bpi,
     m_breakpoints->push_back(bpi);
     m_body = "update";
     client->send(this);
-    client->info("Breakpoint %d set %s", (int)m_breakpoints->size(),
-                 bpi->desc().c_str());
+    client->info("Breakpoint %d set %s", bpi->index(), bpi->desc().c_str());
     return true;
   }
 

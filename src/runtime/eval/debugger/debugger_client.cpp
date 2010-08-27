@@ -18,6 +18,7 @@
 #include <runtime/eval/debugger/debugger_command.h>
 #include <runtime/eval/debugger/cmd/all.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/variable_serializer.h>
 #include <runtime/base/string_util.h>
 #include <runtime/base/preg.h>
 #include <runtime/ext/ext_json.h>
@@ -258,13 +259,14 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
 }
 
 String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
-  String value = f_json_encode(v);
-
-  Variant replaced;
-  preg_replace(replaced,
-               "/\\{\"__PHP_Incomplete_Class_Name\":\"(.*?)\"(,|)/",
-               "$1{", value);
-  value = replaced.toString();
+  String value;
+  if (maxlen <= 0) {
+    VariableSerializer vs(VariableSerializer::VarExport);
+    value = vs.serialize(v, true).toString();
+  } else {
+    VariableSerializer vs(VariableSerializer::DebuggerDump, 0, 1);
+    value = vs.serialize(v, true).toString();
+  }
 
   if (maxlen <= 0 || value.length() - maxlen < 30) {
     return value;
@@ -326,7 +328,7 @@ DebuggerClient::DebuggerClient()
       m_inputState(TakingCommand), m_runState(NotYet),
       m_signum(CmdSignal::SignalNone),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
-      m_threadId(0), m_listLine(0), m_frame(0) {
+      m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0) {
 }
 
 DebuggerClient::~DebuggerClient() {
@@ -391,6 +393,7 @@ void DebuggerClient::switchMachine(DMachineInfoPtr machine) {
     m_matched.clear();
     m_listFile.clear();
     m_listLine = 0;
+    m_listLineFocus = 0;
     m_stacktrace.reset();
     m_frame = 0;
   }
@@ -863,13 +866,17 @@ bool DebuggerClient::console() {
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 
-void DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
+bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
                           int line2 /* = 0 */, int charFocus0 /* = 0 */,
                           int lineFocus1 /* = 0 */, int charFocus1 /* = 0 */) {
   if (line1 == 0 && line2 == 0) {
-    print(highlight_code(source, 0, lineFocus, charFocus0,
-                         lineFocus1, charFocus1));
-    return;
+    String highlighted = highlight_code(source, 0, lineFocus, charFocus0,
+                                        lineFocus1, charFocus1);
+    if (!highlighted.empty()) {
+      print(highlighted);
+      return true;
+    }
+    return false;
   }
 
   String highlighted = highlight_php(source, 1, lineFocus, charFocus0,
@@ -888,7 +895,9 @@ void DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
   }
   if (!sb.empty()) {
     print("%s%s", sb.data(), ANSI_COLOR_END);
+    return true;
   }
+  return false;
 }
 
 char DebuggerClient::ask(const char *fmt, ...) {
@@ -1439,31 +1448,35 @@ void DebuggerClient::getListLocation(std::string &file, int &line,
                                      int &lineFocus1, int &charFocus1) {
   lineFocus0 = charFocus0 = lineFocus1 = charFocus1 = 0;
   if (m_listFile.empty() && m_breakpoint) {
-    setListLocation(m_breakpoint->m_file, m_breakpoint->m_line1);
+    setListLocation(m_breakpoint->m_file, m_breakpoint->m_line1, true);
     lineFocus0 = m_breakpoint->m_line1;
     charFocus0 = m_breakpoint->m_char1;
     lineFocus1 = m_breakpoint->m_line2;
     charFocus1 = m_breakpoint->m_char2;
-    if (m_listLine) {
-      m_listLine -= CodeBlockSize / 2;
-      if (m_listLine < 0) {
-        m_listLine = 0;
-      }
-    }
+  } else if (m_listLineFocus) {
+    lineFocus0 = m_listLineFocus;
   }
   file = m_listFile;
   line = m_listLine;
 }
 
-void DebuggerClient::setListLocation(const std::string &file, int line) {
+void DebuggerClient::setListLocation(const std::string &file, int line,
+                                     bool center) {
   m_listFile = file;
-  m_listLine = line;
-
   if (!m_listFile.empty() && m_listFile[0] != '/' && !SourceRoot.empty()) {
     if (SourceRoot[SourceRoot.size() - 1] != '/') {
       SourceRoot += "/";
     }
     m_listFile = SourceRoot + m_listFile;
+  }
+
+  m_listLine = line;
+  if (center && m_listLine) {
+    m_listLineFocus = m_listLine;
+    m_listLine -= CodeBlockSize / 2;
+    if (m_listLine < 0) {
+      m_listLine = 0;
+    }
   }
 }
 
@@ -1472,7 +1485,7 @@ void DebuggerClient::setSourceRoot(const std::string &sourceRoot) {
   saveConfig();
 
   // apply change right away
-  setListLocation(m_listFile, m_listLine);
+  setListLocation(m_listFile, m_listLine, true);
 }
 
 void DebuggerClient::setMatchedBreakPoints(BreakPointInfoPtrVec breakpoints) {
@@ -1486,6 +1499,7 @@ void DebuggerClient::setCurrentLocation(int64 threadId,
   m_stacktrace.reset();
   m_listFile.clear();
   m_listLine = 0;
+  m_listLineFocus = 0;
   m_acLiveListsDirty = true;
 }
 
@@ -1501,7 +1515,7 @@ void DebuggerClient::setStackTrace(CArrRef stacktrace) {
   m_frame = 0;
 }
 
-void DebuggerClient::moveToFrame(int index) {
+void DebuggerClient::moveToFrame(int index, bool display /* = true */) {
   m_frame = index;
   if (m_frame >= m_stacktrace.size()) {
     m_frame = m_stacktrace.size() - 1;
@@ -1514,9 +1528,17 @@ void DebuggerClient::moveToFrame(int index) {
     String file = frame["file"];
     int line = frame["line"].toInt32();
     if (!file.empty() && line) {
-      setListLocation(file.data(), line);
+      if (m_frame == 0) {
+        m_listFile.clear();
+        m_listLine = 0;
+        m_listLineFocus = 0;
+      } else {
+        setListLocation(file.data(), line, true);
+      }
     }
-    printFrame(m_frame, frame);
+    if (display) {
+      printFrame(m_frame, frame);
+    }
   }
 }
 

@@ -81,7 +81,7 @@ Variant f_constant(CStrRef name) {
     const ClassInfo::ConstantInfo *cinfo =
       ClassInfo::FindConstant(name.data());
     // system/uniquely defined scalar constant (must be valid)
-    if (cinfo) return cinfo->value;
+    if (cinfo) return cinfo->getValue();
     // dynamic/redeclared constant
     return ((Globals*)get_global_variables())->getConstant(name.data());
   }

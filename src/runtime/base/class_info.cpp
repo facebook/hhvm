@@ -185,6 +185,24 @@ const ClassInfo::ConstantInfo *ClassInfo::FindConstant(const char *name) {
   return info;
 }
 
+ClassInfo::ConstantInfo::ConstantInfo() : callbacks(NULL), deferred(true) {
+}
+
+Variant ClassInfo::ConstantInfo::getValue() const {
+  if (deferred) {
+    if (callbacks == NULL) {
+      return get_constant(name);
+    }
+    return callbacks->os_constant(name);
+  }
+  return value;
+}
+
+void ClassInfo::ConstantInfo::setValue(CVarRef v) {
+  value = v;
+  deferred = false;
+}
+
 Array ClassInfo::GetConstants() {
   if (!s_loaded) Load();
   Array res;
@@ -192,13 +210,13 @@ Array ClassInfo::GetConstants() {
   {
     const ConstantMap &scm = s_systemFuncs->getConstants();
     for (ConstantMap::const_iterator it = scm.begin(); it != scm.end(); ++it) {
-      res.set(it->first, it->second->value);
+      res.set(it->first, it->second->getValue());
     }
   }
   {
     const ConstantMap &ucm = s_userFuncs->getConstants();
     for (ConstantMap::const_iterator it = ucm.begin(); it != ucm.end(); ++it) {
-      res.set(it->first, it->second->value);
+      res.set(it->first, it->second->getValue());
     }
   }
   if (s_hook) {
@@ -496,7 +514,7 @@ bool ClassInfo::checkAccess(ClassInfo *defClass,
                             bool staticCall,
                             bool hasObject) const {
   ASSERT(defClass && methodInfo);
-  if (!strcasecmp(this->m_name, defClass->m_name)) {
+  if (!strcasecmp(m_name, defClass->m_name)) {
     if (methodInfo->attribute & ClassInfo::IsStatic) return true;
     return hasObject;
   }
@@ -650,8 +668,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
                                    staticVariable->valueLen));
       VariableUnserializer vu(in);
       try {
-        staticVariable->value = vu.unserialize();
-        staticVariable->value.setStatic();
+        Variant v = vu.unserialize();
+        v.setStatic();
+        staticVariable->setValue(v);
       } catch (Exception &e) {
         ASSERT(false);
       }
@@ -686,8 +705,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       istringstream in(std::string(constant->valueText, constant->valueLen));
       VariableUnserializer vu(in);
       try {
-        constant->value = vu.unserialize();
-        constant->value.setStatic();
+        Variant v = vu.unserialize();
+        v.setStatic();
+        constant->setValue(v);
       } catch (Exception &e) {
         ASSERT(false);
       }
@@ -695,13 +715,11 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       if (!(m_attribute & IsVolatile) && !(m_attribute & IsLazyInit)) {
         const ObjectStaticCallbacks *cwo = get_object_static_callbacks(m_name);
         if (cwo) {
-          constant->value = cwo->os_constant(constant->name);
+          constant->callbacks = cwo;
         } else {
           ASSERT(false);
         }
       }
-    } else {
-      constant->value = get_constant(constant->name);
     }
 
     ASSERT(m_constants.find(constant->name) == m_constants.end());

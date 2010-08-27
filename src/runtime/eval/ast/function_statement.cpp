@@ -372,7 +372,7 @@ void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {
     ci->valueLen = 12;
     ci->valueText = "unsupported";
     if (it->second) {
-      ci->value = it->second->eval(env);
+      ci->setValue(it->second->eval(env));
     }
     info.staticVariables.push_back(ci);
   }

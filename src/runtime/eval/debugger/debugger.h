@@ -62,7 +62,7 @@ public:
    * A new line of PHP code is reached from execution thread.
    */
   static void InterruptFileLine(InterruptSite &site);
-  static void InterruptException(InterruptSite &site);
+  static bool InterruptException(CVarRef e);
 
   /**
    * Surround text with color, if set.

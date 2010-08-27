@@ -142,7 +142,7 @@ public:
   void output (CStrRef s);
   void error  (CStrRef s);
 
-  void code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
+  bool code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
             int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
   char ask(const char *fmt, ...);
 
@@ -217,7 +217,7 @@ public:
   BreakPointInfoPtrVec *getMatchedBreakPoints() { return &m_matched;}
   void getListLocation(std::string &file, int &line, int &lineFocus0,
                        int &charFocus0, int &lineFocus1, int &charFocus1);
-  void setListLocation(const std::string &file, int line);
+  void setListLocation(const std::string &file, int line, bool center);
   void setSourceRoot(const std::string &sourceRoot);
 
   /**
@@ -234,7 +234,7 @@ public:
    */
   Array getStackTrace() { return m_stacktrace;}
   void setStackTrace(CArrRef stacktrace);
-  void moveToFrame(int index);
+  void moveToFrame(int index, bool display = true);
   void printFrame(int index, CArrRef frame);
   int getFrame() const { return m_frame;}
 
@@ -321,6 +321,7 @@ private:
   // list command's current location, which may be different from m_breakpoint
   std::string m_listFile;
   int m_listLine;
+  int m_listLineFocus;
 
   WatchPtrVec m_watches;
 

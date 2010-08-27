@@ -194,9 +194,11 @@ bool CmdList::onClient(DebuggerClient *client) {
 
   CmdListPtr res = client->xend<CmdList>(this);
   if (res->m_code.isString()) {
-    client->code(res->m_code, line, m_line1, m_line2, charFocus0, lineFocus1,
-                 charFocus1);
-    client->setListLocation(m_file, m_line2);
+    if (!client->code(res->m_code, line, m_line1, m_line2, charFocus0,
+                      lineFocus1, charFocus1)) {
+      client->info("No more lines in %s to display.", m_file.c_str());
+    }
+    client->setListLocation(m_file, m_line2, false);
   } else {
     client->error("Unable to read specified source file location.");
   }

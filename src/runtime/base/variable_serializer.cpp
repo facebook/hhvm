@@ -30,9 +30,10 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-VariableSerializer::VariableSerializer(Type type, int option /* = 0 */)
+VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
+                                       int maxRecur /* = 3 */)
   : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
-    m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(3),
+    m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
     m_outputLimit(0) {
 }
 
@@ -78,6 +79,7 @@ void VariableSerializer::write(bool v) {
     break;
   case VarExport:
   case JSON:
+  case DebuggerDump:
     m_buf->append(v ? "true" : "false");
     break;
   case VarDump:
@@ -103,6 +105,7 @@ void VariableSerializer::write(int64 v) {
   case PrintR:
   case VarExport:
   case JSON:
+  case DebuggerDump:
     m_buf->append(v);
     break;
   case VarDump:
@@ -149,6 +152,7 @@ void VariableSerializer::write(double v) {
     break;
   case VarExport:
   case PrintR:
+  case DebuggerDump:
     {
       char *buf;
       if (v == 0.0) v = 0.0; // so to avoid "-0" output
@@ -202,6 +206,7 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     m_buf->append(v, len);
     break;
   }
+  case DebuggerDump:
   case VarExport: {
     if (len < 0) len = strlen(v);
     m_buf->append('\'');
@@ -347,6 +352,7 @@ void VariableSerializer::writeNull() {
     m_buf->append("N;");
     break;
   case JSON:
+  case DebuggerDump:
     m_buf->append("null");
     break;
   default:
@@ -372,6 +378,7 @@ void VariableSerializer::writeOverflow(void* ptr, bool isObject /* = false */) {
     throw NestingLevelTooDeepException();
   case VarDump:
   case DebugDump:
+  case DebuggerDump:
     indent();
     m_buf->append("*RECURSION*\n");
     break;
@@ -511,6 +518,7 @@ void VariableSerializer::writeArrayHeader(const ArrayData *arr, int size) {
     }
     break;
   case JSON:
+  case DebuggerDump:
     if (info.is_vector) {
       m_buf->append("[");
     } else {
@@ -658,6 +666,7 @@ void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
     }
     break;
   case JSON:
+  case DebuggerDump:
     if (!info.first_element) {
       m_buf->append(",");
     }
@@ -727,6 +736,7 @@ void VariableSerializer::writeArrayFooter(const ArrayData *arr) {
     m_buf->append('}');
     break;
   case JSON:
+  case DebuggerDump:
     if (info.is_vector) {
       m_buf->append("]");
     } else {
@@ -773,6 +783,8 @@ bool VariableSerializer::incNestedLevel(void *ptr,
   case PrintR:
   case VarDump:
   case DebugDump:
+  case JSON:
+  case DebuggerDump:
     return ++m_counts[ptr] >= m_maxCount;
   case Serialize:
   case APCSerialize:
@@ -787,8 +799,6 @@ bool VariableSerializer::incNestedLevel(void *ptr,
       return ct >= (m_maxCount - 1);
     }
     break;
-  case JSON:
-    return ++m_counts[ptr] >= m_maxCount;
   default:
     ASSERT(false);
     break;

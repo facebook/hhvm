@@ -157,7 +157,7 @@ bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {
   ci.name = NULL;
   ci.valueLen = 0;
   ci.valueText = NULL;
-  ci.value = val;
+  ci.setValue(val);
   return true;
 }
 

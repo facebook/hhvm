@@ -1125,6 +1125,7 @@ BeginClass(
   array(
     'name'   => "xmlwriter",
     'desc'   => "",
+    'bases'  => array('Sweepable'),
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 

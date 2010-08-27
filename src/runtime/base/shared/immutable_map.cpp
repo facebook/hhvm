@@ -30,34 +30,32 @@ ImmutableMap::~ImmutableMap() {
   free(m_hash);
 }
 
-static string_data_hash g_hash;
-static string_data_same g_same;
-
 void ImmutableMap::add(ThreadSharedVariant *key, ThreadSharedVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
   int pos = m_curPos++;
-  ASSERT(pos < m_capacity);
+  ASSERT(pos <= m_capacity_mask);
   m_buckets[pos].key = key;
   m_buckets[pos].val = val;
   if (key->is(KindOfInt64)) {
-    size_t hash_pos = (size_t)(key->intData()) % m_capacity;
+    size_t hash_pos = (int64)(key->intData()) & (int64)m_capacity_mask;
     m_buckets[pos].next = m_hash[hash_pos];
     m_hash[hash_pos] = pos;
   } else {
     ASSERT(key->is(KindOfString));
-    size_t hash_pos = g_hash(key->getStringData()) % m_capacity;
+    size_t hash_pos = key->getStringData()->hash() & (int64)m_capacity_mask;
     m_buckets[pos].next = m_hash[hash_pos];
     m_hash[hash_pos] = pos;
   }
 }
 
 int ImmutableMap::indexOf(StringData* key) {
-  size_t hash_pos = g_hash(key) % m_capacity;
+  int64 hash = key->hash();
+  size_t hash_pos = hash & (int64)m_capacity_mask;
   for (int bucket = m_hash[hash_pos]; bucket != -1;
        bucket = m_buckets[bucket].next) {
     if (m_buckets[bucket].key->is(KindOfString) &&
-        g_same(m_buckets[bucket].key->getStringData(), key)) {
+        key->same(m_buckets[bucket].key->getStringData())) {
       return bucket;
     }
   }
@@ -65,7 +63,7 @@ int ImmutableMap::indexOf(StringData* key) {
 }
 
 int ImmutableMap::indexOf(int64 key) {
-  size_t hash_pos = (size_t)key % m_capacity;
+  size_t hash_pos = (int64)key & (int64)m_capacity_mask;
   for (int bucket = m_hash[hash_pos]; bucket != -1;
       bucket = m_buckets[bucket].next) {
     if (m_buckets[bucket].key->is(KindOfInt64) &&

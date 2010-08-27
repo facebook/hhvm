@@ -38,10 +38,13 @@ public:
     if (num <= 0) {
       num = 1;
     }
-    m_capacity = num;
-    m_hash = (int*)malloc(sizeof(int) * m_capacity);
-    for (int i = 0; i < m_capacity; i++) m_hash[i] = -1;
-    m_buckets = (Bucket*)malloc(sizeof(Bucket) * m_capacity);
+    int pow_2 = 1;
+    while (num >>= 1) pow_2++;
+    int capacity = 1 << pow_2;
+    m_capacity_mask = capacity - 1;
+    m_hash = (int*)malloc(sizeof(int) * capacity);
+    for (int i = 0; i < capacity; i++) m_hash[i] = -1;
+    m_buckets = (Bucket*)malloc(sizeof(Bucket) * capacity);
   }
 
   virtual ~ImmutableMap();
@@ -70,8 +73,9 @@ public:
   }
 
   size_t getStructSize() {
-    size_t size = sizeof(ImmutableMap) + sizeof(Bucket) * m_capacity +
-                  sizeof(int) * m_capacity;
+    size_t size = sizeof(ImmutableMap) +
+                  sizeof(Bucket) * (m_capacity_mask + 1) +
+                  sizeof(int) * (m_capacity_mask + 1);
     return size;
   }
 
@@ -88,7 +92,7 @@ private:
   /** buckets, stored in index order */
   Bucket* m_buckets;
   int m_curPos;
-  int m_capacity;
+  unsigned int m_capacity_mask;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -206,9 +206,9 @@ static void php_dom_throw_error(dom_exception_code error_code,
   }
 
   if (strict_error) {
-    c_domexception *e = NEW(c_domexception)();
+    p_domexception e(NEW(c_domexception)());
     e->t___construct(error_message);
-    throw Object(e);
+    throw e;
   }
   raise_warning(error_message);
 }

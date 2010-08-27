@@ -1962,6 +1962,14 @@ Variant c_domnode::t_appendchild(CObjRef newnode) {
   return create_node_object(new_child, m_doc, false);
 }
 
+ObjectData *c_domnode::clone() {
+  ObjectData *obj = cloneImpl();
+  c_domnode *node = static_cast<c_domnode*>(obj);
+  node->m_node = m_node;
+  node->m_doc = m_doc;
+  return obj;
+}
+
 Variant c_domnode::t_clonenode(bool deep /* = false */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::clonenode);
   xmlNodePtr n = m_node;

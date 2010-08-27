@@ -4181,6 +4181,7 @@ bool TestCodeRun::TestObjectMethod() {
       "$ourFileName = \"testFile.txt\";\n"
       "$ourFileHandle = fopen($ourFileName, 'w') or die(\"can't open file\");\n"
       "fclose($ourFileHandle);\n"
+      "unlink($ourFileName);\n"
       "\n"
       "echo \"done\\n\";");
  return true;

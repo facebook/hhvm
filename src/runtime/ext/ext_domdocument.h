@@ -144,6 +144,7 @@ class c_domnode : public ExtObjectData, public Sweepable {
   public: virtual void destruct();
 
 public:
+  virtual ObjectData *clone();
   sp_domdocument m_doc;
   xmlNodePtr m_node;
 };

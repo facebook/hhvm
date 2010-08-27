@@ -1600,6 +1600,7 @@ BeginClass(
     'footer' => <<<EOT
 
 public:
+  virtual ObjectData *clone();
   sp_domdocument m_doc;
   xmlNodePtr m_node;
 EOT

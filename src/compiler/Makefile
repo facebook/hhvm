@@ -24,5 +24,7 @@ $(OUT_DIR)analysis/code_error.inc: $(ERROR_INC)
 $(OUT_DIR)analysis/dependency.inc: $(DEPENDENCY_INC)
 	$(V)cat $^ > $@
 
-$(OBJECTS): $(OUT_DIR)analysis/code_error.inc
-$(OBJECTS): $(OUT_DIR)analysis/dependency.inc
+INC_FILES := $(OUT_DIR)analysis/code_error.inc $(OUT_DIR)analysis/dependency.inc
+do-setup: $(INC_FILES)
+
+$(OBJECTS) : $(INC_FILES)

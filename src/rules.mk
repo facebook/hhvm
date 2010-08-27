@@ -140,6 +140,7 @@ endif
 STATIC_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).so
 APP_TARGET = $(OUT_TOP)$(PROJECT_NAME)
+
 MONO_TARGETS = $(filter-out $(PROJECT_NAME), $(patsubst %.cpp, %, $(wildcard *.cpp)))
 
 # external shared libraries
@@ -607,9 +608,14 @@ LIB_PATHS = $(HPHP_LIB) \
 # This is to make sure "make" without any target will actually "make all".
 overall: all
 
+# Add quiet as a dependent to prevent "nothing to do for... warnings from make"
+.PHONY: quiet
+quiet:
+	@true
+
 # Suppressing no rule errors
 %.d:
-	@true
+	@
 
 DEPEND_FILES := $(OBJECTS:.o=.d)
 
@@ -724,6 +730,9 @@ SUB_INTERMEDIATE_FILES = $(INTERMEDIATE_FILES)
 
 $(OBJECTS): $(GENERATED_SOURCES)
 
+.PHONY: objects
+objects: $(OBJECTS) quiet
+
 ifdef SHOW_LINK
 
 $(SHARED_LIB): $(OBJECTS)
@@ -753,17 +762,30 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 
 endif
 
-.PHONY:out-of-date
+.PHONY:out-of-date do-setup
+
+do-setup: quiet
+
 $(APP_TARGET): $(OBJECTS) $(DEP_LIBS) $(FORCE_RELINK)
 	$(LINK_OBJECTS) $(LINK_LIBS)
 
-.PHONY: $(LIB_TARGETS)
-$(LIB_TARGETS): $(CODEGEN_TARGETS)
+.PHONY: $(LIB_TARGETS) \
+	$(addsuffix -obj, $(LIB_TARGETS) $(PROGRAMS)) \
+	$(addsuffix -setup, $(LIB_TARGETS) $(PROGRAMS))
+
+$(addsuffix -setup, $(PROGRAMS) $(LIB_TARGETS)):
+	$(V)$(MAKE) $(NO_PRINT) -C $(@:-setup=) do-setup
+
+$(addsuffix -obj, $(LIB_TARGETS) $(PROGRAMS)): %-obj : %-setup
+
+$(LIB_TARGETS): % : %-obj $(CODEGEN_TARGETS)
 	$(V)$(MAKE) $(NO_PRINT) -C $@
 
-.PHONY: $(PROGRAMS)
-$(PROGRAMS): $(LIB_TARGETS)
+$(PROGRAMS): % : %-obj $(LIB_TARGETS)
 	$(V)$(MAKE) $(NO_PRINT) -C $@
+
+$(addsuffix -obj, $(PROGRAMS) $(LIB_TARGETS)):
+	$(V)$(MAKE) $(NO_PRINT) -C $(@:-obj=) objects
 
 .PHONY: report
 report:

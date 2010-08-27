@@ -19,3 +19,8 @@ $(HPHPI): $(HPHP) $(PHP_FILES) hphpi_build.hdf
 
 clobber:
 	$(V)rm -rf $(OUT_DIR)gen $(HPHPI)
+
+.PHONY: do-setup objects
+do-setup objects:
+	@true
+

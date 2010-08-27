@@ -41,6 +41,8 @@ TARGETS = $(PROGRAMS) $(SHARED_LIB) $(STATIC_LIB)
 all: $(TARGETS)
 
 $(PROGRAMS) : $(STATIC_LIB)
+hphp-setup: compiler-setup
 hphp: compiler
-hphpi : hphp
+hphpi: hphp
+test-setup: compiler-setup
 test: compiler

@@ -408,7 +408,9 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
         item.len = (int)(int64)*(p+1);
-        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        // Strings would be copied into APC anyway.
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
+        value.checkStatic();
         item.value = s.construct(item.key, item.len, value, false);
       }
       s.prime(vars);
@@ -423,7 +425,7 @@ void apc_load_impl(const char **int_keys, int64 *int_values,
         SharedStore::KeyValuePair &item = vars[i];
         item.key = *p;
         item.len = (int)(int64)*(p+1);
-        String value(*(p+2), (int)(int64)*(p+3), CopyString);
+        String value(*(p+2), (int)(int64)*(p+3), AttachLiteral);
         item.value = s.construct(item.key, item.len, value, true);
       }
       s.prime(vars);
@@ -480,7 +482,6 @@ static double my_time() {
   t = a.tv_sec + (a.tv_usec/1000000.00);
   return t;
 }
-
 
 #define RFC1867_TRACKING_KEY_MAXLEN 63
 #define RFC1867_NAME_MAXLEN 63

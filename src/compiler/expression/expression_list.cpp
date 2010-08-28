@@ -422,7 +422,12 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   ar->setInExpression(false);
   bool ret = false;
   if (m_arrayElements) {
-    ret = Expression::preOutputCPP(cg, ar, state);
+    /*
+     * would like to do:
+     *  ret = Expression::preOutputCPP(cg, ar, state);
+     * but icc has problems with the generated code.
+     */
+    ret = hasEffect();
   } else if (n > 1 && m_kind == ListKindLeft) {
     ret = true;
   } else {

@@ -7876,7 +7876,7 @@ Variant c_ReflectionClass::t_getstaticproperties() {
         if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isStatic */ MethodIndex(312, 1) /* isStatic */ ,  "isStatic", 0x7A15DC56E8CC0B19LL, 0))) {
           {
             {
-              Variant tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+              const Variant &tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
               Variant tmp5((v_prop));
               v_ret.set(tmp4, (tmp5));
             }
@@ -7931,7 +7931,7 @@ Variant c_ReflectionClass::t_getdefaultproperties() {
         if (toBoolean(v_prop. BIND_CLASS_DOT o_invoke_few_args(/* isDefault */ MethodIndex(326, 1) /* isDefault */ ,  "isDefault", 0x384A52597AB11F15LL, 0))) {
           {
             {
-              Variant tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+              const Variant &tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
               Variant tmp5((v_prop));
               v_ret.set(tmp4, (tmp5));
             }
@@ -11000,15 +11000,15 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_method)) {
         {
           {
-            Variant tmp3((v_method.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            const Variant &tmp3((v_method.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_method.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            const Variant &tmp4((v_method.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_method.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            const Variant &tmp5((v_method.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
             m_class = tmp5;
           }
         }
@@ -12424,15 +12424,15 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_prop)) {
         {
           {
-            Variant tmp3((v_prop.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            const Variant &tmp3((v_prop.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            const Variant &tmp4((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            const Variant &tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
             m_class = tmp5;
           }
         }
@@ -14994,7 +14994,7 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
         v_params = tmp1;
       }
       {
-        Variant tmp2((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
+        const Variant &tmp2((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
         m_info = tmp2;
       }
     }
@@ -15105,7 +15105,10 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
   }
   if (instanceOf(v_defaultValue, "stdclass")) {
     {
-      x_hphp_throw_fatal_error(toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss10d8f28e, "msg"), true)));
+      {
+        const String &tmp4((toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss10d8f28e, "msg"), true))));
+        x_hphp_throw_fatal_error(tmp4);
+      }
     }
   }
   return v_defaultValue;

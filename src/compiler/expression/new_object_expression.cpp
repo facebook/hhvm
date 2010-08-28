@@ -176,7 +176,6 @@ void NewObjectExpression::preOutputStash(CodeGenerator &cg,
 
 void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  bool linemap = outputLineMap(cg, ar, true);
   string &cname = (m_origName == "self" || m_origName == "parent") ?
     m_name : m_origName;
   bool outsideClass = !ar->checkClassPresent(m_origName);
@@ -239,7 +238,6 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
       ClassScope::OutputVolatileCheckEnd(cg);
     }
   }
-  if (linemap) cg_printf(")");
 }
 
 bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,

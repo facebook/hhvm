@@ -172,13 +172,11 @@ endif
 endif
 
 PREFIX := $(TIMECMD)$(if $(USE_CCACHE), ccache,$(if $(NO_DISTCC),, distcc))
+ICC_ARGS := -no-ipo -wd1418 -wd1918 -wd383 -wd869 -wd981 -wd424 -wd1419 -wd444 -wd271 -wd2259 -wd1572 -wd1599 -wd82 -wd177 -wd593
 
-ifndef CXX
-CXX = g++
-endif
-ifndef CC
-CC = gcc
-endif
+CXX := $(if $(USE_ICC),$(ICC)/bin/intel64/icpc $(ICC_ARGS),g++)
+CC = $(if $(USE_ICC),$(ICC)/bin/intel64/icc $(ICC_ARGS),gcc)
+
 P_CXX = $(PREFIX) $(CXX)
 P_CC = $(PREFIX) $(CC)
 # override make default for icpcp case
@@ -252,10 +250,8 @@ CXXFLAGS += -ftemplate-depth-60
 endif
 
 ifndef NO_WALL
-CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof
-ifeq ($(findstring g++, $(CXX)), g++)
-CXXFLAGS += -Wno-parentheses
-endif
+CXXFLAGS += -Wall -Woverloaded-virtual -Wno-deprecated -Wno-strict-aliasing -Wno-write-strings -Wno-invalid-offsetof \
+	$(if $(USE_ICC),-w1,-Wno-parentheses)
 endif
 
 ifndef NO_WERROR

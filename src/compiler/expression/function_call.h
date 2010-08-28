@@ -73,6 +73,7 @@ protected:
   bool m_redeclared;
   bool m_redeclaredClass;
   bool m_derivedFromRedeclaring;
+  bool m_noStatic;
 
   // Extra arguments form an array, to which the scalar array optimization
   // should also apply.

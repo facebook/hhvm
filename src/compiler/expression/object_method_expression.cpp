@@ -323,7 +323,6 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
-  bool linemap = outputLineMap(cg, ar, true) ? 1 : 0;
   if (isThis && ar->getFunctionScope()->isStatic()) {
     cg_printf("GET_THIS_ARROW()");
   }
@@ -432,5 +431,4 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       cg_printf(", -1LL)");
     }
   }
-  if (linemap) cg_printf(")");
 }

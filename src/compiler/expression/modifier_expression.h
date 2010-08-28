@@ -41,6 +41,8 @@ public:
   bool isAbstract() const;
   bool isFinal() const;
 
+  int getLocalEffects() const { return NoEffect; }
+
 private:
   std::vector<int> m_modifiers;
 

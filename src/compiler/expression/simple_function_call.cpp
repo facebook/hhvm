@@ -1324,11 +1324,8 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
 
 void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
-  bool linemap = outputLineMap(cg, ar, true);
-
   if (!m_lambda.empty()) {
     cg_printf("\"%s\"", m_lambda.c_str());
-    if (linemap) cg_printf(")");
     return;
   }
 
@@ -1371,12 +1368,10 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
         cg_printf("throw_fatal(\"bad define\")");
         if (close) cg_printf(")");
       }
-      if (linemap) cg_printf(")");
       return;
     }
     if (m_name == "func_num_args") {
       cg_printf("num_args");
-      if (linemap) cg_printf(")");
       return;
     }
 
@@ -1393,7 +1388,6 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
             m_params->outputCPP(cg, ar);
           }
           cg_printf(")");
-          if (linemap) cg_printf(")");
           return;
         }
       }
@@ -1490,14 +1484,12 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
           default:
             break;
           }
-          if (linemap) cg_printf(")");
           return;
         }
       }
       break;
     case GetDefinedVarsFunction:
       cg_printf("get_defined_vars(variables)");
-      if (linemap) cg_printf(")");
       return;
     default:
       break;
@@ -1505,7 +1497,6 @@ void SimpleFunctionCall::outputCPPImpl(CodeGenerator &cg,
   }
 
   outputCPPParamOrderControlled(cg, ar);
-  if (linemap) cg_printf(")");
 }
 
 bool SimpleFunctionCall::canInvokeFewArgs() {

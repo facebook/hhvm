@@ -526,7 +526,10 @@ bool Expression::outputLineMap(CodeGenerator &cg, AnalysisResultPtr ar,
     break;
   case CodeGenerator::ClusterCPP:
     {
-      if (!(force || (getLocalEffects() & Construct::CanThrow))) {
+      if (!force &&
+          !(getLocalEffects() & (Construct::CanThrow|
+                                 Construct::AccessorEffect|
+                                 Construct::DiagnosticEffect))) {
         return false;
       }
       int line = cg.getLineNo(CodeGenerator::PrimaryStream);
@@ -615,9 +618,11 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
      (isLvalue && dynamic_cast<FunctionCall*>(this)));
 
   ar->wrapExpressionBegin(cg);
+  // make LINE macro separate to not interfere with persistance of expression.
+  // and because nested LINE macros dont work
+  if (outputLineMap(cg, ar)) cg_printf("0);\n");
+
   if (constRef) {
-    // make LINE macro separate to not interfere with persistance of expression.
-    if (outputLineMap(cg, ar, true)) cg_printf("0);\n");
     cg_printf("const ");
   }
 
@@ -678,7 +683,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
     m_context = save;
 
     cg_printf("));\n");
-    if (isLvalue && constRef) {
+    if ((isLvalue || hasContext(DeepReference)) && constRef) {
       dstType->outputCPPDecl(cg, ar);
       cg_printf(" &%s_lv = const_cast<", t.c_str());
       dstType->outputCPPDecl(cg, ar);
@@ -744,7 +749,7 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           cg.setItemIndex(i);
           ExpressionList *el = static_cast<ExpressionList*>(this);
           if (i >= el->getOutputCount()) {
-            s = 0;
+            s = lastState = 0;
             noEffect = true;
           }
         }
@@ -784,11 +789,11 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
   }
 
   if (ExpressionPtr e0 = getNthExpr(0)) {
-    e0->preOutputCPP(cg, ar, state);
+    e0->preOutputCPP(cg, ar, state & ~(StashVars));
   }
 
   if (ExpressionPtr e1 = getNthExpr(1)) {
-    e1->preOutputCPP(cg, ar, state);
+    e1->preOutputCPP(cg, ar, state & ~(StashVars));
   }
 
   return true;
@@ -917,7 +922,9 @@ void Expression::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     wrapped = preOutputCPP(cg, ar, 0);
   }
 
+  bool linemap = outputLineMap(cg, ar);
   outputCPPInternal(cg, ar);
+  if (linemap) cg_printf(")");
 
   m_implementedType = it;
   m_actualType = at;

@@ -140,7 +140,6 @@ void DynamicFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
                                         AnalysisResultPtr ar) {
-  bool linemap = outputLineMap(cg, ar, true);
   if (m_class || !m_className.empty()) {
     if (m_class) {
       // e.g. $cls::$func(...)
@@ -190,5 +189,4 @@ void DynamicFunctionCall::outputCPPImpl(CodeGenerator &cg,
   } else {
     cg_printf(", -1)");
   }
-  if (linemap) cg_printf(")");
 }

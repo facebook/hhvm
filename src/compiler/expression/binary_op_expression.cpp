@@ -976,7 +976,6 @@ bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
   ArrayElementExpressionPtr exp =
     dynamic_pointer_cast<ArrayElementExpression>(m_exp1);
   if (exp->isSuperGlobal() || exp->isDynamicGlobal()) return false;
-  bool linemap = outputLineMap(cg, ar);
 
   // turning $a['elem'] Op= $b into $a.setOpEqual('elem', $b);
   exp->getVariable()->outputCPP(cg, ar);
@@ -1004,7 +1003,6 @@ bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
   }
   cg_printf(")");
 
-  if (linemap) cg_printf(")");
   return true;
 }
 
@@ -1012,8 +1010,6 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
 
   if (isOpEqual() && outputCPPImplOpEqual(cg, ar)) return;
-
-  bool linemap = outputLineMap(cg, ar);
 
   bool wrapped = true;
   switch (m_op) {
@@ -1216,5 +1212,4 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   }
 
   if (wrapped) cg_printf(")");
-  if (linemap) cg_printf(")");
 }

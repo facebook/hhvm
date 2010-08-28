@@ -178,12 +178,9 @@ void IncludeExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
-  bool linemap = outputLineMap(cg, ar, true);
-
   // Includes aren't really supported in system mode
   if (cg.getOutput() == CodeGenerator::SystemCPP) {
     cg_printf("true");
-    if (linemap) cg_printf(")");
     return;
   }
   const char *vars = m_privateScope ?
@@ -197,7 +194,6 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
                 fs->pseudoMainName().c_str(),
                 once ? "true" : "false",
                 vars, cg.getGlobals(ar));
-      if (linemap) cg_printf(")");
       return;
     }
   }
@@ -221,5 +217,4 @@ void IncludeExpression::outputCPPImpl(CodeGenerator &cg,
             once ? "true" : "false",
             vars,
             currentDir.c_str());
-  if (linemap) cg_printf(")");
 }

@@ -237,6 +237,7 @@ bool ListAssignment::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
   m_cppTemp = genCPPTemp(cg, ar);
   ar->wrapExpressionBegin(cg);
+  if (outputLineMap(cg, ar)) cg_printf("0);\n");
   cg_printf("CVarRef %s((", m_cppTemp.c_str());
   m_array->outputCPP(cg, ar);
   cg_printf("));\n");

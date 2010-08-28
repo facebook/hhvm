@@ -91,11 +91,17 @@ endif
 ###############################################################################
 # Directories
 
+ifdef USE_ICC
+ifndef ICC
+override USE_ICC:=
+endif
+endif
+
 ifdef OUTDIR_BY_TYPE
 ifndef OUTPUT_ROOT
 OUTPUT_ROOT := bin
-OUT_EXT=$(if $(DEBUG),-g,-O)
 endif
+OUT_EXT=$(if $(USE_ICC),-icc)$(if $(DEBUG),-g,-O)
 endif
 
 ABS_PROJECT_ROOT := $(shell cd $(PROJECT_ROOT) && readlink -f `pwd`)
@@ -137,4 +143,8 @@ EXT_DIR = $(PROJECT_ROOT)/external-$(OS)
 	$(V)-$(MKDIR) $(@D)
 	$(V)touch $@
 
+dirinfo:
+	@echo $(ABS_PROJECT_ROOT) $(OUT_TOP) $(if $(DEBUG),D,R)$(if $(USE_ICC),-I)
+
 endif
+

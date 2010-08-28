@@ -42,7 +42,8 @@ FunctionCall::FunctionCall
     m_extraArg(0), m_variableArgument(false), m_voidReturn(false),
     m_voidWrapper(false), m_allowVoidReturn(false), m_redeclared(false),
     m_redeclaredClass(false), m_derivedFromRedeclaring(false),
-    m_argArrayId(-1), m_argArrayHash(-1), m_argArrayIndex(-1) {
+    m_noStatic(false), m_argArrayId(-1), m_argArrayHash(-1),
+    m_argArrayIndex(-1) {
 
   if (m_nameExp &&
       m_nameExp->getKindOf() == Expression::KindOfScalarExpression) {
@@ -217,7 +218,16 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (!ar->inExpression()) {
     return true;
   }
-  Expression::preOutputCPP(cg, ar, state | FixOrder);
+  Expression::preOutputCPP(cg, ar, state & ~FixOrder);
+  ar->wrapExpressionBegin(cg);
+  cg_printf("FrameInjection::SetStaticClassName(info, ");
+  cg_printString(m_origClassName, ar);
+  cg_printf(");\n");
+  m_noStatic = true;
+  preOutputStash(cg, ar, FixOrder);
+  m_noStatic = false;
+  cg_printf("FrameInjection::ResetStaticClassName(info);\n");
+
   if (!(state & FixOrder)) {
     cg_printf("id(%s);\n", cppTemp().c_str());
   }
@@ -227,9 +237,10 @@ bool FunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
 
 void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool staticClassName = false;
-  if (!m_className.empty() && m_cppTemp.empty() &&
+  if (!m_noStatic && !m_className.empty() && m_cppTemp.empty() &&
       m_origClassName != "self" &&
       m_origClassName != "parent") {
+
     cg_printf("STATIC_CLASS_NAME_CALL(");
     cg_printString(m_origClassName, ar);
     cg_printf(", ");
@@ -237,11 +248,10 @@ void FunctionCall::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
     staticClassName = true;
   }
 
-  bool wrap = m_voidWrapper && m_cppTemp.empty();
+  if (m_voidReturn) clearContext(RefValue);
+  bool wrap = m_voidWrapper && m_cppTemp.empty() && !isUnused();
   if (wrap) {
     cg_printf("(");
-    // void wrapper means void return, means we can't put ref around the call
-    clearContext(RefValue);
   }
   Expression::outputCPP(cg, ar);
   if (wrap) {

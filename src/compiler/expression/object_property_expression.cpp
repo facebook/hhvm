@@ -57,6 +57,10 @@ ExpressionPtr ObjectPropertyExpression::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // static analysis functions
 
+bool ObjectPropertyExpression::isTemporary() const {
+  return !m_valid && !(m_context & (LValue | RefValue | UnsetContext));
+}
+
 void ObjectPropertyExpression::setContext(Context context) {
   m_context |= context;
   switch (context) {

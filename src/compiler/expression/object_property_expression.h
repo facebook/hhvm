@@ -45,7 +45,7 @@ public:
                                   int op);
   virtual void outputCPPUnset(CodeGenerator &cg, AnalysisResultPtr ar);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
-
+  bool isTemporary() const;
 private:
   void setEffect(Effect effect);
   void clearEffect(Effect effect);

@@ -96,9 +96,13 @@ class ObjectData : public Countable {
   // class info
   virtual CStrRef o_getClassName() const = 0;
   virtual bool isResource() const { return false;}
-  virtual int64 o_toInt64() const { return 1;}
   bool o_isClass(const char *s) const;
   int o_getId() const { return o_id;}
+
+  // overridable casting
+  virtual bool   o_toBoolean() const { return true;}
+  virtual int64  o_toInt64()   const { return 1;}
+  virtual double o_toDouble()  const { return o_toInt64();}
 
   template<typename T>
   T *bindClass(ThreadInfo *info) {

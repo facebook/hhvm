@@ -803,14 +803,8 @@ Variant c_simplexmlelement::t___set(Variant name, Variant value) {
   return null;
 }
 
-Array c_simplexmlelement::o_toArray() const {
-  if (m_attributes.toArray().empty()) {
-    return m_children;
-  }
-  Array ret;
-  ret.set("@attributes", m_attributes);
-  ret += m_children;
-  return ret;
+bool c_simplexmlelement::o_toBoolean() const {
+  return m_node != NULL || o_properties;
 }
 
 int64 c_simplexmlelement::o_toInt64() const {
@@ -820,6 +814,25 @@ int64 c_simplexmlelement::o_toInt64() const {
     prop = iter.second();
   }
   return prop.toString().toInt64();
+}
+
+double c_simplexmlelement::o_toDouble() const {
+  Variant prop;
+  ArrayIter iter(m_children);
+  if (iter) {
+    prop = iter.second();
+  }
+  return prop.toString().toDouble();
+}
+
+Array c_simplexmlelement::o_toArray() const {
+  if (m_attributes.toArray().empty()) {
+    return m_children;
+  }
+  Array ret;
+  ret.set("@attributes", m_attributes);
+  ret += m_children;
+  return ret;
 }
 
 Variant c_simplexmlelement::t_getiterator() {

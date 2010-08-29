@@ -11373,6 +11373,13 @@ bool TestCodeRun::TestAssignment() {
 }
 
 bool TestCodeRun::TestSimpleXML() {
+  MVCR("<?php $x = new SimpleXMLElement('<foo><bar>345.234</bar></foo>');"
+       "var_dump((double)$x->bar);");
+  MVCR("<?php $x = new SimpleXMLElement('<foo><bar></bar></foo>');"
+       "var_dump((bool)$x->bar);");
+  MVCR("<?php $x = new SimpleXMLElement('<foo><bar>0</bar></foo>');"
+       "var_dump((bool)$x->bar);");
+
   MVCR("<?php "
        "$x = new SimpleXMLElement('<foo/>'); "
        "$x->addAttribute('attr', 'one'); "

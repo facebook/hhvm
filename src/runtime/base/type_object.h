@@ -112,12 +112,12 @@ class Object : public SmartPtr<ObjectData> {
   /**
    * Type conversions
    */
-  bool   toBoolean() const { return m_px != NULL;}
+  bool   toBoolean() const { return m_px ? m_px->o_toBoolean() : false;}
   char   toByte   () const { return m_px ? m_px->o_toInt64() : 0;}
   short  toInt16  () const { return m_px ? m_px->o_toInt64() : 0;}
   int    toInt32  () const { return m_px ? m_px->o_toInt64() : 0;}
   int64  toInt64  () const { return m_px ? m_px->o_toInt64() : 0;}
-  double toDouble () const { return m_px ? m_px->o_toInt64() : 0;}
+  double toDouble () const { return m_px ? m_px->o_toDouble() : 0;}
   String toString () const { return m_px ? m_px->t___tostring() : String();}
   Array  toArray  () const;
   Variant toKey   () const;

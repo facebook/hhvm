@@ -1524,7 +1524,7 @@ bool Variant::toBooleanHelper() const {
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toBoolean();
   case KindOfArray:   return !m_data.parr->empty();
-  case KindOfObject:  return m_data.pobj != NULL;
+  case KindOfObject:  return m_data.pobj->o_toBoolean();
   case KindOfVariant: return m_data.pvar->toBoolean();
   default:
     ASSERT(false);
@@ -1542,7 +1542,7 @@ int64 Variant::toInt64Helper(int base /* = 10 */) const {
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toInt64(base);
   case KindOfArray:   return m_data.parr->empty() ? 0 : 1;
-  case KindOfObject:  return m_data.pobj ? m_data.pobj->o_toInt64() : 0;
+  case KindOfObject:  return m_data.pobj->o_toInt64();
   case KindOfVariant: return m_data.pvar->toInt64(base);
   default:
     ASSERT(false);
@@ -1557,6 +1557,7 @@ double Variant::toDouble() const {
   case KindOfDouble:  return m_data.dbl;
   case KindOfStaticString:
   case KindOfString:  return m_data.pstr->toDouble();
+  case KindOfObject:  return m_data.pobj->o_toDouble();
   case KindOfVariant: return m_data.pvar->toDouble();
   default:
     break;

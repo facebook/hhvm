@@ -112,14 +112,9 @@ std::string CmdInterrupt::desc() const {
       return "Post-Send Processing was ended.";
     case BreakPointReached:
     case ExceptionThrown: {
-      if (m_bpi) {
-        if (m_interrupt == BreakPointReached) {
-          return m_bpi->site();
-        }
-        if (m_bpi->m_exceptionClass == BreakPointInfo::ErrorClassName) {
-          return "An error occurred " + m_bpi->site();
-        }
-        return "Throwing " + m_bpi->m_exceptionClass + " " + m_bpi->site();
+      ASSERT(m_site);
+      if (m_site) {
+        return m_site->desc();
       }
       return "Breakpoint reached.";
     }

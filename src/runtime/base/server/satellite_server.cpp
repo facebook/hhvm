@@ -204,24 +204,26 @@ private:
 
 SatelliteServerPtr SatelliteServer::Create(SatelliteServerInfoPtr info) {
   SatelliteServerPtr satellite;
-  switch (info->getType()) {
-  case KindOfInternalPageServer:
-    satellite = SatelliteServerPtr(new InternalPageServer(info));
-    break;
-  case KindOfDanglingPageServer:
-    satellite = SatelliteServerPtr(new DanglingPageServer(info));
-    break;
-  case KindOfRPCServer:
-    satellite = SatelliteServerPtr(new RPCServer(info));
-    break;
-  case KindOfXboxServer:
-    satellite = SatelliteServerPtr(new RPCServer(info));
-    break;
-  default:
-    ASSERT(false);
-  }
-  if (satellite) {
-    satellite->setName(info->getName());
+  if (info->getPort()) {
+    switch (info->getType()) {
+    case KindOfInternalPageServer:
+      satellite = SatelliteServerPtr(new InternalPageServer(info));
+      break;
+    case KindOfDanglingPageServer:
+      satellite = SatelliteServerPtr(new DanglingPageServer(info));
+      break;
+    case KindOfRPCServer:
+      satellite = SatelliteServerPtr(new RPCServer(info));
+      break;
+    case KindOfXboxServer:
+      satellite = SatelliteServerPtr(new RPCServer(info));
+      break;
+    default:
+      ASSERT(false);
+    }
+    if (satellite) {
+      satellite->setName(info->getName());
+    }
   }
   return satellite;
 }

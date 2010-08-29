@@ -424,7 +424,7 @@ These are experimental LFU settings.
     * {
       Type = RPCServer | InternalPageServer | DanglingPageServer
 
-      Port = 9999
+      Port = 0  # disabled
       ThreadCount = 5
 
       # only for RPCServer

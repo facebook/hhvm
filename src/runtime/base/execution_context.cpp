@@ -559,13 +559,17 @@ void ExecutionContext::handleError(const std::string &msg,
     handled = callUserErrorHandler(ee, errnum, false);
   }
   if (mode == AlwaysThrow || (mode == ThrowIfUnhandled && !handled)) {
-    if (!Eval::Debugger::InterruptException(String(msg))) return;
+    try {
+      if (!Eval::Debugger::InterruptException(String(msg))) return;
+    } catch (const Eval::DebuggerClientExitException &e) {}
     throw FatalErrorException(msg.c_str());
   }
   if (!handled &&
       (RuntimeOption::NoSilencer ||
        (getErrorReportingLevel() & errnum) != 0)) {
-    if (!Eval::Debugger::InterruptException(String(msg))) return;
+    try {
+      if (!Eval::Debugger::InterruptException(String(msg))) return;
+    } catch (const Eval::DebuggerClientExitException &e) {}
     Logger::Log(prefix.c_str(), ee);
   }
 }

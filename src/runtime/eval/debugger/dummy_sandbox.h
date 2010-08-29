@@ -50,6 +50,7 @@ private:
   std::string m_startupFile;
 
   AsyncFunc<DummySandbox> m_thread;
+  bool m_inited;
   bool m_stopped;
   int m_signum;
 

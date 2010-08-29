@@ -242,9 +242,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
   bool ret = false;
   try {
     throw;
-  } catch (const Eval::DebuggerRestartException &e) {
-    throw;
-  } catch (const Eval::DebuggerClientExitException &e) {
+  } catch (const Eval::DebuggerException &e) {
     throw;
   } catch (const ExitException &e) {
     ret = true;
@@ -674,6 +672,10 @@ static int execute_program_impl(int argc, char **argv) {
       while (true) {
         try {
           execute_command_line_begin(new_argc, new_argv, po.xhprofFlags);
+
+          DECLARE_THREAD_INFO;
+          FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain);
+
           if (po.debug_extension.empty()) {
             // even if it's empty, still need to call for warmup
             hphp_invoke_simple(" "); // so not to run the 1st file if compiled
@@ -962,7 +964,9 @@ void hphp_context_exit(ExecutionContext *context, bool psp,
     context->onShutdownPostSend();
   }
   if (RuntimeOption::EnableDebugger) {
-    Eval::Debugger::InterruptPSPEnded(program);
+    try {
+      Eval::Debugger::InterruptPSPEnded(program);
+    } catch (const Eval::DebuggerException &e) {}
   }
   Eval::RequestEvalState::DestructObjects();
   if (shutdown) {

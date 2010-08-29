@@ -56,6 +56,42 @@ int InterruptSite::getFileLen() const {
   return m_file_strlen;
 }
 
+std::string InterruptSite::desc() const {
+  string ret;
+  if (m_exception.isNull()) {
+    ret = "Break";
+  } else if (m_exception.isObject()) {
+    ret = "Exception thrown";
+  } else {
+    ret = "Error occurred";
+  }
+
+  const char *cls = getClass();
+  const char *func = getFunction();
+  if (func && *func) {
+    ret += " at ";
+    if (cls && *cls) {
+      ret += cls;
+      ret += "::";
+    }
+    ret += func;
+    ret += "()";
+  }
+
+  string file = getFile();
+  int line0 = getLine0();
+  if (line0) {
+    ret += " on line " + lexical_cast<string>(line0);
+    if (!file.empty()) {
+      ret += " of " + file;
+    }
+  } else if (!file.empty()) {
+    ret += " in " + file;
+  }
+
+  return ret;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 const char *BreakPointInfo::ErrorClassName = "@";

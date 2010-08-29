@@ -31,7 +31,7 @@ DummySandbox::DummySandbox(DebuggerProxy *proxy,
                            const std::string &defaultPath,
                            const std::string &startupFile)
     : m_proxy(proxy), m_defaultPath(defaultPath), m_startupFile(startupFile),
-      m_thread(this, &DummySandbox::run), m_stopped(false),
+      m_thread(this, &DummySandbox::run), m_inited(false), m_stopped(false),
       m_signum(CmdSignal::SignalNone) {
 }
 
@@ -54,22 +54,28 @@ void DummySandbox::run() {
       char *argv[] = {"", NULL};
       execute_command_line_begin(1, argv, 0);
 
-      DSandboxInfo sandbox = m_proxy->getSandbox();
-      SystemGlobals *g = (SystemGlobals *)get_global_variables();
-      g->gv__SERVER.set("HPHP_SANDBOX_ID", sandbox.id());
+      DECLARE_THREAD_INFO;
+      FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain);
 
-      std::string doc = getStartupDoc(sandbox);
-      bool error; string errorMsg;
-      bool ret = hphp_invoke(g_context.get(), doc, false, null_array, null,
-                             "", "", "", error, errorMsg);
+      DSandboxInfo sandbox = m_proxy->getSandbox();
       string msg;
-      if (!ret || error) {
-        msg = "Unable to pre-load " + doc;
-        if (!errorMsg.empty()) {
-          msg += ": " + errorMsg;
+      if (m_inited) {
+        SystemGlobals *g = (SystemGlobals *)get_global_variables();
+        g->gv__SERVER.set("HPHP_SANDBOX_ID", sandbox.id());
+
+        std::string doc = getStartupDoc(sandbox);
+        bool error; string errorMsg;
+        bool ret = hphp_invoke(g_context.get(), doc, false, null_array, null,
+                               "", "", "", error, errorMsg);
+        if (!ret || error) {
+          msg = "Unable to pre-load " + doc;
+          if (!errorMsg.empty()) {
+            msg += ": " + errorMsg;
+          }
         }
       }
 
+      m_inited = true;
       Debugger::RegisterSandbox(sandbox);
       Debugger::InterruptSessionStarted(NULL, msg.c_str());
 
@@ -82,15 +88,8 @@ void DummySandbox::run() {
         }
         m_signum = CmdSignal::SignalNone;
       }
-
-      execute_command_line_end(0, false, NULL);
-    } catch (const DebuggerRestartException &e) {
-      execute_command_line_end(0, false, NULL);
-    } catch (const DebuggerClientExitException &e) {
-      execute_command_line_end(0, false, NULL);
-      // no exit here, as there are cases when sandbox cannot find any
-      // matching proxy momentarily while proxy is changing its sandbox id.
-    }
+    } catch (const DebuggerException &e) {}
+    execute_command_line_end(0, false, NULL);
   }
 
   Debugger::OnServerShutdown();

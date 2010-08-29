@@ -119,7 +119,7 @@ void Debugger::InterruptFileLine(InterruptSite &site) {
 bool Debugger::InterruptException(CVarRef e) {
   if (RuntimeOption::EnableDebugger) {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
-    if (ti->m_reqInjectionData.debugger) {
+    if (ti->m_top && ti->m_reqInjectionData.debugger) {
       Eval::InterruptSite site(ti->m_top, e);
       Eval::Debugger::Interrupt(ExceptionThrown, NULL, &site);
       if (site.isJumping()) {

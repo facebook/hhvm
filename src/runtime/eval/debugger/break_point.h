@@ -55,6 +55,7 @@ public:
   int getFileLen() const;
 
   std::string &url() const { return m_url;}
+  std::string desc() const;
 
   bool isJumping() const { return m_jumping;}
   void setJumping() { m_jumping = true;}

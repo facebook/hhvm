@@ -421,7 +421,7 @@ bool DebuggerClient::connectRemote(const std::string &host, int port) {
   if (port <= 0) {
     port = RuntimeOption::DebuggerServerPort;
   }
-  info("Connecting and pre-loading %s:%d...", host.c_str(), port);
+  info("Connecting to %s:%d...", host.c_str(), port);
   Socket *sock = new Socket(socket(PF_INET, SOCK_STREAM, 0), PF_INET,
                             String(host), port);
   Object obj(sock);

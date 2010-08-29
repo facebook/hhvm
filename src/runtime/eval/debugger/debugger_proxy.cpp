@@ -129,7 +129,7 @@ void DebuggerProxy::getThreads(DThreadInfoPtrVec &threads) {
     (CmdInterrupt*)ThreadInfo::s_threadInfo->m_reqInjectionData.interrupt;
   ASSERT(tint);
   if (tint) {
-    threads.push_back(CreateThreadInfo(tint->desc()));
+    threads.push_back(createThreadInfo(tint->desc()));
   }
   for (std::map<int64, DThreadInfoPtr>::const_iterator iter =
          m_threads.begin(); iter != m_threads.end(); ++iter) {
@@ -148,11 +148,12 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
       // jumps and flow control commands only belong to sticky thread
       return false;
     }
-    m_threads[self] = CreateThreadInfo(cmd.desc());
-    while (m_thread && m_thread != self) {
+    m_threads[self] = createThreadInfo(cmd.desc());
+    while (!m_stopped && m_thread && m_thread != self) {
       wait(1);
     }
     m_threads.erase(self);
+    if (m_stopped) return false;
   } else if (check && !checkJumpFlowBreak(cmd)) {
     return false;
   }
@@ -176,7 +177,11 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
         Lock lock(m_signalMutex);
         m_signum = CmdSignal::SignalNone;
         processInterrupt(cmd);
+      } catch (const DebuggerException &e) {
+        switchThreadMode(Normal);
+        throw;
       } catch (...) {
+        ASSERT(false); // no other exceptions should be seen here
         switchThreadMode(Normal);
         throw;
       }
@@ -197,6 +202,8 @@ void DebuggerProxy::interrupt(CmdInterrupt &cmd) {
     Lock lock(this);
     m_thread = 0;
     notify();
+  } else if (cmd.getInterruptType() == PSPEnded) {
+    switchThreadMode(Normal); // we are done with this thread
   }
 }
 
@@ -349,7 +356,16 @@ void DebuggerProxy::processInterrupt(CmdInterrupt &cmd) {
         throw DebuggerClientExitException();
       }
     }
-    if (!res || !res->onServer(this)) {
+    try {
+      if (!res || !res->onServer(this)) {
+        Debugger::RemoveProxy(shared_from_this());
+        return;
+      }
+    } catch (const DebuggerException &e) {
+      throw;
+    } catch (...) {
+      Logger::Error("onServer() throws non DebuggerException: %d",
+                    res->getType());
       Debugger::RemoveProxy(shared_from_this());
       return;
     }
@@ -488,9 +504,6 @@ static void append_stderr(const char *header, const char *msg,
 
 Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
                                   bool log) {
-  DECLARE_THREAD_INFO
-  // using "_" as filename
-  FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain)
   Variant ret;
   StringBuffer sb;
   g_context->setStdout(append_stdout, &sb);
@@ -528,7 +541,11 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   return ret;
 }
 
-DThreadInfoPtr DebuggerProxy::CreateThreadInfo(const std::string &desc) {
+const char *DebuggerProxy::getThreadType() const {
+  return isLocal() ? "Command Line Script" : "Dummy Sandbox";
+}
+
+DThreadInfoPtr DebuggerProxy::createThreadInfo(const std::string &desc) {
   DThreadInfoPtr info(new DThreadInfo());
   info->m_id = Process::GetThreadId();
   info->m_desc = desc;
@@ -537,7 +554,7 @@ DThreadInfoPtr DebuggerProxy::CreateThreadInfo(const std::string &desc) {
     info->m_type = transport->getThreadTypeName();
     info->m_url = transport->getCommand();
   } else {
-    info->m_type = "CLI";
+    info->m_type = getThreadType();
   }
   return info;
 }

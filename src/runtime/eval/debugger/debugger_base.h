@@ -26,15 +26,28 @@ namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 // exceptions
 
-class DebuggerClientExitException  : public Exception {};
-class DebuggerConsoleExitException : public Exception {};
-class DebuggerProtocolException    : public Exception {};
+// client side exception
+class DebuggerClientException      : public Exception {};
+class DebuggerConsoleExitException : public DebuggerClientException {};
+class DebuggerProtocolException    : public DebuggerClientException {};
 
-class DebuggerRestartException : public Exception {
+// both client and server side exception
+class DebuggerException            : public Exception {};
+class DebuggerClientExitException  : public DebuggerException {
+  virtual const char *what() const throw() {
+    return "Debugger client has just quit.";
+  }
+};
+class DebuggerRestartException     : public DebuggerException {
 public:
   DebuggerRestartException(StringVecPtr args) : m_args(args) {}
-  StringVecPtr m_args;
   ~DebuggerRestartException() throw() {}
+
+  virtual const char *what() const throw() {
+    return "Debugger restarting program or aborting web request.";
+  }
+
+  StringVecPtr m_args;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

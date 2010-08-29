@@ -95,8 +95,8 @@ void CmdThread::processList(DebuggerClient *client, bool output /* = true */) {
     if (thread->m_id == client->getCurrentThreadId()) {
       flag = "*";
     }
-    client->print("%4d %s 0x%llx (%s) %s\n     %s", thread->m_index,
-                  flag, thread->m_id, thread->m_type.c_str(),
+    client->print("%4d %s %s (%lld) %s\n     %s", thread->m_index,
+                  flag, thread->m_type.c_str(), thread->m_id,
                   thread->m_url.c_str(), thread->m_desc.c_str());
   }
 }
@@ -184,10 +184,8 @@ bool CmdThread::onServer(DebuggerProxy *proxy) {
     Transport *transport = g_context->getTransport();
     if (transport) {
       transport->debuggerInfo(info);
-    } else if (proxy->isLocal()) {
-      Add(info, "Thread Type", "Command Line Script");
     } else {
-      Add(info, "Thread Type", "Dummy Sandbox");
+      Add(info, "Thread Type", proxy->getThreadType());
     }
     g_context->debuggerInfo(info);
 

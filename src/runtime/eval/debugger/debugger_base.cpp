@@ -74,12 +74,14 @@ void DSandboxInfo::recvImpl(ThriftBuffer &thrift) {
 
 void DThreadInfo::sendImpl(ThriftBuffer &thrift) {
   thrift.write(m_id);
+  thrift.write(m_desc);
   thrift.write(m_type);
   thrift.write(m_url);
 }
 
 void DThreadInfo::recvImpl(ThriftBuffer &thrift) {
   thrift.read(m_id);
+  thrift.read(m_desc);
   thrift.read(m_type);
   thrift.read(m_url);
 }

@@ -145,7 +145,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
   cmd.m_sandboxes.push_back(sandbox);
 
   client->send(&cmd);
-  client->info("Attaching to %s...", sandbox->desc().c_str());
+  client->info("Pre-loading %s, please wait...", sandbox->desc().c_str());
   throw DebuggerConsoleExitException();
 }
 

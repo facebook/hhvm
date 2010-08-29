@@ -377,18 +377,25 @@ void HttpServer::flushLog() {
 
 void HttpServer::watchDog() {
   int count = 0;
-  while (!m_stopped) {
-    if (RuntimeOption::DropCacheCycle > 0 &&
-        (count % RuntimeOption::DropCacheCycle) == 0) { // every hour
-      dropCache();
+  bool noneed = false;
+  while (!m_stopped && !noneed) {
+    noneed = true;
+
+    if (RuntimeOption::DropCacheCycle > 0) {
+      noneed = false;
+      if ((count % RuntimeOption::DropCacheCycle) == 0) { // every hour
+        dropCache();
+      }
     }
 
     sleep(1);
     ++count;
 
-    if (RuntimeOption::MaxRSSPollingCycle > 0 &&
-        (count % RuntimeOption::MaxRSSPollingCycle) == 0) { // every minute
-      checkMemory();
+    if (RuntimeOption::MaxRSSPollingCycle > 0) {
+      noneed = false;
+      if ((count % RuntimeOption::MaxRSSPollingCycle) == 0) { // every minute
+        checkMemory();
+      }
     }
   }
 }

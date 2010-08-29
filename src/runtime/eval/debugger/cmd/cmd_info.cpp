@@ -181,13 +181,16 @@ String CmdInfo::GetProtoType(DebuggerClient *client, const std::string &cls,
 bool CmdInfo::onServer(DebuggerProxy *proxy) {
   if (m_type == KindOfLiveLists) {
     m_acLiveLists = DebuggerClient::CreateNewLiveLists();
-    ClassInfo::GetSymbolNames(
-      (*m_acLiveLists)[DebuggerClient::AutoCompleteClasses],
-      (*m_acLiveLists)[DebuggerClient::AutoCompleteFunctions],
-      (*m_acLiveLists)[DebuggerClient::AutoCompleteConstants],
-      &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassMethods],
-      &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassProperties],
-      &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassConstants]);
+
+    try {
+      ClassInfo::GetSymbolNames(
+        (*m_acLiveLists)[DebuggerClient::AutoCompleteClasses],
+        (*m_acLiveLists)[DebuggerClient::AutoCompleteFunctions],
+        (*m_acLiveLists)[DebuggerClient::AutoCompleteConstants],
+        &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassMethods],
+        &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassProperties],
+        &(*m_acLiveLists)[DebuggerClient::AutoCompleteClassConstants]);
+    } catch (...) {}
 
     FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
     bool global;
@@ -206,16 +209,20 @@ bool CmdInfo::onServer(DebuggerProxy *proxy) {
   }
 
   if (m_type == KindOfUnknown || m_type == KindOfClass) {
-    Array ret = f_hphp_get_class_info(m_symbol);
-    if (!ret.empty()) {
-      m_info.append(ret);
-    }
+    try {
+      Array ret = f_hphp_get_class_info(m_symbol);
+      if (!ret.empty()) {
+        m_info.append(ret);
+      }
+    } catch (...) {}
   }
   if (m_type == KindOfUnknown || m_type == KindOfFunction) {
-    Array ret = f_hphp_get_function_info(m_symbol);
-    if (!ret.empty()) {
-      m_info.append(ret);
-    }
+    try {
+      Array ret = f_hphp_get_function_info(m_symbol);
+      if (!ret.empty()) {
+        m_info.append(ret);
+      }
+    } catch (...) {}
   }
   return proxy->send(this);
 }

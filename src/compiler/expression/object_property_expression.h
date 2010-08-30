@@ -54,7 +54,6 @@ private:
   ExpressionPtr m_property;
 
   bool m_valid;
-  bool m_static; // whether m_property is actually a static property
   int m_localEffects;
   ClassScopePtr m_class; // when m_object's type was inferred
 

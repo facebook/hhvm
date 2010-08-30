@@ -39,7 +39,7 @@ ObjectPropertyExpression::ObjectPropertyExpression
  ExpressionPtr object, ExpressionPtr property)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_object(object), m_property(property),
-    m_valid(false), m_static(false), m_localEffects(AccessorEffect) {
+    m_valid(false), m_localEffects(AccessorEffect) {
   m_object->setContext(Expression::ObjectContext);
 }
 
@@ -257,14 +257,11 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   if (!cls->derivesFromRedeclaring()) { // Have to use dynamic.
     ret = cls->checkProperty(name, type, coerce, ar, self, present);
     // Private only valid if in the defining class
-    if (present && (getOriginalScope(ar) == cls ||
-                    !(present & VariableTable::VariablePrivate))) {
+    if (present &&
+        !(present & VariableTable::VariableStatic) &&
+        (getOriginalScope(ar) == cls ||
+         !(present & VariableTable::VariablePrivate))) {
       m_valid = true;
-      m_static = present & VariableTable::VariableStatic;
-      if (m_static) {
-        ar->getScope()->getVariables()->
-          setAttribute(VariableTable::NeedGlobalPointer);
-      }
       m_class = cls;
     }
   }
@@ -388,33 +385,14 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       dynamic_pointer_cast<ScalarExpression>(m_property);
     const char *propName = name->getString().c_str();
     if (m_valid && m_object->getType()->isSpecificObject()) {
-      if (m_static) {
-        if (!bThis) {
-          ASSERT(m_class);
-          if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
-          cg_printf("g->%s%s%s%s",
-                    Option::StaticPropertyPrefix, m_class->getName().c_str(),
-                    Option::IdPrefix.c_str(), propName);
-          if (doExist) cg_printf(")");
-        } else {
-          // if $val is a class static variable (static $val), then $val
-          // cannot be declared as a class variable (var $val), $this->val
-          // refers to a non-static class variable and has to use get/lval.
-          if (useGetThis) cg_printf("GET_THIS_DOT()");
-          cg_printf("%s(", func.c_str());
-          cg_printString(propName, ar);
-          cg_printf("%s%s)", error, context);
-        }
-      } else {
-        if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
-        if (!bThis) {
-          ASSERT(!directVariant);
-          m_object->outputCPP(cg, ar);
-          cg_printf("->");
-        }
-        cg_printf("%s%s", Option::PropertyPrefix, propName);
-        if (doExist) cg_printf(")");
+      if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
+      if (!bThis) {
+        ASSERT(!directVariant);
+        m_object->outputCPP(cg, ar);
+        cg_printf("->");
       }
+      cg_printf("%s%s", Option::PropertyPrefix, propName);
+      if (doExist) cg_printf(")");
     } else {
       if (!bThis) {
         if (directVariant) {

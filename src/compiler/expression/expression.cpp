@@ -708,16 +708,18 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   int n = getKidCount();
   if (hasEffect()) {
     int j;
+    ExpressionPtr lastExpr;
     for (i = j = 0; i < n; i++) {
       ExpressionPtr k = getNthExpr(i);
       if (k && !k->isScalar()) {
         if (k->hasEffect()) {
           lastEffect = i;
+          lastExpr = k;
         }
         j++;
       }
     }
-    if (lastEffect >= 0 && j > 1) {
+    if (lastEffect >= 0 && (j > 1 || lastExpr->isTemporary())) {
       kidState |= FixOrder;
       if (stashAll) {
         lastEffect = n - 1;

@@ -673,7 +673,13 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     case T_ARRAY_CAST:    cg_printf("(");          break;
     case T_OBJECT_CAST:   cg_printf("(");          break;
     case T_BOOL_CAST:     cg_printf("(");          break;
-    case T_UNSET_CAST:    cg_printf("(");          break;
+    case T_UNSET_CAST:
+      if (m_exp->hasCPPTemp()) {
+        cg_printf("(id(");
+      } else {
+        cg_printf("(");
+      }
+      break;
     case T_EXIT:          cg_printf("f_exit(");    break;
     case T_ARRAY:
       cg_printf("Array(");
@@ -755,7 +761,11 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       }
       break;
     case T_UNSET_CAST:
-      cg_printf(",null");
+      if (m_exp->hasCPPTemp()) {
+        cg_printf("),null");
+      } else {
+        cg_printf(",null");
+      }
     case T_CLONE:
     case '!':
     case '(':

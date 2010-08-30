@@ -180,6 +180,19 @@ bool FrameInjection::IsGlobalScope(FrameInjection *frame) {
   return true;
 }
 
+FrameInjection *FrameInjection::GetStackFrame(int level) {
+  FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
+  for (int i = 0; i < level && frame; i++) {
+    while (frame && (frame->m_flags & PseudoMain)) {
+      frame = frame->getPrev();
+    }
+    if (frame) {
+      frame = frame->getPrev();
+    }
+  }
+  return frame;
+}
+
 String FrameInjection::getFileName() {
   if (m_flags & PseudoMain) {
     return m_name + 10;

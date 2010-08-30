@@ -22,22 +22,25 @@ namespace HPHP { namespace Eval {
 void CmdEval::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_output);
+  thrift.write(m_frame);
 }
 
 void CmdEval::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_output);
+  thrift.read(m_frame);
 }
 
 bool CmdEval::onClient(DebuggerClient *client) {
   m_body = client->getCode();
+  m_frame = client->getFrame();
   CmdEvalPtr res = client->xend<CmdEval>(this);
   client->print(res->m_output);
   return true;
 }
 
 bool CmdEval::onServer(DebuggerProxy *proxy) {
-  DebuggerProxy::ExecutePHP(m_body, m_output, !proxy->isLocal());
+  DebuggerProxy::ExecutePHP(m_body, m_output, !proxy->isLocal(), m_frame);
   return proxy->send(this);
 }
 

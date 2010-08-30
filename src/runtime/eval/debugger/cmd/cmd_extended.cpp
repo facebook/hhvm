@@ -50,8 +50,12 @@ static string format_unique_prefix(const std::string &cmd,
 }
 
 void CmdExtended::helpImpl(DebuggerClient *client, const char *name) {
-  client->help("%s {cmd} {arg1} {arg2} ...    invoke specified command", name);
-  client->help("%s{cmd} {arg1} {arg2} ...     invoke specified command", name);
+  const char *cmd = "{cmd} {arg1} {arg2} ...";
+  const char *help = "invoke specified command";
+  client->helpCmds((string(name) + " " + cmd).c_str(), help,
+                   (string(name) + cmd).c_str(), help,
+                   NULL);
+
   const ExtendedCommandMap &cmds = getCommandMap();
   if (!cmds.empty()) {
     client->help("");

@@ -142,10 +142,7 @@ Array CmdVariable::GetLocalVariables(FrameInjection* frame, bool &global) {
 }
 
 bool CmdVariable::onServer(DebuggerProxy *proxy) {
-  FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
-  for (int i = 0; i < m_frame && frame; i++) {
-    frame = frame->getPrev();
-  }
+  FrameInjection *frame = FrameInjection::GetStackFrame(m_frame);
   m_variables = GetLocalVariables(frame, m_global);
   return proxy->send(this);
 }

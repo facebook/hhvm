@@ -40,6 +40,16 @@ public:
                             bool withThis = true);
   static int GetLine(bool skip = false);
 
+  // what does "static::" resolve to?
+  static String GetStaticClassName(ThreadInfo *info);
+  static void SetStaticClassName(ThreadInfo *info, CStrRef cls);
+  static void ResetStaticClassName(ThreadInfo *info);
+  static void SetCallingObject(ThreadInfo* info, ObjectData *obj);
+
+  static bool IsGlobalScope();
+  static bool IsGlobalScope(FrameInjection *frame);
+  static FrameInjection *GetStackFrame(int level);
+
 public:
   FrameInjection(ThreadInfo *info, CStrRef cls, const char *name,
                  ObjectData *obj = NULL, int fs = 0)
@@ -88,15 +98,6 @@ public:
   Object &getThisForArrow();
 
 public:
-  // what does "static::" resolve to?
-  static String GetStaticClassName(ThreadInfo *info);
-  static void SetStaticClassName(ThreadInfo *info, CStrRef cls);
-  static void ResetStaticClassName(ThreadInfo *info);
-  static void SetCallingObject(ThreadInfo* info, ObjectData *obj);
-
-  static bool IsGlobalScope();
-  static bool IsGlobalScope(FrameInjection *frame);
-
   class StaticClassNameHelper {
   public:
     StaticClassNameHelper(ThreadInfo *info, CStrRef cls) : m_info(info) {

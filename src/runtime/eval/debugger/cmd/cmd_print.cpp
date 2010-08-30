@@ -121,12 +121,14 @@ void CmdPrint::sendImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::sendImpl(thrift);
   thrift.write(m_ret);
   thrift.write(m_output);
+  thrift.write(m_frame);
 }
 
 void CmdPrint::recvImpl(DebuggerThriftBuffer &thrift) {
   DebuggerCommand::recvImpl(thrift);
   thrift.read(m_ret);
   thrift.read(m_output);
+  thrift.read(m_frame);
 }
 
 void CmdPrint::list(DebuggerClient *client) {
@@ -235,6 +237,7 @@ bool CmdPrint::processClear(DebuggerClient *client) {
 void CmdPrint::processWatch(DebuggerClient *client, const char *format,
                             const std::string &php) {
   m_body = php;
+  m_frame = client->getFrame();
   CmdPrintPtr res = client->xend<CmdPrint>(this);
   if (!res->m_output.empty()) {
     client->output(res->m_output);
@@ -281,7 +284,7 @@ bool CmdPrint::onClient(DebuggerClient *client) {
 
 bool CmdPrint::onServer(DebuggerProxy *proxy) {
   m_ret = DebuggerProxy::ExecutePHP(DebuggerProxy::MakePHPReturn(m_body),
-                                    m_output, !proxy->isLocal());
+                                    m_output, !proxy->isLocal(), m_frame);
   return proxy->send(this);
 }
 

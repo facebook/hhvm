@@ -42,7 +42,8 @@ public:
 
   static std::string MakePHP(const std::string &php);
   static std::string MakePHPReturn(const std::string &php);
-  static Variant ExecutePHP(const std::string &php, String &output, bool log);
+  static Variant ExecutePHP(const std::string &php, String &output, bool log,
+                            int frame);
 
 public:
   DebuggerProxy(SmartPtr<Socket> socket, bool local);

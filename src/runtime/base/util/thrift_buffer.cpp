@@ -16,6 +16,7 @@
 
 #include <runtime/base/util/thrift_buffer.h>
 #include <runtime/base/builtin_functions.h>
+#include <runtime/base/variable_unserializer.h>
 
 #define INVALID_DATA 1
 
@@ -188,6 +189,16 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static Variant unserialize_with_no_notice(CStrRef str) {
+  istringstream in(std::string(str.data(), str.size()));
+  VariableUnserializer vu(in);
+  Variant v;
+  try {
+    v = vu.unserialize();
+  } catch (Exception &e) {}
+  return v;
+}
+
 void ThriftBuffer::read(std::string &data) {
   String sdata;
   read(sdata);
@@ -218,7 +229,7 @@ void ThriftBuffer::write(const std::vector<std::string> &data) {
 void ThriftBuffer::read(Array &data) {
   String sdata;
   read(sdata);
-  data = f_unserialize(sdata).toArray();
+  data = unserialize_with_no_notice(sdata).toArray();
 }
 
 void ThriftBuffer::write(CArrRef data) {
@@ -229,7 +240,7 @@ void ThriftBuffer::write(CArrRef data) {
 void ThriftBuffer::read(Object &data) {
   String sdata;
   read(sdata);
-  data = f_unserialize(sdata).toObject();
+  data = unserialize_with_no_notice(sdata).toObject();
 }
 
 void ThriftBuffer::write(CObjRef data) {
@@ -240,7 +251,7 @@ void ThriftBuffer::write(CObjRef data) {
 void ThriftBuffer::read(Variant &data) {
   String sdata;
   read(sdata);
-  data = f_unserialize(sdata);
+  data = unserialize_with_no_notice(sdata);
 }
 
 void ThriftBuffer::write(CVarRef data) {

@@ -503,7 +503,7 @@ static void append_stderr(const char *header, const char *msg,
 }
 
 Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
-                                  bool log) {
+                                  bool log, int frame) {
   Variant ret;
   StringBuffer sb;
   g_context->setStdout(append_stdout, &sb);
@@ -512,14 +512,11 @@ Variant DebuggerProxy::ExecutePHP(const std::string &php, String &output,
   }
   try {
     LVariableTable *vars = get_variable_table();
-    FrameInjection *frame = ThreadInfo::s_threadInfo->m_top;
-    if (frame) {
-      frame = frame->getPrev(); // skipping our "_" artificial frame
-      if (frame) {
-        EvalFrameInjection *eframe = dynamic_cast<EvalFrameInjection*>(frame);
-        if (eframe) {
-          vars = &eframe->getEnv();
-        }
+    FrameInjection *f = FrameInjection::GetStackFrame(frame);
+    if (f) {
+      EvalFrameInjection *eframe = dynamic_cast<EvalFrameInjection*>(f);
+      if (eframe) {
+        vars = &eframe->getEnv();
       }
     }
 

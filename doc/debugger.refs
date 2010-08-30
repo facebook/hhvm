@@ -56,16 +56,15 @@ format, though every field is optional, looks like this,
 	function call: {namespace}::{cls}::{func}
 	url matching:  @{url}
 
-(1) Url has to be specified at end.
+1) Url has to be specified at end.
 
-(2) Function calls can be 1, 2 or more, matching a call chain. If more
+2) Function calls can be 1, 2 or more, matching a call chain. If more
 than one function are specified, they don't have to be direct callers to
 match. It will match any caller on the stack.
 
-(3) Pay attention to those delimiters, and they are required to tell
-what a field should be interpreted as, unless it is a number, then it
-must be line numbers. Otherwise, use them to indicate what the names
-are:
+3) Pay attention to those delimiters, and they are required to tell what
+a field should be interpreted as, unless it is a number, then it must be
+line numbers. Otherwise, use them to indicate what the names are:
 
 	{file}:                filename
 	{line1}-{line2}        any line between them (inclusive)
@@ -88,7 +87,7 @@ For examples,
 	b html/mypage.php:MyClass::foo()
 	b mypage.php:123@index.php
 
-(4) You may also use regular expressions to match any of these names,
+4) You may also use regular expressions to match any of these names,
 except line numbers. For examples,
 
 	b r Feed.*::on.*()
@@ -412,164 +411,65 @@ will be evaluated and printed out.
 
 After you type this command, you will not see me anymore.
 
-Program help exited normally.
 
-    ------------------- Getting Started with Debugger -------------------
+    ---------------------------- Run Command ----------------------------
 
-
-1. Quick Overview
-
-(1) from A to Z
-
-All built-in debugger commands are un-ambiguous with their first
-letters. Therefore, a single letter is sufficient to issue the command.
-
-(2) tab, tab, tab
-
-Use TAB to auto-complete.
-
-(3) help
-
-Use "help" to read more about command details.
-
-(4) info and list
-
-Use "info" and "list" commands to read more about source code.
+    [r]un                restarts program
+    [r]un {file}         starts a new program
+      {arg1} {arg2} ...
 
 
-2. Debugging local script
+Aborts current execution and restarts program with specified arguments.
+If no arguments are specified, it will reuse the PHP file and old
+arguments. If arguments are to be changed, please include file name,
+even if it is the same, as the first one.
 
-The command to run a script normally looks like this,
-
-  ./hphpi -f myscript.php
-
-Simply add "-m debug" to run the script in debugger,
-
-  ./hphpi -m debug -f myscript.php
-
-Once started, set breakpoints like this,
-
-  hphpd> break myscript.php:10
-  hphpd> break foo()
-
-Then let it run, until it hits the breakpoints,
-
-  hphpd> run
-
-At breakpoints, examine variables or evaluate expressions,
-
-  hphpd> variable
-  hphpd> print $a
-  hphpd> =$a
-  hphpd> <?php print $a; ?>
-  hphpd> <?php
-   ..... print $a;
-   ..... ?>
-
-Optionally, modify variables like this,
-
-  hphpd> $a = 10
-  hphpd> <?php $a = 10; ?>
-  hphpd> <?php
-   ..... $a = 10;
-   ..... ?>
-
-Then let it continue, until it hits more breakpoints,
-
-  hphpd> continue
-
-Finally, quit debugger,
-
-  hphpd> quit
+In server mode, this command will simply abort current page handling
+without restarting anything.
 
 
-3. Debugging sandbox
+    ---------------------------- Step Command ----------------------------
 
-Connect to an HPHPi server from command line,
-
-  ./hphpi -m debug --debug-host mymachine.com
-
-Or, connect from within debugger,
-
-  hphpd> machine connect mymachine.com
-
-This will try to attach to a default sandbox on that machine.
-"Attaching" means it will only debug web requests hitting that sandbox.
-To switch to a different sandbox,
-
-  mymachine> machine list
-  mymachine> machine attach 2
-
-In remote debugging mode, a breakpoint can be specific about an URL,
-
-  mymachine> break myscript.php:10@index.php
-  mymachine> break foo()@index.php
-
-You may connect to more than one machine and breakpoints will be shared
-by all of them.
+    [s]tep {count=1}     steps into lines of code
 
 
-4. Understanding dummy sandbox
-
-When a web request hits a breakpoint, debugger will run in a "Web
-Request" thread. Use "thread" command to display this information,
-
-  mymachine> thread
-
-What will debugger use when there is no web request thread that's
-active, but we need to set a breakpoint? We created so-called "dummy
-sandbox", purely for taking debugger commands when there is no active
-web request. When there is no active request, hit Ctrl-C to break
-debugger, and use "thread" to display dummy sandbox thread's
-information.
-
-  Ctrl-C
-  mymachine> thread
-
-In dummy sandbox, a PHP file can be pre-loaded, so that we can "info"
-functions and classes and execute certain code. This file is specified
-on server side by
-
-  Eval.Debugger.StartupDocument = scripts/startup.php
-
-Dummy sandbox will always use currently attached sandbox's PHP files.
-When files are modified, simply reload them by
-
-  mymachine> continue
-  Ctrl-C
+Use this command at break to step into lines of code. Specify a count to
+step more than once.
 
 
-5. Colors and Configuration
+    --------------------------- Thread Command ---------------------------
 
-By default, it will use emacs colors for dark background. To change
-them, run debugger at least once, then look for ~/.hphpd.hdf file.
-Replace "Code" node with,
-
-  Color {
-    Code : Color.Palette.vim
-  }
-
-Or, specify your own colors in different places of the configuration
-file.
+    [t]hread             displays current thread's information
+    [t]hread [l]ist      lists all threads at break
+    [t]hread {index}     switches to the specified thread
+    [t]hread [n]ormal    breaks all threads
+    [t]hread [s]ticky    only send command to current thread
+    [t]hread             only break current thread
+      [e]xclusive
 
 
-    ---------------------------- Help Command ----------------------------
+Use '[t]hread' alone to display information of current thread.
 
-    [h]elp [s]tart       displays material for getting started
-    [h]elp [t]utorial    changing tutorial modes
-      on|off|auto
+When a thread is at break, you may specify how other threads should
+behave if they also happen to hit some breakpoints. Normally, other
+threads will also break, and they will interrupt debugger session with
+their breakpoints. So breaks from different threads may interleave. If
+'[t]hread [s]ticky' is specified, all other threads will wait until
+current thread is finished. This will help debugging to focus on just
+one thread without losing breaks from other threads. If there is no need
+to hold up any other threads, use '[t]hread [e]xclusive'. Then other
+threads will not break at all. This mode is useful for live debugging a
+production server, without interrupting many threads at a time. Use
+'[t]hread [n]ormal' to change thread mode back to normal.
 
-
-Please read "Getting Started" material with '[h]elp [s]tart' for first
-time use to get yourself familiar with basics.
-
-Tutorial mode displays extra information when something didn't work as
-you expected. "auto" mode will display the same information just once.
-"on" mode will display it as long as you run into the same situation.
-"off" mode completely turns off all tutorial texts.
-
-To get detailed information of a command, type '{cmd} [h]elp' or '{cmd}
-?' or 'help {cmd}' or '? {cmd}'.
+Some debugging commands will automatically turn thread mode to sticky.
+These include continue, step, next or out commands with a counter of
+more than 1. Or a jump command. These commands imply non-interruption
+from another thread. The mode will remain even after these commands
+until '[t]hread [n]ormal' is issued.
+When multple threads hit breakpoints at the same time, use '[t]hread
+[l]ist' command to display their indices, which can be used to switch
+between them with '[t]hread {index}'.
 
 
     ----------------------------- Up Command -----------------------------
@@ -612,8 +512,11 @@ Use '[f]rame {index}' to jump to one particular frame. At any frame, use
 
     -------------------------- Extended Command --------------------------
 
-x {cmd} {arg1} {arg2} ...    invoke specified command
-x{cmd} {arg1} {arg2} ...     invoke specified command
+    x {cmd} {arg1}       invoke specified command
+      {arg2} ...
+    x{cmd} {arg1}        invoke specified command
+      {arg2} ...
+
 
 where {cmd} can be:
 
@@ -624,8 +527,11 @@ Type 'x [h]elp|? {cmd} to read their usages.
 
     ----------------------- User Extended Command -----------------------
 
-y {cmd} {arg1} {arg2} ...    invoke specified command
-y{cmd} {arg1} {arg2} ...     invoke specified command
+    y {cmd} {arg1}       invoke specified command
+      {arg2} ...
+    y{cmd} {arg1}        invoke specified command
+      {arg2} ...
+
 
 These commands are implemented and installed in PHP by implementing
 DebuggerCommand and calling hphpd_install_user_command(). For example

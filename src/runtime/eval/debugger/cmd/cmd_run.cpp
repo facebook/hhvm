@@ -56,6 +56,8 @@ bool CmdRun::help(DebuggerClient *client) {
 }
 
 bool CmdRun::onClient(DebuggerClient *client) {
+  if (DebuggerCommand::onClient(client)) return true;
+
   m_args = StringVecPtr(client->args(), null_deleter());
   client->send(this);
   throw DebuggerConsoleExitException();

@@ -261,10 +261,10 @@ bool DebuggerClient::IsValidNumber(const std::string &arg) {
 String DebuggerClient::FormatVariable(CVarRef v, int maxlen /* = 80 */) {
   String value;
   if (maxlen <= 0) {
-    VariableSerializer vs(VariableSerializer::VarExport);
+    VariableSerializer vs(VariableSerializer::VarDump, 0, 2);
     value = vs.serialize(v, true).toString();
   } else {
-    VariableSerializer vs(VariableSerializer::DebuggerDump, 0, 1);
+    VariableSerializer vs(VariableSerializer::DebuggerDump, 0, 2);
     value = vs.serialize(v, true).toString();
   }
 
@@ -1366,7 +1366,7 @@ bool DebuggerClient::processTakeCode() {
 
   char first = m_line[0];
   if (first == '=') {
-    m_code = string("<?php $_") + m_line + "; var_export($_);";
+    m_code = string("<?php $_") + m_line + "; var_dump($_);";
     return processEval();
   }
   if (first == '$') {

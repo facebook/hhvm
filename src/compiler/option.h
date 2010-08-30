@@ -139,6 +139,11 @@ public:
   static bool GenConcat;
 
   /**
+   * Generate array_createN service routines
+   */
+  static bool GenArrayCreate;
+
+  /**
    * Separate compilation
    */
   static bool SeparateCompilation;

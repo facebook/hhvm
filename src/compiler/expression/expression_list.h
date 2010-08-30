@@ -83,6 +83,12 @@ public:
   bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
 private:
   void optimize(AnalysisResultPtr ar);
+  unsigned int checkLitstrKeys() const;
+  unsigned int checkIntegerKeys() const;
+  void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
+                                    AnalysisResultPtr ar,
+                                    unsigned int n);
+
   void outputCPPInternal(CodeGenerator &cg,
                          AnalysisResultPtr ar, bool needed, bool pre);
 

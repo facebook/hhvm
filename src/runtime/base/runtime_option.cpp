@@ -234,7 +234,6 @@ int64 RuntimeOption::MaxMemcacheKeyCount = 0;
 int RuntimeOption::SocketDefaultTimeout = 5;
 bool RuntimeOption::EnableMemoryManager = true;
 bool RuntimeOption::CheckMemory = false;
-bool RuntimeOption::UseZendArray = true;
 bool RuntimeOption::UseSmallArray = false;
 bool RuntimeOption::UseDirectCopy = false;
 bool RuntimeOption::EnableApc = true;
@@ -590,7 +589,6 @@ void RuntimeOption::Load(Hdf &config) {
 
     EnableMemoryManager = server["EnableMemoryManager"].getBool(true);
     CheckMemory = server["CheckMemory"].getBool();
-    UseZendArray = server["UseZendArray"].getBool(true);
     UseSmallArray = server["UseSmallArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
 

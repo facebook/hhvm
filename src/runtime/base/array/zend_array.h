@@ -119,6 +119,17 @@ public:
   public:
     Bucket();
     Bucket(CVarRef d);
+
+    // These two constructors should never be called directly, they are
+    // only called from generated code.
+    Bucket(StringData *k, CVarRef d) :
+      key(k), data(d) {
+      ASSERT(k->isLiteral());
+      ASSERT(k->isStatic());
+      h = k->getPrecomputedHash();
+    }
+    Bucket(int64 k, CVarRef d) : h(k), key(NULL), data(d) { }
+
     ~Bucket();
 
     int64       h;
@@ -134,6 +145,10 @@ public:
     DECLARE_SMART_ALLOCATION_NOCALLBACKS(Bucket);
     void dump();
   };
+
+  // These two functions should never be called directly, they are only
+  // called from generated code.
+  ZendArray(uint nSize, Bucket *bkts[]);
 
 private:
   uint             m_nTableSize;

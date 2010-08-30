@@ -164,6 +164,11 @@ class StringData {
   double toDouble () const;
   DataType toNumeric(int64 &ival, double &dval) const;
 
+  int64 getPrecomputedHash() const {
+    ASSERT(!isShared());
+    return m_hash & 0x7fffffffffffffffull;
+  }
+
   int64 hash() const {
     if (isStatic()) return getPrecomputedHash();
     if (isShared()) return getSharedStringHash();
@@ -233,11 +238,6 @@ class StringData {
   void escalate(); // change to malloc-ed string
   void setChar(int offset, char ch);
   void removeChar(int offset);
-
-  int64 getPrecomputedHash() const {
-    ASSERT(!isShared());
-    return m_hash & 0x7fffffffffffffffull;
-  }
 
   int64 getSharedStringHash() const;
 

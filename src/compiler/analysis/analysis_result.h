@@ -375,6 +375,8 @@ public:
 
   std::set<std::string> m_variableTableFunctions;
   std::set<int> m_concatLengths;
+  std::set<int> m_arrayLitstrKeySizes;
+  std::set<int> m_arrayIntegerKeySizes;
 
   void setSystem() { m_system = true; }
   bool isSystem() const { return m_system; }
@@ -565,6 +567,9 @@ private:
   void outputConcatNumDecl(CodeGenerator &cg, int num);
   void outputConcatDecl(CodeGenerator &cg);
   void outputConcatImpl(CodeGenerator &cg);
+  void outputArrayCreateNumDecl(CodeGenerator &cg, int num, const char *type);
+  void outputArrayCreateDecl(CodeGenerator &cg);
+  void outputArrayCreateImpl(CodeGenerator &cg);
 
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);

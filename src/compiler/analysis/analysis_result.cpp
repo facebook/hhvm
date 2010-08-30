@@ -1679,7 +1679,7 @@ void AnalysisResult::outputRTTIMetaData(const char *filename) {
 }
 
 void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
-  if (!Option::GenConcat) return;
+  if (!Option::GenConcat && !Option::GenArrayCreate) return;
 
   string filename = string(Option::SystemFilePrefix) + "cpputil.h";
   string headerPath = m_outputPath + "/" + filename;
@@ -1696,12 +1696,15 @@ void AnalysisResult::outputCPPUtilDecl(CodeGenerator::Output output) {
     outputTaintDecl(cg);
     outputConcatDecl(cg);
   }
+  if (Option::GenArrayCreate) {
+    outputArrayCreateDecl(cg);
+  }
   cg.namespaceEnd();
   cg_printf("#endif // __GENERATED_cpputil_h__\n");
 }
 
 void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
-  if (!Option::GenConcat) return;
+  if (!Option::GenConcat && !Option::GenArrayCreate) return;
 
   string filename = string(Option::SystemFilePrefix) + "cpputil.cpp";
   string headerPath = m_outputPath + "/" + filename;
@@ -1710,10 +1713,14 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   CodeGenerator cg(&f, output);
   cg_printf("\n");
   cg_printInclude("\"cpputil.h\"");
+  cg_printInclude("<runtime/base/array/zend_array.h>");
   cg.namespaceBegin();
   if (Option::GenConcat) {
     outputTaintImpl(cg);
     outputConcatImpl(cg);
+  }
+  if (Option::GenArrayCreate) {
+    outputArrayCreateImpl(cg);
   }
   cg.namespaceEnd();
 }
@@ -1829,6 +1836,71 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
     cg_printf(";\n");
     cg_printf("return res;\n");
     cg_printf("#endif\n");
+    cg_indentEnd("}\n");
+  }
+}
+
+void AnalysisResult::outputArrayCreateNumDecl(CodeGenerator &cg, int num,
+                                              const char *type) {
+  cg_printf("ArrayData *array_create%d(\n", num);
+  for (int i = 1; i <= num; i++) {
+    cg_printf("  %s k%d, CVarRef v%d", type, i, i);
+    if (i < num) {
+      cg_printf(",\n");
+    } else {
+      cg_printf(")");
+    }
+  }
+}
+
+void AnalysisResult::outputArrayCreateDecl(CodeGenerator &cg) {
+  for (set<int>::const_iterator iter = m_arrayLitstrKeySizes.begin();
+       iter != m_arrayLitstrKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "CStrRef");
+    cg_printf(";\n");
+  }
+  for (set<int>::const_iterator iter = m_arrayIntegerKeySizes.begin();
+       iter != m_arrayIntegerKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "int64");
+    cg_printf(";\n");
+  }
+}
+
+void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
+  for (set<int>::const_iterator iter = m_arrayLitstrKeySizes.begin();
+       iter != m_arrayLitstrKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "CStrRef");
+    cg_indentBegin(" {\n");
+    cg_printf("ZendArray::Bucket *p[] = {\n");
+    for (int i = 1; i <= num; i++) {
+      cg_printf("  NEW(ZendArray::Bucket)(k%d.get(), v%d),\n",
+                i, i);
+    }
+    cg_printf("  NULL,\n");
+    cg_printf("};\n");
+    cg_printf("return NEW(ZendArray)(%d, p);\n", num);
+    cg_indentEnd("}\n");
+  }
+  for (set<int>::const_iterator iter = m_arrayIntegerKeySizes.begin();
+       iter != m_arrayIntegerKeySizes.end(); ++iter) {
+    int num = *iter;
+    ASSERT(num > 0);
+    outputArrayCreateNumDecl(cg, num, "int64");
+    cg_indentBegin(" {\n");
+    cg_printf("ZendArray::Bucket *p[] = {\n");
+    for (int i = 1; i <= num; i++) {
+      cg_printf("  NEW(ZendArray::Bucket)(k%d, v%d),\n",
+                i, i);
+    }
+    cg_printf("  NULL,\n");
+    cg_printf("};\n");
+    cg_printf("return NEW(ZendArray)(%d, p);\n", num);
     cg_indentEnd("}\n");
   }
 }

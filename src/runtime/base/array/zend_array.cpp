@@ -25,8 +25,69 @@
 
 namespace HPHP {
 
+///////////////////////////////////////////////////////////////////////////////
+
 IMPLEMENT_SMART_ALLOCATION_NOCALLBACKS_CLS(ZendArray, Bucket);
 IMPLEMENT_SMART_ALLOCATION(ZendArray, SmartAllocatorImpl::NeedRestoreOnce);
+
+// append/insert/update
+
+#define CONNECT_TO_BUCKET_LIST(element, list_head)                      \
+  (element)->pNext = (list_head);                                       \
+
+#define CONNECT_TO_GLOBAL_DLLIST_INIT(element)                          \
+do {                                                                    \
+  (element)->pListLast = m_pListTail;                                   \
+  m_pListTail = (element);                                              \
+  (element)->pListNext = NULL;                                          \
+  if ((element)->pListLast != NULL) {                                   \
+    (element)->pListLast->pListNext = (element);                        \
+  }                                                                     \
+  if (!m_pListHead) {                                                   \
+    m_pListHead = (element);                                            \
+  }                                                                     \
+  if (m_pos == 0) {                                                     \
+    m_pos = (ssize_t)(element);                                         \
+  }                                                                     \
+} while (false)
+
+#define CONNECT_TO_GLOBAL_DLLIST(element)                               \
+do {                                                                    \
+  CONNECT_TO_GLOBAL_DLLIST_INIT(element);                               \
+  /* If there could be any strong iterators that are past the end, */   \
+  /* we need to a pass and update these iterators to point to the */    \
+  /* newly added element. */                                            \
+  if (m_siPastEnd) {                                                    \
+    m_siPastEnd = 0;                                                    \
+    int sz = m_strongIterators.size();                                  \
+    bool shouldWarn = false;                                            \
+    for (int i = 0; i < sz; ++i) {                                      \
+      if (m_strongIterators[i]->primary == 0) {                         \
+        m_strongIterators[i]->primary = (ssize_t)(element);             \
+        shouldWarn = true;                                              \
+      }                                                                 \
+    }                                                                   \
+    if (shouldWarn) {                                                   \
+      raise_warning("An element was added to an array while a foreach " \
+                    "by reference loop was iterating over the last "    \
+                    "element of the array. This may lead to "           \
+                    "unexpeced results.");                              \
+    }                                                                   \
+  }                                                                     \
+} while (false)
+
+#define SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p)                   \
+do {                                                                    \
+  if (m_linear) {                                                       \
+    int nbytes = m_nTableSize * sizeof(Bucket *);                       \
+    Bucket **t = (Bucket **)malloc(nbytes);                             \
+    memcpy(t, m_arBuckets, nbytes);                                     \
+    m_arBuckets = t;                                                    \
+    m_linear = 0;                                                       \
+  }                                                                     \
+  m_arBuckets[nIndex] = (p);                                            \
+} while (0)
+
 ///////////////////////////////////////////////////////////////////////////////
 // static members
 
@@ -52,6 +113,31 @@ ZendArray::ZendArray(uint nSize /* = 0 */) :
   m_nTableMask = m_nTableSize - 1;
   m_arBuckets = (Bucket **)calloc(m_nTableSize, sizeof(Bucket *));
 }
+
+ZendArray::ZendArray(uint nSize, Bucket *bkts[]) :
+  m_nNumOfElements(nSize), m_nNextFreeElement(0),
+  m_pListHead(NULL), m_pListTail(NULL), m_siPastEnd(0), m_linear(false) {
+
+  if (nSize >= 0x80000000) {
+    m_nTableSize = 0x80000000; // prevent overflow
+  } else {
+    uint i = 3;
+    while ((1U << i) < nSize) {
+      i++;
+    }
+    m_nTableSize = 1 << i;
+  }
+  m_nTableMask = m_nTableSize - 1;
+  m_arBuckets = (Bucket **)calloc(m_nTableSize, sizeof(Bucket *));
+  for (Bucket **b = bkts; *b; b++) {
+    Bucket *p = *b;
+    uint nIndex = (p->h & m_nTableMask);
+    CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
+    m_arBuckets[nIndex] = p;
+    CONNECT_TO_GLOBAL_DLLIST_INIT(p);
+  }
+}
+
 
 ZendArray::~ZendArray() {
   Bucket *p = m_pListHead;
@@ -431,58 +517,6 @@ ssize_t ZendArray::getIndex(CVarRef k) const {
   return ArrayData::invalid_index;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-// append/insert/update
-
-#define CONNECT_TO_BUCKET_DLLIST(element, list_head)                    \
-  (element)->pNext = (list_head);                                       \
-
-#define CONNECT_TO_GLOBAL_DLLIST(element)                               \
-  (element)->pListLast = m_pListTail;                                   \
-  m_pListTail = (element);                                              \
-  (element)->pListNext = NULL;                                          \
-  if ((element)->pListLast != NULL) {                                   \
-    (element)->pListLast->pListNext = (element);                        \
-  }                                                                     \
-  if (!m_pListHead) {                                                   \
-    m_pListHead = (element);                                            \
-  }                                                                     \
-  if (m_pos == 0) {                                                     \
-    m_pos = (ssize_t)(element);                                         \
-  }                                                                     \
-  /* If there could be any strong iterators that are past the end, */   \
-  /* we need to a pass and update these iterators to point to the */    \
-  /* newly added element. */                                            \
-  if (m_siPastEnd) {                                                    \
-    m_siPastEnd = 0;                                                    \
-    int sz = m_strongIterators.size();                                  \
-    bool shouldWarn = false;                                            \
-    for (int i = 0; i < sz; ++i) {                                      \
-      if (m_strongIterators[i]->primary == 0) {                         \
-        m_strongIterators[i]->primary = (ssize_t)(element);             \
-        shouldWarn = true;                                              \
-      }                                                                 \
-    }                                                                   \
-    if (shouldWarn) {                                                   \
-      raise_warning("An element was added to an array while a foreach " \
-                    "by reference loop was iterating over the last "    \
-                    "element of the array. This may lead to "           \
-                    "unexpeced results.");                              \
-    }                                                                   \
-  }
-
-#define SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p)                   \
-do {                                                                    \
-  if (m_linear) {                                                       \
-    int nbytes = m_nTableSize * sizeof(Bucket *);                       \
-    Bucket **t = (Bucket **)malloc(nbytes);                             \
-    memcpy(t, m_arBuckets, nbytes);                                     \
-    m_arBuckets = t;                                                    \
-    m_linear = 0;                                                       \
-  }                                                                     \
-  m_arBuckets[nIndex] = (p);                                            \
-} while (0)
-
 void ZendArray::resize() {
   int curSize = m_nTableSize * sizeof(Bucket *);
   // No need to use calloc() or memset(), as rehash() is going to clear
@@ -502,7 +536,7 @@ void ZendArray::rehash() {
   memset(m_arBuckets, 0, m_nTableSize * sizeof(Bucket *));
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
     uint nIndex = (p->h & m_nTableMask);
-    CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+    CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
     SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   }
 }
@@ -512,7 +546,7 @@ bool ZendArray::nextInsert(CVarRef data) {
   Bucket * p = NEW(Bucket)(data);
   p->h = h;
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   m_nNextFreeElement = h + 1;
@@ -538,7 +572,7 @@ bool ZendArray::addLval(int64 h, Variant **pDest, bool doFind /* = true */) {
     *pDest = &p->data;
   }
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   if ((long)h >= (long)m_nNextFreeElement) {
@@ -567,7 +601,7 @@ bool ZendArray::addLval(StringData *key, int64 h, Variant **pDest,
   p->h = h;
   *pDest = &p->data;
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   if (++m_nNumOfElements > m_nTableSize) {
@@ -584,7 +618,7 @@ bool ZendArray::add(int64 h, CVarRef data) {
   p = NEW(Bucket)(data);
   p->h = h;
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   if ((long)h >= (long)m_nNextFreeElement) {
@@ -607,7 +641,7 @@ bool ZendArray::add(StringData *key, CVarRef data) {
   p->key->incRefCount();
   p->h = h;
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
   if (++m_nNumOfElements > m_nTableSize) {
@@ -627,7 +661,7 @@ bool ZendArray::update(int64 h, CVarRef data) {
   p->h = h;
 
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
 
@@ -655,7 +689,7 @@ bool ZendArray::update(litstr key, CVarRef data) {
   p->h = h;
 
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
 
@@ -679,7 +713,7 @@ bool ZendArray::update(StringData *key, CVarRef data) {
   p->h = h;
 
   uint nIndex = (h & m_nTableMask);
-  CONNECT_TO_BUCKET_DLLIST(p, m_arBuckets[nIndex]);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
   SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
   CONNECT_TO_GLOBAL_DLLIST(p);
 

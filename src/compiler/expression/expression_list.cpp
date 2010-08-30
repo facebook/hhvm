@@ -470,6 +470,70 @@ bool ExpressionList::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return true;
 }
 
+unsigned int ExpressionList::checkLitstrKeys() const {
+  ASSERT(m_arrayElements);
+  set<string> keys;
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ArrayPairExpressionPtr ap =
+      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+    ExpressionPtr name = ap->getName();
+    if (!name) return 0;
+    Variant value;
+    bool ret = name->getScalarValue(value);
+    if (!ret) return 0;
+    if (!value.isString()) return 0;
+    String str = value.toString();
+    if (str->isInteger()) return 0;
+    string s(str.data(), str.size());
+    keys.insert(s);
+  }
+  return keys.size();
+}
+
+unsigned int ExpressionList::checkIntegerKeys() const {
+  ASSERT(m_arrayElements);
+  set<int64> keys;
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ArrayPairExpressionPtr ap =
+      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+    ExpressionPtr name = ap->getName();
+    if (!name) return 0;
+    Variant value;
+    bool ret = name->getScalarValue(value);
+    if (!ret) return 0;
+    if (!value.isInteger()) return 0;
+    int64 v = value.toInt64();
+    keys.insert(v);
+  }
+  return keys.size();
+}
+
+void ExpressionList::outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
+                                                  AnalysisResultPtr ar,
+                                                  unsigned int n) {
+  cg_printf("array_create%d(", n);
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    if (ExpressionPtr exp = m_exps[i]) {
+      ArrayPairExpressionPtr ap =
+        dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+      ExpressionPtr name = ap->getName();
+      ExpressionPtr value = ap->getValue();
+      if (name) {
+        name->outputCPP(cg, ar);
+      } else {
+        cg_printf("%d", i);
+      }
+      cg_printf(", ");
+      value->outputCPP(cg, ar);
+      if (i < n-1) {
+        cg_printf(", ");
+      } else {
+        cg_printf(")");
+      }
+    }
+  }
+}
+
 void ExpressionList::outputCPPInternal(CodeGenerator &cg,
                                        AnalysisResultPtr ar,
                                        bool needed, bool pre) {
@@ -482,6 +546,23 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
       if (ap->getName()) {
         isVector = false;
         break;
+      }
+    }
+    if (m_cppTemp.empty() &&
+        Option::GenArrayCreate && cg.getOutput() != CodeGenerator::SystemCPP) {
+      unsigned int n = isVector ? m_exps.size() : checkIntegerKeys();
+      if (n > 0 && n == m_exps.size()) {
+        ar->m_arrayIntegerKeySizes.insert(n);
+        outputCPPUniqLitKeyArrayInit(cg, ar, n);
+        return;
+      }
+      if (!isVector) {
+        n = checkLitstrKeys();
+        if (n > 0 && n == m_exps.size()) {
+          ar->m_arrayLitstrKeySizes.insert(n);
+          outputCPPUniqLitKeyArrayInit(cg, ar, n);
+          return;
+        }
       }
     }
     cg_printf("ArrayInit");

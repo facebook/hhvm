@@ -56,7 +56,7 @@ String::String(int n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  SmartPtr<StringData>::operator=(NEW(StringData)(buf, AttachString));
+  SmartPtr<StringData>::operator=(NEW(StringData)(buf, len, AttachString));
 }
 
 String::String(int64 n) {
@@ -71,7 +71,7 @@ String::String(int64 n) {
 
   buf = (char*)malloc(len + 1);
   memcpy(buf, p, len + 1); // including the null terminator.
-  m_px = NEW(StringData)(buf, AttachString);
+  m_px = NEW(StringData)(buf, len, AttachString);
   m_px->incRefCount();
 }
 

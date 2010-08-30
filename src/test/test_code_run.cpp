@@ -1203,6 +1203,20 @@ bool TestCodeRun::TestString() {
        "  echo $i,':';var_dump(strrpos('xabcay', 'a',$i));"
        "}");
 
+  MVCR("<?php\n"
+       "$a = 'zz';\n"
+       "$a++;\n"
+       "$b = 'zz';\n" // $b should remain 'zz'
+       "var_dump($a, $b);\n");
+
+  MVCR("<?php\n"
+       "function test($s) {\n"
+       "  $a = array('abc' => 1, 'abcd' => 2);\n"
+       "  $s .= 'c'; var_dump($a[$s]);\n"
+       "  $s .= 'd'; var_dump($a[$s]);\n" // should find 'abcd' in $a
+       "}\n"
+       "test('ab');\n");
+
   return true;
 }
 

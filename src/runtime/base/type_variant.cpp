@@ -24,6 +24,7 @@
 #include <runtime/ext/ext_variable.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/fiber_reference_map.h>
+#include <runtime/base/zend/zend_string.h>
 #include <compiler/parser/hphp.tab.hpp>
 
 using namespace std;
@@ -416,8 +417,14 @@ void Variant::split() {
   switch (m_type) {
   case KindOfVariant: m_data.pvar->split();     break;
   // copy-on-write
-  case KindOfStaticString:  set(m_data.pstr->copy()); break;
-  case KindOfString:  set(m_data.pstr->copy()); break;
+  case KindOfStaticString:
+  case KindOfString:
+  {
+    int len = m_data.pstr->size();
+    const char *copy = string_duplicate(m_data.pstr->data(), len);
+    set(NEW(StringData)(copy, len, AttachString));
+    break;
+  }
   case KindOfArray:   set(m_data.parr->copy()); break;
   default:
     break;

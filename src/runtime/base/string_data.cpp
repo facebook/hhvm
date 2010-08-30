@@ -78,6 +78,7 @@ void StringData::releaseData() {
       free((void*)m_data);
     }
   }
+  m_hash = 0;
 }
 
 void StringData::assign(const char *data, StringDataMode mode) {
@@ -137,6 +138,8 @@ void StringData::append(const char *s, int len) {
     throw InvalidArgumentException("len: %d", len);
   }
 
+  ASSERT(!isStatic()); // never mess around with static strings!
+
   if (!isMalloced()) {
     int newlen;
     m_data = string_concat(data(), size(), s, len, newlen);
@@ -144,6 +147,7 @@ void StringData::append(const char *s, int len) {
       m_shared->decRef();
     }
     m_len = newlen;
+    m_hash = 0;
   } else if (m_data == s) {
     int newlen;
     char *newdata = string_concat(data(), size(), s, len, newlen);
@@ -158,6 +162,7 @@ void StringData::append(const char *s, int len) {
     m_data = (const char*)realloc((void*)m_data, m_len + 1);
     memcpy((void*)(m_data + dataLen), s, len);
     ((char*)m_data)[m_len] = '\0';
+    m_hash = 0;
   }
 }
 
@@ -180,7 +185,7 @@ StringData *StringData::copy(bool sharedMemory /* = false */) const {
 }
 
 void StringData::escalate() {
-  ASSERT(isImmutable());
+  ASSERT(isImmutable() && !isStatic());
 
   int len = size();
   ASSERT(len);
@@ -190,6 +195,8 @@ void StringData::escalate() {
   buf[len] = '\0';
   m_len = len;
   m_data = buf;
+  // clear precomputed hashcode
+  m_hash = 0;
 }
 
 void StringData::dump() {
@@ -228,6 +235,7 @@ StringData *StringData::getChar(int offset) const {
 }
 
 void StringData::setChar(int offset, CStrRef substring) {
+  ASSERT(!isStatic());
   if (offset >= 0) {
     int len = size();
     if (len == 0) {
@@ -255,6 +263,7 @@ void StringData::setChar(int offset, CStrRef substring) {
 
 void StringData::setChar(int offset, char ch) {
   ASSERT(offset >= 0 && offset < size());
+  ASSERT(!isStatic());
   if (isImmutable()) {
     escalate();
   }
@@ -263,6 +272,7 @@ void StringData::setChar(int offset, char ch) {
 
 void StringData::removeChar(int offset) {
   ASSERT(offset >= 0 && offset < size());
+  ASSERT(!isStatic());
   int len = size();
   if (isImmutable()) {
     char *data = (char*)malloc(len);
@@ -279,10 +289,12 @@ void StringData::removeChar(int offset) {
   } else {
     m_len = ((m_len & IsMask) | (len - 1));
     memmove((void*)(m_data + offset), m_data + offset + 1, len - offset);
+    m_hash = 0;
   }
 }
 
 void StringData::inc() {
+  ASSERT(!isStatic());
   if (empty()) {
     m_len = (IsLiteral | 1);
     m_data = "1";

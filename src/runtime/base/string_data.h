@@ -121,7 +121,9 @@ class StringData {
   bool isShared() const { return m_len & IsShared;}
   bool isLinear() const { return m_len & IsLinear;}
   bool isMalloced() const { return (m_len & IsMask) == 0 && m_data;}
-  bool isImmutable() const { return m_len & (IsLiteral | IsShared | IsLinear);}
+  bool isImmutable() const {
+    return (m_len & (IsLiteral | IsShared | IsLinear)) || isStatic();
+  }
   bool isNumeric() const;
   bool isInteger() const;
   bool isStrictlyInteger(int64 &res) {

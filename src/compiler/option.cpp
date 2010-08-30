@@ -185,6 +185,7 @@ bool Option::AllVolatile = false;
 StringBag Option::OptionStrings;
 
 bool Option::GenerateSourceInfo = false;
+bool Option::GenerateDocComments = true;
 bool Option::UseVirtualDispatch = false;
 
 bool Option::EliminateDeadCode = true;
@@ -352,6 +353,7 @@ void Option::Load(Hdf &config) {
   AllVolatile = config["AllVolatile"].getBool();
 
   GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);
+  GenerateDocComments = config["GenerateDocComments"].getBool(true);
   UseVirtualDispatch = config["UseVirtualDispatch"].getBool(false);
 
   EliminateDeadCode  = config["EliminateDeadCode"].getBool(true);

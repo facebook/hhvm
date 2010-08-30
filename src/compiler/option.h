@@ -317,6 +317,7 @@ public:
   static int InlineFunctionThreshold;
   static bool ControlEvalOrder;
   static bool GenerateSourceInfo;
+  static bool GenerateDocComments;
   static bool UseVirtualDispatch;
 
   static bool EliminateDeadCode;

@@ -172,6 +172,11 @@ PHP files. It can be used to translate C++ stacktrace to more readable PHP
 stacktrace. When FrameInjection enabled, there is no need to do stacktrace
 translation any more, so this option is by default set to false to save space.
 
+= GenerateDocComments
+
+Default is true. Whether to store doc comments in class map, so they can be
+queried from reflection.
+
 = DynamicFunctionPrefix
 
 Deprecating. These are options for specifying which functions may be called

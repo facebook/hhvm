@@ -1268,7 +1268,6 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
     attribute |= ClassInfo::IsStatic;
   }
   if (isFinal()) attribute |= ClassInfo::IsFinal;
-  if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
 
   if (isVariableArgument()) {
     attribute |= ClassInfo::VariableArguments;
@@ -1281,6 +1280,11 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   attribute |= m_attributeClassInfo;
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
+    attribute |= ClassInfo::HasDocComment;
+  } else {
+    attribute &= ~ClassInfo::HasDocComment;
+  }
 
   // Use the original cased name, for reflection to work correctly.
   cg_printf("(const char *)0x%04X, \"%s\", \"%s\", (const char *)%d, "
@@ -1290,7 +1294,7 @@ void FunctionScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
             m_stmt ? m_stmt->getLocation()->line0 : 0,
             m_stmt ? m_stmt->getLocation()->line1 : 0);
 
-  if (!m_docComment.empty()) {
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
     cg_printf("\"%s\",\n", dc);
     free(dc);

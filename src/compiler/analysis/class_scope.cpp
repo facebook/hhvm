@@ -503,9 +503,14 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (isInterface()) attribute |= ClassInfo::IsInterface|ClassInfo::IsAbstract;
   if (m_kindOf == KindOfAbstractClass) attribute |= ClassInfo::IsAbstract;
   if (m_kindOf == KindOfFinalClass) attribute |= ClassInfo::IsFinal;
-  if (!m_docComment.empty()) attribute |= ClassInfo::HasDocComment;
   if (needLazyStaticInitializer()) attribute |= ClassInfo::IsLazyInit;
+
   attribute |= m_attributeClassInfo;
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
+    attribute |= ClassInfo::HasDocComment;
+  } else {
+    attribute &= ~ClassInfo::HasDocComment;
+  }
 
   string parent;
   if (!m_parent.empty()) {
@@ -523,7 +528,7 @@ void ClassScope::outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar) {
             m_stmt ? m_stmt->getLocation()->line0 : 0,
             m_stmt ? m_stmt->getLocation()->line1 : 0);
 
-  if (!m_docComment.empty()) {
+  if (!m_docComment.empty() && Option::GenerateDocComments) {
     char *dc = string_cplus_escape(m_docComment.c_str(), m_docComment.size());
     cg_printf("\"%s\",\n", dc);
     free(dc);

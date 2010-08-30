@@ -793,6 +793,23 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                 (*it)->loc()->line1);
           }
         }
+        int m1 = (*it)->getModifiers();
+        int m2 = m->getModifiers();
+        // Access levels
+        int p1 = m1 & (Public|Protected|Private);
+        if (!p1) p1 = Public;
+        int p2 = m2 & (Public|Protected|Private);
+        if (!p2) p2 = Public;
+        if (p1 > p2) {
+          const char *pn;
+          if (p1 == Private) pn = "private";
+          else if (p1 == Protected) pn = "protected";
+          else pn = "public";
+          // Illegal strengthening of privacy
+          raise_error("Access level to %s::%s() must be %s (as in class %s) "
+              "or weaker", name().c_str(), (*it)->name().c_str(), pn,
+              mClass->name().c_str());
+        }
       }
       // Check for multiple abstract function declarations
       hphp_const_char_imap<const char*> abstracts;

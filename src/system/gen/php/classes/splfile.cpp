@@ -70,21 +70,21 @@ Variant c_splfileobject::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileobject
-bool c_splfileobject::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_splfileobject
+Variant * c_splfileobject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject
-bool c_splfileobject::o_existsPublic(CStrRef s) const {
-  return c_splfileinfo::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileobject
+Variant * c_splfileobject::o_realPropPublic(CStrRef s, int flags) const {
+  return c_splfileinfo::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileobject
-bool c_splfileobject::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileobject
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileobject
+Variant * c_splfileobject::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileobject
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_splfileobject
 Variant c_splfileobject::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -3929,21 +3929,21 @@ Variant c_splfileinfo::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
-bool c_splfileinfo::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_splfileinfo
+Variant * c_splfileinfo::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileinfo
-bool c_splfileinfo::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileinfo
+Variant * c_splfileinfo::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo
-bool c_splfileinfo::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileinfo
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileinfo
+Variant * c_splfileinfo::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileinfo
 #ifndef OMIT_JUMP_TABLE_CLASS_set_splfileinfo
 Variant c_splfileinfo::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);

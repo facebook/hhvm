@@ -44,7 +44,8 @@ public:
   virtual Array o_toArray() const;
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
-  virtual bool o_exists(CStrRef prop, CStrRef context = null_string) const;
+  virtual Variant *o_realProp(CStrRef prop, int flags,
+                              CStrRef context = null_string) const;
   virtual Variant o_get(CStrRef prop, bool error = true,
                         CStrRef context = null_string);
   virtual Variant o_getUnchecked(CStrRef prop, CStrRef context = null_string);

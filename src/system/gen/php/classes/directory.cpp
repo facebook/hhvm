@@ -94,32 +94,32 @@ Variant c_directory::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_directory
-bool c_directory::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_directory
+Variant * c_directory::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directory
-bool c_directory::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_directory
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directory
+Variant * c_directory::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_EXISTS_STRING(0x1429F792A6880074LL, "path", 4);
+      HASH_REALPROP_STRING(0x1429F792A6880074LL, "path", 4, path);
       break;
     case 2:
-      HASH_EXISTS_STRING(0x5C4CA333F4541532LL, "handle", 6);
+      HASH_REALPROP_STRING(0x5C4CA333F4541532LL, "handle", 6, handle);
       break;
     default:
       break;
   }
-  return c_ObjectData::o_existsPublic(s);
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directory
-bool c_directory::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directory
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directory
+Variant * c_directory::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directory
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directory
 #ifndef OMIT_JUMP_TABLE_CLASS_set_directory
 Variant c_directory::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);

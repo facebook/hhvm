@@ -43,8 +43,8 @@ class c_domainexception : public c_logicexception {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_domainexception 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_domainexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_domainexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domainexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_domainexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_domainexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_domainexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domainexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_domainexception 1
@@ -54,7 +54,7 @@ class c_domainexception : public c_logicexception {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domainexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_domainexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_domainexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_domainexception 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_domainexception 1

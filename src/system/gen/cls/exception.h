@@ -40,8 +40,8 @@ class c_exception : public ExtObjectData {
   public:
   virtual void o_getArray(Array &props) const;
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_exception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_exception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_exception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_exception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_exception 1
 #define OMIT_JUMP_TABLE_CLASS_get_exception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_exception 1
 #define OMIT_JUMP_TABLE_CLASS_set_exception 1
@@ -51,7 +51,7 @@ class c_exception : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  virtual bool o_existsPublic(CStrRef s) const;
+  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual Variant o_getPublic(CStrRef s, bool error = true);
   virtual Variant o_setPublic(CStrRef s,
                               CVarRef v, bool forInit);

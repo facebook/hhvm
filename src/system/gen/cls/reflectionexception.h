@@ -42,8 +42,8 @@ class c_reflectionexception : public c_exception {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionexception 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_reflectionexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_reflectionexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_reflectionexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_reflectionexception 1
@@ -53,7 +53,7 @@ class c_reflectionexception : public c_exception {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionexception 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionexception 1

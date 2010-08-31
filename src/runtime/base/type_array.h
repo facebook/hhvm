@@ -268,6 +268,8 @@ class Array : public SmartPtr<ArrayData> {
     return *ret;
   }
 
+  Variant *lvalPtr(CStrRef key, bool forWrite, bool create);
+
   Variant &lvalAt();
 
   Variant &lvalAt(bool    key, bool checkExist = false) {

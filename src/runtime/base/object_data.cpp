@@ -136,15 +136,23 @@ ObjectData::os_invoke_from_eval(const char *c, const char *s,
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-bool ObjectData::o_exists(CStrRef propName,
-                          CStrRef context /* = null_string */) const {
-  return o_existsPublic(propName);
+Variant *ObjectData::o_realProp(CStrRef propName, int flags,
+                                CStrRef context /* = null_string */) const {
+  return o_realPropPublic(propName, flags);
 }
 
-bool ObjectData::o_existsPublic(CStrRef propName) const {
-  return propName.size() > 0 && o_properties &&
-         // object properties are always strings
-         o_properties->exists(propName, true);
+Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
+  if (propName.size() > 0 && ((flags & RealPropCreate) || o_properties)) {
+    return o_properties->lvalPtr(propName,
+                                 flags & RealPropWrite, flags & RealPropCreate);
+  }
+  return NULL;
+}
+
+bool ObjectData::o_exists(CStrRef propName,
+                          CStrRef context /* = null_string */) const {
+  const Variant *t = o_realProp(propName, 0, context);
+  return t && t->isInitialized();
 }
 
 Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
@@ -759,15 +767,15 @@ Variant ObjectData::doGet(Variant v_name, bool error) {
 }
 
 bool ObjectData::doIsSet(CStrRef prop, CStrRef context) {
-  if (o_exists(prop, context)) {
-    return !o_get(prop, false, context).isNull();
+  if (Variant *t = o_realProp(prop, 0, context)) {
+    return !t->isNull();
   }
   return t___isset(prop);
 }
 
 bool ObjectData::doEmpty(CStrRef prop, CStrRef context) {
-  if (o_exists(prop, context)) {
-    return empty(o_get(prop, false, context));
+  if (Variant *t = o_realProp(prop, 0, context)) {
+    return empty(*t);
   }
   return !t___isset(prop) || empty(t___get(prop));
 }
@@ -828,11 +836,8 @@ Variant ObjectData::t___unset(Variant v_name) {
 }
 
 bool ObjectData::o_propExists(CStrRef s, CStrRef context /* = null_string */) {
-  // Exists and the value is not null or it is null but also initialized.
-  // Can't just do isInitialized because type inferred properties may not
-  // be in the o_lval table.
-  return o_exists(s, context) && (!o_get(s, context).isNull() ||
-      o_lval(s, context).isInitialized());
+  Variant *t = o_realProp(s, 0, context);
+  return t && t->isInitialized();
 }
 
 Variant ObjectData::t___sleep() {

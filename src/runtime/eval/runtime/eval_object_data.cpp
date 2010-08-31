@@ -100,13 +100,16 @@ Array EvalObjectData::o_toArray() const {
   return props;
 }
 
-bool EvalObjectData::o_exists(CStrRef s,
-                              CStrRef context /* = null_string */) const {
+Variant *EvalObjectData::o_realProp(CStrRef s, int flags,
+                                    CStrRef context /* = null_string */) const {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  return (m_privates.exists(c, true) &&
-          m_privates.rvalAt(c, false, true).getArrayData()
-              ->exists(s)) ||
-         DynamicObjectData::o_exists(s, c);
+  if (m_privates.exists(c, true)) {
+    if (Variant *ret = toArray(m_privates.rvalAt(c, false, true)).
+        lvalPtr(s, flags & RealPropWrite, false)) {
+      return ret;
+    }
+  }
+  return DynamicObjectData::o_realProp(s, flags);
 }
 
 void EvalObjectData::o_getArray(Array &props) const {

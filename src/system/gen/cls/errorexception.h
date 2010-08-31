@@ -42,8 +42,8 @@ class c_errorexception : public c_exception {
   public:
   virtual void o_getArray(Array &props) const;
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_errorexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_errorexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_errorexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_errorexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_errorexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_errorexception 1
@@ -53,7 +53,7 @@ class c_errorexception : public c_exception {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  virtual bool o_existsPublic(CStrRef s) const;
+  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual Variant o_getPublic(CStrRef s, bool error = true);
   virtual Variant o_setPublic(CStrRef s,
                               CVarRef v, bool forInit);

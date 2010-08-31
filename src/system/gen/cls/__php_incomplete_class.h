@@ -40,8 +40,8 @@ class c___php_incomplete_class : public ExtObjectData {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY___php_incomplete_class 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY___php_incomplete_class 1
-#define OMIT_JUMP_TABLE_CLASS_exists___php_incomplete_class 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_realProp___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___php_incomplete_class 1
 #define OMIT_JUMP_TABLE_CLASS_get___php_incomplete_class 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE___php_incomplete_class 1
 #define OMIT_JUMP_TABLE_CLASS_set___php_incomplete_class 1
@@ -51,7 +51,7 @@ class c___php_incomplete_class : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC___php_incomplete_class 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___php_incomplete_class 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC___php_incomplete_class 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC___php_incomplete_class 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___php_incomplete_class 1

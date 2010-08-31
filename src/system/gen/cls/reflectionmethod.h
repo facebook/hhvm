@@ -44,8 +44,8 @@ class c_reflectionmethod : public c_reflectionfunctionabstract {
   public:
   virtual void o_getArray(Array &props) const;
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionmethod 1
-#define OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionmethod 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_reflectionmethod 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionmethod 1
 #define OMIT_JUMP_TABLE_CLASS_get_reflectionmethod 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionmethod 1
 #define OMIT_JUMP_TABLE_CLASS_set_reflectionmethod 1
@@ -55,7 +55,7 @@ class c_reflectionmethod : public c_reflectionfunctionabstract {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  virtual bool o_existsPublic(CStrRef s) const;
+  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual Variant o_getPublic(CStrRef s, bool error = true);
   virtual Variant o_setPublic(CStrRef s,
                               CVarRef v, bool forInit);

@@ -40,8 +40,8 @@ class c_splfileinfo : public ExtObjectData {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo 1
-#define OMIT_JUMP_TABLE_CLASS_exists_splfileinfo 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileinfo 1
 #define OMIT_JUMP_TABLE_CLASS_get_splfileinfo 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo 1
 #define OMIT_JUMP_TABLE_CLASS_set_splfileinfo 1
@@ -51,7 +51,7 @@ class c_splfileinfo : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileinfo 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileinfo 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileinfo 1

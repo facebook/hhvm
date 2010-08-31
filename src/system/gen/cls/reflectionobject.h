@@ -43,8 +43,8 @@ class c_reflectionobject : public c_reflectionclass {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_reflectionobject 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_reflectionobject 1
-  virtual bool o_exists(CStrRef s, CStrRef context = null_string) const;
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionobject 1
+  virtual Variant *o_realProp(CStrRef s, int flags, CStrRef context = null_string) const;
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionobject 1
   virtual Variant o_get(CStrRef s, bool error = true, CStrRef context = null_string);
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionobject 1
   virtual Variant o_set(CStrRef s, CVarRef v, bool forInit = false, CStrRef context = null_string);
@@ -54,7 +54,7 @@ class c_reflectionobject : public c_reflectionclass {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionobject 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionobject 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_reflectionobject 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_reflectionobject 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_reflectionobject 1

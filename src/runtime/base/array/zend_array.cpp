@@ -779,6 +779,28 @@ ArrayData *ZendArray::lval(CStrRef k, Variant *&ret, bool copy,
   return a;
 }
 
+ArrayData *ZendArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                              bool create) {
+  StringData *key = k.get();
+  int64 prehash = key->hash();
+  ZendArray *a = 0, *t = this;
+  if (copy) {
+    a = t = copyImpl();
+  }
+
+  if (create) {
+    t->addLval(key, prehash, &ret);
+  } else {
+    Bucket *p = t->find(key->data(), key->size(), prehash);
+    if (p) {
+      ret = &p->data;
+    } else {
+      ret = NULL;
+    }
+  }
+  return a;
+}
+
 ArrayData *ZendArray::lval(litstr k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   String s(k, AttachLiteral);

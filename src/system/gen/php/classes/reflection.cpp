@@ -87,29 +87,29 @@ Variant c_reflectionfunctionabstract::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunctionabstract
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionfunctionabstract
-bool c_reflectionfunctionabstract::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionfunctionabstract
+Variant * c_reflectionfunctionabstract::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionfunctionabstract
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunctionabstract
-bool c_reflectionfunctionabstract::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionfunctionabstract
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionfunctionabstract
+Variant * c_reflectionfunctionabstract::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
+      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
       break;
     default:
       break;
   }
-  return c_ObjectData::o_existsPublic(s);
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunctionabstract
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunctionabstract
-bool c_reflectionfunctionabstract::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionfunctionabstract
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionfunctionabstract
+Variant * c_reflectionfunctionabstract::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunctionabstract
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionfunctionabstract
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionfunctionabstract
 Variant c_reflectionfunctionabstract::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -1075,30 +1075,30 @@ Variant c_reflectionobject::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionobject
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionobject
-bool c_reflectionobject::o_exists(CStrRef prop, CStrRef context) const {
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionobject
+Variant * c_reflectionobject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_reflectionclass::o_existsPrivate(prop); }
+      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_reflectionclass::o_realPropPrivate(prop, flags); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop);
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionobject
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionobject
-bool c_reflectionobject::o_existsPublic(CStrRef s) const {
-  return c_reflectionclass::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionobject
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionobject
+Variant * c_reflectionobject::o_realPropPublic(CStrRef s, int flags) const {
+  return c_reflectionclass::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionobject
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionobject
-bool c_reflectionobject::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionobject
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionobject
+Variant * c_reflectionobject::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionobject
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionobject
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionobject
 Variant c_reflectionobject::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -3768,21 +3768,21 @@ Variant c_reflectionexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionexception
-bool c_reflectionexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionexception
+Variant * c_reflectionexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionexception
-bool c_reflectionexception::o_existsPublic(CStrRef s) const {
-  return c_exception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionexception
+Variant * c_reflectionexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_exception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionexception
-bool c_reflectionexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionexception
+Variant * c_reflectionexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionexception
 Variant c_reflectionexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -4500,46 +4500,46 @@ Variant c_reflectionclass::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionclass
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionclass
-bool c_reflectionclass::o_exists(CStrRef prop, CStrRef context) const {
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionclass
+Variant * c_reflectionclass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_existsPrivate(prop); }
+      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_realPropPrivate(prop, flags); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop);
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionclass
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionclass
-bool c_reflectionclass::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionclass
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionclass
+Variant * c_reflectionclass::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
+      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
       break;
     default:
       break;
   }
-  return c_ObjectData::o_existsPublic(s);
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionclass
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionclass
-bool c_reflectionclass::o_existsPrivate(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionclass
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionclass
+Variant * c_reflectionclass::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
+      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
       break;
     default:
       break;
   }
-  return o_existsPublic(s);
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionclass
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionclass
 Variant c_reflectionclass::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -8290,41 +8290,41 @@ Variant c_reflectionextension::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionextension
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionextension
-bool c_reflectionextension::o_exists(CStrRef prop, CStrRef context) const {
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionextension
+Variant * c_reflectionextension::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD_STRING(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_existsPrivate(prop); }
+      HASH_GUARD_STRING(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_realPropPrivate(prop, flags); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop);
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionextension
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionextension
-bool c_reflectionextension::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionextension
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionextension
+Variant * c_reflectionextension::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionextension
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionextension
-bool c_reflectionextension::o_existsPrivate(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionextension
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionextension
+Variant * c_reflectionextension::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
+      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
       break;
     case 3:
-      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
+      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
       break;
     default:
       break;
   }
-  return o_existsPublic(s);
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionextension
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionextension
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionextension
 Variant c_reflectionextension::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -9401,32 +9401,32 @@ Variant c_reflectionmethod::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionmethod
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod
-bool c_reflectionmethod::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionmethod
+Variant * c_reflectionmethod::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionmethod
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionmethod
-bool c_reflectionmethod::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionmethod
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionmethod
+Variant * c_reflectionmethod::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
-      HASH_EXISTS_STRING(0x2E3A246D1F74C210LL, "class", 5);
+      HASH_REALPROP_STRING(0x2E3A246D1F74C210LL, "class", 5, class);
       break;
     case 2:
-      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
+      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
       break;
     default:
       break;
   }
-  return c_reflectionfunctionabstract::o_existsPublic(s);
+  return c_reflectionfunctionabstract::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionmethod
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionmethod
-bool c_reflectionmethod::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionmethod
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionmethod
+Variant * c_reflectionmethod::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionmethod
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionmethod
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionmethod
 Variant c_reflectionmethod::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -11565,35 +11565,35 @@ Variant c_reflectionproperty::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionproperty
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionproperty
-bool c_reflectionproperty::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionproperty
+Variant * c_reflectionproperty::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionproperty
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionproperty
-bool c_reflectionproperty::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionproperty
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionproperty
+Variant * c_reflectionproperty::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 7) {
     case 0:
-      HASH_EXISTS_STRING(0x2E3A246D1F74C210LL, "class", 5);
+      HASH_REALPROP_STRING(0x2E3A246D1F74C210LL, "class", 5, class);
       break;
     case 2:
-      HASH_EXISTS_STRING(0x5655B4FF77E35232LL, "name", 4);
+      HASH_REALPROP_STRING(0x5655B4FF77E35232LL, "name", 4, name);
       break;
     case 7:
-      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
+      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
       break;
     default:
       break;
   }
-  return c_ObjectData::o_existsPublic(s);
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionproperty
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionproperty
-bool c_reflectionproperty::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionproperty
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionproperty
+Variant * c_reflectionproperty::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionproperty
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionproperty
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionproperty
 Variant c_reflectionproperty::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -13019,21 +13019,21 @@ Variant c_reflectionfunction::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionfunction
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionfunction
-bool c_reflectionfunction::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionfunction
+Variant * c_reflectionfunction::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionfunction
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunction
-bool c_reflectionfunction::o_existsPublic(CStrRef s) const {
-  return c_reflectionfunctionabstract::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionfunction
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionfunction
+Variant * c_reflectionfunction::o_realPropPublic(CStrRef s, int flags) const {
+  return c_reflectionfunctionabstract::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionfunction
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunction
-bool c_reflectionfunction::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionfunction
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionfunction
+Variant * c_reflectionfunction::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionfunction
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionfunction
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionfunction
 Variant c_reflectionfunction::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -14421,29 +14421,29 @@ Variant c_reflectionparameter::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_reflectionparameter
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_reflectionparameter
-bool c_reflectionparameter::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_reflectionparameter
+Variant * c_reflectionparameter::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_reflectionparameter
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionparameter
-bool c_reflectionparameter::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_reflectionparameter
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionparameter
+Variant * c_reflectionparameter::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x0F2EF58F157D479FLL, "info", 4);
+      HASH_REALPROP_STRING(0x0F2EF58F157D479FLL, "info", 4, info);
       break;
     default:
       break;
   }
-  return c_ObjectData::o_existsPublic(s);
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_reflectionparameter
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionparameter
-bool c_reflectionparameter::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_reflectionparameter
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionparameter
+Variant * c_reflectionparameter::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_reflectionparameter
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_reflectionparameter
 #ifndef OMIT_JUMP_TABLE_CLASS_set_reflectionparameter
 Variant c_reflectionparameter::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);

@@ -68,7 +68,7 @@ public:
 
   enum JumpTableType {
     JumpReturn,
-    JumpExists,
+    JumpRealProp,
     JumpSet,
     JumpInitialized,
     JumpInitializedString,
@@ -95,9 +95,9 @@ public:
     JumpTableClassGet,
     JumpTableClassGetPublic,
     JumpTableClassGetPrivate,
-    JumpTableClassExists,
-    JumpTableClassExistsPublic,
-    JumpTableClassExistsPrivate,
+    JumpTableClassRealProp,
+    JumpTableClassRealPropPublic,
+    JumpTableClassRealPropPrivate,
     JumpTableClassSet,
     JumpTableClassSetPublic,
     JumpTableClassSetPrivate,

@@ -318,16 +318,16 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_SETARRAY_%s 1\n", clsName);
   }
 
-  if (variables->hasJumpTable(VariableTable::JumpTableClassExists)) {
-    cg_printf("virtual bool o_exists(CStrRef s, "
+  if (variables->hasJumpTable(VariableTable::JumpTableClassRealProp)) {
+    cg_printf("virtual Variant *o_realProp(CStrRef s, int flags, "
               "CStrRef context = null_string) const;\n");
   } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_exists_%s 1\n", clsName);
+    cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_%s 1\n", clsName);
   }
   if (variables->hasNonStaticPrivate()) {
-    cg_printf("bool o_existsPrivate(CStrRef s) const;\n");
+    cg_printf("Variant *o_realPropPrivate(CStrRef s, int flags) const;\n");
   } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_%s 1\n", clsName);
+    cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_%s 1\n", clsName);
   }
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassGet)) {
@@ -368,10 +368,11 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 
   cg.printSection("DECLARE_INSTANCE_PUBLIC_PROP_OPS");
   cg_printf("public:\n");
-  if (variables->hasJumpTable(VariableTable::JumpTableClassExistsPublic)) {
-    cg_printf("virtual bool o_existsPublic(CStrRef s) const;\n");
+  if (variables->hasJumpTable(VariableTable::JumpTableClassRealPropPublic)) {
+    cg_printf("virtual Variant *o_realPropPublic(CStrRef s, "
+              "int flags) const;\n");
   } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_%s 1\n", clsName);
+    cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_%s 1\n", clsName);
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassGetPublic)) {
     cg_printf("virtual Variant o_getPublic(CStrRef s, bool error = true);\n");

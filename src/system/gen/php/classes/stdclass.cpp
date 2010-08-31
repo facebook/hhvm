@@ -65,21 +65,21 @@ Variant c_stdclass::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_stdclass
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_stdclass
-bool c_stdclass::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_stdclass
+Variant * c_stdclass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_stdclass
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_stdclass
-bool c_stdclass::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_stdclass
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_stdclass
+Variant * c_stdclass::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_stdclass
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_stdclass
-bool c_stdclass::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_stdclass
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdclass
+Variant * c_stdclass::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_stdclass
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdclass
 #ifndef OMIT_JUMP_TABLE_CLASS_set_stdclass
 Variant c_stdclass::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -214,21 +214,21 @@ Variant c___php_incomplete_class::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE___php_incomplete_class
-#ifndef OMIT_JUMP_TABLE_CLASS_exists___php_incomplete_class
-bool c___php_incomplete_class::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp___php_incomplete_class
+Variant * c___php_incomplete_class::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists___php_incomplete_class
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC___php_incomplete_class
-bool c___php_incomplete_class::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp___php_incomplete_class
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___php_incomplete_class
+Variant * c___php_incomplete_class::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC___php_incomplete_class
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE___php_incomplete_class
-bool c___php_incomplete_class::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___php_incomplete_class
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___php_incomplete_class
+Variant * c___php_incomplete_class::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE___php_incomplete_class
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___php_incomplete_class
 #ifndef OMIT_JUMP_TABLE_CLASS_set___php_incomplete_class
 Variant c___php_incomplete_class::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);

@@ -43,8 +43,8 @@ class c_outofrangeexception : public c_logicexception {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_outofrangeexception 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_outofrangeexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_outofrangeexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofrangeexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_outofrangeexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_outofrangeexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_outofrangeexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofrangeexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_outofrangeexception 1
@@ -54,7 +54,7 @@ class c_outofrangeexception : public c_logicexception {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofrangeexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_outofrangeexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_outofrangeexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_outofrangeexception 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_outofrangeexception 1

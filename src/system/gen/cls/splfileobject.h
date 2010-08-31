@@ -49,8 +49,8 @@ class c_splfileobject : public c_splfileinfo {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileobject 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileobject 1
-#define OMIT_JUMP_TABLE_CLASS_exists_splfileobject 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileobject 1
 #define OMIT_JUMP_TABLE_CLASS_get_splfileobject 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject 1
 #define OMIT_JUMP_TABLE_CLASS_set_splfileobject 1
@@ -60,7 +60,7 @@ class c_splfileobject : public c_splfileinfo {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splfileobject 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileobject 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject 1

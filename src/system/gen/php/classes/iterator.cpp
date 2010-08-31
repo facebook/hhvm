@@ -109,41 +109,41 @@ Variant c_arrayiterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_arrayiterator
-bool c_arrayiterator::o_exists(CStrRef prop, CStrRef context) const {
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_arrayiterator
+Variant * c_arrayiterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_existsPrivate(prop); }
+      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_realPropPrivate(prop, flags); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop);
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_arrayiterator
-bool c_arrayiterator::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_arrayiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_arrayiterator
+Variant * c_arrayiterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_arrayiterator
-bool c_arrayiterator::o_existsPrivate(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_arrayiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_arrayiterator
+Variant * c_arrayiterator::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
-      HASH_EXISTS_STRING(0x7D2126D089B92EA5LL, "arr", 3);
+      HASH_REALPROP_STRING(0x7D2126D089B92EA5LL, "arr", 3, arr);
       break;
     case 3:
-      HASH_EXISTS_STRING(0x7401482B86AFCBFBLL, "flags", 5);
+      HASH_REALPROP_STRING(0x7401482B86AFCBFBLL, "flags", 5, flags);
       break;
     default:
       break;
   }
-  return o_existsPublic(s);
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_arrayiterator
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_arrayiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_arrayiterator
 Variant c_arrayiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -1939,38 +1939,38 @@ Variant c_appenditerator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_appenditerator
-bool c_appenditerator::o_exists(CStrRef prop, CStrRef context) const {
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_appenditerator
+Variant * c_appenditerator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
     case 0:
-      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_existsPrivate(prop); }
+      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_realPropPrivate(prop, flags); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop);
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_appenditerator
-bool c_appenditerator::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_appenditerator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_appenditerator
+Variant * c_appenditerator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_appenditerator
-bool c_appenditerator::o_existsPrivate(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_appenditerator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_appenditerator
+Variant * c_appenditerator::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x60EA38C41F14FF71LL, "iterators", 9);
+      HASH_REALPROP_STRING(0x60EA38C41F14FF71LL, "iterators", 9, iterators);
       break;
     default:
       break;
   }
-  return o_existsPublic(s);
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_appenditerator
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_appenditerator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_appenditerator
 Variant c_appenditerator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -2858,21 +2858,21 @@ Variant c_recursivedirectoryiterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_recursivedirectoryiterator
-bool c_recursivedirectoryiterator::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_recursivedirectoryiterator
+Variant * c_recursivedirectoryiterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursivedirectoryiterator
-bool c_recursivedirectoryiterator::o_existsPublic(CStrRef s) const {
-  return c_directoryiterator::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_recursivedirectoryiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursivedirectoryiterator
+Variant * c_recursivedirectoryiterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_directoryiterator::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursivedirectoryiterator
-bool c_recursivedirectoryiterator::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursivedirectoryiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursivedirectoryiterator
+Variant * c_recursivedirectoryiterator::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursivedirectoryiterator
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursivedirectoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_recursivedirectoryiterator
 Variant c_recursivedirectoryiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -5418,21 +5418,21 @@ Variant c_directoryiterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_directoryiterator
-bool c_directoryiterator::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_directoryiterator
+Variant * c_directoryiterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directoryiterator
-bool c_directoryiterator::o_existsPublic(CStrRef s) const {
-  return c_splfileinfo::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_directoryiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directoryiterator
+Variant * c_directoryiterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_splfileinfo::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directoryiterator
-bool c_directoryiterator::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directoryiterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directoryiterator
+Variant * c_directoryiterator::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_directoryiterator
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directoryiterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_directoryiterator
 Variant c_directoryiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -7703,21 +7703,21 @@ Variant c_recursiveiteratoriterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_recursiveiteratoriterator
-bool c_recursiveiteratoriterator::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_recursiveiteratoriterator
+Variant * c_recursiveiteratoriterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursiveiteratoriterator
-bool c_recursiveiteratoriterator::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_recursiveiteratoriterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursiveiteratoriterator
+Variant * c_recursiveiteratoriterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursiveiteratoriterator
-bool c_recursiveiteratoriterator::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursiveiteratoriterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursiveiteratoriterator
+Variant * c_recursiveiteratoriterator::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursiveiteratoriterator
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursiveiteratoriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator
 Variant c_recursiveiteratoriterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -8420,21 +8420,21 @@ Variant c_filteriterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_filteriterator
-bool c_filteriterator::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_filteriterator
+Variant * c_filteriterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_filteriterator
-bool c_filteriterator::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_filteriterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_filteriterator
+Variant * c_filteriterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_filteriterator
-bool c_filteriterator::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_filteriterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_filteriterator
+Variant * c_filteriterator::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_filteriterator
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_filteriterator
 #ifndef OMIT_JUMP_TABLE_CLASS_set_filteriterator
 Variant c_filteriterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);

@@ -65,21 +65,21 @@ Variant c_unexpectedvalueexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception
-bool c_unexpectedvalueexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_unexpectedvalueexception
+Variant * c_unexpectedvalueexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_unexpectedvalueexception
-bool c_unexpectedvalueexception::o_existsPublic(CStrRef s) const {
-  return c_runtimeexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_unexpectedvalueexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_unexpectedvalueexception
+Variant * c_unexpectedvalueexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_runtimeexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_unexpectedvalueexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_unexpectedvalueexception
-bool c_unexpectedvalueexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_unexpectedvalueexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_unexpectedvalueexception
+Variant * c_unexpectedvalueexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_unexpectedvalueexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_unexpectedvalueexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_unexpectedvalueexception
 Variant c_unexpectedvalueexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -750,21 +750,21 @@ Variant c_overflowexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_overflowexception
-bool c_overflowexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_overflowexception
+Variant * c_overflowexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_overflowexception
-bool c_overflowexception::o_existsPublic(CStrRef s) const {
-  return c_runtimeexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_overflowexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_overflowexception
+Variant * c_overflowexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_runtimeexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_overflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_overflowexception
-bool c_overflowexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_overflowexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_overflowexception
+Variant * c_overflowexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_overflowexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_overflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_overflowexception
 Variant c_overflowexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -1435,21 +1435,21 @@ Variant c_outofboundsexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception
-bool c_outofboundsexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_outofboundsexception
+Variant * c_outofboundsexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofboundsexception
-bool c_outofboundsexception::o_existsPublic(CStrRef s) const {
-  return c_runtimeexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_outofboundsexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_outofboundsexception
+Variant * c_outofboundsexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_runtimeexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofboundsexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofboundsexception
-bool c_outofboundsexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_outofboundsexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_outofboundsexception
+Variant * c_outofboundsexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofboundsexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_outofboundsexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_outofboundsexception
 Variant c_outofboundsexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -2120,21 +2120,21 @@ Variant c_logicexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_logicexception
-bool c_logicexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_logicexception
+Variant * c_logicexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_logicexception
-bool c_logicexception::o_existsPublic(CStrRef s) const {
-  return c_exception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_logicexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_logicexception
+Variant * c_logicexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_exception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_logicexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_logicexception
-bool c_logicexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_logicexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_logicexception
+Variant * c_logicexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_logicexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_logicexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_logicexception
 Variant c_logicexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -2805,21 +2805,21 @@ Variant c_rangeexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_rangeexception
-bool c_rangeexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_rangeexception
+Variant * c_rangeexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_rangeexception
-bool c_rangeexception::o_existsPublic(CStrRef s) const {
-  return c_runtimeexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_rangeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_rangeexception
+Variant * c_rangeexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_runtimeexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_rangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_rangeexception
-bool c_rangeexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_rangeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_rangeexception
+Variant * c_rangeexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_rangeexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_rangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_rangeexception
 Variant c_rangeexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -3490,21 +3490,21 @@ Variant c_invalidargumentexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception
-bool c_invalidargumentexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_invalidargumentexception
+Variant * c_invalidargumentexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_invalidargumentexception
-bool c_invalidargumentexception::o_existsPublic(CStrRef s) const {
-  return c_logicexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_invalidargumentexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_invalidargumentexception
+Variant * c_invalidargumentexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_logicexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_invalidargumentexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_invalidargumentexception
-bool c_invalidargumentexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_invalidargumentexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_invalidargumentexception
+Variant * c_invalidargumentexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_invalidargumentexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_invalidargumentexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_invalidargumentexception
 Variant c_invalidargumentexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -4175,21 +4175,21 @@ Variant c_underflowexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_underflowexception
-bool c_underflowexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_underflowexception
+Variant * c_underflowexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_underflowexception
-bool c_underflowexception::o_existsPublic(CStrRef s) const {
-  return c_runtimeexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_underflowexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_underflowexception
+Variant * c_underflowexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_runtimeexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_underflowexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_underflowexception
-bool c_underflowexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_underflowexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_underflowexception
+Variant * c_underflowexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_underflowexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_underflowexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_underflowexception
 Variant c_underflowexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -4860,21 +4860,21 @@ Variant c_outofrangeexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_outofrangeexception
-bool c_outofrangeexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_outofrangeexception
+Variant * c_outofrangeexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofrangeexception
-bool c_outofrangeexception::o_existsPublic(CStrRef s) const {
-  return c_logicexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_outofrangeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_outofrangeexception
+Variant * c_outofrangeexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_logicexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_outofrangeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofrangeexception
-bool c_outofrangeexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_outofrangeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_outofrangeexception
+Variant * c_outofrangeexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_outofrangeexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_outofrangeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_outofrangeexception
 Variant c_outofrangeexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -5545,21 +5545,21 @@ Variant c_badmethodcallexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_badmethodcallexception
-bool c_badmethodcallexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_badmethodcallexception
+Variant * c_badmethodcallexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badmethodcallexception
-bool c_badmethodcallexception::o_existsPublic(CStrRef s) const {
-  return c_badfunctioncallexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_badmethodcallexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_badmethodcallexception
+Variant * c_badmethodcallexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_badfunctioncallexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badmethodcallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badmethodcallexception
-bool c_badmethodcallexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_badmethodcallexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_badmethodcallexception
+Variant * c_badmethodcallexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badmethodcallexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_badmethodcallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_badmethodcallexception
 Variant c_badmethodcallexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -6230,21 +6230,21 @@ Variant c_runtimeexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_runtimeexception
-bool c_runtimeexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_runtimeexception
+Variant * c_runtimeexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_runtimeexception
-bool c_runtimeexception::o_existsPublic(CStrRef s) const {
-  return c_exception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_runtimeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_runtimeexception
+Variant * c_runtimeexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_exception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_runtimeexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_runtimeexception
-bool c_runtimeexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_runtimeexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_runtimeexception
+Variant * c_runtimeexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_runtimeexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_runtimeexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_runtimeexception
 Variant c_runtimeexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -6971,41 +6971,41 @@ Variant c_exception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_exception
-bool c_exception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_exception
+Variant * c_exception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_exception
-bool c_exception::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_exception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_exception
+Variant * c_exception::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 15) {
     case 7:
-      HASH_EXISTS_STRING(0x3CCB986B2CF0A747LL, "trace", 5);
+      HASH_REALPROP_STRING(0x3CCB986B2CF0A747LL, "trace", 5, trace);
       break;
     case 9:
-      HASH_EXISTS_STRING(0x58C72230857ACDB9LL, "code", 4);
+      HASH_REALPROP_STRING(0x58C72230857ACDB9LL, "code", 4, code);
       break;
     case 10:
-      HASH_EXISTS_STRING(0x04AB35CACF8C8C9ALL, "line", 4);
+      HASH_REALPROP_STRING(0x04AB35CACF8C8C9ALL, "line", 4, line);
       break;
     case 11:
-      HASH_EXISTS_STRING(0x0247CDBB94C9D47BLL, "message", 7);
+      HASH_REALPROP_STRING(0x0247CDBB94C9D47BLL, "message", 7, message);
       break;
     case 15:
-      HASH_EXISTS_STRING(0x7863294A8F33D14FLL, "file", 4);
+      HASH_REALPROP_STRING(0x7863294A8F33D14FLL, "file", 4, file);
       break;
     default:
       break;
   }
-  return c_ObjectData::o_existsPublic(s);
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_exception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_exception
-bool c_exception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_exception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_exception
+Variant * c_exception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_exception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_exception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_exception
 Variant c_exception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -7991,29 +7991,29 @@ Variant c_errorexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_errorexception
-bool c_errorexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_errorexception
+Variant * c_errorexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_errorexception
-bool c_errorexception::o_existsPublic(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_errorexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_errorexception
+Variant * c_errorexception::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_EXISTS_STRING(0x4FDAA620FA5F15F9LL, "severity", 8);
+      HASH_REALPROP_STRING(0x4FDAA620FA5F15F9LL, "severity", 8, severity);
       break;
     default:
       break;
   }
-  return c_exception::o_existsPublic(s);
+  return c_exception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_errorexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception
-bool c_errorexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_errorexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_errorexception
+Variant * c_errorexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_errorexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_errorexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_errorexception
 Variant c_errorexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -8947,21 +8947,21 @@ Variant c_badfunctioncallexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception
-bool c_badfunctioncallexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_badfunctioncallexception
+Variant * c_badfunctioncallexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badfunctioncallexception
-bool c_badfunctioncallexception::o_existsPublic(CStrRef s) const {
-  return c_logicexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_badfunctioncallexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_badfunctioncallexception
+Variant * c_badfunctioncallexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_logicexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_badfunctioncallexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badfunctioncallexception
-bool c_badfunctioncallexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_badfunctioncallexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_badfunctioncallexception
+Variant * c_badfunctioncallexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_badfunctioncallexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_badfunctioncallexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_badfunctioncallexception
 Variant c_badfunctioncallexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -9632,21 +9632,21 @@ Variant c_lengthexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_lengthexception
-bool c_lengthexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_lengthexception
+Variant * c_lengthexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_lengthexception
-bool c_lengthexception::o_existsPublic(CStrRef s) const {
-  return c_logicexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_lengthexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_lengthexception
+Variant * c_lengthexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_logicexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_lengthexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_lengthexception
-bool c_lengthexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_lengthexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_lengthexception
+Variant * c_lengthexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_lengthexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_lengthexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_lengthexception
 Variant c_lengthexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
@@ -10317,21 +10317,21 @@ Variant c_domainexception::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_domainexception
-bool c_domainexception::o_exists(CStrRef prop, CStrRef context) const {
-  return o_existsPublic(prop);
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_domainexception
+Variant * c_domainexception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domainexception
-bool c_domainexception::o_existsPublic(CStrRef s) const {
-  return c_logicexception::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_domainexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_domainexception
+Variant * c_domainexception::o_realPropPublic(CStrRef s, int flags) const {
+  return c_logicexception::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_domainexception
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domainexception
-bool c_domainexception::o_existsPrivate(CStrRef s) const {
-  return o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_domainexception
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_domainexception
+Variant * c_domainexception::o_realPropPrivate(CStrRef s, int flags) const {
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_domainexception
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_domainexception
 #ifndef OMIT_JUMP_TABLE_CLASS_set_domainexception
 Variant c_domainexception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);

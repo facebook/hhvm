@@ -138,6 +138,11 @@ void ArrayData::load(CVarRef k, Variant &v) const {
   if (exists(k)) v = get(k);
 }
 
+ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                              bool create) {
+  throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // stack and queue operations
 

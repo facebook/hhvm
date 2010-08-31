@@ -122,9 +122,9 @@ namespace HPHP {
 
 #define DECLARE_INSTANCE_PROP_OPS                                       \
   public:                                                               \
-  virtual bool o_exists(CStrRef prop,                                   \
+  virtual Variant *o_realProp(CStrRef prop, int flags,                  \
                         CStrRef context = null_string) const;           \
-  bool o_existsPrivate(CStrRef s) const;                                \
+  Variant *o_realPropPrivate(CStrRef s, int flags) const;               \
   virtual void o_getArray(Array &props) const;                          \
   virtual void o_setArray(CArrRef props);                               \
   virtual Variant o_get(CStrRef prop, bool error = true,                \
@@ -138,7 +138,7 @@ namespace HPHP {
 
 #define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
   public:                                                               \
-  virtual bool o_existsPublic(CStrRef s) const;                         \
+  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;        \
   virtual Variant o_getPublic(CStrRef s, bool error = true);            \
   virtual Variant o_setPublic(CStrRef s, CVarRef v, bool forInit);      \
   virtual Variant &o_lvalPublic(CStrRef s);                             \
@@ -234,6 +234,14 @@ namespace HPHP {
 #define HASH_EXISTS_STRING(code, str, len)                              \
   if (hash == code && s.length() == len &&                              \
       memcmp(s.data(), str, len) == 0) return true
+#define HASH_REALPROP_STRING(code, str, len, prop)                      \
+  if (hash == code && s.length() == len &&                              \
+      memcmp(s.data(), str, len) == 0)                                  \
+    return const_cast<Variant*>(&m_##prop)
+#define HASH_REALPROP_TYPED_STRING(code, str, len, prop)                \
+  if (!flags && hash == code && s.length() == len &&                    \
+      memcmp(s.data(), str, len) == 0)                                  \
+    return g->__realPropProxy = m_##prop,&g->__realPropProxy
 #define HASH_INITIALIZED(code, name, str)                               \
   if (hash == code && strcmp(s, str) == 0)                              \
     return isInitialized(name)

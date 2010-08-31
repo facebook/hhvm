@@ -61,6 +61,12 @@ class ObjectData : public Countable {
     HasSleep      = 4, // __sleep()
     InSet         = 8, // __set()
     InGet         = 16, // __get()
+    HasGet        = 32,
+    HasSet        = 64,
+  };
+  enum {
+    RealPropCreate = 1,// Property should be created if it doesnt exist
+    RealPropWrite = 2  // Property could be modified
   };
 
   ObjectData(bool isResource = false);
@@ -151,8 +157,10 @@ class ObjectData : public Countable {
   virtual Array o_toArray() const;
   virtual Array o_toIterArray(CStrRef context, bool getRef = false);
   virtual Array o_getDynamicProperties() const;
+  virtual Variant *o_realProp(CStrRef s, int flags,
+                              CStrRef context = null_string) const;
+  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual bool o_exists(CStrRef s, CStrRef context = null_string) const;
-  virtual bool o_existsPublic(CStrRef s) const;
   virtual Variant o_get(CStrRef s, bool error = true,
                         CStrRef context = null_string);
   virtual Variant o_getPublic(CStrRef s, bool error = true);

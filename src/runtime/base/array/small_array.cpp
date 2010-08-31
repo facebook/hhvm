@@ -578,6 +578,42 @@ ArrayData *SmallArray::lval(CStrRef k, Variant *&ret, bool copy,
   return result;
 }
 
+ArrayData *SmallArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                               bool create) {
+  StringData *key = k.get();
+  int64 prehash = key->hash();
+  int p = find(key->data(), key->size(), prehash);
+  Bucket *pb = m_arBuckets + p;
+
+  SmallArray *result = NULL;
+  if (pb->kind == Empty) {
+    if (create && m_nNumOfElements >= SARR_SIZE) {
+      ArrayData *a = escalateToZendArray();
+      a->lvalPtr(k, ret, false, create);
+      return a;
+    }
+    ret = NULL;
+    if (copy) {
+      result = copyImpl();
+      if (create) {
+        pb = result->addKey(p, key);
+        ret = &pb->data;
+      }
+    } else if (create) {
+      addKey(p, key);
+      ret = &pb->data;
+    }
+    return result;
+  }
+
+  if (copy) {
+    result = copyImpl();
+    pb = result->m_arBuckets + p;
+  }
+  ret = &pb->data;
+  return result;
+}
+
 ArrayData *SmallArray::lval(CVarRef k, Variant *&ret, bool copy,
                             bool checkExist /* = false */) {
   if (k.isNumeric()) {

@@ -42,8 +42,8 @@ class c_reflectionclass : public ExtObjectData {
   public:
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
-  virtual bool o_exists(CStrRef s, CStrRef context = null_string) const;
-  bool o_existsPrivate(CStrRef s) const;
+  virtual Variant *o_realProp(CStrRef s, int flags, CStrRef context = null_string) const;
+  Variant *o_realPropPrivate(CStrRef s, int flags) const;
   virtual Variant o_get(CStrRef s, bool error = true, CStrRef context = null_string);
   Variant o_getPrivate(CStrRef s, bool error = true);
   virtual Variant o_set(CStrRef s, CVarRef v, bool forInit = false, CStrRef context = null_string);
@@ -53,7 +53,7 @@ class c_reflectionclass : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-  virtual bool o_existsPublic(CStrRef s) const;
+  virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
   virtual Variant o_getPublic(CStrRef s, bool error = true);
   virtual Variant o_setPublic(CStrRef s,
                               CVarRef v, bool forInit);

@@ -43,8 +43,8 @@ class c_underflowexception : public c_runtimeexception {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_underflowexception 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_underflowexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_underflowexception 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_underflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_underflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_underflowexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_underflowexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_underflowexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_underflowexception 1
@@ -54,7 +54,7 @@ class c_underflowexception : public c_runtimeexception {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_underflowexception 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_underflowexception 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_underflowexception 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_underflowexception 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_underflowexception 1

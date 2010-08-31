@@ -106,41 +106,42 @@ Variant c_splobjectstorage::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splobjectstorage
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_splobjectstorage
-bool c_splobjectstorage::o_exists(CStrRef prop, CStrRef context) const {
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_splobjectstorage
+Variant * c_splobjectstorage::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
-      HASH_GUARD_STRING(0x5BA243B9FBA7A64FLL, SplObjectStorage) { return o_existsPrivate(prop); }
+      HASH_GUARD_STRING(0x5BA243B9FBA7A64FLL, SplObjectStorage) { return o_realPropPrivate(prop, flags); }
       break;
     default:
       break;
   }
-  return o_existsPublic(prop);
+  return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_splobjectstorage
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splobjectstorage
-bool c_splobjectstorage::o_existsPublic(CStrRef s) const {
-  return c_ObjectData::o_existsPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splobjectstorage
+Variant * c_splobjectstorage::o_realPropPublic(CStrRef s, int flags) const {
+  return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_splobjectstorage
-#ifndef OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splobjectstorage
-bool c_splobjectstorage::o_existsPrivate(CStrRef s) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splobjectstorage
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splobjectstorage
+Variant * c_splobjectstorage::o_realPropPrivate(CStrRef s, int flags) const {
+  DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
   switch (hash & 3) {
     case 2:
-      HASH_EXISTS_STRING(0x4B27521443880CAELL, "index", 5);
+      HASH_REALPROP_TYPED_STRING(0x4B27521443880CAELL, "index", 5, index);
       break;
     case 3:
-      HASH_EXISTS_STRING(0x17AC96477E2B6DC3LL, "storage", 7);
+      HASH_REALPROP_STRING(0x17AC96477E2B6DC3LL, "storage", 7, storage);
       break;
     default:
       break;
   }
-  return o_existsPublic(s);
+  return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_splobjectstorage
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splobjectstorage
 #ifndef OMIT_JUMP_TABLE_CLASS_set_splobjectstorage
 Variant c_splobjectstorage::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;

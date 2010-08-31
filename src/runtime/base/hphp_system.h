@@ -79,6 +79,7 @@ public:
   virtual Array getDefinedVars();
 public:
   Variant __lvalProxy;
+  Variant __realPropProxy;
   bool FVF(__autoload);
 private:
   Array m_dynamicConstants;  // declared constants

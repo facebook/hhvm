@@ -167,6 +167,13 @@ class ArrayData : public Countable {
                           bool checkExist = false) = 0;
 
   /**
+   * Helper function used for getting a reference to elements of
+   * the o_properties array
+   */
+  virtual ArrayData *lvalPtr(CStrRef k, Variant *&ret, bool copy,
+                             bool create);
+
+  /**
    * Setting a value at specified key. If "copy" is true, make a copy first
    * then set the value. Return NULL if escalation is not needed, or an
    * escalated array data.

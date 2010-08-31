@@ -1548,8 +1548,9 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   outputCPPPropertyOp(cg, ar, cls, parent, "get", ", bool error",
                       ", error", "Variant", false, JumpReturnString, false,
                       dynamicObject, JumpTableClassGet);
-  outputCPPPropertyOp(cg, ar, cls, parent, "exists", "", "", "bool", true,
-                      JumpExists, false, dynamicObject, JumpTableClassExists);
+  outputCPPPropertyOp(cg, ar, cls, parent, "realProp", ", int flags", ", flags",
+                      "Variant *", true, JumpRealProp, false, dynamicObject,
+                      JumpTableClassRealProp);
   outputCPPPropertyOp(cg, ar, cls, parent, "set",
                       ", CVarRef v, bool forInit",
                       ", v, forInit", "Variant",
@@ -1661,6 +1662,7 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
   hphp_const_char_map<ssize_t> varIdx;
   strings.reserve(m_symbols.size());
   bool hasStatic = false;
+  bool needsGlobals = type == JumpReturnInit;
   for (unsigned int i = 0; i < m_symbols.size(); i++) {
     const string &name = m_symbols[i];
     bool stat = isStatic(name);
@@ -1674,23 +1676,27 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       hasStatic |= stat;
       if (type == JumpIndex) varIdx[name.c_str()] = strings.size();
       strings.push_back(name.c_str());
+      if (type == JumpRealProp &&
+          !Type::SameType(getFinalType(name), Type::Variant)) {
+        needsGlobals = true;
+      }
     }
   }
   if (strings.empty()) return false;
 
-  if (hasStatic) {
-    cg.printDeclareGlobals();
-    ClassScopePtr cls = ar->getClassScope();
-    if (cls && cls->needLazyStaticInitializer()) {
-      cg_printf("lazy_initializer(g);\n");
-    }
-    if (declaredGlobals) *declaredGlobals = true;
-  } else if (type == JumpReturnInit) {
+  if (hasStatic || needsGlobals) {
     cg.printDeclareGlobals();
     if (declaredGlobals) *declaredGlobals = true;
   }
 
-  bool useString = (type == JumpExists) || (type == JumpSet) ||
+  if (hasStatic) {
+    ClassScopePtr cls = ar->getClassScope();
+    if (cls && cls->needLazyStaticInitializer()) {
+      cg_printf("lazy_initializer(g);\n");
+    }
+  }
+
+  bool useString = (type == JumpRealProp) || (type == JumpSet) ||
                    (type == JumpReturnString) ||
                    (type == JumpInitializedString) || (type == JumpReturnInit);
 
@@ -1713,10 +1719,12 @@ bool VariableTable::outputCPPJumpTable(CodeGenerator &cg, AnalysisResultPtr ar,
       varName = string("g->") + varName;
     }
     switch (type) {
-    case VariableTable::JumpExists:
-      cg_printf("HASH_EXISTS_STRING(0x%016llXLL, \"%s\", %d);\n",
+    case VariableTable::JumpRealProp:
+      cg_printf("HASH_REALPROP_%sSTRING(0x%016llXLL, \"%s\", %d, %s);\n",
+                Type::SameType(getFinalType(name), Type::Variant) ?
+                "" : "TYPED_",
                 hash_string(name), cg.escapeLabel(name).c_str(),
-                strlen(name));
+                strlen(name), cg.formatLabel(name).c_str());
       break;
     case VariableTable::JumpReturn:
       cg_printf("HASH_RETURN(0x%016llXLL, %s,\n",

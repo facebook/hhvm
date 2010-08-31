@@ -468,6 +468,22 @@ Variant Array::rvalAt(CVarRef key, bool error /* = false*/) const {
   return null_variant;
 }
 
+Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
+  if (create) {
+    return &lvalAt(key, false, true);
+  }
+  Variant *ret = NULL;
+  if (m_px) {
+    ArrayData *escalated = m_px->lvalPtr(key, ret,
+                                         forWrite && m_px->getCount() > 1,
+                                         false);
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+  }
+  return ret;
+}
+
 Variant &Array::lvalAt(litstr  key, bool checkExist /* = false */,
                        bool isString /* = false */) {
   if (isString) return lvalAtImpl(String(key), checkExist);

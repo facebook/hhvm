@@ -84,12 +84,12 @@ ObjectData* DynamicObjectData::clone() {
 ///////////////////////////////////////////////////////////////////////////////
 // instance methods and properties
 
-bool DynamicObjectData::o_exists(CStrRef propName,
-                                 CStrRef context /* = null_string */) const {
+Variant *DynamicObjectData::o_realProp(
+  CStrRef propName, int flags, CStrRef context /* = null_string */) const {
   if (!parent.isNull()) {
-    return parent->o_exists(propName, context);
+    return parent->o_realProp(propName, flags, context);
   } else {
-    return ObjectData::o_exists(propName, context);
+    return ObjectData::o_realProp(propName, flags, context);
   }
 }
 

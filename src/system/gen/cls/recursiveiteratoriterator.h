@@ -45,8 +45,8 @@ class c_recursiveiteratoriterator : public ExtObjectData {
   public:
 #define OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator 1
 #define OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator 1
-#define OMIT_JUMP_TABLE_CLASS_exists_recursiveiteratoriterator 1
-#define OMIT_JUMP_TABLE_CLASS_exists_PRIVATE_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursiveiteratoriterator 1
 #define OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator 1
 #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator 1
 #define OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator 1
@@ -56,7 +56,7 @@ class c_recursiveiteratoriterator : public ExtObjectData {
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
-#define OMIT_JUMP_TABLE_CLASS_exists_PUBLIC_recursiveiteratoriterator 1
+#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursiveiteratoriterator 1
 #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursiveiteratoriterator 1
 #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursiveiteratoriterator 1
 #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursiveiteratoriterator 1

@@ -26,6 +26,8 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(XboxServerInfo);
 
+class RPCRequestHandler;
+
 class XboxServer {
 public:
   /**
@@ -47,27 +49,36 @@ public:
   static Object TaskStart(CStrRef message);
   static bool TaskStatus(CObjRef task);
   static int TaskResult(CObjRef task, int timeout_ms, Variant &ret);
+
+  /**
+   * Gets the ServerInfo and RequestHandler for the current xbox worker thread.
+   * Returns NULL for non-xbox threads.
+   */
+  static XboxServerInfoPtr GetServerInfo();
+  static RPCRequestHandler *GetRequestHandler();
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 
 class XboxServerInfo : public SatelliteServerInfo {
-  public:
-    XboxServerInfo() : SatelliteServerInfo(Hdf()) {
-      m_type = SatelliteServer::KindOfXboxServer;
-      m_name = "xbox";
-      reload();
-    }
+public:
+  XboxServerInfo() : SatelliteServerInfo(Hdf()) {
+    m_type = SatelliteServer::KindOfXboxServer;
+    m_name = "xbox";
+    reload();
+  }
 
-    void reload() {
-      m_threadCount = RuntimeOption::XboxServerThreadCount;
-      m_port        = RuntimeOption::XboxServerPort;
-      m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
-      m_maxDuration = RuntimeOption::XboxServerInfoDuration;
-      m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
-      m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
-      m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
-    }
+  void reload() {
+    m_threadCount = RuntimeOption::XboxServerThreadCount;
+    m_port        = RuntimeOption::XboxServerPort;
+    m_maxRequest  = RuntimeOption::XboxServerInfoMaxRequest;
+    m_maxDuration = RuntimeOption::XboxServerInfoDuration;
+    m_warmupDoc   = RuntimeOption::XboxServerInfoWarmupDoc;
+    m_reqInitFunc = RuntimeOption::XboxServerInfoReqInitFunc;
+    m_reqInitDoc  = RuntimeOption::XboxServerInfoReqInitDoc;
+  }
+
+  void setMaxDuration(int duration) { m_maxDuration = duration; }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

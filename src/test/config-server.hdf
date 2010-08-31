@@ -25,3 +25,11 @@ Satellites {
     WarmupDocument = string
   }
 }
+
+Xbox {
+  ServerInfo {
+    ThreadCount = 1
+    RequestInitDocument = string
+    MaxDuration = 10
+  }
+}

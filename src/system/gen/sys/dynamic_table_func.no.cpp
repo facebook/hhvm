@@ -3462,6 +3462,12 @@ Variant i_pagelet_server_is_enabled(CArrRef params) {
   if (count > 0) return throw_toomany_arguments("pagelet_server_is_enabled", 0, 1);
   return (f_pagelet_server_is_enabled());
 }
+Variant i_xbox_get_thread_timeout(CArrRef params) {
+  FUNCTION_INJECTION(xbox_get_thread_timeout);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xbox_get_thread_timeout", 0, 1);
+  return (f_xbox_get_thread_timeout());
+}
 Variant i_imagecolorexactalpha(CArrRef params) {
   FUNCTION_INJECTION(imagecolorexactalpha);
   int count __attribute__((__unused__)) = params.size();
@@ -15176,6 +15182,12 @@ Variant i_substr_replace(CArrRef params) {
     return (f_substr_replace(arg0, arg1, arg2, arg3));
   }
 }
+Variant i_xbox_get_thread_time(CArrRef params) {
+  FUNCTION_INJECTION(xbox_get_thread_time);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xbox_get_thread_time", 0, 1);
+  return (f_xbox_get_thread_time());
+}
 Variant i_xmlwriter_write_dtd(CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_write_dtd);
   int count __attribute__((__unused__)) = params.size();
@@ -22144,6 +22156,12 @@ Variant i_hphp_invoke_method(CArrRef params) {
     return (f_hphp_invoke_method(arg0, arg1, arg2, arg3));
   }
 }
+Variant i_xbox_schedule_thread_reset(CArrRef params) {
+  FUNCTION_INJECTION(xbox_schedule_thread_reset);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xbox_schedule_thread_reset", 0, 1);
+  return (f_xbox_schedule_thread_reset(), null);
+}
 Variant i_date_offset_get(CArrRef params) {
   FUNCTION_INJECTION(date_offset_get);
   int count __attribute__((__unused__)) = params.size();
@@ -24166,6 +24184,17 @@ Variant i_magickgetreleasedate(CArrRef params) {
   if (count > 0) return throw_toomany_arguments("magickgetreleasedate", 0, 1);
   return (f_magickgetreleasedate());
 }
+Variant i_xbox_set_thread_timeout(CArrRef params) {
+  FUNCTION_INJECTION(xbox_set_thread_timeout);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("xbox_set_thread_timeout", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_xbox_set_thread_timeout(arg0), null);
+  }
+}
 Variant i_sem_remove(CArrRef params) {
   FUNCTION_INJECTION(sem_remove);
   int count __attribute__((__unused__)) = params.size();
@@ -25317,6 +25346,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 647:
       HASH_INVOKE(0x27698DDEDAD6E287LL, openssl_pkey_new);
+      HASH_INVOKE(0x23A1E13930E44287LL, xbox_schedule_thread_reset);
       break;
     case 656:
       HASH_INVOKE(0x04C11602C720A290LL, convert_cyr_string);
@@ -25479,6 +25509,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 780:
       HASH_INVOKE(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen);
+      break;
+    case 785:
+      HASH_INVOKE(0x141EDCAE1D155311LL, xbox_get_thread_time);
       break;
     case 789:
       HASH_INVOKE(0x4F1E663AE18FD315LL, msg_remove_queue);
@@ -26329,6 +26362,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1459:
       HASH_INVOKE(0x001DBE44BC0B55B3LL, magicksetimagecolormapcolor);
+      HASH_INVOKE(0x7AFA32F70E8195B3LL, xbox_set_thread_timeout);
       break;
     case 1461:
       HASH_INVOKE(0x3F9C5B4708FC55B5LL, timezone_name_get);
@@ -29155,6 +29189,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 3697:
       HASH_INVOKE(0x6AC126DCE941FE71LL, memory_get_peak_usage);
+      break;
+    case 3699:
+      HASH_INVOKE(0x3B28CA1BE1D0DE73LL, xbox_get_thread_timeout);
       break;
     case 3700:
       HASH_INVOKE(0x47D0510206B89E74LL, ini_restore);
@@ -35420,6 +35457,18 @@ Variant ei_pagelet_server_is_enabled(Eval::VariableEnvironment &env, const Eval:
     (*it)->eval(env);
   }
   return (x_pagelet_server_is_enabled());
+}
+Variant ei_xbox_get_thread_timeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xbox_get_thread_timeout", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xbox_get_thread_timeout());
 }
 Variant ei_imagecolorexactalpha(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -55144,6 +55193,18 @@ Variant ei_substr_replace(Eval::VariableEnvironment &env, const Eval::FunctionCa
   if (count <= 3) return (x_substr_replace(a0, a1, a2));
   else return (x_substr_replace(a0, a1, a2, a3));
 }
+Variant ei_xbox_get_thread_time(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xbox_get_thread_time", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xbox_get_thread_time());
+}
 Variant ei_xmlwriter_write_dtd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -66972,6 +67033,18 @@ Variant ei_hphp_invoke_method(Eval::VariableEnvironment &env, const Eval::Functi
   }
   return (x_hphp_invoke_method(a0, a1, a2, a3));
 }
+Variant ei_xbox_schedule_thread_reset(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("xbox_schedule_thread_reset", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xbox_schedule_thread_reset(), null);
+}
 Variant ei_date_offset_get(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -70356,6 +70429,22 @@ Variant ei_magickgetreleasedate(Eval::VariableEnvironment &env, const Eval::Func
   }
   return (x_magickgetreleasedate());
 }
+Variant ei_xbox_set_thread_timeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("xbox_set_thread_timeout", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xbox_set_thread_timeout(a0), null);
+}
 Variant ei_sem_remove(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -71754,6 +71843,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 647:
       HASH_INVOKE_FROM_EVAL(0x27698DDEDAD6E287LL, openssl_pkey_new);
+      HASH_INVOKE_FROM_EVAL(0x23A1E13930E44287LL, xbox_schedule_thread_reset);
       break;
     case 656:
       HASH_INVOKE_FROM_EVAL(0x04C11602C720A290LL, convert_cyr_string);
@@ -71916,6 +72006,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 780:
       HASH_INVOKE_FROM_EVAL(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen);
+      break;
+    case 785:
+      HASH_INVOKE_FROM_EVAL(0x141EDCAE1D155311LL, xbox_get_thread_time);
       break;
     case 789:
       HASH_INVOKE_FROM_EVAL(0x4F1E663AE18FD315LL, msg_remove_queue);
@@ -72766,6 +72859,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1459:
       HASH_INVOKE_FROM_EVAL(0x001DBE44BC0B55B3LL, magicksetimagecolormapcolor);
+      HASH_INVOKE_FROM_EVAL(0x7AFA32F70E8195B3LL, xbox_set_thread_timeout);
       break;
     case 1461:
       HASH_INVOKE_FROM_EVAL(0x3F9C5B4708FC55B5LL, timezone_name_get);
@@ -75592,6 +75686,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3697:
       HASH_INVOKE_FROM_EVAL(0x6AC126DCE941FE71LL, memory_get_peak_usage);
+      break;
+    case 3699:
+      HASH_INVOKE_FROM_EVAL(0x3B28CA1BE1D0DE73LL, xbox_get_thread_timeout);
       break;
     case 3700:
       HASH_INVOKE_FROM_EVAL(0x47D0510206B89E74LL, ini_restore);

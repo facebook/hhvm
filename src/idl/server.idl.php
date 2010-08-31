@@ -287,6 +287,54 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'    => "xbox_get_thread_timeout",
+    'desc'    => "Gets the timeout (maximum duration), in seconds, of the current xbox thread. Throws for non-xbox threads.",
+    'flags'   => HasDocComment | HipHopSpecific,
+    'return'  => array(
+      'type'    => Int32,
+      'desc'    => "The current timeout (maximum duration)."
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'    => "xbox_set_thread_timeout",
+    'desc'    => "Sets the timeout (maximum duration), in seconds, of the current xbox thread. The xbox thread would reset when this amount of time has passed since the previous reset. Throws for non-xbox threads.",
+    'flags'   => HasDocComment | HipHopSpecific,
+    'return'  => array(
+      'type'    => null,
+    ),
+    'args'    => array(
+      array(
+        'name'  => "timeout",
+        'type'  => Int32,
+        'desc'  => "The new timeout (maximum duration).",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'    => "xbox_schedule_thread_reset",
+    'desc'    => "Schedules a reset of the current xbox thread, when the next request comes in. Throws for non-xbox threads.",
+    'flags'   => HasDocComment | HipHopSpecific,
+    'return'  => array(
+      'type'    => null,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'    => "xbox_get_thread_time",
+    'desc'    => "Returns the time that the current xbox thread has been running without a reset, in seconds, and throws for non-xbox threads.",
+    'flags'   => HasDocComment | HipHopSpecific,
+    'return'  => array(
+      'type'    => Int32,
+      'desc'    => "The time that the current xbox thread has been running without a reset.",
+    ),
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

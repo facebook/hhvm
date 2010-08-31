@@ -47,6 +47,9 @@ public:
    * Whether state has been dirtied.
    */
   bool needReset() const;
+  void setReset() { m_reset = true; }
+
+  time_t getCreationTime() const { return m_created; }
 
 private:
   ExecutionContext *m_context;

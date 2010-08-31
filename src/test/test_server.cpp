@@ -179,6 +179,7 @@ bool TestServer::RunTests(const std::string &which) {
   //RUN_TEST(TestRequestHandling);
   RUN_TEST(TestHttpClient);
   RUN_TEST(TestRPCServer);
+  RUN_TEST(TestXboxServer);
 
   return ret;
 }
@@ -564,6 +565,49 @@ bool TestServer::TestRPCServer() {
          "100",
          "call_user_func?auth=test&p=\"A::f\"&p=100",
          8083);
+
+  return true;
+}
+
+bool TestServer::TestXboxServer() {
+  VSGET("<?php\n"
+        "if (array_key_exists('main', $_GET)) {\n"
+        "  $t = xbox_task_start('1');\n"
+        "  xbox_task_result($t, 0, $r);\n"
+        "  var_dump($r);\n"
+        "  $t = xbox_task_start('2');\n"
+        "  xbox_task_result($t, 0, $r);\n"
+        "  $t = xbox_task_start('1');\n"
+        "  xbox_task_result($t, 0, $r);\n"
+        "  var_dump($r);\n"
+        "  sleep(7);\n"
+        "  $t = xbox_task_start('3');\n"
+        "  xbox_task_result($t, 0, $r);\n"
+        "  var_dump($r);\n"
+        "  sleep(2);\n"
+        "  $t = xbox_task_start('4');\n"
+        "  xbox_task_result($t, 0, $r);\n"
+        "  $t = xbox_task_start('3');\n"
+        "  xbox_task_result($t, 0, $r);\n"
+        "  var_dump($r);\n"
+        "  sleep(2);\n"
+        "  $t = xbox_task_start('3');\n"
+        "  xbox_task_result($t, 0, $r);\n"
+        "  var_dump($r);\n"
+        "} else {\n"
+        "  function xbox_process_message($msg) {\n"
+        "    if ($msg == '1') return xbox_get_thread_timeout();\n"
+        "    else if ($msg == '2') xbox_set_thread_timeout(5);\n"
+        "    else if ($msg == '3') return xbox_get_thread_time();\n"
+        "    else xbox_schedule_thread_reset();\n"
+        "  }\n"
+        "}\n",
+        "int(10)\n"
+        "int(5)\n"
+        "int(0)\n"
+        "int(0)\n"
+        "int(2)\n",
+        "string?main=1");
 
   return true;
 }

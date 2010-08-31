@@ -22,6 +22,7 @@
 #include <runtime/base/server/http_protocol.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/util/string_buffer.h>
+#include <runtime/base/server/rpc_request_handler.h>
 
 using namespace std;
 using namespace boost;
@@ -156,6 +157,44 @@ bool f_xbox_task_status(CObjRef task) {
 
 int64 f_xbox_task_result(CObjRef task, int64 timeout_ms, Variant ret) {
   return XboxServer::TaskResult(task, timeout_ms, ret);
+}
+
+int f_xbox_get_thread_timeout() {
+  XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
+  if (server_info) {
+    return server_info->getMaxDuration();
+  }
+  throw Exception("Not an xbox worker!");
+}
+
+void f_xbox_set_thread_timeout(int timeout) {
+  if (timeout < 0) {
+    raise_warning("Cannot set timeout/duration to a negative number.");
+    return;
+  }
+  XboxServerInfoPtr server_info = XboxServer::GetServerInfo();
+  if (server_info) {
+    server_info->setMaxDuration(timeout);
+  } else {
+    throw Exception("Not an xbox worker!");
+  }
+}
+
+void f_xbox_schedule_thread_reset() {
+  RPCRequestHandler *handler = XboxServer::GetRequestHandler();
+  if (handler) {
+    handler->setReset();
+  } else {
+    throw Exception("Not an xbox worker!");
+  }
+}
+
+int f_xbox_get_thread_time() {
+  RPCRequestHandler *handler = XboxServer::GetRequestHandler();
+  if (handler) {
+    return time(NULL) - handler->getCreationTime();
+  }
+  throw Exception("Not an xbox worker!");
 }
 
 ///////////////////////////////////////////////////////////////////////////////

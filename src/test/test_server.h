@@ -54,6 +54,9 @@ public:
   // test RPCServer
   bool TestRPCServer();
 
+  // test XboxServer
+  bool TestXboxServer();
+
 protected:
   void RunServer();
   void StopServer();

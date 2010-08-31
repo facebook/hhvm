@@ -561,6 +561,8 @@ Variant ArrayUtil::Shuffle(CArrRef input) {
 Variant ArrayUtil::RandomKeys(CArrRef input, int num_req /* = 1 */) {
   int count = input.size();
   if (num_req <= 0 || num_req > count) {
+    raise_warning("Second argument has to be between 1 and the "
+                  "number of elements in the array");
     return null;
   }
 

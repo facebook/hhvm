@@ -57,7 +57,6 @@ Variant pm_php$globals$symbols_php(bool incOnce /* = false */, LVariableTable* v
   v__FILES = s_sys_sa00000000;
   v__ENV = s_sys_sa00000000;
   v__REQUEST = s_sys_sa00000000;
-  v__SESSION = s_sys_sa00000000;
   setNull(v_HTTP_RAW_POST_DATA);
   setNull(v_http_response_header);
   return true;

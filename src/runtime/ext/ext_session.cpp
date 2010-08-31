@@ -1014,7 +1014,7 @@ new_session:
 
   /* Unconditionally destroy existing arrays -- possible dirty data */
   SystemGlobals *g = (SystemGlobals*)get_global_variables();
-  g->gv__SESSION.reset();
+  g->gv__SESSION = Array::Create();
 
   PS(invalid_session_id) = false;
   String value;

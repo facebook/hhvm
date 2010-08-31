@@ -1824,9 +1824,16 @@ void c_arrayiterator::t_seek(CVarRef v_position) {
     for (v_i = 0LL; (less(v_i, v_position)); v_i++) {
       LOOP_COUNTER_CHECK(1);
       {
-        if (!(toBoolean(x_next(ref(lval(m_arr)))))) {
+        {
+          bool tmp2;
           {
-            break;
+            bool tmp3((toBoolean(x_next(ref(lval(m_arr))))));
+            tmp2 = (!(tmp3));
+          }
+          if (tmp2) {
+            {
+              break;
+            }
           }
         }
       }
@@ -1855,7 +1862,11 @@ bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
 /* SRC: classes/iterator.php line 632 */
 bool c_arrayiterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
-  return !same(x_current(ref(lval(m_arr))), false);
+  {
+    const Variant &tmp1((x_key(ref(lval(m_arr)))));
+    bool tmp2((x_is_null(tmp1)));
+    return !(tmp2);
+  }
 } /* function */
 /* SRC: classes/iterator.php line 923 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_appenditerator
@@ -2690,24 +2701,52 @@ void c_appenditerator::t_rewind() {
   m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
   if (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
     {
-      o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
+      {
+        const Object &tmp1((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+        tmp1-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
+      }
     }
   }
 } /* function */
 /* SRC: classes/iterator.php line 985 */
 bool c_appenditerator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
-  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) && toBoolean(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
+  {
+    bool tmp1 = (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
+    if (tmp1) {
+      const Object &tmp2((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+      tmp1 = (toBoolean(tmp2-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
+    }
+    return tmp1;
+  }
 } /* function */
 /* SRC: classes/iterator.php line 998 */
 Variant c_appenditerator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
-  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* current */ MethodIndex(7, 1) /* current */ ,  "current", 0x5B3A4A72846B21DCLL, 0))) : ((Variant)(null)));
+  {
+    Variant tmp1;
+    if (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
+      const Object &tmp2((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+      tmp1 = (tmp2-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* current */ MethodIndex(7, 1) /* current */ ,  "current", 0x5B3A4A72846B21DCLL, 0));
+    } else {
+      tmp1 = (null);
+    }
+    return tmp1;
+  }
 } /* function */
 /* SRC: classes/iterator.php line 1016 */
 Variant c_appenditerator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
-  return (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)) ? ((Variant)(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* key */ MethodIndex(2, 1) /* key */ ,  "key", 0x56EDB60C824E8C51LL, 0))) : ((Variant)(null)));
+  {
+    Variant tmp1;
+    if (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
+      const Object &tmp2((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+      tmp1 = (tmp2-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* key */ MethodIndex(2, 1) /* key */ ,  "key", 0x56EDB60C824E8C51LL, 0));
+    } else {
+      tmp1 = (null);
+    }
+    return tmp1;
+  }
 } /* function */
 /* SRC: classes/iterator.php line 1030 */
 void c_appenditerator::t_next() {
@@ -2717,22 +2756,42 @@ void c_appenditerator::t_next() {
       return;
     }
   }
-  o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* next */ MethodIndex(1, 1) /* next */ ,  "next", 0x3C6D50F3BB8102B8LL, 0);
-  if (toBoolean(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
+  {
+    const Object &tmp1((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+    tmp1-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* next */ MethodIndex(1, 1) /* next */ ,  "next", 0x3C6D50F3BB8102B8LL, 0);
+  }
+  {
+    bool tmp2;
     {
-      return;
+      const Object &tmp3((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+      tmp2 = (toBoolean(tmp3-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
+    }
+    if (tmp2) {
+      {
+        return;
+      }
     }
   }
   m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* next */ MethodIndex(1, 1) /* next */ ,  "next", 0x3C6D50F3BB8102B8LL, 0);
-  LOOP_COUNTER(1);
+  LOOP_COUNTER(4);
   {
     while (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
-      LOOP_COUNTER_CHECK(1);
+      LOOP_COUNTER_CHECK(4);
       {
-        o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
-        if (toBoolean(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0). BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
+        {
+          const Object &tmp5((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+          tmp5-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
+        }
+        {
+          bool tmp6;
           {
-            return;
+            const Object &tmp7((toObject(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0))));
+            tmp6 = (toBoolean(tmp7-> BIND_CLASS_ARROW(ObjectData) o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
+          }
+          if (tmp6) {
+            {
+              return;
+            }
           }
         }
         m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* next */ MethodIndex(1, 1) /* next */ ,  "next", 0x3C6D50F3BB8102B8LL, 0);
@@ -2745,10 +2804,11 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
     ArrayInit tmp1(2, true);
-    tmp1.set(o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0));
+    const Variant &tmp2((o_root_invoke_few_args(/* getInnerIterator */ MethodIndex(4, 1) /* getInnerIterator */ ,  "getInnerIterator", 0x3106F858B09C7424LL, 0)));
+    tmp1.set(tmp2);
     tmp1.set(v_func);
-    const Array &tmp2((Array(tmp1)));
-    return x_call_user_func_array(tmp2, toArray(v_params));
+    const Array &tmp3((Array(tmp1)));
+    return x_call_user_func_array(tmp3, toArray(v_params));
   }
 } /* function */
 /* SRC: classes/iterator.php line 755 */
@@ -5245,11 +5305,18 @@ void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  if (!(x_hphp_recursivedirectoryiterator___construct(GET_THIS(), toString(v_path), toInt64(v_flags)))) {
+  {
+    bool tmp1;
     {
+      bool tmp2((x_hphp_recursivedirectoryiterator___construct(GET_THIS(), toString(v_path), toInt64(v_flags))));
+      tmp1 = (!(tmp2));
+    }
+    if (tmp1) {
       {
-        p_unexpectedvalueexception tmp1 = NEWOBJ(c_unexpectedvalueexception)();
-        throw_exception((tmp1->create(concat3(NAMSTR(s_sys_ss35f9d4be, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp1));
+        {
+          p_unexpectedvalueexception tmp3 = NEWOBJ(c_unexpectedvalueexception)();
+          throw_exception((tmp3->create(concat3(NAMSTR(s_sys_ss35f9d4be, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp3));
+        }
       }
     }
   }
@@ -7534,11 +7601,18 @@ void c_directoryiterator::init() {
 void c_directoryiterator::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
-  if (!(x_hphp_directoryiterator___construct(GET_THIS(), toString(v_path)))) {
+  {
+    bool tmp1;
     {
+      bool tmp2((x_hphp_directoryiterator___construct(GET_THIS(), toString(v_path))));
+      tmp1 = (!(tmp2));
+    }
+    if (tmp1) {
       {
-        p_unexpectedvalueexception tmp1 = NEWOBJ(c_unexpectedvalueexception)();
-        throw_exception((tmp1->create(concat3(NAMSTR(s_sys_ss3c6754b7, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp1));
+        {
+          p_unexpectedvalueexception tmp3 = NEWOBJ(c_unexpectedvalueexception)();
+          throw_exception((tmp3->create(concat3(NAMSTR(s_sys_ss3c6754b7, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp3));
+        }
       }
     }
   }

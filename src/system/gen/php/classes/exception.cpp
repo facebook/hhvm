@@ -7800,7 +7800,16 @@ void c_exception::t___init__() {
               }
               tmp5 = (tmp6);
             }
-            tmp4 = ((tmp5 || (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), NAMSTR(s_sys_ss7f49956c, "exception"))) && !(x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true), NAMSTR(s_sys_ss7f49956c, "exception"))))));
+            bool tmp9 = (tmp5);
+            if (!tmp9) {
+              bool tmp10 = (toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), NAMSTR(s_sys_ss7f49956c, "exception"))));
+              if (tmp10) {
+                bool tmp11((x_is_subclass_of(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true), NAMSTR(s_sys_ss7f49956c, "exception"))));
+                tmp10 = (!(tmp11));
+              }
+              tmp9 = (tmp10);
+            }
+            tmp4 = (tmp9);
           }
           if (tmp4) {
             {
@@ -7809,22 +7818,22 @@ void c_exception::t___init__() {
           }
         }
         {
-          const Variant &tmp9((x_array_shift(ref(lval(m_trace)))));
-          v_frame = tmp9;
+          const Variant &tmp12((x_array_shift(ref(lval(m_trace)))));
+          v_frame = tmp12;
         }
       }
     }
   }
   if (isset(v_frame, NAMSTR(s_sys_ss70cc2eb1, "file"), true)) {
     {
-      Variant tmp10((v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), true, true)));
-      m_file = tmp10;
+      Variant tmp13((v_frame.rvalAt(NAMSTR(s_sys_ss70cc2eb1, "file"), true, true)));
+      m_file = tmp13;
     }
   }
   if (isset(v_frame, NAMSTR(s_sys_ss30737366, "line"), true)) {
     {
-      Variant tmp11((v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), true, true)));
-      m_line = tmp11;
+      Variant tmp14((v_frame.rvalAt(NAMSTR(s_sys_ss30737366, "line"), true, true)));
+      m_line = tmp14;
     }
   }
 } /* function */

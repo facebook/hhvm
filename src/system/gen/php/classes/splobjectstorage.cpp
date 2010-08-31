@@ -829,7 +829,10 @@ void c_splobjectstorage::t_rewind() {
 /* SRC: classes/splobjectstorage.php line 37 */
 bool c_splobjectstorage::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::valid);
-  return !same(x_key(ref(lval(m_storage))), false);
+  {
+    const Variant &tmp1((x_key(ref(lval(m_storage)))));
+    return !same(tmp1, false);
+  }
 } /* function */
 /* SRC: classes/splobjectstorage.php line 50 */
 int64 c_splobjectstorage::t_key() {
@@ -881,11 +884,22 @@ bool c_splobjectstorage::t_contains(CVarRef v_obj) {
 /* SRC: classes/splobjectstorage.php line 124 */
 void c_splobjectstorage::t_attach(CVarRef v_obj) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::attach);
-  if ((x_is_object(v_obj) && !(t_contains(v_obj)))) {
+  {
+    bool tmp1;
     {
+      bool tmp2 = (x_is_object(v_obj));
+      if (tmp2) {
+        bool tmp3((t_contains(v_obj)));
+        tmp2 = (!(tmp3));
+      }
+      tmp1 = (tmp2);
+    }
+    if (tmp1) {
       {
-        Variant tmp1((v_obj));
-        m_storage.append((tmp1));
+        {
+          Variant tmp4((v_obj));
+          m_storage.append((tmp4));
+        }
       }
     }
   }

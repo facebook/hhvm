@@ -199,14 +199,15 @@ void StringData::escalate() {
   m_hash = 0;
 }
 
-void StringData::dump() {
+void StringData::dump() const {
   const char *p = data();
   int len = size();
 
-  printf("StringData(%d) (%s%s%s%d): [", _count,
+  printf("StringData(%d) (%s%s%s%s%d): [", _count,
          isLiteral() ? "literal " : "",
          isShared() ? "shared " : "",
          isLinear() ? "linear " : "",
+         isStatic() ? "static " : "",
          len);
   for (int i = 0; i < len; i++) {
     char ch = p[i];

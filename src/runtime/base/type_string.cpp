@@ -651,7 +651,7 @@ String String::fiberCopy() const {
 ///////////////////////////////////////////////////////////////////////////////
 // debugging
 
-void String::dump() {
+void String::dump() const {
   if (m_px) {
     m_px->dump();
   } else {

@@ -56,6 +56,9 @@ bool TestExtIconv::test_iconv_mime_encode() {
 }
 
 bool TestExtIconv::test_iconv_mime_decode() {
+
+  VS(f_iconv_mime_decode("=?windows-1256?Q?My_Persona?= =?windows-1256?Q?l_Profile_?= =?windows-1256?Q?was_Disabl?= =?windows-1256?Q?ed=FE?="), false);
+
   VS(f_iconv_mime_decode("Subject: =?UTF-8?B?UHLDnGZ1bmcgUHLDnGZ1bmc=?=",
                          0, "ISO-8859-1"),
      "Subject: Pr\xDC""fung Pr\xDC""fung");

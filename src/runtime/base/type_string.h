@@ -278,7 +278,7 @@ public:
   /**
    * Debugging
    */
-  void dump();
+  void dump() const;
 
  private:
   StringOffset lvalAtImpl(int key) {

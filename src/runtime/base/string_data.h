@@ -207,7 +207,7 @@ class StringData {
   void backup(LinearAllocator &allocator);
   void restore(const char *&data);
   void sweep();
-  void dump();
+  void dump() const;
 
   /**
    * The order of the data members is significant. The _count field must

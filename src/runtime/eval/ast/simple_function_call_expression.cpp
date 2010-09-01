@@ -57,15 +57,16 @@ ExpressionPtr
 SimpleFunctionCallExpression::make(EXPRESSION_ARGS, NamePtr name,
                                    const vector<ExpressionPtr> &params,
                                    const Parser &p) {
-  String sname = StringUtil::ToLower(name->getStatic());
+  String sname = name->getStatic();
   if (!sname.isNull()) {
-    if (sname == "get_class" && params.size() == 0) {
+    if (strcasecmp(sname.data(), "get_class") == 0 && params.size() == 0) {
       if (p.currentClass()) {
         return new ScalarExpression(EXPRESSION_PASS, p.currentClass()->name());
       } else {
         return new ScalarExpression(EXPRESSION_PASS, false);
       }
-    } else if (sname == "get_parent_class" && params.size() == 0) {
+    } else if (strcasecmp(sname.data(), "get_parent_class") == 0 &&
+               params.size() == 0) {
       if (p.currentClass() && !p.currentClass()->parent().empty()) {
         return new ScalarExpression(EXPRESSION_PASS,
                                     p.currentClass()->parent());

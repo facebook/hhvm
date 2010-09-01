@@ -144,6 +144,11 @@ public:
     }
   };
 
+  // these two constructors should never be called directly, they are
+  // only called from generated code.
+  SmallArray(unsigned int nSize, StringData *keys[], const Variant *values[]);
+  SmallArray(unsigned int nSize, int64 *keys[], const Variant *values[]);
+
 private:
   int8            m_nNumOfElements;
   int8            m_nListHead;

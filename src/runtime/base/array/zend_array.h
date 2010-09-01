@@ -148,8 +148,8 @@ public:
     void dump();
   };
 
-  // These two functions should never be called directly, they are only
-  // called from generated code.
+  // This constructor should never be called directly, it is only called
+  // from generated code.
   ZendArray(uint nSize, Bucket *bkts[]);
 
 private:

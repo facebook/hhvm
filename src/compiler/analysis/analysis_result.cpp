@@ -42,6 +42,7 @@
 #include <compiler/expression/array_pair_expression.h>
 #include <util/process.h>
 #include <runtime/base/rtti_info.h>
+#include <runtime/base/array/small_array.h>
 #include <runtime/ext/ext_json.h>
 
 using namespace HPHP;
@@ -1714,6 +1715,7 @@ void AnalysisResult::outputCPPUtilImpl(CodeGenerator::Output output) {
   cg_printf("\n");
   cg_printInclude("\"cpputil.h\"");
   cg_printInclude("<runtime/base/array/zend_array.h>");
+  cg_printInclude("<runtime/base/array/small_array.h>");
   cg.namespaceBegin();
   if (Option::GenConcat) {
     outputTaintImpl(cg);
@@ -1842,11 +1844,11 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
 
 void AnalysisResult::outputArrayCreateNumDecl(CodeGenerator &cg, int num,
                                               const char *type) {
-  cg_printf("ArrayData *array_create%d(\n", num);
+  cg_printf("ArrayData *array_create%d(", num);
   for (int i = 1; i <= num; i++) {
-    cg_printf("  %s k%d, CVarRef v%d", type, i, i);
+    cg_printf("%s k%d, CVarRef v%d", type, i, i);
     if (i < num) {
-      cg_printf(",\n");
+      cg_printf(", ");
     } else {
       cg_printf(")");
     }
@@ -1877,12 +1879,29 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     ASSERT(num > 0);
     outputArrayCreateNumDecl(cg, num, "CStrRef");
     cg_indentBegin(" {\n");
-    cg_printf("ZendArray::Bucket *p[] = {\n");
+    if (num <= SmallArray::SARR_SIZE) {
+      cg_indentBegin("if (RuntimeOption::UseSmallArray) {\n");
+      cg_indentBegin("StringData *keys[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("k%d.get(), ", i);
+      }
+      cg_indentEnd("NULL,\n");
+      cg_printf("};\n");
+      cg_indentBegin("const Variant *values[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("&v%d, ", i);
+      }
+      cg_indentEnd("NULL,\n");
+      cg_printf("};\n");
+      cg_printf("return NEW(SmallArray)(%d, keys, values);\n", num);
+      cg_indentEnd("}\n");
+    }
+    cg_indentBegin("ZendArray::Bucket *p[] = {\n");
     for (int i = 1; i <= num; i++) {
-      cg_printf("  NEW(ZendArray::Bucket)(k%d.get(), v%d),\n",
+      cg_printf("NEW(ZendArray::Bucket)(k%d.get(), v%d), ",
                 i, i);
     }
-    cg_printf("  NULL,\n");
+    cg_indentEnd("NULL,\n");
     cg_printf("};\n");
     cg_printf("return NEW(ZendArray)(%d, p);\n", num);
     cg_indentEnd("}\n");
@@ -1893,12 +1912,12 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     ASSERT(num > 0);
     outputArrayCreateNumDecl(cg, num, "int64");
     cg_indentBegin(" {\n");
-    cg_printf("ZendArray::Bucket *p[] = {\n");
+    cg_indentBegin("ZendArray::Bucket *p[] = {\n");
     for (int i = 1; i <= num; i++) {
-      cg_printf("  NEW(ZendArray::Bucket)(k%d, v%d),\n",
+      cg_printf("NEW(ZendArray::Bucket)(k%d, v%d), ",
                 i, i);
     }
-    cg_printf("  NULL,\n");
+    cg_indentEnd("NULL,\n");
     cg_printf("};\n");
     cg_printf("return NEW(ZendArray)(%d, p);\n", num);
     cg_indentEnd("}\n");

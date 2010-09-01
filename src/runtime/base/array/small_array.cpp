@@ -34,6 +34,51 @@ SmallArray::SmallArray() : m_nNumOfElements(0),
   m_pos = ArrayData::invalid_index;
 }
 
+SmallArray::SmallArray(unsigned int nSize, StringData *keys[],
+                       const Variant *values[]) :
+  m_nNumOfElements(nSize),
+  m_nListHead(ArrayData::invalid_index),
+  m_nListTail(ArrayData::invalid_index),
+  m_nNextFreeElement(0) {
+  const Variant **v = values;
+  for (StringData **k = keys; *k; k++, v++) {
+    int64 h = (*k)->getPrecomputedHash();
+    int start = str_ihash(h);
+    Bucket *pb = m_arBuckets + start;
+    while (pb->kind != Empty) {
+      pb++;
+      if (pb == m_arBuckets + SARR_TABLE_SIZE) pb = m_arBuckets;
+    }
+    pb->h = h;
+    pb->key = *k;
+    pb->kind = StrKey;
+    pb->data = **v;
+    connect_to_global_dllist(pb - m_arBuckets, *pb);
+  }
+}
+
+SmallArray::SmallArray(unsigned int nSize, int64 *keys[],
+                       const Variant *values[]) :
+  m_nNumOfElements(nSize),
+  m_nListHead(ArrayData::invalid_index),
+  m_nListTail(ArrayData::invalid_index),
+  m_nNextFreeElement(0) {
+  const Variant **v = values;
+  for (int64 **k = keys; *k; k++, v++) {
+    int64 h = **k;
+    int start = int_ihash(h);
+    Bucket *pb = m_arBuckets + start;
+    while (pb->kind != Empty) {
+      pb++;
+      if (pb == m_arBuckets + SARR_TABLE_SIZE) pb = m_arBuckets;
+    }
+    pb->h = h;
+    pb->kind = IntKey;
+    pb->data = **v;
+    connect_to_global_dllist(pb - m_arBuckets, *pb);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // iterations
 

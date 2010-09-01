@@ -508,6 +508,19 @@ unsigned int ExpressionList::checkIntegerKeys() const {
   return keys.size();
 }
 
+unsigned int ExpressionList::checkRefValues() const {
+  ASSERT(m_arrayElements);
+  unsigned int refValueCount = 0;
+  for (unsigned int i = 0; i < m_exps.size(); i++) {
+    ArrayPairExpressionPtr ap =
+      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+    ExpressionPtr value = ap->getValue();
+    ASSERT(value);
+    if (value->hasContext(RefValue)) refValueCount++;
+  }
+  return refValueCount;
+}
+
 void ExpressionList::outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
                                                   AnalysisResultPtr ar,
                                                   unsigned int n) {
@@ -551,17 +564,19 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
     if (m_cppTemp.empty() &&
         Option::GenArrayCreate && cg.getOutput() != CodeGenerator::SystemCPP) {
       unsigned int n = isVector ? m_exps.size() : checkIntegerKeys();
-      if (n > 0 && n == m_exps.size()) {
-        ar->m_arrayIntegerKeySizes.insert(n);
-        outputCPPUniqLitKeyArrayInit(cg, ar, n);
-        return;
-      }
-      if (!isVector) {
-        n = checkLitstrKeys();
+      if (checkRefValues() == 0) {
         if (n > 0 && n == m_exps.size()) {
-          ar->m_arrayLitstrKeySizes.insert(n);
+          ar->m_arrayIntegerKeySizes.insert(n);
           outputCPPUniqLitKeyArrayInit(cg, ar, n);
           return;
+        }
+        if (!isVector) {
+          n = checkLitstrKeys();
+          if (n > 0 && n == m_exps.size()) {
+            ar->m_arrayLitstrKeySizes.insert(n);
+            outputCPPUniqLitKeyArrayInit(cg, ar, n);
+            return;
+          }
         }
       }
     }

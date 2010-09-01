@@ -85,6 +85,7 @@ private:
   void optimize(AnalysisResultPtr ar);
   unsigned int checkLitstrKeys() const;
   unsigned int checkIntegerKeys() const;
+  unsigned int checkRefValues() const;
   void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     unsigned int n);

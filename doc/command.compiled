@@ -47,6 +47,16 @@ When running "debug" mode, specifies which HPHPi server port to connect.
 
 When running "debug" mode, specifies which debugger extension PHP file to load.
 
+= --debug-cmd
+
+When running "debug" mode, specifies a command to execute at startup time.
+Multiple --debug-cmd can be specified to execute more than one command.
+
+= --debug-sandbox
+
+When running "debug" mode, specifies which sandbox to attach to for remote
+debugging. Default is "default".
+
 = -f, --file
 
 When mode is <b>run</b>, specifies which PHP to execute.

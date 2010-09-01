@@ -226,12 +226,10 @@ void DebuggerClient::LoadCodeColor(CodeColor index, Hdf hdf,
   DefaultCodeColors[index * 2 + 1] = color ? ANSI_COLOR_END : NULL;
 }
 
-SmartPtr<Socket> DebuggerClient::Start(const std::string &host, int port,
-                                       const std::string &extension,
-                                       const StringVec &cmds) {
+SmartPtr<Socket> DebuggerClient::Start(const DebuggerClientOptions &options) {
   Debugger::SetTextColors();
   SmartPtr<Socket> ret = s_debugger_client.connectLocal();
-  s_debugger_client.start(host, port, extension, cmds);
+  s_debugger_client.start(options);
   return ret;
 }
 
@@ -455,11 +453,9 @@ std::string DebuggerClient::getPrompt() {
   return *name + "> ";
 }
 
-void DebuggerClient::start(const std::string &host, int port,
-                           const std::string &extension,
-                           const StringVec &cmds) {
+void DebuggerClient::start(const DebuggerClientOptions &options) {
   loadConfig();
-  if (!cmds.empty()) {
+  if (!options.cmds.empty()) {
     UseColor = false;
     s_use_utf8 = false;
     NoPrompt = true;
@@ -470,12 +466,11 @@ void DebuggerClient::start(const std::string &host, int port,
     info("Type \"help\" or \"?\" for a complete list of commands.\n");
   }
 
-  if (!host.empty()) {
-    connectRemote(host, port);
+  if (!options.host.empty()) {
+    connectRemote(options.host, options.port);
   }
 
-  m_extension = extension;
-  m_quickCmds = cmds;
+  m_options = options;
   m_mainThread.start();
 }
 
@@ -488,16 +483,16 @@ void DebuggerClient::run() {
   ReadlineApp app;
   playMacro("startup");
 
-  if (!m_quickCmds.empty()) {
+  if (!m_options.cmds.empty()) {
     m_macroPlaying = MacroPtr(new Macro());
-    m_macroPlaying->m_cmds = m_quickCmds;
+    m_macroPlaying->m_cmds = m_options.cmds;
     m_macroPlaying->m_cmds.push_back("q");
     m_macroPlaying->m_index = 0;
   }
 
   hphp_session_init();
   ExecutionContext *context = hphp_context_init();
-  hphp_invoke_simple(m_extension);
+  hphp_invoke_simple(m_options.extension);
   try {
     runImpl();
   } catch (...) {
@@ -726,7 +721,7 @@ bool DebuggerClient::initializeMachine() {
     // attaching to default sandbox
     if (!m_machine->m_sandboxAttached) {
       try {
-        CmdMachine::AttachSandbox(this);
+        CmdMachine::AttachSandbox(this, NULL, m_options.sandbox.c_str());
       } catch (DebuggerConsoleExitException &e) {
         m_machine->m_sandboxAttached = true;
       }

@@ -57,9 +57,7 @@ public:
   /**
    * Starts/stops a debugger client.
    */
-  static SmartPtr<Socket> Start(const std::string &host, int port,
-                                const std::string &extension,
-                                const StringVec &cmds);
+  static SmartPtr<Socket> Start(const DebuggerClientOptions &options);
   static void Stop();
 
   /**
@@ -107,8 +105,7 @@ public:
   /**
    * Thread functions.
    */
-  void start(const std::string &host, int port,
-             const std::string &extension, const StringVec &cmds);
+  void start(const DebuggerClientOptions &options);
   void stop();
   void run();
 
@@ -275,8 +272,7 @@ private:
   int m_tutorial;
   std::set<std::string> m_tutorialVisited;
 
-  std::string m_extension;
-  StringVec m_quickCmds;
+  DebuggerClientOptions m_options;
   AsyncFunc<DebuggerClient> m_mainThread;
   bool m_stopped;
 

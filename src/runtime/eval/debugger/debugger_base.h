@@ -24,6 +24,17 @@
 
 namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
+// startup options for debugger client
+
+struct DebuggerClientOptions {
+  std::string host;
+  int port;
+  std::string extension;
+  StringVec cmds;
+  std::string sandbox;
+};
+
+///////////////////////////////////////////////////////////////////////////////
 // exceptions
 
 // client side exception

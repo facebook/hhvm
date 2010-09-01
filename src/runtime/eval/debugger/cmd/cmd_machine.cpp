@@ -134,7 +134,7 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
 
   DSandboxInfoPtr sandbox(new DSandboxInfo());
   sandbox->m_user = user ? user : "";
-  sandbox->m_name = name ? name : "default";
+  sandbox->m_name = (name && *name) ? name : "default";
   return AttachSandbox(client, sandbox);
 }
 

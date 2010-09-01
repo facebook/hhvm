@@ -30,8 +30,7 @@ public:
    * Start/stop Debugger for remote debugging.
    */
   static void StartServer();
-  static void StartClient(const std::string &host, int port,
-                          const std::string &extension, const StringVec &cmds);
+  static void StartClient(const DebuggerClientOptions &options);
   static void OnServerShutdown();
   static void Stop();
 

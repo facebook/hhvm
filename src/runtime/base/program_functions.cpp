@@ -74,10 +74,6 @@ struct ProgramOptions {
   StringVec  confStrings;
   int        port;
   int        admin_port;
-  string     debug_host;
-  int        debug_port;
-  string     debug_extension;
-  StringVec  debug_cmds;
   string     user;
   string     file;
   int        count;
@@ -85,6 +81,8 @@ struct ProgramOptions {
   StringVec  args;
   string     buildId;
   int        xhprofFlags;
+
+  Eval::DebuggerClientOptions debugger_options;
 };
 
 class StartTime {
@@ -556,14 +554,17 @@ static int execute_program_impl(int argc, char **argv) {
      "start an HTTP server at specified port")
     ("admin-port", value<int>(&po.admin_port)->default_value(-1),
      "start admin listerner at specified port")
-    ("debug-host,h", value<string>(&po.debug_host),
+    ("debug-host,h", value<string>(&po.debugger_options.host),
      "connect to debugger server at specified address")
-    ("debug-port", value<int>(&po.debug_port)->default_value(-1),
+    ("debug-port", value<int>(&po.debugger_options.port)->default_value(-1),
      "connect to debugger server at specified port")
-    ("debug-extension", value<string>(&po.debug_extension),
+    ("debug-extension", value<string>(&po.debugger_options.extension),
      "PHP file that extends y command")
-    ("debug-cmd", value<StringVec >(&po.debug_cmds)->composing(),
+    ("debug-cmd", value<StringVec>(&po.debugger_options.cmds)->composing(),
      "executes this debugger command and returns its output in stdout")
+    ("debug-sandbox",
+     value<string>(&po.debugger_options.sandbox)->default_value("default"),
+     "initial sandbox to attach to when debugger is started")
     ("user,u", value<string>(&po.user),
      "run server under this user account")
     ("file,f", value<string>(&po.file),
@@ -663,8 +664,7 @@ static int execute_program_impl(int argc, char **argv) {
 
     if (po.mode == "debug") {
       RuntimeOption::EnableDebugger = true;
-      Eval::Debugger::StartClient(po.debug_host, po.debug_port,
-                                  po.debug_extension, po.debug_cmds);
+      Eval::Debugger::StartClient(po.debugger_options);
 
       string file = po.file;
       StringVecPtr client_args; bool restarting = false;
@@ -676,11 +676,11 @@ static int execute_program_impl(int argc, char **argv) {
           DECLARE_THREAD_INFO;
           FRAME_INJECTION_FLAGS(empty_string, _, FrameInjection::PseudoMain);
 
-          if (po.debug_extension.empty()) {
+          if (po.debugger_options.extension.empty()) {
             // even if it's empty, still need to call for warmup
             hphp_invoke_simple(" "); // so not to run the 1st file if compiled
           } else {
-            hphp_invoke_simple(po.debug_extension);
+            hphp_invoke_simple(po.debugger_options.extension);
           }
           Eval::Debugger::RegisterSandbox(Eval::DSandboxInfo());
           if (!restarting) {

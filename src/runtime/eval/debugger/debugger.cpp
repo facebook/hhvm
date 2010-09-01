@@ -33,11 +33,8 @@ void Debugger::StartServer() {
   DebuggerServer::Start();
 }
 
-void Debugger::StartClient(const std::string &host, int port,
-                           const std::string &extension,
-                           const StringVec &cmds) {
-  SmartPtr<Socket> localProxy =
-    DebuggerClient::Start(host, port, extension, cmds);
+void Debugger::StartClient(const DebuggerClientOptions &options) {
+  SmartPtr<Socket> localProxy = DebuggerClient::Start(options);
   if (localProxy.get()) {
     RegisterProxy(localProxy, true);
   }

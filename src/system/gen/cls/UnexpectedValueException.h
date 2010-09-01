@@ -50,18 +50,12 @@ class c_UnexpectedValueException : public c_RuntimeException {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_UnexpectedValueException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_UnexpectedValueException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnexpectedValueException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_UnexpectedValueException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_UnexpectedValueException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_UnexpectedValueException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_UnexpectedValueException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_UnexpectedValueException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_UnexpectedValueException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnexpectedValueException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_UnexpectedValueException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_UnexpectedValueException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_UnexpectedValueException 1
 
   // DECLARE_COMMON_INVOKE

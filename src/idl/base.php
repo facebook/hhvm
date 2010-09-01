@@ -619,11 +619,36 @@ EOT
   foreach ($class['properties'] as $p) {
     generatePropertyCPPForwardDeclarations($p, $f);
   }
+
   fprintf($f, "class c_%s", $clsname);
+  $magic_methods = array('__get' => 'ObjectData::UseGet',
+                         '__set' => 'ObjectData::UseSet',
+                         '__unset' => 'ObjectData::UseUnset');
+  $flags = array();
+  foreach ($class['methods'] as $m) {
+    $name = $m['name'];
+    if (isset($magic_methods[$name])) {
+      $flags[$name] = $magic_methods[$name];
+    }
+  }
+
   if ($class['parent']) {
+    global $classes;
+    $pclass = $class;
+    while ($flags && $pclass['parent'] && isset($classes[$class['parent']])) {
+      $pclass = $classes[$class['parent']];
+      foreach ($pclass['methods'] as $m) {
+        unset($flags[$m['name']]);
+      }
+    }
     fprintf($f, " : public c_" . $class['parent']);
   } else {
     fprintf($f, " : public ExtObjectData");
+    if ($flags) {
+      echo "Using Flags!\n";
+      fprintf($f, "Flags<%s>", implode('|', $flags));
+      $flags = false;
+    }
   }
   foreach ($class['bases'] as $p) {
     fprintf($f, ", public $p");
@@ -658,6 +683,10 @@ EOT
   }
 
   fprintf($f, "  // need to implement\n");
+  if ($flags) {
+    fprintf($f, "  // constructor must call setAttributes(%s)\n",
+            implode('|', $flags));
+  }
   fprintf($f, "  public: c_%s();\n", $class['name']);
   fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {
@@ -691,8 +720,6 @@ function generateMethodCPPHeader($method, $class, $f) {
   if ($method['name'] == "__call") {
     fprintf($f, "  public: Variant doCall(Variant v_name, ");
     fprintf($f, "Variant v_arguments, bool fatal);\n");
-  } else if ($method['name'] == "__get") {
-    fprintf($f, "  public: Variant doGet(Variant v_name, bool error);\n");
   }
 }
 

@@ -151,16 +151,16 @@ bool ObjectPropertyExpression::exist(VariableEnvironment &env, int op) const {
   String name(m_name->get(env));
   SET_LINE;
   if (op == T_ISSET) {
-    return obj->doIsSet(name);
+    return obj->o_isset(name);
   } else {
-    return obj->doEmpty(name);
+    return obj->o_empty(name);
   }
 }
 void ObjectPropertyExpression::unset(VariableEnvironment &env) const {
   Object obj(m_obj->eval(env));
   String name(m_name->get(env));
   SET_LINE_VOID;
-  obj->t___unset(name);
+  obj->o_unset(name);
 }
 
 NamePtr ObjectPropertyExpression::getProperty() const { return m_name; }

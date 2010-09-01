@@ -594,6 +594,8 @@ class Variant {
     return lval();
   }
 
+  Variant *lvalPtr(CStrRef key, bool forWrite, bool create);
+
   static Variant &lvalInvalid();
   static Variant &lvalBlackHole();
 
@@ -621,6 +623,7 @@ class Variant {
 
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
+  Variant o_getPublic(CStrRef propName, bool error = true) const;
   ObjectOffset o_lval(CStrRef propName, CStrRef context = null_string);
 
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);

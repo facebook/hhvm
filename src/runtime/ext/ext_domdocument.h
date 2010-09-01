@@ -102,7 +102,9 @@ Variant f_dom_xpath_register_php_functions(CVarRef obj, CVarRef funcs = null);
 // class DOMNode
 
 FORWARD_DECLARE_CLASS(DOMNode);
-class c_DOMNode : public ExtObjectData, public Sweepable {
+class c_DOMNode :
+      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
+      public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMNode)
   END_CLASS_MAP(DOMNode)
@@ -132,7 +134,6 @@ class c_DOMNode : public ExtObjectData, public Sweepable {
   public: Variant t_c14nfile(CStrRef uri, bool exclusive = false, bool with_comments = false, CVarRef xpath = null, CVarRef ns_prefixes = null);
   public: Variant t_getnodepath();
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -168,7 +169,6 @@ class c_DOMAttr : public c_DOMNode {
   public: void t___construct(CStrRef name, CStrRef value = null_string);
   public: bool t_isid();
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -204,7 +204,6 @@ class c_DOMCharacterData : public c_DOMNode {
   public: bool t_replacedata(int64 offset, int64 count, CStrRef data);
   public: String t_substringdata(int64 offset, int64 count);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -265,7 +264,6 @@ class c_DOMText : public c_DOMCharacterData {
   public: bool t_iswhitespaceinelementcontent();
   public: Variant t_splittext(int64 offset);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -354,7 +352,6 @@ class c_DOMDocument : public c_DOMNode {
   public: bool t_validate();
   public: Variant t_xinclude(int64 options = 0);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -425,7 +422,6 @@ class c_DOMDocumentType : public c_DOMNode {
   public: ~c_DOMDocumentType();
   public: void t___construct();
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -474,7 +470,6 @@ class c_DOMElement : public c_DOMNode {
   public: Variant t_setidattributenode(CObjRef idattr, bool isid);
   public: Variant t_setidattributens(CStrRef namespaceuri, CStrRef localname, bool isid);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -505,7 +500,6 @@ class c_DOMEntity : public c_DOMNode {
   public: ~c_DOMEntity();
   public: void t___construct();
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -564,7 +558,6 @@ class c_DOMNotation : public c_DOMNode {
   public: ~c_DOMNotation();
   public: void t___construct();
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -595,7 +588,6 @@ class c_DOMProcessingInstruction : public c_DOMNode {
   public: ~c_DOMProcessingInstruction();
   public: void t___construct(CStrRef name, CStrRef value = null_string);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 
@@ -652,7 +644,9 @@ public:
 // class DOMNamedNodeMap
 
 FORWARD_DECLARE_CLASS(DOMNamedNodeMap);
-class c_DOMNamedNodeMap : public ExtObjectData, public dom_iterable {
+class c_DOMNamedNodeMap :
+      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
+      public dom_iterable {
  public:
   BEGIN_CLASS_MAP(DOMNamedNodeMap)
   PARENT_CLASS(IteratorAggregate)
@@ -669,7 +663,6 @@ class c_DOMNamedNodeMap : public ExtObjectData, public dom_iterable {
   public: Variant t_getnameditemns(CStrRef namespaceuri, CStrRef localname);
   public: Variant t_item(int64 index);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t_getiterator();
   public: Variant t___destruct();
@@ -687,7 +680,9 @@ class c_DOMNamedNodeMap : public ExtObjectData, public dom_iterable {
 // class DOMNodeList
 
 FORWARD_DECLARE_CLASS(DOMNodeList);
-class c_DOMNodeList : public ExtObjectData, public dom_iterable {
+class c_DOMNodeList :
+      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
+      public dom_iterable {
  public:
   BEGIN_CLASS_MAP(DOMNodeList)
   PARENT_CLASS(IteratorAggregate)
@@ -702,7 +697,6 @@ class c_DOMNodeList : public ExtObjectData, public dom_iterable {
   public: void t___construct();
   public: Variant t_item(int64 index);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t_getiterator();
   public: Variant t___destruct();
@@ -778,7 +772,9 @@ class c_DOMImplementation : public ExtObjectData {
 // class DOMXPath
 
 FORWARD_DECLARE_CLASS(DOMXPath);
-class c_DOMXPath : public ExtObjectData, public Sweepable {
+class c_DOMXPath :
+      public ExtObjectDataFlags<ObjectData::UseGet|ObjectData::UseSet>,
+      public Sweepable {
  public:
   BEGIN_CLASS_MAP(DOMXPath)
   END_CLASS_MAP(DOMXPath)
@@ -795,7 +791,6 @@ class c_DOMXPath : public ExtObjectData, public Sweepable {
   public: bool t_registernamespace(CStrRef prefix, CStrRef uri);
   public: Variant t_registerphpfunctions(CVarRef funcs = null);
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: Variant t___destruct();
 

@@ -48,19 +48,12 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunctionAbstract 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunctionAbstract 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunctionAbstract 1
-  #define OMIT_JUMP_TABLE_CLASS_get_ReflectionFunctionAbstract 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionFunctionAbstract 1
-  #define OMIT_JUMP_TABLE_CLASS_set_ReflectionFunctionAbstract 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionFunctionAbstract 1
   #define OMIT_JUMP_TABLE_CLASS_lval_ReflectionFunctionAbstract 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ReflectionFunctionAbstract 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
-  virtual Variant o_getPublic(CStrRef s, bool error = true);
-  virtual Variant o_setPublic(CStrRef s,
-                              CVarRef v, bool forInit);
   virtual Variant &o_lvalPublic(CStrRef s);
 
   // DECLARE_COMMON_INVOKE

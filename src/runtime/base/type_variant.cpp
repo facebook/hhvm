@@ -2208,6 +2208,14 @@ Variant &Variant::lvalAt(CVarRef k, bool checkExist /* = false */) {
   return lvalAtImpl(k, checkExist);
 }
 
+Variant *Variant::lvalPtr(CStrRef key, bool forWrite, bool create) {
+  Variant *t = m_type == KindOfVariant ? m_data.pvar : this;
+  if (t->m_type == KindOfArray) {
+    return t->asArrRef().lvalPtr(key, forWrite, create);
+  }
+  return NULL;
+}
+
 Variant &Variant::lvalInvalid() {
   throw_bad_type_exception("not array objects");
   return lvalBlackHole();
@@ -2264,6 +2272,17 @@ Variant Variant::o_get(CStrRef propName, bool error /* = true */,
     return m_data.pobj->o_get(propName, error, context);
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_get(propName, error, context);
+  } else if (error) {
+    raise_notice("Trying to get property of non-object");
+  }
+  return null_variant;
+}
+
+Variant Variant::o_getPublic(CStrRef propName, bool error /* = true */) const {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_getPublic(propName, error);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_getPublic(propName, error);
   } else if (error) {
     raise_notice("Trying to get property of non-object");
   }

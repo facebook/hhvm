@@ -50,21 +50,6 @@ void c_UnexpectedValueException::o_setArray(CArrRef props) {
   c_RuntimeException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_UnexpectedValueException
-Variant c_UnexpectedValueException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_UnexpectedValueException
-Variant c_UnexpectedValueException::o_getPublic(CStrRef s, bool error) {
-  return c_RuntimeException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_UnexpectedValueException
-Variant c_UnexpectedValueException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_UnexpectedValueException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_UnexpectedValueException
 Variant * c_UnexpectedValueException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -80,21 +65,6 @@ Variant * c_UnexpectedValueException::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_UnexpectedValueException
-Variant c_UnexpectedValueException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_UnexpectedValueException
-Variant c_UnexpectedValueException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_RuntimeException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_UnexpectedValueException
-Variant c_UnexpectedValueException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_UnexpectedValueException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_UnexpectedValueException
 Variant& c_UnexpectedValueException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -735,21 +705,6 @@ void c_OverflowException::o_setArray(CArrRef props) {
   c_RuntimeException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_OverflowException
-Variant c_OverflowException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_OverflowException
-Variant c_OverflowException::o_getPublic(CStrRef s, bool error) {
-  return c_RuntimeException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_OverflowException
-Variant c_OverflowException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_OverflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_OverflowException
 Variant * c_OverflowException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -765,21 +720,6 @@ Variant * c_OverflowException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_OverflowException
-Variant c_OverflowException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_OverflowException
-Variant c_OverflowException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_RuntimeException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_OverflowException
-Variant c_OverflowException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_OverflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_OverflowException
 Variant& c_OverflowException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -1420,21 +1360,6 @@ void c_OutOfBoundsException::o_setArray(CArrRef props) {
   c_RuntimeException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_OutOfBoundsException
-Variant c_OutOfBoundsException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_OutOfBoundsException
-Variant c_OutOfBoundsException::o_getPublic(CStrRef s, bool error) {
-  return c_RuntimeException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_OutOfBoundsException
-Variant c_OutOfBoundsException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_OutOfBoundsException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_OutOfBoundsException
 Variant * c_OutOfBoundsException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -1450,21 +1375,6 @@ Variant * c_OutOfBoundsException::o_realPropPrivate(CStrRef s, int flags) const 
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_OutOfBoundsException
-Variant c_OutOfBoundsException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_OutOfBoundsException
-Variant c_OutOfBoundsException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_RuntimeException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_OutOfBoundsException
-Variant c_OutOfBoundsException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_OutOfBoundsException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_OutOfBoundsException
 Variant& c_OutOfBoundsException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -2105,21 +2015,6 @@ void c_LogicException::o_setArray(CArrRef props) {
   c_Exception::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_LogicException
-Variant c_LogicException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_LogicException
-Variant c_LogicException::o_getPublic(CStrRef s, bool error) {
-  return c_Exception::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_LogicException
-Variant c_LogicException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_LogicException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_LogicException
 Variant * c_LogicException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2135,21 +2030,6 @@ Variant * c_LogicException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_LogicException
-Variant c_LogicException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_LogicException
-Variant c_LogicException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_Exception::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_LogicException
-Variant c_LogicException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_LogicException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_LogicException
 Variant& c_LogicException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -2790,21 +2670,6 @@ void c_RangeException::o_setArray(CArrRef props) {
   c_RuntimeException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_RangeException
-Variant c_RangeException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RangeException
-Variant c_RangeException::o_getPublic(CStrRef s, bool error) {
-  return c_RuntimeException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RangeException
-Variant c_RangeException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_RangeException
 Variant * c_RangeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2820,21 +2685,6 @@ Variant * c_RangeException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_RangeException
-Variant c_RangeException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RangeException
-Variant c_RangeException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_RuntimeException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RangeException
-Variant c_RangeException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_RangeException
 Variant& c_RangeException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -3475,21 +3325,6 @@ void c_InvalidArgumentException::o_setArray(CArrRef props) {
   c_LogicException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_InvalidArgumentException
-Variant c_InvalidArgumentException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_InvalidArgumentException
-Variant c_InvalidArgumentException::o_getPublic(CStrRef s, bool error) {
-  return c_LogicException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_InvalidArgumentException
-Variant c_InvalidArgumentException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_InvalidArgumentException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_InvalidArgumentException
 Variant * c_InvalidArgumentException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -3505,21 +3340,6 @@ Variant * c_InvalidArgumentException::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_InvalidArgumentException
-Variant c_InvalidArgumentException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_InvalidArgumentException
-Variant c_InvalidArgumentException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_LogicException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_InvalidArgumentException
-Variant c_InvalidArgumentException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_InvalidArgumentException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_InvalidArgumentException
 Variant& c_InvalidArgumentException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -4160,21 +3980,6 @@ void c_UnderflowException::o_setArray(CArrRef props) {
   c_RuntimeException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_UnderflowException
-Variant c_UnderflowException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_UnderflowException
-Variant c_UnderflowException::o_getPublic(CStrRef s, bool error) {
-  return c_RuntimeException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_UnderflowException
-Variant c_UnderflowException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_UnderflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_UnderflowException
 Variant * c_UnderflowException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -4190,21 +3995,6 @@ Variant * c_UnderflowException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_UnderflowException
-Variant c_UnderflowException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_UnderflowException
-Variant c_UnderflowException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_RuntimeException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_UnderflowException
-Variant c_UnderflowException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_UnderflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_UnderflowException
 Variant& c_UnderflowException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -4845,21 +4635,6 @@ void c_OutOfRangeException::o_setArray(CArrRef props) {
   c_LogicException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_OutOfRangeException
-Variant c_OutOfRangeException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_OutOfRangeException
-Variant c_OutOfRangeException::o_getPublic(CStrRef s, bool error) {
-  return c_LogicException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_OutOfRangeException
-Variant c_OutOfRangeException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_OutOfRangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_OutOfRangeException
 Variant * c_OutOfRangeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -4875,21 +4650,6 @@ Variant * c_OutOfRangeException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_OutOfRangeException
-Variant c_OutOfRangeException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_OutOfRangeException
-Variant c_OutOfRangeException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_LogicException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_OutOfRangeException
-Variant c_OutOfRangeException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_OutOfRangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_OutOfRangeException
 Variant& c_OutOfRangeException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -5530,21 +5290,6 @@ void c_BadMethodCallException::o_setArray(CArrRef props) {
   c_BadFunctionCallException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_BadMethodCallException
-Variant c_BadMethodCallException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_BadMethodCallException
-Variant c_BadMethodCallException::o_getPublic(CStrRef s, bool error) {
-  return c_BadFunctionCallException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_BadMethodCallException
-Variant c_BadMethodCallException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_BadMethodCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException
 Variant * c_BadMethodCallException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5560,21 +5305,6 @@ Variant * c_BadMethodCallException::o_realPropPrivate(CStrRef s, int flags) cons
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_BadMethodCallException
-Variant c_BadMethodCallException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_BadMethodCallException
-Variant c_BadMethodCallException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_BadFunctionCallException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_BadMethodCallException
-Variant c_BadMethodCallException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_BadMethodCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_BadMethodCallException
 Variant& c_BadMethodCallException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -6215,21 +5945,6 @@ void c_RuntimeException::o_setArray(CArrRef props) {
   c_Exception::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_RuntimeException
-Variant c_RuntimeException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RuntimeException
-Variant c_RuntimeException::o_getPublic(CStrRef s, bool error) {
-  return c_Exception::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RuntimeException
-Variant c_RuntimeException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RuntimeException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException
 Variant * c_RuntimeException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -6245,21 +5960,6 @@ Variant * c_RuntimeException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_RuntimeException
-Variant c_RuntimeException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RuntimeException
-Variant c_RuntimeException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_Exception::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RuntimeException
-Variant c_RuntimeException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RuntimeException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_RuntimeException
 Variant& c_RuntimeException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -6931,46 +6631,6 @@ void c_Exception::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_Exception
-Variant c_Exception::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Exception
-Variant c_Exception::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 7:
-      HASH_RETURN_NAMSTR(0x3CCB986B2CF0A747LL, s_sys_ss2cf0a747, m_trace,
-                         5);
-      break;
-    case 9:
-      HASH_RETURN_NAMSTR(0x58C72230857ACDB9LL, s_sys_ss7a853247, m_code,
-                         4);
-      break;
-    case 10:
-      HASH_RETURN_NAMSTR(0x04AB35CACF8C8C9ALL, s_sys_ss30737366, m_line,
-                         4);
-      break;
-    case 11:
-      HASH_RETURN_NAMSTR(0x0247CDBB94C9D47BLL, s_sys_ss6b362b85, m_message,
-                         7);
-      break;
-    case 15:
-      HASH_RETURN_NAMSTR(0x7863294A8F33D14FLL, s_sys_ss70cc2eb1, m_file,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Exception
-Variant c_Exception::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Exception
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Exception
 Variant * c_Exception::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -7006,46 +6666,6 @@ Variant * c_Exception::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_Exception
-Variant c_Exception::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Exception
-Variant c_Exception::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 7:
-      HASH_SET_STRING(0x3CCB986B2CF0A747LL, m_trace,
-                      "trace", 5);
-      break;
-    case 9:
-      HASH_SET_STRING(0x58C72230857ACDB9LL, m_code,
-                      "code", 4);
-      break;
-    case 10:
-      HASH_SET_STRING(0x04AB35CACF8C8C9ALL, m_line,
-                      "line", 4);
-      break;
-    case 11:
-      HASH_SET_STRING(0x0247CDBB94C9D47BLL, m_message,
-                      "message", 7);
-      break;
-    case 15:
-      HASH_SET_STRING(0x7863294A8F33D14FLL, m_file,
-                      "file", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Exception
-Variant c_Exception::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Exception
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_Exception
 Variant& c_Exception::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -7967,30 +7587,6 @@ void c_ErrorException::o_setArray(CArrRef props) {
   c_Exception::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ErrorException
-Variant c_ErrorException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ErrorException
-Variant c_ErrorException::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x4FDAA620FA5F15F9LL, s_sys_ss05a0ea07, m_severity,
-                         8);
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ErrorException
-Variant c_ErrorException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ErrorException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ErrorException
 Variant * c_ErrorException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -8014,30 +7610,6 @@ Variant * c_ErrorException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ErrorException
-Variant c_ErrorException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ErrorException
-Variant c_ErrorException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_SET_STRING(0x4FDAA620FA5F15F9LL, m_severity,
-                      "severity", 8);
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ErrorException
-Variant c_ErrorException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ErrorException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ErrorException
 Variant& c_ErrorException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -8932,21 +8504,6 @@ void c_BadFunctionCallException::o_setArray(CArrRef props) {
   c_LogicException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_BadFunctionCallException
-Variant c_BadFunctionCallException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_BadFunctionCallException
-Variant c_BadFunctionCallException::o_getPublic(CStrRef s, bool error) {
-  return c_LogicException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_BadFunctionCallException
-Variant c_BadFunctionCallException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_BadFunctionCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_BadFunctionCallException
 Variant * c_BadFunctionCallException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -8962,21 +8519,6 @@ Variant * c_BadFunctionCallException::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_BadFunctionCallException
-Variant c_BadFunctionCallException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_BadFunctionCallException
-Variant c_BadFunctionCallException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_LogicException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_BadFunctionCallException
-Variant c_BadFunctionCallException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_BadFunctionCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_BadFunctionCallException
 Variant& c_BadFunctionCallException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -9617,21 +9159,6 @@ void c_LengthException::o_setArray(CArrRef props) {
   c_LogicException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_LengthException
-Variant c_LengthException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_LengthException
-Variant c_LengthException::o_getPublic(CStrRef s, bool error) {
-  return c_LogicException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_LengthException
-Variant c_LengthException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_LengthException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_LengthException
 Variant * c_LengthException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -9647,21 +9174,6 @@ Variant * c_LengthException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_LengthException
-Variant c_LengthException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_LengthException
-Variant c_LengthException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_LogicException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_LengthException
-Variant c_LengthException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_LengthException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_LengthException
 Variant& c_LengthException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -10302,21 +9814,6 @@ void c_DomainException::o_setArray(CArrRef props) {
   c_LogicException::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DomainException
-Variant c_DomainException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DomainException
-Variant c_DomainException::o_getPublic(CStrRef s, bool error) {
-  return c_LogicException::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DomainException
-Variant c_DomainException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DomainException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DomainException
 Variant * c_DomainException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -10332,21 +9829,6 @@ Variant * c_DomainException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DomainException
-Variant c_DomainException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DomainException
-Variant c_DomainException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_LogicException::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DomainException
-Variant c_DomainException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DomainException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DomainException
 Variant& c_DomainException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);

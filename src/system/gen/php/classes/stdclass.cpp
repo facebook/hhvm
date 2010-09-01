@@ -50,21 +50,6 @@ void c_stdClass::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_get_stdClass
-Variant c_stdClass::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_stdClass
-Variant c_stdClass::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_stdClass
-Variant c_stdClass::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_stdClass
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_stdClass
 Variant * c_stdClass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -80,21 +65,6 @@ Variant * c_stdClass::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_set_stdClass
-Variant c_stdClass::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_stdClass
-Variant c_stdClass::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_stdClass
-Variant c_stdClass::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_stdClass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_stdClass
 Variant& c_stdClass::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -199,21 +169,6 @@ void c___PHP_Incomplete_Class::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_get___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE___PHP_Incomplete_Class
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp___PHP_Incomplete_Class
 Variant * c___PHP_Incomplete_Class::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -229,21 +184,6 @@ Variant * c___PHP_Incomplete_Class::o_realPropPrivate(CStrRef s, int flags) cons
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_set___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE___PHP_Incomplete_Class
-Variant c___PHP_Incomplete_Class::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE___PHP_Incomplete_Class
 #ifndef OMIT_JUMP_TABLE_CLASS_lval___PHP_Incomplete_Class
 Variant& c___PHP_Incomplete_Class::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);

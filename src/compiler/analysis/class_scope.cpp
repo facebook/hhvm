@@ -70,7 +70,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
     else if (f->getName() == "__call") setAttribute(HasUnknownMethodHandler);
-    else if (f->getName() == "__get") setAttribute(HasUnknownPropHandler);
+    else if (f->getName() == "__get") setAttribute(HasUnknownPropGetter);
+    else if (f->getName() == "__set") setAttribute(HasUnknownPropSetter);
     addFunction(ar, f);
   }
   setAttribute(Extension);
@@ -1112,14 +1113,6 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
                    Option::ClassPrefix, clsName);
     cg_printf("return t___call(v_name, !v_arguments.isNull() ? "
               "v_arguments : Variant(Array::Create()));\n");
-    cg_indentEnd("}\n");
-  }
-
-  // doGet
-  if (getAttribute(ClassScope::HasUnknownPropHandler)) {
-    cg_indentBegin("Variant %s%s::doGet(Variant v_name, bool error) {\n",
-                   Option::ClassPrefix, clsName);
-    cg_printf("return t___get(v_name);\n");
     cg_indentEnd("}\n");
   }
 

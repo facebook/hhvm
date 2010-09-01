@@ -517,21 +517,6 @@ void c_PDOException::o_setArray(CArrRef props) {
   c_Exception::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PDOException
-Variant c_PDOException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_PDOException
-Variant c_PDOException::o_getPublic(CStrRef s, bool error) {
-  return c_Exception::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_PDOException
-Variant c_PDOException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_PDOException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDOException
 Variant * c_PDOException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -547,21 +532,6 @@ Variant * c_PDOException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PDOException
-Variant c_PDOException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_PDOException
-Variant c_PDOException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_Exception::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_PDOException
-Variant c_PDOException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_PDOException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PDOException
 Variant& c_PDOException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -1248,21 +1218,6 @@ void c_DOMDocumentFragment::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMDocumentFragment
-Variant c_DOMDocumentFragment::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMDocumentFragment
-Variant c_DOMDocumentFragment::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMDocumentFragment
-Variant c_DOMDocumentFragment::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMDocumentFragment
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentFragment
 Variant * c_DOMDocumentFragment::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -1278,21 +1233,6 @@ Variant * c_DOMDocumentFragment::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMDocumentFragment
-Variant c_DOMDocumentFragment::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMDocumentFragment
-Variant c_DOMDocumentFragment::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMDocumentFragment
-Variant c_DOMDocumentFragment::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMDocumentFragment
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMDocumentFragment
 Variant& c_DOMDocumentFragment::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -3019,21 +2959,6 @@ void c_DOMText::o_setArray(CArrRef props) {
   c_DOMCharacterData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMText
-Variant c_DOMText::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMText
-Variant c_DOMText::o_getPublic(CStrRef s, bool error) {
-  return c_DOMCharacterData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMText
-Variant c_DOMText::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMText
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMText
 Variant * c_DOMText::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -3049,21 +2974,6 @@ Variant * c_DOMText::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMText
-Variant c_DOMText::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMText
-Variant c_DOMText::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMCharacterData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMText
-Variant c_DOMText::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMText
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMText
 Variant& c_DOMText::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -3156,9 +3066,6 @@ ObjectData *c_DOMText::cloneImpl() {
 }
 void c_DOMText::cloneSet(c_DOMText *clone) {
   c_DOMCharacterData::cloneSet(clone);
-}
-Variant c_DOMText::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMText
 Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -5286,21 +5193,6 @@ void c_DebuggerClient::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DebuggerClient
-Variant c_DebuggerClient::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DebuggerClient
-Variant c_DebuggerClient::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DebuggerClient
-Variant c_DebuggerClient::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DebuggerClient
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DebuggerClient
 Variant * c_DebuggerClient::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5316,21 +5208,6 @@ Variant * c_DebuggerClient::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DebuggerClient
-Variant c_DebuggerClient::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DebuggerClient
-Variant c_DebuggerClient::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DebuggerClient
-Variant c_DebuggerClient::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DebuggerClient
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DebuggerClient
 Variant& c_DebuggerClient::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -7610,21 +7487,6 @@ void c_DOMCDATASection::o_setArray(CArrRef props) {
   c_DOMText::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMCDATASection
-Variant c_DOMCDATASection::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMCDATASection
-Variant c_DOMCDATASection::o_getPublic(CStrRef s, bool error) {
-  return c_DOMText::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMCDATASection
-Variant c_DOMCDATASection::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMCDATASection
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMCDATASection
 Variant * c_DOMCDATASection::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -7640,21 +7502,6 @@ Variant * c_DOMCDATASection::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMCDATASection
-Variant c_DOMCDATASection::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMCDATASection
-Variant c_DOMCDATASection::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMText::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMCDATASection
-Variant c_DOMCDATASection::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMCDATASection
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMCDATASection
 Variant& c_DOMCDATASection::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -9859,21 +9706,6 @@ void c_Locale::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_get_Locale
-Variant c_Locale::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Locale
-Variant c_Locale::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Locale
-Variant c_Locale::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Locale
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Locale
 Variant * c_Locale::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -9889,21 +9721,6 @@ Variant * c_Locale::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_set_Locale
-Variant c_Locale::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Locale
-Variant c_Locale::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Locale
-Variant c_Locale::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Locale
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_Locale
 Variant& c_Locale::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -10183,21 +10000,6 @@ void c_DOMDocumentType::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMDocumentType
-Variant c_DOMDocumentType::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMDocumentType
-Variant c_DOMDocumentType::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMDocumentType
-Variant c_DOMDocumentType::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMDocumentType
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocumentType
 Variant * c_DOMDocumentType::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -10213,21 +10015,6 @@ Variant * c_DOMDocumentType::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMDocumentType
-Variant c_DOMDocumentType::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMDocumentType
-Variant c_DOMDocumentType::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMDocumentType
-Variant c_DOMDocumentType::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMDocumentType
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMDocumentType
 Variant& c_DOMDocumentType::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -10297,9 +10084,6 @@ ObjectData *c_DOMDocumentType::cloneImpl() {
 }
 void c_DOMDocumentType::cloneSet(c_DOMDocumentType *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMDocumentType::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMDocumentType
 Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -11893,21 +11677,6 @@ void c_SQLite3Stmt::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SQLite3Stmt
-Variant c_SQLite3Stmt::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SQLite3Stmt
-Variant c_SQLite3Stmt::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SQLite3Stmt
-Variant c_SQLite3Stmt::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SQLite3Stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Stmt
 Variant * c_SQLite3Stmt::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -11923,21 +11692,6 @@ Variant * c_SQLite3Stmt::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SQLite3Stmt
-Variant c_SQLite3Stmt::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SQLite3Stmt
-Variant c_SQLite3Stmt::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SQLite3Stmt
-Variant c_SQLite3Stmt::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SQLite3Stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SQLite3Stmt
 Variant& c_SQLite3Stmt::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -12716,21 +12470,6 @@ void c_DOMNodeList::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMNodeList
-Variant c_DOMNodeList::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNodeList
-Variant c_DOMNodeList::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNodeList
-Variant c_DOMNodeList::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNodeList
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeList
 Variant * c_DOMNodeList::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -12746,21 +12485,6 @@ Variant * c_DOMNodeList::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMNodeList
-Variant c_DOMNodeList::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNodeList
-Variant c_DOMNodeList::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNodeList
-Variant c_DOMNodeList::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNodeList
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNodeList
 Variant& c_DOMNodeList::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -12830,9 +12554,6 @@ ObjectData *c_DOMNodeList::cloneImpl() {
 }
 void c_DOMNodeList::cloneSet(c_DOMNodeList *clone) {
   ObjectData::cloneSet(clone);
-}
-Variant c_DOMNodeList::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMNodeList
 Variant c_DOMNodeList::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -13300,21 +13021,6 @@ void c_Normalizer::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_get_Normalizer
-Variant c_Normalizer::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Normalizer
-Variant c_Normalizer::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Normalizer
-Variant c_Normalizer::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Normalizer
 Variant * c_Normalizer::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -13330,21 +13036,6 @@ Variant * c_Normalizer::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_set_Normalizer
-Variant c_Normalizer::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Normalizer
-Variant c_Normalizer::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Normalizer
-Variant c_Normalizer::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_Normalizer
 Variant& c_Normalizer::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -13981,21 +13672,6 @@ void c_DOMCharacterData::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMCharacterData
-Variant c_DOMCharacterData::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMCharacterData
-Variant c_DOMCharacterData::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMCharacterData
-Variant c_DOMCharacterData::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMCharacterData
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMCharacterData
 Variant * c_DOMCharacterData::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -14011,21 +13687,6 @@ Variant * c_DOMCharacterData::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMCharacterData
-Variant c_DOMCharacterData::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMCharacterData
-Variant c_DOMCharacterData::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMCharacterData
-Variant c_DOMCharacterData::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMCharacterData
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMCharacterData
 Variant& c_DOMCharacterData::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -14095,9 +13756,6 @@ ObjectData *c_DOMCharacterData::cloneImpl() {
 }
 void c_DOMCharacterData::cloneSet(c_DOMCharacterData *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMCharacterData::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMCharacterData
 Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -16085,21 +15743,6 @@ void c_DOMEntityReference::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMEntityReference
-Variant c_DOMEntityReference::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMEntityReference
-Variant c_DOMEntityReference::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMEntityReference
-Variant c_DOMEntityReference::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMEntityReference
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMEntityReference
 Variant * c_DOMEntityReference::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -16115,21 +15758,6 @@ Variant * c_DOMEntityReference::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMEntityReference
-Variant c_DOMEntityReference::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMEntityReference
-Variant c_DOMEntityReference::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMEntityReference
-Variant c_DOMEntityReference::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMEntityReference
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMEntityReference
 Variant& c_DOMEntityReference::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -17824,21 +17452,6 @@ void c_SimpleXMLElementIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SimpleXMLElementIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElementIterator
 Variant * c_SimpleXMLElementIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -17854,21 +17467,6 @@ Variant * c_SimpleXMLElementIterator::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SimpleXMLElementIterator
-Variant c_SimpleXMLElementIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SimpleXMLElementIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SimpleXMLElementIterator
 Variant& c_SimpleXMLElementIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -18405,21 +18003,6 @@ void c_DateTimeZone::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DateTimeZone
-Variant c_DateTimeZone::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DateTimeZone
-Variant c_DateTimeZone::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DateTimeZone
-Variant c_DateTimeZone::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DateTimeZone
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DateTimeZone
 Variant * c_DateTimeZone::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -18435,21 +18018,6 @@ Variant * c_DateTimeZone::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DateTimeZone
-Variant c_DateTimeZone::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DateTimeZone
-Variant c_DateTimeZone::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DateTimeZone
-Variant c_DateTimeZone::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DateTimeZone
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DateTimeZone
 Variant& c_DateTimeZone::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -19171,21 +18739,6 @@ void c_DOMNodeIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMNodeIterator
-Variant c_DOMNodeIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNodeIterator
-Variant c_DOMNodeIterator::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNodeIterator
-Variant c_DOMNodeIterator::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNodeIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNodeIterator
 Variant * c_DOMNodeIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -19201,21 +18754,6 @@ Variant * c_DOMNodeIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMNodeIterator
-Variant c_DOMNodeIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNodeIterator
-Variant c_DOMNodeIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNodeIterator
-Variant c_DOMNodeIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNodeIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNodeIterator
 Variant& c_DOMNodeIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -19752,21 +19290,6 @@ void c_DOMImplementation::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMImplementation
-Variant c_DOMImplementation::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMImplementation
-Variant c_DOMImplementation::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMImplementation
-Variant c_DOMImplementation::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMImplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMImplementation
 Variant * c_DOMImplementation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -19782,21 +19305,6 @@ Variant * c_DOMImplementation::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMImplementation
-Variant c_DOMImplementation::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMImplementation
-Variant c_DOMImplementation::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMImplementation
-Variant c_DOMImplementation::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMImplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMImplementation
 Variant& c_DOMImplementation::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -20357,21 +19865,6 @@ void c_SoapHeader::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SoapHeader
-Variant c_SoapHeader::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapHeader
-Variant c_SoapHeader::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapHeader
-Variant c_SoapHeader::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapHeader
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapHeader
 Variant * c_SoapHeader::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -20387,21 +19880,6 @@ Variant * c_SoapHeader::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SoapHeader
-Variant c_SoapHeader::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapHeader
-Variant c_SoapHeader::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapHeader
-Variant c_SoapHeader::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapHeader
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapHeader
 Variant& c_SoapHeader::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -20813,21 +20291,6 @@ void c_DOMNotation::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMNotation
-Variant c_DOMNotation::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNotation
-Variant c_DOMNotation::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNotation
-Variant c_DOMNotation::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNotation
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNotation
 Variant * c_DOMNotation::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -20843,21 +20306,6 @@ Variant * c_DOMNotation::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMNotation
-Variant c_DOMNotation::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNotation
-Variant c_DOMNotation::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNotation
-Variant c_DOMNotation::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNotation
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNotation
 Variant& c_DOMNotation::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -20927,9 +20375,6 @@ ObjectData *c_DOMNotation::cloneImpl() {
 }
 void c_DOMNotation::cloneSet(c_DOMNotation *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMNotation::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMNotation
 Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -22523,21 +21968,6 @@ void c_DebuggerProxy::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DebuggerProxy
-Variant c_DebuggerProxy::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DebuggerProxy
-Variant c_DebuggerProxy::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DebuggerProxy
-Variant c_DebuggerProxy::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DebuggerProxy
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DebuggerProxy
 Variant * c_DebuggerProxy::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -22553,21 +21983,6 @@ Variant * c_DebuggerProxy::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DebuggerProxy
-Variant c_DebuggerProxy::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DebuggerProxy
-Variant c_DebuggerProxy::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DebuggerProxy
-Variant c_DebuggerProxy::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DebuggerProxy
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DebuggerProxy
 Variant& c_DebuggerProxy::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -22966,21 +22381,6 @@ void c_DOMComment::o_setArray(CArrRef props) {
   c_DOMCharacterData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMComment
-Variant c_DOMComment::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMComment
-Variant c_DOMComment::o_getPublic(CStrRef s, bool error) {
-  return c_DOMCharacterData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMComment
-Variant c_DOMComment::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMComment
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMComment
 Variant * c_DOMComment::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -22996,21 +22396,6 @@ Variant * c_DOMComment::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMComment
-Variant c_DOMComment::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMComment
-Variant c_DOMComment::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMCharacterData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMComment
-Variant c_DOMComment::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMComment
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMComment
 Variant& c_DOMComment::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -25114,21 +24499,6 @@ void c_SQLite3::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SQLite3
-Variant c_SQLite3::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SQLite3
-Variant c_SQLite3::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SQLite3
-Variant c_SQLite3::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SQLite3
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3
 Variant * c_SQLite3::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -25144,21 +24514,6 @@ Variant * c_SQLite3::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SQLite3
-Variant c_SQLite3::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SQLite3
-Variant c_SQLite3::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SQLite3
-Variant c_SQLite3::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SQLite3
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SQLite3
 Variant& c_SQLite3::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -26587,21 +25942,6 @@ void c_DOMAttr::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMAttr
-Variant c_DOMAttr::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMAttr
-Variant c_DOMAttr::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMAttr
-Variant c_DOMAttr::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMAttr
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMAttr
 Variant * c_DOMAttr::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -26617,21 +25957,6 @@ Variant * c_DOMAttr::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMAttr
-Variant c_DOMAttr::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMAttr
-Variant c_DOMAttr::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMAttr
-Variant c_DOMAttr::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMAttr
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMAttr
 Variant& c_DOMAttr::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -26730,9 +26055,6 @@ ObjectData *c_DOMAttr::cloneImpl() {
 }
 void c_DOMAttr::cloneSet(c_DOMAttr *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMAttr::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMAttr
 Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -28406,21 +27728,6 @@ void c_SoapVar::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SoapVar
-Variant c_SoapVar::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapVar
-Variant c_SoapVar::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapVar
-Variant c_SoapVar::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapVar
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapVar
 Variant * c_SoapVar::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -28436,21 +27743,6 @@ Variant * c_SoapVar::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SoapVar
-Variant c_SoapVar::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapVar
-Variant c_SoapVar::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapVar
-Variant c_SoapVar::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapVar
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapVar
 Variant& c_SoapVar::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -28893,21 +28185,6 @@ void c_DOMNamedNodeMap::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNamedNodeMap
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNamedNodeMap
 Variant * c_DOMNamedNodeMap::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -28923,21 +28200,6 @@ Variant * c_DOMNamedNodeMap::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNamedNodeMap
-Variant c_DOMNamedNodeMap::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNamedNodeMap
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNamedNodeMap
 Variant& c_DOMNamedNodeMap::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -29007,9 +28269,6 @@ ObjectData *c_DOMNamedNodeMap::cloneImpl() {
 }
 void c_DOMNamedNodeMap::cloneSet(c_DOMNamedNodeMap *clone) {
   ObjectData::cloneSet(clone);
-}
-Variant c_DOMNamedNodeMap::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMNamedNodeMap
 Variant c_DOMNamedNodeMap::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -29627,21 +28886,6 @@ void c_SQLite3Result::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SQLite3Result
-Variant c_SQLite3Result::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SQLite3Result
-Variant c_SQLite3Result::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SQLite3Result
-Variant c_SQLite3Result::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SQLite3Result
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SQLite3Result
 Variant * c_SQLite3Result::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -29657,21 +28901,6 @@ Variant * c_SQLite3Result::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SQLite3Result
-Variant c_SQLite3Result::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SQLite3Result
-Variant c_SQLite3Result::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SQLite3Result
-Variant c_SQLite3Result::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SQLite3Result
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SQLite3Result
 Variant& c_SQLite3Result::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -30320,21 +29549,6 @@ void c_SimpleXMLElement::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SimpleXMLElement
-Variant c_SimpleXMLElement::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SimpleXMLElement
-Variant c_SimpleXMLElement::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SimpleXMLElement
-Variant c_SimpleXMLElement::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SimpleXMLElement
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SimpleXMLElement
 Variant * c_SimpleXMLElement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -30350,21 +29564,6 @@ Variant * c_SimpleXMLElement::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SimpleXMLElement
-Variant c_SimpleXMLElement::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SimpleXMLElement
-Variant c_SimpleXMLElement::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SimpleXMLElement
-Variant c_SimpleXMLElement::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SimpleXMLElement
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SimpleXMLElement
 Variant& c_SimpleXMLElement::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -30508,9 +29707,6 @@ ObjectData *c_SimpleXMLElement::cloneImpl() {
 }
 void c_SimpleXMLElement::cloneSet(c_SimpleXMLElement *clone) {
   ObjectData::cloneSet(clone);
-}
-Variant c_SimpleXMLElement::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_SimpleXMLElement
 Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -32342,21 +31538,6 @@ void c_Memcache::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_get_Memcache
-Variant c_Memcache::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Memcache
-Variant c_Memcache::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Memcache
-Variant c_Memcache::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Memcache
 Variant * c_Memcache::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -32372,21 +31553,6 @@ Variant * c_Memcache::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_set_Memcache
-Variant c_Memcache::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Memcache
-Variant c_Memcache::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Memcache
-Variant c_Memcache::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_Memcache
 Variant& c_Memcache::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -34555,21 +33721,6 @@ void c_DOMProcessingInstruction::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMProcessingInstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMProcessingInstruction
 Variant * c_DOMProcessingInstruction::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -34585,21 +33736,6 @@ Variant * c_DOMProcessingInstruction::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMProcessingInstruction
-Variant c_DOMProcessingInstruction::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMProcessingInstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMProcessingInstruction
 Variant& c_DOMProcessingInstruction::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -34698,9 +33834,6 @@ ObjectData *c_DOMProcessingInstruction::cloneImpl() {
 }
 void c_DOMProcessingInstruction::cloneSet(c_DOMProcessingInstruction *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMProcessingInstruction::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMProcessingInstruction
 Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -36328,21 +35461,6 @@ void c_PDOStatement::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PDOStatement
-Variant c_PDOStatement::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_PDOStatement
-Variant c_PDOStatement::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_PDOStatement
-Variant c_PDOStatement::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_PDOStatement
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDOStatement
 Variant * c_PDOStatement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -36358,21 +35476,6 @@ Variant * c_PDOStatement::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PDOStatement
-Variant c_PDOStatement::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_PDOStatement
-Variant c_PDOStatement::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_PDOStatement
-Variant c_PDOStatement::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_PDOStatement
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PDOStatement
 Variant& c_PDOStatement::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -38485,21 +37588,6 @@ void c_SoapClient::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SoapClient
-Variant c_SoapClient::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapClient
-Variant c_SoapClient::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapClient
-Variant c_SoapClient::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapClient
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapClient
 Variant * c_SoapClient::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -38515,21 +37603,6 @@ Variant * c_SoapClient::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SoapClient
-Variant c_SoapClient::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapClient
-Variant c_SoapClient::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapClient
-Variant c_SoapClient::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapClient
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapClient
 Variant& c_SoapClient::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -39724,21 +38797,6 @@ void c_SoapParam::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SoapParam
-Variant c_SoapParam::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapParam
-Variant c_SoapParam::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapParam
-Variant c_SoapParam::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapParam
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapParam
 Variant * c_SoapParam::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -39754,21 +38812,6 @@ Variant * c_SoapParam::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SoapParam
-Variant c_SoapParam::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapParam
-Variant c_SoapParam::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapParam
-Variant c_SoapParam::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapParam
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapParam
 Variant& c_SoapParam::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -40087,21 +39130,6 @@ void c_DateTime::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DateTime
-Variant c_DateTime::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DateTime
-Variant c_DateTime::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DateTime
-Variant c_DateTime::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DateTime
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DateTime
 Variant * c_DateTime::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -40117,21 +39145,6 @@ Variant * c_DateTime::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DateTime
-Variant c_DateTime::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DateTime
-Variant c_DateTime::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DateTime
-Variant c_DateTime::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DateTime
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DateTime
 Variant& c_DateTime::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -41102,21 +40115,6 @@ void c_Collator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_Collator
-Variant c_Collator::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Collator
-Variant c_Collator::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Collator
-Variant c_Collator::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Collator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Collator
 Variant * c_Collator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -41132,21 +40130,6 @@ Variant * c_Collator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_Collator
-Variant c_Collator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Collator
-Variant c_Collator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Collator
-Variant c_Collator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Collator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_Collator
 Variant& c_Collator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -42440,21 +41423,6 @@ void c_PDO::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PDO
-Variant c_PDO::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_PDO
-Variant c_PDO::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_PDO
-Variant c_PDO::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_PDO
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_PDO
 Variant * c_PDO::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -42470,21 +41438,6 @@ Variant * c_PDO::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PDO
-Variant c_PDO::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_PDO
-Variant c_PDO::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_PDO
-Variant c_PDO::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_PDO
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_PDO
 Variant& c_PDO::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -44130,21 +43083,6 @@ void c_ImageSprite::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ImageSprite
-Variant c_ImageSprite::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ImageSprite
-Variant c_ImageSprite::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ImageSprite
-Variant c_ImageSprite::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ImageSprite
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ImageSprite
 Variant * c_ImageSprite::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -44160,21 +43098,6 @@ Variant * c_ImageSprite::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ImageSprite
-Variant c_ImageSprite::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ImageSprite
-Variant c_ImageSprite::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ImageSprite
-Variant c_ImageSprite::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ImageSprite
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ImageSprite
 Variant& c_ImageSprite::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -45339,21 +44262,6 @@ void c_DOMEntity::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMEntity
-Variant c_DOMEntity::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMEntity
-Variant c_DOMEntity::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMEntity
-Variant c_DOMEntity::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMEntity
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMEntity
 Variant * c_DOMEntity::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -45369,21 +44277,6 @@ Variant * c_DOMEntity::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMEntity
-Variant c_DOMEntity::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMEntity
-Variant c_DOMEntity::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMEntity
-Variant c_DOMEntity::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMEntity
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMEntity
 Variant& c_DOMEntity::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -45453,9 +44346,6 @@ ObjectData *c_DOMEntity::cloneImpl() {
 }
 void c_DOMEntity::cloneSet(c_DOMEntity *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMEntity::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMEntity
 Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -47049,21 +45939,6 @@ void c_XMLWriter::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_get_XMLWriter
-Variant c_XMLWriter::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_XMLWriter
-Variant c_XMLWriter::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_XMLWriter
-Variant c_XMLWriter::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_XMLWriter
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_XMLWriter
 Variant * c_XMLWriter::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -47079,21 +45954,6 @@ Variant * c_XMLWriter::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_set_XMLWriter
-Variant c_XMLWriter::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_XMLWriter
-Variant c_XMLWriter::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_XMLWriter
-Variant c_XMLWriter::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_XMLWriter
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_XMLWriter
 Variant& c_XMLWriter::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -50416,21 +49276,6 @@ void c_DOMException::o_setArray(CArrRef props) {
   c_Exception::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMException
-Variant c_DOMException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMException
-Variant c_DOMException::o_getPublic(CStrRef s, bool error) {
-  return c_Exception::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMException
-Variant c_DOMException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMException
 Variant * c_DOMException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -50446,21 +49291,6 @@ Variant * c_DOMException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMException
-Variant c_DOMException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMException
-Variant c_DOMException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_Exception::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMException
-Variant c_DOMException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMException
 Variant& c_DOMException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -51225,21 +50055,6 @@ void c_DOMXPath::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMXPath
-Variant c_DOMXPath::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMXPath
-Variant c_DOMXPath::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMXPath
-Variant c_DOMXPath::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMXPath
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMXPath
 Variant * c_DOMXPath::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -51255,21 +50070,6 @@ Variant * c_DOMXPath::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMXPath
-Variant c_DOMXPath::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMXPath
-Variant c_DOMXPath::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMXPath
-Variant c_DOMXPath::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMXPath
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMXPath
 Variant& c_DOMXPath::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -51353,9 +50153,6 @@ ObjectData *c_DOMXPath::cloneImpl() {
 }
 void c_DOMXPath::cloneSet(c_DOMXPath *clone) {
   ObjectData::cloneSet(clone);
-}
-Variant c_DOMXPath::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMXPath
 Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -52047,21 +50844,6 @@ void c_SoapServer::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SoapServer
-Variant c_SoapServer::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapServer
-Variant c_SoapServer::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapServer
-Variant c_SoapServer::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapServer
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapServer
 Variant * c_SoapServer::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -52077,21 +50859,6 @@ Variant * c_SoapServer::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SoapServer
-Variant c_SoapServer::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapServer
-Variant c_SoapServer::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapServer
-Variant c_SoapServer::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapServer
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapServer
 Variant& c_SoapServer::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -53051,21 +51818,6 @@ void c_DOMNode::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMNode
-Variant c_DOMNode::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNode
-Variant c_DOMNode::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNode
-Variant c_DOMNode::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMNode
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMNode
 Variant * c_DOMNode::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -53081,21 +51833,6 @@ Variant * c_DOMNode::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMNode
-Variant c_DOMNode::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNode
-Variant c_DOMNode::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNode
-Variant c_DOMNode::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMNode
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNode
 Variant& c_DOMNode::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -53165,9 +51902,6 @@ ObjectData *c_DOMNode::cloneImpl() {
 }
 void c_DOMNode::cloneSet(c_DOMNode *clone) {
   ObjectData::cloneSet(clone);
-}
-Variant c_DOMNode::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMNode
 Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -54761,21 +53495,6 @@ void c_DOMDocument::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMDocument
-Variant c_DOMDocument::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMDocument
-Variant c_DOMDocument::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMDocument
-Variant c_DOMDocument::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMDocument
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMDocument
 Variant * c_DOMDocument::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -54791,21 +53510,6 @@ Variant * c_DOMDocument::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMDocument
-Variant c_DOMDocument::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMDocument
-Variant c_DOMDocument::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMDocument
-Variant c_DOMDocument::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMDocument
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMDocument
 Variant& c_DOMDocument::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -54913,9 +53617,6 @@ ObjectData *c_DOMDocument::cloneImpl() {
 }
 void c_DOMDocument::cloneSet(c_DOMDocument *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMDocument::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMDocument
 Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
@@ -58715,21 +57416,6 @@ void c_LibXMLError::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_get_LibXMLError
-Variant c_LibXMLError::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_LibXMLError
-Variant c_LibXMLError::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_LibXMLError
-Variant c_LibXMLError::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_LibXMLError
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_LibXMLError
 Variant * c_LibXMLError::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -58745,21 +57431,6 @@ Variant * c_LibXMLError::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_set_LibXMLError
-Variant c_LibXMLError::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_LibXMLError
-Variant c_LibXMLError::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_LibXMLError
-Variant c_LibXMLError::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_LibXMLError
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_LibXMLError
 Variant& c_LibXMLError::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -59030,21 +57701,6 @@ void c_SoapFault::o_setArray(CArrRef props) {
   c_Exception::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SoapFault
-Variant c_SoapFault::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapFault
-Variant c_SoapFault::o_getPublic(CStrRef s, bool error) {
-  return c_Exception::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapFault
-Variant c_SoapFault::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SoapFault
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SoapFault
 Variant * c_SoapFault::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -59060,21 +57716,6 @@ Variant * c_SoapFault::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SoapFault
-Variant c_SoapFault::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapFault
-Variant c_SoapFault::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_Exception::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapFault
-Variant c_SoapFault::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SoapFault
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapFault
 Variant& c_SoapFault::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -59933,21 +58574,6 @@ void c_DOMElement::o_setArray(CArrRef props) {
   c_DOMNode::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DOMElement
-Variant c_DOMElement::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMElement
-Variant c_DOMElement::o_getPublic(CStrRef s, bool error) {
-  return c_DOMNode::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMElement
-Variant c_DOMElement::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DOMElement
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DOMElement
 Variant * c_DOMElement::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -59963,21 +58589,6 @@ Variant * c_DOMElement::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DOMElement
-Variant c_DOMElement::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMElement
-Variant c_DOMElement::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DOMNode::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMElement
-Variant c_DOMElement::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DOMElement
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMElement
 Variant& c_DOMElement::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -60091,9 +58702,6 @@ ObjectData *c_DOMElement::cloneImpl() {
 }
 void c_DOMElement::cloneSet(c_DOMElement *clone) {
   c_DOMNode::cloneSet(clone);
-}
-Variant c_DOMElement::doGet(Variant v_name, bool error) {
-  return t___get(v_name);
 }
 #ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DOMElement
 Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {

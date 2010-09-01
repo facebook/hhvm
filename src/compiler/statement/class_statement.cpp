@@ -331,31 +331,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_%s 1\n", clsName);
   }
 
-  if (variables->hasJumpTable(VariableTable::JumpTableClassGet)) {
-    cg_printf("virtual Variant o_get(CStrRef s, bool error = true,\n");
-    cg_printf("                      CStrRef context = null_string);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_get_%s 1\n", clsName);
-  }
-  if (variables->hasNonStaticPrivate()) {
-    cg_printf("Variant o_getPrivate(CStrRef s, bool error = true);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_%s 1\n", clsName);
-  }
-
-  if (variables->hasJumpTable(VariableTable::JumpTableClassSet)) {
-    cg_printf("virtual Variant o_set(CStrRef s, CVarRef v, "
-              "bool forInit = false,\n");
-    cg_printf("                      CStrRef context = null_string);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_set_%s 1\n", clsName);
-  }
-  if (variables->hasNonStaticPrivate()) {
-    cg_printf("Variant o_setPrivate(CStrRef s, CVarRef v, bool forInit);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_%s 1\n", clsName);
-  }
-
   if (variables->hasJumpTable(VariableTable::JumpTableClassLval)) {
     cg_printf("virtual Variant &o_lval(CStrRef s, "
               "CStrRef context = null_string);\n");
@@ -375,17 +350,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
               "int flags) const;\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_%s 1\n", clsName);
-  }
-  if (variables->hasJumpTable(VariableTable::JumpTableClassGetPublic)) {
-    cg_printf("virtual Variant o_getPublic(CStrRef s, bool error = true);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_%s 1\n", clsName);
-  }
-  if (variables->hasJumpTable(VariableTable::JumpTableClassSetPublic)) {
-    cg_printf("virtual Variant o_setPublic(CStrRef s,\n");
-    cg_printf("                            CVarRef v, bool forInit);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_%s 1\n", clsName);
   }
   if (variables->hasJumpTable(VariableTable::JumpTableClassLvalPublic)) {
     cg_printf("virtual Variant &o_lvalPublic(CStrRef s);\n");
@@ -574,7 +538,13 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (system || Option::EnableEval >= Option::LimitedEval) {
           cg_printf("DECLARE_INVOKES_FROM_EVAL\n");
         }
-        if (dyn || idyn || redec) {
+
+        bool hasGet = classScope->getAttribute(
+          ClassScope::HasUnknownPropGetter);
+        bool hasSet = classScope->getAttribute(
+          ClassScope::HasUnknownPropSetter);
+
+        if (dyn || idyn || redec || hasGet || hasSet) {
           if (redec) {
             cg_printf("DECLARE_ROOT;\n");
              if (!dyn && !idyn) {
@@ -584,19 +554,24 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
              }
           }
 
-          string conInit = ":";
+          string conInit = "";
           if (dyn) {
-            conInit += "DynamicObjectData(\"" + m_parent + "\", r)";
+            conInit = ":DynamicObjectData(\"" + m_parent + "\", r)";
           } else if (idyn) {
-            conInit += string(Option::ClassPrefix) + parCls->getId(cg) +
+            conInit = ":" + string(Option::ClassPrefix) + parCls->getId(cg) +
               "(r?r:this)";
-          } else {
-            conInit += "root(r?r:this)";
+          } else if (redec) {
+            conInit = ":root(r?r:this)";
           }
 
-          cg_printf("%s%s(ObjectData* r = NULL)%s {}\n",
-                    Option::ClassPrefix, clsName,
-                    conInit.c_str());
+          cg_indentBegin("%s%s(%s)%s {%s",
+                         Option::ClassPrefix, clsName,
+                         conInit.empty() ? "" : "ObjectData* r = NULL",
+                         conInit.c_str(),
+                         hasGet || hasSet ? "\n" : "");
+          if (hasGet) cg_printf("setAttribute(UseGet);\n");
+          if (hasSet) cg_printf("setAttribute(UseSet);\n");
+          cg_indentEnd("}\n");
         }
       }
 
@@ -625,11 +600,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("Variant doCall(Variant v_name, Variant v_arguments, "
                   "bool fatal);\n");
       }
-      // doGet
-      if (classScope->getAttribute(ClassScope::HasUnknownPropHandler)) {
-        cg_printf("Variant doGet(Variant v_name, bool error);\n");
-      }
-
 
       if (classScope->isRedeclaring() &&
           !classScope->derivesFromRedeclaring()) {

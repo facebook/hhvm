@@ -148,7 +148,10 @@ Variant *ObjectData::o_realProp(CStrRef propName, int flags,
 }
 
 Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
-  if (propName.size() > 0 && ((flags & RealPropCreate) || o_properties)) {
+  if (propName.size() > 0 &&
+      !(flags & RealPropNoDynamic) &&
+      (o_properties ||
+       ((flags & RealPropCreate) && (o_properties = NEW(Array)(), true)))) {
     return o_properties->lvalPtr(propName,
                                  flags & RealPropWrite, flags & RealPropCreate);
   }
@@ -157,53 +160,90 @@ Variant *ObjectData::o_realPropPublic(CStrRef propName, int flags) const {
 
 bool ObjectData::o_exists(CStrRef propName,
                           CStrRef context /* = null_string */) const {
-  const Variant *t = o_realProp(propName, 0, context);
+  const Variant *t = o_realProp(propName, RealPropUnchecked, context);
   return t && t->isInitialized();
+}
+
+inline Variant ObjectData::o_getImpl(CStrRef propName, int flags,
+                                     bool error /* = true */,
+                                     CStrRef context /* = null_string */) {
+  if (propName.size() == 0) {
+    return null;
+  }
+
+  if (Variant *t = o_realProp(propName, flags, context)) {
+    if (t->isInitialized())
+      return *t;
+  }
+
+  if (getAttribute(UseGet)) {
+    AttributeClearer a(UseGet, this);
+    return t___get(propName);
+  }
+
+  if (error) {
+    return o_getError(propName, context);
+  }
+
+  return null;
 }
 
 Variant ObjectData::o_get(CStrRef propName, bool error /* = true */,
                           CStrRef context /* = null_string */) {
-  return o_getPublic(propName, error);
+  return o_getImpl(propName, 0, error, context);
 }
-
 
 Variant ObjectData::o_getPublic(CStrRef propName, bool error /* = true */) {
   if (propName.size() == 0) {
     return null;
   }
-  if (o_properties && o_properties->exists(propName, true)) {
-    return o_properties->rvalAt(propName, false, true);
+
+  if (Variant *t = o_realPropPublic(propName, 0)) {
+    if (t->isInitialized())
+      return *t;
   }
-  if (getAttribute(InGet)) {
-    return ObjectData::doGet(propName, error);
-  } else {
-    AttributeSetter a(InGet, this);
-    return doGet(propName, error);
+
+  if (getAttribute(UseGet)) {
+    AttributeClearer a(UseGet, this);
+    return t___get(propName);
   }
+
+  if (error) {
+    return o_getError(propName, null_string);
+  }
+
+  return null;
 }
 
 Variant ObjectData::o_getUnchecked(CStrRef propName,
                                    CStrRef context /* = null_string */) {
-  return o_get(propName, true, context);
+  return o_getImpl(propName, RealPropUnchecked, true, context);
 }
 
 Variant ObjectData::o_set(CStrRef propName, CVarRef v,
                           bool forInit /* = false */,
                           CStrRef context /* = null_string */) {
-  return o_setPublic(propName, v, forInit);
-}
-
-Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
-                                bool forInit /* = false */) {
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
   }
-  if (forInit || getAttribute(InSet)) {
-    return ObjectData::t___set(propName, v);
-  } else {
-    AttributeSetter a(InSet, this);
+
+  bool useSet = !forInit && getAttribute(UseSet);
+  int flags = useSet ? RealPropWrite : RealPropCreate | RealPropWrite;
+  if (forInit) flags |= RealPropUnchecked;
+
+  if (Variant *t = o_realProp(propName, flags, context)) {
+    if (!useSet || t->isInitialized()) {
+      *t = v;
+    }
+    return null;
+  }
+
+  if (useSet) {
+    AttributeClearer a(UseSet, this);
     return t___set(propName, v);
   }
+
+  return o_setError(propName, context);
 }
 
 void ObjectData::o_setArray(CArrRef properties) {
@@ -215,11 +255,11 @@ void ObjectData::o_setArray(CArrRef properties) {
       if (valueRef) {
         CVarRef secondRef = iter.secondRef();
         if (secondRef.isReferenced()) {
-          o_setPublic(key, ref(secondRef), false);
+          o_set(key, ref(secondRef), false);
           continue;
         }
       }
-      o_setPublic(key, iter.second(), false);
+      o_set(key, iter.second(), false);
     }
   }
 }
@@ -764,26 +804,47 @@ Variant ObjectData::doRootCall(Variant v_name,
   return doCall(v_name, v_arguments, fatal);
 }
 
-Variant ObjectData::doGet(Variant v_name, bool error) {
-  if (error) {
-    raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
-                 v_name.toString().data());
-  }
-  return null_variant;
+Variant ObjectData::o_getError(CStrRef prop, CStrRef context) {
+  raise_notice("Undefined property: %s::$%s", o_getClassName().data(),
+               prop.data());
+  return null;
 }
 
-bool ObjectData::doIsSet(CStrRef prop, CStrRef context) {
+Variant ObjectData::o_setError(CStrRef prop, CStrRef context) {
+  return null;
+}
+
+bool ObjectData::o_isset(CStrRef prop, CStrRef context) {
   if (Variant *t = o_realProp(prop, 0, context)) {
-    return !t->isNull();
+    if (t->isInitialized()) {
+      return !t->isNull();
+    }
   }
   return t___isset(prop);
 }
 
-bool ObjectData::doEmpty(CStrRef prop, CStrRef context) {
+bool ObjectData::o_empty(CStrRef prop, CStrRef context) {
   if (Variant *t = o_realProp(prop, 0, context)) {
-    return empty(*t);
+    if (t->isInitialized()) {
+      return empty(*t);
+    }
   }
-  return !t___isset(prop) || empty(t___get(prop));
+  return !t___isset(prop) || !getAttribute(UseGet) ||
+    (AttributeClearer(UseGet, this),empty(t___get(prop)));
+}
+
+Variant ObjectData::o_unset(CStrRef prop, CStrRef context) {
+  if (getAttribute(UseUnset)) {
+    AttributeClearer a(UseUnset, this);
+    return t___unset(prop);
+  } else {
+    if (Variant *t = o_realProp(prop, RealPropWrite|RealPropNoDynamic)) {
+      unset(*t);
+    } else if (o_properties && o_properties->exists(prop, true)) {
+      o_properties->weakRemove(prop, true);
+    }
+  }
+  return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -801,19 +862,12 @@ Variant ObjectData::t___call(Variant v_name, Variant v_arguments) {
 }
 
 Variant ObjectData::t___set(Variant v_name, Variant v_value) {
-  if (!o_properties) {
-    o_properties = NEW(Array)();
-  }
-  if (v_value.isReferenced()) {
-    o_properties->set(v_name, ref(v_value), true);
-  } else {
-    o_properties->set(v_name, v_value, true);
-  }
+  // not called
   return null;
 }
 
 Variant ObjectData::t___get(Variant v_name) {
-  // Not called
+  // not called
   return null;
 }
 
@@ -833,11 +887,7 @@ bool ObjectData::t___isset(Variant v_name) {
 }
 
 Variant ObjectData::t___unset(Variant v_name) {
-  String sname = v_name.toString();
-  unset(o_lval(sname));
-  if (o_properties && o_properties->exists(sname, true)) {
-    o_properties->weakRemove(sname, true);
-  }
+  // not called
   return null;
 }
 

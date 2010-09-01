@@ -69,43 +69,6 @@ void c_SplObjectStorage::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SplObjectStorage
-Variant c_SplObjectStorage::o_get(CStrRef prop, bool error, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x5BA243B9FBA7A64FLL, SplObjectStorage) { return o_getPrivate(prop, error); }
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplObjectStorage
-Variant c_SplObjectStorage::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplObjectStorage
-Variant c_SplObjectStorage::o_getPrivate(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_RETURN_NAMSTR(0x4B27521443880CAELL, s_sys_ss43880cae, m_index,
-                         5);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, s_sys_ss7e2b6dc3, m_storage,
-                         7);
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplObjectStorage
 Variant * c_SplObjectStorage::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -142,43 +105,6 @@ Variant * c_SplObjectStorage::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SplObjectStorage
-Variant c_SplObjectStorage::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x5BA243B9FBA7A64FLL, SplObjectStorage) { return o_setPrivate(prop, v, forInit); }
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplObjectStorage
-Variant c_SplObjectStorage::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplObjectStorage
-Variant c_SplObjectStorage::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_SET_STRING(0x4B27521443880CAELL, m_index,
-                      "index", 5);
-      break;
-    case 3:
-      HASH_SET_STRING(0x17AC96477E2B6DC3LL, m_storage,
-                      "storage", 7);
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SplObjectStorage
 Variant& c_SplObjectStorage::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;

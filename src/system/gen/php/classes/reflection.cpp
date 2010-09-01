@@ -63,30 +63,6 @@ void c_ReflectionFunctionAbstract::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, s_sys_ss157d479f, m_info,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunctionAbstract
 Variant * c_ReflectionFunctionAbstract::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -110,30 +86,6 @@ Variant * c_ReflectionFunctionAbstract::o_realPropPrivate(CStrRef s, int flags) 
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
-                      "info", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionFunctionAbstract
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionFunctionAbstract
-Variant c_ReflectionFunctionAbstract::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionFunctionAbstract
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionFunctionAbstract
 Variant& c_ReflectionFunctionAbstract::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -1051,30 +1003,6 @@ void c_ReflectionObject::o_setArray(CArrRef props) {
   c_ReflectionClass::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionObject
-Variant c_ReflectionObject::o_get(CStrRef prop, bool error, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_ReflectionClass::o_getPrivate(prop, error); }
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionObject
-Variant c_ReflectionObject::o_getPublic(CStrRef s, bool error) {
-  return c_ReflectionClass::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionObject
-Variant c_ReflectionObject::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionObject
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionObject
 Variant * c_ReflectionObject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -1099,30 +1027,6 @@ Variant * c_ReflectionObject::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionObject
-Variant c_ReflectionObject::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return c_ReflectionClass::o_setPrivate(prop, v, forInit); }
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionObject
-Variant c_ReflectionObject::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ReflectionClass::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionObject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionObject
-Variant c_ReflectionObject::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionObject
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionObject
 Variant& c_ReflectionObject::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -3753,21 +3657,6 @@ void c_ReflectionException::o_setArray(CArrRef props) {
   c_Exception::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionException
-Variant c_ReflectionException::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionException
-Variant c_ReflectionException::o_getPublic(CStrRef s, bool error) {
-  return c_Exception::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionException
-Variant c_ReflectionException::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionException
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionException
 Variant * c_ReflectionException::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -3783,21 +3672,6 @@ Variant * c_ReflectionException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionException
-Variant c_ReflectionException::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionException
-Variant c_ReflectionException::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_Exception::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionException
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionException
-Variant c_ReflectionException::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionException
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionException
 Variant& c_ReflectionException::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -4458,48 +4332,6 @@ void c_ReflectionClass::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionClass
-Variant c_ReflectionClass::o_get(CStrRef prop, bool error, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_getPrivate(prop, error); }
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionClass
-Variant c_ReflectionClass::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, s_sys_ss77e35232, m_name,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionClass
-Variant c_ReflectionClass::o_getPrivate(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, s_sys_ss157d479f, m_info,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionClass
 Variant * c_ReflectionClass::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -4540,48 +4372,6 @@ Variant * c_ReflectionClass::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionClass
-Variant c_ReflectionClass::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x35A44A5E6AE2E71DLL, ReflectionClass) { return o_setPrivate(prop, v, forInit); }
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionClass
-Variant c_ReflectionClass::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
-                      "name", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionClass
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionClass
-Variant c_ReflectionClass::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
-                      "info", 4);
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionClass
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionClass
 Variant& c_ReflectionClass::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -8253,43 +8043,6 @@ void c_ReflectionExtension::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionExtension
-Variant c_ReflectionExtension::o_get(CStrRef prop, bool error, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_getPrivate(prop, error); }
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionExtension
-Variant c_ReflectionExtension::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionExtension
-Variant c_ReflectionExtension::o_getPrivate(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, s_sys_ss77e35232, m_name,
-                         4);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, s_sys_ss157d479f, m_info,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionExtension
 Variant * c_ReflectionExtension::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -8325,43 +8078,6 @@ Variant * c_ReflectionExtension::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionExtension
-Variant c_ReflectionExtension::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x0B61E0BFCFA06573LL, ReflectionExtension) { return o_setPrivate(prop, v, forInit); }
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionExtension
-Variant c_ReflectionExtension::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionExtension
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionExtension
-Variant c_ReflectionExtension::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 2:
-      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
-                      "name", 4);
-      break;
-    case 3:
-      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
-                      "info", 4);
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionExtension
 Variant& c_ReflectionExtension::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -9373,34 +9089,6 @@ void c_ReflectionMethod::o_setArray(CArrRef props) {
   c_ReflectionFunctionAbstract::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionMethod
-Variant c_ReflectionMethod::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionMethod
-Variant c_ReflectionMethod::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, s_sys_ss1f74c210, m_class,
-                         5);
-      break;
-    case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, s_sys_ss77e35232, m_name,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionMethod
-Variant c_ReflectionMethod::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionMethod
 Variant * c_ReflectionMethod::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -9427,34 +9115,6 @@ Variant * c_ReflectionMethod::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionMethod
-Variant c_ReflectionMethod::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionMethod
-Variant c_ReflectionMethod::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_SET_STRING(0x2E3A246D1F74C210LL, m_class,
-                      "class", 5);
-      break;
-    case 2:
-      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
-                      "name", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ReflectionFunctionAbstract::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionMethod
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionMethod
-Variant c_ReflectionMethod::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionMethod
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionMethod
 Variant& c_ReflectionMethod::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -11340,15 +11000,15 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_method)) {
         {
           {
-            Variant tmp3((v_method.o_get(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            Variant tmp3((v_method.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_method.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            Variant tmp4((v_method.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_method.o_get(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            Variant tmp5((v_method.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
             m_class = tmp5;
           }
         }
@@ -11533,38 +11193,6 @@ void c_ReflectionProperty::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionProperty
-Variant c_ReflectionProperty::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionProperty
-Variant c_ReflectionProperty::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x2E3A246D1F74C210LL, s_sys_ss1f74c210, m_class,
-                         5);
-      break;
-    case 2:
-      HASH_RETURN_NAMSTR(0x5655B4FF77E35232LL, s_sys_ss77e35232, m_name,
-                         4);
-      break;
-    case 7:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, s_sys_ss157d479f, m_info,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionProperty
-Variant c_ReflectionProperty::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionProperty
 Variant * c_ReflectionProperty::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -11594,38 +11222,6 @@ Variant * c_ReflectionProperty::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionProperty
-Variant c_ReflectionProperty::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionProperty
-Variant c_ReflectionProperty::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 7) {
-    case 0:
-      HASH_SET_STRING(0x2E3A246D1F74C210LL, m_class,
-                      "class", 5);
-      break;
-    case 2:
-      HASH_SET_STRING(0x5655B4FF77E35232LL, m_name,
-                      "name", 4);
-      break;
-    case 7:
-      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
-                      "info", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionProperty
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionProperty
-Variant c_ReflectionProperty::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionProperty
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionProperty
 Variant& c_ReflectionProperty::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -12828,15 +12424,15 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
       if (toBoolean(v_prop)) {
         {
           {
-            Variant tmp3((v_prop.o_get(NAMSTR(s_sys_ss157d479f, "info"), true)));
+            Variant tmp3((v_prop.o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
             m_info = tmp3;
           }
           {
-            Variant tmp4((v_prop.o_get(NAMSTR(s_sys_ss77e35232, "name"), true)));
+            Variant tmp4((v_prop.o_getPublic(NAMSTR(s_sys_ss77e35232, "name"), true)));
             m_name = tmp4;
           }
           {
-            Variant tmp5((v_prop.o_get(NAMSTR(s_sys_ss1f74c210, "class"), true)));
+            Variant tmp5((v_prop.o_getPublic(NAMSTR(s_sys_ss1f74c210, "class"), true)));
             m_class = tmp5;
           }
         }
@@ -13004,21 +12600,6 @@ void c_ReflectionFunction::o_setArray(CArrRef props) {
   c_ReflectionFunctionAbstract::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionFunction
-Variant c_ReflectionFunction::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionFunction
-Variant c_ReflectionFunction::o_getPublic(CStrRef s, bool error) {
-  return c_ReflectionFunctionAbstract::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionFunction
-Variant c_ReflectionFunction::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionFunction
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunction
 Variant * c_ReflectionFunction::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -13034,21 +12615,6 @@ Variant * c_ReflectionFunction::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionFunction
-Variant c_ReflectionFunction::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionFunction
-Variant c_ReflectionFunction::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ReflectionFunctionAbstract::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionFunction
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionFunction
-Variant c_ReflectionFunction::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionFunction
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionFunction
 Variant& c_ReflectionFunction::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -14397,30 +13963,6 @@ void c_ReflectionParameter::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ReflectionParameter
-Variant c_ReflectionParameter::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionParameter
-Variant c_ReflectionParameter::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x0F2EF58F157D479FLL, s_sys_ss157d479f, m_info,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionParameter
-Variant c_ReflectionParameter::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ReflectionParameter
 Variant * c_ReflectionParameter::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -14444,30 +13986,6 @@ Variant * c_ReflectionParameter::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ReflectionParameter
-Variant c_ReflectionParameter::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionParameter
-Variant c_ReflectionParameter::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_SET_STRING(0x0F2EF58F157D479FLL, m_info,
-                      "info", 4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionParameter
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionParameter
-Variant c_ReflectionParameter::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionParameter
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ReflectionParameter
 Variant& c_ReflectionParameter::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -15476,7 +14994,7 @@ void c_ReflectionParameter::t___construct(Variant v_func, Variant v_param) {
         v_params = tmp1;
       }
       {
-        Variant tmp2((v_params.rvalAt(v_param, true).o_get(NAMSTR(s_sys_ss157d479f, "info"), true)));
+        Variant tmp2((v_params.rvalAt(v_param, true).o_getPublic(NAMSTR(s_sys_ss157d479f, "info"), true)));
         m_info = tmp2;
       }
     }
@@ -15587,7 +15105,7 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
   }
   if (instanceOf(v_defaultValue, "stdclass")) {
     {
-      x_hphp_throw_fatal_error(toString(v_defaultValue.o_get(NAMSTR(s_sys_ss10d8f28e, "msg"), true)));
+      x_hphp_throw_fatal_error(toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss10d8f28e, "msg"), true)));
     }
   }
   return v_defaultValue;

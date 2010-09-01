@@ -51,18 +51,12 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_get_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_set_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_lval_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ReflectionFunction 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ReflectionFunction 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ReflectionFunction 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ReflectionFunction 1
 
   // DECLARE_COMMON_INVOKE

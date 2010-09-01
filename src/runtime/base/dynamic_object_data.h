@@ -44,12 +44,9 @@ class DynamicObjectData : public ObjectData {
   virtual Array o_getDynamicProperties() const;
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;
-  virtual Variant o_get(CStrRef prop, bool error = true,
-                        CStrRef context = null_string);
-  virtual Variant o_set(CStrRef prop, CVarRef v, bool forInit = false,
-                        CStrRef context = null_string);
+  virtual Variant *o_realPropPublic(CStrRef prop, int flags) const;
   virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string);
-  void o_set(const Array properties);
+//  void o_setDynamicProperties(const Array properties);
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
 
@@ -79,8 +76,6 @@ class DynamicObjectData : public ObjectData {
                                              INVOKE_FEW_ARGS_DECL_ARGS);
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
-
-  virtual Variant doGet(Variant v_name, bool error);
 
   // magic methods
   // __construct is handled in a special way

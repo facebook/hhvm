@@ -43,7 +43,8 @@ class VariableEnvironment;
  * 1. Statically resolved properties and methods will be statically called.
  * 2. Dynamic properties:
  *    o_get() -> t___get() as fallback
- *    o_lval() -> o_set() -> t___set() as fallback
+ *    o_lval() -> t___get() as fallback (!really)
+ *    o_set() -> t___set() as fallback
  * 3. Dynamic methods:
  *    o_invoke() -> t___call() as fallback
  * 4. Auto-generated jump-tables:
@@ -56,22 +57,25 @@ class VariableEnvironment;
 class ObjectData : public Countable {
  public:
   enum Attribute {
-    InConstructor = 1, // __construct()
-    InDestructor  = 2, // __destruct()
-    HasSleep      = 4, // __sleep()
-    InSet         = 8, // __set()
-    InGet         = 16, // __get()
-    HasGet        = 32,
-    HasSet        = 64,
+    InConstructor = 1,  // __construct()
+    InDestructor  = 2,  // __destruct()
+    HasSleep      = 4,  // __sleep()
+    UseSet        = 8,  // __set()
+    UseGet        = 16, // __get()
+    UseUnset      = 32, // __unset()
   };
   enum {
-    RealPropCreate = 1,// Property should be created if it doesnt exist
-    RealPropWrite = 2  // Property could be modified
+    RealPropCreate = 1,   // Property should be created if it doesnt exist
+    RealPropWrite = 2,    // Property could be modified
+    RealPropNoDynamic = 4,// Dont return dynamic properties
+    RealPropUnchecked = 8,// Dont check property accessibility
   };
 
   ObjectData(bool isResource = false);
   virtual ~ObjectData(); // all PHP classes need virtual tables
 
+  void setAttributes(int attrs) { o_attribute |= attrs; }
+  void setAttributes(const ObjectData *o) { o_attribute |= o->o_attribute; }
   bool getAttribute(Attribute attr) const { return o_attribute & attr; }
   void setAttribute(Attribute attr) const { o_attribute |= attr;}
   void clearAttribute(Attribute attr) const { o_attribute &= ~attr;}
@@ -160,20 +164,21 @@ class ObjectData : public Countable {
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
-  virtual bool o_exists(CStrRef s, CStrRef context = null_string) const;
-  virtual Variant o_get(CStrRef s, bool error = true,
-                        CStrRef context = null_string);
-  virtual Variant o_getPublic(CStrRef s, bool error = true);
-  virtual Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
-  virtual Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
-                        CStrRef context = null_string);
-  virtual Variant o_setPublic(CStrRef s, CVarRef v, bool forInit);
+  bool o_exists(CStrRef s, CStrRef context = null_string) const;
+  Variant o_get(CStrRef s, bool error = true,
+                CStrRef context = null_string);
+  Variant o_getPublic(CStrRef s, bool error = true);
+  Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
+  Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
+                CStrRef context = null_string);
   virtual Variant &o_lval(CStrRef s, CStrRef context = null_string);
   virtual Variant &o_lvalPublic(CStrRef s);
 
   virtual void o_setArray(CArrRef properties);
   virtual void o_getArray(Array &props) const {}
 
+  virtual Variant o_getError(CStrRef prop, CStrRef context);
+  virtual Variant o_setError(CStrRef prop, CStrRef context);
   /**
    * This is different from o_exists(), which is isset() semantics. This one
    * is property_exists() semantics that check whether it was unset before.
@@ -246,9 +251,10 @@ class ObjectData : public Countable {
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
   virtual Variant doRootCall(Variant v_name, Variant v_arguments, bool fatal);
 
-  virtual Variant doGet(Variant v_name, bool error);
-  virtual bool doIsSet(CStrRef prop, CStrRef context = null_string);
-  virtual bool doEmpty(CStrRef prop, CStrRef context = null_string);
+  bool o_isset(CStrRef prop, CStrRef context = null_string);
+  bool o_empty(CStrRef prop, CStrRef context = null_string);
+  Variant o_unset(CStrRef prop, CStrRef context = null_string);
+
   // magic methods
   // __construct is handled in a special way
   virtual Variant t___destruct();
@@ -279,6 +285,8 @@ class ObjectData : public Countable {
 
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}
+  inline Variant o_getImpl(CStrRef propName, int flags,
+                           bool error = true, CStrRef context = null_string);
 
  protected:
   int o_id;                      // a numeric identifier of this object
@@ -308,6 +316,13 @@ public:
   virtual ObjectData *getRoot() { return root; }
 protected: ObjectData *root;
 
+};
+
+template <int flags> class ExtObjectDataFlags : public ExtObjectData {
+public:
+  ExtObjectDataFlags() {
+    ObjectData::setAttributes(flags);
+  }
 };
 
 // Callback structure for functions related to static methods
@@ -348,7 +363,7 @@ class ItemSize<UNIT_SIZE> {
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-// Attribute helper
+// Attribute helpers
 class AttributeSetter {
 public:
   AttributeSetter(ObjectData::Attribute a, ObjectData *o) : m_a(a), m_o(o) {
@@ -356,6 +371,19 @@ public:
   }
   ~AttributeSetter() {
     m_o->clearAttribute(m_a);
+  }
+private:
+  ObjectData::Attribute m_a;
+  ObjectData *m_o;
+};
+
+class AttributeClearer {
+public:
+  AttributeClearer(ObjectData::Attribute a, ObjectData *o) : m_a(a), m_o(o) {
+    o->clearAttribute(a);
+  }
+  ~AttributeClearer() {
+    m_o->setAttribute(m_a);
   }
 private:
   ObjectData::Attribute m_a;

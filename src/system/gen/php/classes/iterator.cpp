@@ -72,43 +72,6 @@ void c_ArrayIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_ArrayIterator
-Variant c_ArrayIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_getPrivate(prop, error); }
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ArrayIterator
-Variant c_ArrayIterator::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ArrayIterator
-Variant c_ArrayIterator::o_getPrivate(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x7D2126D089B92EA5LL, s_sys_ss7646d15b, m_arr,
-                         3);
-      break;
-    case 3:
-      HASH_RETURN_NAMSTR(0x7401482B86AFCBFBLL, s_sys_ss79503405, m_flags,
-                         5);
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator
 Variant * c_ArrayIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -144,43 +107,6 @@ Variant * c_ArrayIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_ArrayIterator
-Variant c_ArrayIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x3D5870E53BF89873LL, ArrayIterator) { return o_setPrivate(prop, v, forInit); }
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ArrayIterator
-Variant c_ArrayIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ArrayIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ArrayIterator
-Variant c_ArrayIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 1:
-      HASH_SET_STRING(0x7D2126D089B92EA5LL, m_arr,
-                      "arr", 3);
-      break;
-    case 3:
-      HASH_SET_STRING(0x7401482B86AFCBFBLL, m_flags,
-                      "flags", 5);
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_ArrayIterator
 Variant& c_ArrayIterator::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -1906,39 +1832,6 @@ void c_AppendIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_AppendIterator
-Variant c_AppendIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_getPrivate(prop, error); }
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_AppendIterator
-Variant c_AppendIterator::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_AppendIterator
-Variant c_AppendIterator::o_getPrivate(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x60EA38C41F14FF71LL, s_sys_ss1f14ff71, m_iterators,
-                         9);
-      break;
-    default:
-      break;
-  }
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_AppendIterator
 Variant * c_AppendIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -1971,39 +1864,6 @@ Variant * c_AppendIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_AppendIterator
-Variant c_AppendIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 0:
-      HASH_GUARD_STRING(0x2E363D51549781C8LL, AppendIterator) { return o_setPrivate(prop, v, forInit); }
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_AppendIterator
-Variant c_AppendIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_AppendIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_AppendIterator
-Variant c_AppendIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_SET_STRING(0x60EA38C41F14FF71LL, m_iterators,
-                      "iterators", 9);
-      break;
-    default:
-      break;
-  }
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_AppendIterator
 Variant& c_AppendIterator::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -2843,21 +2703,6 @@ void c_RecursiveDirectoryIterator::o_setArray(CArrRef props) {
   c_DirectoryIterator::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_RecursiveDirectoryIterator
-Variant c_RecursiveDirectoryIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveDirectoryIterator
-Variant c_RecursiveDirectoryIterator::o_getPublic(CStrRef s, bool error) {
-  return c_DirectoryIterator::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveDirectoryIterator
-Variant c_RecursiveDirectoryIterator::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveDirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator
 Variant * c_RecursiveDirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -2873,21 +2718,6 @@ Variant * c_RecursiveDirectoryIterator::o_realPropPrivate(CStrRef s, int flags) 
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_RecursiveDirectoryIterator
-Variant c_RecursiveDirectoryIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveDirectoryIterator
-Variant c_RecursiveDirectoryIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_DirectoryIterator::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveDirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveDirectoryIterator
-Variant c_RecursiveDirectoryIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveDirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_RecursiveDirectoryIterator
 Variant& c_RecursiveDirectoryIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -5403,21 +5233,6 @@ void c_DirectoryIterator::o_setArray(CArrRef props) {
   c_SplFileInfo::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_DirectoryIterator
-Variant c_DirectoryIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DirectoryIterator
-Variant c_DirectoryIterator::o_getPublic(CStrRef s, bool error) {
-  return c_SplFileInfo::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DirectoryIterator
-Variant c_DirectoryIterator::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_DirectoryIterator
 Variant * c_DirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -5433,21 +5248,6 @@ Variant * c_DirectoryIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_DirectoryIterator
-Variant c_DirectoryIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DirectoryIterator
-Variant c_DirectoryIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_SplFileInfo::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DirectoryIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DirectoryIterator
-Variant c_DirectoryIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DirectoryIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_DirectoryIterator
 Variant& c_DirectoryIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -7688,21 +7488,6 @@ void c_RecursiveIteratorIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveIteratorIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_RecursiveIteratorIterator
 Variant * c_RecursiveIteratorIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -7718,21 +7503,6 @@ Variant * c_RecursiveIteratorIterator::o_realPropPrivate(CStrRef s, int flags) c
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveIteratorIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveIteratorIterator
-Variant c_RecursiveIteratorIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveIteratorIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_RecursiveIteratorIterator
 Variant& c_RecursiveIteratorIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -8405,21 +8175,6 @@ void c_FilterIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_FilterIterator
-Variant c_FilterIterator::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_FilterIterator
-Variant c_FilterIterator::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_FilterIterator
-Variant c_FilterIterator::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator
 Variant * c_FilterIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -8435,21 +8190,6 @@ Variant * c_FilterIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_FilterIterator
-Variant c_FilterIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_FilterIterator
-Variant c_FilterIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_FilterIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_FilterIterator
-Variant c_FilterIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_FilterIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_FilterIterator
 Variant& c_FilterIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);

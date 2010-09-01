@@ -353,14 +353,10 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     }
   }
   if (doExist) {
-    func = doExist > 0 ? "doIsSet" : "doEmpty";
+    func = doExist > 0 ? "o_isset" : "o_empty";
     error = "";
   } else {
-    if (bThis && funcScope && funcScope->isStatic()) {
-      func = Option::ObjectStaticPrefix;
-      error = "";
-      context = "";
-    } else if (m_context & ExistContext) {
+    if (m_context & ExistContext) {
       error = ", false";
     }
     if (m_context & (LValue | RefValue | UnsetContext)) {
@@ -368,6 +364,10 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       error = "";
     } else {
       func += "get";
+      if (!cls || !cls->getVariables()->hasPrivate()) {
+        func += "Public";
+        context = "";
+      }
     }
   }
 
@@ -453,15 +453,12 @@ void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
                                               AnalysisResultPtr ar) {
   bool bThis = m_object->isThis();
   if (bThis) {
-    FunctionScopePtr func = ar->getFunctionScope();
-    if (func && func->isStatic()) {
-      cg.printf("GET_THIS_ARROW()");
-    }
+    cg.printf("GET_THIS_ARROW()");
   } else {
     m_object->outputCPP(cg, ar);
     cg_printf("->");
   }
-  cg_printf("t___unset(");
+  cg_printf("o_unset(");
   bool direct = m_property->isUnquotedScalar();
   if (direct) {
     cg_printf("\"");

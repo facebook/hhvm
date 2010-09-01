@@ -46,14 +46,11 @@ public:
   virtual void o_setArray(CArrRef props);
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;
-  virtual Variant o_get(CStrRef prop, bool error = true,
-                        CStrRef context = null_string);
-  virtual Variant o_getUnchecked(CStrRef prop, CStrRef context = null_string);
   virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string);
-  virtual Variant o_set(CStrRef prop, CVarRef v, bool forInit = false,
-                        CStrRef context = null_string);
   void o_setPrivate(const char *cls, const char *s, int64 hash, CVarRef v);
 
+  virtual Variant o_getError(CStrRef prop, CStrRef context);
+  virtual Variant o_setError(CStrRef prop, CStrRef context);
 
    // methods
   virtual CStrRef o_getClassName() const;
@@ -78,7 +75,6 @@ public:
 
 
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
-  virtual Variant doGet(Variant v_name, bool error);
 
   // magic methods
   // __construct is handled in a special way

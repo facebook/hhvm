@@ -38,7 +38,10 @@ bool f_libxml_disable_entity_loader(bool disable = true);
 // class SimpleXMLElement
 
 FORWARD_DECLARE_CLASS(SimpleXMLElement);
-class c_SimpleXMLElement : public ExtObjectData {
+class c_SimpleXMLElement :
+      public ExtObjectDataFlags<ObjectData::UseGet|
+                                ObjectData::UseSet|
+                                ObjectData::UseUnset> {
  public:
   BEGIN_CLASS_MAP(SimpleXMLElement)
   PARENT_CLASS(ArrayAccess)
@@ -71,7 +74,6 @@ class c_SimpleXMLElement : public ExtObjectData {
   public: void t_addattribute(CStrRef qname, CStrRef value = null_string, CStrRef ns = null_string);
   public: String t___tostring();
   public: Variant t___get(Variant name);
-  public: Variant doGet(Variant v_name, bool error);
   public: Variant t___set(Variant name, Variant value);
   public: bool t___isset(Variant name);
   public: Variant t___unset(Variant name);

@@ -49,18 +49,12 @@ class c_RuntimeException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RuntimeException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RuntimeException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RuntimeException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RuntimeException 1
 
   // DECLARE_COMMON_INVOKE

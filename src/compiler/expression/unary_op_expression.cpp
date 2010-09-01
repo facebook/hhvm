@@ -511,7 +511,8 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 void UnaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                        int state) {
   if (hasCPPTemp() || m_op == T_FILE) return;
-  if (m_exp && !getLocalEffects() && m_op != '@' &&
+  if (m_exp && !getLocalEffects() &&
+      m_op != '@' && m_op != T_ISSET && m_op != T_EMPTY &&
       !m_exp->is(KindOfExpressionList)) {
     m_exp->preOutputStash(cg, ar, state);
   } else {

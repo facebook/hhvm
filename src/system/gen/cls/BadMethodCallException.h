@@ -51,18 +51,12 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_BadMethodCallException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_BadMethodCallException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_BadMethodCallException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_BadMethodCallException 1
 
   // DECLARE_COMMON_INVOKE

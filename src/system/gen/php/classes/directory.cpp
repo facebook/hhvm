@@ -66,34 +66,6 @@ void c_Directory::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_get_Directory
-Variant c_Directory::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Directory
-Variant c_Directory::o_getPublic(CStrRef s, bool error) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, s_sys_ss5977ff8c, m_path,
-                         4);
-      break;
-    case 2:
-      HASH_RETURN_NAMSTR(0x5C4CA333F4541532LL, s_sys_ss0babeace, m_handle,
-                         6);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Directory
-Variant c_Directory::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_Directory
 Variant * c_Directory::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -120,34 +92,6 @@ Variant * c_Directory::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_set_Directory
-Variant c_Directory::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Directory
-Variant c_Directory::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_SET_STRING(0x1429F792A6880074LL, m_path,
-                      "path", 4);
-      break;
-    case 2:
-      HASH_SET_STRING(0x5C4CA333F4541532LL, m_handle,
-                      "handle", 6);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Directory
-Variant c_Directory::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_Directory
 Variant& c_Directory::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);

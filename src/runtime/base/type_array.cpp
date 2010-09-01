@@ -470,6 +470,9 @@ Variant Array::rvalAt(CVarRef key, bool error /* = false*/) const {
 
 Variant *Array::lvalPtr(CStrRef key, bool forWrite, bool create) {
   if (create) {
+    if (!m_px) {
+      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    }
     return &lvalAt(key, false, true);
   }
   Variant *ret = NULL;

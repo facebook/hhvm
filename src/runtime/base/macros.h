@@ -126,20 +126,12 @@ namespace HPHP {
   Variant *o_realPropPrivate(CStrRef s, int flags) const;               \
   virtual void o_getArray(Array &props) const;                          \
   virtual void o_setArray(CArrRef props);                               \
-  virtual Variant o_get(CStrRef prop, bool error = true,                \
-                        CStrRef context = null_string);                 \
-  Variant o_getPrivate(CStrRef s, bool error = true);                   \
-  virtual Variant o_set(CStrRef prop, CVarRef v, bool forInit = false,  \
-                        CStrRef context = null_string);                 \
-  Variant o_setPrivate(CStrRef s, CVarRef v, bool forInit);             \
   virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string); \
   Variant &o_lvalPrivate(CStrRef s);                                    \
 
 #define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
   public:                                                               \
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;        \
-  virtual Variant o_getPublic(CStrRef s, bool error = true);            \
-  virtual Variant o_setPublic(CStrRef s, CVarRef v, bool forInit);      \
   virtual Variant &o_lvalPublic(CStrRef s);                             \
 
 #define DECLARE_COMMON_INVOKES                                          \
@@ -238,7 +230,8 @@ namespace HPHP {
       memcmp(s.data(), str, len) == 0)                                  \
     return const_cast<Variant*>(&m_##prop)
 #define HASH_REALPROP_TYPED_STRING(code, str, len, prop)                \
-  if (!flags && hash == code && s.length() == len &&                    \
+  if (!(flags&(RealPropCreate|RealPropWrite)) &&                        \
+      hash == code && s.length() == len &&                              \
       memcmp(s.data(), str, len) == 0)                                  \
     return g->__realPropProxy = m_##prop,&g->__realPropProxy
 #define HASH_INITIALIZED(code, name, str)                               \

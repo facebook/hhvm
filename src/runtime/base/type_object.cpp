@@ -63,6 +63,11 @@ Variant Object::o_get(CStrRef propName, bool error /* = true */,
   return m_px->o_get(propName, error, context);
 }
 
+Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->o_getPublic(propName, error);
+}
+
 ObjectOffset Object::o_lval(CStrRef propName,
                             CStrRef context /* = null_string */) {
   if (!m_px) {
@@ -71,16 +76,22 @@ ObjectOffset Object::o_lval(CStrRef propName,
   return ObjectOffset(m_px, propName, context);
 }
 
-bool Object::doIsSet(CStrRef propName,
+bool Object::o_isset(CStrRef propName,
                      CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->doIsSet(propName, context);
+  return m_px->o_isset(propName, context);
 }
 
-bool Object::doEmpty(CStrRef propName,
+bool Object::o_empty(CStrRef propName,
                      CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();
-  return m_px->doEmpty(propName, context);
+  return m_px->o_empty(propName, context);
+}
+
+Variant Object::o_unset(CStrRef propName,
+                        CStrRef context /* = null_string */) const {
+  if (!m_px) throw NullPointerException();
+  return m_px->o_unset(propName, context);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

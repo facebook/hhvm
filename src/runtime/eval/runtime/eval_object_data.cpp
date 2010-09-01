@@ -35,7 +35,10 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls, const char* pname,
   if (r == NULL) {
     RequestEvalState::registerObject(this);
   }
+  if (getMethodStatement("__get")) setAttribute(UseGet);
+  if (getMethodStatement("__set")) setAttribute(UseSet);
 }
+
 // Only used for cloning and so should not register object
 EvalObjectData::EvalObjectData(ClassEvalState &cls) :
   DynamicObjectData(NULL, this), m_cls(cls) {
@@ -103,13 +106,38 @@ Array EvalObjectData::o_toArray() const {
 Variant *EvalObjectData::o_realProp(CStrRef s, int flags,
                                     CStrRef context /* = null_string */) const {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  if (m_privates.exists(c, true)) {
-    if (Variant *ret = toArray(m_privates.rvalAt(c, false, true)).
-        lvalPtr(s, flags & RealPropWrite, false)) {
+  if (Variant *priv =
+      const_cast<Array&>(m_privates).lvalPtr(c, flags & RealPropWrite, false)) {
+    if (Variant *ret = priv->lvalPtr(s, flags & RealPropWrite, false)) {
       return ret;
     }
   }
+  int mods;
+  if (!(flags & RealPropUnchecked) &&
+      !m_cls.getClass()->attemptPropertyAccess(s, c, mods)) {
+    return NULL;
+  }
   return DynamicObjectData::o_realProp(s, flags);
+}
+
+Variant EvalObjectData::o_getError(CStrRef prop, CStrRef context) {
+  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int mods;
+  if (!m_cls.getClass()->attemptPropertyAccess(prop, c, mods)) {
+    m_cls.getClass()->failPropertyAccess(prop, c, mods);
+  } else {
+    DynamicObjectData::o_getError(prop, context);
+  }
+  return null;
+}
+
+Variant EvalObjectData::o_setError(CStrRef prop, CStrRef context) {
+  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
+  int mods;
+  if (!m_cls.getClass()->attemptPropertyAccess(prop, c, mods)) {
+    m_cls.getClass()->failPropertyAccess(prop, c, mods);
+  }
+  return null;
 }
 
 void EvalObjectData::o_getArray(Array &props) const {
@@ -141,35 +169,6 @@ void EvalObjectData::o_setArray(CArrRef props) {
   DynamicObjectData::o_setArray(props);
 }
 
-Variant EvalObjectData::o_get(CStrRef s, bool error /* = true */,
-                              CStrRef context /* = null_string */) {
-  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  Variant priv = m_privates.rvalAt(c, false, true);
-  if (priv.is(KindOfArray) && priv.getArrayData()->exists(s)) {
-    return priv.rvalAt(s, false, true);
-  }
-  int mods;
-  if (!m_cls.getClass()->attemptPropertyAccess(s, c, mods)) {
-    const MethodStatement *ms = getMethodStatement("__get");
-    if (ms) {
-      return doGet(s, false);
-    }
-    m_cls.getClass()->failPropertyAccess(s, c, mods);
-  }
-  return DynamicObjectData::o_get(s, error, c);
-}
-
-Variant EvalObjectData::o_getUnchecked(CStrRef s,
-                                       CStrRef context /* = null_string */) {
-  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  Variant priv = m_privates.rvalAt(c, false, true);
-  if (priv.is(KindOfArray) && priv.getArrayData()->exists(s)) {
-    return priv.rvalAt(s, false, true);
-  }
-  return DynamicObjectData::o_get(s, true, c);
-}
-
-
 Variant &EvalObjectData::o_lval(CStrRef s,
                                 CStrRef context /* = null_string */) {
   CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
@@ -184,26 +183,6 @@ Variant &EvalObjectData::o_lval(CStrRef s,
     m_cls.getClass()->failPropertyAccess(s, c, mods);
   }
   return DynamicObjectData::o_lval(s, c);
-}
-
-Variant EvalObjectData::o_set(CStrRef s, CVarRef v, bool forInit /* = false */,
-                              CStrRef context /* = null_string */) {
-  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  if (m_privates.exists(c, true)) {
-    Variant &priv = m_privates.lvalAt(c, false, true);
-    if (priv.is(KindOfArray) && priv.getArrayData()->exists(s)) {
-      return priv.set(s, v, true);
-    }
-  }
-  int mods;
-  if (!forInit && !m_cls.getClass()->attemptPropertyAccess(s, c, mods)) {
-    const MethodStatement *ms = getMethodStatement("__set");
-    if (ms) {
-      return t___set(s, v);
-    }
-    m_cls.getClass()->failPropertyAccess(s, c, mods);
-  }
-  return DynamicObjectData::o_set(s, v, forInit, c);
 }
 
 void EvalObjectData::o_setPrivate(const char *cls, const char *s, int64 hash,
@@ -393,15 +372,6 @@ Variant EvalObjectData::doCall(Variant v_name, Variant v_arguments,
                               CREATE_VECTOR2(v_name, v_arguments), false);
   } else {
     return DynamicObjectData::doCall(v_name, v_arguments, fatal);
-  }
-}
-
-Variant EvalObjectData::doGet(Variant v_name, bool error) {
-  const MethodStatement *ms = getMethodStatement("__get");
-  if (ms) {
-    return ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
-  } else {
-    return DynamicObjectData::doGet(v_name, error);
   }
 }
 

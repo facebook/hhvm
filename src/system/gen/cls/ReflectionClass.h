@@ -52,21 +52,12 @@ class c_ReflectionClass : public ExtObjectData {
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;
-  virtual Variant o_get(CStrRef s, bool error = true,
-                        CStrRef context = null_string);
-  Variant o_getPrivate(CStrRef s, bool error = true);
-  virtual Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
-                        CStrRef context = null_string);
-  Variant o_setPrivate(CStrRef s, CVarRef v, bool forInit);
   virtual Variant &o_lval(CStrRef s, CStrRef context = null_string);
   Variant &o_lvalPrivate(CStrRef s);
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
-  virtual Variant o_getPublic(CStrRef s, bool error = true);
-  virtual Variant o_setPublic(CStrRef s,
-                              CVarRef v, bool forInit);
   virtual Variant &o_lvalPublic(CStrRef s);
 
   // DECLARE_COMMON_INVOKE

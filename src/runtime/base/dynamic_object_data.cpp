@@ -32,6 +32,7 @@ DynamicObjectData::DynamicObjectData(const char* pname,
   if (pname) {
     CountableHelper h(root);
     parent = create_object(pname, Array(), false, root);
+    setAttributes(parent.get());
   }
 }
 
@@ -93,24 +94,12 @@ Variant *DynamicObjectData::o_realProp(
   }
 }
 
-Variant DynamicObjectData::o_get(CStrRef propName, bool error /* = true */,
-                                 CStrRef context /* = null_string */) {
+Variant *DynamicObjectData::o_realPropPublic(CStrRef propName,
+                                             int flags) const {
   if (!parent.isNull()) {
-    return parent->o_get(propName, error, context);
+    return parent->o_realPropPublic(propName, flags);
   } else {
-    if (propName.size() == 0) {
-      return null;
-    }
-    // property names are definitely strings
-    if (o_properties && o_properties->exists(propName, true)) {
-      return o_properties->rvalAt(propName, false, true);
-    }
-    if (root->getAttribute(InGet)) {
-      return ObjectData::doGet(propName, error);
-    } else {
-      AttributeSetter a(InGet, root);
-      return root->doGet(propName, error);
-    }
+    return ObjectData::o_realPropPublic(propName, flags);
   }
 }
 
@@ -127,27 +116,6 @@ void DynamicObjectData::o_setArray(CArrRef props) {
     return parent->o_setArray(props);
   } else {
     return ObjectData::o_setArray(props);
-  }
-}
-
-Variant DynamicObjectData::o_set(CStrRef propName, CVarRef v,
-    bool forInit /* = false */, CStrRef context /* = null_string */) {
-  if (!parent.isNull()) {
-    return parent->o_set(propName, v, forInit, context);
-  } else {
-    if (propName.size() == 0) {
-      throw EmptyObjectPropertyException();
-    }
-    if (o_properties && o_properties->exists(propName, true)) {
-      o_properties->set(propName, v, true);
-      return v;
-    }
-    if (forInit || root->getAttribute(InSet)) {
-      return ObjectData::t___set(propName, v);
-    } else {
-      AttributeSetter a(InSet, root);
-      return root->t___set(propName, v);
-    }
   }
 }
 
@@ -390,15 +358,6 @@ Variant DynamicObjectData::doCall(Variant v_name, Variant v_arguments,
 Variant DynamicObjectData::doRootCall(Variant v_name, Variant v_arguments,
                                       bool fatal) {
   return root->doCall(v_name, v_arguments, fatal);
-}
-
-
-Variant DynamicObjectData::doGet(Variant v_name, bool error) {
-  if (!parent.isNull()) {
-    return parent->doGet(v_name, error);
-  } else {
-    return ObjectData::doGet(v_name, error);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

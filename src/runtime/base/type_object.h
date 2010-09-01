@@ -136,9 +136,11 @@ class Object : public SmartPtr<ObjectData> {
    */
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
+  Variant o_getPublic(CStrRef propName, bool error = true) const;
   ObjectOffset o_lval(CStrRef propName, CStrRef context = null_string);
-  bool doIsSet(CStrRef propName, CStrRef context = null_string) const;
-  bool doEmpty(CStrRef propName, CStrRef context = null_string) const;
+  bool o_isset(CStrRef propName, CStrRef context = null_string) const;
+  bool o_empty(CStrRef propName, CStrRef context = null_string) const;
+  Variant o_unset(CStrRef propName, CStrRef context = null_string) const;
   /**
    * Input/Output
    */

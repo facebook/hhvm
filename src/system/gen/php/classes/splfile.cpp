@@ -55,21 +55,6 @@ void c_SplFileObject::o_setArray(CArrRef props) {
   c_SplFileInfo::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SplFileObject
-Variant c_SplFileObject::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileObject
-Variant c_SplFileObject::o_getPublic(CStrRef s, bool error) {
-  return c_SplFileInfo::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileObject
-Variant c_SplFileObject::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileObject
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileObject
 Variant * c_SplFileObject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -85,21 +70,6 @@ Variant * c_SplFileObject::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SplFileObject
-Variant c_SplFileObject::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileObject
-Variant c_SplFileObject::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_SplFileInfo::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileObject
-Variant c_SplFileObject::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileObject
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SplFileObject
 Variant& c_SplFileObject::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
@@ -3914,21 +3884,6 @@ void c_SplFileInfo::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_get_SplFileInfo
-Variant c_SplFileInfo::o_get(CStrRef prop, bool error, CStrRef context) {
-  return o_getPublic(prop, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileInfo
-Variant c_SplFileInfo::o_getPublic(CStrRef s, bool error) {
-  return c_ObjectData::o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileInfo
-Variant c_SplFileInfo::o_getPrivate(CStrRef s, bool error) {
-  return o_getPublic(s, error);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileInfo
 #ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo
 Variant * c_SplFileInfo::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
@@ -3944,21 +3899,6 @@ Variant * c_SplFileInfo::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_set_SplFileInfo
-Variant c_SplFileInfo::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
-  return o_setPublic(prop, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileInfo
-Variant c_SplFileInfo::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_ObjectData::o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileInfo
-Variant c_SplFileInfo::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
-  return o_setPublic(s, v, forInit);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileInfo
 #ifndef OMIT_JUMP_TABLE_CLASS_lval_SplFileInfo
 Variant& c_SplFileInfo::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);

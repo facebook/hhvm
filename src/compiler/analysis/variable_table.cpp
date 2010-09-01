@@ -1545,16 +1545,9 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_SETARRAY_%s", cls);
   if (empty) m_emptyJumpTables.insert(JumpTableClassSetArray);
 
-  outputCPPPropertyOp(cg, ar, cls, parent, "get", ", bool error",
-                      ", error", "Variant", false, JumpReturnString, false,
-                      dynamicObject, JumpTableClassGet);
   outputCPPPropertyOp(cg, ar, cls, parent, "realProp", ", int flags", ", flags",
                       "Variant *", true, JumpRealProp, false, dynamicObject,
                       JumpTableClassRealProp);
-  outputCPPPropertyOp(cg, ar, cls, parent, "set",
-                      ", CVarRef v, bool forInit",
-                      ", v, forInit", "Variant",
-                      false, JumpSet, false, dynamicObject, JumpTableClassSet);
   outputCPPPropertyOp(cg, ar, cls, parent, "lval", "", "", "Variant&", false,
                       JumpReturnString, true, dynamicObject,
                       JumpTableClassLval);

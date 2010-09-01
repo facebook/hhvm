@@ -231,7 +231,9 @@ void MethodStatement::onParse(AnalysisResultPtr ar) {
   if (m_name == "__call") {
     classScope->setAttribute(ClassScope::HasUnknownMethodHandler);
   } else if (m_name == "__get") {
-    classScope->setAttribute(ClassScope::HasUnknownPropHandler);
+    classScope->setAttribute(ClassScope::HasUnknownPropGetter);
+  } else if (m_name == "__set") {
+    classScope->setAttribute(ClassScope::HasUnknownPropSetter);
   }
 
   m_className = classScope->getName();

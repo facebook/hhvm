@@ -50,18 +50,12 @@ class c_DomainException : public c_LogicException {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_DomainException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_DomainException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DomainException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_DomainException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DomainException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DomainException 1
-  #define OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DomainException 1
   #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DomainException 1
 
   // DECLARE_COMMON_INVOKE

@@ -612,6 +612,10 @@ quiet:
 %.d:
 	@
 
+# Suppressing errors for missing headers caused by old deps in .d files
+%.h:
+	@
+
 DEPEND_FILES := $(OBJECTS:.o=.d)
 
 ifneq ($(DEPEND_FILES),)

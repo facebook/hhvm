@@ -147,6 +147,17 @@ invokeStaticDirect(const char* cls, VariableEnvironment &env,
   return evalBody(fenv);
 }
 
+Variant MethodStatement::evalBody(VariableEnvironment &env) const {
+  if (isAbstract()) {
+    raise_error("Cannot call abstract method %s()", m_fullName.c_str());
+  }
+  if (m_ref) {
+    return ref(FunctionStatement::evalBody(env));
+  } else {
+    return FunctionStatement::evalBody(env);
+  }
+}
+
 void MethodStatement::getInfo(ClassInfo::MethodInfo &info) const {
   FunctionStatement::getInfo(info);
   int attr = info.attribute == ClassInfo::IsNothing ? 0 : info.attribute;

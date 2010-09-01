@@ -52,6 +52,7 @@ private:
   int m_modifiers;
   std::string m_fullName;
   virtual const std::string &fullName() const;
+  Variant evalBody(VariableEnvironment &env) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

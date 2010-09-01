@@ -118,6 +118,9 @@ and this variable is inferred as integers, it will be 0, instead of null.
 
 PHP doesn't respect pass-by-reference parameters and return value. HipHop does.
 
+PHP doesn't allow func_get_args() to be used as arguments of these two
+functions. HipHop does.
+
 (4) XMLWriter
 
 In PHP, XMLWriter class and its functions returned different types of objects,

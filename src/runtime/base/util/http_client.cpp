@@ -21,11 +21,21 @@
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <util/logger.h>
+#include <util/ssl_init.h>
 
 using namespace std;
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
+
+//so that curl_global_init() is called ahead of time, avoiding crash
+class StaticInitializer {
+public: StaticInitializer() {
+  curl_global_init(CURL_GLOBAL_ALL);
+  SSLInit::init();
+  }
+};
+static StaticInitializer s_initCurl;
 
 HttpClient::HttpClient(int timeout /* = 5 */, int maxRedirect /* = 1 */,
                        bool use11 /* = true */, bool decompress /* = false */)

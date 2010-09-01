@@ -38,6 +38,7 @@
 #include <runtime/ext/ext_apc.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <util/ssl_init.h>
 
 using namespace boost;
 using namespace std;
@@ -77,9 +78,10 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::EnableSSL) {
+    SSLInit::init();
     m_pageServer->enableSSL(RuntimeOption::SSLCertificateFile,
-        RuntimeOption::SSLCertificateKeyFile,
-        RuntimeOption::SSLPort);
+                            RuntimeOption::SSLCertificateKeyFile,
+                            RuntimeOption::SSLPort);
   }
 
   m_adminServer = ServerPtr

@@ -319,58 +319,57 @@ Variant EvalObjectData::o_invoke_few_args_mil(const char *s,
     return o_invoke_mil(s, Array(), hash);
   }
   case 1: {
-    Array params(ArrayInit(1, true).set(0, a0).create());
+    Array params(ArrayInit(1, true).set(a0).create());
     return o_invoke_mil(s, params, hash);
   }
   case 2: {
-    Array params(ArrayInit(2, true).set(0, a0).set(1, a1).create());
+    Array params(ArrayInit(2, true).set(a0).set(a1).create());
     return o_invoke_mil(s, params, hash);
   }
   case 3: {
-    Array params(ArrayInit(3, true).set(0, a0).set(1, a1).set(2, a2).create());
+    Array params(ArrayInit(3, true).set(a0).set(a1).set(a2).create());
     return o_invoke_mil(s, params, hash);
   }
 #if INVOKE_FEW_ARGS_COUNT > 3
   case 4: {
-    Array params(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).create());
+    Array params(ArrayInit(4, true).set(a0).set(a1).set(a2).set(a3).create());
     return o_invoke_mil(s, params, hash);
   }
   case 5: {
-    Array params(ArrayInit(5, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).create());
+    Array params(ArrayInit(5, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).create());
     return o_invoke_mil(s, params, hash);
   }
   case 6: {
-    Array params(ArrayInit(6, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).create());
+    Array params(ArrayInit(6, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).create());
     return o_invoke_mil(s, params, hash);
   }
 #endif
 #if INVOKE_FEW_ARGS_COUNT > 6
   case 7: {
-    Array params(ArrayInit(7, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).create());
+    Array params(ArrayInit(7, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).create());
     return o_invoke_mil(s, params, hash);
   }
   case 8: {
-    Array params(ArrayInit(8, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).create());
+    Array params(ArrayInit(8, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).create());
     return o_invoke_mil(s, params, hash);
   }
   case 9: {
-    Array params(ArrayInit(9, true).set(0, a0).set(1, a1).set(2, a2).
-                                    set(3, a3).set(4, a4).set(5, a5).
-                                    set(6, a6).set(7, a7).set(8, a8).create());
+    Array params(ArrayInit(9, true).set(a0).set(a1).set(a2).
+                                    set(a3).set(a4).set(a5).
+                                    set(a6).set(a7).set(a8).create());
     return o_invoke_mil(s, params, hash);
   }
   case 10: {
-    Array params(ArrayInit(10, true).set(0, a0).set(1, a1).set(2, a2).
-                                     set(3, a3).set(4, a4).set(5, a5).
-                                     set(6, a6).set(7, a7).set(8, a8).
-                                     set(9, a9).create());
+    Array params(ArrayInit(10, true).set(a0).set(a1).set(a2).
+                                     set(a3).set(a4).set(a5).
+                                     set(a6).set(a7).set(a8).
+                                     set(a9).create());
     return o_invoke_mil(s, params, hash);
   }
 #endif

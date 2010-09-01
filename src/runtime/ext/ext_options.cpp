@@ -570,23 +570,23 @@ Array f_getrusage(int who /* = 0 */) {
   }
 
   return Array(ArrayInit(17, true).
-               set( 0, PHP_RUSAGE_PARA(ru_oublock)).
-               set( 1, PHP_RUSAGE_PARA(ru_inblock)).
-               set( 2, PHP_RUSAGE_PARA(ru_msgsnd)).
-               set( 3, PHP_RUSAGE_PARA(ru_msgrcv)).
-               set( 4, PHP_RUSAGE_PARA(ru_maxrss)).
-               set( 5, PHP_RUSAGE_PARA(ru_ixrss)).
-               set( 6, PHP_RUSAGE_PARA(ru_idrss)).
-               set( 7, PHP_RUSAGE_PARA(ru_minflt)).
-               set( 8, PHP_RUSAGE_PARA(ru_majflt)).
-               set( 9, PHP_RUSAGE_PARA(ru_nsignals)).
-               set(10, PHP_RUSAGE_PARA(ru_nvcsw)).
-               set(11, PHP_RUSAGE_PARA(ru_nivcsw)).
-               set(12, PHP_RUSAGE_PARA(ru_nswap)).
-               set(13, PHP_RUSAGE_PARA(ru_utime.tv_usec)).
-               set(14, PHP_RUSAGE_PARA(ru_utime.tv_sec)).
-               set(15, PHP_RUSAGE_PARA(ru_stime.tv_usec)).
-               set(16, PHP_RUSAGE_PARA(ru_stime.tv_sec)).
+               set(PHP_RUSAGE_PARA(ru_oublock)).
+               set(PHP_RUSAGE_PARA(ru_inblock)).
+               set(PHP_RUSAGE_PARA(ru_msgsnd)).
+               set(PHP_RUSAGE_PARA(ru_msgrcv)).
+               set(PHP_RUSAGE_PARA(ru_maxrss)).
+               set(PHP_RUSAGE_PARA(ru_ixrss)).
+               set(PHP_RUSAGE_PARA(ru_idrss)).
+               set(PHP_RUSAGE_PARA(ru_minflt)).
+               set(PHP_RUSAGE_PARA(ru_majflt)).
+               set(PHP_RUSAGE_PARA(ru_nsignals)).
+               set(PHP_RUSAGE_PARA(ru_nvcsw)).
+               set(PHP_RUSAGE_PARA(ru_nivcsw)).
+               set(PHP_RUSAGE_PARA(ru_nswap)).
+               set(PHP_RUSAGE_PARA(ru_utime.tv_usec)).
+               set(PHP_RUSAGE_PARA(ru_utime.tv_sec)).
+               set(PHP_RUSAGE_PARA(ru_stime.tv_usec)).
+               set(PHP_RUSAGE_PARA(ru_stime.tv_sec)).
                create());
 }
 

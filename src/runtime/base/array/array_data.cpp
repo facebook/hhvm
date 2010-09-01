@@ -36,7 +36,7 @@ ArrayData *ArrayData::Create() {
 
 ArrayData *ArrayData::Create(CVarRef value) {
   ArrayInit init(1, true);
-  init.set(0, value);
+  init.set(value);
   return init.create();
 }
 

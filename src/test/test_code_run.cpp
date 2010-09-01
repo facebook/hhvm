@@ -6655,6 +6655,14 @@ bool TestCodeRun::TestCompilation() {
   MVCR("<?php "
        "call_user_func_array(array('Normalizer','normalize'),array('bar'));");
 
+  MVCR("<?php "
+       "function bar($g) { return $g; }"
+       "class X {"
+       "  static function foo() {"
+       "    echo $this->baz(bar(1), bar(''));"
+       "  }"
+       "}");
+
   return true;
 }
 

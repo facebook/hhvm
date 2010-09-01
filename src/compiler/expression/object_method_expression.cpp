@@ -323,16 +323,12 @@ bool ObjectMethodExpression::directVariantProxy(AnalysisResultPtr ar) {
 void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
                                            AnalysisResultPtr ar) {
   bool isThis = m_object->isThis();
-
+  bool linemap = outputLineMap(cg, ar, true) ? 1 : 0;
   if (isThis && ar->getFunctionScope()->isStatic()) {
-    bool linemap = outputLineMap(cg, ar, true);
-    cg_printf("throw_fatal(\"Using $this when not in object context\")");
-    if (linemap) cg_printf(")");
-    return;
+    cg_printf("GET_THIS_ARROW()");
   }
 
   bool fewParams = canInvokeFewArgs();
-  bool linemap = outputLineMap(cg, ar, true);
 
   if (!isThis) {
     if (directVariantProxy(ar) && !m_object->hasCPPTemp()) {

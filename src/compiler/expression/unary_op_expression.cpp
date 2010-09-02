@@ -101,8 +101,6 @@ bool UnaryOpExpression::isScalar() const {
   case '!':
   case '+':
   case '-':
-  case T_INC:
-  case T_DEC:
   case '~':
   case '@':
   case '(':
@@ -140,8 +138,15 @@ bool UnaryOpExpression::containsDynamicConstant(AnalysisResultPtr ar) const {
 }
 
 bool UnaryOpExpression::getScalarValue(Variant &value) {
+  if (m_exp) {
+    if (m_op == T_ARRAY) {
+      return m_exp->getScalarValue(value);
+    }
+    Variant t;
+    return m_exp->getScalarValue(t) &&
+      preCompute(t, value);
+  }
   if (m_op != T_ARRAY) return false;
-  if (m_exp) return (m_exp->getScalarValue(value));
   value = Array::Create();
   return true;
 }
@@ -184,8 +189,7 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
   }
 }
 
-bool UnaryOpExpression::preCompute(AnalysisResultPtr ar, CVarRef value,
-                                   Variant &result) {
+bool UnaryOpExpression::preCompute(CVarRef value, Variant &result) {
   switch(m_op) {
   case '!':
     result = (!toBoolean(value)); break;
@@ -196,6 +200,7 @@ bool UnaryOpExpression::preCompute(AnalysisResultPtr ar, CVarRef value,
   case '~':
     result = ~value; break;
   case '(':
+  case '@':
     result = value; break;
   case T_INT_CAST:
     result = value.toInt64(); break;
@@ -253,7 +258,6 @@ bool UnaryOpExpression::canonCompare(ExpressionPtr e) const {
 ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   Variant value;
   Variant result;
-  bool hasResult;
 
   ar->preOptimize(m_exp);
   if (m_exp && ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
@@ -261,22 +265,20 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
       return m_exp;
     }
     if (m_op == T_UNSET) {
-      if (m_exp->isScalar()) {
-        return m_exp;
-      }
-      if (m_exp->is(KindOfExpressionList)) {
-        if (static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0) {
-          return CONSTANT("null");
-        }
+      if (m_exp->isScalar() ||
+          (m_exp->is(KindOfExpressionList) &&
+           static_pointer_cast<ExpressionList>(m_exp)->getCount() == 0)) {
+        return CONSTANT("null");
       }
       return ExpressionPtr();
     }
   }
 
-  if (!m_exp || !m_exp->isScalar()) return ExpressionPtr();
-  if (!m_exp->getScalarValue(value)) return ExpressionPtr();
-  hasResult = preCompute(ar, value, result);
-  if (hasResult) {
+  if (m_op != T_ARRAY &&
+      m_exp &&
+      m_exp->isScalar() &&
+      m_exp->getScalarValue(value) &&
+      preCompute(value, result)) {
     return MakeScalarExpression(ar, getLocation(), result);
   }
   return ExpressionPtr();
@@ -614,7 +616,8 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     int index = -1;
     if (m_exp) {
       ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
-      if (pairs && pairs->isScalarArrayPairs()) {
+      Variant v;
+      if (pairs && pairs->isScalarArrayPairs() && pairs->getScalarValue(v)) {
         id = ar->registerScalarArray(m_exp, hash, index);
       }
     } else {

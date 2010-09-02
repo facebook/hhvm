@@ -1660,6 +1660,13 @@ bool TestCodeRun::TestScalarArray() {
       "function test2() { $a = array(__FUNCTION__, __LINE__); return $a; }\n"
       "var_dump(test1()); var_dump(test2());");
 
+  MVCR("<?php ;"
+       "define('VALUE', 1);"
+       "function func($params) {"
+       " var_dump($params);"
+       "}"
+       "func(array('key' => @VALUE));");
+
   return true;
 }
 

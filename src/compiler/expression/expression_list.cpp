@@ -128,6 +128,7 @@ bool ExpressionList::containsDynamicConstant(AnalysisResultPtr ar) const {
 }
 
 bool ExpressionList::isScalarArrayPairs() const {
+  if (!m_arrayElements) return false;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr exp =
       dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);

@@ -81,15 +81,17 @@ public:
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
                     int state);
   bool outputCPPUnneeded(CodeGenerator &cg, AnalysisResultPtr ar);
+  unsigned int checkRefValues(bool arrayElements = true,
+                              unsigned int start = 0) const;
+  void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
+                                    AnalysisResultPtr ar,
+                                    int64 max,
+                                    bool arrayElements = true,
+                                    unsigned int start = 0);
 private:
   void optimize(AnalysisResultPtr ar);
   unsigned int checkLitstrKeys() const;
   unsigned int checkIntegerKeys(int64 &max) const;
-  unsigned int checkRefValues() const;
-  void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
-                                    AnalysisResultPtr ar,
-                                    unsigned int n,
-                                    int64 max);
 
   void outputCPPInternal(CodeGenerator &cg,
                          AnalysisResultPtr ar, bool needed, bool pre);

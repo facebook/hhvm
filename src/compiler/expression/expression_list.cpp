@@ -520,34 +520,44 @@ unsigned int ExpressionList::checkIntegerKeys(int64 &max) const {
   return keys.size();
 }
 
-unsigned int ExpressionList::checkRefValues() const {
-  ASSERT(m_arrayElements);
+unsigned int ExpressionList::checkRefValues(bool arrayElements /* = true */,
+                                            unsigned int start /* = 0 */)
+  const {
+  if (arrayElements) ASSERT(m_arrayElements);
   unsigned int refValueCount = 0;
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
-    ArrayPairExpressionPtr ap =
-      dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-    ExpressionPtr value = ap->getValue();
+  for (unsigned int i = start; i < m_exps.size(); i++) {
+    ExpressionPtr value = m_exps[i];
+    if (arrayElements) {
+      ArrayPairExpressionPtr ap =
+        dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+      value = ap->getValue();
+    }
     ASSERT(value);
     if (value->hasContext(RefValue)) refValueCount++;
   }
   return refValueCount;
 }
 
-void ExpressionList::outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
-                                                  AnalysisResultPtr ar,
-                                                  unsigned int n,
-                                                  int64 max) {
-  cg_printf("array_create%d(%lu, ", n, max);
-  for (unsigned int i = 0; i < m_exps.size(); i++) {
+void ExpressionList::outputCPPUniqLitKeyArrayInit(
+  CodeGenerator &cg, AnalysisResultPtr ar, int64 max,
+  bool arrayElements /* = true */, unsigned int start /* = 0 */) {
+  if (arrayElements) ASSERT(m_arrayElements);
+  unsigned int n =  m_exps.size();
+  cg_printf("array_create%d(%lu, ", n - start, max);
+  for (unsigned int i = start; i < n; i++) {
     if (ExpressionPtr exp = m_exps[i]) {
-      ArrayPairExpressionPtr ap =
-        dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
-      ExpressionPtr name = ap->getName();
-      ExpressionPtr value = ap->getValue();
+      ExpressionPtr name;
+      ExpressionPtr value = exp;
+      if (arrayElements) {
+        ArrayPairExpressionPtr ap =
+          dynamic_pointer_cast<ArrayPairExpression>(m_exps[i]);
+        name = ap->getName();
+        value = ap->getValue();
+      }
       if (name) {
         name->outputCPP(cg, ar);
       } else {
-        cg_printf("%d", i);
+        cg_printf("%d", i - start);
       }
       cg_printf(", ");
       value->outputCPP(cg, ar);
@@ -578,17 +588,17 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
         Option::GenArrayCreate && cg.getOutput() != CodeGenerator::SystemCPP) {
       int64 max = m_exps.size();
       unsigned int n = isVector ? m_exps.size() : checkIntegerKeys(max);
-      if (checkRefValues() == 0) {
+      if (checkRefValues() <= 1) {
         if (n > 0 && n == m_exps.size()) {
           ar->m_arrayIntegerKeySizes.insert(n);
-          outputCPPUniqLitKeyArrayInit(cg, ar, n, max);
+          outputCPPUniqLitKeyArrayInit(cg, ar, max);
           return;
         }
         if (!isVector) {
           n = checkLitstrKeys();
           if (n > 0 && n == m_exps.size()) {
             ar->m_arrayLitstrKeySizes.insert(n);
-            outputCPPUniqLitKeyArrayInit(cg, ar, n, 0);
+            outputCPPUniqLitKeyArrayInit(cg, ar, 0);
             return;
           }
         }

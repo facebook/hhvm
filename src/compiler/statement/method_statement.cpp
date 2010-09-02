@@ -596,6 +596,38 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ar->popScope();
 }
 
+int MethodStatement::checkRefParams() {
+  int refParamCount = 0;
+  for (int i = 0; i < m_params->getCount(); i++) {
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+    if (param->isRef()) refParamCount++;
+  }
+  return refParamCount;
+}
+
+void MethodStatement::outputParamArrayInit(CodeGenerator &cg) {
+  int n = m_params->getCount();
+  ASSERT(n > 0);
+  cg_printf("array_create%d(%d, ", n, n);
+  for (int i = 0; i < n; i++) {
+    ParameterExpressionPtr param =
+      dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+    const string &paramName = param->getName();
+    cg_printf("%d, ", i);
+    if (param->isRef()) {
+      cg_printf("ref(%s%s)", Option::VariablePrefix, paramName.c_str());
+    } else {
+      cg_printf("%s%s", Option::VariablePrefix, paramName.c_str());
+    }
+    if (i < n - 1) {
+      cg_printf(", ");
+    } else {
+      cg_printf(")");
+    }
+  }
+}
+
 void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
                                              AnalysisResultPtr ar,
                                              const char *name,
@@ -603,18 +635,24 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
                                              FunctionScopePtr funcScope) {
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
     if (m_params) {
-      cg_printf("INTERCEPT_INJECTION(\"%s\", (Array(ArrayInit(%d, true)",
-                name, m_params->getCount());
-      string params;
-      for (int i = 0; i < m_params->getCount(); i++) {
-        ParameterExpressionPtr param =
-          dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-        const string &paramName = param->getName();
-        cg_printf(".set%s(%d, %s%s)", param->isRef() ? "Ref" : "",
-                  i, Option::VariablePrefix, paramName.c_str());
+      int n = m_params->getCount();
+      cg_printf("INTERCEPT_INJECTION(\"%s\", ", name);
+      if (Option::GenArrayCreate && checkRefParams() <= 1) {
+        ar->m_arrayIntegerKeySizes.insert(n);
+        outputParamArrayInit(cg);
+        cg_printf(", %s);\n", funcScope->isRefReturn() ? "ref(r)" : "r");
+      } else {
+        cg_printf("(Array(ArrayInit(%d, true)", n);
+        for (int i = 0; i < n; i++) {
+          ParameterExpressionPtr param =
+            dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
+          const string &paramName = param->getName();
+          cg_printf(".set%s(%d, %s%s)", param->isRef() ? "Ref" : "",
+                    i, Option::VariablePrefix, paramName.c_str());
+        }
+        cg_printf(".create())), %s);\n",
+                  funcScope->isRefReturn() ? "ref(r)" : "r");
       }
-      cg_printf(".create())), %s);\n",
-                funcScope->isRefReturn() ? "ref(r)" : "r");
     } else {
       cg_printf("INTERCEPT_INJECTION(\"%s\", null_array, %s);\n",
                 name, funcScope->isRefReturn() ? "ref(r)" : "r");

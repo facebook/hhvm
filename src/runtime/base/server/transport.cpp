@@ -564,7 +564,8 @@ void Transport::prepareHeaders(bool compressed, const void *data, int size) {
     }
   }
 
-  if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end()) {
+  if (m_responseHeaders.find("Content-Type") == m_responseHeaders.end() &&
+      m_responseCode != 304) {
     addHeaderImpl("Content-Type", "text/html; charset=utf-8");
   }
 
@@ -649,6 +650,10 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
   ServerStatsHelper ssh("send");
   String response = prepareResponse(data, size, compressed, !chunked);
 
+  if (m_responseCode < 0) {
+    m_responseCode = code;
+  }
+
   // HTTP header handling
   if (!m_headerSent) {
     prepareHeaders(compressed, data, size);
@@ -656,9 +661,6 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
   }
 
   m_responseSize += response.size();
-  if (m_responseCode < 0) {
-    m_responseCode = code;
-  }
   ServerStats::SetThreadMode(ServerStats::Writing);
   sendImpl(response.data(), response.size(), m_responseCode, chunked);
   ServerStats::SetThreadMode(ServerStats::Processing);

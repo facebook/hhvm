@@ -65,6 +65,12 @@ bool ObjectData::o_isClass(const char *s) const {
   return strcasecmp(s, o_getClassName()) == 0;
 }
 
+int64 ObjectData::o_toInt64() const {
+  raise_notice("Object of class %s could not be converted to int",
+               o_getClassName().data());
+  return 1;
+}
+
 const Eval::MethodStatement *ObjectData::getMethodStatement(const char* name)
   const {
   return NULL;

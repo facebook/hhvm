@@ -107,7 +107,7 @@ class ObjectData : public Countable {
 
   // overridable casting
   virtual bool   o_toBoolean() const { return true;}
-  virtual int64  o_toInt64()   const { return 1;}
+  virtual int64  o_toInt64() const;
   virtual double o_toDouble()  const { return o_toInt64();}
 
   template<typename T>

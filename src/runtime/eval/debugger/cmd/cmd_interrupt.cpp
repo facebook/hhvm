@@ -110,6 +110,7 @@ std::string CmdInterrupt::desc() const {
         return "Post-Send Processing for " + m_program + " was ended.";
       }
       return "Post-Send Processing was ended.";
+    case HardBreakPoint:
     case BreakPointReached:
     case ExceptionThrown: {
       ASSERT(m_site);
@@ -168,6 +169,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
                      m_program.c_str());
       }
       break;
+    case HardBreakPoint:
     case BreakPointReached:
     case ExceptionThrown: {
       bool found = false;
@@ -189,7 +191,8 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
             bp->m_state = BreakPointInfo::Disabled;
             toggled = true;
           }
-          if (m_interrupt == BreakPointReached) {
+          if (m_interrupt == BreakPointReached ||
+              m_interrupt == HardBreakPoint) {
             client->info("Breakpoint %d reached %s", bp->index(),
                          m_bpi->site().c_str());
           } else {
@@ -251,6 +254,7 @@ bool CmdInterrupt::shouldBreak(const BreakPointInfoPtrVec &bps) {
   switch (m_interrupt) {
     case SessionStarted:
     case SessionEnded:
+    case HardBreakPoint:
       return true; // always break
     case RequestStarted:
     case RequestEnded:

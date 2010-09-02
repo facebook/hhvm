@@ -18,6 +18,7 @@
 #include <runtime/eval/debugger/debugger.h>
 #include <runtime/eval/debugger/cmd/cmd_signal.h>
 #include <runtime/base/program_functions.h>
+#include <runtime/base/server/source_root_info.h>
 #include <runtime/base/externals.h>
 #include <system/gen/sys/system_globals.h>
 #include <util/process.h>
@@ -61,7 +62,8 @@ void DummySandbox::run() {
       string msg;
       if (m_inited) {
         SystemGlobals *g = (SystemGlobals *)get_global_variables();
-        g->gv__SERVER.set("HPHP_SANDBOX_ID", sandbox.id());
+        SourceRootInfo sri(sandbox.m_user, sandbox.m_name);
+        sri.setServerVariables(g->gv__SERVER);
 
         std::string doc = getStartupDoc(sandbox);
         bool error; string errorMsg;

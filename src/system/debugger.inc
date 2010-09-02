@@ -3,6 +3,7 @@
 #if EXT_TYPE == 0
 "hphpd_install_user_command", T(Boolean), S(0), "cmd", T(String), NULL, NULL, S(0), "clsname", T(String), NULL, NULL, S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Expands HipHop debugger with a user extended command.\n *\n * @cmd        string  The command name to register.\n * @clsname    string  The debugger command class that has its\n *                     implementation.\n *\n * @return     bool    TRUE if the command name was not used before, FALSE\n *                     otherwise.\n */", 
 "hphpd_get_user_commands", T(Array), S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Gets a list of user extended commands.\n *\n * @return     map     A map of commands and their PHP classes.\n */", 
+"hphpd_break", T(Void), S(0), "condition", T(Boolean), "b:1;", "true", S(0), NULL, S(81920), "/**\n * ( HipHop specific )\n *\n * Sets a hard breakpoint. When a debugger is running, this line of code\n * will break into debugger, if condition is met. If there is no debugger\n * that's attached, it will not do anything.\n *\n * @condition  bool    If true, break, otherwise, continue.\n */", 
 
 #elif EXT_TYPE == 1
 

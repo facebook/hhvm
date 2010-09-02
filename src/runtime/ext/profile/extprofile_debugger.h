@@ -35,6 +35,11 @@ inline Array x_hphpd_get_user_commands() {
   return f_hphpd_get_user_commands();
 }
 
+inline void x_hphpd_break(bool condition = true) {
+  FUNCTION_INJECTION_BUILTIN(hphpd_break);
+  f_hphpd_break(condition);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

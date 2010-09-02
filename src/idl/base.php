@@ -249,6 +249,7 @@ function DefineFunction($func) {
   if ($current_class && $classes[$current_class]['flags'] & HipHopSpecific) {
     $func['flags'] |= HipHopSpecific;
   }
+  if (!isset($func['return'])) $func['return'] = array();
   $func['ret_desc'] = idx($func['return'], 'desc');
   $func['return'] = idx($func['return'], 'type');
   if ($func['return'] & Reference) {

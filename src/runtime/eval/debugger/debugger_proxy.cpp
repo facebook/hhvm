@@ -281,7 +281,8 @@ bool DebuggerProxy::checkJumpFlowBreak(CmdInterrupt &cmd) {
     bool fcShouldBreak = false; // should I break according to flow control?
     bool bpShouldBreak = false; // should I break according to breakpoints?
 
-    if (cmd.getInterruptType() == BreakPointReached && m_flow) {
+    if ((cmd.getInterruptType() == BreakPointReached ||
+         cmd.getInterruptType() == HardBreakPoint) && m_flow) {
       fcShouldBreak = breakByFlowControl(cmd);
     }
 
@@ -310,7 +311,8 @@ bool DebuggerProxy::processJumpFlowBreak(CmdInterrupt &cmd) {
   if (cmd.getFrame()) {
     cmd.getFrame()->setBreakPointHit();
   }
-  if (cmd.getInterruptType() == BreakPointReached && m_flow) {
+  if ((cmd.getInterruptType() == BreakPointReached ||
+       cmd.getInterruptType() == HardBreakPoint) && m_flow) {
     if (m_flow->is(DebuggerCommand::KindOfContinue)) {
       if (!m_flow->decCount()) m_flow.reset();
       return false;

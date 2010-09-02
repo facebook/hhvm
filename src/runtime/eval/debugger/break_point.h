@@ -29,6 +29,7 @@ enum InterruptType {
   RequestStarted,
   RequestEnded,
   PSPEnded,
+  HardBreakPoint,
   BreakPointReached,
   ExceptionThrown,
 };

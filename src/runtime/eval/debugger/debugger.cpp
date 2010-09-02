@@ -113,6 +113,10 @@ void Debugger::InterruptFileLine(InterruptSite &site) {
   Interrupt(BreakPointReached, NULL, &site);
 }
 
+void Debugger::InterruptHard(InterruptSite &site) {
+  Interrupt(HardBreakPoint, NULL, &site);
+}
+
 bool Debugger::InterruptException(CVarRef e) {
   if (RuntimeOption::EnableDebugger) {
     ThreadInfo *ti = ThreadInfo::s_threadInfo.get();

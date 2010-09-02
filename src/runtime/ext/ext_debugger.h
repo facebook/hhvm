@@ -28,6 +28,7 @@ namespace HPHP {
 
 bool f_hphpd_install_user_command(CStrRef cmd, CStrRef clsname);
 Array f_hphpd_get_user_commands();
+void f_hphpd_break(bool condition = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 // class DebuggerProxy

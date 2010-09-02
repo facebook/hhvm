@@ -38,6 +38,26 @@ SourceRootInfo::SourceRootInfo(const char *host)
   }
   Array pair = StringUtil::Explode(matches.rvalAt(1), "-", 2);
   m_user = pair.rvalAt(0).toString();
+  bool defaultSb = pair.size() == 1;
+  if (defaultSb) {
+    m_sandbox = "default";
+  } else {
+    m_sandbox = pair.rvalAt(1).toString();
+  }
+
+  create();
+}
+
+SourceRootInfo::SourceRootInfo(const std::string &user,
+                               const std::string &sandbox)
+    : m_sandboxCond(RuntimeOption::SandboxMode ? SandboxOn : SandboxOff) {
+  if (!sandboxOn()) return;
+  m_user = user;
+  m_sandbox = sandbox;
+  create();
+}
+
+void SourceRootInfo::create() {
   String homePath = String(RuntimeOption::SandboxHome) + "/" + m_user + "/";
   {
     struct stat hstat;
@@ -50,12 +70,6 @@ SourceRootInfo::SourceRootInfo(const char *host)
         }
       }
     }
-  }
-  bool defaultSb = pair.size() == 1;
-  if (defaultSb) {
-    m_sandbox = "default";
-  } else {
-    m_sandbox = pair.rvalAt(1).toString();
   }
 
   string confpath = string(homePath.c_str()) +
@@ -82,7 +96,7 @@ SourceRootInfo::SourceRootInfo(const char *host)
   if (!userOverride.empty()) {
     m_user = userOverride;
   }
-  if (defaultSb) {
+  if (m_sandbox == "default") {
     if (sp.isNull()) {
       sp = "www/";
     }

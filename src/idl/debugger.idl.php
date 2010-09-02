@@ -84,6 +84,21 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "hphpd_break",
+    'desc'   => "Sets a hard breakpoint. When a debugger is running, this line of code will break into debugger, if condition is met. If there is no debugger that's attached, it will not do anything.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'args'   => array(
+      array(
+        'name'   => "condition",
+        'type'   => Boolean,
+        'desc'   => "If true, break, otherwise, continue.",
+        'value'  => "true",
+      ),
+    ),
+  ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

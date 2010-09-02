@@ -17,6 +17,10 @@ testing and some alternative PHP implementation.
 - hphp_thread_set_warmup_enabled
 - hphp_get_thread_id
 
+- hphpd_install_user_command
+- hphpd_get_user_commands
+- hphpd_break
+
 - register_postsend_function
 - register_cleanup_function
 

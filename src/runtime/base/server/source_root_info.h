@@ -27,6 +27,9 @@ class Transport;
 class SourceRootInfo {
 public:
   SourceRootInfo(const char *host);
+  SourceRootInfo(const std::string &user, const std::string &sandbox);
+  void create();
+
   ~SourceRootInfo();
 
   void setServerVariables(Variant &server) const;

@@ -18135,6 +18135,18 @@ Variant i_apd_stop_trace(CArrRef params) {
   if (count > 0) return throw_toomany_arguments("apd_stop_trace", 0, 1);
   return (f_apd_stop_trace(), null);
 }
+Variant i_hphpd_break(CArrRef params) {
+  FUNCTION_INJECTION(hphpd_break);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("hphpd_break", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (f_hphpd_break(), null);
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_hphpd_break(arg0), null);
+  }
+}
 Variant i_addcslashes(CArrRef params) {
   FUNCTION_INJECTION(addcslashes);
   int count __attribute__((__unused__)) = params.size();
@@ -18943,6 +18955,17 @@ Variant i_xbox_task_start(CArrRef params) {
     return (f_xbox_task_start(arg0));
   }
 }
+Variant i_newpixelwands(CArrRef params) {
+  FUNCTION_INJECTION(newpixelwands);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_newpixelwands(arg0));
+  }
+}
 Variant i_getcwd(CArrRef params) {
   FUNCTION_INJECTION(getcwd);
   int count __attribute__((__unused__)) = params.size();
@@ -18965,17 +18988,6 @@ Variant i_mb_get_info(CArrRef params) {
     if (count <= 0) return (f_mb_get_info());
     CVarRef arg0((ad->getValue(pos)));
     return (f_mb_get_info(arg0));
-  }
-}
-Variant i_newpixelwands(CArrRef params) {
-  FUNCTION_INJECTION(newpixelwands);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_newpixelwands(arg0));
   }
 }
 Variant i_fputcsv(CArrRef params) {
@@ -26728,6 +26740,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1773:
       HASH_INVOKE(0x04BD4B43921956EDLL, ldap_search);
+      HASH_INVOKE(0x2B661CD43C6006EDLL, hphpd_break);
       break;
     case 1774:
       HASH_INVOKE(0x76382756EA00B6EELL, is_object);
@@ -60186,6 +60199,23 @@ Variant ei_apd_stop_trace(Eval::VariableEnvironment &env, const Eval::FunctionCa
   }
   return (x_apd_stop_trace(), null);
 }
+Variant ei_hphpd_break(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("hphpd_break", 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 0) return (x_hphpd_break(), null);
+  else return (x_hphpd_break(a0), null);
+}
 Variant ei_addcslashes(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -61571,6 +61601,22 @@ Variant ei_xbox_task_start(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   return (x_xbox_task_start(a0));
 }
+Variant ei_newpixelwands(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_newpixelwands(a0));
+}
 Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -61611,22 +61657,6 @@ Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   }
   if (count <= 0) return (x_mb_get_info());
   else return (x_mb_get_info(a0));
-}
-Variant ei_newpixelwands(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_newpixelwands(a0));
 }
 Variant ei_fputcsv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -73225,6 +73255,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1773:
       HASH_INVOKE_FROM_EVAL(0x04BD4B43921956EDLL, ldap_search);
+      HASH_INVOKE_FROM_EVAL(0x2B661CD43C6006EDLL, hphpd_break);
       break;
     case 1774:
       HASH_INVOKE_FROM_EVAL(0x76382756EA00B6EELL, is_object);

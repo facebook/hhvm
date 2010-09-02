@@ -34,7 +34,11 @@ const std::string &DSandboxInfo::id() const {
 }
 
 const std::string DSandboxInfo::desc() const {
-  return m_user + "'s " + m_name + " sandbox";
+  string ret = m_user + "'s " + m_name + " sandbox";
+  if (!m_path.empty()) {
+    ret += " at " + m_path;
+  }
+  return ret;
 }
 
 void DSandboxInfo::set(const std::string &id) {

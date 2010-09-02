@@ -192,7 +192,7 @@ protected:
     t->o_invoke(s_flush, Array(), -1);
   }
   void directWrite(const char* data, size_t len) {
-    Array args = CREATE_VECTOR1(String(buffer, buffer_used, CopyString));
+    Array args = CREATE_VECTOR1(String(data, len, CopyString));
     t->o_invoke(s_write, args, -1);
   }
 };

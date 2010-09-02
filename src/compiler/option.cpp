@@ -156,7 +156,7 @@ bool Option::GenerateCPPComments = true;
 bool Option::GenerateCPPMetaInfo = true;
 bool Option::GenerateCPPNameSpace = true;
 bool Option::GenConcat = true;
-bool Option::GenArrayCreate = true;
+bool Option::GenArrayCreate = false;
 bool Option::KeepStatementsWithNoEffect = false;
 
 int Option::ConditionalIncludeExpandLevel = 1;

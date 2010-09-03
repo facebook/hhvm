@@ -491,8 +491,9 @@ unsigned int ExpressionList::checkLitstrKeys() const {
   return keys.size();
 }
 
-unsigned int ExpressionList::checkIntegerKeys() const {
+unsigned int ExpressionList::checkIntegerKeys(int64 &max) const {
   ASSERT(m_arrayElements);
+  max = 0;
   set<int64> keys;
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     ArrayPairExpressionPtr ap =
@@ -504,8 +505,10 @@ unsigned int ExpressionList::checkIntegerKeys() const {
     if (!ret) return 0;
     if (!value.isInteger()) return 0;
     int64 v = value.toInt64();
+    if (max < v) max = v;
     keys.insert(v);
   }
+  if (max > 0) max++;
   return keys.size();
 }
 
@@ -524,8 +527,9 @@ unsigned int ExpressionList::checkRefValues() const {
 
 void ExpressionList::outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
                                                   AnalysisResultPtr ar,
-                                                  unsigned int n) {
-  cg_printf("array_create%d(", n);
+                                                  unsigned int n,
+                                                  int64 max) {
+  cg_printf("array_create%d(%lu, ", n, max);
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     if (ExpressionPtr exp = m_exps[i]) {
       ArrayPairExpressionPtr ap =
@@ -564,18 +568,19 @@ void ExpressionList::outputCPPInternal(CodeGenerator &cg,
     }
     if (m_cppTemp.empty() &&
         Option::GenArrayCreate && cg.getOutput() != CodeGenerator::SystemCPP) {
-      unsigned int n = isVector ? m_exps.size() : checkIntegerKeys();
+      int64 max = m_exps.size();
+      unsigned int n = isVector ? m_exps.size() : checkIntegerKeys(max);
       if (checkRefValues() == 0) {
         if (n > 0 && n == m_exps.size()) {
           ar->m_arrayIntegerKeySizes.insert(n);
-          outputCPPUniqLitKeyArrayInit(cg, ar, n);
+          outputCPPUniqLitKeyArrayInit(cg, ar, n, max);
           return;
         }
         if (!isVector) {
           n = checkLitstrKeys();
           if (n > 0 && n == m_exps.size()) {
             ar->m_arrayLitstrKeySizes.insert(n);
-            outputCPPUniqLitKeyArrayInit(cg, ar, n);
+            outputCPPUniqLitKeyArrayInit(cg, ar, n, 0);
             return;
           }
         }

@@ -114,8 +114,8 @@ ZendArray::ZendArray(uint nSize /* = 0 */) :
   m_arBuckets = (Bucket **)calloc(m_nTableSize, sizeof(Bucket *));
 }
 
-ZendArray::ZendArray(uint nSize, Bucket *bkts[]) :
-  m_nNumOfElements(nSize), m_nNextFreeElement(0),
+ZendArray::ZendArray(uint nSize, unsigned long n, Bucket *bkts[]) :
+  m_nNumOfElements(nSize), m_nNextFreeElement(n),
   m_pListHead(NULL), m_pListTail(NULL), m_siPastEnd(0), m_linear(false) {
 
   if (nSize >= 0x80000000) {

@@ -34,12 +34,13 @@ SmallArray::SmallArray() : m_nNumOfElements(0),
   m_pos = ArrayData::invalid_index;
 }
 
-SmallArray::SmallArray(unsigned int nSize, StringData *keys[],
+SmallArray::SmallArray(unsigned int nSize, unsigned long n,
+                       StringData *keys[],
                        const Variant *values[]) :
   m_nNumOfElements(nSize),
   m_nListHead(ArrayData::invalid_index),
   m_nListTail(ArrayData::invalid_index),
-  m_nNextFreeElement(0) {
+  m_nNextFreeElement(n) {
   const Variant **v = values;
   for (StringData **k = keys; *k; k++, v++) {
     int64 h = (*k)->getPrecomputedHash();
@@ -57,15 +58,15 @@ SmallArray::SmallArray(unsigned int nSize, StringData *keys[],
   }
 }
 
-SmallArray::SmallArray(unsigned int nSize, int64 *keys[],
-                       const Variant *values[]) :
+SmallArray::SmallArray(unsigned int nSize, unsigned long n,
+                       int64 keys[], const Variant *values[]) :
   m_nNumOfElements(nSize),
   m_nListHead(ArrayData::invalid_index),
   m_nListTail(ArrayData::invalid_index),
-  m_nNextFreeElement(0) {
-  const Variant **v = values;
-  for (int64 **k = keys; *k; k++, v++) {
-    int64 h = **k;
+  m_nNextFreeElement(n) {
+  int64 *k = keys;
+  for (const Variant **v = values; *v; v++, k++) {
+    int64 h = *k;
     int start = int_ihash(h);
     Bucket *pb = m_arBuckets + start;
     while (pb->kind != Empty) {

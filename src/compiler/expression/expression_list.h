@@ -84,11 +84,12 @@ public:
 private:
   void optimize(AnalysisResultPtr ar);
   unsigned int checkLitstrKeys() const;
-  unsigned int checkIntegerKeys() const;
+  unsigned int checkIntegerKeys(int64 &max) const;
   unsigned int checkRefValues() const;
   void outputCPPUniqLitKeyArrayInit(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
-                                    unsigned int n);
+                                    unsigned int n,
+                                    int64 max);
 
   void outputCPPInternal(CodeGenerator &cg,
                          AnalysisResultPtr ar, bool needed, bool pre);

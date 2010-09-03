@@ -150,7 +150,7 @@ public:
 
   // This constructor should never be called directly, it is only called
   // from generated code.
-  ZendArray(uint nSize, Bucket *bkts[]);
+  ZendArray(uint nSize, unsigned long n, Bucket *bkts[]);
 
 private:
   uint             m_nTableSize;

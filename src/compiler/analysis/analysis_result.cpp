@@ -1844,7 +1844,7 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
 
 void AnalysisResult::outputArrayCreateNumDecl(CodeGenerator &cg, int num,
                                               const char *type) {
-  cg_printf("ArrayData *array_create%d(", num);
+  cg_printf("ArrayData *array_create%d(unsigned long n, ", num);
   for (int i = 1; i <= num; i++) {
     cg_printf("%s k%d, CVarRef v%d", type, i, i);
     if (i < num) {
@@ -1893,7 +1893,7 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
       }
       cg_indentEnd("NULL,\n");
       cg_printf("};\n");
-      cg_printf("return NEW(SmallArray)(%d, keys, values);\n", num);
+      cg_printf("return NEW(SmallArray)(%d, n, keys, values);\n", num);
       cg_indentEnd("}\n");
     }
     cg_indentBegin("ZendArray::Bucket *p[] = {\n");
@@ -1903,7 +1903,7 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     }
     cg_indentEnd("NULL,\n");
     cg_printf("};\n");
-    cg_printf("return NEW(ZendArray)(%d, p);\n", num);
+    cg_printf("return NEW(ZendArray)(%d, n, p);\n", num);
     cg_indentEnd("}\n");
   }
   for (set<int>::const_iterator iter = m_arrayIntegerKeySizes.begin();
@@ -1912,6 +1912,23 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     ASSERT(num > 0);
     outputArrayCreateNumDecl(cg, num, "int64");
     cg_indentBegin(" {\n");
+    if (num <= SmallArray::SARR_SIZE) {
+      cg_indentBegin("if (RuntimeOption::UseSmallArray) {\n");
+      cg_indentBegin("int64 keys[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("k%d, ", i);
+      }
+      cg_indentEnd("NULL,\n");
+      cg_printf("};\n");
+      cg_indentBegin("const Variant *values[] = {\n");
+      for (int i = 1; i <= num; i++) {
+        cg_printf("&v%d, ", i);
+      }
+      cg_indentEnd("NULL,\n");
+      cg_printf("};\n");
+      cg_printf("return NEW(SmallArray)(%d, n, keys, values);\n", num);
+      cg_indentEnd("}\n");
+    }
     cg_indentBegin("ZendArray::Bucket *p[] = {\n");
     for (int i = 1; i <= num; i++) {
       cg_printf("NEW(ZendArray::Bucket)(k%d, v%d), ",
@@ -1919,7 +1936,7 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
     }
     cg_indentEnd("NULL,\n");
     cg_printf("};\n");
-    cg_printf("return NEW(ZendArray)(%d, p);\n", num);
+    cg_printf("return NEW(ZendArray)(%d, n, p);\n", num);
     cg_indentEnd("}\n");
   }
 }

@@ -338,16 +338,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
                                                     bool directVariant,
                                                     int doExist) {
   bool bThis = m_object->isThis();
-  bool useGetThis = false;
   FunctionScopePtr funcScope = ar->getFunctionScope();
-  if (bThis) {
-    if (funcScope && funcScope->isStatic()) {
-      cg_printf("GET_THIS_ARROW()");
-    } else {
-      // in order for __set() and __get() to be called
-      useGetThis = true;
-    }
-  }
 
   const char *op = ".";
   string func = Option::ObjectPrefix;
@@ -377,6 +368,22 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       error = "";
     } else {
       func += "get";
+    }
+  }
+
+  bool linemap = false;
+  if (strcmp(error, ", true") == 0) {
+    // existence check for object properties
+    linemap = outputLineMap(cg, ar, true);
+  }
+
+  bool useGetThis = false;
+  if (bThis) {
+    if (funcScope && funcScope->isStatic()) {
+      cg_printf("GET_THIS_ARROW()");
+    } else {
+      // in order for __set() and __get() to be called
+      useGetThis = true;
     }
   }
 
@@ -433,6 +440,8 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     m_property->outputCPP(cg, ar);
     cg_printf("%s%s)", error, context);
   }
+
+  if (linemap) cg_printf(")");
 }
 
 void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,

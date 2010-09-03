@@ -331,9 +331,10 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
   bool fewParams = canInvokeFewArgs();
 
   if (!isThis) {
-    if (directVariantProxy(ar) && !m_object->hasCPPTemp()) {
+    if (!m_object->getActualType() ||
+        (directVariantProxy(ar) && !m_object->hasCPPTemp())) {
       TypePtr expectedType = m_object->getExpectedType();
-      ASSERT(expectedType->is(Type::KindOfObject));
+      ASSERT(!expectedType || expectedType->is(Type::KindOfObject));
       // Clear m_expectedType to avoid type cast (toObject).
       m_object->setExpectedType(TypePtr());
       m_object->outputCPP(cg, ar);

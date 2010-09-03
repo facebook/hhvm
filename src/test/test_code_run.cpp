@@ -6695,6 +6695,12 @@ bool TestCodeRun::TestCompilation() {
        "  }"
        "}");
 
+  MVCR("<?php "
+       "function foo() {}"
+       "function test() {"
+       "  foo()->bar();"
+       "}");
+
   return true;
 }
 

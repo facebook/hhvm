@@ -34,7 +34,7 @@ void ImmutableMap::add(ThreadSharedVariant *key, ThreadSharedVariant *val) {
   // NOTE: no check on duplication because we assume the original array has no
   // duplication
   int pos = m_curPos++;
-  ASSERT(pos <= m_capacity_mask);
+  ASSERT(pos <= (int)m_capacity_mask);
   m_buckets[pos].key = key;
   m_buckets[pos].val = val;
   if (key->is(KindOfInt64)) {

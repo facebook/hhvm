@@ -78,6 +78,7 @@ public:
   void setClassInfoAttribute(int flag) {
     m_attributeClassInfo |= flag;
   }
+  const std::string &getDocComment() const { return m_docComment;}
   void setDocComment(const std::string &doc) { m_docComment = doc;}
 
   /**

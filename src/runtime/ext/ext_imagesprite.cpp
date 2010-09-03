@@ -322,7 +322,7 @@ void ImageFromString::loadImage(bool block /* = false */) {
   }
 }
 
-ImageFromHTTP::ImageFromHTTP(String path, c_imagesprite* sprite, int timeout)
+ImageFromHTTP::ImageFromHTTP(String path, c_ImageSprite* sprite, int timeout)
     : Image(path, sprite) {
   m_ev_group = NULL;
   m_host = null_string;
@@ -434,7 +434,7 @@ void ImageFromHTTP::completed() {
 
 // PHP accessible classes/functions
 
-c_imagesprite::c_imagesprite() {
+c_ImageSprite::c_ImageSprite() {
   m_image_string_buffer = null_string;
   m_image = NULL;
   m_current = false;
@@ -445,17 +445,15 @@ c_imagesprite::c_imagesprite() {
   m_sprite_errors = Array::Create();
 }
 
-c_imagesprite::~c_imagesprite() {
+c_ImageSprite::~c_ImageSprite() {
 }
 
-void c_imagesprite::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::__construct);
+void c_ImageSprite::t___construct() {
 }
 
-Object c_imagesprite::t_addfile(CStrRef file,
-  CArrRef options /* = null */) {
-
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::addfile);
+Object c_ImageSprite::t_addfile(CStrRef file,
+                                CArrRef options /* = null */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::addfile);
   m_current = false;
 
   ImageSprite::Image *entry = new ImageSprite::ImageFromFile(file, this);
@@ -468,10 +466,9 @@ Object c_imagesprite::t_addfile(CStrRef file,
   return this;
 }
 
-Object c_imagesprite::t_addstring(CStrRef id, CStrRef data,
-  CArrRef options /* = null */) {
-
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::addstring);
+Object c_ImageSprite::t_addstring(CStrRef id, CStrRef data,
+                                  CArrRef options /* = null */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::addstring);
   m_current = false;
 
   ImageSprite::Image *entry = new ImageSprite::ImageFromString(id, data, this);
@@ -484,10 +481,9 @@ Object c_imagesprite::t_addstring(CStrRef id, CStrRef data,
   return this;
 }
 
-Object c_imagesprite::t_addurl(CStrRef url, int timeout_ms /* = 0 */,
-  CArrRef options /* = null */) {
-
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::addurl);
+Object c_ImageSprite::t_addurl(CStrRef url, int timeout_ms /* = 0 */,
+                               CArrRef options /* = null */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::addurl);
   m_current = false;
 
   ImageSprite::Image *entry = new ImageSprite::ImageFromHTTP(
@@ -504,8 +500,8 @@ Object c_imagesprite::t_addurl(CStrRef url, int timeout_ms /* = 0 */,
   return this;
 }
 
-Object c_imagesprite::t_clear(CVarRef files /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::clear);
+Object c_ImageSprite::t_clear(CVarRef files /* = null */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::clear);
   if (same(files, null)) {
     // Clear them all, might as well __destruct
     t___destruct();
@@ -530,8 +526,8 @@ Object c_imagesprite::t_clear(CVarRef files /* = null */) {
   return this;
 }
 
-Object c_imagesprite::t_loaddims(bool block /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::loaddims);
+Object c_ImageSprite::t_loaddims(bool block /* = false */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::loaddims);
   if (same(m_current, true)) {
     return this;
   }
@@ -559,8 +555,8 @@ Object c_imagesprite::t_loaddims(bool block /* = false */) {
   return this;
 }
 
-Object c_imagesprite::t_loadimages(bool block /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::loadimages);
+Object c_ImageSprite::t_loadimages(bool block /* = false */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::loadimages);
   if (same(m_current, true)) {
     return this;
   }
@@ -598,8 +594,8 @@ Object c_imagesprite::t_loadimages(bool block /* = false */) {
           std::vector<ImageSprite::Block*>, \
           ImageSprite::BlockAreaComparator>
 
-Object c_imagesprite::t_map() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::map);
+Object c_ImageSprite::t_map() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::map);
   if (same(m_current, true)) {
     return this;
   }
@@ -981,10 +977,10 @@ Object c_imagesprite::t_map() {
   return this;
 }
 
-String c_imagesprite::t_output(CStrRef output_file /* = null_string*/,
+String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
                                CStrRef format /* = "png" */,
                                int32 quality /* = 75 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::output);
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::output);
   t_loadimages(true);
   t_map();
 
@@ -1058,11 +1054,11 @@ String c_imagesprite::t_output(CStrRef output_file /* = null_string*/,
   }
 }
 
-String c_imagesprite::t_css(CStrRef css_namespace,
+String c_ImageSprite::t_css(CStrRef css_namespace,
                             CStrRef sprite_file /* = null_string */,
                             CStrRef output_file /* = null_string */,
                             bool verbose /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::css);
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::css);
   t_loaddims(true);
   t_map();
 
@@ -1130,25 +1126,24 @@ String c_imagesprite::t_css(CStrRef css_namespace,
   }
 }
 
-Array c_imagesprite::t_geterrors() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::geterrors);
+Array c_ImageSprite::t_geterrors() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::geterrors);
   Array ret = Array::Create();
   ret.set("images", m_img_errors);
   ret.set("sprite", m_sprite_errors);
   return ret;
 }
 
-Array c_imagesprite::t_mapping() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::mapping);
+Array c_ImageSprite::t_mapping() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::mapping);
   t_loaddims(true);
   t_map();
 
   return m_mapping;
 }
 
-Variant c_imagesprite::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(imagesprite, imagesprite::__destruct);
-
+Variant c_ImageSprite::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::__destruct);
   // Sic Trogdor on everything
   if (m_image != NULL) {
     delete m_image;

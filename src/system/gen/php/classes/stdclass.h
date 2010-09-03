@@ -22,15 +22,15 @@
 #include <php/classes/stdclass.fw.h>
 
 // Declarations
-#include <cls/stdclass.h>
-#include <cls/__php_incomplete_class.h>
+#include <cls/stdClass.h>
+#include <cls/__PHP_Incomplete_Class.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant pm_php$classes$stdclass_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
-Object co_stdclass(CArrRef params, bool init = true);
-Object co___php_incomplete_class(CArrRef params, bool init = true);
+Object co_stdClass(CArrRef params, bool init = true);
+Object co___PHP_Incomplete_Class(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

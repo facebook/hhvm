@@ -32,7 +32,7 @@ namespace HPHP {
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_GENERIC_INTERFACE(debuggercommand);
+FORWARD_DECLARE_GENERIC_INTERFACE(DebuggerCommand);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

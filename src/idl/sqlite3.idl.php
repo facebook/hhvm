@@ -154,7 +154,7 @@ DefineConstant(
 
 BeginClass(
   array(
-    'name'   => "sqlite3",
+    'name'   => "SQLite3",
     'desc'   => "A class that interfaces SQLite 3 databases.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
@@ -499,13 +499,13 @@ EndClass(
 
 BeginClass(
   array(
-    'name'   => "sqlite3stmt",
+    'name'   => "SQLite3Stmt",
     'desc'   => "A class that handles prepared statements for the SQLite 3 extension.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: void validate() const;
-  public: sp_sqlite3 m_db;
+  public: p_SQLite3 m_db;
   public: sqlite3_stmt *m_raw_stmt;
     DECLARE_BOOST_TYPES(BoundParam);
     struct BoundParam {
@@ -666,13 +666,13 @@ EndClass(
 
 BeginClass(
   array(
-    'name'   => "sqlite3result",
+    'name'   => "SQLite3Result",
     'desc'   => "A class that handles result sets for the SQLite 3 extension.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
   public: void validate() const;
-  public: sp_sqlite3stmt m_stmt;
+  public: p_SQLite3Stmt m_stmt;
 EOT
 ,
   ));

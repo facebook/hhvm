@@ -38,7 +38,7 @@ extern StaticString s_sys_ss21d85096;
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_CLASS(directory);
+FORWARD_DECLARE_CLASS(Directory);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

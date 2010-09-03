@@ -549,7 +549,7 @@ int JSON_parser(Variant &z, unsigned short p[], int length, int assoc/*<fb>*/,
             top.unset();
           }
           if (!assoc) {
-            top = Object(NEW(c_stdclass)());
+            top = Object(NEW(c_stdClass)());
           } else {
             top = Array::Create();
           }

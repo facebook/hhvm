@@ -152,7 +152,7 @@ DefineFunction(
       array(
         'name'   => "formdata",
         'type'   => Variant,
-        'desc'   => "May be an array or object containing properties.\n\nThe array form may be a simple one-dimensional structure, or an array of arrays (who in turn may contain other arrays).",
+        'desc'   => "May be an array or object containing properties.\n\nIf query_data is an array, it may be a simple one-dimensional structure, or an array of arrays (which in turn may contain other arrays).\n\nIf query_data is an object, then only public properties will be incorporated into the result.",
       ),
       array(
         'name'   => "numeric_prefix",
@@ -176,7 +176,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "On seriously malformed URLs, parse_url() may return FALSE and emit a E_WARNING. Otherwise an associative array is returned, whose components may be (at least one): scheme - e.g. http host port user pass path query - after the question mark ? fragment - after the hashmark #\n\nIf the component parameter is specified a string is returned instead of an array.",
+      'desc'   => "On seriously malformed URLs, parse_url() may return FALSE. Otherwise an associative array is returned, whose components may be (at least one): scheme - e.g. http host port user pass path query - after the question mark ? fragment - after the hashmark #\n\nIf the component parameter is specified a string is returned instead of an array.",
     ),
     'args'   => array(
       array(

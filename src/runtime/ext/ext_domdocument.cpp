@@ -206,7 +206,7 @@ static void php_dom_throw_error(dom_exception_code error_code,
   }
 
   if (strict_error) {
-    p_domexception e(NEW(c_domexception)());
+    p_DOMException e(NEW(c_DOMException)());
     e->t___construct(error_message);
     throw e;
   }
@@ -626,7 +626,7 @@ static String _dom_get_valid_file_path(const char *source) {
   return file_dest;
 }
 
-static xmlDocPtr dom_document_parser(c_domdocument * domdoc, int mode,
+static xmlDocPtr dom_document_parser(c_DOMDocument * domdoc, int mode,
                                      char *source, int options) {
   xmlDocPtr ret = NULL;
   xmlParserCtxtPtr ctxt = NULL;
@@ -719,7 +719,7 @@ static xmlDocPtr dom_document_parser(c_domdocument * domdoc, int mode,
   return ret;
 }
 
-static Variant dom_parse_document(c_domdocument *domdoc, CStrRef source,
+static Variant dom_parse_document(c_DOMDocument *domdoc, CStrRef source,
                                   int options, int mode) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
@@ -737,7 +737,7 @@ static Variant dom_parse_document(c_domdocument *domdoc, CStrRef source,
   return true;
 }
 
-static Variant dom_load_html(c_domdocument *domdoc, CStrRef source, int mode) {
+static Variant dom_load_html(c_DOMDocument *domdoc, CStrRef source, int mode) {
   if (source.empty()) {
     raise_warning("Empty string supplied as input");
     return false;
@@ -770,7 +770,7 @@ static Variant dom_load_html(c_domdocument *domdoc, CStrRef source, int mode) {
   return domdoc;
 }
 
-static bool _dom_document_relaxNG_validate(c_domdocument *domdoc,
+static bool _dom_document_relaxNG_validate(c_DOMDocument *domdoc,
                                            CStrRef source, int type) {
   xmlRelaxNGParserCtxtPtr parser;
   xmlRelaxNGPtr           sptr;
@@ -830,7 +830,7 @@ static bool _dom_document_relaxNG_validate(c_domdocument *domdoc,
   return is_valid == 0;
 }
 
-static bool _dom_document_schema_validate(c_domdocument * domdoc,
+static bool _dom_document_schema_validate(c_DOMDocument * domdoc,
                                           CStrRef source, int type) {
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;
   xmlSchemaParserCtxtPtr  parser;
@@ -1138,7 +1138,7 @@ static void removeOrphan(Array &orphans, xmlNodePtr node) {
   }
 }
 
-static Variant php_dom_create_object(xmlNodePtr obj, sp_domdocument doc,
+static Variant php_dom_create_object(xmlNodePtr obj, p_DOMDocument doc,
                                      bool owner = false) {
   const char *clsname = NULL;
   switch (obj->type) {
@@ -1167,7 +1167,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, sp_domdocument doc,
     clsname = doc->m_classmap[clsname].toString().data();
   }
   Object wrapper = create_object(clsname, Array(), false);
-  c_domnode *nodeobj = wrapper.getTyped<c_domnode>();
+  c_DOMNode *nodeobj = wrapper.getTyped<c_DOMNode>();
   nodeobj->m_doc = doc;
   nodeobj->m_node = obj;
   if (owner && doc.get()) {
@@ -1176,7 +1176,7 @@ static Variant php_dom_create_object(xmlNodePtr obj, sp_domdocument doc,
   return wrapper;
 }
 
-static Variant create_node_object(xmlNodePtr node, sp_domdocument doc,
+static Variant create_node_object(xmlNodePtr node, p_DOMDocument doc,
                                   bool owner = false) {
   if (!node) {
     return null;
@@ -1188,7 +1188,7 @@ static Variant create_node_object(xmlNodePtr node, sp_domdocument doc,
   return retval;
 }
 
-static Variant php_xpath_eval(c_domxpath * domxpath, CStrRef expr,
+static Variant php_xpath_eval(c_DOMXPath * domxpath, CStrRef expr,
                               CObjRef context, int type) {
   xmlXPathObjectPtr xpathobjp;
   int nsnbr = 0, xpath_type;
@@ -1206,7 +1206,7 @@ static Variant php_xpath_eval(c_domxpath * domxpath, CStrRef expr,
   }
   xmlNodePtr nodep = NULL;
   if (!context.isNull()) {
-    c_domnode *domnode = context.getTyped<c_domnode>();
+    c_DOMNode *domnode = context.getTyped<c_DOMNode>();
     nodep = domnode->m_node;
   }
   if (!nodep) {
@@ -1275,7 +1275,7 @@ static Variant php_xpath_eval(c_domxpath * domxpath, CStrRef expr,
         retval.append(create_node_object(node, domxpath->m_doc, owner));
       }
     }
-    c_domnodelist *nodelist = NEW(c_domnodelist)();
+    c_DOMNodeList *nodelist = NEW(c_DOMNodeList)();
     nodelist->m_doc = domxpath->m_doc;
     nodelist->m_baseobjptr = retval;
     nodelist->m_nodetype = DOM_NODESET;
@@ -1498,7 +1498,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_NODE(nodep)                               \
-  c_domnode *domnode = obj.getTyped<c_domnode>();       \
+  c_DOMNode *domnode = obj.getTyped<c_DOMNode>();       \
   xmlNodePtr nodep = domnode->m_node;                   \
   if (nodep == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
@@ -1506,7 +1506,7 @@ public:
   }                                                     \
 
 #define CHECK_WRITE_NODE(nodep)                         \
-  c_domnode *domnode = obj.getTyped<c_domnode>();       \
+  c_DOMNode *domnode = obj.getTyped<c_DOMNode>();       \
   xmlNodePtr nodep = domnode->m_node;                   \
   if (nodep == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
@@ -1643,7 +1643,7 @@ static Variant domnode_childnodes_read(CObjRef obj) {
   if (!dom_node_children_valid(nodep)) {
     return null;
   }
-  c_domnodelist *retval = NEW(c_domnodelist)();
+  c_DOMNodeList *retval = NEW(c_DOMNodeList)();
   retval->m_doc = domnode->m_doc;
   retval->m_baseobj = obj;
   retval->m_nodetype = XML_ELEMENT_NODE;
@@ -1681,7 +1681,7 @@ static Variant domnode_nextsibling_read(CObjRef obj) {
 static Variant domnode_attributes_read(CObjRef obj) {
   CHECK_NODE(nodep);
   if (nodep->type == XML_ELEMENT_NODE) {
-    c_domnamednodemap *nodemap = NEW(c_domnamednodemap)();
+    c_DOMNamedNodeMap *nodemap = NEW(c_DOMNamedNodeMap)();
     nodemap->m_doc = domnode->m_doc;
     nodemap->m_baseobj = obj;
     nodemap->m_nodetype = XML_ATTRIBUTE_NODE;
@@ -1862,38 +1862,38 @@ static PropertyAccessorMap domnode_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domnode::c_domnode() : m_node(NULL) {
+c_DOMNode::c_DOMNode() : m_node(NULL) {
 }
 
-c_domnode::~c_domnode() {
+c_DOMNode::~c_DOMNode() {
 }
 
-void c_domnode::t___construct() {
+void c_DOMNode::t___construct() {
 }
 
-Variant c_domnode::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::__destruct);
+Variant c_DOMNode::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::__destruct);
   return null;
 }
 
-Variant c_domnode::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::__get);
+Variant c_DOMNode::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::__get);
   return domnode_properties_map.getter(name)(this);
 }
 
-Variant c_domnode::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::__set);
+Variant c_DOMNode::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::__set);
   domnode_properties_map.setter(name)(this, value);
   return null;
 }
 
-Variant c_domnode::t_appendchild(CObjRef newnode) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::appendchild);
+Variant c_DOMNode::t_appendchild(CObjRef newnode) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::appendchild);
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
-  c_domnode *newdomnode = newnode.getTyped<c_domnode>();
+  c_DOMNode *newdomnode = newnode.getTyped<c_DOMNode>();
   xmlNodePtr child = newdomnode->m_node;
   xmlNodePtr new_child = NULL;
   if (dom_node_is_read_only(nodep) ||
@@ -1962,16 +1962,16 @@ Variant c_domnode::t_appendchild(CObjRef newnode) {
   return create_node_object(new_child, m_doc, false);
 }
 
-ObjectData *c_domnode::clone() {
+ObjectData *c_DOMNode::clone() {
   ObjectData *obj = cloneImpl();
-  c_domnode *node = static_cast<c_domnode*>(obj);
+  c_DOMNode *node = static_cast<c_DOMNode*>(obj);
   node->m_node = m_node;
   node->m_doc = m_doc;
   return obj;
 }
 
-Variant c_domnode::t_clonenode(bool deep /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::clonenode);
+Variant c_DOMNode::t_clonenode(bool deep /* = false */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::clonenode);
   xmlNodePtr n = m_node;
   xmlNode * node = xmlDocCopyNode(n, n->doc, deep);
   if (!node) {
@@ -2006,14 +2006,14 @@ Variant c_domnode::t_clonenode(bool deep /* = false */) {
   return create_node_object(node, m_doc, true);
 }
 
-int64 c_domnode::t_getlineno() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::getlineno);
+int64 c_DOMNode::t_getlineno() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::getlineno);
   xmlNodePtr nodep = m_node;
   return xmlGetLineNo(nodep);
 }
 
-bool c_domnode::t_hasattributes() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::hasattributes);
+bool c_DOMNode::t_hasattributes() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::hasattributes);
   xmlNodePtr nodep = m_node;
   if (nodep->type != XML_ELEMENT_NODE) {
     return false;
@@ -2021,8 +2021,8 @@ bool c_domnode::t_hasattributes() {
   return nodep->properties;
 }
 
-bool c_domnode::t_haschildnodes() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::haschildnodes);
+bool c_DOMNode::t_haschildnodes() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::haschildnodes);
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
     return false;
@@ -2030,14 +2030,14 @@ bool c_domnode::t_haschildnodes() {
   return nodep->children;
 }
 
-Variant c_domnode::t_insertbefore(CObjRef newnode,
+Variant c_DOMNode::t_insertbefore(CObjRef newnode,
                                   CObjRef refnode /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::insertbefore);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::insertbefore);
   xmlNodePtr parentp = m_node;
   if (!dom_node_children_valid(parentp)) {
     return false;
   }
-  c_domnode *domchildnode = newnode.getTyped<c_domnode>();
+  c_DOMNode *domchildnode = newnode.getTyped<c_DOMNode>();
   xmlNodePtr child = domchildnode->m_node;
   xmlNodePtr new_child = NULL;
   int stricterror = m_doc->m_stricterror;
@@ -2059,7 +2059,7 @@ Variant c_domnode::t_insertbefore(CObjRef newnode,
     return false;
   }
   if (!refnode.isNull()) {
-    c_domnode *domrefnode = refnode.getTyped<c_domnode>();
+    c_DOMNode *domrefnode = refnode.getTyped<c_DOMNode>();
     xmlNodePtr refp = domrefnode->m_node;
     if (refp->parent != parentp) {
       php_dom_throw_error(NOT_FOUND_ERR, stricterror);
@@ -2160,8 +2160,8 @@ Variant c_domnode::t_insertbefore(CObjRef newnode,
   return create_node_object(new_child, m_doc, false);
 }
 
-bool c_domnode::t_isdefaultnamespace(CStrRef namespaceuri) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::isdefaultnamespace);
+bool c_DOMNode::t_isdefaultnamespace(CStrRef namespaceuri) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::isdefaultnamespace);
   xmlNodePtr nodep = m_node;
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE ||
@@ -2177,19 +2177,19 @@ bool c_domnode::t_isdefaultnamespace(CStrRef namespaceuri) {
   return false;
 }
 
-bool c_domnode::t_issamenode(CObjRef node) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::issamenode);
-  c_domnode *otherdomnode = node.getTyped<c_domnode>();
+bool c_DOMNode::t_issamenode(CObjRef node) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::issamenode);
+  c_DOMNode *otherdomnode = node.getTyped<c_DOMNode>();
   return m_node == otherdomnode->m_node;
 }
 
-bool c_domnode::t_issupported(CStrRef feature, CStrRef version) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::issupported);
+bool c_DOMNode::t_issupported(CStrRef feature, CStrRef version) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::issupported);
   return dom_has_feature(feature.data(), version.data());
 }
 
-Variant c_domnode::t_lookupnamespaceuri(CStrRef namespaceuri) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::lookupnamespaceuri);
+Variant c_DOMNode::t_lookupnamespaceuri(CStrRef namespaceuri) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::lookupnamespaceuri);
   xmlNodePtr nodep = m_node;
   xmlNsPtr nsptr;
   if (nodep->type == XML_DOCUMENT_NODE ||
@@ -2206,8 +2206,8 @@ Variant c_domnode::t_lookupnamespaceuri(CStrRef namespaceuri) {
   return null;
 }
 
-Variant c_domnode::t_lookupprefix(CStrRef prefix) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::lookupprefix);
+Variant c_DOMNode::t_lookupprefix(CStrRef prefix) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::lookupprefix);
   xmlNodePtr nodep = m_node;
   xmlNodePtr lookupp;
   xmlNsPtr nsptr;
@@ -2240,19 +2240,19 @@ Variant c_domnode::t_lookupprefix(CStrRef prefix) {
   return null;
 }
 
-void c_domnode::t_normalize() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::normalize);
+void c_DOMNode::t_normalize() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::normalize);
   dom_normalize(m_node);
 }
 
-Variant c_domnode::t_removechild(CObjRef node) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::removechild);
+Variant c_DOMNode::t_removechild(CObjRef node) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::removechild);
   xmlNodePtr children;
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
-  c_domnode *domnode2 = node.getTyped<c_domnode>();
+  c_DOMNode *domnode2 = node.getTyped<c_DOMNode>();
   xmlNodePtr child = domnode2->m_node;
   int stricterror = m_doc->m_stricterror;
   if (dom_node_is_read_only(nodep) ||
@@ -2276,16 +2276,16 @@ Variant c_domnode::t_removechild(CObjRef node) {
   return false;
 }
 
-Variant c_domnode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::replacechild);
+Variant c_DOMNode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::replacechild);
   int foundoldchild = 0;
   xmlNodePtr nodep = m_node;
   if (!dom_node_children_valid(nodep)) {
     return false;
   }
-  c_domnode *domnewchildnode = newchildobj.getTyped<c_domnode>();
+  c_DOMNode *domnewchildnode = newchildobj.getTyped<c_DOMNode>();
   xmlNodePtr newchild = domnewchildnode->m_node;
-  c_domnode *domoldchildnode = oldchildobj.getTyped<c_domnode>();
+  c_DOMNode *domoldchildnode = oldchildobj.getTyped<c_DOMNode>();
   xmlNodePtr oldchild = domoldchildnode->m_node;
   xmlNodePtr children = nodep->children;
   if (!children) {
@@ -2338,26 +2338,26 @@ Variant c_domnode::t_replacechild(CObjRef newchildobj, CObjRef oldchildobj) {
   return false;
 }
 
-Variant c_domnode::t_c14n(bool exclusive /* = false */,
+Variant c_DOMNode::t_c14n(bool exclusive /* = false */,
                           bool with_comments /* = false */,
                           CVarRef xpath /* = null */,
                           CVarRef ns_prefixes /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::c14n);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::c14n);
   return dom_canonicalization(m_node, "", exclusive, with_comments,
                               xpath, ns_prefixes, 0);
 }
 
-Variant c_domnode::t_c14nfile(CStrRef uri, bool exclusive /* = false */,
+Variant c_DOMNode::t_c14nfile(CStrRef uri, bool exclusive /* = false */,
                               bool with_comments /* = false */,
                               CVarRef xpath /* = null */,
                               CVarRef ns_prefixes /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::c14nfile);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::c14nfile);
   return dom_canonicalization(m_node, uri, exclusive, with_comments,
                               xpath, ns_prefixes, 1);
 }
 
-Variant c_domnode::t_getnodepath() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnode, domnode::getnodepath);
+Variant c_DOMNode::t_getnodepath() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNode, DOMNode::getnodepath);
   xmlNodePtr n = m_node;
   char *value = (char*)xmlGetNodePath(n);
   if (value) {
@@ -2371,7 +2371,7 @@ Variant c_domnode::t_getnodepath() {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_ATTR(attrp)                               \
-  c_domattr *domattr = obj.getTyped<c_domattr>();       \
+  c_DOMAttr *domattr = obj.getTyped<c_DOMAttr>();       \
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;       \
   if (attrp == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
@@ -2379,7 +2379,7 @@ Variant c_domnode::t_getnodepath() {
   }                                                     \
 
 #define CHECK_WRITE_ATTR(attrp)                         \
-  c_domattr *domattr = obj.getTyped<c_domattr>();       \
+  c_DOMAttr *domattr = obj.getTyped<c_DOMAttr>();       \
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;       \
   if (attrp == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
@@ -2440,15 +2440,15 @@ static PropertyAccessorMap domattr_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domattr::c_domattr() {
+c_DOMAttr::c_DOMAttr() {
 }
 
-c_domattr::~c_domattr() {
+c_DOMAttr::~c_DOMAttr() {
 }
 
-void c_domattr::t___construct(CStrRef name,
+void c_DOMAttr::t___construct(CStrRef name,
                               CStrRef value /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domattr, domattr::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMAttr, DOMAttr::__construct);
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
   if (name_valid != 0) {
     php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
@@ -2461,24 +2461,24 @@ void c_domattr::t___construct(CStrRef name,
   }
 }
 
-Variant c_domattr::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domattr, domattr::__destruct);
+Variant c_DOMAttr::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMAttr, DOMAttr::__destruct);
   return null;
 }
 
-Variant c_domattr::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domattr, domattr::__get);
+Variant c_DOMAttr::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMAttr, DOMAttr::__get);
   return domattr_properties_map.getter(name)(this);
 }
 
-Variant c_domattr::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domattr, domattr::__set);
+Variant c_DOMAttr::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMAttr, DOMAttr::__set);
   domattr_properties_map.setter(name)(this, value);
   return null;
 }
 
-bool c_domattr::t_isid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domattr, domattr::isid);
+bool c_DOMAttr::t_isid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMAttr, DOMAttr::isid);
   xmlAttrPtr attrp = (xmlAttrPtr)m_node;
   return attrp->atype == XML_ATTRIBUTE_ID;
 }
@@ -2523,33 +2523,33 @@ static PropertyAccessorMap domcharacterdata_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domcharacterdata::c_domcharacterdata() {
+c_DOMCharacterData::c_DOMCharacterData() {
 }
 
-c_domcharacterdata::~c_domcharacterdata() {
+c_DOMCharacterData::~c_DOMCharacterData() {
 }
 
-void c_domcharacterdata::t___construct() {
+void c_DOMCharacterData::t___construct() {
 }
 
-Variant c_domcharacterdata::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::__destruct);
+Variant c_DOMCharacterData::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::__destruct);
   return null;
 }
 
-Variant c_domcharacterdata::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::__get);
+Variant c_DOMCharacterData::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::__get);
   return domcharacterdata_properties_map.getter(name)(this);
 }
 
-Variant c_domcharacterdata::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::__set);
+Variant c_DOMCharacterData::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::__set);
   domcharacterdata_properties_map.setter(name)(this, value);
   return null;
 }
 
-bool c_domcharacterdata::t_appenddata(CStrRef arg) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::appenddata);
+bool c_DOMCharacterData::t_appenddata(CStrRef arg) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::appenddata);
   xmlNodePtr nodep = m_node;
   // Implement logic from libxml xmlTextConcat to add suport for
   // comments and PI
@@ -2566,8 +2566,8 @@ bool c_domcharacterdata::t_appenddata(CStrRef arg) {
   return true;
 }
 
-bool c_domcharacterdata::t_deletedata(int64 offset, int64 count) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::deletedata);
+bool c_DOMCharacterData::t_deletedata(int64 offset, int64 count) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::deletedata);
   xmlNodePtr node = m_node;
   xmlChar *cur, *substring, *second;
   cur = xmlNodeGetContent(node);
@@ -2597,8 +2597,8 @@ bool c_domcharacterdata::t_deletedata(int64 offset, int64 count) {
   return true;
 }
 
-bool c_domcharacterdata::t_insertdata(int64 offset, CStrRef data) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::insertdata);
+bool c_DOMCharacterData::t_insertdata(int64 offset, CStrRef data) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::insertdata);
   xmlNodePtr node = m_node;
   xmlChar *cur, *first, *second;
   cur = xmlNodeGetContent(node);
@@ -2622,9 +2622,9 @@ bool c_domcharacterdata::t_insertdata(int64 offset, CStrRef data) {
   return true;
 }
 
-bool c_domcharacterdata::t_replacedata(int64 offset, int64 count,
+bool c_DOMCharacterData::t_replacedata(int64 offset, int64 count,
                                        CStrRef data) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::replacedata);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::replacedata);
   xmlNodePtr node = m_node;
   xmlChar *cur, *substring, *second = NULL;
   cur = xmlNodeGetContent(node);
@@ -2659,8 +2659,8 @@ bool c_domcharacterdata::t_replacedata(int64 offset, int64 count,
   return true;
 }
 
-String c_domcharacterdata::t_substringdata(int64 offset, int64 count) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcharacterdata, domcharacterdata::substringdata);
+String c_DOMCharacterData::t_substringdata(int64 offset, int64 count) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCharacterData, DOMCharacterData::substringdata);
   xmlNodePtr node = m_node;
   xmlChar *cur, *substring;
   cur = xmlNodeGetContent(node);
@@ -2688,22 +2688,22 @@ String c_domcharacterdata::t_substringdata(int64 offset, int64 count) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domcomment::c_domcomment() {
+c_DOMComment::c_DOMComment() {
 }
 
-c_domcomment::~c_domcomment() {
+c_DOMComment::~c_DOMComment() {
 }
 
-void c_domcomment::t___construct(CStrRef value /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcomment, domcomment::__construct);
+void c_DOMComment::t___construct(CStrRef value /* = null_string */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMComment, DOMComment::__construct);
   m_node = xmlNewComment((xmlChar *)value.data());
   if (!m_node) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
   }
 }
 
-Variant c_domcomment::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcomment, domcomment::__destruct);
+Variant c_DOMComment::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMComment, DOMComment::__destruct);
   return null;
 }
 
@@ -2743,43 +2743,43 @@ static PropertyAccessorMap domtext_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domtext::c_domtext() {
+c_DOMText::c_DOMText() {
 }
 
-c_domtext::~c_domtext() {
+c_DOMText::~c_DOMText() {
 }
 
-void c_domtext::t___construct(CStrRef value /* = 'null_string' */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domtext, domtext::__construct);
+void c_DOMText::t___construct(CStrRef value /* = 'null_string' */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMText, DOMText::__construct);
   m_node = xmlNewText((xmlChar *)value.data());
   if (!m_node) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
   }
 }
 
-Variant c_domtext::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domtext, domtext::__destruct);
+Variant c_DOMText::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMText, DOMText::__destruct);
   return null;
 }
 
-Variant c_domtext::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domtext, domtext::__get);
+Variant c_DOMText::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMText, DOMText::__get);
   return domtext_properties_map.getter(name)(this);
 }
 
-Variant c_domtext::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domtext, domtext::__set);
+Variant c_DOMText::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMText, DOMText::__set);
   domtext_properties_map.setter(name)(this, value);
   return null;
 }
 
-bool c_domtext::t_iswhitespaceinelementcontent() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domtext, domtext::iswhitespaceinelementcontent);
+bool c_DOMText::t_iswhitespaceinelementcontent() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMText, DOMText::iswhitespaceinelementcontent);
   return xmlIsBlankNode(m_node);
 }
 
-Variant c_domtext::t_splittext(int64 offset) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domtext, domtext::splittext);
+Variant c_DOMText::t_splittext(int64 offset) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMText, DOMText::splittext);
   xmlNodePtr node = m_node;
   xmlChar *cur, *first, *second;
   xmlNodePtr nnode;
@@ -2810,7 +2810,7 @@ Variant c_domtext::t_splittext(int64 offset) {
     xmlAddNextSibling(node, nnode);
     nnode->type = XML_TEXT_NODE;
   }
-  c_domtext *ret = NEW(c_domtext)();
+  c_DOMText *ret = NEW(c_DOMText)();
   ret->m_doc = m_doc;
   ret->m_node = nnode;
   appendOrphan(m_doc->m_orphans, nnode);
@@ -2819,29 +2819,29 @@ Variant c_domtext::t_splittext(int64 offset) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domcdatasection::c_domcdatasection() {
+c_DOMCDATASection::c_DOMCDATASection() {
 }
 
-c_domcdatasection::~c_domcdatasection() {
+c_DOMCDATASection::~c_DOMCDATASection() {
 }
 
-void c_domcdatasection::t___construct(CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcdatasection, domcdatasection::__construct);
+void c_DOMCDATASection::t___construct(CStrRef value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCDATASection, DOMCDATASection::__construct);
   m_node = xmlNewCDataBlock(NULL, (xmlChar *)value.data(), value.size());
   if (!m_node) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
   }
 }
 
-Variant c_domcdatasection::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domcdatasection, domcdatasection::__destruct);
+Variant c_DOMCDATASection::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMCDATASection, DOMCDATASection::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_DOC(docp)                                         \
-  c_domdocument *domdoc = obj.getTyped<c_domdocument>();        \
+  c_DOMDocument *domdoc = obj.getTyped<c_DOMDocument>();        \
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;                   \
   if (docp == NULL) {                                           \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                  \
@@ -2849,7 +2849,7 @@ Variant c_domcdatasection::t___destruct() {
   }                                                             \
 
 #define CHECK_WRITE_DOC(docp)                                   \
-  c_domdocument *domdoc = obj.getTyped<c_domdocument>();        \
+  c_DOMDocument *domdoc = obj.getTyped<c_DOMDocument>();        \
   xmlDocPtr docp = (xmlDocPtr)domdoc->m_node;                   \
   if (docp == NULL) {                                           \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                  \
@@ -2862,7 +2862,7 @@ static Variant dom_document_doctype_read(CObjRef obj) {
 }
 
 static Variant dom_document_implementation_read(CObjRef obj) {
-  return NEW(c_domimplementation)();
+  return NEW(c_DOMImplementation)();
 }
 
 static Variant dom_document_document_element_read(CObjRef obj) {
@@ -2934,12 +2934,12 @@ static void dom_document_version_write(CObjRef obj, CVarRef value) {
 
 #define DOCPROP_READ_WRITE(member, name)                                \
   static Variant dom_document_ ##name## _read(CObjRef obj) {            \
-    c_domdocument *domdoc = obj.getTyped<c_domdocument>();              \
+    c_DOMDocument *domdoc = obj.getTyped<c_DOMDocument>();              \
     return domdoc->m_ ## member;                                        \
   }                                                                     \
   static void dom_document_ ##name## _write(CObjRef obj,                \
                                             CVarRef value) {            \
-    c_domdocument *domdoc = obj.getTyped<c_domdocument>();              \
+    c_DOMDocument *domdoc = obj.getTyped<c_DOMDocument>();              \
     domdoc->m_ ## member = value.toBoolean();                           \
   }                                                                     \
 
@@ -3015,7 +3015,7 @@ static PropertyAccessorMap domdocument_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domdocument::c_domdocument() :
+c_DOMDocument::c_DOMDocument() :
   m_formatoutput(false),
   m_validateonparse(false),
   m_resolveexternals(false),
@@ -3026,7 +3026,7 @@ c_domdocument::c_domdocument() :
   m_owner(false) {
 }
 
-c_domdocument::~c_domdocument() {
+c_DOMDocument::~c_DOMDocument() {
   for (ArrayIter iter(m_orphans); iter; ++iter) {
     xmlNodePtr node = (xmlNodePtr)iter.first().toInt64();
     xmlUnlinkNode(node);
@@ -3043,9 +3043,9 @@ c_domdocument::~c_domdocument() {
   }
 }
 
-void c_domdocument::t___construct(CStrRef version /* = null_string */,
+void c_DOMDocument::t___construct(CStrRef version /* = null_string */,
                                   CStrRef encoding /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::__construct);
   xmlDoc *docp = xmlNewDoc((xmlChar*)version.data());
   if (!docp) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
@@ -3058,24 +3058,24 @@ void c_domdocument::t___construct(CStrRef version /* = null_string */,
   m_owner = true;
 }
 
-Variant c_domdocument::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::__destruct);
+Variant c_DOMDocument::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::__destruct);
   return null;
 }
 
-Variant c_domdocument::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::__get);
+Variant c_DOMDocument::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::__get);
   return domdocument_properties_map.getter(name)(this);
 }
 
-Variant c_domdocument::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::__set);
+Variant c_DOMDocument::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::__set);
   domdocument_properties_map.setter(name)(this, value);
   return null;
 }
 
-Variant c_domdocument::t_createattribute(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createattribute);
+Variant c_DOMDocument::t_createattribute(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createattribute);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
     php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
@@ -3085,16 +3085,16 @@ Variant c_domdocument::t_createattribute(CStrRef name) {
   if (!node) {
     return false;
   }
-  c_domattr *ret = NEW(c_domattr)();
+  c_DOMAttr *ret = NEW(c_DOMAttr)();
   ret->m_doc = this;
   ret->m_node = (xmlNodePtr)node;
   appendOrphan(m_orphans, (xmlNodePtr)node);
   return ret;
 }
 
-Variant c_domdocument::t_createattributens(CStrRef namespaceuri,
+Variant c_DOMDocument::t_createattributens(CStrRef namespaceuri,
                                            CStrRef qualifiedname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createattributens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createattributens);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNodePtr nodep = NULL;
   xmlNsPtr nsptr;
@@ -3139,58 +3139,58 @@ Variant c_domdocument::t_createattributens(CStrRef namespaceuri,
   if (nodep == NULL) {
     return false;
   }
-  c_domattr *ret = NEW(c_domattr)();
+  c_DOMAttr *ret = NEW(c_DOMAttr)();
   ret->m_doc = this;
   ret->m_node = nodep;
   appendOrphan(m_orphans, nodep);
   return ret;
 }
 
-Variant c_domdocument::t_createcdatasection(CStrRef data) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createcdatasection);
+Variant c_DOMDocument::t_createcdatasection(CStrRef data) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createcdatasection);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node = xmlNewCDataBlock(docp, (xmlChar*)data.data(), data.size());
   if (!node) {
     return false;
   }
-  c_domcdatasection *ret = NEW(c_domcdatasection)();
+  c_DOMCDATASection *ret = NEW(c_DOMCDATASection)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(m_orphans, node);
   return ret;
 }
 
-Variant c_domdocument::t_createcomment(CStrRef data) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createcomment);
+Variant c_DOMDocument::t_createcomment(CStrRef data) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createcomment);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node = xmlNewCDataBlock(docp, (xmlChar*)data.data(), data.size());
   if (!node) {
     return false;
   }
-  c_domcomment *ret = NEW(c_domcomment)();
+  c_DOMComment *ret = NEW(c_DOMComment)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(m_orphans, node);
   return ret;
 }
 
-Variant c_domdocument::t_createdocumentfragment() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createdocumentfragment);
+Variant c_DOMDocument::t_createdocumentfragment() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createdocumentfragment);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node = xmlNewDocFragment(docp);
   if (!node) {
     return false;
   }
-  c_domdocumentfragment *ret = NEW(c_domdocumentfragment)();
+  c_DOMDocumentFragment *ret = NEW(c_DOMDocumentFragment)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(m_orphans, node);
   return ret;
 }
 
-Variant c_domdocument::t_createelement(CStrRef name,
+Variant c_DOMDocument::t_createelement(CStrRef name,
                                        CStrRef value /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createelement);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createelement);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
     php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
@@ -3201,17 +3201,17 @@ Variant c_domdocument::t_createelement(CStrRef name,
   if (!node) {
     return false;
   }
-  c_domelement *ret = NEW(c_domelement)();
+  c_DOMElement *ret = NEW(c_DOMElement)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(m_orphans, node);
   return ret;
 }
 
-Variant c_domdocument::t_createelementns(CStrRef namespaceuri,
+Variant c_DOMDocument::t_createelementns(CStrRef namespaceuri,
                                          CStrRef qualifiedname,
                                          CStrRef value /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createelementns);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createelementns);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNodePtr nodep = NULL;
   xmlNsPtr nsptr = NULL;
@@ -3251,15 +3251,15 @@ Variant c_domdocument::t_createelementns(CStrRef namespaceuri,
     return false;
   }
   nodep->ns = nsptr;
-  c_domelement *ret = NEW(c_domelement)();
+  c_DOMElement *ret = NEW(c_DOMElement)();
   ret->m_doc = this;
   ret->m_node = nodep;
   appendOrphan(m_orphans, nodep);
   return ret;
 }
 
-Variant c_domdocument::t_createentityreference(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createentityreference);
+Variant c_DOMDocument::t_createentityreference(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createentityreference);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)name.data(), 0) != 0) {
     php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
@@ -3269,17 +3269,17 @@ Variant c_domdocument::t_createentityreference(CStrRef name) {
   if (!node) {
     return false;
   }
-  c_domentity *ret = NEW(c_domentity)();
+  c_DOMEntity *ret = NEW(c_DOMEntity)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(m_orphans, node);
   return ret;
 }
 
-Variant c_domdocument::t_createprocessinginstruction(CStrRef target,
+Variant c_DOMDocument::t_createprocessinginstruction(CStrRef target,
                                                      CStrRef data
                                                      /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createprocessinginstruction);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createprocessinginstruction);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   if (xmlValidateName((xmlChar*)target.data(), 0) != 0) {
     php_dom_throw_error(INVALID_CHARACTER_ERR, m_doc->m_stricterror);
@@ -3291,33 +3291,33 @@ Variant c_domdocument::t_createprocessinginstruction(CStrRef target,
     return false;
   }
   node->doc = docp;
-  c_domprocessinginstruction *ret = NEW(c_domprocessinginstruction)();
+  c_DOMProcessingInstruction *ret = NEW(c_DOMProcessingInstruction)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(m_orphans, node);
   return ret;
 }
 
-Variant c_domdocument::t_createtextnode(CStrRef data) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::createtextnode);
+Variant c_DOMDocument::t_createtextnode(CStrRef data) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::createtextnode);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlNode *node = xmlNewDocText(docp, (xmlChar*)data.data());
   if (!node) {
     return false;
   }
-  c_domtext *ret = NEW(c_domtext)();
+  c_DOMText *ret = NEW(c_DOMText)();
   ret->m_doc = this;
   ret->m_node = node;
   appendOrphan(m_orphans, node);
   return ret;
 }
 
-Variant c_domdocument::t_getelementbyid(CStrRef elementid) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::getelementbyid);
+Variant c_DOMDocument::t_getelementbyid(CStrRef elementid) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::getelementbyid);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlAttrPtr attrp = xmlGetID(docp, (xmlChar*)elementid.data());
   if (attrp && attrp->parent) {
-    c_domtext *ret = NEW(c_domtext)();
+    c_DOMText *ret = NEW(c_DOMText)();
     ret->m_doc = this;
     ret->m_node = attrp->parent;
     return ret;
@@ -3325,9 +3325,9 @@ Variant c_domdocument::t_getelementbyid(CStrRef elementid) {
   return null;
 }
 
-Variant c_domdocument::t_getelementsbytagname(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::getelementsbytagname);
-  c_domnodelist *ret = NEW(c_domnodelist)();
+Variant c_DOMDocument::t_getelementsbytagname(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::getelementsbytagname);
+  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
   ret->m_doc = this;
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -3335,10 +3335,10 @@ Variant c_domdocument::t_getelementsbytagname(CStrRef name) {
   return ret;
 }
 
-Variant c_domdocument::t_getelementsbytagnamens(CStrRef namespaceuri,
+Variant c_DOMDocument::t_getelementsbytagnamens(CStrRef namespaceuri,
                                                 CStrRef localname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::getelementsbytagnamens);
-  c_domnodelist *ret = NEW(c_domnodelist)();
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::getelementsbytagnamens);
+  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
   ret->m_doc = this;
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -3347,11 +3347,11 @@ Variant c_domdocument::t_getelementsbytagnamens(CStrRef namespaceuri,
   return ret;
 }
 
-Variant c_domdocument::t_importnode(CObjRef importednode,
+Variant c_DOMDocument::t_importnode(CObjRef importednode,
                                     bool deep /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::importnode);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::importnode);
   xmlDocPtr docp = (xmlDocPtr)m_node;
-  c_domnode *domnode = importednode.getTyped<c_domnode>();
+  c_DOMNode *domnode = importednode.getTyped<c_DOMNode>();
   xmlNodePtr nodep = domnode->m_node;
   xmlNodePtr retnodep;
   long recursive = deep ? 1 : 0;
@@ -3377,8 +3377,8 @@ Variant c_domdocument::t_importnode(CObjRef importednode,
   return create_node_object(retnodep, m_doc, owner);
 }
 
-Variant c_domdocument::t_load(CStrRef filename, int64 options /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::load);
+Variant c_DOMDocument::t_load(CStrRef filename, int64 options /* = 0 */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::load);
   String translated = File::TranslatePath(filename);
   if (translated.empty()) {
     raise_warning("Unable to read file: %s", filename.data());
@@ -3387,13 +3387,13 @@ Variant c_domdocument::t_load(CStrRef filename, int64 options /* = 0 */) {
   return dom_parse_document(this, translated, options, DOM_LOAD_FILE);
 }
 
-Variant c_domdocument::t_loadhtml(CStrRef source) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::loadhtml);
+Variant c_DOMDocument::t_loadhtml(CStrRef source) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::loadhtml);
   return dom_load_html(this, source, DOM_LOAD_STRING);
 }
 
-Variant c_domdocument::t_loadhtmlfile(CStrRef filename) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::loadhtmlfile);
+Variant c_DOMDocument::t_loadhtmlfile(CStrRef filename) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::loadhtmlfile);
   String translated = File::TranslatePath(filename);
   if (translated.empty()) {
     raise_warning("Unable to read file: %s", filename.data());
@@ -3402,19 +3402,19 @@ Variant c_domdocument::t_loadhtmlfile(CStrRef filename) {
   return dom_load_html(this, translated, DOM_LOAD_FILE);
 }
 
-Variant c_domdocument::t_loadxml(CStrRef source, int64 options /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::loadxml);
+Variant c_DOMDocument::t_loadxml(CStrRef source, int64 options /* = 0 */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::loadxml);
   return dom_parse_document(this, source, options, DOM_LOAD_STRING);
 }
 
-void c_domdocument::t_normalizedocument() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::normalizedocument);
+void c_DOMDocument::t_normalizedocument() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::normalizedocument);
   dom_normalize(m_node);
 }
 
-bool c_domdocument::t_registernodeclass(CStrRef baseclass,
+bool c_DOMDocument::t_registernodeclass(CStrRef baseclass,
                                         CStrRef extendedclass) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::registernodeclass);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::registernodeclass);
   if (!class_exists(baseclass)) {
     raise_error("Class %s does not exist", baseclass.data());
     return false;
@@ -3436,18 +3436,18 @@ bool c_domdocument::t_registernodeclass(CStrRef baseclass,
   return true;
 }
 
-bool c_domdocument::t_relaxngvalidate(CStrRef filename) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::relaxngvalidate);
+bool c_DOMDocument::t_relaxngvalidate(CStrRef filename) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::relaxngvalidate);
   return _dom_document_relaxNG_validate(this, filename, DOM_LOAD_FILE);
 }
 
-bool c_domdocument::t_relaxngvalidatesource(CStrRef source) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::relaxngvalidatesource);
+bool c_DOMDocument::t_relaxngvalidatesource(CStrRef source) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::relaxngvalidatesource);
   return _dom_document_relaxNG_validate(this, source, DOM_LOAD_STRING);
 }
 
-Variant c_domdocument::t_save(CStrRef file, int64 options /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::save);
+Variant c_DOMDocument::t_save(CStrRef file, int64 options /* = 0 */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::save);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0, saveempty = 0;
 
@@ -3473,8 +3473,8 @@ Variant c_domdocument::t_save(CStrRef file, int64 options /* = 0 */) {
   return bytes;
 }
 
-Variant c_domdocument::t_savehtml() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::savehtml);
+Variant c_DOMDocument::t_savehtml() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::savehtml);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlChar *mem;
   int size;
@@ -3488,8 +3488,8 @@ Variant c_domdocument::t_savehtml() {
   return ret;
 }
 
-Variant c_domdocument::t_savehtmlfile(CStrRef file) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::savehtmlfile);
+Variant c_DOMDocument::t_savehtmlfile(CStrRef file) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::savehtmlfile);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int bytes, format = 0;
 
@@ -3507,9 +3507,9 @@ Variant c_domdocument::t_savehtmlfile(CStrRef file) {
   return bytes;
 }
 
-Variant c_domdocument::t_savexml(CObjRef node /* = null_object */,
+Variant c_DOMDocument::t_savexml(CObjRef node /* = null_object */,
                                  int64 options /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::savexml);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::savexml);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlBufferPtr buf;
   xmlChar *mem;
@@ -3518,7 +3518,7 @@ Variant c_domdocument::t_savexml(CObjRef node /* = null_object */,
   format = m_formatoutput;
 
   if (!node.isNull()) {
-    c_domnode *domnode = node.getTyped<c_domnode>();
+    c_DOMNode *domnode = node.getTyped<c_DOMNode>();
     xmlNodePtr node = domnode->m_node;
     /* Dump contents of Node */
     if (node->doc != docp) {
@@ -3565,18 +3565,18 @@ Variant c_domdocument::t_savexml(CObjRef node /* = null_object */,
   }
 }
 
-bool c_domdocument::t_schemavalidate(CStrRef filename) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::schemavalidate);
+bool c_DOMDocument::t_schemavalidate(CStrRef filename) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::schemavalidate);
   return _dom_document_schema_validate(this, filename, DOM_LOAD_FILE);
 }
 
-bool c_domdocument::t_schemavalidatesource(CStrRef source) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::schemavalidatesource);
+bool c_DOMDocument::t_schemavalidatesource(CStrRef source) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::schemavalidatesource);
   return _dom_document_schema_validate(this, source, DOM_LOAD_STRING);
 }
 
-bool c_domdocument::t_validate() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::validate);
+bool c_DOMDocument::t_validate() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::validate);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   xmlValidCtxt *cvp;
   if (docp->intSubset == NULL) {
@@ -3591,8 +3591,8 @@ bool c_domdocument::t_validate() {
   return ret;
 }
 
-Variant c_domdocument::t_xinclude(int64 options /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocument, domdocument::xinclude);
+Variant c_DOMDocument::t_xinclude(int64 options /* = 0 */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocument, DOMDocument::xinclude);
   xmlDocPtr docp = (xmlDocPtr)m_node;
   int err = xmlXIncludeProcessFlags(docp, options);
   /* XML_XINCLUDE_START and XML_XINCLUDE_END nodes need to be removed as these
@@ -3615,27 +3615,27 @@ Variant c_domdocument::t_xinclude(int64 options /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domdocumentfragment::c_domdocumentfragment() {
+c_DOMDocumentFragment::c_DOMDocumentFragment() {
 }
 
-c_domdocumentfragment::~c_domdocumentfragment() {
+c_DOMDocumentFragment::~c_DOMDocumentFragment() {
 }
 
-void c_domdocumentfragment::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocumentfragment, domdocumentfragment::__construct);
+void c_DOMDocumentFragment::t___construct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentFragment, DOMDocumentFragment::__construct);
   m_node = xmlNewDocFragment(NULL);
   if (!m_node) {
     php_dom_throw_error(INVALID_STATE_ERR, 1);
   }
 }
 
-Variant c_domdocumentfragment::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocumentfragment, domdocumentfragment::__destruct);
+Variant c_DOMDocumentFragment::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentFragment, DOMDocumentFragment::__destruct);
   return null;
 }
 
-bool c_domdocumentfragment::t_appendxml(CStrRef data) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocumentfragment, domdocumentfragment::appendxml);
+bool c_DOMDocumentFragment::t_appendxml(CStrRef data) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentFragment, DOMDocumentFragment::appendxml);
   xmlNodePtr nodep = m_node;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
@@ -3659,7 +3659,7 @@ bool c_domdocumentfragment::t_appendxml(CStrRef data) {
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_DOCTYPE(dtdptr)                                           \
-  c_domdocumenttype *domdoctype = obj.getTyped<c_domdocumenttype>();    \
+  c_DOMDocumentType *domdoctype = obj.getTyped<c_DOMDocumentType>();    \
   xmlDtdPtr dtdptr = (xmlDtdPtr)domdoctype->m_node;                     \
   if (dtdptr == NULL) {                                                 \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                          \
@@ -3673,7 +3673,7 @@ static Variant dom_documenttype_name_read(CObjRef obj) {
 
 static Variant dom_documenttype_entities_read(CObjRef obj) {
   CHECK_DOCTYPE(doctypep);
-  c_domnamednodemap *ret = NEW(c_domnamednodemap)();
+  c_DOMNamedNodeMap *ret = NEW(c_DOMNamedNodeMap)();
   ret->m_doc = domdoctype->m_doc;
   ret->m_baseobj = obj;
   ret->m_nodetype = XML_ENTITY_NODE;
@@ -3683,7 +3683,7 @@ static Variant dom_documenttype_entities_read(CObjRef obj) {
 
 static Variant dom_documenttype_notations_read(CObjRef obj) {
   CHECK_DOCTYPE(doctypep);
-  c_domnamednodemap *ret = NEW(c_domnamednodemap)();
+  c_DOMNamedNodeMap *ret = NEW(c_DOMNamedNodeMap)();
   ret->m_doc = domdoctype->m_doc;
   ret->m_baseobj = obj;
   ret->m_nodetype = XML_NOTATION_NODE;
@@ -3740,27 +3740,27 @@ static PropertyAccessorMap domdocumenttype_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domdocumenttype::c_domdocumenttype() {
+c_DOMDocumentType::c_DOMDocumentType() {
 }
 
-c_domdocumenttype::~c_domdocumenttype() {
+c_DOMDocumentType::~c_DOMDocumentType() {
 }
 
-void c_domdocumenttype::t___construct() {
+void c_DOMDocumentType::t___construct() {
 }
 
-Variant c_domdocumenttype::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocumenttype, domdocumenttype::__destruct);
+Variant c_DOMDocumentType::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentType, DOMDocumentType::__destruct);
   return null;
 }
 
-Variant c_domdocumenttype::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocumenttype, domdocumenttype::__get);
+Variant c_DOMDocumentType::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentType, DOMDocumentType::__get);
   return domdocumenttype_properties_map.getter(name)(this);
 }
 
-Variant c_domdocumenttype::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domdocumenttype, domdocumenttype::__set);
+Variant c_DOMDocumentType::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMDocumentType, DOMDocumentType::__set);
   domdocumenttype_properties_map.setter(name)(this, value);
   return null;
 }
@@ -3796,16 +3796,16 @@ static PropertyAccessorMap domelement_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domelement::c_domelement() {
+c_DOMElement::c_DOMElement() {
 }
 
-c_domelement::~c_domelement() {
+c_DOMElement::~c_DOMElement() {
 }
 
-void c_domelement::t___construct(CStrRef name,
+void c_DOMElement::t___construct(CStrRef name,
                                  CStrRef value /* = null_string */,
                                  CStrRef namespaceuri /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::__construct);
   xmlNodePtr nodep = NULL;
   char *localname = NULL, *prefix = NULL;
   int errorcode = 0;
@@ -3864,24 +3864,24 @@ void c_domelement::t___construct(CStrRef name,
   m_node = nodep;
 }
 
-Variant c_domelement::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::__destruct);
+Variant c_DOMElement::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::__destruct);
   return null;
 }
 
-Variant c_domelement::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::__get);
+Variant c_DOMElement::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::__get);
   return domelement_properties_map.getter(name)(this);
 }
 
-Variant c_domelement::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::__set);
+Variant c_DOMElement::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::__set);
   domelement_properties_map.setter(name)(this, value);
   return null;
 }
 
-String c_domelement::t_getattribute(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::getattribute);
+String c_DOMElement::t_getattribute(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getattribute);
   xmlNodePtr nodep = m_node;
   xmlChar *value = NULL;
   xmlNodePtr attr;
@@ -3906,8 +3906,8 @@ String c_domelement::t_getattribute(CStrRef name) {
   return "";
 }
 
-Variant c_domelement::t_getattributenode(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::getattributenode);
+Variant c_DOMElement::t_getattributenode(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getattributenode);
   xmlNodePtr nodep = m_node;
   xmlNodePtr attrp;
   attrp = dom_get_dom1_attribute(nodep, (xmlChar*)name.data());
@@ -3934,7 +3934,7 @@ Variant c_domelement::t_getattributenode(CStrRef name) {
     attrp->ns = curns;
     owner = true;
   }
-  c_domnode *ret = NEW(c_domattr)();
+  c_DOMNode *ret = NEW(c_DOMAttr)();
   ret->m_doc = m_doc;
   ret->m_node = (xmlNodePtr)attrp;
   if (owner) {
@@ -3943,9 +3943,9 @@ Variant c_domelement::t_getattributenode(CStrRef name) {
   return ret;
 }
 
-Object c_domelement::t_getattributenodens(CStrRef namespaceuri,
+Object c_DOMElement::t_getattributenodens(CStrRef namespaceuri,
                                           CStrRef localname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::getattributenodens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getattributenodens);
   xmlNodePtr elemp = m_node;
   xmlAttrPtr attrp;
   attrp = xmlHasNsProp(elemp, (xmlChar*)localname.data(),
@@ -3953,15 +3953,15 @@ Object c_domelement::t_getattributenodens(CStrRef namespaceuri,
   if (attrp == NULL) {
     return null_object;
   }
-  c_domnode *ret = NEW(c_domattr)();
+  c_DOMNode *ret = NEW(c_DOMAttr)();
   ret->m_doc = m_doc;
   ret->m_node = (xmlNodePtr)attrp;
   return ret;
 }
 
-String c_domelement::t_getattributens(CStrRef namespaceuri,
+String c_DOMElement::t_getattributens(CStrRef namespaceuri,
                                       CStrRef localname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::getattributens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getattributens);
   xmlNodePtr elemp = m_node;
   xmlNsPtr nsptr;
   xmlChar *strattr;
@@ -3983,9 +3983,9 @@ String c_domelement::t_getattributens(CStrRef namespaceuri,
   return "";
 }
 
-Object c_domelement::t_getelementsbytagname(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::getelementsbytagname);
-  c_domnodelist *ret = NEW(c_domnodelist)();
+Object c_DOMElement::t_getelementsbytagname(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getelementsbytagname);
+  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
   ret->m_doc = m_doc;
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -3993,10 +3993,10 @@ Object c_domelement::t_getelementsbytagname(CStrRef name) {
   return ret;
 }
 
-Object c_domelement::t_getelementsbytagnamens(CStrRef namespaceuri,
+Object c_DOMElement::t_getelementsbytagnamens(CStrRef namespaceuri,
                                               CStrRef localname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::getelementsbytagnamens);
-  c_domnodelist *ret = NEW(c_domnodelist)();
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::getelementsbytagnamens);
+  c_DOMNodeList *ret = NEW(c_DOMNodeList)();
   ret->m_doc = m_doc;
   ret->m_baseobj = this;
   ret->m_nodetype = 0;
@@ -4005,14 +4005,14 @@ Object c_domelement::t_getelementsbytagnamens(CStrRef namespaceuri,
   return ret;
 }
 
-bool c_domelement::t_hasattribute(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::hasattribute);
+bool c_DOMElement::t_hasattribute(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::hasattribute);
   xmlNodePtr nodep = m_node;
   return dom_get_dom1_attribute(nodep, (xmlChar*)name.data()) != NULL;
 }
 
-bool c_domelement::t_hasattributens(CStrRef namespaceuri, CStrRef localname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::hasattributens);
+bool c_DOMElement::t_hasattributens(CStrRef namespaceuri, CStrRef localname) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::hasattributens);
   xmlNodePtr elemp = m_node;
   xmlNs *nsp;
   xmlChar *value = xmlGetNsProp(elemp, (xmlChar*)localname.data(),
@@ -4032,8 +4032,8 @@ bool c_domelement::t_hasattributens(CStrRef namespaceuri, CStrRef localname) {
   return false;
 }
 
-bool c_domelement::t_removeattribute(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::removeattribute);
+bool c_DOMElement::t_removeattribute(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::removeattribute);
   xmlNodePtr nodep = m_node;
   xmlNodePtr attrp;
   if (dom_node_is_read_only(nodep)) {
@@ -4058,10 +4058,10 @@ bool c_domelement::t_removeattribute(CStrRef name) {
   return true;
 }
 
-Variant c_domelement::t_removeattributenode(CObjRef oldattr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::removeattributenode);
+Variant c_DOMElement::t_removeattributenode(CObjRef oldattr) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::removeattributenode);
   xmlNodePtr nodep = m_node;
-  c_domattr *attr = oldattr.getTyped<c_domattr>();
+  c_DOMAttr *attr = oldattr.getTyped<c_DOMAttr>();
   xmlAttrPtr attrp = (xmlAttrPtr)attr->m_node;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
@@ -4072,16 +4072,16 @@ Variant c_domelement::t_removeattributenode(CObjRef oldattr) {
     return false;
   }
   xmlUnlinkNode((xmlNodePtr)attrp);
-  c_domattr *ret = NEW(c_domattr)();
+  c_DOMAttr *ret = NEW(c_DOMAttr)();
   ret->m_doc = m_doc;
   ret->m_node = (xmlNodePtr)attrp;
   appendOrphan(m_doc->m_orphans, (xmlNodePtr)attrp);
   return ret;
 }
 
-Variant c_domelement::t_removeattributens(CStrRef namespaceuri,
+Variant c_DOMElement::t_removeattributens(CStrRef namespaceuri,
                                           CStrRef localname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::removeattributens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::removeattributens);
   xmlNodePtr nodep = m_node;
   xmlAttr *attrp;
   xmlNsPtr nsptr;
@@ -4114,8 +4114,8 @@ Variant c_domelement::t_removeattributens(CStrRef namespaceuri,
   return null;
 }
 
-Variant c_domelement::t_setattribute(CStrRef name, CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::setattribute);
+Variant c_DOMElement::t_setattribute(CStrRef name, CStrRef value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::setattribute);
   xmlNodePtr nodep = m_node;
   xmlNodePtr attr = NULL;
   int name_valid;
@@ -4156,16 +4156,16 @@ Variant c_domelement::t_setattribute(CStrRef name, CStrRef value) {
     raise_warning("No such attribute '%s'", name.data());
     return false;
   }
-  c_domattr *ret = NEW(c_domattr)();
+  c_DOMAttr *ret = NEW(c_DOMAttr)();
   ret->m_doc = m_doc;
   ret->m_node = (xmlNodePtr)attr;
   return ret;
 }
 
-Variant c_domelement::t_setattributenode(CObjRef newattr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::setattributenode);
+Variant c_DOMElement::t_setattributenode(CObjRef newattr) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::setattributenode);
   xmlNodePtr nodep = m_node;
-  c_domattr *domattr = newattr.getTyped<c_domattr>();
+  c_DOMAttr *domattr = newattr.getTyped<c_DOMAttr>();
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
   xmlAttr *existattrp = NULL;
   if (dom_node_is_read_only(nodep)) {
@@ -4190,7 +4190,7 @@ Variant c_domelement::t_setattributenode(CObjRef newattr) {
   xmlAddChild(nodep, (xmlNodePtr)attrp);
   /* Returns old property if removed otherwise NULL */
   if (existattrp != NULL) {
-    c_domattr *ret = NEW(c_domattr)();
+    c_DOMAttr *ret = NEW(c_DOMAttr)();
     ret->m_doc = m_doc;
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
@@ -4198,12 +4198,12 @@ Variant c_domelement::t_setattributenode(CObjRef newattr) {
   return null;
 }
 
-Variant c_domelement::t_setattributenodens(CObjRef newattr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::setattributenodens);
+Variant c_DOMElement::t_setattributenodens(CObjRef newattr) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::setattributenodens);
   xmlNs *nsp;
   xmlAttr *existattrp = NULL;
   xmlNodePtr nodep = m_node;
-  c_domattr *domattr = newattr.getTyped<c_domattr>();
+  c_DOMAttr *domattr = newattr.getTyped<c_DOMAttr>();
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
@@ -4232,7 +4232,7 @@ Variant c_domelement::t_setattributenodens(CObjRef newattr) {
   xmlAddChild(nodep, (xmlNodePtr) attrp);
   /* Returns old property if removed otherwise NULL */
   if (existattrp != NULL) {
-    c_domattr *ret = NEW(c_domattr)();
+    c_DOMAttr *ret = NEW(c_DOMAttr)();
     ret->m_doc = m_doc;
     ret->m_node = (xmlNodePtr)existattrp;
     return ret;
@@ -4240,9 +4240,9 @@ Variant c_domelement::t_setattributenodens(CObjRef newattr) {
   return null;
 }
 
-Variant c_domelement::t_setattributens(CStrRef namespaceuri, CStrRef name,
+Variant c_DOMElement::t_setattributens(CStrRef namespaceuri, CStrRef name,
                                        CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::setattributens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::setattributens);
   xmlNodePtr elemp = m_node;
   xmlNsPtr nsptr;
   xmlNode *nodep;
@@ -4340,8 +4340,8 @@ Variant c_domelement::t_setattributens(CStrRef namespaceuri, CStrRef name,
   return null;
 }
 
-Variant c_domelement::t_setidattribute(CStrRef name, bool isid) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::setidattribute);
+Variant c_DOMElement::t_setidattribute(CStrRef name, bool isid) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::setidattribute);
   xmlNodePtr nodep = m_node;
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(nodep)) {
@@ -4357,10 +4357,10 @@ Variant c_domelement::t_setidattribute(CStrRef name, bool isid) {
   return null;
 }
 
-Variant c_domelement::t_setidattributenode(CObjRef idattr, bool isid) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::setidattributenode);
+Variant c_DOMElement::t_setidattributenode(CObjRef idattr, bool isid) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::setidattributenode);
   xmlNodePtr nodep = m_node;
-  c_domattr *domattr = idattr.getTyped<c_domattr>();
+  c_DOMAttr *domattr = idattr.getTyped<c_DOMAttr>();
   xmlAttrPtr attrp = (xmlAttrPtr)domattr->m_node;
   if (dom_node_is_read_only(nodep)) {
     php_dom_throw_error(NO_MODIFICATION_ALLOWED_ERR, m_doc->m_stricterror);
@@ -4374,9 +4374,9 @@ Variant c_domelement::t_setidattributenode(CObjRef idattr, bool isid) {
   return null;
 }
 
-Variant c_domelement::t_setidattributens(CStrRef namespaceuri,
+Variant c_DOMElement::t_setidattributens(CStrRef namespaceuri,
                                          CStrRef localname, bool isid) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domelement, domelement::setidattributens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMElement, DOMElement::setidattributens);
   xmlNodePtr elemp = m_node;
   xmlAttrPtr attrp;
   if (dom_node_is_read_only(elemp)) {
@@ -4396,7 +4396,7 @@ Variant c_domelement::t_setidattributens(CStrRef namespaceuri,
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_ENTITY(nodep)                             \
-  c_domentity *domentity = obj.getTyped<c_domentity>(); \
+  c_DOMEntity *domentity = obj.getTyped<c_DOMEntity>(); \
   xmlEntity *nodep = (xmlEntity*)domentity->m_node;     \
   if (nodep == NULL) {                                  \
     php_dom_throw_error(INVALID_STATE_ERR, 0);          \
@@ -4471,41 +4471,41 @@ static PropertyAccessorMap domentity_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domentity::c_domentity() {
+c_DOMEntity::c_DOMEntity() {
 }
 
-c_domentity::~c_domentity() {
+c_DOMEntity::~c_DOMEntity() {
 }
 
-void c_domentity::t___construct() {
+void c_DOMEntity::t___construct() {
 }
 
-Variant c_domentity::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domentity, domentity::__destruct);
+Variant c_DOMEntity::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMEntity, DOMEntity::__destruct);
   return null;
 }
 
-Variant c_domentity::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domentity, domentity::__get);
+Variant c_DOMEntity::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMEntity, DOMEntity::__get);
   return domentity_properties_map.getter(name)(this);
 }
 
-Variant c_domentity::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domentity, domentity::__set);
+Variant c_DOMEntity::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMEntity, DOMEntity::__set);
   domentity_properties_map.setter(name)(this, value);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domentityreference::c_domentityreference() {
+c_DOMEntityReference::c_DOMEntityReference() {
 }
 
-c_domentityreference::~c_domentityreference() {
+c_DOMEntityReference::~c_DOMEntityReference() {
 }
 
-void c_domentityreference::t___construct(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domentityreference, domentityreference::__construct);
+void c_DOMEntityReference::t___construct(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMEntityReference, DOMEntityReference::__construct);
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
   if (name_valid != 0) {
     php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
@@ -4518,15 +4518,15 @@ void c_domentityreference::t___construct(CStrRef name) {
   }
 }
 
-Variant c_domentityreference::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domentityreference, domentityreference::__destruct);
+Variant c_DOMEntityReference::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMEntityReference, DOMEntityReference::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_NOTATION(nodep)                                 \
-  c_domnotation *domnotation = obj.getTyped<c_domnotation>(); \
+  c_DOMNotation *domnotation = obj.getTyped<c_DOMNotation>(); \
   xmlEntity *nodep = (xmlEntity*)domnotation->m_node;         \
   if (nodep == NULL) {                                        \
     php_dom_throw_error(INVALID_STATE_ERR, 0);                \
@@ -4562,27 +4562,27 @@ static PropertyAccessorMap domnotation_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domnotation::c_domnotation() {
+c_DOMNotation::c_DOMNotation() {
 }
 
-c_domnotation::~c_domnotation() {
+c_DOMNotation::~c_DOMNotation() {
 }
 
-void c_domnotation::t___construct() {
+void c_DOMNotation::t___construct() {
 }
 
-Variant c_domnotation::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnotation, domnotation::__destruct);
+Variant c_DOMNotation::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNotation, DOMNotation::__destruct);
   return null;
 }
 
-Variant c_domnotation::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnotation, domnotation::__get);
+Variant c_DOMNotation::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNotation, DOMNotation::__get);
   return domnotation_properties_map.getter(name)(this);
 }
 
-Variant c_domnotation::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnotation, domnotation::__set);
+Variant c_DOMNotation::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNotation, DOMNotation::__set);
   domnotation_properties_map.setter(name)(this, value);
   return null;
 }
@@ -4623,16 +4623,16 @@ static PropertyAccessorMap domprocessinginstruction_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domprocessinginstruction::c_domprocessinginstruction() {
+c_DOMProcessingInstruction::c_DOMProcessingInstruction() {
 }
 
-c_domprocessinginstruction::~c_domprocessinginstruction() {
+c_DOMProcessingInstruction::~c_DOMProcessingInstruction() {
 }
 
-void c_domprocessinginstruction::t___construct(CStrRef name,
+void c_DOMProcessingInstruction::t___construct(CStrRef name,
                                                CStrRef value
                                                /*= null_string*/) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domprocessinginstruction, domprocessinginstruction::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMProcessingInstruction, DOMProcessingInstruction::__construct);
   int name_valid = xmlValidateName((xmlChar *)name.data(), 0);
   if (name_valid != 0) {
     php_dom_throw_error(INVALID_CHARACTER_ERR, 1);
@@ -4645,18 +4645,18 @@ void c_domprocessinginstruction::t___construct(CStrRef name,
   }
 }
 
-Variant c_domprocessinginstruction::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domprocessinginstruction, domprocessinginstruction::__destruct);
+Variant c_DOMProcessingInstruction::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMProcessingInstruction, DOMProcessingInstruction::__destruct);
   return null;
 }
 
-Variant c_domprocessinginstruction::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domprocessinginstruction, domprocessinginstruction::__get);
+Variant c_DOMProcessingInstruction::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMProcessingInstruction, DOMProcessingInstruction::__get);
   return domprocessinginstruction_properties_map.getter(name)(this);
 }
 
-Variant c_domprocessinginstruction::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domprocessinginstruction, domprocessinginstruction::__set);
+Variant c_DOMProcessingInstruction::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMProcessingInstruction, DOMProcessingInstruction::__set);
   domprocessinginstruction_properties_map.setter(name)(this, value);
   return null;
 }
@@ -4664,7 +4664,7 @@ Variant c_domprocessinginstruction::t___set(Variant name, Variant value) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant dom_namednodemap_length_read(CObjRef obj) {
-  c_domnamednodemap *objmap = obj.getTyped<c_domnamednodemap>();
+  c_DOMNamedNodeMap *objmap = obj.getTyped<c_DOMNamedNodeMap>();
 
   int count = 0;
   if (objmap->m_nodetype == XML_NOTATION_NODE ||
@@ -4673,7 +4673,7 @@ static Variant dom_namednodemap_length_read(CObjRef obj) {
       count = xmlHashSize(objmap->m_ht);
     }
   } else {
-    xmlNodePtr nodep = objmap->m_baseobj.getTyped<c_domnode>()->m_node;
+    xmlNodePtr nodep = objmap->m_baseobj.getTyped<c_DOMNode>()->m_node;
     if (nodep) {
       xmlAttrPtr curnode = nodep->properties;
       if (curnode) {
@@ -4697,22 +4697,22 @@ static PropertyAccessorMap domnamednodemap_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domnamednodemap::c_domnamednodemap() {
+c_DOMNamedNodeMap::c_DOMNamedNodeMap() {
 }
 
-c_domnamednodemap::~c_domnamednodemap() {
+c_DOMNamedNodeMap::~c_DOMNamedNodeMap() {
 }
 
-void c_domnamednodemap::t___construct() {
+void c_DOMNamedNodeMap::t___construct() {
 }
 
-Variant c_domnamednodemap::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnamednodemap, domnamednodemap::__destruct);
+Variant c_DOMNamedNodeMap::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::__destruct);
   return null;
 }
 
-Variant c_domnamednodemap::t_getnameditem(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnamednodemap, domnamednodemap::getnameditem);
+Variant c_DOMNamedNodeMap::t_getnameditem(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::getnameditem);
   xmlNodePtr itemnode = NULL;
   bool owner = false;
   if (m_nodetype == XML_NOTATION_NODE || m_nodetype == XML_ENTITY_NODE) {
@@ -4731,7 +4731,7 @@ Variant c_domnamednodemap::t_getnameditem(CStrRef name) {
       }
     }
   } else {
-    xmlNodePtr nodep = m_baseobj.getTyped<c_domnode>()->m_node;
+    xmlNodePtr nodep = m_baseobj.getTyped<c_DOMNode>()->m_node;
     if (nodep) {
       itemnode = (xmlNodePtr)xmlHasProp(nodep, (xmlChar*)name.data());
     }
@@ -4748,9 +4748,9 @@ Variant c_domnamednodemap::t_getnameditem(CStrRef name) {
   return null;
 }
 
-Variant c_domnamednodemap::t_getnameditemns(CStrRef namespaceuri,
+Variant c_DOMNamedNodeMap::t_getnameditemns(CStrRef namespaceuri,
                                             CStrRef localname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnamednodemap, domnamednodemap::getnameditemns);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::getnameditemns);
   xmlNodePtr itemnode = NULL;
   bool owner = false;
   if (m_nodetype == XML_NOTATION_NODE || m_nodetype == XML_ENTITY_NODE) {
@@ -4769,7 +4769,7 @@ Variant c_domnamednodemap::t_getnameditemns(CStrRef namespaceuri,
       }
     }
   } else {
-    xmlNodePtr nodep = m_baseobj.getTyped<c_domnode>()->m_node;
+    xmlNodePtr nodep = m_baseobj.getTyped<c_DOMNode>()->m_node;
     if (nodep) {
       itemnode = (xmlNodePtr)xmlHasNsProp(nodep, (xmlChar*)localname.data(),
                                           (xmlChar*)namespaceuri.data());
@@ -4787,8 +4787,8 @@ Variant c_domnamednodemap::t_getnameditemns(CStrRef namespaceuri,
   return null;
 }
 
-Variant c_domnamednodemap::t_item(int64 index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnamednodemap, domnamednodemap::item);
+Variant c_DOMNamedNodeMap::t_item(int64 index) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::item);
   if (index >= 0) {
     xmlNodePtr itemnode = NULL;
     bool owner = false;
@@ -4802,7 +4802,7 @@ Variant c_domnamednodemap::t_item(int64 index) {
         }
       }
     } else {
-      xmlNodePtr nodep = m_baseobj.getTyped<c_domnode>()->m_node;
+      xmlNodePtr nodep = m_baseobj.getTyped<c_DOMNode>()->m_node;
       if (nodep) {
         xmlNodePtr curnode = (xmlNodePtr)nodep->properties;
         int count = 0;
@@ -4827,20 +4827,20 @@ Variant c_domnamednodemap::t_item(int64 index) {
   return null;
 }
 
-Variant c_domnamednodemap::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnamednodemap, domnamednodemap::__get);
+Variant c_DOMNamedNodeMap::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::__get);
   return domnamednodemap_properties_map.getter(name)(this);
 }
 
-Variant c_domnamednodemap::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnamednodemap, domnamednodemap::__set);
+Variant c_DOMNamedNodeMap::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::__set);
   domnamednodemap_properties_map.setter(name)(this, value);
   return null;
 }
 
-Variant c_domnamednodemap::t_getiterator() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnamednodemap, domnamednodemap::getiterator);
-  c_domnodeiterator *iter = NEW(c_domnodeiterator)();
+Variant c_DOMNamedNodeMap::t_getiterator() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNamedNodeMap, DOMNamedNodeMap::getiterator);
+  c_DOMNodeIterator *iter = NEW(c_DOMNodeIterator)();
   iter->reset_iterator(this);
   return Object(iter);
 }
@@ -4848,7 +4848,7 @@ Variant c_domnamednodemap::t_getiterator() {
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant dom_nodelist_length_read(CObjRef obj) {
-  c_domnodelist *objmap = obj.getTyped<c_domnodelist>();
+  c_DOMNodeList *objmap = obj.getTyped<c_DOMNodeList>();
 
   int count = 0;
   if (objmap->m_ht) {
@@ -4857,7 +4857,7 @@ static Variant dom_nodelist_length_read(CObjRef obj) {
     if (objmap->m_nodetype == DOM_NODESET) {
       count = objmap->m_baseobjptr.size();
     } else {
-      xmlNodePtr nodep = objmap->m_baseobj.getTyped<c_domnode>()->m_node;
+      xmlNodePtr nodep = objmap->m_baseobj.getTyped<c_DOMNode>()->m_node;
       if (nodep) {
         if (objmap->m_nodetype == XML_ATTRIBUTE_NODE ||
             objmap->m_nodetype == XML_ELEMENT_NODE) {
@@ -4895,33 +4895,33 @@ static PropertyAccessorMap domnodelist_properties_map
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domnodelist::c_domnodelist() {
+c_DOMNodeList::c_DOMNodeList() {
 }
 
-c_domnodelist::~c_domnodelist() {
+c_DOMNodeList::~c_DOMNodeList() {
 }
 
-void c_domnodelist::t___construct() {
+void c_DOMNodeList::t___construct() {
 }
 
-Variant c_domnodelist::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodelist, domnodelist::__destruct);
+Variant c_DOMNodeList::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::__destruct);
   return null;
 }
 
-Variant c_domnodelist::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodelist, domnodelist::__get);
+Variant c_DOMNodeList::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::__get);
   return domnodelist_properties_map.getter(name)(this);
 }
 
-Variant c_domnodelist::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodelist, domnodelist::__set);
+Variant c_DOMNodeList::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::__set);
   domnodelist_properties_map.setter(name)(this, value);
   return null;
 }
 
-Variant c_domnodelist::t_item(int64 index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodelist, domnodelist::item);
+Variant c_DOMNodeList::t_item(int64 index) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::item);
   xmlNodePtr itemnode = NULL;
   xmlNodePtr nodep, curnode;
   int count = 0;
@@ -4940,7 +4940,7 @@ Variant c_domnodelist::t_item(int64 index) {
           return m_baseobjptr[index];
         }
       } else if (!m_baseobj.isNull()) {
-        nodep = m_baseobj.getTyped<c_domnode>()->m_node;
+        nodep = m_baseobj.getTyped<c_DOMNode>()->m_node;
         if (nodep) {
           if (m_nodetype == XML_ATTRIBUTE_NODE ||
               m_nodetype == XML_ELEMENT_NODE) {
@@ -4970,53 +4970,53 @@ Variant c_domnodelist::t_item(int64 index) {
   return null_object;
 }
 
-Variant c_domnodelist::t_getiterator() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodelist, domnodelist::getiterator);
-  c_domnodeiterator *iter = NEW(c_domnodeiterator)();
+Variant c_DOMNodeList::t_getiterator() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeList, DOMNodeList::getiterator);
+  c_DOMNodeIterator *iter = NEW(c_DOMNodeIterator)();
   iter->reset_iterator(this);
   return Object(iter);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domexception::c_domexception() {
+c_DOMException::c_DOMException() {
 }
 
-c_domexception::~c_domexception() {
+c_DOMException::~c_DOMException() {
 }
 
-void c_domexception::t___construct(CStrRef message /* = "" */,
+void c_DOMException::t___construct(CStrRef message /* = "" */,
                                    int64 code /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domexception, domexception::__construct);
-  c_exception::t___construct(message, code);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMException, DOMException::__construct);
+  c_Exception::t___construct(message, code);
 }
 
-Variant c_domexception::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domexception, domexception::__destruct);
+Variant c_DOMException::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMException, DOMException::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domimplementation::c_domimplementation() {
+c_DOMImplementation::c_DOMImplementation() {
 }
 
-c_domimplementation::~c_domimplementation() {
+c_DOMImplementation::~c_DOMImplementation() {
 }
 
-void c_domimplementation::t___construct() {
+void c_DOMImplementation::t___construct() {
 }
 
-Variant c_domimplementation::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domimplementation, domimplementation::__destruct);
+Variant c_DOMImplementation::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMImplementation, DOMImplementation::__destruct);
   return null;
 }
 
-Variant c_domimplementation::t_createdocument
+Variant c_DOMImplementation::t_createdocument
 (CStrRef namespaceuri /* = null_string */,
  CStrRef qualifiedname /* = null_string */,
  CObjRef doctypeobj /* = null_object */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domimplementation, domimplementation::createdocument);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMImplementation, DOMImplementation::createdocument);
   xmlDoc *docp;
   xmlNode *nodep;
   xmlNsPtr nsptr = NULL;
@@ -5024,7 +5024,7 @@ Variant c_domimplementation::t_createdocument
   char *prefix = NULL, *localname = NULL;
   xmlDtdPtr doctype = NULL;
   if (!doctypeobj.isNull()) {
-    c_domdocumenttype *domdoctype = doctypeobj.getTyped<c_domdocumenttype>();
+    c_DOMDocumentType *domdoctype = doctypeobj.getTyped<c_DOMDocumentType>();
     doctype = (xmlDtdPtr)domdoctype->m_node;
     if (doctype->type == XML_DOCUMENT_TYPE_NODE) {
       raise_warning("Invalid DocumentType object");
@@ -5086,17 +5086,17 @@ Variant c_domimplementation::t_createdocument
     xmlDocSetRootElement(docp, nodep);
     xmlFree(localname);
   }
-  c_domdocument *ret = NEW(c_domdocument)();
+  c_DOMDocument *ret = NEW(c_DOMDocument)();
   ret->m_node = (xmlNodePtr)docp;
   ret->m_owner = true;
   return ret;
 }
 
-Variant c_domimplementation::t_createdocumenttype
+Variant c_DOMImplementation::t_createdocumenttype
 (CStrRef qualifiedname /* = null_string */,
  CStrRef publicid /* = null_string */,
  CStrRef systemid /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domimplementation, domimplementation::createdocumenttype);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMImplementation, DOMImplementation::createdocumenttype);
   xmlDtd *doctype;
   xmlChar *pch1 = NULL, *pch2 = NULL, *localname = NULL;
   xmlURIPtr uri;
@@ -5134,8 +5134,8 @@ Variant c_domimplementation::t_createdocumenttype
   return create_node_object((xmlNodePtr)doctype, NULL, true);
 }
 
-bool c_domimplementation::t_hasfeature(CStrRef feature, CStrRef version) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domimplementation, domimplementation::hasfeature);
+bool c_DOMImplementation::t_hasfeature(CStrRef feature, CStrRef version) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMImplementation, DOMImplementation::hasfeature);
   return dom_has_feature(feature.data(), version.data());
 }
 
@@ -5143,7 +5143,7 @@ bool c_domimplementation::t_hasfeature(CStrRef feature, CStrRef version) {
 
 static Variant dom_xpath_document_read(CObjRef obj) {
   xmlDoc *docp = NULL;
-  c_domxpath *xpath = obj.getTyped<c_domxpath>();
+  c_DOMXPath *xpath = obj.getTyped<c_DOMXPath>();
   xmlXPathContextPtr ctx = (xmlXPathContextPtr)xpath->m_node;
   if (ctx) {
     docp = (xmlDocPtr)ctx->doc;
@@ -5163,7 +5163,7 @@ static PropertyAccessorMap domxpath_properties_map
 static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
                                        int nargs, int type) {
   int error = 0;
-  c_domxpath *intern = (c_domxpath*) ctxt->context->userData;
+  c_DOMXPath *intern = (c_DOMXPath*) ctxt->context->userData;
   if (intern == NULL) {
     xmlGenericError(xmlGenericErrorContext,
                     "xmlExtFunctionTest: failed to get the internal object\n");
@@ -5262,7 +5262,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt,
         intern->m_node_list = Array::Create();
       }
       intern->m_node_list.append(retval);
-      xmlNode *nodep = retval.toObject().getTyped<c_domnode>()->m_node;
+      xmlNode *nodep = retval.toObject().getTyped<c_DOMNode>()->m_node;
       valuePush(ctxt, xmlXPathNewNodeSet(nodep));
     } else if (retval.is(KindOfBoolean)) {
       valuePush(ctxt, xmlXPathNewBoolean(retval.toBoolean()));
@@ -5286,19 +5286,19 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt,
   dom_xpath_ext_function_php(ctxt, nargs, 2);
 }
 
-c_domxpath::c_domxpath() : m_node(NULL), m_registerPhpFunctions(0) {
+c_DOMXPath::c_DOMXPath() : m_node(NULL), m_registerPhpFunctions(0) {
 }
 
-c_domxpath::~c_domxpath() {
+c_DOMXPath::~c_DOMXPath() {
   if (m_node) {
     xmlXPathFreeContext((xmlXPathContextPtr)m_node);
     m_node = NULL;
   }
 }
 
-void c_domxpath::t___construct(CVarRef doc) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::__construct);
-  m_doc = doc.toObject().getTyped<c_domdocument>();
+void c_DOMXPath::t___construct(CVarRef doc) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::__construct);
+  m_doc = doc.toObject().getTyped<c_DOMDocument>();
   xmlDocPtr docp = (xmlDocPtr)m_doc->m_node;
   xmlXPathContextPtr ctx = xmlXPathNewContext(docp);
   if (ctx == NULL) {
@@ -5316,36 +5316,36 @@ void c_domxpath::t___construct(CVarRef doc) {
   ctx->userData = this;
 }
 
-Variant c_domxpath::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::__destruct);
+Variant c_DOMXPath::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::__destruct);
   return null;
 }
 
-Variant c_domxpath::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::__get);
+Variant c_DOMXPath::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::__get);
   return domxpath_properties_map.getter(name)(this);
 }
 
-Variant c_domxpath::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::__set);
+Variant c_DOMXPath::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::__set);
   domxpath_properties_map.setter(name)(this, value);
   return null;
 }
 
-Variant c_domxpath::t_evaluate(CStrRef expr,
+Variant c_DOMXPath::t_evaluate(CStrRef expr,
                                CObjRef context /* = null_object */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::evaluate);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::evaluate);
   return php_xpath_eval(this, expr, context, PHP_DOM_XPATH_EVALUATE);
 }
 
-Variant c_domxpath::t_query(CStrRef expr,
+Variant c_DOMXPath::t_query(CStrRef expr,
                             CObjRef context /* = null_object */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::query);
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::query);
   return php_xpath_eval(this, expr, context, PHP_DOM_XPATH_QUERY);
 }
 
-bool c_domxpath::t_registernamespace(CStrRef prefix, CStrRef uri) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::registernamespace);
+bool c_DOMXPath::t_registernamespace(CStrRef prefix, CStrRef uri) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::registernamespace);
   xmlXPathContextPtr ctxp = (xmlXPathContextPtr)m_node;
   if (ctxp == NULL) {
     raise_warning("Invalid XPath Context");
@@ -5355,8 +5355,8 @@ bool c_domxpath::t_registernamespace(CStrRef prefix, CStrRef uri) {
                             (xmlChar*)uri.data()) == 0;
 }
 
-Variant c_domxpath::t_registerphpfunctions(CVarRef funcs /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domxpath, domxpath::registerphpfunctions);
+Variant c_DOMXPath::t_registerphpfunctions(CVarRef funcs /* = null */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMXPath, DOMXPath::registerphpfunctions);
   if (funcs.isArray()) {
     Array arr = funcs.toArray();
     for (ArrayIter iter(arr); iter; ++iter) {
@@ -5376,15 +5376,15 @@ Variant c_domxpath::t_registerphpfunctions(CVarRef funcs /* = null */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_domnodeiterator::c_domnodeiterator()
+c_DOMNodeIterator::c_DOMNodeIterator()
   : m_objmap(NULL), m_iter(NULL), m_index(-1) {
 }
 
-c_domnodeiterator::~c_domnodeiterator() {
+c_DOMNodeIterator::~c_DOMNodeIterator() {
   delete m_iter;
 }
 
-void c_domnodeiterator::reset_iterator(dom_iterable *objmap) {
+void c_DOMNodeIterator::reset_iterator(dom_iterable *objmap) {
   m_objmap = objmap;
 
   xmlNodePtr curnode = NULL;
@@ -5394,7 +5394,7 @@ void c_domnodeiterator::reset_iterator(dom_iterable *objmap) {
     if (m_objmap->m_nodetype == DOM_NODESET) {
       m_iter = new ArrayIter(m_objmap->m_baseobjptr);
     } else {
-      xmlNodePtr nodep = m_objmap->m_baseobj.getTyped<c_domnode>()->m_node;
+      xmlNodePtr nodep = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_node;
       if (!nodep) {
         goto err;
       }
@@ -5431,40 +5431,40 @@ void c_domnodeiterator::reset_iterator(dom_iterable *objmap) {
   }
  err:
   if (curnode) {
-    sp_domdocument doc = m_objmap->m_baseobj.getTyped<c_domnode>()->m_doc;
+    p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_doc;
     m_curobj = create_node_object(curnode, doc, owner);
   } else {
     m_curobj.reset();
   }
 }
 
-void c_domnodeiterator::t___construct() {
+void c_DOMNodeIterator::t___construct() {
 }
 
-Variant c_domnodeiterator::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodeiterator, domnodeiterator::__destruct);
+Variant c_DOMNodeIterator::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeIterator, DOMNodeIterator::__destruct);
   return null;
 }
 
-Variant c_domnodeiterator::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodeiterator, domnodeiterator::current);
+Variant c_DOMNodeIterator::t_current() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeIterator, DOMNodeIterator::current);
   if (m_iter) {
     return m_iter->second();
   }
   return m_curobj;
 }
 
-Variant c_domnodeiterator::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodeiterator, domnodeiterator::key);
+Variant c_DOMNodeIterator::t_key() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeIterator, DOMNodeIterator::key);
   if (m_iter) {
     return m_iter->first();
   }
-  xmlNodePtr curnode = m_curobj.getTyped<c_domnode>()->m_node;
+  xmlNodePtr curnode = m_curobj.getTyped<c_DOMNode>()->m_node;
   return String((const char *)curnode->name, CopyString);
 }
 
-Variant c_domnodeiterator::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodeiterator, domnodeiterator::next);
+Variant c_DOMNodeIterator::t_next() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeIterator, DOMNodeIterator::next);
   if (m_iter) {
     m_iter->next();
     return null;
@@ -5474,14 +5474,14 @@ Variant c_domnodeiterator::t_next() {
   bool owner = false;
   if (m_objmap->m_nodetype != XML_ENTITY_NODE &&
       m_objmap->m_nodetype != XML_NOTATION_NODE) {
-    curnode = m_curobj.getTyped<c_domnode>()->m_node;
+    curnode = m_curobj.getTyped<c_DOMNode>()->m_node;
     if (m_objmap->m_nodetype == XML_ATTRIBUTE_NODE ||
         m_objmap->m_nodetype == XML_ELEMENT_NODE) {
       curnode = curnode->next;
     } else {
       /* Nav the tree evey time as this is LIVE */
       xmlNodePtr basenode =
-        m_objmap->m_baseobj.getTyped<c_domnode>()->m_node;
+        m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_node;
       if (basenode && (basenode->type == XML_DOCUMENT_NODE ||
                        basenode->type == XML_HTML_DOCUMENT_NODE)) {
         basenode = xmlDocGetRootElement((xmlDoc *) basenode);
@@ -5507,7 +5507,7 @@ Variant c_domnodeiterator::t_next() {
   }
 err:
   if (curnode) {
-    sp_domdocument doc = m_objmap->m_baseobj.getTyped<c_domnode>()->m_doc;
+    p_DOMDocument doc = m_objmap->m_baseobj.getTyped<c_DOMNode>()->m_doc;
     m_curobj = create_node_object(curnode, doc, owner);
   } else {
     m_curobj.reset();
@@ -5515,8 +5515,8 @@ err:
   return null;
 }
 
-Variant c_domnodeiterator::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodeiterator, domnodeiterator::rewind);
+Variant c_DOMNodeIterator::t_rewind() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeIterator, DOMNodeIterator::rewind);
   delete m_iter;
   m_iter = NULL;
   m_index = -1;
@@ -5524,8 +5524,8 @@ Variant c_domnodeiterator::t_rewind() {
   return null;
 }
 
-Variant c_domnodeiterator::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(domnodeiterator, domnodeiterator::valid);
+Variant c_DOMNodeIterator::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(DOMNodeIterator, DOMNodeIterator::valid);
   if (m_iter) {
     return !m_iter->end();
   }
@@ -5536,9 +5536,9 @@ Variant c_domnodeiterator::t_valid() {
 // function-style wrappers
 
 #define DOM_GET_OBJ(name)                                       \
-  c_dom ##name *pobj = NULL;                                    \
+  c_DOM ##name *pobj = NULL;                                    \
   if (obj.isObject()) {                                         \
-    pobj = obj.toObject().getTyped<c_dom ##name>(true, true);   \
+    pobj = obj.toObject().getTyped<c_DOM ##name>(true, true);   \
     if (pobj == NULL) {                                         \
       raise_warning("Expecting dom " #name " object");          \
       return null;                                              \
@@ -5547,390 +5547,390 @@ Variant c_domnodeiterator::t_valid() {
 
 Variant f_dom_document_create_element(CVarRef obj, CStrRef name,
                                       CStrRef value /* = null_string */) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createelement(name, value);
 }
 
 Variant f_dom_document_create_document_fragment(CVarRef obj) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createdocumentfragment();
 }
 
 Variant f_dom_document_create_text_node(CVarRef obj, CStrRef data) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createtextnode(data);
 }
 
 Variant f_dom_document_create_comment(CVarRef obj, CStrRef data) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createcomment(data);
 }
 
 Variant f_dom_document_create_cdatasection(CVarRef obj, CStrRef data) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createcdatasection(data);
 }
 
 Variant f_dom_document_create_processing_instruction(CVarRef obj, CStrRef target, CStrRef data /* = null_string */) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createprocessinginstruction(target, data);
 }
 
 Variant f_dom_document_create_attribute(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createattribute(name);
 }
 
 Variant f_dom_document_create_entity_reference(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createentityreference(name);
 }
 
 Variant f_dom_document_get_elements_by_tag_name(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_getelementsbytagname(name);
 }
 
 Variant f_dom_document_import_node(CVarRef obj, CObjRef importednode,
                                    bool deep /* = false */) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_importnode(importednode, deep);
 }
 
 Variant f_dom_document_create_element_ns(CVarRef obj, CStrRef namespaceuri,
                                          CStrRef qualifiedname,
                                          CStrRef value /* = null_string */) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createelementns(namespaceuri, qualifiedname, value);
 }
 
 Variant f_dom_document_create_attribute_ns(CVarRef obj, CStrRef namespaceuri,
                                            CStrRef qualifiedname) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_createattributens(namespaceuri, qualifiedname);
 }
 
 Variant f_dom_document_get_elements_by_tag_name_ns(CVarRef obj, CStrRef namespaceuri, CStrRef localname) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_getelementsbytagnamens(namespaceuri, localname);
 }
 
 Variant f_dom_document_get_element_by_id(CVarRef obj, CStrRef elementid) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_getelementbyid(elementid);
 }
 
 Variant f_dom_document_normalize_document(CVarRef obj) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   pobj->t_normalizedocument();
   return null;
 }
 
 Variant f_dom_document_save(CVarRef obj, CStrRef file,
                             int64 options /* = 0 */) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_save(file, options);
 }
 
 Variant f_dom_document_savexml(CVarRef obj, CObjRef node /* = null_object */,
                                int64 options /* = 0 */) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_savexml(node, options);
 }
 
 Variant f_dom_document_validate(CVarRef obj) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_validate();
 }
 
 Variant f_dom_document_xinclude(CVarRef obj, int64 options /* = 0 */) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_xinclude(options);
 }
 
 Variant f_dom_document_save_html(CVarRef obj) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_savehtml();
 }
 
 Variant f_dom_document_save_html_file(CVarRef obj, CStrRef file) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_savehtmlfile(file);
 }
 
 Variant f_dom_document_schema_validate_file(CVarRef obj, CStrRef filename) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_schemavalidate(filename);
 }
 
 Variant f_dom_document_schema_validate_xml(CVarRef obj, CStrRef source) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_schemavalidatesource(source);
 }
 
 Variant f_dom_document_relaxng_validate_file(CVarRef obj, CStrRef filename) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_relaxngvalidate(filename);
 }
 
 Variant f_dom_document_relaxng_validate_xml(CVarRef obj, CStrRef source) {
-  DOM_GET_OBJ(document);
+  DOM_GET_OBJ(Document);
   return pobj->t_relaxngvalidatesource(source);
 }
 
 Variant f_dom_node_insert_before(CVarRef obj, CObjRef newnode,
                                  CObjRef refnode /* = null */) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_insertbefore(newnode, refnode);
 }
 
 Variant f_dom_node_replace_child(CVarRef obj, CObjRef newchildobj,
                                  CObjRef oldchildobj) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_replacechild(newchildobj, oldchildobj);
 }
 
 Variant f_dom_node_remove_child(CVarRef obj, CObjRef node) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_removechild(node);
 }
 
 Variant f_dom_node_append_child(CVarRef obj, CObjRef newnode) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_appendchild(newnode);
 }
 
 Variant f_dom_node_has_child_nodes(CVarRef obj) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_haschildnodes();
 }
 
 Variant f_dom_node_clone_node(CVarRef obj, bool deep /* = false */) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_clonenode(deep);
 }
 
 Variant f_dom_node_normalize(CVarRef obj) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   pobj->t_normalize();
   return null;
 }
 
 Variant f_dom_node_is_supported(CVarRef obj, CStrRef feature,
                                 CStrRef version) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_issupported(feature, version);
 }
 
 Variant f_dom_node_has_attributes(CVarRef obj) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_hasattributes();
 }
 
 Variant f_dom_node_is_same_node(CVarRef obj, CObjRef node) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_issamenode(node);
 }
 
 Variant f_dom_node_lookup_prefix(CVarRef obj, CStrRef prefix) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_lookupprefix(prefix);
 }
 
 Variant f_dom_node_is_default_namespace(CVarRef obj, CStrRef namespaceuri) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_isdefaultnamespace(namespaceuri);
 }
 
 Variant f_dom_node_lookup_namespace_uri(CVarRef obj, CStrRef namespaceuri) {
-  DOM_GET_OBJ(node);
+  DOM_GET_OBJ(Node);
   return pobj->t_lookupnamespaceuri(namespaceuri);
 }
 
 Variant f_dom_nodelist_item(CVarRef obj, int64 index) {
-  DOM_GET_OBJ(nodelist);
+  DOM_GET_OBJ(NodeList);
   return pobj->t_item(index);
 }
 
 Variant f_dom_namednodemap_get_named_item(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(namednodemap);
+  DOM_GET_OBJ(NamedNodeMap);
   return pobj->t_getnameditem(name);
 }
 
 Variant f_dom_namednodemap_item(CVarRef obj, int64 index) {
-  DOM_GET_OBJ(namednodemap);
+  DOM_GET_OBJ(NamedNodeMap);
   return pobj->t_item(index);
 }
 
 Variant f_dom_namednodemap_get_named_item_ns(CVarRef obj, CStrRef namespaceuri,
                                              CStrRef localname) {
-  DOM_GET_OBJ(namednodemap);
+  DOM_GET_OBJ(NamedNodeMap);
   return pobj->t_getnameditemns(namespaceuri, localname);
 }
 
 Variant f_dom_characterdata_substring_data(CVarRef obj, int64 offset,
                                            int64 count) {
-  DOM_GET_OBJ(characterdata);
+  DOM_GET_OBJ(CharacterData);
   return pobj->t_substringdata(offset, count);
 }
 
 Variant f_dom_characterdata_append_data(CVarRef obj, CStrRef arg) {
-  DOM_GET_OBJ(characterdata);
+  DOM_GET_OBJ(CharacterData);
   return pobj->t_appenddata(arg);
 }
 
 Variant f_dom_characterdata_insert_data(CVarRef obj, int64 offset,
                                         CStrRef data) {
-  DOM_GET_OBJ(characterdata);
+  DOM_GET_OBJ(CharacterData);
   return pobj->t_insertdata(offset, data);
 }
 
 Variant f_dom_characterdata_delete_data(CVarRef obj, int64 offset,
                                         int64 count) {
-  DOM_GET_OBJ(characterdata);
+  DOM_GET_OBJ(CharacterData);
   return pobj->t_deletedata(offset, count);
 }
 
 Variant f_dom_characterdata_replace_data(CVarRef obj, int64 offset,
                                          int64 count, CStrRef data) {
-  DOM_GET_OBJ(characterdata);
+  DOM_GET_OBJ(CharacterData);
   return pobj->t_replacedata(offset, count, data);
 }
 
 Variant f_dom_attr_is_id(CVarRef obj) {
-  DOM_GET_OBJ(attr);
+  DOM_GET_OBJ(Attr);
   return pobj->t_isid();
 }
 
 Variant f_dom_element_get_attribute(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_getattribute(name);
 }
 
 Variant f_dom_element_set_attribute(CVarRef obj, CStrRef name, CStrRef value) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_setattribute(name, value);
 }
 
 Variant f_dom_element_remove_attribute(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_removeattribute(name);
 }
 
 Variant f_dom_element_get_attribute_node(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_getattributenode(name);
 }
 
 Variant f_dom_element_set_attribute_node(CVarRef obj, CObjRef newattr) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_setattributenode(newattr);
 }
 
 Variant f_dom_element_remove_attribute_node(CVarRef obj, CObjRef oldattr) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_removeattributenode(oldattr);
 }
 
 Variant f_dom_element_get_elements_by_tag_name(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_getelementsbytagname(name);
 }
 
 Variant f_dom_element_get_attribute_ns(CVarRef obj, CStrRef namespaceuri,
                                        CStrRef localname) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_getattributens(namespaceuri, localname);
 }
 
 Variant f_dom_element_set_attribute_ns(CVarRef obj, CStrRef namespaceuri,
                                        CStrRef name, CStrRef value) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_setattributens(namespaceuri, name, value);
 }
 
 Variant f_dom_element_remove_attribute_ns(CVarRef obj, CStrRef namespaceuri,
                                           CStrRef localname) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_removeattributens(namespaceuri, localname);
 }
 
 Variant f_dom_element_get_attribute_node_ns(CVarRef obj, CStrRef namespaceuri,
                                             CStrRef localname) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_getattributenodens(namespaceuri, localname);
 }
 
 Variant f_dom_element_set_attribute_node_ns(CVarRef obj, CObjRef newattr) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_setattributenodens(newattr);
 }
 
 Variant f_dom_element_get_elements_by_tag_name_ns(CVarRef obj,
                                                   CStrRef namespaceuri,
                                                   CStrRef localname) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_getelementsbytagnamens(namespaceuri, localname);
 }
 
 Variant f_dom_element_has_attribute(CVarRef obj, CStrRef name) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_hasattribute(name);
 }
 
 Variant f_dom_element_has_attribute_ns(CVarRef obj, CStrRef namespaceuri,
                                        CStrRef localname) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_hasattributens(namespaceuri, localname);
 }
 
 Variant f_dom_element_set_id_attribute(CVarRef obj, CStrRef name, bool isid) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_setidattribute(name, isid);
 }
 
 Variant f_dom_element_set_id_attribute_ns(CVarRef obj, CStrRef namespaceuri,
                                           CStrRef localname, bool isid) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_setidattributens(namespaceuri, localname, isid);
 }
 
 Variant f_dom_element_set_id_attribute_node(CVarRef obj, CObjRef idattr,
                                             bool isid) {
-  DOM_GET_OBJ(element);
+  DOM_GET_OBJ(Element);
   return pobj->t_setidattributenode(idattr, isid);
 }
 
 Variant f_dom_text_split_text(CVarRef obj, int64 offset) {
-  DOM_GET_OBJ(text);
+  DOM_GET_OBJ(Text);
   return pobj->t_splittext(offset);
 }
 
 Variant f_dom_text_is_whitespace_in_element_content(CVarRef obj) {
-  DOM_GET_OBJ(text);
+  DOM_GET_OBJ(Text);
   return pobj->t_iswhitespaceinelementcontent();
 }
 
 Variant f_dom_xpath_register_ns(CVarRef obj, CStrRef prefix, CStrRef uri) {
-  DOM_GET_OBJ(xpath);
+  DOM_GET_OBJ(XPath);
   return pobj->t_registernamespace(prefix, uri);
 }
 
 Variant f_dom_xpath_query(CVarRef obj, CStrRef expr,
                           CObjRef context /* = null_object */) {
-  DOM_GET_OBJ(xpath);
+  DOM_GET_OBJ(XPath);
   return pobj->t_query(expr, context);
 }
 
 Variant f_dom_xpath_evaluate(CVarRef obj, CStrRef expr,
                              CObjRef context /* = null_object */) {
-  DOM_GET_OBJ(xpath);
+  DOM_GET_OBJ(XPath);
   return pobj->t_evaluate(expr, context);
 }
 
 Variant f_dom_xpath_register_php_functions(CVarRef obj,
                                            CVarRef funcs /* = null */) {
-  DOM_GET_OBJ(xpath);
+  DOM_GET_OBJ(XPath);
   return pobj->t_registerphpfunctions(funcs);
 }
 

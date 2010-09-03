@@ -225,7 +225,7 @@ void ObjectData::o_setArray(CArrRef properties) {
 }
 
 Object ObjectData::FromArray(ArrayData *properties) {
-  ObjectData *ret = NEW(c_stdclass)();
+  ObjectData *ret = NEW(c_stdClass)();
   if (!properties->empty()) {
     ret->o_properties = NEW(Array)(properties);
   }

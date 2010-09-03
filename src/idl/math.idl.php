@@ -761,7 +761,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Double,
-      'desc'   => "Calculated length of the hypotenuse is_finite hexdec Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "Calculated length of the hypotenuse is_finite hexdec Last updated: Fri, 03 Sep 2010  ",
     ),
     'args'   => array(
       array(

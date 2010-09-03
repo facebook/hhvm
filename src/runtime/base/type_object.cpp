@@ -66,7 +66,7 @@ Variant Object::o_get(CStrRef propName, bool error /* = true */,
 ObjectOffset Object::o_lval(CStrRef propName,
                             CStrRef context /* = null_string */) {
   if (!m_px) {
-    operator=(NEW(c_stdclass)());
+    operator=(NEW(c_stdClass)());
   }
   return ObjectOffset(m_px, propName, context);
 }

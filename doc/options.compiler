@@ -165,6 +165,11 @@ safer HTML templating. For more information, search XHP.
 
 Facebook specific. Ignore.
 
+= GenerateCppLibCode
+
+Default is false. When turned on, it will generate better C++ code to be used
+as C++ libraries, including better class methods and doc comments.
+
 = GenerateSourceInfo
 
 Default is false. Source info is a map from locations in C++ files to those in
@@ -231,6 +236,7 @@ used in different places of code generation.
 - ObjectStaticPrefix
 - SmartPtrPrefix
 - MethodPrefix
+- MethodWrapperPrefix
 - MethodImplPrefix
 - PropertyPrefix
 - StaticPropertyPrefix

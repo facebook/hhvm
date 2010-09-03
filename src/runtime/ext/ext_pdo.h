@@ -26,103 +26,103 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Array f_pdo_drivers();
-extern const int64 q_pdo_PARAM_BOOL;
-extern const int64 q_pdo_PARAM_NULL;
-extern const int64 q_pdo_PARAM_INT;
-extern const int64 q_pdo_PARAM_STR;
-extern const int64 q_pdo_PARAM_LOB;
-extern const int64 q_pdo_PARAM_STMT;
-extern const int64 q_pdo_PARAM_INPUT_OUTPUT;
-extern const int64 q_pdo_PARAM_EVT_ALLOC;
-extern const int64 q_pdo_PARAM_EVT_FREE;
-extern const int64 q_pdo_PARAM_EVT_EXEC_PRE;
-extern const int64 q_pdo_PARAM_EVT_EXEC_POST;
-extern const int64 q_pdo_PARAM_EVT_FETCH_PRE;
-extern const int64 q_pdo_PARAM_EVT_FETCH_POST;
-extern const int64 q_pdo_PARAM_EVT_NORMALIZE;
-extern const int64 q_pdo_FETCH_USE_DEFAULT;
-extern const int64 q_pdo_FETCH_LAZY;
-extern const int64 q_pdo_FETCH_ASSOC;
-extern const int64 q_pdo_FETCH_NUM;
-extern const int64 q_pdo_FETCH_BOTH;
-extern const int64 q_pdo_FETCH_OBJ;
-extern const int64 q_pdo_FETCH_BOUND;
-extern const int64 q_pdo_FETCH_COLUMN;
-extern const int64 q_pdo_FETCH_CLASS;
-extern const int64 q_pdo_FETCH_INTO;
-extern const int64 q_pdo_FETCH_FUNC;
-extern const int64 q_pdo_FETCH_GROUP;
-extern const int64 q_pdo_FETCH_UNIQUE;
-extern const int64 q_pdo_FETCH_KEY_PAIR;
-extern const int64 q_pdo_FETCH_CLASSTYPE;
-extern const int64 q_pdo_FETCH_SERIALIZE;
-extern const int64 q_pdo_FETCH_PROPS_LATE;
-extern const int64 q_pdo_FETCH_NAMED;
-extern const int64 q_pdo_ATTR_AUTOCOMMIT;
-extern const int64 q_pdo_ATTR_PREFETCH;
-extern const int64 q_pdo_ATTR_TIMEOUT;
-extern const int64 q_pdo_ATTR_ERRMODE;
-extern const int64 q_pdo_ATTR_SERVER_VERSION;
-extern const int64 q_pdo_ATTR_CLIENT_VERSION;
-extern const int64 q_pdo_ATTR_SERVER_INFO;
-extern const int64 q_pdo_ATTR_CONNECTION_STATUS;
-extern const int64 q_pdo_ATTR_CASE;
-extern const int64 q_pdo_ATTR_CURSOR_NAME;
-extern const int64 q_pdo_ATTR_CURSOR;
-extern const int64 q_pdo_ATTR_ORACLE_NULLS;
-extern const int64 q_pdo_ATTR_PERSISTENT;
-extern const int64 q_pdo_ATTR_STATEMENT_CLASS;
-extern const int64 q_pdo_ATTR_FETCH_TABLE_NAMES;
-extern const int64 q_pdo_ATTR_FETCH_CATALOG_NAMES;
-extern const int64 q_pdo_ATTR_DRIVER_NAME;
-extern const int64 q_pdo_ATTR_STRINGIFY_FETCHES;
-extern const int64 q_pdo_ATTR_MAX_COLUMN_LEN;
-extern const int64 q_pdo_ATTR_EMULATE_PREPARES;
-extern const int64 q_pdo_ATTR_DEFAULT_FETCH_MODE;
-extern const int64 q_pdo_ERRMODE_SILENT;
-extern const int64 q_pdo_ERRMODE_WARNING;
-extern const int64 q_pdo_ERRMODE_EXCEPTION;
-extern const int64 q_pdo_CASE_NATURAL;
-extern const int64 q_pdo_CASE_LOWER;
-extern const int64 q_pdo_CASE_UPPER;
-extern const int64 q_pdo_NULL_NATURAL;
-extern const int64 q_pdo_NULL_EMPTY_STRING;
-extern const int64 q_pdo_NULL_TO_STRING;
-extern const StaticString q_pdo_ERR_NONE;
-extern const int64 q_pdo_FETCH_ORI_NEXT;
-extern const int64 q_pdo_FETCH_ORI_PRIOR;
-extern const int64 q_pdo_FETCH_ORI_FIRST;
-extern const int64 q_pdo_FETCH_ORI_LAST;
-extern const int64 q_pdo_FETCH_ORI_ABS;
-extern const int64 q_pdo_FETCH_ORI_REL;
-extern const int64 q_pdo_CURSOR_FWDONLY;
-extern const int64 q_pdo_CURSOR_SCROLL;
-extern const int64 q_pdo_MYSQL_ATTR_USE_BUFFERED_QUERY;
-extern const int64 q_pdo_MYSQL_ATTR_LOCAL_INFILE;
-extern const int64 q_pdo_MYSQL_ATTR_MAX_BUFFER_SIZE;
-extern const int64 q_pdo_MYSQL_ATTR_INIT_COMMAND;
-extern const int64 q_pdo_MYSQL_ATTR_READ_DEFAULT_FILE;
-extern const int64 q_pdo_MYSQL_ATTR_READ_DEFAULT_GROUP;
-extern const int64 q_pdo_MYSQL_ATTR_COMPRESS;
-extern const int64 q_pdo_MYSQL_ATTR_DIRECT_QUERY;
-extern const int64 q_pdo_MYSQL_ATTR_FOUND_ROWS;
-extern const int64 q_pdo_MYSQL_ATTR_IGNORE_SPACE;
+extern const int64 q_PDO_PARAM_BOOL;
+extern const int64 q_PDO_PARAM_NULL;
+extern const int64 q_PDO_PARAM_INT;
+extern const int64 q_PDO_PARAM_STR;
+extern const int64 q_PDO_PARAM_LOB;
+extern const int64 q_PDO_PARAM_STMT;
+extern const int64 q_PDO_PARAM_INPUT_OUTPUT;
+extern const int64 q_PDO_PARAM_EVT_ALLOC;
+extern const int64 q_PDO_PARAM_EVT_FREE;
+extern const int64 q_PDO_PARAM_EVT_EXEC_PRE;
+extern const int64 q_PDO_PARAM_EVT_EXEC_POST;
+extern const int64 q_PDO_PARAM_EVT_FETCH_PRE;
+extern const int64 q_PDO_PARAM_EVT_FETCH_POST;
+extern const int64 q_PDO_PARAM_EVT_NORMALIZE;
+extern const int64 q_PDO_FETCH_USE_DEFAULT;
+extern const int64 q_PDO_FETCH_LAZY;
+extern const int64 q_PDO_FETCH_ASSOC;
+extern const int64 q_PDO_FETCH_NUM;
+extern const int64 q_PDO_FETCH_BOTH;
+extern const int64 q_PDO_FETCH_OBJ;
+extern const int64 q_PDO_FETCH_BOUND;
+extern const int64 q_PDO_FETCH_COLUMN;
+extern const int64 q_PDO_FETCH_CLASS;
+extern const int64 q_PDO_FETCH_INTO;
+extern const int64 q_PDO_FETCH_FUNC;
+extern const int64 q_PDO_FETCH_GROUP;
+extern const int64 q_PDO_FETCH_UNIQUE;
+extern const int64 q_PDO_FETCH_KEY_PAIR;
+extern const int64 q_PDO_FETCH_CLASSTYPE;
+extern const int64 q_PDO_FETCH_SERIALIZE;
+extern const int64 q_PDO_FETCH_PROPS_LATE;
+extern const int64 q_PDO_FETCH_NAMED;
+extern const int64 q_PDO_ATTR_AUTOCOMMIT;
+extern const int64 q_PDO_ATTR_PREFETCH;
+extern const int64 q_PDO_ATTR_TIMEOUT;
+extern const int64 q_PDO_ATTR_ERRMODE;
+extern const int64 q_PDO_ATTR_SERVER_VERSION;
+extern const int64 q_PDO_ATTR_CLIENT_VERSION;
+extern const int64 q_PDO_ATTR_SERVER_INFO;
+extern const int64 q_PDO_ATTR_CONNECTION_STATUS;
+extern const int64 q_PDO_ATTR_CASE;
+extern const int64 q_PDO_ATTR_CURSOR_NAME;
+extern const int64 q_PDO_ATTR_CURSOR;
+extern const int64 q_PDO_ATTR_ORACLE_NULLS;
+extern const int64 q_PDO_ATTR_PERSISTENT;
+extern const int64 q_PDO_ATTR_STATEMENT_CLASS;
+extern const int64 q_PDO_ATTR_FETCH_TABLE_NAMES;
+extern const int64 q_PDO_ATTR_FETCH_CATALOG_NAMES;
+extern const int64 q_PDO_ATTR_DRIVER_NAME;
+extern const int64 q_PDO_ATTR_STRINGIFY_FETCHES;
+extern const int64 q_PDO_ATTR_MAX_COLUMN_LEN;
+extern const int64 q_PDO_ATTR_EMULATE_PREPARES;
+extern const int64 q_PDO_ATTR_DEFAULT_FETCH_MODE;
+extern const int64 q_PDO_ERRMODE_SILENT;
+extern const int64 q_PDO_ERRMODE_WARNING;
+extern const int64 q_PDO_ERRMODE_EXCEPTION;
+extern const int64 q_PDO_CASE_NATURAL;
+extern const int64 q_PDO_CASE_LOWER;
+extern const int64 q_PDO_CASE_UPPER;
+extern const int64 q_PDO_NULL_NATURAL;
+extern const int64 q_PDO_NULL_EMPTY_STRING;
+extern const int64 q_PDO_NULL_TO_STRING;
+extern const StaticString q_PDO_ERR_NONE;
+extern const int64 q_PDO_FETCH_ORI_NEXT;
+extern const int64 q_PDO_FETCH_ORI_PRIOR;
+extern const int64 q_PDO_FETCH_ORI_FIRST;
+extern const int64 q_PDO_FETCH_ORI_LAST;
+extern const int64 q_PDO_FETCH_ORI_ABS;
+extern const int64 q_PDO_FETCH_ORI_REL;
+extern const int64 q_PDO_CURSOR_FWDONLY;
+extern const int64 q_PDO_CURSOR_SCROLL;
+extern const int64 q_PDO_MYSQL_ATTR_USE_BUFFERED_QUERY;
+extern const int64 q_PDO_MYSQL_ATTR_LOCAL_INFILE;
+extern const int64 q_PDO_MYSQL_ATTR_MAX_BUFFER_SIZE;
+extern const int64 q_PDO_MYSQL_ATTR_INIT_COMMAND;
+extern const int64 q_PDO_MYSQL_ATTR_READ_DEFAULT_FILE;
+extern const int64 q_PDO_MYSQL_ATTR_READ_DEFAULT_GROUP;
+extern const int64 q_PDO_MYSQL_ATTR_COMPRESS;
+extern const int64 q_PDO_MYSQL_ATTR_DIRECT_QUERY;
+extern const int64 q_PDO_MYSQL_ATTR_FOUND_ROWS;
+extern const int64 q_PDO_MYSQL_ATTR_IGNORE_SPACE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class PDO
 
-FORWARD_DECLARE_CLASS(pdo);
-class c_pdo : public ExtObjectData, public Sweepable {
+FORWARD_DECLARE_CLASS(PDO);
+class c_PDO : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(pdo)
-  END_CLASS_MAP(pdo)
-  DECLARE_CLASS(pdo, PDO, ObjectData)
+  BEGIN_CLASS_MAP(PDO)
+  END_CLASS_MAP(PDO)
+  DECLARE_CLASS(PDO, PDO, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_pdo();
-  public: ~c_pdo();
+  public: c_PDO();
+  public: ~c_PDO();
   public: void t___construct(CStrRef dsn, CStrRef username = null_string, CStrRef password = null_string, CArrRef options = null_array);
   public: Variant t_prepare(CStrRef statement, CArrRef options = null_array);
   public: bool t_begintransaction();
@@ -135,7 +135,7 @@ class c_pdo : public ExtObjectData, public Sweepable {
   public: Variant t_errorcode();
   public: Array t_errorinfo();
   public: Variant t_query(CStrRef sql);
-  public: Variant t_quote(CStrRef str, int64 paramtype = q_pdo_PARAM_STR);
+  public: Variant t_quote(CStrRef str, int64 paramtype = q_PDO_PARAM_STR);
   public: Variant t___wakeup();
   public: Variant t___sleep();
   public: static Array ti_getavailabledrivers(const char* cls );
@@ -145,7 +145,7 @@ class c_pdo : public ExtObjectData, public Sweepable {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_pdo *create(String dsn, String username = null_string, String password = null_string, Array options = null_array);
+  public: c_PDO *create(String dsn, String username = null_string, String password = null_string, Array options = null_array);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
@@ -157,28 +157,28 @@ class c_pdo : public ExtObjectData, public Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 // class PDOStatement
 
-FORWARD_DECLARE_CLASS(pdostatement);
-class c_pdostatement : public ExtObjectData, public Sweepable {
+FORWARD_DECLARE_CLASS(PDOStatement);
+class c_PDOStatement : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(pdostatement)
-  PARENT_CLASS(iterator)
-  END_CLASS_MAP(pdostatement)
-  DECLARE_CLASS(pdostatement, PDOStatement, ObjectData)
+  BEGIN_CLASS_MAP(PDOStatement)
+  PARENT_CLASS(Iterator)
+  END_CLASS_MAP(PDOStatement)
+  DECLARE_CLASS(PDOStatement, PDOStatement, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_pdostatement();
-  public: ~c_pdostatement();
+  public: c_PDOStatement();
+  public: ~c_PDOStatement();
   public: void t___construct();
   public: Variant t_execute(CArrRef params = null_array);
-  public: Variant t_fetch(int64 how = q_pdo_FETCH_BOTH, int64 orientation = q_pdo_FETCH_ORI_NEXT, int64 offset = 0);
+  public: Variant t_fetch(int64 how = q_PDO_FETCH_BOTH, int64 orientation = q_PDO_FETCH_ORI_NEXT, int64 offset = 0);
   public: Variant t_fetchobject(CStrRef class_name = null_string, CVarRef ctor_args = null);
   public: Variant t_fetchcolumn(int64 column_numner = 0);
-  public: Variant t_fetchall(int64 how = q_pdo_FETCH_BOTH, CVarRef class_name = null, CVarRef ctor_args = null);
-  public: bool t_bindvalue(CVarRef paramno, CVarRef param, int64 type = q_pdo_PARAM_STR);
-  public: bool t_bindparam(CVarRef paramno, Variant param, int64 type = q_pdo_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
-  public: bool t_bindcolumn(CVarRef paramno, Variant param, int64 type = q_pdo_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
+  public: Variant t_fetchall(int64 how = q_PDO_FETCH_BOTH, CVarRef class_name = null, CVarRef ctor_args = null);
+  public: bool t_bindvalue(CVarRef paramno, CVarRef param, int64 type = q_PDO_PARAM_STR);
+  public: bool t_bindparam(CVarRef paramno, Variant param, int64 type = q_PDO_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
+  public: bool t_bindcolumn(CVarRef paramno, Variant param, int64 type = q_PDO_PARAM_STR, int64 max_value_len = 0, CVarRef driver_params = null);
   public: int64 t_rowcount();
   public: Variant t_errorcode();
   public: Array t_errorinfo();
@@ -200,7 +200,7 @@ class c_pdostatement : public ExtObjectData, public Sweepable {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_pdostatement *create();
+  public: c_PDOStatement *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
@@ -214,24 +214,24 @@ class c_pdostatement : public ExtObjectData, public Sweepable {
 ///////////////////////////////////////////////////////////////////////////////
 // class PDOException
 
-FORWARD_DECLARE_CLASS(pdoexception);
-class c_pdoexception : public c_exception {
+FORWARD_DECLARE_CLASS(PDOException);
+class c_PDOException : public c_Exception {
  public:
-  BEGIN_CLASS_MAP(pdoexception)
-  RECURSIVE_PARENT_CLASS(exception)
-  END_CLASS_MAP(pdoexception)
-  DECLARE_CLASS(pdoexception, PDOException, exception)
+  BEGIN_CLASS_MAP(PDOException)
+  RECURSIVE_PARENT_CLASS(Exception)
+  END_CLASS_MAP(PDOException)
+  DECLARE_CLASS(PDOException, PDOException, Exception)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_pdoexception();
-  public: ~c_pdoexception();
+  public: c_PDOException();
+  public: ~c_PDOException();
   public: void t___construct();
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_pdoexception *create();
+  public: c_PDOException *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);

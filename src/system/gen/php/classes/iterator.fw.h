@@ -98,30 +98,30 @@ extern StaticArray s_sys_sa00000000;
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_GENERIC_INTERFACE(outeriterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(serializable);
-FORWARD_DECLARE_GENERIC_INTERFACE(traversable);
-FORWARD_DECLARE_GENERIC_INTERFACE(countable);
-FORWARD_DECLARE_CLASS(arrayiterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(iterator);
-FORWARD_DECLARE_CLASS(appenditerator);
-FORWARD_DECLARE_GENERIC_INTERFACE(seekableiterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(recursiveiterator);
-FORWARD_DECLARE_CLASS(recursivedirectoryiterator);
-extern const int64 q_recursivedirectoryiterator_CURRENT_AS_SELF;
-extern const int64 q_recursivedirectoryiterator_CURRENT_AS_FILEINFO;
-extern const int64 q_recursivedirectoryiterator_CURRENT_AS_PATHNAME;
-extern const int64 q_recursivedirectoryiterator_KEY_AS_PATHNAME;
-extern const int64 q_recursivedirectoryiterator_KEY_AS_FILENAME;
-extern const int64 q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY;
-FORWARD_DECLARE_CLASS(directoryiterator);
-FORWARD_DECLARE_GENERIC_INTERFACE(iteratoraggregate);
-FORWARD_DECLARE_CLASS(recursiveiteratoriterator);
-extern const int64 q_recursiveiteratoriterator_LEAVES_ONLY;
-extern const int64 q_recursiveiteratoriterator_SELF_FIRST;
-extern const int64 q_recursiveiteratoriterator_CHILD_FIRST;
-extern const int64 q_recursiveiteratoriterator_CATCH_GET_CHILD;
-FORWARD_DECLARE_CLASS(filteriterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(OuterIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(Serializable);
+FORWARD_DECLARE_GENERIC_INTERFACE(Traversable);
+FORWARD_DECLARE_GENERIC_INTERFACE(Countable);
+FORWARD_DECLARE_CLASS(ArrayIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(Iterator);
+FORWARD_DECLARE_CLASS(AppendIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(SeekableIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(RecursiveIterator);
+FORWARD_DECLARE_CLASS(RecursiveDirectoryIterator);
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF;
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO;
+extern const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator_KEY_AS_PATHNAME;
+extern const int64 q_RecursiveDirectoryIterator_KEY_AS_FILENAME;
+extern const int64 q_RecursiveDirectoryIterator_NEW_CURRENT_AND_KEY;
+FORWARD_DECLARE_CLASS(DirectoryIterator);
+FORWARD_DECLARE_GENERIC_INTERFACE(IteratorAggregate);
+FORWARD_DECLARE_CLASS(RecursiveIteratorIterator);
+extern const int64 q_RecursiveIteratorIterator_LEAVES_ONLY;
+extern const int64 q_RecursiveIteratorIterator_SELF_FIRST;
+extern const int64 q_RecursiveIteratorIterator_CHILD_FIRST;
+extern const int64 q_RecursiveIteratorIterator_CATCH_GET_CHILD;
+FORWARD_DECLARE_CLASS(FilterIterator);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

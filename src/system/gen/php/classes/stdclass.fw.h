@@ -32,8 +32,8 @@ namespace HPHP {
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_CLASS(stdclass);
-FORWARD_DECLARE_CLASS(__php_incomplete_class);
+FORWARD_DECLARE_CLASS(stdClass);
+FORWARD_DECLARE_CLASS(__PHP_Incomplete_Class);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

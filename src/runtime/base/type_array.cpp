@@ -270,7 +270,7 @@ Object Array::toObject() const {
   if (m_px) {
     return m_px->toObject();
   }
-  return Object(NEW(c_stdclass)());
+  return Object(NEW(c_stdClass)());
 }
 
 ///////////////////////////////////////////////////////////////////////////////

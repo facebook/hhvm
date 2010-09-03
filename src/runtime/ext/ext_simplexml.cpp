@@ -108,10 +108,10 @@ static void add_property(Array &properties, xmlNodePtr node, Object value) {
   }
 }
 
-static c_simplexmlelement *create_text(CObjRef doc, xmlNodePtr node,
+static c_SimpleXMLElement *create_text(CObjRef doc, xmlNodePtr node,
                                        CStrRef value, CStrRef ns,
                                        bool is_prefix, bool free_text) {
-  c_simplexmlelement *elem = NEW(c_simplexmlelement)();
+  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
   elem->m_doc = doc;
   elem->m_node = node->parent; // assign to parent, not node
   elem->m_children.set(0, value);
@@ -124,9 +124,9 @@ static c_simplexmlelement *create_text(CObjRef doc, xmlNodePtr node,
 static Array create_children(CObjRef doc, xmlNodePtr root,
                              CStrRef ns, bool is_prefix);
 
-static c_simplexmlelement *create_element(CObjRef doc, xmlNodePtr node,
+static c_SimpleXMLElement *create_element(CObjRef doc, xmlNodePtr node,
                                           CStrRef ns, bool is_prefix) {
-  c_simplexmlelement *elem = NEW(c_simplexmlelement)();
+  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
   elem->m_doc = doc;
   elem->m_node = node;
   if (node) {
@@ -242,7 +242,7 @@ Variant f_simplexml_load_string(CStrRef data,
   if (!doc) {
     return false;
   }
-  c_simplexmlelement *ret = create_element(Object(NEW(XmlDocWrapper)(doc)),
+  c_SimpleXMLElement *ret = create_element(Object(NEW(XmlDocWrapper)(doc)),
                                            root, ns, is_prefix);
   return Object(ret);
 }
@@ -258,24 +258,24 @@ Variant f_simplexml_load_file(CStrRef filename,
 ///////////////////////////////////////////////////////////////////////////////
 // SimpleXMLElement
 
-c_simplexmlelement::c_simplexmlelement()
+c_SimpleXMLElement::c_SimpleXMLElement()
     : m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
   m_children = Array::Create();
 }
 
-c_simplexmlelement::~c_simplexmlelement() {
+c_SimpleXMLElement::~c_SimpleXMLElement() {
   if (m_xpath) {
     xmlXPathFreeContext(m_xpath);
   }
 }
 
-void c_simplexmlelement::t___construct(CStrRef data, int64 options /* = 0 */,
+void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
                                        bool data_is_url /* = false */,
                                        CStrRef ns /* = "" */,
                                        bool is_prefix /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__construct);
   String xml = data;
   if (data_is_url) {
     Variant ret = f_file_get_contents(data);
@@ -299,8 +299,8 @@ void c_simplexmlelement::t___construct(CStrRef data, int64 options /* = 0 */,
   }
 }
 
-Variant c_simplexmlelement::t_xpath(CStrRef path) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::xpath);
+Variant c_SimpleXMLElement::t_xpath(CStrRef path) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::xpath);
   if (m_is_attribute || !m_node) {
     return null;
   }
@@ -368,8 +368,8 @@ Variant c_simplexmlelement::t_xpath(CStrRef path) {
   return ret;
 }
 
-bool c_simplexmlelement::t_registerxpathnamespace(CStrRef prefix, CStrRef ns) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::registerxpathnamespace);
+bool c_SimpleXMLElement::t_registerxpathnamespace(CStrRef prefix, CStrRef ns) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::registerxpathnamespace);
   if (m_node) {
     if (!m_xpath) {
       m_xpath = xmlXPathNewContext(m_node->doc);
@@ -380,8 +380,8 @@ bool c_simplexmlelement::t_registerxpathnamespace(CStrRef prefix, CStrRef ns) {
   return false;
 }
 
-Variant c_simplexmlelement::t_asxml(CStrRef filename /* = "" */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::asxml);
+Variant c_SimpleXMLElement::t_asxml(CStrRef filename /* = "" */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::asxml);
   if (!m_node) return false;
 
   if (!filename.empty()) {
@@ -424,8 +424,8 @@ Variant c_simplexmlelement::t_asxml(CStrRef filename /* = "" */) {
   return ret;
 }
 
-Array c_simplexmlelement::t_getnamespaces(bool recursive /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::getnamespaces);
+Array c_SimpleXMLElement::t_getnamespaces(bool recursive /* = false */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getnamespaces);
   Array ret = Array::Create();
   if (m_node) {
     if (m_node->type == XML_ELEMENT_NODE) {
@@ -437,8 +437,8 @@ Array c_simplexmlelement::t_getnamespaces(bool recursive /* = false */) {
   return ret;
 }
 
-Array c_simplexmlelement::t_getdocnamespaces(bool recursive /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::getdocnamespaces);
+Array c_SimpleXMLElement::t_getdocnamespaces(bool recursive /* = false */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getdocnamespaces);
   Array ret = Array::Create();
   if (m_node) {
     add_registered_namespaces(ret, xmlDocGetRootElement(m_node->doc),
@@ -447,14 +447,14 @@ Array c_simplexmlelement::t_getdocnamespaces(bool recursive /* = false */) {
   return ret;
 }
 
-Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
+Object c_SimpleXMLElement::t_children(CStrRef ns /* = "" */,
                                       bool is_prefix /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::children);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::children);
   if (m_is_attribute) {
     return Object();
   }
 
-  c_simplexmlelement *elem = NEW(c_simplexmlelement)();
+  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_text = m_is_text;
@@ -466,16 +466,16 @@ Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
     Array props = Array::Create();
     for (ArrayIter iter(m_children); iter; ++iter) {
       if (iter.second().isObject()) {
-        c_simplexmlelement *elem = iter.second().toObject().
-          getTyped<c_simplexmlelement>();
+        c_SimpleXMLElement *elem = iter.second().toObject().
+          getTyped<c_SimpleXMLElement>();
         if (elem->m_node && match_ns(elem->m_node, ns, is_prefix)) {
           props.set(iter.first(), iter.second());
         }
       } else {
         Array subnodes;
         for (ArrayIter iter2(iter.second()); iter2; ++iter2) {
-          c_simplexmlelement *elem = iter2.second().toObject().
-            getTyped<c_simplexmlelement>();
+          c_SimpleXMLElement *elem = iter2.second().toObject().
+            getTyped<c_SimpleXMLElement>();
           if (elem->m_node && match_ns(elem->m_node, ns, is_prefix)) {
             subnodes.append(iter2.second());
           }
@@ -494,8 +494,8 @@ Object c_simplexmlelement::t_children(CStrRef ns /* = "" */,
   return elem;
 }
 
-String c_simplexmlelement::t_getname() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::getname);
+String c_SimpleXMLElement::t_getname() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getname);
   if (m_is_children) {
     Variant first;
     ArrayIter iter(m_children);
@@ -509,14 +509,14 @@ String c_simplexmlelement::t_getname() {
   return String();
 }
 
-Object c_simplexmlelement::t_attributes(CStrRef ns /* = "" */,
+Object c_SimpleXMLElement::t_attributes(CStrRef ns /* = "" */,
                                         bool is_prefix /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::attributes);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::attributes);
   if (m_is_attribute) {
     return Object();
   }
 
-  c_simplexmlelement *elem = NEW(c_simplexmlelement)();
+  c_SimpleXMLElement *elem = NEW(c_SimpleXMLElement)();
   elem->m_doc = m_doc;
   elem->m_node = m_node;
   elem->m_is_attribute = true;
@@ -531,10 +531,10 @@ Object c_simplexmlelement::t_attributes(CStrRef ns /* = "" */,
   return elem;
 }
 
-Variant c_simplexmlelement::t_addchild(CStrRef qname,
+Variant c_SimpleXMLElement::t_addchild(CStrRef qname,
                                        CStrRef value /* = null_string */,
                                        CStrRef ns /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::addchild);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::addchild);
   if (qname.empty()) {
     raise_warning("Element name is required");
     return null;
@@ -594,10 +594,10 @@ Variant c_simplexmlelement::t_addchild(CStrRef qname,
   return child;
 }
 
-void c_simplexmlelement::t_addattribute(CStrRef qname,
+void c_SimpleXMLElement::t_addattribute(CStrRef qname,
                                         CStrRef value /* = null_string */,
                                         CStrRef ns /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::addattribute);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::addattribute);
   if (qname.empty()) {
     raise_warning("Attribute name is required");
     return;
@@ -644,8 +644,8 @@ void c_simplexmlelement::t_addattribute(CStrRef qname,
   }
 }
 
-String c_simplexmlelement::t___tostring() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__tostring);
+String c_SimpleXMLElement::t___tostring() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__tostring);
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {
@@ -654,8 +654,8 @@ String c_simplexmlelement::t___tostring() {
       return prop.toString();
     }
     if (prop.isObject()) {
-      c_simplexmlelement *elem =
-        prop.toObject().getTyped<c_simplexmlelement>();
+      c_SimpleXMLElement *elem =
+        prop.toObject().getTyped<c_SimpleXMLElement>();
       if (elem->m_is_text && elem->m_free_text) {
         return prop.toString();
       }
@@ -664,19 +664,19 @@ String c_simplexmlelement::t___tostring() {
   return "";
 }
 
-Variant &c_simplexmlelement::___lval(Variant v_name) {
+Variant &c_SimpleXMLElement::___lval(Variant v_name) {
   return m_children.lvalAt(v_name);
 }
 
-Variant c_simplexmlelement::t___get(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__get);
+Variant c_SimpleXMLElement::t___get(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__get);
   Variant ret = m_children[name];
   if (ret.isArray()) {
     ret = ret[0];
   }
   if (ret.isObject()) {
-    c_simplexmlelement *elem = ret.toObject().getTyped<c_simplexmlelement>();
-    c_simplexmlelement *e = NEW(c_simplexmlelement)();
+    c_SimpleXMLElement *elem = ret.toObject().getTyped<c_SimpleXMLElement>();
+    c_SimpleXMLElement *e = NEW(c_SimpleXMLElement)();
     e->m_doc = elem->m_doc;
     e->m_node = elem->m_node;
     e->m_children = ref(elem->m_children);
@@ -686,13 +686,13 @@ Variant c_simplexmlelement::t___get(Variant name) {
     return e;
   }
   if (ret.isNull()) {
-    return NEW(c_simplexmlelement)();
+    return NEW(c_SimpleXMLElement)();
   }
   return ret;
 }
 
-Variant c_simplexmlelement::t___unset(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__unset);
+Variant c_SimpleXMLElement::t___unset(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__unset);
   if (m_node == NULL) return null;
 
   Variant node;
@@ -703,15 +703,15 @@ Variant c_simplexmlelement::t___unset(Variant name) {
   }
 
   if (node.isObject()) {
-    c_simplexmlelement *elem =
-      node.toObject().getTyped<c_simplexmlelement>();
+    c_SimpleXMLElement *elem =
+      node.toObject().getTyped<c_SimpleXMLElement>();
     if (elem->m_node) {
       xmlUnlinkNode(elem->m_node);
     }
   } else if (node.isArray()) {
     for (ArrayIter iter(node); iter; ++iter) {
-      c_simplexmlelement *elem = iter.second().toObject().
-        getTyped<c_simplexmlelement>();
+      c_SimpleXMLElement *elem = iter.second().toObject().
+        getTyped<c_SimpleXMLElement>();
       if (elem->m_node) {
         xmlUnlinkNode(elem->m_node);
       }
@@ -726,8 +726,8 @@ Variant c_simplexmlelement::t___unset(Variant name) {
   return null;
 }
 
-bool c_simplexmlelement::t___isset(Variant name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__isset);
+bool c_SimpleXMLElement::t___isset(Variant name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__isset);
   if (m_node) {
     if (m_is_attribute) {
       return m_attributes.toArray().exists(name);
@@ -752,8 +752,8 @@ static void change_node_zval(xmlNodePtr node, CStrRef value) {
   }
 }
 
-Variant c_simplexmlelement::t___set(Variant name, Variant value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__set);
+Variant c_SimpleXMLElement::t___set(Variant name, Variant value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__set);
   if (m_node == NULL) return null;
 
   String svalue = value.toString();
@@ -769,8 +769,8 @@ Variant c_simplexmlelement::t___set(Variant name, Variant value) {
 
   xmlNodePtr newnode = NULL;
   if (node.isObject()) {
-    c_simplexmlelement *elem =
-      node.toObject().getTyped<c_simplexmlelement>();
+    c_SimpleXMLElement *elem =
+      node.toObject().getTyped<c_SimpleXMLElement>();
     if (elem->m_node) {
       xmlNodePtr tempnode;
       while ((tempnode = (xmlNodePtr)elem->m_node->children)) {
@@ -815,11 +815,11 @@ Variant c_simplexmlelement::t___set(Variant name, Variant value) {
   return null;
 }
 
-bool c_simplexmlelement::o_toBoolean() const {
+bool c_SimpleXMLElement::o_toBoolean() const {
   return m_node != NULL || o_properties;
 }
 
-int64 c_simplexmlelement::o_toInt64() const {
+int64 c_SimpleXMLElement::o_toInt64() const {
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {
@@ -828,7 +828,7 @@ int64 c_simplexmlelement::o_toInt64() const {
   return prop.toString().toInt64();
 }
 
-double c_simplexmlelement::o_toDouble() const {
+double c_SimpleXMLElement::o_toDouble() const {
   Variant prop;
   ArrayIter iter(m_children);
   if (iter) {
@@ -837,7 +837,7 @@ double c_simplexmlelement::o_toDouble() const {
   return prop.toString().toDouble();
 }
 
-Array c_simplexmlelement::o_toArray() const {
+Array c_SimpleXMLElement::o_toArray() const {
   if (m_attributes.toArray().empty()) {
     return m_children;
   }
@@ -847,15 +847,15 @@ Array c_simplexmlelement::o_toArray() const {
   return ret;
 }
 
-Variant c_simplexmlelement::t_getiterator() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::getiterator);
-  c_simplexmlelementiterator *iter = NEW(c_simplexmlelementiterator)();
+Variant c_SimpleXMLElement::t_getiterator() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::getiterator);
+  c_SimpleXMLElementIterator *iter = NEW(c_SimpleXMLElementIterator)();
   iter->reset_iterator(this);
   return Object(iter);
 }
 
-int64 c_simplexmlelement::t_count() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::count);
+int64 c_SimpleXMLElement::t_count() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::count);
   if (m_is_attribute) {
     return m_attributes.toArray().size();
   }
@@ -869,16 +869,16 @@ int64 c_simplexmlelement::t_count() {
   return m_children.toArray().size();
 }
 
-Variant c_simplexmlelement::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::__destruct);
+Variant c_SimpleXMLElement::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // implementing ArrayAccess
 
-bool c_simplexmlelement::t_offsetexists(CVarRef index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::offsetexists);
+bool c_SimpleXMLElement::t_offsetexists(CVarRef index) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetexists);
   if (index.isInteger()) {
     int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
     for (ArrayIterPtr iter = var.begin(); !iter->end(); iter->next()) {
@@ -891,8 +891,8 @@ bool c_simplexmlelement::t_offsetexists(CVarRef index) {
   return m_attributes.toArray().exists(index);
 }
 
-Variant c_simplexmlelement::t_offsetget(CVarRef index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::offsetget);
+Variant c_SimpleXMLElement::t_offsetget(CVarRef index) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetget);
   if (index.isInteger()) {
     if (m_is_property) {
       int64 n = 0; int64 nIndex = index.toInt64(); Variant var(this);
@@ -908,8 +908,8 @@ Variant c_simplexmlelement::t_offsetget(CVarRef index) {
   return m_attributes[index];
 }
 
-void c_simplexmlelement::t_offsetset(CVarRef index, CVarRef newvalue) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::offsetset);
+void c_SimpleXMLElement::t_offsetset(CVarRef index, CVarRef newvalue) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetset);
   if (index.isInteger()) {
     raise_error("unable to replace a SimpleXMLElement node");
     return;
@@ -936,8 +936,8 @@ void c_simplexmlelement::t_offsetset(CVarRef index, CVarRef newvalue) {
   }
 }
 
-void c_simplexmlelement::t_offsetunset(CVarRef index) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelement, simplexmlelement::offsetunset);
+void c_SimpleXMLElement::t_offsetunset(CVarRef index) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElement, SimpleXMLElement::offsetunset);
   if (index.isInteger()) {
     raise_error("unable to remove a SimpleXMLElement node");
     return;
@@ -964,16 +964,16 @@ void c_simplexmlelement::t_offsetunset(CVarRef index) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_simplexmlelementiterator::c_simplexmlelementiterator()
+c_SimpleXMLElementIterator::c_SimpleXMLElementIterator()
     : m_parent(NULL), m_iter1(NULL), m_iter2(NULL) {
 }
 
-c_simplexmlelementiterator::~c_simplexmlelementiterator() {
+c_SimpleXMLElementIterator::~c_SimpleXMLElementIterator() {
   delete m_iter1;
   delete m_iter2;
 }
 
-void c_simplexmlelementiterator::reset_iterator(c_simplexmlelement *parent) {
+void c_SimpleXMLElementIterator::reset_iterator(c_SimpleXMLElement *parent) {
   delete m_iter1; m_iter1 = NULL;
   delete m_iter2; m_iter2 = NULL;
   m_parent = parent;
@@ -1003,8 +1003,8 @@ void c_simplexmlelementiterator::reset_iterator(c_simplexmlelement *parent) {
   if (m_parent->m_children.toArray().size() == 1) {
     ArrayIter iter(m_parent->m_children);
     if (iter.second().isObject()) {
-      c_simplexmlelement *elem = iter.second().toObject().
-        getTyped<c_simplexmlelement>();
+      c_SimpleXMLElement *elem = iter.second().toObject().
+        getTyped<c_SimpleXMLElement>();
       if (elem->m_is_text && elem->m_free_text) {
         return;
       }
@@ -1017,16 +1017,16 @@ void c_simplexmlelementiterator::reset_iterator(c_simplexmlelement *parent) {
   }
 }
 
-void c_simplexmlelementiterator::t___construct() {
+void c_SimpleXMLElementIterator::t___construct() {
 }
 
-Variant c_simplexmlelementiterator::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelementiterator, simplexmlelementiterator::__destruct);
+Variant c_SimpleXMLElementIterator::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::__destruct);
   return null;
 }
 
-Variant c_simplexmlelementiterator::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelementiterator, simplexmlelementiterator::current);
+Variant c_SimpleXMLElementIterator::t_current() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::current);
   if (m_iter1 == NULL) return null;
   if (m_parent->m_is_attribute) {
     return m_iter1->second();
@@ -1045,16 +1045,16 @@ Variant c_simplexmlelementiterator::t_current() {
   return null;
 }
 
-Variant c_simplexmlelementiterator::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelementiterator, simplexmlelementiterator::key);
+Variant c_SimpleXMLElementIterator::t_key() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::key);
   if (m_iter1) {
     return m_iter1->first();
   }
   return null;
 }
 
-Variant c_simplexmlelementiterator::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelementiterator, simplexmlelementiterator::next);
+Variant c_SimpleXMLElementIterator::t_next() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::next);
   if (m_iter1 == NULL) return null;
   if (m_parent->m_is_attribute) {
     m_iter1->next();
@@ -1082,29 +1082,29 @@ Variant c_simplexmlelementiterator::t_next() {
   return null;
 }
 
-Variant c_simplexmlelementiterator::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelementiterator, simplexmlelementiterator::rewind);
+Variant c_SimpleXMLElementIterator::t_rewind() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::rewind);
   reset_iterator(m_parent);
   return null;
 }
 
-Variant c_simplexmlelementiterator::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(simplexmlelementiterator, simplexmlelementiterator::valid);
+Variant c_SimpleXMLElementIterator::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SimpleXMLElementIterator, SimpleXMLElementIterator::valid);
   return m_iter1 && !m_iter1->end();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // LibXMLError
 
-c_libxmlerror::c_libxmlerror() {
+c_LibXMLError::c_LibXMLError() {
 }
-c_libxmlerror::~c_libxmlerror() {
+c_LibXMLError::~c_LibXMLError() {
 }
-void c_libxmlerror::t___construct() {
+void c_LibXMLError::t___construct() {
 }
 
-Variant c_libxmlerror::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(libxmlerror, libxmlerror::__destruct);
+Variant c_LibXMLError::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(LibXMLError, LibXMLError::__destruct);
   return null;
 }
 
@@ -1182,7 +1182,7 @@ static void libxml_error_handler(void *userData, xmlErrorPtr error) {
 }
 
 static Object create_libxmlerror(xmlError &error) {
-  Object ret(NEW(c_libxmlerror)());
+  Object ret(NEW(c_LibXMLError)());
   ret->o_set("level",   error.level);
   ret->o_set("code",    error.code);
   ret->o_set("column",  error.int2);

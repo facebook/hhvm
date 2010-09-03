@@ -144,6 +144,12 @@ public:
   bool isErrorSuppressed(CodeError::ErrorType e) const;
 
   static void recomputeEffects() { s_effectsTag++; }
+
+  /**
+   * Write where this construct was in PHP files.
+   */
+  void printSource(CodeGenerator &cg);
+
 private:
   struct ExtraData {
     std::set<std::string> hphpNotes;
@@ -176,11 +182,6 @@ protected:
                        bool strong = true);
   void addUserClass(AnalysisResultPtr ar, const std::string &name,
                     bool strong = true);
-
-  /**
-   * Write where this construct was in PHP files.
-   */
-  void printSource(CodeGenerator &cg);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

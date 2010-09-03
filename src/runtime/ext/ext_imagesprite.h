@@ -3,6 +3,7 @@
    | HipHop for PHP                                                       |
    +----------------------------------------------------------------------+
    | Copyright (c) 2010 Facebook, Inc. (http://www.facebook.com)          |
+   | Copyright (c) 1997-2010 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -30,18 +31,18 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class ImageSprite
 
-FORWARD_DECLARE_CLASS(imagesprite);
-class c_imagesprite : public ExtObjectData {
+FORWARD_DECLARE_CLASS(ImageSprite);
+class c_ImageSprite : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(imagesprite)
-  END_CLASS_MAP(imagesprite)
-  DECLARE_CLASS(imagesprite, ImageSprite, ObjectData)
+  BEGIN_CLASS_MAP(ImageSprite)
+  END_CLASS_MAP(ImageSprite)
+  DECLARE_CLASS(ImageSprite, ImageSprite, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_imagesprite();
-  public: ~c_imagesprite();
+  public: c_ImageSprite();
+  public: ~c_ImageSprite();
   public: void t___construct();
   public: Object t_addfile(CStrRef file, CArrRef options = null);
   public: Object t_addstring(CStrRef id, CStrRef data, CArrRef options = null);
@@ -57,7 +58,7 @@ class c_imagesprite : public ExtObjectData {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_imagesprite *create();
+  public: c_ImageSprite *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);

@@ -33,7 +33,6 @@ namespace HPHP {
 #define FORWARD_DECLARE_CLASS(cls)                      \
   class c_##cls;                                        \
   typedef SmartObject<c_##cls> p_##cls;                 \
-  typedef SmartObject<c_##cls> sp_##cls                 \
 
 #define FORWARD_DECLARE_INTERFACE(cls)                  \
   class c_##cls;                                        \

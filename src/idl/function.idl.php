@@ -227,7 +227,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_serialized",
     'desc'   => "Invoke a function with serialized function and parameters by calling serialize(array(\"func\" => \$func, \"params\" => \$params)), and returns function return in serialized format of array(\"ret\" => \$ret, \"exception\" => \$exception). Useful for over-network invocation.",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => String,
       'desc'   => "Serialized return.",
@@ -245,7 +245,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_array_rpc",
     'desc'   => "Same as call_user_func_array(), but executes on a remote HipHop RPC server",
-    'flags'  =>  HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",
@@ -288,7 +288,7 @@ DefineFunction(
   array(
     'name'   => "call_user_func_rpc",
     'desc'   => "Same as call_user_func(), but executes on a remote HipHop RPC server",
-    'flags'  =>  MixedVariableArguments | HipHopSpecific,
+    'flags'  =>  HasDocComment | HipHopSpecific | MixedVariableArguments,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the function result, or FALSE on error.",

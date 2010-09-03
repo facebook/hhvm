@@ -168,30 +168,30 @@ extern StaticArray s_sys_sa00000000;
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_CLASS(reflectionfunctionabstract);
-FORWARD_DECLARE_CLASS(reflectionobject);
-FORWARD_DECLARE_GENERIC_INTERFACE(reflector);
-FORWARD_DECLARE_CLASS(reflectionexception);
-FORWARD_DECLARE_CLASS(reflectionclass);
-extern const int64 q_reflectionclass_IS_IMPLICIT_ABSTRACT;
-extern const int64 q_reflectionclass_IS_EXPLICIT_ABSTRACT;
-extern const int64 q_reflectionclass_IS_FINAL;
-FORWARD_DECLARE_CLASS(reflectionextension);
-FORWARD_DECLARE_CLASS(reflectionmethod);
-extern const int64 q_reflectionmethod_IS_STATIC;
-extern const int64 q_reflectionmethod_IS_PUBLIC;
-extern const int64 q_reflectionmethod_IS_PROTECTED;
-extern const int64 q_reflectionmethod_IS_PRIVATE;
-extern const int64 q_reflectionmethod_IS_ABSTRACT;
-extern const int64 q_reflectionmethod_IS_FINAL;
-FORWARD_DECLARE_CLASS(reflectionproperty);
-extern const int64 q_reflectionproperty_IS_STATIC;
-extern const int64 q_reflectionproperty_IS_PUBLIC;
-extern const int64 q_reflectionproperty_IS_PROTECTED;
-extern const int64 q_reflectionproperty_IS_PRIVATE;
-FORWARD_DECLARE_CLASS(reflectionfunction);
-extern const int64 q_reflectionfunction_IS_DEPRECATED;
-FORWARD_DECLARE_CLASS(reflectionparameter);
+FORWARD_DECLARE_CLASS(ReflectionFunctionAbstract);
+FORWARD_DECLARE_CLASS(ReflectionObject);
+FORWARD_DECLARE_GENERIC_INTERFACE(Reflector);
+FORWARD_DECLARE_CLASS(ReflectionException);
+FORWARD_DECLARE_CLASS(ReflectionClass);
+extern const int64 q_ReflectionClass_IS_IMPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass_IS_EXPLICIT_ABSTRACT;
+extern const int64 q_ReflectionClass_IS_FINAL;
+FORWARD_DECLARE_CLASS(ReflectionExtension);
+FORWARD_DECLARE_CLASS(ReflectionMethod);
+extern const int64 q_ReflectionMethod_IS_STATIC;
+extern const int64 q_ReflectionMethod_IS_PUBLIC;
+extern const int64 q_ReflectionMethod_IS_PROTECTED;
+extern const int64 q_ReflectionMethod_IS_PRIVATE;
+extern const int64 q_ReflectionMethod_IS_ABSTRACT;
+extern const int64 q_ReflectionMethod_IS_FINAL;
+FORWARD_DECLARE_CLASS(ReflectionProperty);
+extern const int64 q_ReflectionProperty_IS_STATIC;
+extern const int64 q_ReflectionProperty_IS_PUBLIC;
+extern const int64 q_ReflectionProperty_IS_PROTECTED;
+extern const int64 q_ReflectionProperty_IS_PRIVATE;
+FORWARD_DECLARE_CLASS(ReflectionFunction);
+extern const int64 q_ReflectionFunction_IS_DEPRECATED;
+FORWARD_DECLARE_CLASS(ReflectionParameter);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

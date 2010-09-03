@@ -531,7 +531,7 @@ DefineFunction(
       array(
         'name'   => "size",
         'type'   => Int64,
-        'desc'   => "The size to truncate to.\n\nIf size is larger than the file it is extended with null bytes.\n\nIf size is smaller than the extra data will be lost.",
+        'desc'   => "The size to truncate to.\n\nIf size is larger than the file then the file is extended with null bytes.\n\nIf size is smaller than the file then the file is truncated to that size.",
       ),
     ),
   ));

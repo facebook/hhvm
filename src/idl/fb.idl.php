@@ -206,8 +206,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_intercept",
-    'flags'  =>  HipHopSpecific,
-    'desc'   => "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler(\$name, \$obj, \$params, \$data, &\$done)\", where \$name is orginal function's name, \$obj is $\this for an instance method call or null for static method call or function calls, and \$params are original call's parameters. \$data is what's passed to fb_intercept() and set \$done to false to indicate function should continue its execution with old function as if interception did not happen. By default \$done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
+    'desc'   => "Invokes a user handler upon calling a function or a class method. If this handler returns FALSE, code will continue with original function. Otherwise, it will return what handler tells. The handler function looks like \"intercept_handler(\$name, \$obj, \$params, \$data, &\$done)\", where \$name is orginal function's name, \$obj is \$	his for an instance method call or null for static method call or function calls, and \$params are original call's parameters. \$data is what's passed to fb_intercept() and set \$done to false to indicate function should continue its execution with old function as if interception did not happen. By default \$done is true so it will return handler's return immediately without executing old function's code. Note that built-in functions are not interceptable.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "TRUE if successful, FALSE otherwise",
@@ -226,7 +226,7 @@ DefineFunction(
       array(
         'name'   => "data",
         'type'   => Variant,
-        'value'  => 'null_variant',
+        'value'  => "null_variant",
         'desc'   => "Extra data to pass to the handler when intercepting",
       ),
     ),
@@ -235,8 +235,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_stubout_intercept_handler",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "As an interception handler, invokes a different function instead. Useful for stubbing out a function in unit testing. To use this handler, call fb_intercept('old_func', 'fb_stubout_intercept_handler', 'new_func') and this will call new_func() every time when old_func() is called and return new_func()'s return as old_func() call's return.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "What to return on behalf of original function.",
@@ -273,8 +273,8 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "fb_rpc_intercept_handler",
-    'flags'  =>  HipHopSpecific,
     'desc'   => "As an interception handler, invokes a function remotely on an RPC server instead of locally.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
     'return' => array(
       'type'   => Variant,
       'desc'   => "What to return on behalf of original function.",
@@ -694,6 +694,7 @@ DefineFunction(
       ),
     ),
   ));
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

@@ -26,119 +26,119 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/splfile.php line 383 */
-const int64 q_splfileobject_DROP_NEW_LINE = 1LL;
-const int64 q_splfileobject_READ_AHEAD = 2LL;
-const int64 q_splfileobject_SKIP_EMPTY = 6LL;
-const int64 q_splfileobject_READ_CSV = 8LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileobject
-Variant c_splfileobject::os_getInit(CStrRef s) {
-  return c_splfileinfo::os_getInit(s);
+const int64 q_SplFileObject_DROP_NEW_LINE = 1LL;
+const int64 q_SplFileObject_READ_AHEAD = 2LL;
+const int64 q_SplFileObject_SKIP_EMPTY = 6LL;
+const int64 q_SplFileObject_READ_CSV = 8LL;
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileObject
+Variant c_SplFileObject::os_getInit(CStrRef s) {
+  return c_SplFileInfo::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileobject
-Variant c_splfileobject::os_get(CStrRef s) {
-  return c_splfileinfo::os_get(s);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileObject
+Variant c_SplFileObject::os_get(CStrRef s) {
+  return c_SplFileInfo::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject
-Variant &c_splfileobject::os_lval(CStrRef s) {
-  return c_splfileinfo::os_lval(s);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject
+Variant &c_SplFileObject::os_lval(CStrRef s) {
+  return c_SplFileInfo::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileobject
-void c_splfileobject::o_getArray(Array &props) const {
-  c_splfileinfo::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileObject
+void c_SplFileObject::o_getArray(Array &props) const {
+  c_SplFileInfo::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileobject
-void c_splfileobject::o_setArray(CArrRef props) {
-  c_splfileinfo::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject
+void c_SplFileObject::o_setArray(CArrRef props) {
+  c_SplFileInfo::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_splfileobject
-Variant c_splfileobject::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_get_SplFileObject
+Variant c_SplFileObject::o_get(CStrRef prop, bool error, CStrRef context) {
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject
-Variant c_splfileobject::o_getPublic(CStrRef s, bool error) {
-  return c_splfileinfo::o_getPublic(s, error);
+#endif // OMIT_JUMP_TABLE_CLASS_get_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileObject
+Variant c_SplFileObject::o_getPublic(CStrRef s, bool error) {
+  return c_SplFileInfo::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
-Variant c_splfileobject::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileObject
+Variant c_SplFileObject::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_splfileobject
-Variant * c_splfileobject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileObject
+Variant * c_SplFileObject::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileobject
-Variant * c_splfileobject::o_realPropPublic(CStrRef s, int flags) const {
-  return c_splfileinfo::o_realPropPublic(s, flags);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileObject
+Variant * c_SplFileObject::o_realPropPublic(CStrRef s, int flags) const {
+  return c_SplFileInfo::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileobject
-Variant * c_splfileobject::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject
+Variant * c_SplFileObject::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_splfileobject
-Variant c_splfileobject::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_set_SplFileObject
+Variant c_SplFileObject::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject
-Variant c_splfileobject::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_splfileinfo::o_setPublic(s, v, forInit);
+#endif // OMIT_JUMP_TABLE_CLASS_set_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileObject
+Variant c_SplFileObject::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_SplFileInfo::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileobject
-Variant c_splfileobject::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileObject
+Variant c_SplFileObject::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileobject
-Variant& c_splfileobject::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_SplFileObject
+Variant& c_SplFileObject::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject
-Variant& c_splfileobject::o_lvalPublic(CStrRef s) {
-  return c_splfileinfo::o_lvalPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_lval_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileObject
+Variant& c_SplFileObject::o_lvalPublic(CStrRef s) {
+  return c_SplFileInfo::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileobject
-Variant& c_splfileobject::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileObject
+Variant& c_SplFileObject::o_lvalPrivate(CStrRef s) {
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileobject
-Variant c_splfileobject::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
+Variant c_SplFileObject::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
     case 2:
-      HASH_RETURN(0x54B2A676B563E232LL, q_splfileobject_SKIP_EMPTY, "SKIP_EMPTY");
+      HASH_RETURN(0x54B2A676B563E232LL, q_SplFileObject_SKIP_EMPTY, "SKIP_EMPTY");
       break;
     case 3:
-      HASH_RETURN(0x23519E830A6DEC13LL, q_splfileobject_READ_CSV, "READ_CSV");
+      HASH_RETURN(0x23519E830A6DEC13LL, q_SplFileObject_READ_CSV, "READ_CSV");
       break;
     case 4:
-      HASH_RETURN(0x05ABC27224BDAC64LL, q_splfileobject_DROP_NEW_LINE, "DROP_NEW_LINE");
+      HASH_RETURN(0x05ABC27224BDAC64LL, q_SplFileObject_DROP_NEW_LINE, "DROP_NEW_LINE");
       break;
     case 6:
-      HASH_RETURN(0x6ABD9DCA7D94431ELL, q_splfileobject_READ_AHEAD, "READ_AHEAD");
+      HASH_RETURN(0x6ABD9DCA7D94431ELL, q_SplFileObject_READ_AHEAD, "READ_AHEAD");
       break;
     default:
       break;
   }
-  return c_splfileinfo::os_constant(s);
+  return c_SplFileInfo::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileobject
-IMPLEMENT_CLASS(splfileobject)
-c_splfileobject *c_splfileobject::create(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss122506fb, "r")
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
+IMPLEMENT_CLASS(SplFileObject)
+c_SplFileObject *c_SplFileObject::create(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss122506fb, "r")
 , Variant v_use_include_path //  = false
 , Variant v_context //  = null
 ) {
@@ -147,7 +147,7 @@ c_splfileobject *c_splfileobject::create(Variant v_filename, Variant v_open_mode
   t___construct(v_filename, v_open_mode, v_use_include_path, v_context);
   return this;
 }
-ObjectData *c_splfileobject::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_SplFileObject::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -177,7 +177,7 @@ ObjectData *c_splfileobject::dynCreate(CArrRef params, bool construct /* = true 
   }
   return this;
 }
-void c_splfileobject::dynConstruct(CArrRef params) {
+void c_SplFileObject::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 4) throw_wrong_arguments("SplFileObject::__construct", count, 1, 4, 2);
   do {
@@ -202,7 +202,7 @@ void c_splfileobject::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1, arg2, arg3));
   } while (false);
 }
-void c_splfileobject::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_SplFileObject::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   Variant a2;
@@ -233,18 +233,18 @@ void c_splfileobject::dynConstructFromEval(Eval::VariableEnvironment &env, const
   else if (count == 3) (t___construct(a0, a1, a2), null);
   else (t___construct(a0, a1, a2, a3), null);
 }
-ObjectData *c_splfileobject::cloneImpl() {
-  c_splfileobject *obj = NEW(c_splfileobject)();
+ObjectData *c_SplFileObject::cloneImpl() {
+  c_SplFileObject *obj = NEW(c_SplFileObject)();
   cloneSet(obj);
   return obj;
 }
-void c_splfileobject::cloneSet(c_splfileobject *clone) {
-  c_splfileinfo::cloneSet(clone);
+void c_SplFileObject::cloneSet(c_SplFileObject *clone) {
+  c_SplFileInfo::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
-Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileObject
+Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -258,7 +258,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_iswritable());
       }
       break;
-    case 0x168:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         {
@@ -293,7 +293,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_next());
       }
       break;
-    case 0x169:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         {
@@ -317,7 +317,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_key());
       }
       break;
-    case 0x16a:
+    case 0x17d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         {
@@ -340,7 +340,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x16b:
+    case 0x17e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         {
@@ -374,7 +374,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_valid());
       }
       break;
-    case 0x16c:
+    case 0x17f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         {
@@ -402,7 +402,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_getlinktarget());
       }
       break;
-    case 0x16d:
+    case 0x180:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
@@ -460,7 +460,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x16e:
+    case 0x181:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         {
@@ -471,7 +471,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x16f:
+    case 0x182:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
@@ -489,7 +489,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_getpath());
       }
       break;
-    case 0x170:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         {
@@ -506,13 +506,13 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_getinode());
       }
       break;
-    case 0x172:
+    case 0x185:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
-    case 0x171:
+    case 0x184:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
@@ -542,13 +542,13 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_getfilename());
       }
       break;
-    case 0x173:
+    case 0x186:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
-    case 0x174:
+    case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
@@ -566,7 +566,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_haschildren());
       }
       break;
-    case 0x175:
+    case 0x188:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
@@ -583,7 +583,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x176:
+    case 0x189:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         const_cast<Array&>(params).escalate(true);
@@ -638,7 +638,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         return (t_current());
       }
       break;
-    case 0x178:
+    case 0x18b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         {
@@ -650,7 +650,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x177:
+    case 0x18a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
@@ -684,7 +684,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
         }
       }
       break;
-    case 0x179:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
@@ -705,7 +705,7 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
@@ -1151,13 +1151,13 @@ Variant c_splfileobject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
-Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileObject
+Variant c_SplFileObject::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -1171,7 +1171,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_iswritable());
       }
       break;
-    case 0x168:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
         return (t_fscanf(a0));
@@ -1196,7 +1196,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_next());
       }
       break;
-    case 0x169:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fseek", count, 2, 2, 1);
         return (t_fseek(a0, a1));
@@ -1214,7 +1214,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_key());
       }
       break;
-    case 0x16a:
+    case 0x17d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::fgetss", count, 1, 1, 1);
         return (t_fgetss(a0));
@@ -1227,7 +1227,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_setfileclass(a0));
       }
       break;
-    case 0x16b:
+    case 0x17e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::fgetcsv", 3, 1);
         if (count <= 0) return (t_fgetcsv());
@@ -1249,7 +1249,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_valid());
       }
       break;
-    case 0x16c:
+    case 0x17f:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
         if (count <= 0) return (t_setcsvcontrol());
@@ -1270,7 +1270,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_getlinktarget());
       }
       break;
-    case 0x16d:
+    case 0x180:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getCsvControl", 0, 1);
         return (t_getcsvcontrol());
@@ -1310,13 +1310,13 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_getpathinfo(a0));
       }
       break;
-    case 0x16e:
+    case 0x181:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
         return (t_setmaxlinelen(a0));
       }
       break;
-    case 0x16f:
+    case 0x182:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::getMaxLineLen", 0, 1);
         return (t_getmaxlinelen());
@@ -1334,7 +1334,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_getpath());
       }
       break;
-    case 0x170:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplFileObject::ftruncate", count, 1, 1, 1);
         return (t_ftruncate(a0));
@@ -1346,13 +1346,13 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_getinode());
       }
       break;
-    case 0x172:
+    case 0x185:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fflush", 0, 1);
         return (t_fflush());
       }
       break;
-    case 0x171:
+    case 0x184:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::eof", 0, 1);
         return (t_eof());
@@ -1382,13 +1382,13 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_getfilename());
       }
       break;
-    case 0x173:
+    case 0x186:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgetc", 0, 1);
         return (t_fgetc());
       }
       break;
-    case 0x174:
+    case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fpassthru", 0, 1);
         return (t_fpassthru());
@@ -1406,7 +1406,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_haschildren());
       }
       break;
-    case 0x175:
+    case 0x188:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fgets", 0, 1);
         return (t_fgets());
@@ -1418,7 +1418,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_seek(a0));
       }
       break;
-    case 0x176:
+    case 0x189:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::flock", count, 2, 2, 1);
         return (t_flock(a0, ref(a1)));
@@ -1461,13 +1461,13 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_current());
       }
       break;
-    case 0x178:
+    case 0x18b:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 2) return throw_wrong_arguments("SplFileObject::fwrite", count, 2, 2, 1);
         return (t_fwrite(a0, a1));
       }
       break;
-    case 0x177:
+    case 0x18a:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::ftell", 0, 1);
         return (t_ftell());
@@ -1494,7 +1494,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
         return (t_openfile(a0, a1, a2));
       }
       break;
-    case 0x179:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("SplFileObject::fstat", 0, 1);
         return (t_fstat());
@@ -1515,7 +1515,7 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
@@ -1858,21 +1858,21 @@ Variant c_splfileobject::o_invoke_few_args(MethodIndex methodIndex, const char *
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileobject
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject
-Variant c_splfileobject::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileObject
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileObject
+Variant c_SplFileObject::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileobject
-Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileObject
+Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -1903,7 +1903,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_iswritable());
       }
       break;
-    case 0x168:
+    case 0x17b:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -1968,7 +1968,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_next());
       }
       break;
-    case 0x169:
+    case 0x17c:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -2018,7 +2018,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_key());
       }
       break;
-    case 0x16a:
+    case 0x17d:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2055,7 +2055,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         else return (t_setfileclass(a0));
       }
       break;
-    case 0x16b:
+    case 0x17e:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -2117,7 +2117,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_valid());
       }
       break;
-    case 0x16c:
+    case 0x17f:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -2174,7 +2174,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_getlinktarget());
       }
       break;
-    case 0x16d:
+    case 0x180:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2286,7 +2286,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         else return (t_getpathinfo(a0));
       }
       break;
-    case 0x16e:
+    case 0x181:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2304,7 +2304,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_setmaxlinelen(a0));
       }
       break;
-    case 0x16f:
+    case 0x182:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2346,7 +2346,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_getpath());
       }
       break;
-    case 0x170:
+    case 0x183:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2378,7 +2378,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_getinode());
       }
       break;
-    case 0x172:
+    case 0x185:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2392,7 +2392,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_fflush());
       }
       break;
-    case 0x171:
+    case 0x184:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2462,7 +2462,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_getfilename());
       }
       break;
-    case 0x173:
+    case 0x186:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2476,7 +2476,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_fgetc());
       }
       break;
-    case 0x174:
+    case 0x187:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2518,7 +2518,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_haschildren());
       }
       break;
-    case 0x175:
+    case 0x188:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2550,7 +2550,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_seek(a0));
       }
       break;
-    case 0x176:
+    case 0x189:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -2661,7 +2661,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_current());
       }
       break;
-    case 0x178:
+    case 0x18b:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         Variant a1;
@@ -2683,7 +2683,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         return (t_fwrite(a0, a1));
       }
       break;
-    case 0x177:
+    case 0x18a:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2754,7 +2754,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         else return (t_openfile(a0, a1, a2));
       }
       break;
-    case 0x179:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -2799,7 +2799,7 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 0:
@@ -3710,28 +3710,28 @@ Variant c_splfileobject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     default:
       break;
   }
-#endif
-  return c_splfileinfo::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_SplFileInfo::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_splfileobject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_SplFileObject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_splfileinfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_SplFileInfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_splfileobject = {
-  c_splfileobject::os_getInit,
-  c_splfileobject::os_get,
-  c_splfileobject::os_lval,
-  c_splfileobject::os_invoke,
-  c_splfileobject::os_constant,
+struct ObjectStaticCallbacks cw_SplFileObject = {
+  c_SplFileObject::os_getInit,
+  c_SplFileObject::os_get,
+  c_SplFileObject::os_lval,
+  c_SplFileObject::os_invoke,
+  c_SplFileObject::os_constant,
 };
-void c_splfileobject::init() {
-  c_splfileinfo::init();
+void c_SplFileObject::init() {
+  c_SplFileInfo::init();
 }
 /* SRC: classes/splfile.php line 391 */
-void c_splfileobject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss122506fb, "r")
+void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  = NAMSTR(s_sys_ss122506fb, "r")
 , Variant v_use_include_path //  = false
 , Variant v_context //  = null
 ) {
@@ -3743,27 +3743,27 @@ void c_splfileobject::t___construct(Variant v_filename, Variant v_open_mode //  
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/splfile.php line 409 */
-Variant c_splfileobject::t_current() {
+Variant c_SplFileObject::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::current);
   return x_hphp_splfileobject_current(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 421 */
-bool c_splfileobject::t_eof() {
+bool c_SplFileObject::t_eof() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::eof);
   return x_hphp_splfileobject_eof(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 433 */
-bool c_splfileobject::t_fflush() {
+bool c_SplFileObject::t_fflush() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fflush);
   return x_hphp_splfileobject_fflush(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 451 */
-String c_splfileobject::t_fgetc() {
+String c_SplFileObject::t_fgetc() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetc);
   return x_hphp_splfileobject_fgetc(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 481 */
-Variant c_splfileobject::t_fgetcsv(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
+Variant c_SplFileObject::t_fgetcsv(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
 , CVarRef v_enclosure //  = NAMSTR(s_sys_ss228ee909, "\"")
 , CVarRef v_escape //  = NAMSTR(s_sys_ss2a618761, "\\")
 ) {
@@ -3771,102 +3771,102 @@ Variant c_splfileobject::t_fgetcsv(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b
   return x_hphp_splfileobject_fgetcsv(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
 } /* function */
 /* SRC: classes/splfile.php line 496 */
-String c_splfileobject::t_fgets() {
+String c_SplFileObject::t_fgets() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgets);
   return x_hphp_splfileobject_fgets(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 516 */
-String c_splfileobject::t_fgetss(CVarRef v_allowable_tags) {
+String c_SplFileObject::t_fgetss(CVarRef v_allowable_tags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fgetss);
   return x_hphp_splfileobject_fgetss(GET_THIS(), toString(v_allowable_tags));
 } /* function */
 /* SRC: classes/splfile.php line 536 */
-bool c_splfileobject::t_flock(CVarRef v_operation, Variant v_wouldblock) {
+bool c_SplFileObject::t_flock(CVarRef v_operation, Variant v_wouldblock) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::flock);
   return x_hphp_splfileobject_flock(GET_THIS(), ref(v_wouldblock));
 } /* function */
 /* SRC: classes/splfile.php line 554 */
-int64 c_splfileobject::t_fpassthru() {
+int64 c_SplFileObject::t_fpassthru() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fpassthru);
   return x_hphp_splfileobject_fpassthru(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 578 */
-Variant c_splfileobject::t_fscanf(CVarRef v_format) {
+Variant c_SplFileObject::t_fscanf(CVarRef v_format) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fscanf);
   return invoke("hphp_splfileobject_fscanf", Array(ArrayInit(1, true).setRef(toInt64(GET_THIS())).create()), 0x6DB71D850799D76ELL);
 } /* function */
 /* SRC: classes/splfile.php line 604 */
-int64 c_splfileobject::t_fseek(CVarRef v_offset, CVarRef v_whence) {
+int64 c_SplFileObject::t_fseek(CVarRef v_offset, CVarRef v_whence) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fseek);
   return x_hphp_splfileobject_fseek(GET_THIS(), toInt64(v_offset), toInt64(v_whence));
 } /* function */
 /* SRC: classes/splfile.php line 618 */
-Variant c_splfileobject::t_fstat() {
+Variant c_SplFileObject::t_fstat() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fstat);
   return x_hphp_splfileobject_fstat(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 632 */
-int64 c_splfileobject::t_ftell() {
+int64 c_SplFileObject::t_ftell() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::ftell);
   return x_hphp_splfileobject_ftell(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 652 */
-bool c_splfileobject::t_ftruncate(CVarRef v_size) {
+bool c_SplFileObject::t_ftruncate(CVarRef v_size) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::ftruncate);
   return x_hphp_splfileobject_ftruncate(GET_THIS(), toInt64(v_size));
 } /* function */
 /* SRC: classes/splfile.php line 670 */
-int64 c_splfileobject::t_fwrite(CVarRef v_str, CVarRef v_length) {
+int64 c_SplFileObject::t_fwrite(CVarRef v_str, CVarRef v_length) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fwrite);
   return x_hphp_splfileobject_fwrite(GET_THIS(), toString(v_str), toInt64(v_length));
 } /* function */
 /* SRC: classes/splfile.php line 682 */
-Variant c_splfileobject::t_getchildren() {
+Variant c_SplFileObject::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getChildren);
   return null;
 } /* function */
 /* SRC: classes/splfile.php line 696 */
-Variant c_splfileobject::t_getcsvcontrol() {
+Variant c_SplFileObject::t_getcsvcontrol() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getCsvControl);
   return x_hphp_splfileobject_getcvscontrol(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 708 */
-int64 c_splfileobject::t_getflags() {
+int64 c_SplFileObject::t_getflags() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getFlags);
   return x_hphp_splfileobject_getflags(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 722 */
-int64 c_splfileobject::t_getmaxlinelen() {
+int64 c_SplFileObject::t_getmaxlinelen() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getMaxLineLen);
   return x_hphp_splfileobject_getmaxlinelen(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 735 */
-bool c_splfileobject::t_haschildren() {
+bool c_SplFileObject::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::hasChildren);
   return false;
 } /* function */
 /* SRC: classes/splfile.php line 751 */
-int64 c_splfileobject::t_key() {
+int64 c_SplFileObject::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::key);
   return x_hphp_splfileobject_key(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 763 */
-Variant c_splfileobject::t_next() {
+Variant c_SplFileObject::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::next);
   return (x_hphp_splfileobject_next(GET_THIS()), null);
 } /* function */
 /* SRC: classes/splfile.php line 775 */
-Variant c_splfileobject::t_rewind() {
+Variant c_SplFileObject::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::rewind);
   return (x_hphp_splfileobject_rewind(GET_THIS()), null);
 } /* function */
 /* SRC: classes/splfile.php line 789 */
-Variant c_splfileobject::t_seek(CVarRef v_line_pos) {
+Variant c_SplFileObject::t_seek(CVarRef v_line_pos) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::seek);
   return (x_hphp_splfileobject_seek(GET_THIS(), toInt64(v_line_pos)), null);
 } /* function */
 /* SRC: classes/splfile.php line 806 */
-Variant c_splfileobject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
+Variant c_SplFileObject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
 , CVarRef v_enclosure //  = NAMSTR(s_sys_ss228ee909, "\"")
 , CVarRef v_escape //  = NAMSTR(s_sys_ss2a618761, "\\")
 ) {
@@ -3874,119 +3874,119 @@ Variant c_splfileobject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMSTR(s_sys_
   return (x_hphp_splfileobject_setcsvcontrol(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape)), null);
 } /* function */
 /* SRC: classes/splfile.php line 823 */
-Variant c_splfileobject::t_setflags(CVarRef v_flags) {
+Variant c_SplFileObject::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setFlags);
   return (x_hphp_splfileobject_setflags(GET_THIS(), toInt64(v_flags)), null);
 } /* function */
 /* SRC: classes/splfile.php line 838 */
-Variant c_splfileobject::t_setmaxlinelen(CVarRef v_max_len) {
+Variant c_SplFileObject::t_setmaxlinelen(CVarRef v_max_len) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setMaxLineLen);
   return (x_hphp_splfileobject_setmaxlinelen(GET_THIS(), toInt64(v_max_len)), null);
 } /* function */
 /* SRC: classes/splfile.php line 850 */
-bool c_splfileobject::t_valid() {
+bool c_SplFileObject::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::valid);
   return x_hphp_splfileobject_valid(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 11 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileinfo
-Variant c_splfileinfo::os_getInit(CStrRef s) {
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileInfo
+Variant c_SplFileInfo::os_getInit(CStrRef s) {
   return c_ObjectData::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileinfo
-Variant c_splfileinfo::os_get(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileInfo
+Variant c_SplFileInfo::os_get(CStrRef s) {
   return c_ObjectData::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileinfo
-Variant &c_splfileinfo::os_lval(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo
+Variant &c_SplFileInfo::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo
-void c_splfileinfo::o_getArray(Array &props) const {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileInfo
+void c_SplFileInfo::o_getArray(Array &props) const {
   c_ObjectData::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo
-void c_splfileinfo::o_setArray(CArrRef props) {
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo
+void c_SplFileInfo::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_get_splfileinfo
-Variant c_splfileinfo::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_SplFileInfo
+Variant c_SplFileInfo::o_get(CStrRef prop, bool error, CStrRef context) {
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo
-Variant c_splfileinfo::o_getPublic(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileInfo
+Variant c_SplFileInfo::o_getPublic(CStrRef s, bool error) {
   return c_ObjectData::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
-Variant c_splfileinfo::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileInfo
+Variant c_SplFileInfo::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_splfileinfo
-Variant * c_splfileinfo::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo
+Variant * c_SplFileInfo::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileinfo
-Variant * c_splfileinfo::o_realPropPublic(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileInfo
+Variant * c_SplFileInfo::o_realPropPublic(CStrRef s, int flags) const {
   return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileinfo
-Variant * c_splfileinfo::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo
+Variant * c_SplFileInfo::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_set_splfileinfo
-Variant c_splfileinfo::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_SplFileInfo
+Variant c_SplFileInfo::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo
-Variant c_splfileinfo::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileInfo
+Variant c_SplFileInfo::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo
-Variant c_splfileinfo::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileInfo
+Variant c_SplFileInfo::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
-Variant& c_splfileinfo::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_SplFileInfo
+Variant& c_SplFileInfo::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileinfo
-Variant& c_splfileinfo::o_lvalPublic(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileInfo
+Variant& c_SplFileInfo::o_lvalPublic(CStrRef s) {
   return c_ObjectData::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileinfo
-Variant& c_splfileinfo::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileInfo
+Variant& c_SplFileInfo::o_lvalPrivate(CStrRef s) {
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileinfo
-Variant c_splfileinfo::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
+Variant c_SplFileInfo::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_splfileinfo
-IMPLEMENT_CLASS(splfileinfo)
-c_splfileinfo *c_splfileinfo::create(Variant v_file_name) {
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
+IMPLEMENT_CLASS(SplFileInfo)
+c_SplFileInfo *c_SplFileInfo::create(Variant v_file_name) {
   CountableHelper h(this);
   init();
   t___construct(v_file_name);
   return this;
 }
-ObjectData *c_splfileinfo::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_SplFileInfo::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -4001,7 +4001,7 @@ ObjectData *c_splfileinfo::dynCreate(CArrRef params, bool construct /* = true */
   }
   return this;
 }
-void c_splfileinfo::dynConstruct(CArrRef params) {
+void c_SplFileInfo::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("SplFileInfo::__construct", count, 1, 1, 2);
   {
@@ -4011,7 +4011,7 @@ void c_splfileinfo::dynConstruct(CArrRef params) {
     (t___construct(arg0));
   }
 }
-void c_splfileinfo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_SplFileInfo::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -4027,18 +4027,18 @@ void c_splfileinfo::dynConstructFromEval(Eval::VariableEnvironment &env, const E
   }
   (t___construct(a0), null);
 }
-ObjectData *c_splfileinfo::cloneImpl() {
-  c_splfileinfo *obj = NEW(c_splfileinfo)();
+ObjectData *c_SplFileInfo::cloneImpl() {
+  c_SplFileInfo *obj = NEW(c_SplFileInfo)();
   cloneSet(obj);
   return obj;
 }
-void c_splfileinfo::cloneSet(c_splfileinfo *clone) {
+void c_SplFileInfo::cloneSet(c_SplFileInfo *clone) {
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
-Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileInfo
+Variant c_SplFileInfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4256,7 +4256,7 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
@@ -4467,13 +4467,13 @@ Variant c_splfileinfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
-Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileInfo
+Variant c_SplFileInfo::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -4654,7 +4654,7 @@ Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s,
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
@@ -4828,21 +4828,21 @@ Variant c_splfileinfo::o_invoke_few_args(MethodIndex methodIndex, const char *s,
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_splfileinfo
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileinfo
-Variant c_splfileinfo::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_SplFileInfo
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileInfo
+Variant c_SplFileInfo::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_splfileinfo
-Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileInfo
+Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -5284,7 +5284,7 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 5:
@@ -5718,157 +5718,157 @@ Variant c_splfileinfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_splfileinfo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_SplFileInfo::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_splfileinfo = {
-  c_splfileinfo::os_getInit,
-  c_splfileinfo::os_get,
-  c_splfileinfo::os_lval,
-  c_splfileinfo::os_invoke,
-  c_splfileinfo::os_constant,
+struct ObjectStaticCallbacks cw_SplFileInfo = {
+  c_SplFileInfo::os_getInit,
+  c_SplFileInfo::os_get,
+  c_SplFileInfo::os_lval,
+  c_SplFileInfo::os_invoke,
+  c_SplFileInfo::os_constant,
 };
-void c_splfileinfo::init() {
+void c_SplFileInfo::init() {
 }
 /* SRC: classes/splfile.php line 13 */
-void c_splfileinfo::t___construct(Variant v_file_name) {
+void c_SplFileInfo::t___construct(Variant v_file_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::__construct);
   bool oldInCtor = gasInCtor(true);
   x_hphp_splfileinfo___construct(GET_THIS(), toString(v_file_name));
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/splfile.php line 26 */
-String c_splfileinfo::t_getpath() {
+String c_SplFileInfo::t_getpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPath);
   return x_hphp_splfileinfo_getpath(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 38 */
-String c_splfileinfo::t_getfilename() {
+String c_SplFileInfo::t_getfilename() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getFilename);
   return x_hphp_splfileinfo_getfilename(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 52 */
-Object c_splfileinfo::t_getfileinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
+Object c_SplFileInfo::t_getfileinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getFileInfo);
   return x_hphp_splfileinfo_getfileinfo(GET_THIS(), toString(v_class_name));
 } /* function */
 /* SRC: classes/splfile.php line 67 */
-String c_splfileinfo::t_getbasename(CVarRef v_suffix //  = NAMSTR(s_sys_ss00000000, "")
+String c_SplFileInfo::t_getbasename(CVarRef v_suffix //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getBasename);
   return x_hphp_splfileinfo_getbasename(GET_THIS(), toString(v_suffix));
 } /* function */
 /* SRC: classes/splfile.php line 79 */
-String c_splfileinfo::t_getpathname() {
+String c_SplFileInfo::t_getpathname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPathname);
   return x_hphp_splfileinfo_getpathname(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 94 */
-Object c_splfileinfo::t_getpathinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
+Object c_SplFileInfo::t_getpathinfo(CVarRef v_class_name //  = NAMSTR(s_sys_ss00000000, "")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPathInfo);
   return x_hphp_splfileinfo_getpathinfo(GET_THIS(), toString(v_class_name));
 } /* function */
 /* SRC: classes/splfile.php line 106 */
-int64 c_splfileinfo::t_getperms() {
+int64 c_SplFileInfo::t_getperms() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getPerms);
   return x_hphp_splfileinfo_getperms(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 118 */
-int64 c_splfileinfo::t_getinode() {
+int64 c_SplFileInfo::t_getinode() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getInode);
   return x_hphp_splfileinfo_getinode(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 130 */
-int64 c_splfileinfo::t_getsize() {
+int64 c_SplFileInfo::t_getsize() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getSize);
   return x_hphp_splfileinfo_getsize(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 142 */
-int64 c_splfileinfo::t_getowner() {
+int64 c_SplFileInfo::t_getowner() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getOwner);
   return x_hphp_splfileinfo_getowner(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 154 */
-int64 c_splfileinfo::t_getgroup() {
+int64 c_SplFileInfo::t_getgroup() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getGroup);
   return x_hphp_splfileinfo_getgroup(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 166 */
-int64 c_splfileinfo::t_getatime() {
+int64 c_SplFileInfo::t_getatime() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getATime);
   return x_hphp_splfileinfo_getatime(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 180 */
-int64 c_splfileinfo::t_getmtime() {
+int64 c_SplFileInfo::t_getmtime() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getMTime);
   return x_hphp_splfileinfo_getmtime(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 193 */
-int64 c_splfileinfo::t_getctime() {
+int64 c_SplFileInfo::t_getctime() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getCTime);
   return x_hphp_splfileinfo_getctime(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 206 */
-String c_splfileinfo::t_gettype() {
+String c_SplFileInfo::t_gettype() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getType);
   return x_hphp_splfileinfo_gettype(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 218 */
-bool c_splfileinfo::t_iswritable() {
+bool c_SplFileInfo::t_iswritable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isWritable);
   return x_hphp_splfileinfo_iswritable(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 230 */
-bool c_splfileinfo::t_isreadable() {
+bool c_SplFileInfo::t_isreadable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isReadable);
   return x_hphp_splfileinfo_isreadable(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 242 */
-bool c_splfileinfo::t_isexecutable() {
+bool c_SplFileInfo::t_isexecutable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isExecutable);
   return x_hphp_splfileinfo_isexecutable(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 256 */
-bool c_splfileinfo::t_isfile() {
+bool c_SplFileInfo::t_isfile() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isFile);
   return x_hphp_splfileinfo_isfile(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 268 */
-bool c_splfileinfo::t_isdir() {
+bool c_SplFileInfo::t_isdir() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isDir);
   return x_hphp_splfileinfo_isdir(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 281 */
-bool c_splfileinfo::t_islink() {
+bool c_SplFileInfo::t_islink() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::isLink);
   return x_hphp_splfileinfo_islink(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 296 */
-String c_splfileinfo::t_getlinktarget() {
+String c_SplFileInfo::t_getlinktarget() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getLinkTarget);
   return x_hphp_splfileinfo_getlinktarget(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 309 */
-Variant c_splfileinfo::t_getrealpath() {
+Variant c_SplFileInfo::t_getrealpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::getRealPath);
   return x_hphp_splfileinfo_getrealpath(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 313 */
-String c_splfileinfo::t___tostring() {
+String c_SplFileInfo::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::__toString);
   return x_hphp_splfileinfo___tostring(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 337 */
-Object c_splfileinfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss122506fb, "r")
+Object c_SplFileInfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss122506fb, "r")
 , CVarRef v_use_include_path //  = false
 , CVarRef v_context //  = null_variant
 ) {
@@ -5876,22 +5876,22 @@ Object c_splfileinfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss122506fb, "
   return x_hphp_splfileinfo_openfile(GET_THIS(), toString(v_mode), toBoolean(v_use_include_path), v_context);
 } /* function */
 /* SRC: classes/splfile.php line 355 */
-Variant c_splfileinfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5da6122e, "SplFileObject")
+Variant c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5da6122e, "SplFileObject")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setFileClass);
   return (x_hphp_splfileinfo_setfileclass(GET_THIS(), toString(v_class_name)), null);
 } /* function */
 /* SRC: classes/splfile.php line 371 */
-Variant c_splfileinfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss016dc059, "SplFileInfo")
+Variant c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss016dc059, "SplFileInfo")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setInfoClass);
   return (x_hphp_splfileinfo_setinfoclass(GET_THIS(), toString(v_class_name)), null);
 } /* function */
-Object co_splfileobject(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_splfileobject)())->dynCreate(params, init));
+Object co_SplFileObject(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_SplFileObject)())->dynCreate(params, init));
 }
-Object co_splfileinfo(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_splfileinfo)())->dynCreate(params, init));
+Object co_SplFileInfo(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_SplFileInfo)())->dynCreate(params, init));
 }
 Variant pm_php$classes$splfile_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/splfile.php, pm_php$classes$splfile_php);

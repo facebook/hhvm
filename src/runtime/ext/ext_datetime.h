@@ -27,30 +27,30 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTime
 
-extern const StaticString q_datetime_ATOM;
-extern const StaticString q_datetime_COOKIE;
-extern const StaticString q_datetime_ISO8601;
-extern const StaticString q_datetime_RFC822;
-extern const StaticString q_datetime_RFC850;
-extern const StaticString q_datetime_RFC1036;
-extern const StaticString q_datetime_RFC1123;
-extern const StaticString q_datetime_RFC2822;
-extern const StaticString q_datetime_RFC3339;
-extern const StaticString q_datetime_RSS;
-extern const StaticString q_datetime_W3C;
+extern const StaticString q_DateTime_ATOM;
+extern const StaticString q_DateTime_COOKIE;
+extern const StaticString q_DateTime_ISO8601;
+extern const StaticString q_DateTime_RFC822;
+extern const StaticString q_DateTime_RFC850;
+extern const StaticString q_DateTime_RFC1036;
+extern const StaticString q_DateTime_RFC1123;
+extern const StaticString q_DateTime_RFC2822;
+extern const StaticString q_DateTime_RFC3339;
+extern const StaticString q_DateTime_RSS;
+extern const StaticString q_DateTime_W3C;
 
-FORWARD_DECLARE_CLASS(datetime);
-class c_datetime : public ExtObjectData {
+FORWARD_DECLARE_CLASS(DateTime);
+class c_DateTime : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(datetime)
-  END_CLASS_MAP(datetime)
-  DECLARE_CLASS(datetime, DateTime, ObjectData)
+  BEGIN_CLASS_MAP(DateTime)
+  END_CLASS_MAP(DateTime)
+  DECLARE_CLASS(DateTime, DateTime, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_datetime();
-  public: ~c_datetime();
+  public: c_DateTime();
+  public: ~c_DateTime();
   public: void t___construct(CStrRef time = "now",
                              CObjRef timezone = null_object);
   public: String t_format(CStrRef format);
@@ -64,24 +64,24 @@ class c_datetime : public ExtObjectData {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_datetime *create(String time = "now",
+  public: c_DateTime *create(String time = "now",
                              Object timezone = null_object);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
-  // Helper for DateTime -> c_datetime conversion
+  // Helper for DateTime -> c_DateTime conversion
   public: static Object wrap(SmartObject<DateTime> dt) {
-    c_datetime *cdt = NEW(c_datetime)();
+    c_DateTime *cdt = NEW(c_DateTime)();
     Object ret(cdt);
     cdt->m_dt = dt;
     return ret;
   }
 
-  // Helper for c_datetime -> DateTime conversion
+  // Helper for c_DateTime -> DateTime conversion
   public: static SmartObject<DateTime> unwrap(CObjRef datetime) {
-    SmartObject<c_datetime> cdt = datetime.getTyped<c_datetime>(true);
+    SmartObject<c_DateTime> cdt = datetime.getTyped<c_DateTime>(true);
     if (cdt.get() == NULL)
       return SmartObject<DateTime>();
     return cdt->m_dt;
@@ -94,33 +94,33 @@ class c_datetime : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class DateTimeZone
 
-extern const int64 q_datetimezone_AFRICA;
-extern const int64 q_datetimezone_AMERICA;
-extern const int64 q_datetimezone_ANTARCTICA;
-extern const int64 q_datetimezone_ARCTIC;
-extern const int64 q_datetimezone_ASIA;
-extern const int64 q_datetimezone_ATLANTIC;
-extern const int64 q_datetimezone_AUSTRALIA;
-extern const int64 q_datetimezone_EUROPE;
-extern const int64 q_datetimezone_INDIAN;
-extern const int64 q_datetimezone_PACIFIC;
-extern const int64 q_datetimezone_UTC;
-extern const int64 q_datetimezone_ALL;
-extern const int64 q_datetimezone_ALL_WITH_BC;
-extern const int64 q_datetimezone_PER_COUNTRY;
+extern const int64 q_DateTimeZone_AFRICA;
+extern const int64 q_DateTimeZone_AMERICA;
+extern const int64 q_DateTimeZone_ANTARCTICA;
+extern const int64 q_DateTimeZone_ARCTIC;
+extern const int64 q_DateTimeZone_ASIA;
+extern const int64 q_DateTimeZone_ATLANTIC;
+extern const int64 q_DateTimeZone_AUSTRALIA;
+extern const int64 q_DateTimeZone_EUROPE;
+extern const int64 q_DateTimeZone_INDIAN;
+extern const int64 q_DateTimeZone_PACIFIC;
+extern const int64 q_DateTimeZone_UTC;
+extern const int64 q_DateTimeZone_ALL;
+extern const int64 q_DateTimeZone_ALL_WITH_BC;
+extern const int64 q_DateTimeZone_PER_COUNTRY;
 
-FORWARD_DECLARE_CLASS(datetimezone);
-class c_datetimezone : public ExtObjectData {
+FORWARD_DECLARE_CLASS(DateTimeZone);
+class c_DateTimeZone : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(datetimezone)
-  END_CLASS_MAP(datetimezone)
-  DECLARE_CLASS(datetimezone, DateTimeZone, ObjectData)
+  BEGIN_CLASS_MAP(DateTimeZone)
+  END_CLASS_MAP(DateTimeZone)
+  DECLARE_CLASS(DateTimeZone, DateTimeZone, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_datetimezone();
-  public: ~c_datetimezone();
+  public: c_DateTimeZone();
+  public: ~c_DateTimeZone();
   public: void t___construct(CStrRef timezone);
   public: String t_getname();
   public: int64 t_getoffset(CObjRef datetime);
@@ -136,23 +136,23 @@ class c_datetimezone : public ExtObjectData {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_datetimezone *create(String timezone);
+  public: c_DateTimeZone *create(String timezone);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
-  // Helper for TimeZone -> c_datetimezone conversion
+  // Helper for TimeZone -> c_DateTimeZone conversion
   public: static Object wrap(SmartObject<TimeZone> tz) {
-    c_datetimezone *ctz = NEW(c_datetimezone)();
+    c_DateTimeZone *ctz = NEW(c_DateTimeZone)();
     Object ret(ctz);
     ctz->m_tz = tz;
     return ret;
   }
 
-  // Helper for c_datetimezone -> TimeZone conversion
+  // Helper for c_DateTimeZone -> TimeZone conversion
   public: static SmartObject<TimeZone> unwrap(CObjRef timezone) {
-    SmartObject<c_datetimezone> ctz = timezone.getTyped<c_datetimezone>(true);
+    SmartObject<c_DateTimeZone> ctz = timezone.getTyped<c_DateTimeZone>(true);
     if (ctz.get() == NULL)
       return SmartObject<TimeZone>();
     return ctz->m_tz;
@@ -287,11 +287,11 @@ inline bool f_date_default_timezone_set(CStrRef name) {
 }
 
 inline Array f_timezone_identifiers_list() {
-  return c_datetimezone::t_listidentifiers();
+  return c_DateTimeZone::t_listidentifiers();
 }
 
 inline Array f_timezone_abbreviations_list() {
-  return c_datetimezone::t_listabbreviations();
+  return c_DateTimeZone::t_listabbreviations();
 }
 
 inline Variant f_timezone_name_from_abbr(CStrRef abbr, int gmtoffset = -1,
@@ -304,22 +304,22 @@ inline Variant f_timezone_name_from_abbr(CStrRef abbr, int gmtoffset = -1,
 }
 
 inline Object f_timezone_open(CStrRef timezone) {
-  c_datetimezone *ctz = NEW(c_datetimezone)();
+  c_DateTimeZone *ctz = NEW(c_DateTimeZone)();
   Object ret(ctz);
   ctz->t___construct(timezone);
   return ret;
 }
 
 inline String f_timezone_name_get(CObjRef object) {
-  return object.getTyped<c_datetimezone>()->t_getname();
+  return object.getTyped<c_DateTimeZone>()->t_getname();
 }
 
 inline int f_timezone_offset_get(CObjRef object, CObjRef dt) {
-  return object.getTyped<c_datetimezone>()->t_getoffset(dt);
+  return object.getTyped<c_DateTimeZone>()->t_getoffset(dt);
 }
 
 inline Array f_timezone_transitions_get(CObjRef object) {
-  return object.getTyped<c_datetimezone>()->t_gettransitions();
+  return object.getTyped<c_DateTimeZone>()->t_gettransitions();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -331,31 +331,31 @@ inline bool f_checkdate(int month, int day, int year) {
 
 inline Object f_date_create(CStrRef time = null_string,
                             CObjRef timezone = null_object) {
-  c_datetime *cdt = NEW(c_datetime)();
+  c_DateTime *cdt = NEW(c_DateTime)();
   Object ret(cdt);
   cdt->t___construct(time, timezone);
   return ret;
 }
 
 inline void f_date_date_set(CObjRef object, int year, int month, int day) {
-  object.getTyped<c_datetime>()->t_setdate(year, month, day);
+  object.getTyped<c_DateTime>()->t_setdate(year, month, day);
 }
 
 inline void f_date_isodate_set(CObjRef object, int year, int week,
                                int day = 1) {
-  object.getTyped<c_datetime>()->t_setisodate(year, week, day);
+  object.getTyped<c_DateTime>()->t_setisodate(year, week, day);
 }
 
 inline String f_date_format(CObjRef object, CStrRef format) {
-  return object.getTyped<c_datetime>()->t_format(format);
+  return object.getTyped<c_DateTime>()->t_format(format);
 }
 
 inline void f_date_modify(CObjRef object, CStrRef modify) {
-  object.getTyped<c_datetime>()->t_modify(modify);
+  object.getTyped<c_DateTime>()->t_modify(modify);
 }
 
 inline int f_date_offset_get(CObjRef object) {
-  return object.getTyped<c_datetime>()->t_getoffset();
+  return object.getTyped<c_DateTime>()->t_getoffset();
 }
 
 inline Variant f_date_parse(CStrRef date) {
@@ -364,15 +364,15 @@ inline Variant f_date_parse(CStrRef date) {
 
 inline void f_date_time_set(CObjRef object, int hour, int minute,
                             int second = 0) {
-  object.getTyped<c_datetime>()->t_settime(hour, minute, second);
+  object.getTyped<c_DateTime>()->t_settime(hour, minute, second);
 }
 
 inline Variant f_date_timezone_get(CObjRef object) {
-  return object.getTyped<c_datetime>()->t_gettimezone();
+  return object.getTyped<c_DateTime>()->t_gettimezone();
 }
 
 inline void f_date_timezone_set(CObjRef object, CObjRef timezone) {
-  object.getTyped<c_datetime>()->t_settimezone(timezone);
+  object.getTyped<c_DateTime>()->t_settimezone(timezone);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

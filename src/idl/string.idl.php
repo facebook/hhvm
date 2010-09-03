@@ -679,7 +679,7 @@ DefineFunction(
         'name'   => "length",
         'type'   => Int32,
         'value'  => "0x7FFFFFFF",
-        'desc'   => "If length is given and is positive, the string returned will contain at most length characters beginning from start (depending on the length of string).\n\nIf length is given and is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes a position beyond this truncation, an empty string will be returned.\n\nIf length is given and is 0, FALSE or NULL an empty string will be returned.\n\nIf length is omitted, the substring starting from start() until the end of the string will be returned. Example #2 Using a negative length",
+        'desc'   => "If length is given and is positive, the string returned will contain at most length characters beginning from start (depending on the length of string).\n\nIf length is given and is negative, then that many characters will be omitted from the end of string (after the start position has been calculated when a start is negative). If start denotes a position beyond this truncation, an empty string will be returned.\n\nIf length is given and is 0, FALSE or NULL an empty string will be returned.\n\nIf length is omitted, the substring starting from start until the end of the string will be returned. Example #2 Using a negative length",
       ),
     ),
   ));

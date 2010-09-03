@@ -23,7 +23,7 @@ IMPLEMENT_DEFAULT_EXTENSION(xmlwriter);
 // functions are just wrappers of object methods
 
 Variant f_xmlwriter_open_memory() {
-  c_xmlwriter *x = NEW(c_xmlwriter)();
+  c_XMLWriter *x = NEW(c_XMLWriter)();
   Object ret(x);
   if (x->t_openmemory()) {
     return ret;
@@ -32,7 +32,7 @@ Variant f_xmlwriter_open_memory() {
 }
 
 Object f_xmlwriter_open_uri(CStrRef uri) {
-  c_xmlwriter *x = NEW(c_xmlwriter)();
+  c_XMLWriter *x = NEW(c_XMLWriter)();
   Object ret(x);
   if (x->t_openuri(uri)) {
     return ret;
@@ -41,12 +41,12 @@ Object f_xmlwriter_open_uri(CStrRef uri) {
 }
 
 bool f_xmlwriter_set_indent_string(CObjRef xmlwriter, CStrRef indentstring) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_setindentstring(indentstring);
 }
 
 bool f_xmlwriter_set_indent(CObjRef xmlwriter, bool indent) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_setindent(indent);
 }
 
@@ -54,137 +54,137 @@ bool f_xmlwriter_start_document(CObjRef xmlwriter,
                                 CStrRef version /* = "1.0" */,
                                 CStrRef encoding /* = null_string */,
                                 CStrRef standalone /* = null_string */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdocument(version, encoding, standalone);
 }
 
 bool f_xmlwriter_start_element(CObjRef xmlwriter, CStrRef name) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startelement(name);
 }
 
 bool f_xmlwriter_start_element_ns(CObjRef xmlwriter, CStrRef prefix,
                                   CStrRef name, CStrRef uri) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startelementns(prefix, name, uri);
 }
 
 bool f_xmlwriter_write_element_ns(CObjRef xmlwriter, CStrRef prefix,
                                   CStrRef name, CStrRef uri,
                                   CStrRef content /* = null_string */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeelementns(prefix, name, uri, content);
 }
 
 bool f_xmlwriter_write_element(CObjRef xmlwriter, CStrRef name,
                                CStrRef content /* = null_string */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeelement(name, content);
 }
 
 bool f_xmlwriter_end_element(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_endelement();
 }
 
 bool f_xmlwriter_full_end_element(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_fullendelement();
 }
 
 bool f_xmlwriter_start_attribute_ns(CObjRef xmlwriter, CStrRef prefix,
                                     CStrRef name, CStrRef uri) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startattributens(prefix, name, uri);
 }
 
 bool f_xmlwriter_start_attribute(CObjRef xmlwriter, CStrRef name) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startattribute(name);
 }
 
 bool f_xmlwriter_write_attribute_ns(CObjRef xmlwriter, CStrRef prefix,
                                     CStrRef name, CStrRef uri,
                                     CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeattributens(prefix, name, uri, content);
 }
 
 bool f_xmlwriter_write_attribute(CObjRef xmlwriter, CStrRef name,
                                  CStrRef value) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeattribute(name, value);
 }
 
 bool f_xmlwriter_end_attribute(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_endattribute();
 }
 
 bool f_xmlwriter_start_cdata(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startcdata();
 }
 
 bool f_xmlwriter_write_cdata(CObjRef xmlwriter, CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writecdata(content);
 }
 
 bool f_xmlwriter_end_cdata(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_endcdata();
 }
 
 bool f_xmlwriter_start_comment(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startcomment();
 }
 
 bool f_xmlwriter_write_comment(CObjRef xmlwriter, CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writecomment(content);
 }
 
 bool f_xmlwriter_end_comment(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_endcomment();
 }
 
 bool f_xmlwriter_end_document(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddocument();
 }
 
 bool f_xmlwriter_start_pi(CObjRef xmlwriter, CStrRef target) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startpi(target);
 }
 
 bool f_xmlwriter_write_pi(CObjRef xmlwriter, CStrRef target, CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writepi(target, content);
 }
 
 bool f_xmlwriter_end_pi(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_endpi();
 }
 
 bool f_xmlwriter_text(CObjRef xmlwriter, CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_text(content);
 }
 
 bool f_xmlwriter_write_raw(CObjRef xmlwriter, CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writeraw(content);
 }
 
 bool f_xmlwriter_start_dtd(CObjRef xmlwriter, CStrRef qualifiedname,
                            CStrRef publicid /* = null_string */,
                            CStrRef systemid /* = null_string */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtd(qualifiedname, publicid, systemid);
 }
 
@@ -192,45 +192,45 @@ bool f_xmlwriter_write_dtd(CObjRef xmlwriter, CStrRef name,
                            CStrRef publicid /* = null_string */,
                            CStrRef systemid /* = null_string */,
                            CStrRef subset /* = null_string */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writedtd(name, publicid, systemid, subset);
 }
 
 bool f_xmlwriter_start_dtd_element(CObjRef xmlwriter, CStrRef qualifiedname) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtdelement(qualifiedname);
 }
 
 bool f_xmlwriter_write_dtd_element(CObjRef xmlwriter, CStrRef name,
                                    CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writedtdelement(name, content);
 }
 
 bool f_xmlwriter_end_dtd_element(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtdelement();
 }
 
 bool f_xmlwriter_start_dtd_attlist(CObjRef xmlwriter, CStrRef name) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtdattlist(name);
 }
 
 bool f_xmlwriter_write_dtd_attlist(CObjRef xmlwriter, CStrRef name,
                                    CStrRef content) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writedtdattlist(name, content);
 }
 
 bool f_xmlwriter_end_dtd_attlist(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtdattlist();
 }
 
 bool f_xmlwriter_start_dtd_entity(CObjRef xmlwriter, CStrRef name,
                                   bool isparam) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_startdtdentity(name, isparam);
 }
 
@@ -239,27 +239,27 @@ bool f_xmlwriter_write_dtd_entity(CObjRef xmlwriter, CStrRef name,
                                   CStrRef publicid /* = null_string */,
                                   CStrRef systemid /* = null_string */,
                                   CStrRef ndataid /* = null_string */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_writedtdentity(name, content);
 }
 
 bool f_xmlwriter_end_dtd_entity(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtdentity();
 }
 
 bool f_xmlwriter_end_dtd(CObjRef xmlwriter) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_enddtd();
 }
 
 Variant f_xmlwriter_flush(CObjRef xmlwriter, bool empty /* = true */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_flush(empty);
 }
 
 String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush /* = true */) {
-  return xmlwriter.getTyped<c_xmlwriter>()->
+  return xmlwriter.getTyped<c_XMLWriter>()->
     t_outputmemory(flush);
 }
 
@@ -267,7 +267,7 @@ String f_xmlwriter_output_memory(CObjRef xmlwriter, bool flush /* = true */) {
 // helpers
 
 static int write_file(void *context, const char *buffer, int len) {
-  return ((c_xmlwriter*)context)->m_uri->writeImpl(buffer, len);
+  return ((c_XMLWriter*)context)->m_uri->writeImpl(buffer, len);
 }
 
 static int close_file(void *context) {
@@ -280,10 +280,10 @@ static xmlChar *xmls(CStrRef s) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_xmlwriter::c_xmlwriter() : m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
+c_XMLWriter::c_XMLWriter() : m_ptr(NULL), m_output(NULL), m_uri_output(NULL) {
 }
 
-c_xmlwriter::~c_xmlwriter() {
+c_XMLWriter::~c_XMLWriter() {
   if (m_ptr) {
     xmlFreeTextWriter(m_ptr);
   }
@@ -295,11 +295,11 @@ c_xmlwriter::~c_xmlwriter() {
   }
 }
 
-void c_xmlwriter::t___construct() {
+void c_XMLWriter::t___construct() {
 }
 
-bool c_xmlwriter::t_openmemory() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::openmemory);
+bool c_XMLWriter::t_openmemory() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::openmemory);
   m_output = xmlBufferCreate();
   if (m_output == NULL) {
     raise_warning("Unable to create output buffer");
@@ -308,8 +308,8 @@ bool c_xmlwriter::t_openmemory() {
   return m_ptr = xmlNewTextWriterMemory(m_output, 0);
 }
 
-bool c_xmlwriter::t_openuri(CStrRef uri) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::openuri);
+bool c_XMLWriter::t_openuri(CStrRef uri) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::openuri);
   Variant file = File::Open(uri, "wb");
   if (same(file, false)) {
     return false;
@@ -325,8 +325,8 @@ bool c_xmlwriter::t_openuri(CStrRef uri) {
   return true;
 }
 
-bool c_xmlwriter::t_setindentstring(CStrRef indentstring) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::setindentstring);
+bool c_XMLWriter::t_setindentstring(CStrRef indentstring) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::setindentstring);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterSetIndentString(m_ptr, (xmlChar*)indentstring.data());
@@ -334,8 +334,8 @@ bool c_xmlwriter::t_setindentstring(CStrRef indentstring) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_setindent(bool indent) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::setindent);
+bool c_XMLWriter::t_setindent(bool indent) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::setindent);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterSetIndent(m_ptr, indent);
@@ -343,10 +343,10 @@ bool c_xmlwriter::t_setindent(bool indent) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startdocument(CStrRef version /* = "1.0" */,
+bool c_XMLWriter::t_startdocument(CStrRef version /* = "1.0" */,
                                   CStrRef encoding /* = null_string */,
                                   CStrRef standalone /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startdocument);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startdocument);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterStartDocument(m_ptr, (const char *)xmls(version),
@@ -356,8 +356,8 @@ bool c_xmlwriter::t_startdocument(CStrRef version /* = "1.0" */,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startelement(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startelement);
+bool c_XMLWriter::t_startelement(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startelement);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -369,8 +369,8 @@ bool c_xmlwriter::t_startelement(CStrRef name) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startelementns(CStrRef prefix, CStrRef name, CStrRef uri) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startelementns);
+bool c_XMLWriter::t_startelementns(CStrRef prefix, CStrRef name, CStrRef uri) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startelementns);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -384,9 +384,9 @@ bool c_xmlwriter::t_startelementns(CStrRef prefix, CStrRef name, CStrRef uri) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writeelementns(CStrRef prefix, CStrRef name, CStrRef uri,
+bool c_XMLWriter::t_writeelementns(CStrRef prefix, CStrRef name, CStrRef uri,
                                    CStrRef content /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writeelementns);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writeelementns);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -410,9 +410,9 @@ bool c_xmlwriter::t_writeelementns(CStrRef prefix, CStrRef name, CStrRef uri,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writeelement(CStrRef name,
+bool c_XMLWriter::t_writeelement(CStrRef name,
                                  CStrRef content /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writeelement);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writeelement);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -432,8 +432,8 @@ bool c_xmlwriter::t_writeelement(CStrRef name,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_endelement() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::endelement);
+bool c_XMLWriter::t_endelement() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::endelement);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndElement(m_ptr);
@@ -441,8 +441,8 @@ bool c_xmlwriter::t_endelement() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_fullendelement() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::fullendelement);
+bool c_XMLWriter::t_fullendelement() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::fullendelement);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterFullEndElement(m_ptr);
@@ -450,9 +450,9 @@ bool c_xmlwriter::t_fullendelement() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startattributens(CStrRef prefix, CStrRef name,
+bool c_XMLWriter::t_startattributens(CStrRef prefix, CStrRef name,
                                      CStrRef uri) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startattributens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startattributens);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid attribute name: %s", name.data());
     return false;
@@ -466,8 +466,8 @@ bool c_xmlwriter::t_startattributens(CStrRef prefix, CStrRef name,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startattribute(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startattribute);
+bool c_XMLWriter::t_startattribute(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startattribute);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid attribute name: %s", name.data());
     return false;
@@ -479,9 +479,9 @@ bool c_xmlwriter::t_startattribute(CStrRef name) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writeattributens(CStrRef prefix, CStrRef name, CStrRef uri,
+bool c_XMLWriter::t_writeattributens(CStrRef prefix, CStrRef name, CStrRef uri,
                                      CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writeattributens);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writeattributens);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid attribute name: %s", name.data());
     return false;
@@ -496,8 +496,8 @@ bool c_xmlwriter::t_writeattributens(CStrRef prefix, CStrRef name, CStrRef uri,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writeattribute(CStrRef name, CStrRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writeattribute);
+bool c_XMLWriter::t_writeattribute(CStrRef name, CStrRef value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writeattribute);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid attribute name: %s", name.data());
     return false;
@@ -510,8 +510,8 @@ bool c_xmlwriter::t_writeattribute(CStrRef name, CStrRef value) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_endattribute() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::endattribute);
+bool c_XMLWriter::t_endattribute() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::endattribute);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndAttribute(m_ptr);
@@ -519,8 +519,8 @@ bool c_xmlwriter::t_endattribute() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startcdata() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startcdata);
+bool c_XMLWriter::t_startcdata() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startcdata);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterStartCDATA(m_ptr);
@@ -528,8 +528,8 @@ bool c_xmlwriter::t_startcdata() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writecdata(CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writecdata);
+bool c_XMLWriter::t_writecdata(CStrRef content) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writecdata);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterWriteCDATA(m_ptr, (xmlChar*)content.data());
@@ -537,8 +537,8 @@ bool c_xmlwriter::t_writecdata(CStrRef content) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_endcdata() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::endcdata);
+bool c_XMLWriter::t_endcdata() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::endcdata);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndCDATA(m_ptr);
@@ -546,8 +546,8 @@ bool c_xmlwriter::t_endcdata() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startcomment() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startcomment);
+bool c_XMLWriter::t_startcomment() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startcomment);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterStartComment(m_ptr);
@@ -555,8 +555,8 @@ bool c_xmlwriter::t_startcomment() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writecomment(CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writecomment);
+bool c_XMLWriter::t_writecomment(CStrRef content) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writecomment);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterWriteComment(m_ptr, (xmlChar*)content.data());
@@ -564,8 +564,8 @@ bool c_xmlwriter::t_writecomment(CStrRef content) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_endcomment() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::endcomment);
+bool c_XMLWriter::t_endcomment() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::endcomment);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndComment(m_ptr);
@@ -573,8 +573,8 @@ bool c_xmlwriter::t_endcomment() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_enddocument() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::enddocument);
+bool c_XMLWriter::t_enddocument() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::enddocument);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndDocument(m_ptr);
@@ -582,8 +582,8 @@ bool c_xmlwriter::t_enddocument() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startpi(CStrRef target) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startpi);
+bool c_XMLWriter::t_startpi(CStrRef target) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startpi);
   if (xmlValidateName((xmlChar*)target.data(), 0)) {
     raise_warning("invalid PI target: %s", target.data());
     return false;
@@ -595,8 +595,8 @@ bool c_xmlwriter::t_startpi(CStrRef target) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writepi(CStrRef target, CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writepi);
+bool c_XMLWriter::t_writepi(CStrRef target, CStrRef content) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writepi);
   if (xmlValidateName((xmlChar*)target.data(), 0)) {
     raise_warning("invalid PI target: %s", target.data());
     return false;
@@ -609,8 +609,8 @@ bool c_xmlwriter::t_writepi(CStrRef target, CStrRef content) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_endpi() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::endpi);
+bool c_XMLWriter::t_endpi() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::endpi);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndPI(m_ptr);
@@ -618,8 +618,8 @@ bool c_xmlwriter::t_endpi() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_text(CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::text);
+bool c_XMLWriter::t_text(CStrRef content) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::text);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterWriteString(m_ptr, (xmlChar*)content.data());
@@ -627,8 +627,8 @@ bool c_xmlwriter::t_text(CStrRef content) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writeraw(CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writeraw);
+bool c_XMLWriter::t_writeraw(CStrRef content) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writeraw);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterWriteRaw(m_ptr, (xmlChar*)content.data());
@@ -636,10 +636,10 @@ bool c_xmlwriter::t_writeraw(CStrRef content) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startdtd(CStrRef qualifiedname,
+bool c_XMLWriter::t_startdtd(CStrRef qualifiedname,
                              CStrRef publicid /* = null_string */,
                              CStrRef systemid /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startdtd);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startdtd);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterStartDTD(m_ptr, (xmlChar*)qualifiedname.data(),
@@ -648,11 +648,11 @@ bool c_xmlwriter::t_startdtd(CStrRef qualifiedname,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writedtd(CStrRef name,
+bool c_XMLWriter::t_writedtd(CStrRef name,
                              CStrRef publicid /* = null_string */,
                              CStrRef systemid /* = null_string */,
                              CStrRef subset /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writedtd);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writedtd);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterWriteDTD(m_ptr, (xmlChar*)name.data(),
@@ -661,8 +661,8 @@ bool c_xmlwriter::t_writedtd(CStrRef name,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startdtdelement(CStrRef qualifiedname) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startdtdelement);
+bool c_XMLWriter::t_startdtdelement(CStrRef qualifiedname) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startdtdelement);
   if (xmlValidateName((xmlChar*)qualifiedname.data(), 0)) {
     raise_warning("invalid element name: %s", qualifiedname.data());
     return false;
@@ -674,8 +674,8 @@ bool c_xmlwriter::t_startdtdelement(CStrRef qualifiedname) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writedtdelement(CStrRef name, CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writedtdelement);
+bool c_XMLWriter::t_writedtdelement(CStrRef name, CStrRef content) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writedtdelement);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -688,8 +688,8 @@ bool c_xmlwriter::t_writedtdelement(CStrRef name, CStrRef content) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_enddtdelement() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::enddtdelement);
+bool c_XMLWriter::t_enddtdelement() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::enddtdelement);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndDTDElement(m_ptr);
@@ -697,8 +697,8 @@ bool c_xmlwriter::t_enddtdelement() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startdtdattlist(CStrRef name) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startdtdattlist);
+bool c_XMLWriter::t_startdtdattlist(CStrRef name) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startdtdattlist);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -710,8 +710,8 @@ bool c_xmlwriter::t_startdtdattlist(CStrRef name) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writedtdattlist(CStrRef name, CStrRef content) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writedtdattlist);
+bool c_XMLWriter::t_writedtdattlist(CStrRef name, CStrRef content) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writedtdattlist);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -724,8 +724,8 @@ bool c_xmlwriter::t_writedtdattlist(CStrRef name, CStrRef content) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_enddtdattlist() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::enddtdattlist);
+bool c_XMLWriter::t_enddtdattlist() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::enddtdattlist);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndDTDAttlist(m_ptr);
@@ -733,8 +733,8 @@ bool c_xmlwriter::t_enddtdattlist() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_startdtdentity(CStrRef name, bool isparam) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::startdtdentity);
+bool c_XMLWriter::t_startdtdentity(CStrRef name, bool isparam) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::startdtdentity);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid attribute name: %s", name.data());
     return false;
@@ -746,12 +746,12 @@ bool c_xmlwriter::t_startdtdentity(CStrRef name, bool isparam) {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_writedtdentity(CStrRef name, CStrRef content,
+bool c_XMLWriter::t_writedtdentity(CStrRef name, CStrRef content,
                                    bool pe /* = false */,
                                    CStrRef publicid /* = null_string */,
                                    CStrRef systemid /* = null_string */,
                                    CStrRef ndataid /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::writedtdentity);
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::writedtdentity);
   if (xmlValidateName((xmlChar*)name.data(), 0)) {
     raise_warning("invalid element name: %s", name.data());
     return false;
@@ -765,8 +765,8 @@ bool c_xmlwriter::t_writedtdentity(CStrRef name, CStrRef content,
   return ret != -1;
 }
 
-bool c_xmlwriter::t_enddtdentity() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::enddtdentity);
+bool c_XMLWriter::t_enddtdentity() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::enddtdentity);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndDTDEntity(m_ptr);
@@ -774,8 +774,8 @@ bool c_xmlwriter::t_enddtdentity() {
   return ret != -1;
 }
 
-bool c_xmlwriter::t_enddtd() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::enddtd);
+bool c_XMLWriter::t_enddtd() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::enddtd);
   int ret = -1;
   if (m_ptr) {
     ret = xmlTextWriterEndDTD(m_ptr);
@@ -783,8 +783,8 @@ bool c_xmlwriter::t_enddtd() {
   return ret != -1;
 }
 
-Variant c_xmlwriter::t_flush(bool empty /* = true */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::flush);
+Variant c_XMLWriter::t_flush(bool empty /* = true */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::flush);
   if (m_ptr && m_output) {
     xmlTextWriterFlush(m_ptr);
     String ret((char*)m_output->content, CopyString);
@@ -796,13 +796,13 @@ Variant c_xmlwriter::t_flush(bool empty /* = true */) {
   return "";
 }
 
-String c_xmlwriter::t_outputmemory(bool flush /* = true */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::outputmemory);
+String c_XMLWriter::t_outputmemory(bool flush /* = true */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::outputmemory);
   return t_flush(flush);
 }
 
-Variant c_xmlwriter::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(xmlwriter, xmlwriter::__destruct);
+Variant c_XMLWriter::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(XMLWriter, XMLWriter::__destruct);
   return null;
 }
 

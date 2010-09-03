@@ -129,8 +129,8 @@ static void sqlite3_do_callback(sqlite3_context *context, CVarRef callback,
 
 static void php_sqlite3_callback_func(sqlite3_context *context, int argc,
                                       sqlite3_value **argv) {
-  c_sqlite3::UserDefinedFunc *udf =
-    (c_sqlite3::UserDefinedFunc*)sqlite3_user_data(context);
+  c_SQLite3::UserDefinedFunc *udf =
+    (c_SQLite3::UserDefinedFunc*)sqlite3_user_data(context);
   sqlite3_do_callback(context, udf->func, argc, argv, false);
 }
 
@@ -141,8 +141,8 @@ static void php_sqlite3_callback_step(sqlite3_context *context, int argc,
     (context, sizeof(php_sqlite3_agg_context));
   agg_context->row_count++;
 
-  c_sqlite3::UserDefinedFunc *udf =
-    (c_sqlite3::UserDefinedFunc*)sqlite3_user_data(context);
+  c_SQLite3::UserDefinedFunc *udf =
+    (c_SQLite3::UserDefinedFunc*)sqlite3_user_data(context);
   sqlite3_do_callback(context, udf->step, argc, argv, true);
 }
 
@@ -152,37 +152,37 @@ static void php_sqlite3_callback_final(sqlite3_context *context) {
     (context, sizeof(php_sqlite3_agg_context));
   agg_context->row_count = 0;
 
-  c_sqlite3::UserDefinedFunc *udf =
-    (c_sqlite3::UserDefinedFunc*)sqlite3_user_data(context);
+  c_SQLite3::UserDefinedFunc *udf =
+    (c_SQLite3::UserDefinedFunc*)sqlite3_user_data(context);
   sqlite3_do_callback(context, udf->fini, 0, NULL, true);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // sqlite3
 
-c_sqlite3::c_sqlite3() : m_raw_db(NULL) {
+c_SQLite3::c_SQLite3() : m_raw_db(NULL) {
 }
 
-c_sqlite3::~c_sqlite3() {
+c_SQLite3::~c_SQLite3() {
   if (m_raw_db) {
     sqlite3_close(m_raw_db);
   }
 }
 
-void c_sqlite3::t___construct() {
+void c_SQLite3::t___construct() {
 }
 
-void c_sqlite3::validate() const {
+void c_SQLite3::validate() const {
   if (!m_raw_db) {
     throw Exception("SQLite3 object was not initialized");
   }
 }
 
-void c_sqlite3::t_open(CStrRef filename,
+void c_SQLite3::t_open(CStrRef filename,
                        int64 flags /* = k_SQLITE3_OPEN_READWRITE |
                                       k_SQLITE3_OPEN_CREATE */,
                        CStrRef encryption_key /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::open);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::open);
   if (m_raw_db) {
     throw Exception("Already initialized DB Object");
   }
@@ -207,13 +207,13 @@ void c_sqlite3::t_open(CStrRef filename,
 #endif
 }
 
-bool c_sqlite3::t_close() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::close);
+bool c_SQLite3::t_close() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::close);
   if (m_raw_db) {
     int errcode = sqlite3_close(m_raw_db);
     if (errcode != SQLITE_OK) {
       raise_warning("Unable to close database: %d, %s", errcode,
-                      sqlite3_errmsg(m_raw_db));
+                    sqlite3_errmsg(m_raw_db));
       return false;
     }
     m_raw_db = NULL;
@@ -221,8 +221,8 @@ bool c_sqlite3::t_close() {
   return true;
 }
 
-bool c_sqlite3::t_exec(CStrRef sql) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::exec);
+bool c_SQLite3::t_exec(CStrRef sql) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::exec);
   validate();
 
   char *errtext = NULL;
@@ -234,34 +234,34 @@ bool c_sqlite3::t_exec(CStrRef sql) {
   return true;
 }
 
-Array c_sqlite3::t_version() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::version);
+Array c_SQLite3::t_version() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::version);
   Array ret;
   ret.set("versionString", String((char*)sqlite3_libversion(), CopyString));
   ret.set("versionNumber", (int64)sqlite3_libversion_number());
   return ret;
 }
 
-int64 c_sqlite3::t_lastinsertrowid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::lastinsertrowid);
+int64 c_SQLite3::t_lastinsertrowid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::lastinsertrowid);
   validate();
   return sqlite3_last_insert_rowid(m_raw_db);
 }
 
-int64 c_sqlite3::t_lasterrorcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::lasterrorcode);
+int64 c_SQLite3::t_lasterrorcode() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::lasterrorcode);
   validate();
   return sqlite3_errcode(m_raw_db);
 }
 
-String c_sqlite3::t_lasterrormsg() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::lasterrormsg);
+String c_SQLite3::t_lasterrormsg() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::lasterrormsg);
   validate();
   return String((char*)sqlite3_errmsg(m_raw_db), CopyString);
 }
 
-bool c_sqlite3::t_loadextension(CStrRef extension) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::loadextension);
+bool c_SQLite3::t_loadextension(CStrRef extension) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::loadextension);
   validate();
 
   String translated = File::TranslatePath(extension);
@@ -283,14 +283,14 @@ bool c_sqlite3::t_loadextension(CStrRef extension) {
   return true;
 }
 
-int64 c_sqlite3::t_changes() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::changes);
+int64 c_SQLite3::t_changes() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::changes);
   validate();
   return sqlite3_changes(m_raw_db);
 }
 
-String c_sqlite3::t_escapestring(CStrRef sql) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::escapestring);
+String c_SQLite3::t_escapestring(CStrRef sql) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::escapestring);
   if (!sql.empty()) {
     char *ret = sqlite3_mprintf("%q", sql.data());
     if (ret) {
@@ -302,13 +302,13 @@ String c_sqlite3::t_escapestring(CStrRef sql) {
   return "";
 }
 
-Variant c_sqlite3::t_prepare(CStrRef sql) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::prepare);
+Variant c_SQLite3::t_prepare(CStrRef sql) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::prepare);
   validate();
   if (!sql.empty()) {
-    c_sqlite3stmt *stmt = NEW(c_sqlite3stmt)();
+    c_SQLite3Stmt *stmt = NEW(c_SQLite3Stmt)();
     Object ret(stmt);
-    stmt->t___construct(sp_sqlite3(this), sql);
+    stmt->t___construct(p_SQLite3(this), sql);
     if (stmt->m_raw_stmt) {
       return ret;
     }
@@ -316,26 +316,26 @@ Variant c_sqlite3::t_prepare(CStrRef sql) {
   return false;
 }
 
-Variant c_sqlite3::t_query(CStrRef sql) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::query);
+Variant c_SQLite3::t_query(CStrRef sql) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::query);
   validate();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
     if (!same(stmt, false)) {
-      return stmt.toObject().getTyped<c_sqlite3stmt>()->t_execute();
+      return stmt.toObject().getTyped<c_SQLite3Stmt>()->t_execute();
     }
   }
   return false;
 }
 
-Variant c_sqlite3::t_querysingle(CStrRef sql, bool entire_row /* = false */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::querysingle);
+Variant c_SQLite3::t_querysingle(CStrRef sql, bool entire_row /* = false */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::querysingle);
   validate();
   if (!sql.empty()) {
     Variant stmt = t_prepare(sql);
     if (!same(stmt, false)) {
       sqlite3_stmt *pstmt =
-        stmt.toObject().getTyped<c_sqlite3stmt>()->m_raw_stmt;
+        stmt.toObject().getTyped<c_SQLite3Stmt>()->m_raw_stmt;
       switch (sqlite3_step(pstmt)) {
       case SQLITE_ROW: /* Valid Row */
         if (entire_row) {
@@ -355,23 +355,23 @@ Variant c_sqlite3::t_querysingle(CStrRef sql, bool entire_row /* = false */) {
         }
       default:
         raise_warning("Unable to execute statement: %s",
-                        sqlite3_errmsg(m_raw_db));
+                      sqlite3_errmsg(m_raw_db));
       }
     }
   }
   return false;
 }
 
-bool c_sqlite3::t_createfunction(CStrRef name, CVarRef callback,
+bool c_SQLite3::t_createfunction(CStrRef name, CVarRef callback,
                                  int64 argcount /* = -1 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::createfunction);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::createfunction);
   validate();
   if (name.empty()) {
     return false;
   }
   if (!f_is_callable(callback)) {
     raise_warning("Not a valid callback function %s",
-                    callback.toString().data());
+                  callback.toString().data());
     return false;
   }
 
@@ -387,21 +387,21 @@ bool c_sqlite3::t_createfunction(CStrRef name, CVarRef callback,
   return false;
 }
 
-bool c_sqlite3::t_createaggregate(CStrRef name, CVarRef step, CVarRef final,
+bool c_SQLite3::t_createaggregate(CStrRef name, CVarRef step, CVarRef final,
                                   int64 argcount /* = -1 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::createaggregate);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::createaggregate);
   validate();
   if (name.empty()) {
     return false;
   }
   if (!f_is_callable(step)) {
     raise_warning("Not a valid callback function %s",
-                    step.toString().data());
+                  step.toString().data());
     return false;
   }
   if (!f_is_callable(final)) {
     raise_warning("Not a valid callback function %s",
-                    final.toString().data());
+                  final.toString().data());
     return false;
   }
 
@@ -419,32 +419,32 @@ bool c_sqlite3::t_createaggregate(CStrRef name, CVarRef step, CVarRef final,
   return false;
 }
 
-bool c_sqlite3::t_openblob(CStrRef table, CStrRef column, int64 rowid,
+bool c_SQLite3::t_openblob(CStrRef table, CStrRef column, int64 rowid,
                            CStrRef dbname /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::openblob);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::openblob);
   throw NotSupportedException(__func__, "sqlite3 stream");
 }
 
-Variant c_sqlite3::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3, sqlite3::__destruct);
+Variant c_SQLite3::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3, SQLite3::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_sqlite3stmt::c_sqlite3stmt() : m_raw_stmt(NULL) {
+c_SQLite3Stmt::c_SQLite3Stmt() : m_raw_stmt(NULL) {
 }
 
-c_sqlite3stmt::~c_sqlite3stmt() {
+c_SQLite3Stmt::~c_SQLite3Stmt() {
   if (m_raw_stmt) {
     sqlite3_finalize(m_raw_stmt);
   }
 }
 
-void c_sqlite3stmt::t___construct(CObjRef dbobject, CStrRef statement) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::__construct);
+void c_SQLite3Stmt::t___construct(CObjRef dbobject, CStrRef statement) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::__construct);
   if (!statement.empty()) {
-    c_sqlite3 *db = dbobject.getTyped<c_sqlite3>();
+    c_SQLite3 *db = dbobject.getTyped<c_SQLite3>();
     db->validate();
     m_db = db;
 
@@ -452,25 +452,25 @@ void c_sqlite3stmt::t___construct(CObjRef dbobject, CStrRef statement) {
                                      statement.size(), &m_raw_stmt, NULL);
     if (errcode != SQLITE_OK) {
       raise_warning("Unable to prepare statement: %d, %s",
-                      errcode, sqlite3_errmsg(db->m_raw_db));
+                    errcode, sqlite3_errmsg(db->m_raw_db));
     }
   }
 }
 
-void c_sqlite3stmt::validate() const {
+void c_SQLite3Stmt::validate() const {
   if (!m_raw_stmt) {
     throw Exception("SQLite3Stmt object was not initialized");
   }
 }
 
-int64 c_sqlite3stmt::t_paramcount() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::paramcount);
+int64 c_SQLite3Stmt::t_paramcount() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::paramcount);
   validate();
   return sqlite3_bind_parameter_count(m_raw_stmt);
 }
 
-bool c_sqlite3stmt::t_close() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::close);
+bool c_SQLite3Stmt::t_close() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::close);
   if (m_raw_stmt) {
     sqlite3_finalize(m_raw_stmt);
     m_raw_stmt = NULL;
@@ -478,32 +478,32 @@ bool c_sqlite3stmt::t_close() {
   return true;
 }
 
-bool c_sqlite3stmt::t_reset() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::reset);
+bool c_SQLite3Stmt::t_reset() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::reset);
   validate();
   if (sqlite3_reset(m_raw_stmt) != SQLITE_OK) {
     raise_warning("Unable to reset statement: %s",
-                    sqlite3_errmsg(sqlite3_db_handle(m_raw_stmt)));
+                  sqlite3_errmsg(sqlite3_db_handle(m_raw_stmt)));
     return false;
   }
   return true;
 }
 
-bool c_sqlite3stmt::t_clear() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::clear);
+bool c_SQLite3Stmt::t_clear() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::clear);
   validate();
   if (sqlite3_clear_bindings(m_raw_stmt) != SQLITE_OK) {
     raise_warning("Unable to clear statement: %s",
-                    sqlite3_errmsg(sqlite3_db_handle(m_raw_stmt)));
+                  sqlite3_errmsg(sqlite3_db_handle(m_raw_stmt)));
     return false;
   }
   m_bound_params.clear();
   return true;
 }
 
-bool c_sqlite3stmt::t_bindparam(CVarRef name, Variant parameter,
+bool c_SQLite3Stmt::t_bindparam(CVarRef name, Variant parameter,
                                 int64 type /* = k_SQLITE3_TEXT */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::bindparam);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::bindparam);
   BoundParamPtr param(new BoundParam());
   param->type = type;
   param->value = ref(parameter);
@@ -526,15 +526,15 @@ bool c_sqlite3stmt::t_bindparam(CVarRef name, Variant parameter,
   return true;
 }
 
-bool c_sqlite3stmt::t_bindvalue(CVarRef name, CVarRef parameter,
+bool c_SQLite3Stmt::t_bindvalue(CVarRef name, CVarRef parameter,
                                 int64 type /* = k_SQLITE3_TEXT */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::bindvalue);
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::bindvalue);
   Variant v = parameter;
   return t_bindparam(name, v, type);
 }
 
-Variant c_sqlite3stmt::t_execute() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::execute);
+Variant c_SQLite3Stmt::t_execute() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::execute);
   validate();
 
   for (unsigned int i = 0; i < m_bound_params.size(); i++) {
@@ -558,7 +558,7 @@ Variant c_sqlite3stmt::t_execute() {
           Variant blob = f_stream_get_contents(p.value);
           if (same(blob, false)) {
             raise_warning("Unable to read stream for parameter %ld",
-                            p.index);
+                          p.index);
             return false;
           }
           sblob = blob.toString();
@@ -581,7 +581,7 @@ Variant c_sqlite3stmt::t_execute() {
       break;
     default:
       raise_warning("Unknown parameter type: %ld for parameter %ld",
-                      p.type, p.index);
+                    p.type, p.index);
       return false;
     }
   }
@@ -591,8 +591,8 @@ Variant c_sqlite3stmt::t_execute() {
   case SQLITE_DONE: /* Valid but no results */
     {
       sqlite3_reset(m_raw_stmt);
-      c_sqlite3result *result = NEW(c_sqlite3result)();
-      result->m_stmt = sp_sqlite3stmt(this);
+      c_SQLite3Result *result = NEW(c_SQLite3Result)();
+      result->m_stmt = p_SQLite3Stmt(this);
       return Object(result);
     }
   case SQLITE_ERROR:
@@ -600,55 +600,55 @@ Variant c_sqlite3stmt::t_execute() {
     // fall through
   default:
     raise_warning("Unable to execute statement: %s",
-                    sqlite3_errmsg(sqlite3_db_handle(m_raw_stmt)));
+                  sqlite3_errmsg(sqlite3_db_handle(m_raw_stmt)));
   }
   return false;
 }
 
-Variant c_sqlite3stmt::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3stmt, sqlite3stmt::__destruct);
+Variant c_SQLite3Stmt::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Stmt, SQLite3Stmt::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_sqlite3result::c_sqlite3result() {
+c_SQLite3Result::c_SQLite3Result() {
 }
 
-c_sqlite3result::~c_sqlite3result() {
+c_SQLite3Result::~c_SQLite3Result() {
 }
 
-void c_sqlite3result::t___construct() {
+void c_SQLite3Result::t___construct() {
 }
 
-void c_sqlite3result::validate() const {
+void c_SQLite3Result::validate() const {
   if (!m_stmt.get()) {
     throw Exception("SQLite3Result object was not initialized");
   }
   m_stmt->validate();
 }
 
-int64 c_sqlite3result::t_numcolumns() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3result, sqlite3result::numcolumns);
+int64 c_SQLite3Result::t_numcolumns() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::numcolumns);
   validate();
   return sqlite3_column_count(m_stmt->m_raw_stmt);
 }
 
-String c_sqlite3result::t_columnname(int64 column) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3result, sqlite3result::columnname);
+String c_SQLite3Result::t_columnname(int64 column) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::columnname);
   validate();
   return String((char*)sqlite3_column_name(m_stmt->m_raw_stmt, column),
                 CopyString);
 }
 
-int64 c_sqlite3result::t_columntype(int64 column) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3result, sqlite3result::columntype);
+int64 c_SQLite3Result::t_columntype(int64 column) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::columntype);
   validate();
   return sqlite3_column_type(m_stmt->m_raw_stmt, column);
 }
 
-Variant c_sqlite3result::t_fetcharray(int64 mode /* = k_SQLITE3_BOTH */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3result, sqlite3result::fetcharray);
+Variant c_SQLite3Result::t_fetcharray(int64 mode /* = k_SQLITE3_BOTH */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::fetcharray);
   validate();
 
   switch (sqlite3_step(m_stmt->m_raw_stmt)) {
@@ -671,26 +671,26 @@ Variant c_sqlite3result::t_fetcharray(int64 mode /* = k_SQLITE3_BOTH */) {
     return false;
   default:
     raise_warning("Unable to execute statement: %s",
-                    sqlite3_errmsg(sqlite3_db_handle(m_stmt->m_raw_stmt)));
+                  sqlite3_errmsg(sqlite3_db_handle(m_stmt->m_raw_stmt)));
   }
   return null;
 }
 
-bool c_sqlite3result::t_reset() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3result, sqlite3result::reset);
+bool c_SQLite3Result::t_reset() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::reset);
   validate();
   return sqlite3_reset(m_stmt->m_raw_stmt) == SQLITE_OK;
 }
 
-bool c_sqlite3result::t_finalize() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3result, sqlite3result::finalize);
+bool c_SQLite3Result::t_finalize() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::finalize);
   validate();
   m_stmt.reset();
   return true;
 }
 
-Variant c_sqlite3result::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(sqlite3result, sqlite3result::__destruct);
+Variant c_SQLite3Result::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(SQLite3Result, SQLite3Result::__destruct);
   return null;
 }
 

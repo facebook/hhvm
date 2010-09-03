@@ -86,7 +86,7 @@ DefineFunction(
       array(
         'name'   => "json",
         'type'   => String,
-        'desc'   => "The json string being decoded.",
+        'desc'   => "The json string being decoded.\n\nThis function only works with UTF-8 encoded data.",
       ),
       array(
         'name'   => "assoc",

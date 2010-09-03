@@ -79,6 +79,7 @@ create: $(EXT).idl.php $(IDL_TOOL) $(IDL_BASE)
 update: $(EXT).idl.php $(IDL_TOOL) $(IDL_BASE)
 	@echo 'Updating files from $<...'
 	@echo ' --> ext_$(EXT).h ext_$(EXT).cpp'
+	$(V)php $(IDL_TOOL) cpp-sep $< ext_$(EXT)_new.h ext_$(EXT)_new.cpp
 	$(V)php $(IDL_TOOL) param $< ext_$(EXT).h ext_$(EXT).cpp
 	@echo ' --> $(EXT).inc'
 	$(V)php $(IDL_TOOL) inc-sep $< $(EXT).inc

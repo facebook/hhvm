@@ -39,22 +39,22 @@ StaticString
 // helper
 static RecursiveIteratorIterator *
 get_recursiveiteratoriterator(CObjRef obj) {
-  c_recursiveiteratoriterator *c_rii =
-    obj.getTyped<c_recursiveiteratoriterator>();
+  c_RecursiveIteratorIterator *c_rii =
+    obj.getTyped<c_RecursiveIteratorIterator>();
   return c_rii->m_rsrc.toObject().getTyped<RecursiveIteratorIterator>();
 }
 
 static RecursiveDirectoryIterator *
 get_recursivedirectoryiterator(CObjRef obj) {
-  c_recursivedirectoryiterator *c_rdi =
-    obj.getTyped<c_recursivedirectoryiterator>();
+  c_RecursiveDirectoryIterator *c_rdi =
+    obj.getTyped<c_RecursiveDirectoryIterator>();
   return c_rdi->m_rsrc.toObject().getTyped<RecursiveDirectoryIterator>();
 }
 
 static DirectoryIterator *
 get_directoryiterator(CObjRef obj) {
-  c_directoryiterator *c_di =
-    obj.getTyped<c_directoryiterator>();
+  c_DirectoryIterator *c_di =
+    obj.getTyped<c_DirectoryIterator>();
   return c_di->m_rsrc.toObject().getTyped<DirectoryIterator>();
 }
 
@@ -126,11 +126,11 @@ RecursiveIteratorIterator::RecursiveIteratorIterator(CObjRef iterator,
 }
 
 Object f_hphp_recursiveiteratoriterator___construct(CObjRef obj, CObjRef iterator, int64 mode, int64 flags) {
-  c_recursiveiteratoriterator *c_rii =
-    obj.getTyped<c_recursiveiteratoriterator>();
-  if (iterator.is<c_recursivedirectoryiterator>()) {
-    c_recursivedirectoryiterator *c_rdi =
-      iterator.getTyped<c_recursivedirectoryiterator>();
+  c_RecursiveIteratorIterator *c_rii =
+    obj.getTyped<c_RecursiveIteratorIterator>();
+  if (iterator.is<c_RecursiveDirectoryIterator>()) {
+    c_RecursiveDirectoryIterator *c_rdi =
+      iterator.getTyped<c_RecursiveDirectoryIterator>();
     c_rii->m_rsrc = NEW(RecursiveIteratorIterator)(c_rdi->m_rsrc, mode, flags);
     return c_rii;
   }
@@ -149,8 +149,8 @@ Variant f_hphp_recursiveiteratoriterator_current(CObjRef obj) {
   unsigned int size = rii->m_iterators.size();
   ASSERT(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
-    c_recursivedirectoryiterator *c_rdi =
-      NEW(c_recursivedirectoryiterator)();
+    c_RecursiveDirectoryIterator *c_rdi =
+      NEW(c_RecursiveDirectoryIterator)();
     c_rdi->m_rsrc = rii->m_iterators[size-1].first;
     return f_hphp_recursivedirectoryiterator_current(c_rdi);
   }
@@ -162,8 +162,8 @@ Variant f_hphp_recursiveiteratoriterator_key(CObjRef obj) {
   unsigned int size = rii->m_iterators.size();
   ASSERT(size > 0);
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
-    c_recursivedirectoryiterator *c_rdi =
-      NEW(c_recursivedirectoryiterator)();
+    c_RecursiveDirectoryIterator *c_rdi =
+      NEW(c_RecursiveDirectoryIterator)();
     c_rdi->m_rsrc = rii->m_iterators[size-1].first;
     return f_hphp_recursivedirectoryiterator_key(c_rdi);
   }
@@ -175,7 +175,7 @@ void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
   unsigned int size = rii->m_iterators.size();
   if (!size) return;
   Object ci = rii->m_iterators[size-1].first;
-  if (rii->m_mode == HPHP::q_recursiveiteratoriterator_SELF_FIRST) {
+  if (rii->m_mode == HPHP::q_RecursiveIteratorIterator_SELF_FIRST) {
     if (!ci.is<RecursiveDirectoryIterator>()) {
       throw NotImplementedException("this type of iterator");
     }
@@ -195,8 +195,8 @@ void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
     if (f_hphp_recursiveiteratoriterator_valid(obj)) return;
     rii->m_iterators.pop_back();
     return f_hphp_recursiveiteratoriterator_next(obj);
-  } else if (rii->m_mode == HPHP::q_recursiveiteratoriterator_CHILD_FIRST ||
-             rii->m_mode == HPHP::q_recursiveiteratoriterator_LEAVES_ONLY) {
+  } else if (rii->m_mode == HPHP::q_RecursiveIteratorIterator_CHILD_FIRST ||
+             rii->m_mode == HPHP::q_RecursiveIteratorIterator_LEAVES_ONLY) {
     if (!ci.is<RecursiveDirectoryIterator>()) {
       throw NotImplementedException("this type of iterator");
     }
@@ -218,7 +218,7 @@ void f_hphp_recursiveiteratoriterator_next(CObjRef obj) {
       } else {
         // CHILD_FIRST: 0 - drill down; 1 - visit 2 - next
         // LEAVES_ONLY: 0 - drill down; 1 - next
-        if (rii->m_mode == HPHP::q_recursiveiteratoriterator_CHILD_FIRST &&
+        if (rii->m_mode == HPHP::q_RecursiveIteratorIterator_CHILD_FIRST &&
           rii->m_iterators[size-1].second == 1) {
           rii->m_iterators[size-1].second = 2;
           return;
@@ -245,8 +245,8 @@ void f_hphp_recursiveiteratoriterator_rewind(CObjRef obj) {
   rii->m_iterators.clear();
   rii->m_iterators.push_back(std::pair<Object,bool>(rii->m_iterator, 0));
   if (rii->m_iterator.is<RecursiveDirectoryIterator>()) {
-    c_recursivedirectoryiterator *c_rdi =
-      NEW(c_recursivedirectoryiterator)();
+    c_RecursiveDirectoryIterator *c_rdi =
+      NEW(c_RecursiveDirectoryIterator)();
     c_rdi->m_rsrc = rii->m_iterator;
     f_hphp_recursivedirectoryiterator_rewind(c_rdi);
     if (!f_hphp_recursiveiteratoriterator_valid(obj)) {
@@ -266,12 +266,12 @@ bool f_hphp_recursiveiteratoriterator_valid(CObjRef obj) {
       rii->m_iterators[size-1].first.getTyped<RecursiveDirectoryIterator>();
     bool valid = rdi->valid();
     if (valid) {
-      if (rii->m_mode == HPHP::q_recursiveiteratoriterator_LEAVES_ONLY ||
-          rii->m_mode == HPHP::q_recursiveiteratoriterator_CHILD_FIRST) {
+      if (rii->m_mode == HPHP::q_RecursiveIteratorIterator_LEAVES_ONLY ||
+          rii->m_mode == HPHP::q_RecursiveIteratorIterator_CHILD_FIRST) {
         String pathName = rdi->getPathName();
         if (f_is_dir(pathName)) {
           if (rii->m_iterators[size-1].second > 0 &&
-              rii->m_mode == HPHP::q_recursiveiteratoriterator_CHILD_FIRST) {
+              rii->m_mode == HPHP::q_RecursiveIteratorIterator_CHILD_FIRST) {
             return true;
           }
           return false;
@@ -284,7 +284,7 @@ bool f_hphp_recursiveiteratoriterator_valid(CObjRef obj) {
 }
 
 bool f_hphp_directoryiterator___construct(CObjRef obj, CStrRef path) {
-  c_directoryiterator *c_di = obj.getTyped<c_directoryiterator>();
+  c_DirectoryIterator *c_di = obj.getTyped<c_DirectoryIterator>();
   SmartObject<DirectoryIterator> rsrc = NEW(DirectoryIterator)(path);
   c_di->m_rsrc = rsrc;
   return !rsrc->m_dir.isNull();
@@ -333,8 +333,8 @@ bool f_hphp_directoryiterator_isdot(CObjRef obj) {
 
 bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path,
     int64 flags) {
-  c_recursivedirectoryiterator *c_rdi =
-    obj.getTyped<c_recursivedirectoryiterator>();
+  c_RecursiveDirectoryIterator *c_rdi =
+    obj.getTyped<c_RecursiveDirectoryIterator>();
   SmartObject<RecursiveDirectoryIterator> rsrc =
     NEW(RecursiveDirectoryIterator)(path, flags);
   c_rdi->m_rsrc = rsrc;
@@ -343,7 +343,7 @@ bool f_hphp_recursivedirectoryiterator___construct(CObjRef obj, CStrRef path,
 
 Variant f_hphp_recursivedirectoryiterator_key(CObjRef obj) {
   RecursiveDirectoryIterator *rdi = get_recursivedirectoryiterator(obj);
-  if (rdi->m_flags == HPHP::q_recursivedirectoryiterator_KEY_AS_FILENAME) {
+  if (rdi->m_flags == HPHP::q_RecursiveDirectoryIterator_KEY_AS_FILENAME) {
     return rdi->m_dirEntry;
   }
   return rdi->getPathName();
@@ -376,11 +376,11 @@ bool f_hphp_recursivedirectoryiterator_valid(CObjRef obj) {
 Variant f_hphp_recursivedirectoryiterator_current(CObjRef obj) {
   RecursiveDirectoryIterator *rdi = get_recursivedirectoryiterator(obj);
   String pathName = rdi->getPathName();
-  if (rdi->m_flags & HPHP::q_recursivedirectoryiterator_CURRENT_AS_PATHNAME) {
+  if (rdi->m_flags & HPHP::q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME) {
     return pathName;
   }
-  if (rdi->m_flags & HPHP::q_recursivedirectoryiterator_CURRENT_AS_FILEINFO) {
-    c_splfileinfo *c_splfi = NEW(c_splfileinfo)();
+  if (rdi->m_flags & HPHP::q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO) {
+    c_SplFileInfo *c_splfi = NEW(c_SplFileInfo)();
     c_splfi->m_rsrc = NEW(SplFileInfo)(pathName);
     return c_splfi;
   }
@@ -394,7 +394,7 @@ bool f_hphp_recursivedirectoryiterator_haschildren(CObjRef obj) {
 Object f_hphp_recursivedirectoryiterator_getchildren(CObjRef obj) {
   if (!f_hphp_recursivedirectoryiterator_haschildren(obj)) return Object();
   RecursiveDirectoryIterator *rdi = get_recursivedirectoryiterator(obj);
-  c_recursivedirectoryiterator *c_rdi = NEW(c_recursivedirectoryiterator)();
+  c_RecursiveDirectoryIterator *c_rdi = NEW(c_RecursiveDirectoryIterator)();
   c_rdi->m_rsrc =
     NEW(RecursiveDirectoryIterator)(rdi->getPathName(), rdi->m_flags);
   return c_rdi;

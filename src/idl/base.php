@@ -1,6 +1,8 @@
 <?php
 
-@require_once '../system/globals/constants.php';
+if (file_exists('../system/globals/constants.php')) {
+  @require_once '../system/globals/constants.php';
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // types
@@ -265,7 +267,7 @@ function DefineFunction($func) {
                               $func['name'].'(..'.$arg['name'].'..)');
         }
         if (preg_match('/^q_([A-Za-z]+)_(\w+)$/', $arg['value'], $m)) {
-          $class = strtolower($m[1]);
+          $class = $m[1];
           $constant = $m[2];
           $arg['default'] = "q_${class}_${constant}";
         } else {
@@ -314,7 +316,7 @@ function DefineFunction($func) {
 
 function typename($type, $prefix = true) {
   if (is_string($type)) {
-    if ($prefix) return 'p_' . strtolower($type);
+    if ($prefix) return 'p_' . $type;
     return $type;
   }
 
@@ -331,7 +333,7 @@ function typename($type, $prefix = true) {
 
 function param_typename($type, $ref) {
   if (is_string($type)) {
-    return 'p_' . strtolower($type);
+    return 'p_' . $type;
   }
 
   global $REFNAMES;
@@ -357,7 +359,7 @@ function typeenum($type) {
 
 function fprintType($f, $type) {
   if (is_string($type)) {
-    fprintf($f, 'S(999), "%s"', strtolower($type));
+    fprintf($f, 'S(999), "%s"', $type);
   } else {
     fprintf($f, 'T(%s)', typeenum($type));
   }
@@ -531,9 +533,13 @@ function generateFuncArgsCall($func, $f, $forceRef = false) {
 
 function generateFuncCPPHeader($func, $f, $method = false, $forceref = false,
                                $static = false, $class = false) {
-  fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
-          typename($func['return']), $method ? ($static ? "ti" : "t") : "f",
-          strtolower($func['name']));
+  if ($method) {
+    fprintf($f, '%s%s %s_%s', $static ? 'static ' : '',
+            typename($func['return']), $static ? "ti" : "t",
+            strtolower($func['name']));
+  } else {
+    fprintf($f, '%s f_%s', typename($func['return']), $func['name']);
+  }
   generateFuncArgsCPPHeader($func, $f, $forceref, $static);
   fprintf($f, ";\n");
 
@@ -553,8 +559,7 @@ function generateFuncProfileHeader($func, $f) {
   $var_arg = ($func['flags'] & VarArgsMask);
   $args = $func['args'];
 
-  fprintf($f, 'inline %s x_%s', typename($func['return']),
-          strtolower($func['name']));
+  fprintf($f, 'inline %s x_%s', typename($func['return']), $func['name']);
   generateFuncArgsCPPHeader($func, $f, null);
   fprintf($f, " {\n");
 
@@ -566,7 +571,7 @@ function generateFuncProfileHeader($func, $f) {
   if (typename($func['return']) !== 'void') {
     fprintf($f, "return ");
   }
-  fprintf($f, "f_%s(", strtolower($func['name']));
+  fprintf($f, "f_%s(", $func['name']);
 
   if ($var_arg) fprintf($f, '_argc, ');
   for ($i = 0; $i < count($args); $i++) {
@@ -591,13 +596,13 @@ function generateConstCPPHeader($const, $f) {
 }
 
 function generateClassCPPHeader($class, $f) {
-  $lowername = strtolower($class['name']);
+  $clsname = $class['name'];
   foreach ($class['consts'] as $k) {
     $name = typename($k['type']);
     if ($name == 'String') {
       $name = 'StaticString';
     }
-    fprintf($f, "extern const %s q_%s_%s;\n", $name, $lowername, $k['name']);
+    fprintf($f, "extern const %s q_%s_%s;\n", $name, $clsname, $k['name']);
   }
 
   fprintf($f,
@@ -610,13 +615,13 @@ function generateClassCPPHeader($class, $f) {
 EOT
           );
 
-  fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n", $lowername);
+  fprintf($f, "FORWARD_DECLARE_CLASS(%s);\n", $clsname);
   foreach ($class['properties'] as $p) {
     generatePropertyCPPForwardDeclarations($p, $f);
   }
-  fprintf($f, "class c_%s", $lowername);
+  fprintf($f, "class c_%s", $clsname);
   if ($class['parent']) {
-    fprintf($f, " : public c_" . strtolower($class['parent']));
+    fprintf($f, " : public c_" . $class['parent']);
   } else {
     fprintf($f, " : public ExtObjectData");
   }
@@ -625,20 +630,20 @@ EOT
   }
   $parents = array();
   fprintf($f, " {\n public:\n");
-  fprintf($f, "  BEGIN_CLASS_MAP(%s)\n", $lowername);
+  fprintf($f, "  BEGIN_CLASS_MAP(%s)\n", $clsname);
   if ($class['parent']) {
     $p = $class['parent'];
-    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
+    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", $p);
   }
   foreach ($class['ifaces'] as $p) {
-    fprintf($f, "  PARENT_CLASS(%s)\n", strtolower($p));
+    fprintf($f, "  PARENT_CLASS(%s)\n", $p);
   }
   foreach ($parents as $p) {
-    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", strtolower($p));
+    fprintf($f, "  RECURSIVE_PARENT_CLASS(%s)\n", $p);
   }
-  fprintf($f, "  END_CLASS_MAP(%s)\n", $lowername);
-  fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $lowername, $class['name'],
-          $class['parent'] ? strtolower($class['parent']) : 'ObjectData');
+  fprintf($f, "  END_CLASS_MAP(%s)\n", $clsname);
+  fprintf($f, "  DECLARE_CLASS(%s, %s, %s)\n", $clsname, $clsname,
+          $class['parent'] ? $class['parent'] : 'ObjectData');
   fprintf($f, "  DECLARE_INVOKES_FROM_EVAL\n");
   fprintf($f, "  ObjectData* dynCreate(CArrRef params, bool init = true);\n");
 
@@ -653,8 +658,8 @@ EOT
   }
 
   fprintf($f, "  // need to implement\n");
-  fprintf($f, "  public: c_%s();\n", strtolower($class['name']));
-  fprintf($f, "  public: ~c_%s();\n", strtolower($class['name']));
+  fprintf($f, "  public: c_%s();\n", $class['name']);
+  fprintf($f, "  public: ~c_%s();\n", $class['name']);
   foreach ($class['methods'] as $m) {
     generateMethodCPPHeader($m, $class, $f);
   }
@@ -713,7 +718,7 @@ function generatePropertyCPPForwardDeclarations($property, $f) {
 
 function generatePreImplemented($method, $class, $f) {
   if ($method['name'] == '__construct') {
-    fprintf($f, "  public: c_%s *create", strtolower($class['name']));
+    fprintf($f, "  public: c_%s *create", $class['name']);
     generateFuncArgsCPPHeader($method, $f, true);
     fprintf($f, ";\n");
     fprintf($f, "  public: void dynConstruct(CArrRef Params);\n");
@@ -735,8 +740,7 @@ function generateFuncCPPImplementation($func, $f) {
   $output = '';
   $need_ret = false;
 
-  fprintf($f, '%s f_%s(', typename($func['return']),
-          strtolower($func['name']));
+  fprintf($f, '%s f_%s(', typename($func['return']), $func['name']);
   $var_arg = ($func['flags'] & VarArgsMask);
   if ($var_arg) fprintf($f, 'int _argc, ');
   $params = "";
@@ -788,7 +792,7 @@ function replaceParams($filename, $header) {
     $var_arg = ($func['flags'] & VarArgsMask);
     $args = $func['args'];
 
-    $search = '\w+\s+f_'.strtolower($func['name']).'\s*\(\s*';
+    $search = '\w+\s+f_'.$func['name'].'\s*\(\s*';
     if ($var_arg) $search .= '\w+\s+\w+,\s*';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];
@@ -814,7 +818,7 @@ function replaceParams($filename, $header) {
     }
     $search .= '\)';
 
-    $replace = typename($func['return']).' f_'.strtolower($func['name']).'(';
+    $replace = typename($func['return']).' f_'.$func['name'].'(';
     if ($var_arg) $replace .= 'int _argc, ';
     for ($i = 0; $i < count($args); $i++) {
       $arg = $args[$i];

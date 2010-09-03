@@ -22,7 +22,7 @@
 #include <php/classes/debugger.fw.h>
 
 // Declarations
-#include <cls/debuggercommand.h>
+#include <cls/DebuggerCommand.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

@@ -25,8 +25,8 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/directory.php line 3 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directory
-Variant c_directory::os_getInit(CStrRef s) {
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Directory
+Variant c_Directory::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
   switch (hash & 3) {
@@ -43,36 +43,36 @@ Variant c_directory::os_getInit(CStrRef s) {
   }
   return c_ObjectData::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_directory
-Variant c_directory::os_get(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_Directory
+Variant c_Directory::os_get(CStrRef s) {
   return c_ObjectData::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directory
-Variant &c_directory::os_lval(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
+Variant &c_Directory::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
-void c_directory::o_getArray(Array &props) const {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
+void c_Directory::o_getArray(Array &props) const {
   if (isInitialized(m_path)) props.set(NAMSTR(s_sys_ss5977ff8c, "path"), m_path.isReferenced() ? ref(m_path) : m_path, true);
   if (isInitialized(m_handle)) props.set(NAMSTR(s_sys_ss0babeace, "handle"), m_handle.isReferenced() ? ref(m_handle) : m_handle, true);
   c_ObjectData::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_directory
-void c_directory::o_setArray(CArrRef props) {
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_Directory
+void c_Directory::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_get_directory
-Variant c_directory::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_get_Directory
+Variant c_Directory::o_get(CStrRef prop, bool error, CStrRef context) {
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directory
-Variant c_directory::o_getPublic(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Directory
+Variant c_Directory::o_getPublic(CStrRef s, bool error) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
@@ -88,19 +88,19 @@ Variant c_directory::o_getPublic(CStrRef s, bool error) {
   }
   return c_ObjectData::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directory
-Variant c_directory::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Directory
+Variant c_Directory::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_directory
-Variant * c_directory::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_Directory
+Variant * c_Directory::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directory
-Variant * c_directory::o_realPropPublic(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Directory
+Variant * c_Directory::o_realPropPublic(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
@@ -114,19 +114,19 @@ Variant * c_directory::o_realPropPublic(CStrRef s, int flags) const {
   }
   return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directory
-Variant * c_directory::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory
+Variant * c_Directory::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_set_directory
-Variant c_directory::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_set_Directory
+Variant c_Directory::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directory
-Variant c_directory::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Directory
+Variant c_Directory::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
@@ -142,19 +142,19 @@ Variant c_directory::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
   }
   return c_ObjectData::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directory
-Variant c_directory::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Directory
+Variant c_Directory::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_directory
-Variant& c_directory::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_Directory
+Variant& c_Directory::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directory
-Variant& c_directory::o_lvalPublic(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Directory
+Variant& c_Directory::o_lvalPublic(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 0:
@@ -170,25 +170,25 @@ Variant& c_directory::o_lvalPublic(CStrRef s) {
   }
   return c_ObjectData::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directory
-Variant& c_directory::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Directory
+Variant& c_Directory::o_lvalPrivate(CStrRef s) {
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_directory
-Variant c_directory::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
+Variant c_Directory::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_directory
-IMPLEMENT_CLASS(directory)
-c_directory *c_directory::create(Variant v_path) {
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
+IMPLEMENT_CLASS(Directory)
+c_Directory *c_Directory::create(Variant v_path) {
   CountableHelper h(this);
   init();
   t___construct(v_path);
   return this;
 }
-ObjectData *c_directory::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_Directory::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -203,7 +203,7 @@ ObjectData *c_directory::dynCreate(CArrRef params, bool construct /* = true */) 
   }
   return this;
 }
-void c_directory::dynConstruct(CArrRef params) {
+void c_Directory::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("Directory::__construct", count, 1, 1, 2);
   {
@@ -213,7 +213,7 @@ void c_directory::dynConstruct(CArrRef params) {
     (t___construct(arg0));
   }
 }
-void c_directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_Directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -229,20 +229,20 @@ void c_directory::dynConstructFromEval(Eval::VariableEnvironment &env, const Eva
   }
   (t___construct(a0), null);
 }
-ObjectData *c_directory::cloneImpl() {
-  c_directory *obj = NEW(c_directory)();
+ObjectData *c_Directory::cloneImpl() {
+  c_Directory *obj = NEW(c_Directory)();
   cloneSet(obj);
   return obj;
 }
-void c_directory::cloneSet(c_directory *clone) {
+void c_Directory::cloneSet(c_Directory *clone) {
   clone->m_path = m_path.isReferenced() ? ref(m_path) : m_path;
   clone->m_handle = m_handle.isReferenced() ? ref(m_handle) : m_handle;
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_directory
-Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
+Variant c_Directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -276,7 +276,7 @@ Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
@@ -309,13 +309,13 @@ Variant c_directory::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_directory
-Variant c_directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
+Variant c_Directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x6:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -344,7 +344,7 @@ Variant c_directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
@@ -372,21 +372,21 @@ Variant c_directory::o_invoke_few_args(MethodIndex methodIndex, const char *s, i
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_directory
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directory
-Variant c_directory::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_Directory
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Directory
+Variant c_Directory::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directory
-Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_Directory
+Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x6:
@@ -452,7 +452,7 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 7) {
     case 1:
@@ -516,29 +516,29 @@ Variant c_directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_directory::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_Directory::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_directory = {
-  c_directory::os_getInit,
-  c_directory::os_get,
-  c_directory::os_lval,
-  c_directory::os_invoke,
-  c_directory::os_constant,
+struct ObjectStaticCallbacks cw_Directory = {
+  c_Directory::os_getInit,
+  c_Directory::os_get,
+  c_Directory::os_lval,
+  c_Directory::os_invoke,
+  c_Directory::os_constant,
 };
-void c_directory::init() {
+void c_Directory::init() {
   m_path = null;
   m_handle = null;
 }
 /* SRC: classes/directory.php line 7 */
-void c_directory::t___construct(Variant v_path) {
+void c_Directory::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::__construct);
   bool oldInCtor = gasInCtor(true);
   m_path = v_path;
@@ -549,22 +549,22 @@ void c_directory::t___construct(Variant v_path) {
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/directory.php line 12 */
-Variant c_directory::t_read() {
+Variant c_Directory::t_read() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::read);
   return x_readdir(toObject(m_handle));
 } /* function */
 /* SRC: classes/directory.php line 16 */
-Variant c_directory::t_rewind() {
+Variant c_Directory::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::rewind);
   return (x_rewinddir(toObject(m_handle)), null);
 } /* function */
 /* SRC: classes/directory.php line 20 */
-Variant c_directory::t_close() {
+Variant c_Directory::t_close() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::close);
   return (x_closedir(toObject(m_handle)), null);
 } /* function */
-Object co_directory(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_directory)())->dynCreate(params, init));
+Object co_Directory(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_Directory)())->dynCreate(params, init));
 }
 Variant pm_php$classes$directory_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/directory.php, pm_php$classes$directory_php);

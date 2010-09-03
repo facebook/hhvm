@@ -539,7 +539,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, CVarRef data, int style,
   /* Special handling of class SoapVar */
   if (data.isObject() && data.toObject().instanceof("SoapVar")) {
     encodePtr enc;
-    c_soapvar *p = data.toObject().getTyped<c_soapvar>();
+    c_SoapVar *p = data.toObject().getTyped<c_SoapVar>();
     if (!p->m_ns.empty()) {
       enc = get_encoder(SOAP_GLOBAL(sdl), p->m_ns.data(), p->m_stype.data());
     } else {
@@ -2615,7 +2615,7 @@ static Variant guess_zval_convert(encodeTypePtr type, xmlNodePtr data) {
   }
   ret = master_to_zval_int(enc, data);
   if (SOAP_GLOBAL(sdl) && type_name && enc->details.sdl_type) {
-    c_soapvar *soapvar = NEW(c_soapvar)();
+    c_SoapVar *soapvar = NEW(c_SoapVar)();
     soapvar->m_type = enc->details.type;
     soapvar->m_value = ret;
 
@@ -3218,7 +3218,7 @@ static encodePtr get_array_type(xmlNodePtr node, CVarRef array,
     Variant tmp = iter.second();
 
     if (tmp.isObject() && tmp.toObject().instanceof("SoapVar")) {
-      c_soapvar *var = tmp.toObject().getTyped<c_soapvar>();
+      c_SoapVar *var = tmp.toObject().getTyped<c_SoapVar>();
       cur_type = var->m_type;
       if (!var->m_stype.empty()) {
         cur_stype = var->m_stype.c_str();

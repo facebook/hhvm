@@ -32,13 +32,13 @@ namespace HPHP {
 #define IMAGESPRITE_PAD_BOTTOM  2
 #define IMAGESPRITE_PAD_RIGHT   3
 
-class c_imagesprite;
+class c_ImageSprite;
 
 namespace ImageSprite {
 
 class ResourceGroup {
   public:
-    ResourceGroup(c_imagesprite* sprite) {
+    ResourceGroup(c_ImageSprite* sprite) {
       m_sprite = sprite;
     }
     virtual ~ResourceGroup() {
@@ -46,12 +46,12 @@ class ResourceGroup {
     }
 
   protected:
-    c_imagesprite* m_sprite;
+    c_ImageSprite* m_sprite;
 };
 
 class ResourceGroupEv : public ResourceGroup {
   public:
-    ResourceGroupEv(c_imagesprite* sprite) : ResourceGroup(sprite) {
+    ResourceGroupEv(c_ImageSprite* sprite) : ResourceGroup(sprite) {
       m_base = event_base_new();
       m_connections = 0;
     }
@@ -74,7 +74,7 @@ class ResourceGroupEv : public ResourceGroup {
 
 class Image {
   public:
-    Image(String path, c_imagesprite* sprite) {
+    Image(String path, c_ImageSprite* sprite) {
       m_sprite = sprite;
       m_path = path;
       m_image = NULL;
@@ -115,7 +115,7 @@ class Image {
     int m_y;
     int m_area;
 
-    c_imagesprite* m_sprite;
+    c_ImageSprite* m_sprite;
     String m_path;
 
     gdImagePtr m_image;
@@ -136,7 +136,7 @@ class Image {
 
 class ImageFromFile : public Image {
   public:
-    ImageFromFile(String path, c_imagesprite* sprite)
+    ImageFromFile(String path, c_ImageSprite* sprite)
       : Image(path, sprite) {
       // Do nothing
     }
@@ -146,7 +146,7 @@ class ImageFromFile : public Image {
 
 class ImageFromString : public Image {
   public:
-    ImageFromString(String id, String data, c_imagesprite* sprite)
+    ImageFromString(String id, String data, c_ImageSprite* sprite)
       : Image(id, sprite) {
       m_data = data;
     }
@@ -159,7 +159,7 @@ class ImageFromString : public Image {
 
 class ImageFromHTTP : public Image {
   public:
-    ImageFromHTTP(String path, c_imagesprite* sprite, int timeout);
+    ImageFromHTTP(String path, c_ImageSprite* sprite, int timeout);
 
     void loadImage(bool block = false);
 

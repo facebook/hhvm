@@ -274,9 +274,9 @@ void ClassConstantExpression::outputCPPImpl(CodeGenerator &cg,
     } else {
       if (cls->getConstants()->isDynamic(m_varName)) {
         cg_printf("%s%s::lazy_initializer(%s)->", Option::ClassPrefix,
-                  trueClassName.c_str(), cg.getGlobals(ar));
+                  cls->getId(cg).c_str(), cg.getGlobals(ar));
       }
-      cg_printf("%s%s_%s", Option::ClassConstantPrefix, trueClassName.c_str(),
+      cg_printf("%s%s_%s", Option::ClassConstantPrefix, cls->getId(cg).c_str(),
                 m_varName.c_str());
     }
     if (outsideClass) {

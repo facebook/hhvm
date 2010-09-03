@@ -1246,11 +1246,11 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
         memDecl += "; ";
         params += ", ";
       }
-      varDecl += type->getCPPDecl() + " &" + Option::TempVariablePrefix +
+      varDecl += type->getCPPDecl(cg, ar) + " &" + Option::TempVariablePrefix +
         cg.formatLabel(name);
       initializer += varName + "(" + Option::TempVariablePrefix +
         cg.formatLabel(name) + ")";
-      memDecl += type->getCPPDecl() + " &" + varName;
+      memDecl += type->getCPPDecl(cg, ar) + " &" + varName;
       params += varName;
     }
   }
@@ -1381,7 +1381,6 @@ void VariableTable::outputCPPPropertyDecl(CodeGenerator &cg,
     // unless it is private or the parent's one is private
     if (isStatic(name) || definedByParent(ar, name)) continue;
 
-    cg_printf("public: ");
     getFinalType(name)->outputCPPDecl(cg, ar);
     cg_printf(" %s%s;\n", Option::PropertyPrefix,
               cg.formatLabel(name).c_str());
@@ -1420,7 +1419,7 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
 }
 
 void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
-    AnalysisResultPtr ar, const char *parent,
+    AnalysisResultPtr ar, const char *parent, const char *parentName,
     ClassScope::Derivation dynamicObject /* = ClassScope::FromNormal */) {
   string clsStr = m_blockScope.getId(cg);
   const char *cls = clsStr.c_str();
@@ -1432,6 +1431,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
     cprefix = Option::ClassStaticsObjectPrefix;
     op = "->";
     gl = "g->";
+    parent = parentName;
   }
   // Statics
   bool gdec = false;
@@ -1444,7 +1444,7 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   }
   if (!gdec && dynamicObject == 1) cg.printDeclareGlobals();
   cg_printf("return %s%s%s%s%sgetInit(s);\n", gl, cprefix,
-             parent, op, Option::ObjectStaticPrefix);
+            parent, op, Option::ObjectStaticPrefix);
   cg_indentEnd("}\n");
   cg.ifdefEnd("OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_%s", cls);
 
@@ -1580,12 +1580,12 @@ bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,
     if (!strcasecmp(name, ar->getClassScope()->getOriginalName().c_str())) {
       cg_printf("HASH_GUARD_STRING(0x%016llXLL, %s) "
                 "{ return %s%sPrivate(prop%s); }\n",
-          hash_string(name), name, Option::ObjectPrefix, op, args);
+                hash_string(name), name, Option::ObjectPrefix, op, args);
     } else {
       cg_printf("HASH_GUARD_STRING(0x%016llXLL, %s) "
                 "{ return %s%s::%s%sPrivate(prop%s); }\n",
-          hash_string(name), name, Option::ClassPrefix,
-          Util::toLower(name).c_str(), Option::ObjectPrefix, op, args);
+                hash_string(name), name, Option::ClassPrefix,
+                name, Option::ObjectPrefix, op, args);
     }
   }
   return true;

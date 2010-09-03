@@ -29,8 +29,8 @@ namespace HPHP {
 /* preface starts */
 /* preface finishes */
 /* SRC: classes/iterator.php line 326 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_arrayiterator
-Variant c_arrayiterator::os_getInit(CStrRef s) {
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ArrayIterator
+Variant c_ArrayIterator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
   switch (hash & 3) {
@@ -47,33 +47,33 @@ Variant c_arrayiterator::os_getInit(CStrRef s) {
   }
   return c_ObjectData::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_arrayiterator
-Variant c_arrayiterator::os_get(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_ArrayIterator
+Variant c_ArrayIterator::os_get(CStrRef s) {
   return c_ObjectData::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
-Variant &c_arrayiterator::os_lval(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
+Variant &c_ArrayIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
-void c_arrayiterator::o_getArray(Array &props) const {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
+void c_ArrayIterator::o_getArray(Array &props) const {
   if (isInitialized(m_arr)) props.set(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
   if (isInitialized(m_flags)) props.set(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
   c_ObjectData::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_arrayiterator
-void c_arrayiterator::o_setArray(CArrRef props) {
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
+void c_ArrayIterator::o_setArray(CArrRef props) {
   props->load(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr);
   props->load(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags);
   c_ObjectData::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_arrayiterator
-Variant c_arrayiterator::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_ArrayIterator
+Variant c_ArrayIterator::o_get(CStrRef prop, bool error, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -85,14 +85,14 @@ Variant c_arrayiterator::o_get(CStrRef prop, bool error, CStrRef context) {
   }
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_arrayiterator
-Variant c_arrayiterator::o_getPublic(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ArrayIterator
+Variant c_ArrayIterator::o_getPublic(CStrRef s, bool error) {
   return c_ObjectData::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_arrayiterator
-Variant c_arrayiterator::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ArrayIterator
+Variant c_ArrayIterator::o_getPrivate(CStrRef s, bool error) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
@@ -108,9 +108,9 @@ Variant c_arrayiterator::o_getPrivate(CStrRef s, bool error) {
   }
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_arrayiterator
-Variant * c_arrayiterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator
+Variant * c_ArrayIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -122,14 +122,14 @@ Variant * c_arrayiterator::o_realProp(CStrRef prop, int flags, CStrRef context) 
   }
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_arrayiterator
-Variant * c_arrayiterator::o_realPropPublic(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ArrayIterator
+Variant * c_ArrayIterator::o_realPropPublic(CStrRef s, int flags) const {
   return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_arrayiterator
-Variant * c_arrayiterator::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator
+Variant * c_ArrayIterator::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
@@ -143,9 +143,9 @@ Variant * c_arrayiterator::o_realPropPrivate(CStrRef s, int flags) const {
   }
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_arrayiterator
-Variant c_arrayiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_ArrayIterator
+Variant c_ArrayIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -157,14 +157,14 @@ Variant c_arrayiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef co
   }
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_arrayiterator
-Variant c_arrayiterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ArrayIterator
+Variant c_ArrayIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_arrayiterator
-Variant c_arrayiterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ArrayIterator
+Variant c_ArrayIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
@@ -180,9 +180,9 @@ Variant c_arrayiterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   }
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_arrayiterator
-Variant& c_arrayiterator::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_ArrayIterator
+Variant& c_ArrayIterator::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -194,14 +194,14 @@ Variant& c_arrayiterator::o_lval(CStrRef prop, CStrRef context) {
   }
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_arrayiterator
-Variant& c_arrayiterator::o_lvalPublic(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ArrayIterator
+Variant& c_ArrayIterator::o_lvalPublic(CStrRef s) {
   return c_ObjectData::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_arrayiterator
-Variant& c_arrayiterator::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ArrayIterator
+Variant& c_ArrayIterator::o_lvalPrivate(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 3) {
     case 1:
@@ -217,21 +217,21 @@ Variant& c_arrayiterator::o_lvalPrivate(CStrRef s) {
   }
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_arrayiterator
-Variant c_arrayiterator::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
+Variant c_ArrayIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_arrayiterator
-IMPLEMENT_CLASS(arrayiterator)
-c_arrayiterator *c_arrayiterator::create(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
+IMPLEMENT_CLASS(ArrayIterator)
+c_ArrayIterator *c_ArrayIterator::create(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
 ) {
   CountableHelper h(this);
   init();
   t___construct(v_array, v_flags);
   return this;
 }
-ObjectData *c_arrayiterator::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_ArrayIterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -251,7 +251,7 @@ ObjectData *c_arrayiterator::dynCreate(CArrRef params, bool construct /* = true 
   }
   return this;
 }
-void c_arrayiterator::dynConstruct(CArrRef params) {
+void c_ArrayIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("ArrayIterator::__construct", count, 1, 2, 2);
   do {
@@ -266,7 +266,7 @@ void c_arrayiterator::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1));
   } while (false);
 }
-void c_arrayiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_ArrayIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -287,20 +287,20 @@ void c_arrayiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
-ObjectData *c_arrayiterator::cloneImpl() {
-  c_arrayiterator *obj = NEW(c_arrayiterator)();
+ObjectData *c_ArrayIterator::cloneImpl() {
+  c_ArrayIterator *obj = NEW(c_ArrayIterator)();
   cloneSet(obj);
   return obj;
 }
-void c_arrayiterator::cloneSet(c_arrayiterator *clone) {
+void c_ArrayIterator::cloneSet(c_ArrayIterator *clone) {
   clone->m_arr = m_arr.isReferenced() ? ref(m_arr) : m_arr;
   clone->m_flags = m_flags.isReferenced() ? ref(m_flags) : m_flags;
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_arrayiterator
-Variant c_arrayiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ArrayIterator
+Variant c_ArrayIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xe:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -490,7 +490,7 @@ Variant c_arrayiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 0:
@@ -673,13 +673,13 @@ Variant c_arrayiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_arrayiterator
-Variant c_arrayiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_ArrayIterator
+Variant c_ArrayIterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xe:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -817,7 +817,7 @@ Variant c_arrayiterator::o_invoke_few_args(MethodIndex methodIndex, const char *
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 0:
@@ -948,21 +948,21 @@ Variant c_arrayiterator::o_invoke_few_args(MethodIndex methodIndex, const char *
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_arrayiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_arrayiterator
-Variant c_arrayiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_ArrayIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ArrayIterator
+Variant c_ArrayIterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_arrayiterator
-Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ArrayIterator
+Variant c_ArrayIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xe:
@@ -1325,7 +1325,7 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 63) {
     case 0:
@@ -1680,29 +1680,29 @@ Variant c_arrayiterator::o_invoke_from_eval(const char *s, Eval::VariableEnviron
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_arrayiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_ArrayIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_arrayiterator = {
-  c_arrayiterator::os_getInit,
-  c_arrayiterator::os_get,
-  c_arrayiterator::os_lval,
-  c_arrayiterator::os_invoke,
-  c_arrayiterator::os_constant,
+struct ObjectStaticCallbacks cw_ArrayIterator = {
+  c_ArrayIterator::os_getInit,
+  c_ArrayIterator::os_get,
+  c_ArrayIterator::os_lval,
+  c_ArrayIterator::os_invoke,
+  c_ArrayIterator::os_constant,
 };
-void c_arrayiterator::init() {
+void c_ArrayIterator::init() {
   m_arr = null;
   m_flags = null;
 }
 /* SRC: classes/iterator.php line 330 */
-void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
+void c_ArrayIterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /* SORT_REGULAR */
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -1711,7 +1711,7 @@ void c_arrayiterator::t___construct(Variant v_array, Variant v_flags //  = 0LL /
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 346 */
-void c_arrayiterator::t_append(CVarRef v_value) {
+void c_ArrayIterator::t_append(CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::append);
   {
     Variant tmp1((v_value));
@@ -1719,7 +1719,7 @@ void c_arrayiterator::t_append(CVarRef v_value) {
   }
 } /* function */
 /* SRC: classes/iterator.php line 359 */
-bool c_arrayiterator::t_asort() {
+bool c_ArrayIterator::t_asort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::asort);
   {
     const Variant &tmp1((lval(m_arr)));
@@ -1728,32 +1728,32 @@ bool c_arrayiterator::t_asort() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 373 */
-int c_arrayiterator::t_count() {
+int c_ArrayIterator::t_count() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::count);
   return x_count(m_arr);
 } /* function */
 /* SRC: classes/iterator.php line 385 */
-Variant c_arrayiterator::t_current() {
+Variant c_ArrayIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::current);
   return x_current(ref(lval(m_arr)));
 } /* function */
 /* SRC: classes/iterator.php line 399 */
-Variant c_arrayiterator::t_getarraycopy() {
+Variant c_ArrayIterator::t_getarraycopy() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getArrayCopy);
   return m_arr;
 } /* function */
 /* SRC: classes/iterator.php line 412 */
-Variant c_arrayiterator::t_getflags() {
+Variant c_ArrayIterator::t_getflags() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::getFlags);
   return m_flags;
 } /* function */
 /* SRC: classes/iterator.php line 424 */
-Variant c_arrayiterator::t_key() {
+Variant c_ArrayIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::key);
   return x_key(ref(lval(m_arr)));
 } /* function */
 /* SRC: classes/iterator.php line 437 */
-bool c_arrayiterator::t_ksort() {
+bool c_ArrayIterator::t_ksort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::ksort);
   {
     const Variant &tmp1((lval(m_arr)));
@@ -1762,39 +1762,39 @@ bool c_arrayiterator::t_ksort() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 451 */
-Variant c_arrayiterator::t_natcasesort() {
+Variant c_ArrayIterator::t_natcasesort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natcasesort);
   return x_natcasesort(ref(lval(m_arr)));
 } /* function */
 /* SRC: classes/iterator.php line 465 */
-Variant c_arrayiterator::t_natsort() {
+Variant c_ArrayIterator::t_natsort() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::natsort);
   return x_natsort(ref(lval(m_arr)));
 } /* function */
 /* SRC: classes/iterator.php line 477 */
-Variant c_arrayiterator::t_next() {
+Variant c_ArrayIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::next);
   return x_next(ref(lval(m_arr)));
 } /* function */
 /* SRC: classes/iterator.php line 492 */
-bool c_arrayiterator::t_offsetexists(CVarRef v_index) {
+bool c_ArrayIterator::t_offsetexists(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetExists);
   return isset(m_arr, v_index);
 } /* function */
 /* SRC: classes/iterator.php line 507 */
-Variant c_arrayiterator::t_offsetget(Variant v_index) {
+Variant c_ArrayIterator::t_offsetget(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   return m_arr.rvalAt(v_index, true);
 } /* function */
 /* SRC: classes/iterator.php line 507 */
-Variant &c_arrayiterator::___offsetget_lval(Variant v_index) {
+Variant &c_ArrayIterator::___offsetget_lval(Variant v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetGet);
   Variant &v = get_system_globals()->__lvalProxy;
   v = t_offsetget(v_index);
   return v;
 } /* function */
 /* SRC: classes/iterator.php line 523 */
-Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
+Variant c_ArrayIterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetSet);
   {
     Variant tmp1((v_newval));
@@ -1803,18 +1803,18 @@ Variant c_arrayiterator::t_offsetset(CVarRef v_index, CVarRef v_newval) {
   return null;
 } /* function */
 /* SRC: classes/iterator.php line 538 */
-Variant c_arrayiterator::t_offsetunset(CVarRef v_index) {
+Variant c_ArrayIterator::t_offsetunset(CVarRef v_index) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::offsetUnset);
   lval(m_arr).weakRemove(v_index);
   return null;
 } /* function */
 /* SRC: classes/iterator.php line 550 */
-Variant c_arrayiterator::t_rewind() {
+Variant c_ArrayIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::rewind);
   return x_reset(ref(lval(m_arr)));
 } /* function */
 /* SRC: classes/iterator.php line 563 */
-void c_arrayiterator::t_seek(CVarRef v_position) {
+void c_ArrayIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::seek);
   int64 v_i = 0;
 
@@ -1841,12 +1841,12 @@ void c_arrayiterator::t_seek(CVarRef v_position) {
   }
 } /* function */
 /* SRC: classes/iterator.php line 586 */
-void c_arrayiterator::t_setflags(CVarRef v_flags) {
+void c_ArrayIterator::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::setFlags);
   m_flags = v_flags;
 } /* function */
 /* SRC: classes/iterator.php line 603 */
-bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
+bool c_ArrayIterator::t_uasort(CVarRef v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uasort);
   {
     const Variant &tmp1((lval(m_arr)));
@@ -1855,12 +1855,12 @@ bool c_arrayiterator::t_uasort(CVarRef v_cmp_function) {
   }
 } /* function */
 /* SRC: classes/iterator.php line 620 */
-bool c_arrayiterator::t_uksort(Variant v_cmp_function) {
+bool c_ArrayIterator::t_uksort(Variant v_cmp_function) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::uksort);
   return toBoolean(invoke("uksort", Array(ArrayInit(1, true).setRef(v_cmp_function).create()), 0x4842AF70A71BE6C4LL));
 } /* function */
 /* SRC: classes/iterator.php line 632 */
-bool c_arrayiterator::t_valid() {
+bool c_ArrayIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ArrayIterator, ArrayIterator::valid);
   {
     const Variant &tmp1((x_key(ref(lval(m_arr)))));
@@ -1869,8 +1869,8 @@ bool c_arrayiterator::t_valid() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 923 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_appenditerator
-Variant c_appenditerator::os_getInit(CStrRef s) {
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
+Variant c_AppendIterator::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -1883,31 +1883,31 @@ Variant c_appenditerator::os_getInit(CStrRef s) {
   }
   return c_ObjectData::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_appenditerator
-Variant c_appenditerator::os_get(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_AppendIterator
+Variant c_AppendIterator::os_get(CStrRef s) {
   return c_ObjectData::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
-Variant &c_appenditerator::os_lval(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
+Variant &c_AppendIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
-void c_appenditerator::o_getArray(Array &props) const {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
+void c_AppendIterator::o_getArray(Array &props) const {
   if (isInitialized(m_iterators)) props.set(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
   c_ObjectData::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_appenditerator
-void c_appenditerator::o_setArray(CArrRef props) {
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
+void c_AppendIterator::o_setArray(CArrRef props) {
   props->load(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators);
   c_ObjectData::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_appenditerator
-Variant c_appenditerator::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_AppendIterator
+Variant c_AppendIterator::o_get(CStrRef prop, bool error, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -1919,14 +1919,14 @@ Variant c_appenditerator::o_get(CStrRef prop, bool error, CStrRef context) {
   }
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_appenditerator
-Variant c_appenditerator::o_getPublic(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_AppendIterator
+Variant c_AppendIterator::o_getPublic(CStrRef s, bool error) {
   return c_ObjectData::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_appenditerator
-Variant c_appenditerator::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_AppendIterator
+Variant c_AppendIterator::o_getPrivate(CStrRef s, bool error) {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
@@ -1938,9 +1938,9 @@ Variant c_appenditerator::o_getPrivate(CStrRef s, bool error) {
   }
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_appenditerator
-Variant * c_appenditerator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_AppendIterator
+Variant * c_AppendIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -1952,14 +1952,14 @@ Variant * c_appenditerator::o_realProp(CStrRef prop, int flags, CStrRef context)
   }
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_appenditerator
-Variant * c_appenditerator::o_realPropPublic(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_AppendIterator
+Variant * c_AppendIterator::o_realPropPublic(CStrRef s, int flags) const {
   return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_appenditerator
-Variant * c_appenditerator::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_AppendIterator
+Variant * c_AppendIterator::o_realPropPrivate(CStrRef s, int flags) const {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
@@ -1970,9 +1970,9 @@ Variant * c_appenditerator::o_realPropPrivate(CStrRef s, int flags) const {
   }
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_appenditerator
-Variant c_appenditerator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_AppendIterator
+Variant c_AppendIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -1984,14 +1984,14 @@ Variant c_appenditerator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef c
   }
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_appenditerator
-Variant c_appenditerator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_AppendIterator
+Variant c_AppendIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_appenditerator
-Variant c_appenditerator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_AppendIterator
+Variant c_AppendIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
@@ -2003,9 +2003,9 @@ Variant c_appenditerator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   }
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_appenditerator
-Variant& c_appenditerator::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_AppendIterator
+Variant& c_AppendIterator::o_lval(CStrRef prop, CStrRef context) {
   CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
   int64 hash = s->hash();
   switch (hash & 1) {
@@ -2017,14 +2017,14 @@ Variant& c_appenditerator::o_lval(CStrRef prop, CStrRef context) {
   }
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_appenditerator
-Variant& c_appenditerator::o_lvalPublic(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_AppendIterator
+Variant& c_AppendIterator::o_lvalPublic(CStrRef s) {
   return c_ObjectData::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_appenditerator
-Variant& c_appenditerator::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_AppendIterator
+Variant& c_AppendIterator::o_lvalPrivate(CStrRef s) {
   int64 hash = s->hash();
   switch (hash & 1) {
     case 1:
@@ -2036,20 +2036,20 @@ Variant& c_appenditerator::o_lvalPrivate(CStrRef s) {
   }
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_appenditerator
-Variant c_appenditerator::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_AppendIterator
+Variant c_AppendIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_appenditerator
-IMPLEMENT_CLASS(appenditerator)
-c_appenditerator *c_appenditerator::create() {
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_AppendIterator
+IMPLEMENT_CLASS(AppendIterator)
+c_AppendIterator *c_AppendIterator::create() {
   CountableHelper h(this);
   init();
   t___construct();
   return this;
 }
-ObjectData *c_appenditerator::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_AppendIterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -2059,12 +2059,12 @@ ObjectData *c_appenditerator::dynCreate(CArrRef params, bool construct /* = true
   }
   return this;
 }
-void c_appenditerator::dynConstruct(CArrRef params) {
+void c_AppendIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("AppendIterator::__construct", 0, 2);
   (t___construct());
 }
-void c_appenditerator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_AppendIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) throw_toomany_arguments("AppendIterator::__construct", 0, 1);
@@ -2076,22 +2076,22 @@ void c_appenditerator::dynConstructFromEval(Eval::VariableEnvironment &env, cons
   }
   (t___construct(), null);
 }
-ObjectData *c_appenditerator::cloneImpl() {
-  c_appenditerator *obj = NEW(c_appenditerator)();
+ObjectData *c_AppendIterator::cloneImpl() {
+  c_AppendIterator *obj = NEW(c_AppendIterator)();
   cloneSet(obj);
   return obj;
 }
-void c_appenditerator::cloneSet(c_appenditerator *clone) {
+void c_AppendIterator::cloneSet(c_AppendIterator *clone) {
   clone->m_iterators = m_iterators.isReferenced() ? ref(m_iterators) : m_iterators;
   ObjectData::cloneSet(clone);
 }
-Variant c_appenditerator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
+Variant c_AppendIterator::doCall(Variant v_name, Variant v_arguments, bool fatal) {
   return t___call(v_name, !v_arguments.isNull() ? v_arguments : Variant(Array::Create()));
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_appenditerator
-Variant c_appenditerator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_AppendIterator
+Variant c_AppendIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2161,7 +2161,7 @@ Variant c_appenditerator::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -2230,13 +2230,13 @@ Variant c_appenditerator::o_invoke(MethodIndex methodIndex, const char *s, CArrR
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_appenditerator
-Variant c_appenditerator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_AppendIterator
+Variant c_AppendIterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -2295,7 +2295,7 @@ Variant c_appenditerator::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -2353,21 +2353,21 @@ Variant c_appenditerator::o_invoke_few_args(MethodIndex methodIndex, const char 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_appenditerator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_appenditerator
-Variant c_appenditerator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_AppendIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_AppendIterator
+Variant c_AppendIterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_appenditerator
-Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_AppendIterator
+Variant c_AppendIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -2511,7 +2511,7 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 31) {
     case 2:
@@ -2653,50 +2653,50 @@ Variant c_appenditerator::o_invoke_from_eval(const char *s, Eval::VariableEnviro
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_appenditerator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_AppendIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_appenditerator = {
-  c_appenditerator::os_getInit,
-  c_appenditerator::os_get,
-  c_appenditerator::os_lval,
-  c_appenditerator::os_invoke,
-  c_appenditerator::os_constant,
+struct ObjectStaticCallbacks cw_AppendIterator = {
+  c_AppendIterator::os_getInit,
+  c_AppendIterator::os_get,
+  c_AppendIterator::os_lval,
+  c_AppendIterator::os_invoke,
+  c_AppendIterator::os_constant,
 };
-void c_appenditerator::init() {
+void c_AppendIterator::init() {
   m_iterators = null;
 }
 /* SRC: classes/iterator.php line 926 */
-void c_appenditerator::t___construct() {
+void c_AppendIterator::t___construct() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__construct);
   bool oldInCtor = gasInCtor(true);
   {
-    p_arrayiterator tmp1((p_arrayiterator((NEWOBJ(c_arrayiterator)())->create(s_sys_sa00000000))));
+    p_ArrayIterator tmp1((p_ArrayIterator((NEWOBJ(c_ArrayIterator)())->create(s_sys_sa00000000))));
     m_iterators = tmp1;
   }
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 941 */
-void c_appenditerator::t_append(CVarRef v_it) {
+void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
   if(!v_it.instanceof("iterator"))
     throw_unexpected_argument_type(0,"append","iterator",v_it);
   m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* append */ MethodIndex(5, 1) /* append */ ,  "append", 0x4DEE4A472DC69EC2LL, 1, v_it);
 } /* function */
 /* SRC: classes/iterator.php line 955 */
-Variant c_appenditerator::t_getinneriterator() {
+Variant c_AppendIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::getInnerIterator);
   return wrap_variant(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* current */ MethodIndex(7, 1) /* current */ ,  "current", 0x5B3A4A72846B21DCLL, 0));
 } /* function */
 /* SRC: classes/iterator.php line 969 */
-void c_appenditerator::t_rewind() {
+void c_AppendIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::rewind);
   m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
   if (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0))) {
@@ -2709,7 +2709,7 @@ void c_appenditerator::t_rewind() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 985 */
-bool c_appenditerator::t_valid() {
+bool c_AppendIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::valid);
   {
     bool tmp1 = (toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)));
@@ -2721,7 +2721,7 @@ bool c_appenditerator::t_valid() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 998 */
-Variant c_appenditerator::t_current() {
+Variant c_AppendIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::current);
   {
     Variant tmp1;
@@ -2735,7 +2735,7 @@ Variant c_appenditerator::t_current() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 1016 */
-Variant c_appenditerator::t_key() {
+Variant c_AppendIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::key);
   {
     Variant tmp1;
@@ -2749,7 +2749,7 @@ Variant c_appenditerator::t_key() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 1030 */
-void c_appenditerator::t_next() {
+void c_AppendIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::next);
   if (!(toBoolean(m_iterators. BIND_CLASS_DOT o_invoke_few_args(/* valid */ MethodIndex(3, 1) /* valid */ ,  "valid", 0x6413CB5154808C44LL, 0)))) {
     {
@@ -2800,7 +2800,7 @@ void c_appenditerator::t_next() {
   }
 } /* function */
 /* SRC: classes/iterator.php line 1048 */
-Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
+Variant c_AppendIterator::t___call(Variant v_func, Variant v_params) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::__call);
   {
     ArrayInit tmp1(2, true);
@@ -2812,134 +2812,134 @@ Variant c_appenditerator::t___call(Variant v_func, Variant v_params) {
   }
 } /* function */
 /* SRC: classes/iterator.php line 755 */
-const int64 q_recursivedirectoryiterator_CURRENT_AS_SELF = 0LL;
-const int64 q_recursivedirectoryiterator_CURRENT_AS_FILEINFO = 16LL;
-const int64 q_recursivedirectoryiterator_CURRENT_AS_PATHNAME = 32LL;
-const int64 q_recursivedirectoryiterator_KEY_AS_PATHNAME = 0LL;
-const int64 q_recursivedirectoryiterator_KEY_AS_FILENAME = 256LL;
-const int64 q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY = 272LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::os_getInit(CStrRef s) {
-  return c_directoryiterator::os_getInit(s);
+const int64 q_RecursiveDirectoryIterator_CURRENT_AS_SELF = 0LL;
+const int64 q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO = 16LL;
+const int64 q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME = 32LL;
+const int64 q_RecursiveDirectoryIterator_KEY_AS_PATHNAME = 0LL;
+const int64 q_RecursiveDirectoryIterator_KEY_AS_FILENAME = 256LL;
+const int64 q_RecursiveDirectoryIterator_NEW_CURRENT_AND_KEY = 272LL;
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::os_getInit(CStrRef s) {
+  return c_DirectoryIterator::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::os_get(CStrRef s) {
-  return c_directoryiterator::os_get(s);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::os_get(CStrRef s) {
+  return c_DirectoryIterator::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursivedirectoryiterator
-Variant &c_recursivedirectoryiterator::os_lval(CStrRef s) {
-  return c_directoryiterator::os_lval(s);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveDirectoryIterator
+Variant &c_RecursiveDirectoryIterator::os_lval(CStrRef s) {
+  return c_DirectoryIterator::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_recursivedirectoryiterator
-void c_recursivedirectoryiterator::o_getArray(Array &props) const {
-  c_directoryiterator::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveDirectoryIterator
+void c_RecursiveDirectoryIterator::o_getArray(Array &props) const {
+  c_DirectoryIterator::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_recursivedirectoryiterator
-void c_recursivedirectoryiterator::o_setArray(CArrRef props) {
-  c_directoryiterator::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator
+void c_RecursiveDirectoryIterator::o_setArray(CArrRef props) {
+  c_DirectoryIterator::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_get(CStrRef prop, bool error, CStrRef context) {
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_getPublic(CStrRef s, bool error) {
-  return c_directoryiterator::o_getPublic(s, error);
+#endif // OMIT_JUMP_TABLE_CLASS_get_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_getPublic(CStrRef s, bool error) {
+  return c_DirectoryIterator::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_recursivedirectoryiterator
-Variant * c_recursivedirectoryiterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator
+Variant * c_RecursiveDirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursivedirectoryiterator
-Variant * c_recursivedirectoryiterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_directoryiterator::o_realPropPublic(s, flags);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveDirectoryIterator
+Variant * c_RecursiveDirectoryIterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_DirectoryIterator::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursivedirectoryiterator
-Variant * c_recursivedirectoryiterator::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveDirectoryIterator
+Variant * c_RecursiveDirectoryIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_directoryiterator::o_setPublic(s, v, forInit);
+#endif // OMIT_JUMP_TABLE_CLASS_set_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_DirectoryIterator::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_recursivedirectoryiterator
-Variant& c_recursivedirectoryiterator::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_RecursiveDirectoryIterator
+Variant& c_RecursiveDirectoryIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursivedirectoryiterator
-Variant& c_recursivedirectoryiterator::o_lvalPublic(CStrRef s) {
-  return c_directoryiterator::o_lvalPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_lval_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RecursiveDirectoryIterator
+Variant& c_RecursiveDirectoryIterator::o_lvalPublic(CStrRef s) {
+  return c_DirectoryIterator::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursivedirectoryiterator
-Variant& c_recursivedirectoryiterator::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RecursiveDirectoryIterator
+Variant& c_RecursiveDirectoryIterator::o_lvalPrivate(CStrRef s) {
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 15) {
     case 0:
-      HASH_RETURN(0x4A34A9DA11ED8F50LL, q_recursivedirectoryiterator_KEY_AS_FILENAME, "KEY_AS_FILENAME");
+      HASH_RETURN(0x4A34A9DA11ED8F50LL, q_RecursiveDirectoryIterator_KEY_AS_FILENAME, "KEY_AS_FILENAME");
       break;
     case 1:
-      HASH_RETURN(0x6AA4D24FB118FCF1LL, q_recursivedirectoryiterator_KEY_AS_PATHNAME, "KEY_AS_PATHNAME");
+      HASH_RETURN(0x6AA4D24FB118FCF1LL, q_RecursiveDirectoryIterator_KEY_AS_PATHNAME, "KEY_AS_PATHNAME");
       break;
     case 4:
-      HASH_RETURN(0x0F0DCA1A52157D84LL, q_recursivedirectoryiterator_NEW_CURRENT_AND_KEY, "NEW_CURRENT_AND_KEY");
+      HASH_RETURN(0x0F0DCA1A52157D84LL, q_RecursiveDirectoryIterator_NEW_CURRENT_AND_KEY, "NEW_CURRENT_AND_KEY");
       break;
     case 5:
-      HASH_RETURN(0x29191B08277C8E85LL, q_recursivedirectoryiterator_CURRENT_AS_SELF, "CURRENT_AS_SELF");
+      HASH_RETURN(0x29191B08277C8E85LL, q_RecursiveDirectoryIterator_CURRENT_AS_SELF, "CURRENT_AS_SELF");
       break;
     case 6:
-      HASH_RETURN(0x5C823ED8BD51E7F6LL, q_recursivedirectoryiterator_CURRENT_AS_FILEINFO, "CURRENT_AS_FILEINFO");
+      HASH_RETURN(0x5C823ED8BD51E7F6LL, q_RecursiveDirectoryIterator_CURRENT_AS_FILEINFO, "CURRENT_AS_FILEINFO");
       break;
     case 15:
-      HASH_RETURN(0x2D581F4C45121E5FLL, q_recursivedirectoryiterator_CURRENT_AS_PATHNAME, "CURRENT_AS_PATHNAME");
+      HASH_RETURN(0x2D581F4C45121E5FLL, q_RecursiveDirectoryIterator_CURRENT_AS_PATHNAME, "CURRENT_AS_PATHNAME");
       break;
     default:
       break;
   }
-  return c_directoryiterator::os_constant(s);
+  return c_DirectoryIterator::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_recursivedirectoryiterator
-IMPLEMENT_CLASS(recursivedirectoryiterator)
-c_recursivedirectoryiterator *c_recursivedirectoryiterator::create(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveDirectoryIterator
+IMPLEMENT_CLASS(RecursiveDirectoryIterator)
+c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
 ) {
   CountableHelper h(this);
   init();
   t___construct(v_path, v_flags);
   return this;
 }
-ObjectData *c_recursivedirectoryiterator::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_RecursiveDirectoryIterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -2959,7 +2959,7 @@ ObjectData *c_recursivedirectoryiterator::dynCreate(CArrRef params, bool constru
   }
   return this;
 }
-void c_recursivedirectoryiterator::dynConstruct(CArrRef params) {
+void c_RecursiveDirectoryIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 2) throw_wrong_arguments("RecursiveDirectoryIterator::__construct", count, 1, 2, 2);
   do {
@@ -2974,7 +2974,7 @@ void c_recursivedirectoryiterator::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1));
   } while (false);
 }
-void c_recursivedirectoryiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_RecursiveDirectoryIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -2995,18 +2995,18 @@ void c_recursivedirectoryiterator::dynConstructFromEval(Eval::VariableEnvironmen
   if (count <= 1) (t___construct(a0), null);
   else (t___construct(a0, a1), null);
 }
-ObjectData *c_recursivedirectoryiterator::cloneImpl() {
-  c_recursivedirectoryiterator *obj = NEW(c_recursivedirectoryiterator)();
+ObjectData *c_RecursiveDirectoryIterator::cloneImpl() {
+  c_RecursiveDirectoryIterator *obj = NEW(c_RecursiveDirectoryIterator)();
   cloneSet(obj);
   return obj;
 }
-void c_recursivedirectoryiterator::cloneSet(c_recursivedirectoryiterator *clone) {
-  c_directoryiterator::cloneSet(clone);
+void c_RecursiveDirectoryIterator::cloneSet(c_RecursiveDirectoryIterator *clone) {
+  c_DirectoryIterator::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3297,7 +3297,7 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 6:
@@ -3577,13 +3577,13 @@ Variant c_recursivedirectoryiterator::o_invoke(MethodIndex methodIndex, const ch
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -3831,7 +3831,7 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 6:
@@ -4068,21 +4068,21 @@ Variant c_recursivedirectoryiterator::o_invoke_few_args(MethodIndex methodIndex,
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursivedirectoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveDirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursivedirectoryiterator
-Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveDirectoryIterator
+Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -4687,7 +4687,7 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 6:
@@ -5280,28 +5280,28 @@ Variant c_recursivedirectoryiterator::o_invoke_from_eval(const char *s, Eval::Va
     default:
       break;
   }
-#endif
-  return c_directoryiterator::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_DirectoryIterator::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_recursivedirectoryiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_RecursiveDirectoryIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_directoryiterator::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_DirectoryIterator::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_recursivedirectoryiterator = {
-  c_recursivedirectoryiterator::os_getInit,
-  c_recursivedirectoryiterator::os_get,
-  c_recursivedirectoryiterator::os_lval,
-  c_recursivedirectoryiterator::os_invoke,
-  c_recursivedirectoryiterator::os_constant,
+struct ObjectStaticCallbacks cw_RecursiveDirectoryIterator = {
+  c_RecursiveDirectoryIterator::os_getInit,
+  c_RecursiveDirectoryIterator::os_get,
+  c_RecursiveDirectoryIterator::os_lval,
+  c_RecursiveDirectoryIterator::os_invoke,
+  c_RecursiveDirectoryIterator::os_constant,
 };
-void c_recursivedirectoryiterator::init() {
-  c_directoryiterator::init();
+void c_RecursiveDirectoryIterator::init() {
+  c_DirectoryIterator::init();
 }
 /* SRC: classes/iterator.php line 764 */
-void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
+void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -5314,7 +5314,7 @@ void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags
     if (tmp1) {
       {
         {
-          p_unexpectedvalueexception tmp3 = NEWOBJ(c_unexpectedvalueexception)();
+          p_UnexpectedValueException tmp3 = NEWOBJ(c_UnexpectedValueException)();
           throw_exception((tmp3->create(concat3(NAMSTR(s_sys_ss35f9d4be, "RecursiveDirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp3));
         }
       }
@@ -5323,159 +5323,159 @@ void c_recursivedirectoryiterator::t___construct(Variant v_path, Variant v_flags
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 772 */
-Variant c_recursivedirectoryiterator::t_current() {
+Variant c_RecursiveDirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::current);
   return x_hphp_recursivedirectoryiterator_current(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 784 */
-Variant c_recursivedirectoryiterator::t_key() {
+Variant c_RecursiveDirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::key);
   return x_hphp_recursivedirectoryiterator_key(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 796 */
-Variant c_recursivedirectoryiterator::t_next() {
+Variant c_RecursiveDirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::next);
   return (x_hphp_recursivedirectoryiterator_next(GET_THIS()), null);
 } /* function */
 /* SRC: classes/iterator.php line 808 */
-Variant c_recursivedirectoryiterator::t_rewind() {
+Variant c_RecursiveDirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::rewind);
   return (x_hphp_recursivedirectoryiterator_rewind(GET_THIS()), null);
 } /* function */
 /* SRC: classes/iterator.php line 812 */
-Variant c_recursivedirectoryiterator::t_seek(CVarRef v_position) {
+Variant c_RecursiveDirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::seek);
   return (invoke("hphp_recursivedirectoryiterator_seek", Array(ArrayInit(1, true).setRef(GET_THIS()).create()), 0x09A98E99D51E8C2BLL), null);
 } /* function */
 /* SRC: classes/iterator.php line 816 */
-String c_recursivedirectoryiterator::t___tostring() {
+String c_RecursiveDirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__toString);
   return x_hphp_recursivedirectoryiterator___tostring(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 820 */
-bool c_recursivedirectoryiterator::t_valid() {
+bool c_RecursiveDirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::valid);
   return x_hphp_recursivedirectoryiterator_valid(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 833 */
-bool c_recursivedirectoryiterator::t_haschildren() {
+bool c_RecursiveDirectoryIterator::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::hasChildren);
   return x_hphp_recursivedirectoryiterator_haschildren(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 846 */
-Object c_recursivedirectoryiterator::t_getchildren() {
+Object c_RecursiveDirectoryIterator::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getChildren);
   return x_hphp_recursivedirectoryiterator_getchildren(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 860 */
-String c_recursivedirectoryiterator::t_getsubpath() {
+String c_RecursiveDirectoryIterator::t_getsubpath() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPath);
   return x_hphp_recursivedirectoryiterator_getsubpath(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 874 */
-String c_recursivedirectoryiterator::t_getsubpathname() {
+String c_RecursiveDirectoryIterator::t_getsubpathname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::getSubPathname);
   return x_hphp_recursivedirectoryiterator_getsubpathname(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 645 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directoryiterator
-Variant c_directoryiterator::os_getInit(CStrRef s) {
-  return c_splfileinfo::os_getInit(s);
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DirectoryIterator
+Variant c_DirectoryIterator::os_getInit(CStrRef s) {
+  return c_SplFileInfo::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_directoryiterator
-Variant c_directoryiterator::os_get(CStrRef s) {
-  return c_splfileinfo::os_get(s);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_DirectoryIterator
+Variant c_DirectoryIterator::os_get(CStrRef s) {
+  return c_SplFileInfo::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directoryiterator
-Variant &c_directoryiterator::os_lval(CStrRef s) {
-  return c_splfileinfo::os_lval(s);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DirectoryIterator
+Variant &c_DirectoryIterator::os_lval(CStrRef s) {
+  return c_SplFileInfo::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_directoryiterator
-void c_directoryiterator::o_getArray(Array &props) const {
-  c_splfileinfo::o_getArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_DirectoryIterator
+void c_DirectoryIterator::o_getArray(Array &props) const {
+  c_SplFileInfo::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_directoryiterator
-void c_directoryiterator::o_setArray(CArrRef props) {
-  c_splfileinfo::o_setArray(props);
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_DirectoryIterator
+void c_DirectoryIterator::o_setArray(CArrRef props) {
+  c_SplFileInfo::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_directoryiterator
-Variant c_directoryiterator::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_DirectoryIterator
+Variant c_DirectoryIterator::o_get(CStrRef prop, bool error, CStrRef context) {
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directoryiterator
-Variant c_directoryiterator::o_getPublic(CStrRef s, bool error) {
-  return c_splfileinfo::o_getPublic(s, error);
+#endif // OMIT_JUMP_TABLE_CLASS_get_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DirectoryIterator
+Variant c_DirectoryIterator::o_getPublic(CStrRef s, bool error) {
+  return c_SplFileInfo::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directoryiterator
-Variant c_directoryiterator::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DirectoryIterator
+Variant c_DirectoryIterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_directoryiterator
-Variant * c_directoryiterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_DirectoryIterator
+Variant * c_DirectoryIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directoryiterator
-Variant * c_directoryiterator::o_realPropPublic(CStrRef s, int flags) const {
-  return c_splfileinfo::o_realPropPublic(s, flags);
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DirectoryIterator
+Variant * c_DirectoryIterator::o_realPropPublic(CStrRef s, int flags) const {
+  return c_SplFileInfo::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directoryiterator
-Variant * c_directoryiterator::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DirectoryIterator
+Variant * c_DirectoryIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_directoryiterator
-Variant c_directoryiterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_DirectoryIterator
+Variant c_DirectoryIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directoryiterator
-Variant c_directoryiterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
-  return c_splfileinfo::o_setPublic(s, v, forInit);
+#endif // OMIT_JUMP_TABLE_CLASS_set_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DirectoryIterator
+Variant c_DirectoryIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+  return c_SplFileInfo::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directoryiterator
-Variant c_directoryiterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DirectoryIterator
+Variant c_DirectoryIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_directoryiterator
-Variant& c_directoryiterator::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_DirectoryIterator
+Variant& c_DirectoryIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directoryiterator
-Variant& c_directoryiterator::o_lvalPublic(CStrRef s) {
-  return c_splfileinfo::o_lvalPublic(s);
+#endif // OMIT_JUMP_TABLE_CLASS_lval_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DirectoryIterator
+Variant& c_DirectoryIterator::o_lvalPublic(CStrRef s) {
+  return c_SplFileInfo::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directoryiterator
-Variant& c_directoryiterator::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DirectoryIterator
+Variant& c_DirectoryIterator::o_lvalPrivate(CStrRef s) {
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_directoryiterator
-Variant c_directoryiterator::os_constant(const char *s) {
-  return c_splfileinfo::os_constant(s);
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DirectoryIterator
+Variant c_DirectoryIterator::os_constant(const char *s) {
+  return c_SplFileInfo::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_directoryiterator
-IMPLEMENT_CLASS(directoryiterator)
-c_directoryiterator *c_directoryiterator::create(Variant v_path) {
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DirectoryIterator
+IMPLEMENT_CLASS(DirectoryIterator)
+c_DirectoryIterator *c_DirectoryIterator::create(Variant v_path) {
   CountableHelper h(this);
   init();
   t___construct(v_path);
   return this;
 }
-ObjectData *c_directoryiterator::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_DirectoryIterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -5490,7 +5490,7 @@ ObjectData *c_directoryiterator::dynCreate(CArrRef params, bool construct /* = t
   }
   return this;
 }
-void c_directoryiterator::dynConstruct(CArrRef params) {
+void c_DirectoryIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count != 1) throw_wrong_arguments("DirectoryIterator::__construct", count, 1, 1, 2);
   {
@@ -5500,7 +5500,7 @@ void c_directoryiterator::dynConstruct(CArrRef params) {
     (t___construct(arg0));
   }
 }
-void c_directoryiterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_DirectoryIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -5516,18 +5516,18 @@ void c_directoryiterator::dynConstructFromEval(Eval::VariableEnvironment &env, c
   }
   (t___construct(a0), null);
 }
-ObjectData *c_directoryiterator::cloneImpl() {
-  c_directoryiterator *obj = NEW(c_directoryiterator)();
+ObjectData *c_DirectoryIterator::cloneImpl() {
+  c_DirectoryIterator *obj = NEW(c_DirectoryIterator)();
   cloneSet(obj);
   return obj;
 }
-void c_directoryiterator::cloneSet(c_directoryiterator *clone) {
-  c_splfileinfo::cloneSet(clone);
+void c_DirectoryIterator::cloneSet(c_DirectoryIterator *clone) {
+  c_SplFileInfo::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
-Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DirectoryIterator
+Variant c_DirectoryIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -5792,7 +5792,7 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 6:
@@ -6046,13 +6046,13 @@ Variant c_directoryiterator::o_invoke(MethodIndex methodIndex, const char *s, CA
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
-Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_DirectoryIterator
+Variant c_DirectoryIterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0xad:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -6275,7 +6275,7 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 6:
@@ -6487,21 +6487,21 @@ Variant c_directoryiterator::o_invoke_few_args(MethodIndex methodIndex, const ch
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_directoryiterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directoryiterator
-Variant c_directoryiterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_DirectoryIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DirectoryIterator
+Variant c_DirectoryIterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_directoryiterator
-Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_DirectoryIterator
+Variant c_DirectoryIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0xad:
@@ -7045,7 +7045,7 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 127) {
     case 6:
@@ -7577,28 +7577,28 @@ Variant c_directoryiterator::o_invoke_from_eval(const char *s, Eval::VariableEnv
     default:
       break;
   }
-#endif
-  return c_splfileinfo::o_invoke_from_eval(s, env, caller, hash, fatal);
+  #endif
+  return c_SplFileInfo::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_directoryiterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_DirectoryIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
-  return c_splfileinfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
+  #else
+  #endif
+  return c_SplFileInfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_directoryiterator = {
-  c_directoryiterator::os_getInit,
-  c_directoryiterator::os_get,
-  c_directoryiterator::os_lval,
-  c_directoryiterator::os_invoke,
-  c_directoryiterator::os_constant,
+struct ObjectStaticCallbacks cw_DirectoryIterator = {
+  c_DirectoryIterator::os_getInit,
+  c_DirectoryIterator::os_get,
+  c_DirectoryIterator::os_lval,
+  c_DirectoryIterator::os_invoke,
+  c_DirectoryIterator::os_constant,
 };
-void c_directoryiterator::init() {
-  c_splfileinfo::init();
+void c_DirectoryIterator::init() {
+  c_SplFileInfo::init();
 }
 /* SRC: classes/iterator.php line 647 */
-void c_directoryiterator::t___construct(Variant v_path) {
+void c_DirectoryIterator::t___construct(Variant v_path) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
   {
@@ -7610,7 +7610,7 @@ void c_directoryiterator::t___construct(Variant v_path) {
     if (tmp1) {
       {
         {
-          p_unexpectedvalueexception tmp3 = NEWOBJ(c_unexpectedvalueexception)();
+          p_UnexpectedValueException tmp3 = NEWOBJ(c_UnexpectedValueException)();
           throw_exception((tmp3->create(concat3(NAMSTR(s_sys_ss3c6754b7, "DirectoryIterator::__construct("), toString(v_path), NAMSTR(s_sys_ss0c10eb92, "): failed to open dir"))), tmp3));
         }
       }
@@ -7619,157 +7619,157 @@ void c_directoryiterator::t___construct(Variant v_path) {
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 662 */
-Variant c_directoryiterator::t_current() {
+Variant c_DirectoryIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::current);
   return x_hphp_directoryiterator_current(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 674 */
-Variant c_directoryiterator::t_key() {
+Variant c_DirectoryIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::key);
   return x_hphp_directoryiterator_key(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 686 */
-Variant c_directoryiterator::t_next() {
+Variant c_DirectoryIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::next);
   return (x_hphp_directoryiterator_next(GET_THIS()), null);
 } /* function */
 /* SRC: classes/iterator.php line 698 */
-Variant c_directoryiterator::t_rewind() {
+Variant c_DirectoryIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::rewind);
   return (x_hphp_directoryiterator_rewind(GET_THIS()), null);
 } /* function */
 /* SRC: classes/iterator.php line 712 */
-Variant c_directoryiterator::t_seek(CVarRef v_position) {
+Variant c_DirectoryIterator::t_seek(CVarRef v_position) {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::seek);
   return (x_hphp_directoryiterator_seek(GET_THIS(), toInt64(v_position)), null);
 } /* function */
 /* SRC: classes/iterator.php line 716 */
-String c_directoryiterator::t___tostring() {
+String c_DirectoryIterator::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::__toString);
   return x_hphp_directoryiterator___tostring(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 729 */
-bool c_directoryiterator::t_valid() {
+bool c_DirectoryIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::valid);
   return x_hphp_directoryiterator_valid(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 742 */
-bool c_directoryiterator::t_isdot() {
+bool c_DirectoryIterator::t_isdot() {
   INSTANCE_METHOD_INJECTION_BUILTIN(DirectoryIterator, DirectoryIterator::isDot);
   return x_hphp_directoryiterator_isdot(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 164 */
-const int64 q_recursiveiteratoriterator_LEAVES_ONLY = 0LL;
-const int64 q_recursiveiteratoriterator_SELF_FIRST = 1LL;
-const int64 q_recursiveiteratoriterator_CHILD_FIRST = 2LL;
-const int64 q_recursiveiteratoriterator_CATCH_GET_CHILD = 16LL;
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::os_getInit(CStrRef s) {
+const int64 q_RecursiveIteratorIterator_LEAVES_ONLY = 0LL;
+const int64 q_RecursiveIteratorIterator_SELF_FIRST = 1LL;
+const int64 q_RecursiveIteratorIterator_CHILD_FIRST = 2LL;
+const int64 q_RecursiveIteratorIterator_CATCH_GET_CHILD = 16LL;
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::os_getInit(CStrRef s) {
   return c_ObjectData::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::os_get(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::os_get(CStrRef s) {
   return c_ObjectData::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursiveiteratoriterator
-Variant &c_recursiveiteratoriterator::os_lval(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator
+Variant &c_RecursiveIteratorIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator
-void c_recursiveiteratoriterator::o_getArray(Array &props) const {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveIteratorIterator
+void c_RecursiveIteratorIterator::o_getArray(Array &props) const {
   c_ObjectData::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator
-void c_recursiveiteratoriterator::o_setArray(CArrRef props) {
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator
+void c_RecursiveIteratorIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_get(CStrRef prop, bool error, CStrRef context) {
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_getPublic(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_getPublic(CStrRef s, bool error) {
   return c_ObjectData::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_recursiveiteratoriterator
-Variant * c_recursiveiteratoriterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_RecursiveIteratorIterator
+Variant * c_RecursiveIteratorIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursiveiteratoriterator
-Variant * c_recursiveiteratoriterator::o_realPropPublic(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveIteratorIterator
+Variant * c_RecursiveIteratorIterator::o_realPropPublic(CStrRef s, int flags) const {
   return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursiveiteratoriterator
-Variant * c_recursiveiteratoriterator::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveIteratorIterator
+Variant * c_RecursiveIteratorIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_recursiveiteratoriterator
-Variant& c_recursiveiteratoriterator::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_RecursiveIteratorIterator
+Variant& c_RecursiveIteratorIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursiveiteratoriterator
-Variant& c_recursiveiteratoriterator::o_lvalPublic(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RecursiveIteratorIterator
+Variant& c_RecursiveIteratorIterator::o_lvalPublic(CStrRef s) {
   return c_ObjectData::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursiveiteratoriterator
-Variant& c_recursiveiteratoriterator::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RecursiveIteratorIterator
+Variant& c_RecursiveIteratorIterator::o_lvalPrivate(CStrRef s) {
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::os_constant(const char *s) {
   int64 hash = hash_string(s);
   switch (hash & 7) {
     case 1:
-      HASH_RETURN(0x618BE0B31B5C1FD1LL, q_recursiveiteratoriterator_CHILD_FIRST, "CHILD_FIRST");
+      HASH_RETURN(0x618BE0B31B5C1FD1LL, q_RecursiveIteratorIterator_CHILD_FIRST, "CHILD_FIRST");
       break;
     case 4:
-      HASH_RETURN(0x181DAA5BC4B24F6CLL, q_recursiveiteratoriterator_LEAVES_ONLY, "LEAVES_ONLY");
-      HASH_RETURN(0x7F32D13555655AA4LL, q_recursiveiteratoriterator_CATCH_GET_CHILD, "CATCH_GET_CHILD");
+      HASH_RETURN(0x181DAA5BC4B24F6CLL, q_RecursiveIteratorIterator_LEAVES_ONLY, "LEAVES_ONLY");
+      HASH_RETURN(0x7F32D13555655AA4LL, q_RecursiveIteratorIterator_CATCH_GET_CHILD, "CATCH_GET_CHILD");
       break;
     case 5:
-      HASH_RETURN(0x0822A034E83D2285LL, q_recursiveiteratoriterator_SELF_FIRST, "SELF_FIRST");
+      HASH_RETURN(0x0822A034E83D2285LL, q_RecursiveIteratorIterator_SELF_FIRST, "SELF_FIRST");
       break;
     default:
       break;
   }
   return c_ObjectData::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_recursiveiteratoriterator
-IMPLEMENT_CLASS(recursiveiteratoriterator)
-c_recursiveiteratoriterator *c_recursiveiteratoriterator::create(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveIteratorIterator
+IMPLEMENT_CLASS(RecursiveIteratorIterator)
+c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
 ) {
   CountableHelper h(this);
@@ -7777,7 +7777,7 @@ c_recursiveiteratoriterator *c_recursiveiteratoriterator::create(Variant v_itera
   t___construct(v_iterator, v_mode, v_flags);
   return this;
 }
-ObjectData *c_recursiveiteratoriterator::dynCreate(CArrRef params, bool construct /* = true */) {
+ObjectData *c_RecursiveIteratorIterator::dynCreate(CArrRef params, bool construct /* = true */) {
   init();
   if (construct) {
     CountableHelper h(this);
@@ -7802,7 +7802,7 @@ ObjectData *c_recursiveiteratoriterator::dynCreate(CArrRef params, bool construc
   }
   return this;
 }
-void c_recursiveiteratoriterator::dynConstruct(CArrRef params) {
+void c_RecursiveIteratorIterator::dynConstruct(CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
   if (count < 1 || count > 3) throw_wrong_arguments("RecursiveIteratorIterator::__construct", count, 1, 3, 2);
   do {
@@ -7822,7 +7822,7 @@ void c_recursiveiteratoriterator::dynConstruct(CArrRef params) {
     (t___construct(arg0, arg1, arg2));
   } while (false);
 }
-void c_recursiveiteratoriterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+void c_RecursiveIteratorIterator::dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
   Variant a2;
@@ -7848,18 +7848,18 @@ void c_recursiveiteratoriterator::dynConstructFromEval(Eval::VariableEnvironment
   else if (count == 2) (t___construct(a0, a1), null);
   else (t___construct(a0, a1, a2), null);
 }
-ObjectData *c_recursiveiteratoriterator::cloneImpl() {
-  c_recursiveiteratoriterator *obj = NEW(c_recursiveiteratoriterator)();
+ObjectData *c_RecursiveIteratorIterator::cloneImpl() {
+  c_RecursiveIteratorIterator *obj = NEW(c_RecursiveIteratorIterator)();
   cloneSet(obj);
   return obj;
 }
-void c_recursiveiteratoriterator::cloneSet(c_recursiveiteratoriterator *clone) {
+void c_RecursiveIteratorIterator::cloneSet(c_RecursiveIteratorIterator *clone) {
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -7915,7 +7915,7 @@ Variant c_recursiveiteratoriterator::o_invoke(MethodIndex methodIndex, const cha
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 1:
@@ -7970,13 +7970,13 @@ Variant c_recursiveiteratoriterator::o_invoke(MethodIndex methodIndex, const cha
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
   switch (methodIndex.m_callIndex) {
     case 0x1:
       if (methodIndex.m_overloadIndex == 0x1) {
@@ -8025,7 +8025,7 @@ Variant c_recursiveiteratoriterator::o_invoke_few_args(MethodIndex methodIndex, 
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 1:
@@ -8073,21 +8073,21 @@ Variant c_recursiveiteratoriterator::o_invoke_few_args(MethodIndex methodIndex, 
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_recursiveiteratoriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_RecursiveIteratorIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_recursiveiteratoriterator
-Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveIteratorIterator
+Variant c_RecursiveIteratorIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
   switch (methodIndex.m_callIndex) {
     case 0x1:
@@ -8205,7 +8205,7 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
     default:
       break;
   }
-#else
+  #else
   if (hash < 0) hash = hash_string(s);
   switch (hash & 15) {
     case 1:
@@ -8321,27 +8321,27 @@ Variant c_recursiveiteratoriterator::o_invoke_from_eval(const char *s, Eval::Var
     default:
       break;
   }
-#endif
+  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_recursiveiteratoriterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_RecursiveIteratorIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_recursiveiteratoriterator = {
-  c_recursiveiteratoriterator::os_getInit,
-  c_recursiveiteratoriterator::os_get,
-  c_recursiveiteratoriterator::os_lval,
-  c_recursiveiteratoriterator::os_invoke,
-  c_recursiveiteratoriterator::os_constant,
+struct ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
+  c_RecursiveIteratorIterator::os_getInit,
+  c_RecursiveIteratorIterator::os_get,
+  c_RecursiveIteratorIterator::os_lval,
+  c_RecursiveIteratorIterator::os_invoke,
+  c_RecursiveIteratorIterator::os_constant,
 };
-void c_recursiveiteratoriterator::init() {
+void c_RecursiveIteratorIterator::init() {
 }
 /* SRC: classes/iterator.php line 170 */
-void c_recursiveiteratoriterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
+void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::__construct);
@@ -8350,201 +8350,201 @@ void c_recursiveiteratoriterator::t___construct(Variant v_iterator, Variant v_mo
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/iterator.php line 186 */
-Object c_recursiveiteratoriterator::t_getinneriterator() {
+Object c_RecursiveIteratorIterator::t_getinneriterator() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::getInnerIterator);
   return x_hphp_recursiveiteratoriterator_getinneriterator(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 197 */
-Variant c_recursiveiteratoriterator::t_current() {
+Variant c_RecursiveIteratorIterator::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::current);
   return x_hphp_recursiveiteratoriterator_current(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 208 */
-Variant c_recursiveiteratoriterator::t_key() {
+Variant c_RecursiveIteratorIterator::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::key);
   return x_hphp_recursiveiteratoriterator_key(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 219 */
-Variant c_recursiveiteratoriterator::t_next() {
+Variant c_RecursiveIteratorIterator::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::next);
   return (x_hphp_recursiveiteratoriterator_next(GET_THIS()), null);
 } /* function */
 /* SRC: classes/iterator.php line 230 */
-Variant c_recursiveiteratoriterator::t_rewind() {
+Variant c_RecursiveIteratorIterator::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::rewind);
   return (x_hphp_recursiveiteratoriterator_rewind(GET_THIS()), null);
 } /* function */
 /* SRC: classes/iterator.php line 242 */
-bool c_recursiveiteratoriterator::t_valid() {
+bool c_RecursiveIteratorIterator::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::valid);
   return x_hphp_recursiveiteratoriterator_valid(GET_THIS());
 } /* function */
 /* SRC: classes/iterator.php line 888 */
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator
-Variant c_filteriterator::os_getInit(CStrRef s) {
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
+Variant c_FilterIterator::os_getInit(CStrRef s) {
   return c_ObjectData::os_getInit(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_filteriterator
-Variant c_filteriterator::os_get(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GET_FilterIterator
+Variant c_FilterIterator::os_get(CStrRef s) {
   return c_ObjectData::os_get(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_filteriterator
-Variant &c_filteriterator::os_lval(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_GET_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
+Variant &c_FilterIterator::os_lval(CStrRef s) {
   return c_ObjectData::os_lval(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_filteriterator
-void c_filteriterator::o_getArray(Array &props) const {
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_FilterIterator
+void c_FilterIterator::o_getArray(Array &props) const {
   c_ObjectData::o_getArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_filteriterator
-void c_filteriterator::o_setArray(CArrRef props) {
+#endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator
+void c_FilterIterator::o_setArray(CArrRef props) {
   c_ObjectData::o_setArray(props);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_filteriterator
-Variant c_filteriterator::o_get(CStrRef prop, bool error, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_FilterIterator
+Variant c_FilterIterator::o_get(CStrRef prop, bool error, CStrRef context) {
   return o_getPublic(prop, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_filteriterator
-Variant c_filteriterator::o_getPublic(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PUBLIC_FilterIterator
+Variant c_FilterIterator::o_getPublic(CStrRef s, bool error) {
   return c_ObjectData::o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_filteriterator
-Variant c_filteriterator::o_getPrivate(CStrRef s, bool error) {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PUBLIC_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_get_PRIVATE_FilterIterator
+Variant c_FilterIterator::o_getPrivate(CStrRef s, bool error) {
   return o_getPublic(s, error);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_filteriterator
-Variant * c_filteriterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
+#endif // OMIT_JUMP_TABLE_CLASS_get_PRIVATE_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator
+Variant * c_FilterIterator::o_realProp(CStrRef prop, int flags, CStrRef context) const {
   return o_realPropPublic(prop, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_filteriterator
-Variant * c_filteriterator::o_realPropPublic(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_FilterIterator
+Variant * c_FilterIterator::o_realPropPublic(CStrRef s, int flags) const {
   return c_ObjectData::o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_filteriterator
-Variant * c_filteriterator::o_realPropPrivate(CStrRef s, int flags) const {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_FilterIterator
+Variant * c_FilterIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_filteriterator
-Variant c_filteriterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_FilterIterator
+Variant c_FilterIterator::o_set(CStrRef prop, CVarRef v, bool forInit, CStrRef context) {
   return o_setPublic(prop, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_filteriterator
-Variant c_filteriterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PUBLIC_FilterIterator
+Variant c_FilterIterator::o_setPublic(CStrRef s, CVarRef v, bool forInit) {
   return c_ObjectData::o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_filteriterator
-Variant c_filteriterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PUBLIC_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_set_PRIVATE_FilterIterator
+Variant c_FilterIterator::o_setPrivate(CStrRef s, CVarRef v, bool forInit) {
   return o_setPublic(s, v, forInit);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_filteriterator
-Variant& c_filteriterator::o_lval(CStrRef prop, CStrRef context) {
+#endif // OMIT_JUMP_TABLE_CLASS_set_PRIVATE_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_FilterIterator
+Variant& c_FilterIterator::o_lval(CStrRef prop, CStrRef context) {
   return o_lvalPublic(prop);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_filteriterator
-Variant& c_filteriterator::o_lvalPublic(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_FilterIterator
+Variant& c_FilterIterator::o_lvalPublic(CStrRef s) {
   return c_ObjectData::o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_filteriterator
-Variant& c_filteriterator::o_lvalPrivate(CStrRef s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_FilterIterator
+Variant& c_FilterIterator::o_lvalPrivate(CStrRef s) {
   return o_lvalPublic(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_filteriterator
-Variant c_filteriterator::os_constant(const char *s) {
+#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
+Variant c_FilterIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_filteriterator
-IMPLEMENT_CLASS(filteriterator)
-ObjectData *c_filteriterator::cloneImpl() {
-  c_filteriterator *obj = NEW(c_filteriterator)();
+#endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
+IMPLEMENT_CLASS(FilterIterator)
+ObjectData *c_FilterIterator::cloneImpl() {
+  c_FilterIterator *obj = NEW(c_FilterIterator)();
   cloneSet(obj);
   return obj;
 }
-void c_filteriterator::cloneSet(c_filteriterator *clone) {
+void c_FilterIterator::cloneSet(c_FilterIterator *clone) {
   ObjectData::cloneSet(clone);
 }
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator
-Variant c_filteriterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_FilterIterator
+Variant c_FilterIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::o_invoke(methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator
-Variant c_filteriterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
-#ifndef NOFMCGEN
-#else
-#endif
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_INVOKE_FilterIterator
+Variant c_FilterIterator::o_invoke_few_args(MethodIndex methodIndex, const char *s, int64 hash, int count, CVarRef a0, CVarRef a1, CVarRef a2, CVarRef a3, CVarRef a4, CVarRef a5) {
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::o_invoke_few_args(methodIndex, s, hash, count, a0, a1, a2, a3, a4, a5);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_filteriterator
-#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_filteriterator
-Variant c_filteriterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
+#endif // OMIT_JUMP_TABLE_CLASS_INVOKE_FilterIterator
+#ifndef OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_FilterIterator
+Variant c_FilterIterator::os_invoke(const char *c, MethodIndex methodIndex, const char *s,  CArrRef params, int64 hash, bool fatal) {
   int count __attribute__((__unused__)) = params.size();
-#ifndef NOFMCGEN
-#else
-#endif
+  #ifndef NOFMCGEN
+  #else
+  #endif
   return c_ObjectData::os_invoke(c, methodIndex, s, params, hash, fatal);
 }
-#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_filteriterator
-Variant c_filteriterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+#endif // OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_FilterIterator
+Variant c_FilterIterator::o_invoke_from_eval(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::o_invoke_from_eval(s, env, caller, hash, fatal);
 }
-Variant c_filteriterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
-#ifndef NOFMCGEN
+Variant c_FilterIterator::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
+  #ifndef NOFMCGEN
   MethodIndex methodIndex = methodIndexExists(s);
-#else
-#endif
+  #else
+  #endif
   return c_ObjectData::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-struct ObjectStaticCallbacks cw_filteriterator = {
-  c_filteriterator::os_getInit,
-  c_filteriterator::os_get,
-  c_filteriterator::os_lval,
-  c_filteriterator::os_invoke,
-  c_filteriterator::os_constant,
+struct ObjectStaticCallbacks cw_FilterIterator = {
+  c_FilterIterator::os_getInit,
+  c_FilterIterator::os_get,
+  c_FilterIterator::os_lval,
+  c_FilterIterator::os_invoke,
+  c_FilterIterator::os_constant,
 };
-void c_filteriterator::init() {
+void c_FilterIterator::init() {
 }
-Object co_arrayiterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_arrayiterator)())->dynCreate(params, init));
+Object co_ArrayIterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_ArrayIterator)())->dynCreate(params, init));
 }
-Object co_appenditerator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_appenditerator)())->dynCreate(params, init));
+Object co_AppendIterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_AppendIterator)())->dynCreate(params, init));
 }
-Object co_recursivedirectoryiterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_recursivedirectoryiterator)())->dynCreate(params, init));
+Object co_RecursiveDirectoryIterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_RecursiveDirectoryIterator)())->dynCreate(params, init));
 }
-Object co_directoryiterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_directoryiterator)())->dynCreate(params, init));
+Object co_DirectoryIterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_DirectoryIterator)())->dynCreate(params, init));
 }
-Object co_recursiveiteratoriterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_recursiveiteratoriterator)())->dynCreate(params, init));
+Object co_RecursiveIteratorIterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_RecursiveIteratorIterator)())->dynCreate(params, init));
 }
-Object co_filteriterator(CArrRef params, bool init /* = true */) {
-  return Object((NEW(c_filteriterator)())->dynCreate(params, init));
+Object co_FilterIterator(CArrRef params, bool init /* = true */) {
+  return Object((NEW(c_FilterIterator)())->dynCreate(params, init));
 }
 Variant pm_php$classes$iterator_php(bool incOnce /* = false */, LVariableTable* variables /* = NULL */, Globals *globals /* = get_globals() */) {
   PSEUDOMAIN_INJECTION_BUILTIN(run_init::classes/iterator.php, pm_php$classes$iterator_php);

@@ -313,17 +313,15 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
 
     ASSERT(cls);
     ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+    string clsId = cls->getId(cg);
     if (cls->needLazyStaticInitializer()) {
       cg_printf("%s%s::lazy_initializer(g)->%s%s%s%s",
-                Option::ClassPrefix,
-                cg.formatLabel(m_resolvedClassName).c_str(),
-                Option::StaticPropertyPrefix,
-                cg.formatLabel(m_resolvedClassName).c_str(),
+                Option::ClassPrefix, clsId.c_str(),
+                Option::StaticPropertyPrefix, clsId.c_str(),
                 Option::IdPrefix.c_str(),
                 cg.formatLabel(var->getString()).c_str());
     } else {
-      cg_printf("g->%s%s%s%s", Option::StaticPropertyPrefix,
-                cg.formatLabel(m_resolvedClassName).c_str(),
+      cg_printf("g->%s%s%s%s", Option::StaticPropertyPrefix, clsId.c_str(),
                 Option::IdPrefix.c_str(),
                 cg.formatLabel(var->getString()).c_str());
     }
@@ -335,8 +333,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
                   Option::ObjectStaticPrefix);
       } else {
         cg_printf("%s%s::%slval(", Option::ClassPrefix,
-                  cg.formatLabel(m_className).c_str(),
-                  Option::ObjectStaticPrefix);
+                  cls->getId(cg).c_str(), Option::ObjectStaticPrefix);
       }
     } else {
       if (m_redeclared) {
@@ -345,8 +342,7 @@ void StaticMemberExpression::outputCPPImpl(CodeGenerator &cg,
                   Option::ObjectStaticPrefix);
       } else {
         cg_printf("%s%s::%sget(", Option::ClassPrefix,
-                  cg.formatLabel(m_className).c_str(),
-                  Option::ObjectStaticPrefix);
+                  cls->getId(cg).c_str(), Option::ObjectStaticPrefix);
       }
     }
     m_exp->outputCPP(cg, ar);

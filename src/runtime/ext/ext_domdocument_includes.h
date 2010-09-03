@@ -43,14 +43,14 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // so every dom node holds a document object to avoid its early deletion
-FORWARD_DECLARE_CLASS(domdocument);
+FORWARD_DECLARE_CLASS(DOMDocument);
 
 // base class of DOMNodeList and DOMNamedNodeMap
 class dom_iterable {
 public:
   dom_iterable() : m_ht(NULL) {}
 
-  sp_domdocument m_doc;
+  p_DOMDocument m_doc;
   Object m_baseobj;
   int m_nodetype;
   xmlHashTable *m_ht;

@@ -81,7 +81,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an array of all DN components. The first element in this array has count key and represents the number of returned values, next elements are numerically indexed DN components. ldap_first_attribute ldap_error Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "Returns an array of all DN components. The first element in this array has count key and represents the number of returned values, next elements are numerically indexed DN components. ldap_first_attribute ldap_error Last updated: Fri, 03 Sep 2010  ",
     ),
     'args'   => array(
       array(
@@ -104,7 +104,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the user friendly name. ldap_err2str ldap_delete Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "Returns the user friendly name. ldap_err2str ldap_delete Last updated: Fri, 03 Sep 2010  ",
     ),
     'args'   => array(
       array(

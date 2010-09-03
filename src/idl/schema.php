@@ -234,8 +234,8 @@ function define_class($class) {
   begin_array();
   out_str('name',   $name, true);
   out_str('parent', $class['parent']);
-  out_fmt('ifaces', idx_array ($class, 'interfaces'));
-  out_fmt('bases',  idx_array ($class, 'extrabases'));
+  out_fmt('ifaces', idx_array ($class, 'ifaces'));
+  out_fmt('bases',  idx_array ($class, 'bases'));
   out_str('desc',   $desc);
   out_fmt('flags',  idx_flags ($class, 'flags'));
   out_str('note',   idx_string($class, 'note'));

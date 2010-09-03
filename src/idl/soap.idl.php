@@ -686,7 +686,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "SoapFault",
-    'parent' => "exception",
+    'parent' => "Exception",
     'desc'   => "Represents a SOAP fault.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT

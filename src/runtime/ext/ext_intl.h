@@ -23,62 +23,75 @@
 #include <runtime/base/base_includes.h>
 #include <runtime/base/zend/zend_collator.h>
 #include <unicode/ucol.h> // icu
-
 namespace HPHP {
-
+extern const int64 q_Collator_SORT_REGULAR;
+}
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 int64 f_intl_get_error_code();
 String f_intl_get_error_message();
 String f_intl_error_name(int64 error_code);
 bool f_intl_is_failure(int64 error_code);
-
-///////////////////////////////////////////////////////////////////////////////
-
-extern const int64 q_collator_SORT_REGULAR;
-extern const int64 q_collator_SORT_NUMERIC;
-extern const int64 q_collator_SORT_STRING;
-extern const int64 q_collator_FRENCH_COLLATION;
-extern const int64 q_collator_ALTERNATE_HANDLING;
-extern const int64 q_collator_CASE_FIRST;
-extern const int64 q_collator_CASE_LEVEL;
-extern const int64 q_collator_NORMALIZATION_MODE;
-extern const int64 q_collator_STRENGTH;
-extern const int64 q_collator_HIRAGANA_QUATERNARY_MODE;
-extern const int64 q_collator_NUMERIC_COLLATION;
-extern const int64 q_collator_DEFAULT_VALUE;
-extern const int64 q_collator_PRIMARY;
-extern const int64 q_collator_SECONDARY;
-extern const int64 q_collator_TERTIARY;
-extern const int64 q_collator_DEFAULT_STRENGTH;
-extern const int64 q_collator_QUATERNARY;
-extern const int64 q_collator_IDENTICAL;
-extern const int64 q_collator_OFF;
-extern const int64 q_collator_ON;
-extern const int64 q_collator_SHIFTED;
-extern const int64 q_collator_NON_IGNORABLE;
-extern const int64 q_collator_LOWER_FIRST;
-extern const int64 q_collator_UPPER_FIRST;
+Variant f_collator_asort(CVarRef obj, Variant arr, int64 sort_flag = q_Collator_SORT_REGULAR);
+Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2);
+Variant f_collator_create(CStrRef locale);
+Variant f_collator_get_attribute(CVarRef obj, int64 attr);
+Variant f_collator_get_error_code(CVarRef obj);
+Variant f_collator_get_error_message(CVarRef obj);
+Variant f_collator_get_locale(CVarRef obj, int64 type = 0);
+Variant f_collator_get_strength(CVarRef obj);
+Variant f_collator_set_attribute(CVarRef obj, int64 attr, int64 val);
+Variant f_collator_set_strength(CVarRef obj, int64 strength);
+Variant f_collator_sort_with_sort_keys(CVarRef obj, Variant arr);
+Variant f_collator_sort(CVarRef obj, Variant arr, int64 sort_flag = q_Collator_SORT_REGULAR);
+Variant f_idn_to_ascii(CStrRef domain, Variant errorcode = null);
+Variant f_idn_to_unicode(CStrRef domain, Variant errorcode = null);
+Variant f_idn_to_utf8(CStrRef domain, Variant errorcode = null);
+extern const int64 q_Collator_SORT_REGULAR;
+extern const int64 q_Collator_SORT_NUMERIC;
+extern const int64 q_Collator_SORT_STRING;
+extern const int64 q_Collator_FRENCH_COLLATION;
+extern const int64 q_Collator_ALTERNATE_HANDLING;
+extern const int64 q_Collator_CASE_FIRST;
+extern const int64 q_Collator_CASE_LEVEL;
+extern const int64 q_Collator_NORMALIZATION_MODE;
+extern const int64 q_Collator_STRENGTH;
+extern const int64 q_Collator_HIRAGANA_QUATERNARY_MODE;
+extern const int64 q_Collator_NUMERIC_COLLATION;
+extern const int64 q_Collator_DEFAULT_VALUE;
+extern const int64 q_Collator_PRIMARY;
+extern const int64 q_Collator_SECONDARY;
+extern const int64 q_Collator_TERTIARY;
+extern const int64 q_Collator_DEFAULT_STRENGTH;
+extern const int64 q_Collator_QUATERNARY;
+extern const int64 q_Collator_IDENTICAL;
+extern const int64 q_Collator_OFF;
+extern const int64 q_Collator_ON;
+extern const int64 q_Collator_SHIFTED;
+extern const int64 q_Collator_NON_IGNORABLE;
+extern const int64 q_Collator_LOWER_FIRST;
+extern const int64 q_Collator_UPPER_FIRST;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Collator
 
-FORWARD_DECLARE_CLASS(collator);
-class c_collator : public ExtObjectData, public Sweepable {
+FORWARD_DECLARE_CLASS(Collator);
+class c_Collator : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(collator)
-  END_CLASS_MAP(collator)
-  DECLARE_CLASS(collator, Collator, ObjectData)
+  BEGIN_CLASS_MAP(Collator)
+  END_CLASS_MAP(Collator)
+  DECLARE_CLASS(Collator, Collator, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_collator();
-  public: ~c_collator();
+  public: c_Collator();
+  public: ~c_Collator();
   public: void t___construct(CStrRef locale);
-  public: bool t_asort(Variant arr, int64 sort_flag = q_collator_SORT_REGULAR);
+  public: bool t_asort(Variant arr, int64 sort_flag = q_Collator_SORT_REGULAR);
   public: Variant t_compare(CStrRef str1, CStrRef str2);
-  public: static Variant ti_create(const char* cls, CStrRef locale);
+  public: static Variant ti_create(const char* cls , CStrRef locale);
   public: static Variant t_create(CStrRef locale) {
     return ti_create("collator", locale);
   }
@@ -90,13 +103,14 @@ class c_collator : public ExtObjectData, public Sweepable {
   public: bool t_setattribute(int64 attr, int64 val);
   public: bool t_setstrength(int64 strength);
   public: bool t_sortwithsortkeys(Variant arr);
-  public: bool t_sort(Variant arr, int64 sort_flag = q_collator_SORT_REGULAR);
+  public: bool t_sort(Variant arr, int64 sort_flag = q_Collator_SORT_REGULAR);
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_collator *create(String locale);
+  public: c_Collator *create(String locale);
   public: void dynConstruct(CArrRef Params);
-  public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
+  public: void dynConstructFromEval(Eval::VariableEnvironment &env,
+                                    const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
  private:
@@ -104,104 +118,79 @@ class c_collator : public ExtObjectData, public Sweepable {
   UCollator *m_ucoll;
   intl_error m_errcode;
 };
-
-Variant f_collator_asort(CVarRef obj, Variant arr, int64 sort_flag = 0);
-Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2);
-Variant f_collator_create(CStrRef locale);
-Variant f_collator_get_attribute(CVarRef obj, int64 attr);
-Variant f_collator_get_error_code(CVarRef obj);
-Variant f_collator_get_error_message(CVarRef obj);
-Variant f_collator_get_locale(CVarRef obj, int64 type = 0);
-Variant f_collator_get_strength(CVarRef obj);
-Variant f_collator_set_attribute(CVarRef obj, int64 attr, int64 val);
-Variant f_collator_set_strength(CVarRef obj, int64 strength);
-Variant f_collator_sort_with_sort_keys(CVarRef obj, Variant arr);
-Variant f_collator_sort(CVarRef obj, Variant arr, int64 sort_flag = 0);
+extern const int64 q_Locale_ACTUAL_LOCALE;
+extern const int64 q_Locale_VALID_LOCALE;
 
 ///////////////////////////////////////////////////////////////////////////////
+// class Locale
 
-extern const int64 q_locale_ACTUAL_LOCALE;
-extern const int64 q_locale_VALID_LOCALE;
-
-///////////////////////////////////////////////////////////////////////////////
-
-FORWARD_DECLARE_CLASS(locale);
-class c_locale : public ExtObjectData {
+FORWARD_DECLARE_CLASS(Locale);
+class c_Locale : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(locale)
-  END_CLASS_MAP(locale)
-  DECLARE_CLASS(locale, Locale, ObjectData)
+  BEGIN_CLASS_MAP(Locale)
+  END_CLASS_MAP(Locale)
+  DECLARE_CLASS(Locale, Locale, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_locale();
-  public: ~c_locale();
+  public: c_Locale();
+  public: ~c_Locale();
   public: void t___construct();
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_locale *create();
+  public: c_Locale *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
 };
-
-///////////////////////////////////////////////////////////////////////////////
-
-extern const int64 q_normalizer_NONE;
-extern const int64 q_normalizer_FORM_D;
-extern const int64 q_normalizer_NFD;
-extern const int64 q_normalizer_FORM_KD;
-extern const int64 q_normalizer_NFKD;
-extern const int64 q_normalizer_FORM_C;
-extern const int64 q_normalizer_NFC;
-extern const int64 q_normalizer_FORM_KC;
-extern const int64 q_normalizer_NFKC;
+extern const int64 q_Normalizer_NONE;
+extern const int64 q_Normalizer_FORM_D;
+extern const int64 q_Normalizer_NFD;
+extern const int64 q_Normalizer_FORM_KD;
+extern const int64 q_Normalizer_NFKD;
+extern const int64 q_Normalizer_FORM_C;
+extern const int64 q_Normalizer_NFC;
+extern const int64 q_Normalizer_FORM_KC;
+extern const int64 q_Normalizer_NFKC;
 
 ///////////////////////////////////////////////////////////////////////////////
 // class Normalizer
 
-FORWARD_DECLARE_CLASS(normalizer);
-class c_normalizer : public ExtObjectData, public Sweepable {
+FORWARD_DECLARE_CLASS(Normalizer);
+class c_Normalizer : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(normalizer)
-  END_CLASS_MAP(normalizer)
-  DECLARE_CLASS(normalizer, Normalizer, ObjectData)
+  BEGIN_CLASS_MAP(Normalizer)
+  END_CLASS_MAP(Normalizer)
+  DECLARE_CLASS(Normalizer, Normalizer, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_normalizer();
-  public: ~c_normalizer();
+  public: c_Normalizer();
+  public: ~c_Normalizer();
   public: void t___construct();
-  public: static Variant ti_isnormalized(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C);
-  public: static Variant t_isnormalized(CStrRef input, int64 form = q_normalizer_FORM_C) {
+  public: static Variant ti_isnormalized(const char* cls , CStrRef input, int64 form = q_Normalizer_FORM_C);
+  public: static Variant t_isnormalized(CStrRef input, int64 form = q_Normalizer_FORM_C) {
     return ti_isnormalized("normalizer", input, form);
   }
-  public: static Variant ti_normalize(const char* cls , CStrRef input, int64 form = q_normalizer_FORM_C);
-  public: static Variant t_normalize(CStrRef input, int64 form = q_normalizer_FORM_C) {
+  public: static Variant ti_normalize(const char* cls , CStrRef input, int64 form = q_Normalizer_FORM_C);
+  public: static Variant t_normalize(CStrRef input, int64 form = q_Normalizer_FORM_C) {
     return ti_normalize("normalizer", input, form);
   }
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_normalizer *create();
+  public: c_Normalizer *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
 };
-
-///////////////////////////////////////////////////////////////////////////////
-// IDN functions
-
-Variant f_idn_to_ascii(CStrRef domain, Variant errorcode = null);
-Variant f_idn_to_unicode(CStrRef domain, Variant errorcode = null);
-Variant f_idn_to_utf8(CStrRef domain, Variant errorcode = null);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -33,7 +33,7 @@ bool TestExtSqlite3::RunTests(const std::string &which) {
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestExtSqlite3::test_sqlite3() {
-  sp_sqlite3 db(NEW(c_sqlite3)());
+  p_SQLite3 db(NEW(c_SQLite3)());
   db->t_open(":memory:test");
   db->t_exec("DROP TABLE foo");
   db->t_exec("CREATE TABLE foo (bar STRING)");
@@ -49,10 +49,10 @@ bool TestExtSqlite3::test_sqlite3() {
   VS(db->t_querysingle("SELECT * FROM foo"), "ABC");
   VS(db->t_querysingle("SELECT * FROM foo", true), CREATE_MAP1("bar", "ABC"));
 
-  // testing query() and sqlite3result
+  // testing query() and SQLite3Result
   {
     Object objResult = db->t_query("SELECT * FROM foo").toObject();
-    c_sqlite3result *res = objResult.getTyped<c_sqlite3result>();
+    c_SQLite3Result *res = objResult.getTyped<c_SQLite3Result>();
 
     VS(res->t_fetcharray(), CREATE_MAP2(0, "ABC", "bar", "ABC"));
     VS(res->t_numcolumns(), 1);
@@ -65,7 +65,7 @@ bool TestExtSqlite3::test_sqlite3() {
   // testing prepare() and sqlite3stmt
   {
     Object objStmt = db->t_prepare("SELECT * FROM foo WHERE bar = :id");
-    c_sqlite3stmt *stmt = objStmt.getTyped<c_sqlite3stmt>();
+    c_SQLite3Stmt *stmt = objStmt.getTyped<c_SQLite3Stmt>();
     VS(stmt->t_paramcount(), 1);
 
     Variant id = "DEF";
@@ -73,7 +73,7 @@ bool TestExtSqlite3::test_sqlite3() {
     id = "ABC";
     {
       Object objResult = stmt->t_execute();
-      c_sqlite3result *res = objResult.getTyped<c_sqlite3result>();
+      c_SQLite3Result *res = objResult.getTyped<c_SQLite3Result>();
       VS(res->t_fetcharray(k_SQLITE3_NUM), CREATE_VECTOR1("DEF"));
     }
 
@@ -84,7 +84,7 @@ bool TestExtSqlite3::test_sqlite3() {
     id = "ABC";
     {
       Object objResult = stmt->t_execute();
-      c_sqlite3result *res = objResult.getTyped<c_sqlite3result>();
+      c_SQLite3Result *res = objResult.getTyped<c_SQLite3Result>();
       VS(res->t_fetcharray(k_SQLITE3_NUM), CREATE_VECTOR1("ABC"));
     }
   }
@@ -93,13 +93,13 @@ bool TestExtSqlite3::test_sqlite3() {
   {
     VERIFY(db->t_createfunction("tolower", "lower", 1));
     Object objResult = db->t_query("SELECT tolower(bar) FROM foo").toObject();
-    c_sqlite3result *res = objResult.getTyped<c_sqlite3result>();
+    c_SQLite3Result *res = objResult.getTyped<c_SQLite3Result>();
     VS(res->t_fetcharray(k_SQLITE3_NUM), CREATE_VECTOR1("abc"));
   }
   {
     VERIFY(db->t_createaggregate("sumlen", "sumlen_step", "sumlen_fini", 1));
     Object objResult = db->t_query("SELECT sumlen(bar) FROM foo").toObject();
-    c_sqlite3result *res = objResult.getTyped<c_sqlite3result>();
+    c_SQLite3Result *res = objResult.getTyped<c_SQLite3Result>();
     VS(res->t_fetcharray(k_SQLITE3_NUM), CREATE_VECTOR1(6));
   }
 

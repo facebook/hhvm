@@ -12,7 +12,11 @@
 // Preamble: C++ code inserted at beginning of ext_{name}.h
 
 DefinePreamble(<<<CPP
-
+#include <runtime/base/zend/zend_collator.h>
+#include <unicode/ucol.h> // icu
+namespace HPHP {
+extern const int64 q_Collator_SORT_REGULAR;
+}
 CPP
 );
 
@@ -128,7 +132,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "0",
+        'value'  => "q_Collator_SORT_REGULAR",
         'desc'   => "Optional sorting type, one of the following:\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings\n\nDefault \$sort_flag value is Collator::SORT_REGULAR. It is also used if an invalid \$sort_flag value has been specified.",
       ),
     ),
@@ -348,7 +352,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "0",
+        'value'  => "q_Collator_SORT_REGULAR",
         'desc'   => "Optional sorting type, one of the following:\n\n\n\nCollator::SORT_REGULAR - compare items normally (don't change types)\n\nCollator::SORT_NUMERIC - compare items numerically\n\nCollator::SORT_STRING - compare items as strings Default sorting type is Collator::SORT_REGULAR.",
       ),
     ),
@@ -462,6 +466,7 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "Collator",
+    'bases'  => array('Sweepable'),
     'desc'   => "Provides string comparison capability with support for appropriate locale-sensitive sort orderings.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
@@ -651,7 +656,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "0",
+        'value'  => "q_Collator_SORT_REGULAR",
       ),
     ),
   ));
@@ -843,7 +848,7 @@ DefineFunction(
       array(
         'name'   => "sort_flag",
         'type'   => Int64,
-        'value'  => "0",
+        'value'  => "q_Collator_SORT_REGULAR",
         'desc'   => "Array of strings to sort.",
       ),
     ),
@@ -908,6 +913,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "Normalizer",
+    'bases'  => array('Sweepable'),
     'desc'   => "Normalization is a process that involves transforming characters and sequences of characters into a formally-defined underlying representation. This process is most important when text needs to be compared for sorting and searching, but it is also used when storing text to ensure that the text is stored in a consistent representation.\n\nThe Unicode Consortium has defined a number of normalization forms reflecting the various needs of applications: Normalization Form D (NFD) - Canonical Decomposition Normalization Form C (NFC) - Canonical Decomposition followed by Canonical Composition Normalization Form KD (NFKD) - Compatibility Decomposition Normalization Form KC (NFKC) - Compatibility Decomposition followed by Canonical Composition The different forms are defined in terms of a set of transformations on the text, transformations that are expressed by both an algorithm and a set of data files.",
     'flags'  =>  HasDocComment,
   ));
@@ -992,7 +998,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_normalizer_FORM_C",
+        'value'  => "q_Normalizer_FORM_C",
         'desc'   => "One of the normalization forms.",
       ),
     ),
@@ -1015,7 +1021,7 @@ DefineFunction(
       array(
         'name'   => "form",
         'type'   => Int64,
-        'value'  => "q_normalizer_FORM_C",
+        'value'  => "q_Normalizer_FORM_C",
       ),
     ),
   ));

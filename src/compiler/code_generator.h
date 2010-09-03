@@ -125,6 +125,7 @@ public:
   void printf(const char *fmt, ...);
   void indentBegin(const char *fmt, ...);
   void indentEnd(const char *fmt, ...);
+  void printRaw(const std::string &msg) { print(msg, false);}
 
   /**
    * Pre-formatted outputs.
@@ -140,6 +141,7 @@ public:
   void printInclude(const std::string &file);
   void printDeclareGlobals();
   void printStartOfJumpTable(int tableSize);
+  void printDocComment(const std::string comment);
   const char *getGlobals(AnalysisResultPtr ar);
   std::string formatLabel(const std::string &name);
   std::string escapeLabel(const std::string &name, bool *binary = NULL);
@@ -225,7 +227,7 @@ private:
   bool m_translatePredefined; // translate predefined constants in PHP output
 
   void print(const char *fmt, va_list ap);
-  void print(const std::string &msg);
+  void print(const std::string &msg, bool indent = true);
 };
 
 #define STR(x) #x

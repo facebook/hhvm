@@ -22,7 +22,7 @@
 #include <php/classes/arrayaccess.fw.h>
 
 // Declarations
-#include <cls/arrayaccess.h>
+#include <cls/ArrayAccess.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

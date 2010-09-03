@@ -54,45 +54,45 @@ bool f_intl_is_failure(int64 error_code) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_collator_SORT_REGULAR = 0;
-const int64 q_collator_SORT_STRING = 1;
-const int64 q_collator_SORT_NUMERIC = 2;
-const int64 q_collator_FRENCH_COLLATION = UCOL_FRENCH_COLLATION;
-const int64 q_collator_ALTERNATE_HANDLING = UCOL_ALTERNATE_HANDLING;
-const int64 q_collator_CASE_FIRST = UCOL_CASE_FIRST;
-const int64 q_collator_CASE_LEVEL = UCOL_CASE_LEVEL;
-const int64 q_collator_NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
-const int64 q_collator_STRENGTH = UCOL_STRENGTH;
-const int64 q_collator_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
-const int64 q_collator_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
-const int64 q_collator_DEFAULT_VALUE = UCOL_DEFAULT;
-const int64 q_collator_PRIMARY = UCOL_PRIMARY;
-const int64 q_collator_SECONDARY = UCOL_SECONDARY;
-const int64 q_collator_TERTIARY = UCOL_TERTIARY;
-const int64 q_collator_DEFAULT_STRENGTH = UCOL_DEFAULT_STRENGTH;
-const int64 q_collator_QUATERNARY = UCOL_QUATERNARY;
-const int64 q_collator_IDENTICAL = UCOL_IDENTICAL;
-const int64 q_collator_OFF = UCOL_OFF;
-const int64 q_collator_ON = UCOL_ON;
-const int64 q_collator_SHIFTED = UCOL_SHIFTED;
-const int64 q_collator_NON_IGNORABLE = UCOL_NON_IGNORABLE;
-const int64 q_collator_LOWER_FIRST = UCOL_LOWER_FIRST;
-const int64 q_collator_UPPER_FIRST = UCOL_UPPER_FIRST;
+const int64 q_Collator_SORT_REGULAR = 0;
+const int64 q_Collator_SORT_STRING = 1;
+const int64 q_Collator_SORT_NUMERIC = 2;
+const int64 q_Collator_FRENCH_COLLATION = UCOL_FRENCH_COLLATION;
+const int64 q_Collator_ALTERNATE_HANDLING = UCOL_ALTERNATE_HANDLING;
+const int64 q_Collator_CASE_FIRST = UCOL_CASE_FIRST;
+const int64 q_Collator_CASE_LEVEL = UCOL_CASE_LEVEL;
+const int64 q_Collator_NORMALIZATION_MODE = UCOL_NORMALIZATION_MODE;
+const int64 q_Collator_STRENGTH = UCOL_STRENGTH;
+const int64 q_Collator_HIRAGANA_QUATERNARY_MODE = UCOL_HIRAGANA_QUATERNARY_MODE;
+const int64 q_Collator_NUMERIC_COLLATION = UCOL_NUMERIC_COLLATION;
+const int64 q_Collator_DEFAULT_VALUE = UCOL_DEFAULT;
+const int64 q_Collator_PRIMARY = UCOL_PRIMARY;
+const int64 q_Collator_SECONDARY = UCOL_SECONDARY;
+const int64 q_Collator_TERTIARY = UCOL_TERTIARY;
+const int64 q_Collator_DEFAULT_STRENGTH = UCOL_DEFAULT_STRENGTH;
+const int64 q_Collator_QUATERNARY = UCOL_QUATERNARY;
+const int64 q_Collator_IDENTICAL = UCOL_IDENTICAL;
+const int64 q_Collator_OFF = UCOL_OFF;
+const int64 q_Collator_ON = UCOL_ON;
+const int64 q_Collator_SHIFTED = UCOL_SHIFTED;
+const int64 q_Collator_NON_IGNORABLE = UCOL_NON_IGNORABLE;
+const int64 q_Collator_LOWER_FIRST = UCOL_LOWER_FIRST;
+const int64 q_Collator_UPPER_FIRST = UCOL_UPPER_FIRST;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_collator::c_collator() : m_locale(), m_ucoll(NULL), m_errcode() {
+c_Collator::c_Collator() : m_locale(), m_ucoll(NULL), m_errcode() {
 }
 
-c_collator::~c_collator() {
+c_Collator::~c_Collator() {
   if (m_ucoll) {
     ucol_close(m_ucoll);
     m_ucoll = NULL;
   }
 }
 
-void c_collator::t___construct(CStrRef locale) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::__construct);
+void c_Collator::t___construct(CStrRef locale) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::__construct);
   if (m_ucoll) {
     ucol_close(m_ucoll);
     m_ucoll = NULL;
@@ -134,9 +134,9 @@ void c_collator::t___construct(CStrRef locale) {
   }
 }
 
-bool c_collator::t_asort(Variant arr,
-                         int64 sort_flag /* = q_collator_SORT_REGULAR */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::asort);
+bool c_Collator::t_asort(Variant arr,
+                         int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::asort);
   if (!arr.isArray()) {
     throw_bad_array_exception(__func__);
     return false;
@@ -156,8 +156,8 @@ bool c_collator::t_asort(Variant arr,
   return ret;
 }
 
-Variant c_collator::t_compare(CStrRef str1, CStrRef str2) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::compare);
+Variant c_Collator::t_compare(CStrRef str1, CStrRef str2) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::compare);
   if (!m_ucoll) {
     raise_warning("compare called on uninitialized Collator object");
     return 0;
@@ -188,13 +188,13 @@ Variant c_collator::t_compare(CStrRef str1, CStrRef str2) {
   return ret;
 }
 
-Variant c_collator::ti_create(const char* cls, CStrRef locale) {
-  STATIC_METHOD_INJECTION_BUILTIN(collator, collator::create);
-  return (NEW(c_collator)())->create(locale);
+Variant c_Collator::ti_create(const char* cls, CStrRef locale) {
+  STATIC_METHOD_INJECTION_BUILTIN(Collator, Collator::create);
+  return (NEW(c_Collator)())->create(locale);
 }
 
-int64 c_collator::t_getattribute(int64 attr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::getattribute);
+int64 c_Collator::t_getattribute(int64 attr) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::getattribute);
   if (!m_ucoll) {
     raise_warning("getattribute called on uninitialized Collator object");
     return 0;
@@ -212,18 +212,18 @@ int64 c_collator::t_getattribute(int64 attr) {
   return ret;
 }
 
-int64 c_collator::t_geterrorcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::geterrorcode);
+int64 c_Collator::t_geterrorcode() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::geterrorcode);
   return m_errcode.code;
 }
 
-String c_collator::t_geterrormessage() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::geterrormessage);
+String c_Collator::t_geterrormessage() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::geterrormessage);
   return String(u_errorName(m_errcode.code), AttachLiteral);
 }
 
-String c_collator::t_getlocale(int64 type /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::getlocale);
+String c_Collator::t_getlocale(int64 type /* = 0 */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::getlocale);
   if (!m_ucoll) {
     raise_warning("getlocale called on uninitialized Collator object");
     return "";
@@ -243,8 +243,8 @@ String c_collator::t_getlocale(int64 type /* = 0 */) {
   return ret;
 }
 
-int64 c_collator::t_getstrength() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::getstrength);
+int64 c_Collator::t_getstrength() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::getstrength);
   if (!m_ucoll) {
     raise_warning("getstrength called on uninitialized Collator object");
     return 0;
@@ -252,8 +252,8 @@ int64 c_collator::t_getstrength() {
   return ucol_getStrength(m_ucoll);
 }
 
-bool c_collator::t_setattribute(int64 attr, int64 val) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::setattribute);
+bool c_Collator::t_setattribute(int64 attr, int64 val) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::setattribute);
   if (!m_ucoll) {
     raise_warning("setattribute called on uninitialized Collator object");
     return false;
@@ -271,8 +271,8 @@ bool c_collator::t_setattribute(int64 attr, int64 val) {
   return true;
 }
 
-bool c_collator::t_setstrength(int64 strength) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::setstrength);
+bool c_Collator::t_setstrength(int64 strength) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::setstrength);
   if (!m_ucoll) {
     raise_warning("setstrength called on uninitialized Collator object");
     return false;
@@ -282,8 +282,8 @@ bool c_collator::t_setstrength(int64 strength) {
 }
 
 typedef struct _collator_sort_key_index {
-	char* key;       /* pointer to sort key */
-	ssize_t valPos;  /* position of the original array element */
+  char* key;       /* pointer to sort key */
+  ssize_t valPos;  /* position of the original array element */
 } collator_sort_key_index_t;
 
 static const int32_t DEF_SORT_KEYS_BUF_SIZE = 1048576;
@@ -298,152 +298,152 @@ static const int32_t DEF_UTF16_BUF_SIZE = 1024;
  * Compare sort keys
  */
 static int collator_cmp_sort_keys(const void* p1, const void* p2, const void*) {
-	char* key1 = ((collator_sort_key_index_t*)p1)->key;
-	char* key2 = ((collator_sort_key_index_t*)p2)->key;
-	return strcmp( key1, key2 );
+  char* key1 = ((collator_sort_key_index_t*)p1)->key;
+  char* key2 = ((collator_sort_key_index_t*)p2)->key;
+  return strcmp( key1, key2 );
 }
 
-bool c_collator::t_sortwithsortkeys(Variant arr) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::sortwithsortkeys);
+bool c_Collator::t_sortwithsortkeys(Variant arr) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::sortwithsortkeys);
   char*       sortKeyBuf = NULL; /* buffer to store sort keys */
-	int32_t     sortKeyBufSize = DEF_SORT_KEYS_BUF_SIZE; /* buffer size */
-	ptrdiff_t   sortKeyBufOffset = 0; /* pos in buffer to store sort key */
-	int32_t     sortKeyLen = 0; /* the length of currently processing key */
-	int32_t     bufLeft = 0;
-	int32_t     bufIncrement = 0;
+  int32_t     sortKeyBufSize = DEF_SORT_KEYS_BUF_SIZE; /* buffer size */
+  ptrdiff_t   sortKeyBufOffset = 0; /* pos in buffer to store sort key */
+  int32_t     sortKeyLen = 0; /* the length of currently processing key */
+  int32_t     bufLeft = 0;
+  int32_t     bufIncrement = 0;
 
   /* buffer to store 'indexes' which will be passed to 'qsort' */
-	collator_sort_key_index_t* sortKeyIndxBuf = NULL;
-	int32_t     sortKeyIndxBufSize   = DEF_SORT_KEYS_INDX_BUF_SIZE;
-	int32_t     sortKeyIndxSize      = sizeof( collator_sort_key_index_t );
+  collator_sort_key_index_t* sortKeyIndxBuf = NULL;
+  int32_t     sortKeyIndxBufSize   = DEF_SORT_KEYS_INDX_BUF_SIZE;
+  int32_t     sortKeyIndxSize      = sizeof( collator_sort_key_index_t );
 
-	int32_t     sortKeyCount         = 0;
-	int32_t     j                    = 0;
+  int32_t     sortKeyCount         = 0;
+  int32_t     j                    = 0;
 
   /* tmp buffer to hold current processing string in utf-16 */
-	UChar*      utf16_buf            = NULL;
+  UChar*      utf16_buf            = NULL;
   /* the length of utf16_buf */
-	int         utf16_buf_size       = DEF_UTF16_BUF_SIZE;
+  int         utf16_buf_size       = DEF_UTF16_BUF_SIZE;
   /* length of converted string */
-	int         utf16_len            = 0;
+  int         utf16_len            = 0;
 
   m_errcode.clear();
   s_intl_error->m_error.clear();
 
-	/*
-	 * Sort specified array.
-	 */
+  /*
+   * Sort specified array.
+   */
   if (!arr.isArray()) {
     return true;
   }
   Array hash = arr.toArray();
-	if (hash.size() == 0) {
+  if (hash.size() == 0) {
     return true;
   }
 
-	/* Create bufers */
-	sortKeyBuf     = (char*)calloc(sortKeyBufSize, sizeof(char));
-	sortKeyIndxBuf = (collator_sort_key_index_t*)malloc(sortKeyIndxBufSize);
-	utf16_buf      = (UChar*)malloc(utf16_buf_size);
+  /* Create bufers */
+  sortKeyBuf     = (char*)calloc(sortKeyBufSize, sizeof(char));
+  sortKeyIndxBuf = (collator_sort_key_index_t*)malloc(sortKeyIndxBufSize);
+  utf16_buf      = (UChar*)malloc(utf16_buf_size);
 
-	/* Iterate through input hash and create a sort key for each value. */
+  /* Iterate through input hash and create a sort key for each value. */
   for (ssize_t pos = hash->iter_begin(); pos != ArrayData::invalid_index;
        pos = hash->iter_advance(pos)) {
-		/* Convert current hash item from UTF-8 to UTF-16LE and save the result
+    /* Convert current hash item from UTF-8 to UTF-16LE and save the result
      * to utf16_buf. */
-		utf16_len = utf16_buf_size;
-		/* Process string values only. */
-		Variant val(hash->getValue(pos));
+    utf16_len = utf16_buf_size;
+    /* Process string values only. */
+    Variant val(hash->getValue(pos));
     if (val.isString()) {
       String str = val.toString();
-			intl_convert_utf8_to_utf16(&utf16_buf, &utf16_len, str.data(),
+      intl_convert_utf8_to_utf16(&utf16_buf, &utf16_len, str.data(),
                                  str.size(), &(m_errcode.code));
-			if (U_FAILURE(m_errcode.code)) {
+      if (U_FAILURE(m_errcode.code)) {
         m_errcode.custom_error_message = "Sort with sort keys failed";
-				if (utf16_buf) {
-					free(utf16_buf);
+        if (utf16_buf) {
+          free(utf16_buf);
         }
-				free(sortKeyIndxBuf);
-				free(sortKeyBuf);
-				return false;
-			}
-		} else {
-			/* Set empty string */
-			utf16_len = 0;
-			utf16_buf[utf16_len] = 0;
-		}
-
-		if ((utf16_len + 1) > utf16_buf_size) {
-			utf16_buf_size = utf16_len + 1;
+        free(sortKeyIndxBuf);
+        free(sortKeyBuf);
+        return false;
+      }
+    } else {
+      /* Set empty string */
+      utf16_len = 0;
+      utf16_buf[utf16_len] = 0;
     }
 
-		/* Get sort key, reallocating the buffer if needed. */
-		bufLeft = sortKeyBufSize - sortKeyBufOffset;
+    if ((utf16_len + 1) > utf16_buf_size) {
+      utf16_buf_size = utf16_len + 1;
+    }
 
-		sortKeyLen = ucol_getSortKey(m_ucoll,
-									  utf16_buf,
-									  utf16_len,
-									  (uint8_t*)sortKeyBuf + sortKeyBufOffset,
-									  bufLeft);
+    /* Get sort key, reallocating the buffer if needed. */
+    bufLeft = sortKeyBufSize - sortKeyBufOffset;
 
-		/* check for sortKeyBuf overflow, increasing its size of the buffer if
+    sortKeyLen = ucol_getSortKey(m_ucoll,
+                    utf16_buf,
+                    utf16_len,
+                    (uint8_t*)sortKeyBuf + sortKeyBufOffset,
+                    bufLeft);
+
+    /* check for sortKeyBuf overflow, increasing its size of the buffer if
        needed */
-		if (sortKeyLen > bufLeft) {
-			bufIncrement = ( sortKeyLen > DEF_SORT_KEYS_BUF_INCREMENT ) ?
+    if (sortKeyLen > bufLeft) {
+      bufIncrement = ( sortKeyLen > DEF_SORT_KEYS_BUF_INCREMENT ) ?
         sortKeyLen : DEF_SORT_KEYS_BUF_INCREMENT;
-			sortKeyBufSize += bufIncrement;
-			bufLeft += bufIncrement;
-			sortKeyBuf = (char*)realloc(sortKeyBuf, sortKeyBufSize);
-			sortKeyLen = ucol_getSortKey(m_ucoll, utf16_buf, utf16_len,
+      sortKeyBufSize += bufIncrement;
+      bufLeft += bufIncrement;
+      sortKeyBuf = (char*)realloc(sortKeyBuf, sortKeyBufSize);
+      sortKeyLen = ucol_getSortKey(m_ucoll, utf16_buf, utf16_len,
                                    (uint8_t*)sortKeyBuf + sortKeyBufOffset,
                                    bufLeft);
-		}
+    }
 
-		/* check sortKeyIndxBuf overflow, increasing its size of the buffer if
+    /* check sortKeyIndxBuf overflow, increasing its size of the buffer if
        needed */
-		if ((sortKeyCount + 1) * sortKeyIndxSize > sortKeyIndxBufSize) {
-			bufIncrement = (sortKeyIndxSize > DEF_SORT_KEYS_INDX_BUF_INCREMENT) ?
+    if ((sortKeyCount + 1) * sortKeyIndxSize > sortKeyIndxBufSize) {
+      bufIncrement = (sortKeyIndxSize > DEF_SORT_KEYS_INDX_BUF_INCREMENT) ?
         sortKeyIndxSize : DEF_SORT_KEYS_INDX_BUF_INCREMENT;
-			sortKeyIndxBufSize += bufIncrement;
-	    sortKeyIndxBuf = (collator_sort_key_index_t*)realloc(sortKeyIndxBuf,
+      sortKeyIndxBufSize += bufIncrement;
+      sortKeyIndxBuf = (collator_sort_key_index_t*)realloc(sortKeyIndxBuf,
                                                            sortKeyIndxBufSize);
-		}
-		sortKeyIndxBuf[sortKeyCount].key = (char*)sortKeyBufOffset;
-		sortKeyIndxBuf[sortKeyCount].valPos = pos;
-		sortKeyBufOffset += sortKeyLen;
-		++sortKeyCount;
-	}
+    }
+    sortKeyIndxBuf[sortKeyCount].key = (char*)sortKeyBufOffset;
+    sortKeyIndxBuf[sortKeyCount].valPos = pos;
+    sortKeyBufOffset += sortKeyLen;
+    ++sortKeyCount;
+  }
 
-	/* update ptrs to point to valid keys. */
-	for( j = 0; j < sortKeyCount; j++ )
-		sortKeyIndxBuf[j].key = sortKeyBuf + (ptrdiff_t)sortKeyIndxBuf[j].key;
+  /* update ptrs to point to valid keys. */
+  for( j = 0; j < sortKeyCount; j++ )
+    sortKeyIndxBuf[j].key = sortKeyBuf + (ptrdiff_t)sortKeyIndxBuf[j].key;
 
-	/* sort it */
-	zend_qsort(sortKeyIndxBuf, sortKeyCount, sortKeyIndxSize,
+  /* sort it */
+  zend_qsort(sortKeyIndxBuf, sortKeyCount, sortKeyIndxSize,
              collator_cmp_sort_keys, NULL);
 
-	/* for resulting hash we'll assign new hash keys rather then reordering */
-	Array sortedHash = Array::Create();
+  /* for resulting hash we'll assign new hash keys rather then reordering */
+  Array sortedHash = Array::Create();
 
-	for (j = 0; j < sortKeyCount; j++) {
+  for (j = 0; j < sortKeyCount; j++) {
     sortedHash.append(hash->getValue(sortKeyIndxBuf[j].valPos));
-	}
+  }
 
-	/* Save sorted hash into return variable. */
-	arr = sortedHash;
+  /* Save sorted hash into return variable. */
+  arr = sortedHash;
 
-	if (utf16_buf)
-		free(utf16_buf);
+  if (utf16_buf)
+    free(utf16_buf);
 
-	free(sortKeyIndxBuf);
-	free(sortKeyBuf);
+  free(sortKeyIndxBuf);
+  free(sortKeyBuf);
 
   return true;
 }
 
-bool c_collator::t_sort(Variant arr,
-                        int64 sort_flag /* = q_collator_SORT_REGULAR */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::sort);
+bool c_Collator::t_sort(Variant arr,
+                        int64 sort_flag /* = q_Collator_SORT_REGULAR */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::sort);
   if (!arr.isArray()) {
     throw_bad_array_exception(__func__);
     return false;
@@ -463,17 +463,17 @@ bool c_collator::t_sort(Variant arr,
   return ret;
 }
 
-Variant c_collator::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(collator, collator::__destruct);
+Variant c_Collator::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Collator, Collator::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CHECK_COLL(obj)                                    \
-  c_collator *coll = NULL;                                 \
+  c_Collator *coll = NULL;                                 \
   if (obj.isObject()) {                                    \
-    coll = obj.toObject().getTyped<c_collator>();          \
+    coll = obj.toObject().getTyped<c_Collator>();          \
   }                                                        \
   if (!coll) {                                             \
     raise_warning("Expecting collator object");            \
@@ -491,7 +491,7 @@ Variant f_collator_compare(CVarRef obj, CStrRef str1, CStrRef str2) {
 }
 
 Variant f_collator_create(CStrRef locale) {
-  return (NEW(c_collator)())->create(locale);
+  return (NEW(c_Collator)())->create(locale);
 }
 
 Variant f_collator_get_attribute(CVarRef obj, int64 attr) {
@@ -541,58 +541,58 @@ Variant f_collator_sort(CVarRef obj, Variant arr, int64 sort_flag /* = 0 */) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_locale_ACTUAL_LOCALE = 0;
-const int64 q_locale_VALID_LOCALE = 1;
+const int64 q_Locale_ACTUAL_LOCALE = 0;
+const int64 q_Locale_VALID_LOCALE = 1;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_locale::c_locale() {
+c_Locale::c_Locale() {
 }
 
-c_locale::~c_locale() {
+c_Locale::~c_Locale() {
 }
 
-void c_locale::t___construct() {
+void c_Locale::t___construct() {
 }
 
-Variant c_locale::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(locale, locale::__destruct);
+Variant c_Locale::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Locale, Locale::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_normalizer_NONE     = UNORM_NONE;
-const int64 q_normalizer_FORM_D   = UNORM_NFD;
-const int64 q_normalizer_NFD      = UNORM_NFD;
-const int64 q_normalizer_FORM_KD  = UNORM_NFKD;
-const int64 q_normalizer_NFKD     = UNORM_NFKD;
-const int64 q_normalizer_FORM_C   = UNORM_NFC;
-const int64 q_normalizer_NFC      = UNORM_NFC;
-const int64 q_normalizer_FORM_KC  = UNORM_NFKC;
-const int64 q_normalizer_NFKC     = UNORM_NFKC;
+const int64 q_Normalizer_NONE     = UNORM_NONE;
+const int64 q_Normalizer_FORM_D   = UNORM_NFD;
+const int64 q_Normalizer_NFD      = UNORM_NFD;
+const int64 q_Normalizer_FORM_KD  = UNORM_NFKD;
+const int64 q_Normalizer_NFKD     = UNORM_NFKD;
+const int64 q_Normalizer_FORM_C   = UNORM_NFC;
+const int64 q_Normalizer_NFC      = UNORM_NFC;
+const int64 q_Normalizer_FORM_KC  = UNORM_NFKC;
+const int64 q_Normalizer_NFKC     = UNORM_NFKC;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-c_normalizer::c_normalizer() {
+c_Normalizer::c_Normalizer() {
 }
 
-c_normalizer::~c_normalizer() {
+c_Normalizer::~c_Normalizer() {
 }
 
-void c_normalizer::t___construct() {
+void c_Normalizer::t___construct() {
 }
 
-Variant c_normalizer::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(normalizer, normalizer::__destruct);
+Variant c_Normalizer::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(Normalizer, Normalizer::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Variant c_normalizer::ti_isnormalized(const char* cls , CStrRef input,
-                                      int64 form /* = q_normalizer_FORM_C */) {
-  STATIC_METHOD_INJECTION_BUILTIN(normalizer, normalizer::isnormalized);
+Variant c_Normalizer::ti_isnormalized(const char* cls , CStrRef input,
+                                      int64 form /* = q_Normalizer_FORM_C */) {
+  STATIC_METHOD_INJECTION_BUILTIN(Normalizer, Normalizer::isnormalized);
   s_intl_error->m_error.clear();
 
   switch (form) {
@@ -638,9 +638,9 @@ Variant c_normalizer::ti_isnormalized(const char* cls , CStrRef input,
   return uret;
 }
 
-Variant c_normalizer::ti_normalize(const char* cls , CStrRef input,
-                                   int64 form /* = q_normalizer_FORM_C */) {
-  STATIC_METHOD_INJECTION_BUILTIN(normalizer, normalizer::normalize);
+Variant c_Normalizer::ti_normalize(const char* cls , CStrRef input,
+                                   int64 form /* = q_Normalizer_FORM_C */) {
+  STATIC_METHOD_INJECTION_BUILTIN(Normalizer, Normalizer::normalize);
   s_intl_error->m_error.clear();
 
   int expansion_factor = 1;

@@ -128,7 +128,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the protocol name as a string.",
+      'desc'   => "Returns the protocol name as a string, or FALSE on failure.",
     ),
     'args'   => array(
       array(

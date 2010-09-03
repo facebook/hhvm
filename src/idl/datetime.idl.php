@@ -743,12 +743,12 @@ DefineFunction(
       array(
         'name'   => "date",
         'type'   => String,
-        'desc'   => "The string to parse (e.g. returned from strftime())",
+        'desc'   => "The string to parse (e.g. returned from strftime()).",
       ),
       array(
         'name'   => "format",
         'type'   => String,
-        'desc'   => "The format used in date (e.g. the same as used in strftime()).\n\nFor more information about the format options, read the strftime() page.",
+        'desc'   => "The format used in date (e.g. the same as used in strftime()). Note that some of the format options available to strftime() may not have any effect within strptime(); the exact subset that are supported will vary based on the operating system and C library in use.\n\nFor more information about the format options, read the strftime() page.",
       ),
     ),
   ));
@@ -1054,7 +1054,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getoffset",
+    'name'   => "getOffset",
     'desc'   => "Procedural style int date_offset_get ( DateTime \$object ) Returns the timezone offset.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1065,7 +1065,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "gettimezone",
+    'name'   => "getTimezone",
     'desc'   => "Procedural style DateTimeZone date_timezone_get ( DateTime \$object ) Return time zone relative to given DateTime.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1094,7 +1094,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setdate",
+    'name'   => "setDate",
     'desc'   => "Procedural style DateTime date_date_set ( DateTime \$object , int \$year , int \$month , int \$day ) Resets the current date of the DateTime object to a different date.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1122,7 +1122,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setisodate",
+    'name'   => "setISODate",
     'desc'   => "Procedural style DateTime date_isodate_set ( DateTime \$object , int \$year , int \$week [, int \$day = 1 ] ) Set a date according to the ISO 8601 standard - using weeks and day offsets rather than specific dates.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1151,7 +1151,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "settime",
+    'name'   => "setTime",
     'desc'   => "Procedural style DateTime date_time_set ( DateTime \$object , int \$hour , int \$minute [, int \$second = 0 ] ) Resets the current time of the DateTime object to a different time.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1180,7 +1180,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "settimezone",
+    'name'   => "setTimezone",
     'desc'   => "Procedural style DateTime date_timezone_set ( DateTime \$object , DateTimeZone \$timezone )",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1324,7 +1324,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getname",
+    'name'   => "getName",
     'desc'   => "Procedural style string timezone_name_get ( void ) Returns the name of the timezone.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1335,7 +1335,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "getoffset",
+    'name'   => "getOffset",
     'desc'   => "Procedural style int timezone_offset_get ( DateTimeZone \$object , DateTime \$datetime ) This function returns the offset to GMT for the date/time specified in the datetime parameter. The GMT offset is calculated with the timezone information contained in the DateTimeZone object being used.",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1353,7 +1353,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "gettransitions",
+    'name'   => "getTransitions",
     'desc'   => "Procedural style array timezone_transitions_get ( DateTimeZone \$object [, int \$timestamp_begin [, int \$timestamp_end ]] )",
     'flags'  =>  HasDocComment,
     'return' => array(
@@ -1364,7 +1364,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "listabbreviations",
+    'name'   => "listAbbreviations",
     'desc'   => "Procedural style array timezone_abbreviations_list ( void )",
     'flags'  =>  IsStatic | HasDocComment,
     'return' => array(
@@ -1375,7 +1375,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "listidentifiers",
+    'name'   => "listIdentifiers",
     'desc'   => "Procedural style array timezone_identifiers_list ([ int \$what = DateTimeZone::ALL [, string \$country = NULL ]] )",
     'flags'  =>  IsStatic | HasDocComment,
     'return' => array(

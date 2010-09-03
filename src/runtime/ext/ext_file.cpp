@@ -1292,7 +1292,7 @@ Variant f_dir(CStrRef directory) {
   if (same(dir, false)) {
     return false;
   }
-  c_directory *c_d = NEW(c_directory)();
+  c_Directory *c_d = NEW(c_Directory)();
   c_d->m_path = directory;
   c_d->m_handle = dir;
   return c_d;

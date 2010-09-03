@@ -108,8 +108,8 @@ const char *BuiltinSymbols::SystemClasses[] = {
 };
 
 const char *BuiltinSymbols::BaseSysRsrcClasses[] = {
-  "splfileinfo",
-  "recursiveiteratoriterator",
+  "SplFileInfo",
+  "RecursiveIteratorIterator",
   NULL
 };
 

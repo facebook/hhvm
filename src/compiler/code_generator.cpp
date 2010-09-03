@@ -218,6 +218,21 @@ void CodeGenerator::printStartOfJumpTable(int tableSize) {
   }
 }
 
+void CodeGenerator::printDocComment(const std::string comment) {
+  if (comment.empty()) return;
+  string escaped;
+  escaped.reserve(comment.size() + 10);
+  for (unsigned int i = 0; i < comment.size(); i++) {
+    char ch = comment[i];
+    escaped += ch;
+    if (ch == '/' && i > 1 && comment[i+1] == '*') {
+      escaped += '\\'; // splitting illegal /* into /\*
+    }
+  }
+  print(escaped, false);
+  printf("\n");
+}
+
 const char *CodeGenerator::getGlobals(AnalysisResultPtr ar) {
   if (m_context == CppParameterDefaultValueDecl ||
       m_context == CppParameterDefaultValueImpl) {
@@ -306,7 +321,7 @@ void CodeGenerator::print(const char *fmt, va_list ap) {
   }
 }
 
-void CodeGenerator::print(const std::string &msg) {
+void CodeGenerator::print(const std::string &msg, bool indent /* = true */) {
   // empty line doesn't need indentation
   if (msg.size() == 1 && msg[0] == '\n') {
     *m_out << '\n';
@@ -317,17 +332,14 @@ void CodeGenerator::print(const std::string &msg) {
 
   if (m_indentPending[m_curStream]) {
     m_indentPending[m_curStream] = false;
-    if (msg[0]!='#') {
-      // Preprocessor statements must not be indented
-      for (int i = 0; i < m_indentation[m_curStream]; i++) {
-        *m_out << Option::Tab;
-      }
+    for (int i = 0; i < m_indentation[m_curStream]; i++) {
+      *m_out << Option::Tab;
     }
   }
   for (unsigned int i = 0; i < msg.length(); i++) {
     unsigned char ch = msg[i];
     *m_out << ch;
-    if (ch == '\n') {
+    if (ch == '\n' && indent) {
       m_lineNo[m_curStream]++;
       if (m_indentPending[m_curStream]) {
         for (int i = 0; i < m_indentation[m_curStream]; i++) {

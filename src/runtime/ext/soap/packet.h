@@ -23,8 +23,8 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-class c_soapclient;
-bool parse_packet_soap(c_soapclient *client, const char *buffer,
+class c_SoapClient;
+bool parse_packet_soap(c_SoapClient *client, const char *buffer,
                        int buffer_size, sdlFunctionPtr fn, const char *fn_name,
                        Variant &return_value, Variant &soap_headers);
 

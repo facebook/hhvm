@@ -22,16 +22,16 @@
 #include <php/classes/reflection.fw.h>
 
 // Declarations
-#include <cls/reflectionfunctionabstract.h>
-#include <cls/reflectionobject.h>
-#include <cls/reflector.h>
-#include <cls/reflectionexception.h>
-#include <cls/reflectionclass.h>
-#include <cls/reflectionextension.h>
-#include <cls/reflectionmethod.h>
-#include <cls/reflectionproperty.h>
-#include <cls/reflectionfunction.h>
-#include <cls/reflectionparameter.h>
+#include <cls/ReflectionFunctionAbstract.h>
+#include <cls/ReflectionObject.h>
+#include <cls/Reflector.h>
+#include <cls/ReflectionException.h>
+#include <cls/ReflectionClass.h>
+#include <cls/ReflectionExtension.h>
+#include <cls/ReflectionMethod.h>
+#include <cls/ReflectionProperty.h>
+#include <cls/ReflectionFunction.h>
+#include <cls/ReflectionParameter.h>
 #include <php/classes/exception.h>
 #include <php/classes/stdclass.h>
 
@@ -39,15 +39,15 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant pm_php$classes$reflection_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
-Object co_reflectionfunctionabstract(CArrRef params, bool init = true);
-Object co_reflectionobject(CArrRef params, bool init = true);
-Object co_reflectionexception(CArrRef params, bool init = true);
-Object co_reflectionclass(CArrRef params, bool init = true);
-Object co_reflectionextension(CArrRef params, bool init = true);
-Object co_reflectionmethod(CArrRef params, bool init = true);
-Object co_reflectionproperty(CArrRef params, bool init = true);
-Object co_reflectionfunction(CArrRef params, bool init = true);
-Object co_reflectionparameter(CArrRef params, bool init = true);
+Object co_ReflectionFunctionAbstract(CArrRef params, bool init = true);
+Object co_ReflectionObject(CArrRef params, bool init = true);
+Object co_ReflectionException(CArrRef params, bool init = true);
+Object co_ReflectionClass(CArrRef params, bool init = true);
+Object co_ReflectionExtension(CArrRef params, bool init = true);
+Object co_ReflectionMethod(CArrRef params, bool init = true);
+Object co_ReflectionProperty(CArrRef params, bool init = true);
+Object co_ReflectionFunction(CArrRef params, bool init = true);
+Object co_ReflectionParameter(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

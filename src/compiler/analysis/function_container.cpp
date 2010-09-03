@@ -102,12 +102,12 @@ void FunctionContainer::outputCPPJumpTableSupport
           // no conflict in the function table
           cg_indentBegin("Variant d%s%s(const char *s, CArrRef params, "
                          "int64 hash, bool fatal) {\n",
-                         Option::InvokePrefix, cg.formatLabel(name).c_str());
+                         Option::InvokePrefix, func->getId(cg).c_str());
           cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                           hash_string_i(name), name);
           FunctionScope::OutputCPPDynamicInvokeCount(cg);
           func->outputCPPDynamicInvoke(cg, ar, funcPrefix,
-                                       cg.formatLabel(name).c_str());
+                                       func->getId(cg).c_str());
           cg_indentEnd("}\n");
           cg_printf("return invoke_builtin(s, params, hash, fatal);\n");
           cg_indentEnd("}\n");
@@ -117,42 +117,42 @@ void FunctionContainer::outputCPPJumpTableSupport
         }
       }
       cg_indentBegin("Variant %s%s(CArrRef params) {\n",
-                     Option::InvokePrefix, cg.formatLabel(name).c_str());
+                     Option::InvokePrefix, func->getId(cg).c_str());
       if (profile) {
         cg_printf("FUNCTION_INJECTION(%s);\n", name);
       }
       FunctionScope::OutputCPPDynamicInvokeCount(cg);
       func->outputCPPDynamicInvoke(cg, ar, funcPrefix,
-                                   cg.formatLabel(name).c_str());
+                                   func->getId(cg).c_str());
       cg_indentEnd("}\n");
     } else {
       hasRedeclared = true;
       if (funcs) funcs->push_back(iter->first.c_str());
       BOOST_FOREACH(FunctionScopePtr func, iter->second) {
         string prefix = Option::InvokePrefix;
-        string name = func->getId(cg);
+        string sname = func->getId(cg);
+        const char *name = sname.c_str();
         cg_indentBegin("Variant %s%s(CArrRef params) {\n",
-                       prefix.c_str(), name.c_str());
+                       prefix.c_str(), name);
         FunctionScope::OutputCPPDynamicInvokeCount(cg);
-        func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name.c_str());
+        func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name);
         cg_indentEnd("}\n");
 
         cg_indentBegin("Variant %s%s_few_args(int count",
-                       prefix.c_str(), name.c_str());
+                       prefix.c_str(), name);
         for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
           cg_printf(", CVarRef a%d", i);
         }
         cg_printf(") {\n");
-        func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name.c_str(), false,
-                                     true);
+        func->outputCPPDynamicInvoke(cg, ar, funcPrefix, name, false, true);
         cg_indentEnd("}\n");
 
         if (func->getRedeclaringId() == 0) {
+          name = func->getName().c_str();
           cg_indentBegin("Variant %s%s(CArrRef params) {\n",
-                         prefix.c_str(), func->getName().c_str());
+                         prefix.c_str(), func->getOriginalName().c_str());
           cg_printf("DECLARE_GLOBAL_VARIABLES(g);\n");
-          cg_printf("return g->%s%s(params);\n",
-                    prefix.c_str(), func->getName().c_str());
+          cg_printf("return g->%s%s(params);\n", prefix.c_str(), name);
           cg_indentEnd("}\n");
         }
       }
@@ -181,9 +181,9 @@ void FunctionContainer::outputCPPJumpTableEvalSupport
 
       cg_indentBegin("Variant %s%s(Eval::VariableEnvironment &env, "
                      "const Eval::FunctionCallExpression *caller) {\n",
-                     Option::EvalInvokePrefix, cg.formatLabel(name).c_str());
+                     Option::EvalInvokePrefix, func->getId(cg).c_str());
       func->outputCPPEvalInvoke(cg, ar, funcPrefix,
-                                cg.formatLabel(name).c_str());
+                                func->getId(cg).c_str());
       cg_indentEnd("}\n");
     } else {
       hasRedeclared = true;
@@ -219,12 +219,13 @@ void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
     StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
       m_functions.find(name);
     ASSERT(iterFuncs != m_functions.end());
-    if (iterFuncs->second[0]->isRedeclaring()) {
+    FunctionScopePtr func = iterFuncs->second[0];
+    if (func->isRedeclaring()) {
       cg_printf("HASH_INVOKE_REDECLARED(0x%016llXLL, %s);\n",
                 hash_string_i(name), cg.formatLabel(name).c_str());
     } else {
       cg_printf("HASH_INVOKE(0x%016llXLL, %s);\n",
-                hash_string_i(name), cg.formatLabel(name).c_str());
+                hash_string_i(name), func->getId(cg).c_str());
     }
   }
 

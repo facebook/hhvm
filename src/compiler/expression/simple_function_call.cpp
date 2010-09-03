@@ -1117,7 +1117,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
       assert(cls);
       cg_printf("%s%s::", Option::ClassPrefix, cls->getId(cg).c_str());
       std::string name = m_name == "__construct" ?
-        cls->findConstructor(ar, true)->getId(cg) :
+        cls->findConstructor(ar, true)->getName() :
         cg.formatLabel(m_name);
 
       cg_printf("%s%s(", Option::MethodPrefix, name.c_str());
@@ -1141,7 +1141,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
         } else {
           cg_printf("%s%s(",
                     m_builtinFunction ? Option::BuiltinFunctionPrefix :
-                    Option::FunctionPrefix, cg.formatLabel(m_name).c_str());
+                    Option::FunctionPrefix, m_funcScope->getId(cg).c_str());
         }
       }
     }
@@ -1177,7 +1177,7 @@ void SimpleFunctionCall::outputCPPParamOrderControlled(CodeGenerator &cg,
                  !m_funcScope->isSepExtension()) {
         if (m_funcScope->isUserFunction()) {
           cg_printf("%s%s(", Option::InvokePrefix,
-                    cg.formatLabel(m_name).c_str());
+                    m_funcScope->getId(cg).c_str());
           needHash = false;
         } else {
           extraArgs = m_safe ? ", false" : ", true";

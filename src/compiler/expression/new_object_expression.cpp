@@ -188,8 +188,8 @@ void NewObjectExpression::outputCPPImpl(CodeGenerator &cg,
         cls->outputVolatileCheckBegin(cg, ar, cname);
       }
       cg_printf("%s%s((NEWOBJ(%s%s)())->create(",
-                Option::SmartPtrPrefix, m_name.c_str(),
-                Option::ClassPrefix, m_name.c_str());
+                Option::SmartPtrPrefix, cls->getId(cg).c_str(),
+                Option::ClassPrefix, cls->getId(cg).c_str());
     } else {
       cg_printf("(%s->create(", m_receiverTemp.c_str());
     }
@@ -271,14 +271,14 @@ bool NewObjectExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     ar->wrapExpressionBegin(cg);
     m_receiverTemp = genCPPTemp(cg, ar);
     bool outsideClass = !ar->checkClassPresent(m_origName);
-    cg_printf("%s%s %s = ", Option::SmartPtrPrefix, m_name.c_str(),
-              m_receiverTemp.c_str());
     ClassScopePtr cls = ar->resolveClass(m_name);
     ASSERT(cls);
+    cg_printf("%s%s %s = ", Option::SmartPtrPrefix,
+              cls->getId(cg).c_str(), m_receiverTemp.c_str());
     if (outsideClass) {
       cls->outputVolatileCheckBegin(cg, ar, cname);
     }
-    cg_printf("NEWOBJ(%s%s)()", Option::ClassPrefix, m_name.c_str());
+    cg_printf("NEWOBJ(%s%s)()", Option::ClassPrefix, cls->getId(cg).c_str());
     if (outsideClass) {
       cls->outputVolatileCheckEnd(cg);
     }

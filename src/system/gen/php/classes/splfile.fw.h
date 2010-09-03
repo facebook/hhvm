@@ -95,12 +95,12 @@ extern StaticString s_sys_ss54808c44;
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_CLASS(splfileobject);
-extern const int64 q_splfileobject_DROP_NEW_LINE;
-extern const int64 q_splfileobject_READ_AHEAD;
-extern const int64 q_splfileobject_SKIP_EMPTY;
-extern const int64 q_splfileobject_READ_CSV;
-FORWARD_DECLARE_CLASS(splfileinfo);
+FORWARD_DECLARE_CLASS(SplFileObject);
+extern const int64 q_SplFileObject_DROP_NEW_LINE;
+extern const int64 q_SplFileObject_READ_AHEAD;
+extern const int64 q_SplFileObject_SKIP_EMPTY;
+extern const int64 q_SplFileObject_READ_CSV;
+FORWARD_DECLARE_CLASS(SplFileInfo);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

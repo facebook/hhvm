@@ -22,20 +22,20 @@
 #include <php/classes/iterator.fw.h>
 
 // Declarations
-#include <cls/outeriterator.h>
-#include <cls/serializable.h>
-#include <cls/traversable.h>
-#include <cls/countable.h>
-#include <cls/arrayiterator.h>
-#include <cls/iterator.h>
-#include <cls/appenditerator.h>
-#include <cls/seekableiterator.h>
-#include <cls/recursiveiterator.h>
-#include <cls/recursivedirectoryiterator.h>
-#include <cls/directoryiterator.h>
-#include <cls/iteratoraggregate.h>
-#include <cls/recursiveiteratoriterator.h>
-#include <cls/filteriterator.h>
+#include <cls/OuterIterator.h>
+#include <cls/Serializable.h>
+#include <cls/Traversable.h>
+#include <cls/Countable.h>
+#include <cls/ArrayIterator.h>
+#include <cls/Iterator.h>
+#include <cls/AppendIterator.h>
+#include <cls/SeekableIterator.h>
+#include <cls/RecursiveIterator.h>
+#include <cls/RecursiveDirectoryIterator.h>
+#include <cls/DirectoryIterator.h>
+#include <cls/IteratorAggregate.h>
+#include <cls/RecursiveIteratorIterator.h>
+#include <cls/FilterIterator.h>
 #include <php/classes/arrayaccess.h>
 #include <php/classes/splfile.h>
 #include <php/classes/exception.h>
@@ -44,12 +44,12 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
-Object co_arrayiterator(CArrRef params, bool init = true);
-Object co_appenditerator(CArrRef params, bool init = true);
-Object co_recursivedirectoryiterator(CArrRef params, bool init = true);
-Object co_directoryiterator(CArrRef params, bool init = true);
-Object co_recursiveiteratoriterator(CArrRef params, bool init = true);
-Object co_filteriterator(CArrRef params, bool init = true);
+Object co_ArrayIterator(CArrRef params, bool init = true);
+Object co_AppendIterator(CArrRef params, bool init = true);
+Object co_RecursiveDirectoryIterator(CArrRef params, bool init = true);
+Object co_DirectoryIterator(CArrRef params, bool init = true);
+Object co_RecursiveIteratorIterator(CArrRef params, bool init = true);
+Object co_FilterIterator(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -38,7 +38,7 @@ class TestExtImagesprite : public TestCppExt {
   bool test_loadImages();
   bool test_map();
 
-  sp_imagesprite sprite;
+  p_ImageSprite sprite;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

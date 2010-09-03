@@ -6418,6 +6418,18 @@ bool TestCodeRun::TestProgramFunctions() {
 }
 
 bool TestCodeRun::TestCompilation() {
+  // testing re-declared classes with missing parents
+  MVCR("<?php $a = bar(); if ($a) { class fOO extends Unknown {} } else "
+       "{ class Foo extends unknOwn {} } function bar() { return 123;}");
+
+  // testing re-declared classes with different cases
+  MVCR("<?php $a = bar(); if ($a) { class fOO {} } else "
+       "{ class Foo {} } function bar() { return 123;} $obj = new foo();");
+
+  // testing re-declared functions with different cases
+  MVCR("<?php $a = bar(); if ($a) { function fOO() {} } else "
+       "{ function Foo() {} } function bar() { return 123;} foo();");
+
   // overlapped interface
   MVCR("<?php interface A {} class B implements A {} "
       "class C extends B implements A {} $obj = new C();");

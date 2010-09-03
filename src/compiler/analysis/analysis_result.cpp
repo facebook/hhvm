@@ -1476,8 +1476,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
     bool extension = cls->getAttribute(ClassScope::Extension);
     if (cls->isInterface()) continue;
 
-    const char *clsName = cls->getName().c_str();
-    classes.push_back(clsName);
+    classes.push_back(cls->getOriginalName().c_str());
     merged[cls->getName()].push_back(cls);
     cls->outputCPPDynamicClassImpl(cg, ar);
     if (extension) {
@@ -1497,7 +1496,7 @@ void AnalysisResult::outputCPPExtClassImpl(CodeGenerator &cg) {
          iter2 != iter->second.end(); ++iter2) {
       ClassScopePtr cls = *iter2;
       if (!cls->isInterface()) {
-        classes.push_back(cls->getName().c_str());
+        classes.push_back(cls->getOriginalName().c_str());
         break;
       }
     }
@@ -1986,14 +1985,14 @@ void AnalysisResult::createGlobalFuncTable() {
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     FunctionScopePtr func = iter->second[0];
     if (func->isDynamic() || func->isRedeclaring()) {
-      funcs.push_back(iter->second[0]->name().c_str());
+      funcs.push_back(iter->second[0]->getOriginalName().c_str());
     }
   }
   for (StringToFunctionScopePtrVecMap::const_iterator iter =
          m_functions.begin(); iter != m_functions.end(); ++iter) {
     FunctionScopePtr func = iter->second[0];
     if (func->isSepExtension()) {
-      funcs.push_back(iter->second[0]->name().c_str());
+      funcs.push_back(iter->second[0]->getOriginalName().c_str());
     }
   }
   if (funcs.size() > 0) {
@@ -2031,14 +2030,14 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       for (unsigned int i = 0; i < it->second.size(); i++) {
         const char *name = it->second[i];
         StringToFunctionScopePtrVecMap::const_iterator sepiter =
-          m_functions.find(name);
+          m_functions.find(Util::toLower(name));
         if (sepiter != m_functions.end()) {
           ASSERT(!system);
           FunctionScopePtr func = sepiter->second[0];
           if (it->second.size() == 1) {
             cg_indentBegin("Variant d%s%s(const char *s, CArrRef params, "
                            "int64 hash, bool fatal) {\n",
-                           Option::InvokePrefix, cg.formatLabel(name).c_str());
+                           Option::InvokePrefix, func->getId(cg).c_str());
             cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                            hash_string_i(name), name);
             FunctionScope::OutputCPPDynamicInvokeCount(cg);
@@ -2049,7 +2048,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
             cg_indentEnd("}\n");
           } else {
             cg_indentBegin("Variant %s%s(CArrRef params) {\n",
-                           Option::InvokePrefix, name);
+                           Option::InvokePrefix, func->getId(cg).c_str());
             FunctionScope::OutputCPPDynamicInvokeCount(cg);
             func->outputCPPDynamicInvoke(cg, ar, Option::BuiltinFunctionPrefix,
                                          cg.formatLabel(name).c_str());
@@ -2058,13 +2057,14 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         }
       }
 
+      FunctionScopePtr func;
       if (it->second.size() == 1 &&
-          !findFunction(it->second[0])->isRedeclaring()) {
+          !(func = findFunction(Util::toLower(it->second[0])))->
+          isRedeclaring()) {
         // no conflict
         cg_printf("Variant d%s%s(const char *s, CArrRef params, int64 hash, "
                   "bool fatal);\n",
-                  Option::InvokePrefix,
-                  cg.formatLabel(it->second.front()).c_str());
+                  Option::InvokePrefix, func->getId(cg).c_str());
       } else {
         for (unsigned int i = 0; i < it->second.size(); i++) {
           const char *name = it->second.at(i);
@@ -2099,11 +2099,12 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
                     "funcTable[i] = &invoke_builtin;\n", m_funcTableSize);
         for (CodeGenerator::MapIntToStringVec::const_iterator it =
                m_funcTable.begin(); it != m_funcTable.end(); it++) {
+          FunctionScopePtr func;
           if (it->second.size() == 1 &&
-              !findFunction(it->second[0])->isRedeclaring()) {
+              !(func = findFunction(Util::toLower(it->second[0])))->
+              isRedeclaring()) {
             cg_printf("funcTable[%d] = &d%s%s;\n", it->first,
-                      Option::InvokePrefix,
-                      cg.formatLabel(it->second.front()).c_str());
+                      Option::InvokePrefix, func->getId(cg).c_str());
           } else {
             cg_printf("funcTable[%d] = &invoke_case_%d;\n",
                       it->first, it->first);
@@ -2175,7 +2176,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
              iter2 != iter->second.end(); ++iter2) {
           cls = *iter2;
           if (cls->isUserClass() && !cls->isInterface()) {
-            classes.push_back(cls->getName().c_str());
+            classes.push_back(cls->getOriginalName().c_str());
             classScopes[cls->getName()].push_back(cls);
             if (!system) {
               cls->outputCPPDynamicClassDecl(cg);
@@ -2190,14 +2191,14 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
 
       BOOST_FOREACH(tie(n, cls), m_systemClasses) {
         if (!cls->isInterface() && !cls->isSepExtension()) {
-          classes.push_back(cls->getName().c_str());
+          classes.push_back(cls->getOriginalName().c_str());
         }
       }
       outputCPPExtClassImpl(cg);
     } else {
       BOOST_FOREACH(tie(n, cls), m_systemClasses) {
         if (!cls->isInterface() && cls->isSepExtension()) {
-          classes.push_back(cls->getName().c_str());
+          classes.push_back(cls->getOriginalName().c_str());
           cls->outputCPPDynamicClassDecl(cg);
           cls->outputCPPGlobalTableWrappersDecl(cg, ar);
           classScopes[cls->getName()].push_back(cls);

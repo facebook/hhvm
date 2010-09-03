@@ -108,7 +108,7 @@ update-all:
 # re-generating .idl files
 
 %.gendoc:
-	@php schema.php $(patsubst %.gendoc, %.idl.php, $@) 1 > $@.php
+	@php schema.php $(patsubst %.gendoc, %.idl.php, $@) -1 > $@.php
 	@mv -f $@.php $(patsubst %.gendoc, %.idl.php, $@)
 
 gendoc-all: $(patsubst %.idl.php, %.gendoc, $(IDL_PHPS))

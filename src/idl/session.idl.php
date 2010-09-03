@@ -355,7 +355,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
-      'desc'   => "No value is returned. Session PgSQL session_unset Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "No value is returned. Session PgSQL session_unset Last updated: Fri, 03 Sep 2010  ",
     ),
   ));
 

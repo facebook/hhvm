@@ -22,16 +22,16 @@
 #include <php/classes/splfile.fw.h>
 
 // Declarations
-#include <cls/splfileobject.h>
-#include <cls/splfileinfo.h>
+#include <cls/SplFileObject.h>
+#include <cls/SplFileInfo.h>
 #include <php/classes/iterator.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant pm_php$classes$splfile_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
-Object co_splfileobject(CArrRef params, bool init = true);
-Object co_splfileinfo(CArrRef params, bool init = true);
+Object co_SplFileObject(CArrRef params, bool init = true);
+Object co_SplFileInfo(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

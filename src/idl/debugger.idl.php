@@ -89,12 +89,15 @@ DefineFunction(
     'name'   => "hphpd_break",
     'desc'   => "Sets a hard breakpoint. When a debugger is running, this line of code will break into debugger, if condition is met. If there is no debugger that's attached, it will not do anything.",
     'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => null,
+    ),
     'args'   => array(
       array(
         'name'   => "condition",
         'type'   => Boolean,
-        'desc'   => "If true, break, otherwise, continue.",
         'value'  => "true",
+        'desc'   => "If true, break, otherwise, continue.",
       ),
     ),
   ));
@@ -139,7 +142,6 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "DebuggerProxy",
-    'desc'   => "",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'footer' => <<<EOT
 
@@ -207,7 +209,6 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DebuggerClient",
-    'desc'   => "",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'footer' => <<<EOT
 

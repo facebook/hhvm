@@ -31,17 +31,17 @@ IMPLEMENT_OBJECT_ALLOCATION(SplFileInfo)
 IMPLEMENT_OBJECT_ALLOCATION(SplFileObject)
 
 static SplFileInfo *get_splfileinfo(CObjRef obj) {
-  c_splfileinfo *c_splfi = obj.getTyped<c_splfileinfo>();
+  c_SplFileInfo *c_splfi = obj.getTyped<c_SplFileInfo>();
   return c_splfi->m_rsrc.toObject().getTyped<SplFileInfo>();
 }
 
 static SplFileObject *get_splfileobject(CObjRef obj) {
-  c_splfileobject *c_splfo = obj.getTyped<c_splfileobject>();
+  c_SplFileObject *c_splfo = obj.getTyped<c_SplFileObject>();
   return c_splfo->m_rsrc.toObject().getTyped<SplFileObject>();
 }
 
 Object f_hphp_splfileinfo___construct(CObjRef obj, CStrRef file_name) {
-  c_splfileinfo *c_splfi = obj.getTyped<c_splfileinfo>();
+  c_SplFileInfo *c_splfi = obj.getTyped<c_SplFileInfo>();
   c_splfi->m_rsrc = NEW(SplFileInfo)(file_name);
   return c_splfi;
 }
@@ -84,7 +84,7 @@ String f_hphp_splfileinfo_getlinktarget(CObjRef obj) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
   String ret = f_readlink_internal(fileInfo->getFileName(), false);
   if (!ret.size())  {
-    throw (Object)sp_exception(NEW(c_exception)())->create(Variant(
+    throw (Object)p_Exception(NEW(c_Exception)())->create(Variant(
       "Unable to read link "+fileInfo->getFileName()
       +", error: no such file or directory"));
   }
@@ -170,7 +170,7 @@ bool f_hphp_splfileinfo_iswritable(CObjRef obj) {
 
 Object f_hphp_splfileinfo_openfile(CObjRef obj, CStrRef open_mode, bool use_include_path, CVarRef context) {
   SplFileInfo *fileInfo = get_splfileinfo(obj);
-  return sp_splfileobject(sp_splfileobject(NEW(c_splfileobject)())->
+  return p_SplFileObject(p_SplFileObject(NEW(c_SplFileObject)())->
            create(String(fileInfo->getFileName()),
                   open_mode, use_include_path, context));
 }
@@ -191,7 +191,7 @@ String f_hphp_splfileinfo___tostring(CObjRef obj) {
 Object f_hphp_splfileobject___construct(CObjRef obj, CStrRef filename, CStrRef open_mode, bool use_include_path, CVarRef context) {
   Variant f = f_fopen(filename, open_mode, use_include_path,
                       context.isNull() ? null_object : context.toObject());
-  c_splfileobject *c_splfo = obj.getTyped<c_splfileobject>();
+  c_SplFileObject *c_splfo = obj.getTyped<c_SplFileObject>();
   c_splfo->m_rsrc = NEW(SplFileObject)(f);
   return c_splfo;
 }

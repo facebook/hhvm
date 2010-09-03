@@ -107,6 +107,7 @@ const char *Option::ObjectPrefix = "o_";
 const char *Option::ObjectStaticPrefix = "os_";
 const char *Option::SmartPtrPrefix = "p_";
 const char *Option::MethodPrefix = "t_";
+const char *Option::MethodWrapperPrefix = "mf_";
 const char *Option::MethodImplPrefix = "ti_";
 const char *Option::PropertyPrefix = "m_";
 const char *Option::StaticPropertyPrefix = "s_";
@@ -178,21 +179,20 @@ bool Option::PrecomputeLiteralStrings = true;
 bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;
+bool Option::UseVirtualDispatch = false;
+bool Option::EliminateDeadCode = true;
+bool Option::LocalCopyProp = true;
+bool Option::StringLoopOpts = true;
+bool Option::AutoInline = false;
 
 bool Option::AllDynamic = true;
 bool Option::AllVolatile = false;
 
 StringBag Option::OptionStrings;
 
+bool Option::GenerateCppLibCode = false;
 bool Option::GenerateSourceInfo = false;
 bool Option::GenerateDocComments = true;
-bool Option::UseVirtualDispatch = false;
-
-bool Option::EliminateDeadCode = true;
-bool Option::LocalCopyProp = true;
-bool Option::StringLoopOpts = true;
-bool Option::AutoInline = false;
-
 bool Option::FlAnnotate = false;
 bool Option::SystemGen = false;
 
@@ -282,6 +282,7 @@ void Option::Load(Hdf &config) {
     READ_CG_OPTION(ObjectStaticPrefix);
     READ_CG_OPTION(SmartPtrPrefix);
     READ_CG_OPTION(MethodPrefix);
+    READ_CG_OPTION(MethodWrapperPrefix);
     READ_CG_OPTION(MethodImplPrefix);
     READ_CG_OPTION(PropertyPrefix);
     READ_CG_OPTION(StaticPropertyPrefix);
@@ -352,10 +353,10 @@ void Option::Load(Hdf &config) {
   AllDynamic = config["AllDynamic"].getBool(true);
   AllVolatile = config["AllVolatile"].getBool();
 
+  GenerateCppLibCode = config["GenerateCppLibCode"].getBool(false);
   GenerateSourceInfo = config["GenerateSourceInfo"].getBool(false);
   GenerateDocComments = config["GenerateDocComments"].getBool(true);
   UseVirtualDispatch = config["UseVirtualDispatch"].getBool(false);
-
   EliminateDeadCode  = config["EliminateDeadCode"].getBool(true);
   LocalCopyProp      = config["LocalCopyProp"].getBool(true);
   StringLoopOpts     = config["StringLoopOpts"].getBool(true);

@@ -22,7 +22,6 @@
 
 #include <runtime/base/base_includes.h>
 #include <runtime/ext/ext_simplexml_include.h>
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -38,21 +37,21 @@ bool f_libxml_disable_entity_loader(bool disable = true);
 ///////////////////////////////////////////////////////////////////////////////
 // class SimpleXMLElement
 
-FORWARD_DECLARE_CLASS(simplexmlelement);
-class c_simplexmlelement : public ExtObjectData {
+FORWARD_DECLARE_CLASS(SimpleXMLElement);
+class c_SimpleXMLElement : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(simplexmlelement)
-  PARENT_CLASS(arrayaccess)
-  PARENT_CLASS(iteratoraggregate)
-  PARENT_CLASS(countable)
-  END_CLASS_MAP(simplexmlelement)
-  DECLARE_CLASS(simplexmlelement, SimpleXMLElement, ObjectData)
+  BEGIN_CLASS_MAP(SimpleXMLElement)
+  PARENT_CLASS(ArrayAccess)
+  PARENT_CLASS(IteratorAggregate)
+  PARENT_CLASS(Countable)
+  END_CLASS_MAP(SimpleXMLElement)
+  DECLARE_CLASS(SimpleXMLElement, SimpleXMLElement, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_simplexmlelement();
-  public: ~c_simplexmlelement();
+  public: c_SimpleXMLElement();
+  public: ~c_SimpleXMLElement();
   public: void t___construct(CStrRef data, int64 options = 0, bool data_is_url = false, CStrRef ns = "", bool is_prefix = false);
   public: bool t_offsetexists(CVarRef index);
   public: Variant t_offsetget(CVarRef index);
@@ -79,7 +78,7 @@ class c_simplexmlelement : public ExtObjectData {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_simplexmlelement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
+  public: c_SimpleXMLElement *create(String data, int64 options = 0, bool data_is_url = false, String ns = "", bool is_prefix = false);
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
@@ -107,23 +106,23 @@ class c_simplexmlelement : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class LibXMLError
 
-FORWARD_DECLARE_CLASS(libxmlerror);
-class c_libxmlerror : public ExtObjectData {
+FORWARD_DECLARE_CLASS(LibXMLError);
+class c_LibXMLError : public ExtObjectData {
  public:
-  BEGIN_CLASS_MAP(libxmlerror)
-  END_CLASS_MAP(libxmlerror)
-  DECLARE_CLASS(libxmlerror, LibXMLError, ObjectData)
+  BEGIN_CLASS_MAP(LibXMLError)
+  END_CLASS_MAP(LibXMLError)
+  DECLARE_CLASS(LibXMLError, LibXMLError, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_libxmlerror();
-  public: ~c_libxmlerror();
+  public: c_LibXMLError();
+  public: ~c_LibXMLError();
   public: void t___construct();
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_libxmlerror *create();
+  public: c_LibXMLError *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
@@ -134,19 +133,19 @@ class c_libxmlerror : public ExtObjectData {
 ///////////////////////////////////////////////////////////////////////////////
 // class SimpleXMLElementIterator
 
-FORWARD_DECLARE_CLASS(simplexmlelementiterator);
-class c_simplexmlelementiterator : public ExtObjectData, public Sweepable {
+FORWARD_DECLARE_CLASS(SimpleXMLElementIterator);
+class c_SimpleXMLElementIterator : public ExtObjectData, public Sweepable {
  public:
-  BEGIN_CLASS_MAP(simplexmlelementiterator)
-  PARENT_CLASS(iterator)
-  END_CLASS_MAP(simplexmlelementiterator)
-  DECLARE_CLASS(simplexmlelementiterator, SimpleXMLElementIterator, ObjectData)
+  BEGIN_CLASS_MAP(SimpleXMLElementIterator)
+  PARENT_CLASS(Iterator)
+  END_CLASS_MAP(SimpleXMLElementIterator)
+  DECLARE_CLASS(SimpleXMLElementIterator, SimpleXMLElementIterator, ObjectData)
   DECLARE_INVOKES_FROM_EVAL
   ObjectData* dynCreate(CArrRef params, bool init = true);
 
   // need to implement
-  public: c_simplexmlelementiterator();
-  public: ~c_simplexmlelementiterator();
+  public: c_SimpleXMLElementIterator();
+  public: ~c_SimpleXMLElementIterator();
   public: void t___construct();
   public: Variant t_current();
   public: Variant t_key();
@@ -156,16 +155,16 @@ class c_simplexmlelementiterator : public ExtObjectData, public Sweepable {
   public: Variant t___destruct();
 
   // implemented by HPHP
-  public: c_simplexmlelementiterator *create();
+  public: c_SimpleXMLElementIterator *create();
   public: void dynConstruct(CArrRef Params);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
 
 public:
-  void reset_iterator(c_simplexmlelement *parent);
+  void reset_iterator(c_SimpleXMLElement *parent);
 
-  c_simplexmlelement *m_parent;
+  c_SimpleXMLElement *m_parent;
   ArrayIter *m_iter1;
   ArrayIter *m_iter2;
   Object     m_temp;

@@ -44,7 +44,7 @@ public:
   virtual BlockScopePtr getScope();
   ClassScopePtr getClassScope() { return m_classScope.lock();}
   virtual std::string getName() const;
-  std::string getOriginalName() const { return m_originalName;}
+  const std::string &getOriginalName() const { return m_originalName;}
   virtual void getAllParents(AnalysisResultPtr ar,
                              std::vector<std::string> &names);
 

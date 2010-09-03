@@ -98,6 +98,7 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "PDO",
+    'bases'  => array('Sweepable'),
     'desc'   => "Represents a connection between PHP and a database server.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
@@ -687,7 +688,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. PDOStatement PDO::rollBack Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure. PDOStatement PDO::rollBack Last updated: Fri, 03 Sep 2010  ",
     ),
     'args'   => array(
       array(
@@ -744,7 +745,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "If a sequence name was not specified for the name parameter, PDO::lastInsertId() returns a string representing the row ID of the last row that was inserted into the database.\n\nIf a sequence name was specified for the name parameter, PDO::lastInsertId() returns a string representing the last value retrieved from the specified sequence object.\n\nIf the PDO driver does not support this capability, PDO::lastInsertId() triggers an IM001 SQLSTATE. PDO::prepare PDO::getAvailableDrivers Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "If a sequence name was not specified for the name parameter, PDO::lastInsertId() returns a string representing the row ID of the last row that was inserted into the database.\n\nIf a sequence name was specified for the name parameter, PDO::lastInsertId() returns a string representing the last value retrieved from the specified sequence object.\n\nIf the PDO driver does not support this capability, PDO::lastInsertId() triggers an IM001 SQLSTATE. PDO::prepare PDO::getAvailableDrivers Last updated: Fri, 03 Sep 2010  ",
     ),
     'args'   => array(
       array(
@@ -812,7 +813,7 @@ DefineFunction(
       array(
         'name'   => "paramtype",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Provides a data type hint for drivers that have alternate quoting styles.",
       ),
     ),
@@ -918,13 +919,13 @@ DefineFunction(
       array(
         'name'   => "how",
         'type'   => Int64,
-        'value'  => "q_pdo_FETCH_BOTH",
+        'value'  => "q_PDO_FETCH_BOTH",
         'desc'   => "Controls how the next row will be returned to the caller. This value must be one of the PDO::FETCH_* constants, defaulting to PDO::FETCH_BOTH.\n\nPDO::FETCH_ASSOC: returns an array indexed by column name as returned in your result set\n\nPDO::FETCH_BOTH (default): returns an array indexed by both column name and 0-indexed column number as returned in your result set\n\nPDO::FETCH_BOUND: returns TRUE and assigns the values of the columns in your result set to the PHP variables to which they were bound with the PDOStatement::bindColumn() method\n\nPDO::FETCH_CLASS: returns a new instance of the requested class, mapping the columns of the result set to named properties in the class. If fetch_style includes PDO::FETCH_CLASSTYPE (e.g. PDO::FETCH_CLASS | PDO::FETCH_CLASSTYPE) then the name of the class is determined from a value of the first column.\n\nPDO::FETCH_INTO: updates an existing instance of the requested class, mapping the columns of the result set to named properties in the class\n\nPDO::FETCH_LAZY: combines PDO::FETCH_BOTH and PDO::FETCH_OBJ, creating the object variable names as they are accessed\n\nPDO::FETCH_NUM: returns an array indexed by column number as returned in your result set, starting at column 0\n\nPDO::FETCH_OBJ: returns an anonymous object with property names that correspond to the column names returned in your result set",
       ),
       array(
         'name'   => "orientation",
         'type'   => Int64,
-        'value'  => "q_pdo_FETCH_ORI_NEXT",
+        'value'  => "q_PDO_FETCH_ORI_NEXT",
         'desc'   => "For a PDOStatement object representing a scrollable cursor, this value determines which row will be returned to the caller. This value must be one of the PDO::FETCH_ORI_* constants, defaulting to PDO::FETCH_ORI_NEXT. To request a scrollable cursor for your PDOStatement object, you must set the PDO::ATTR_CURSOR attribute to PDO::CURSOR_SCROLL when you prepare the SQL statement with PDO::prepare().",
       ),
       array(
@@ -992,7 +993,7 @@ DefineFunction(
       array(
         'name'   => "how",
         'type'   => Int64,
-        'value'  => "q_pdo_FETCH_BOTH",
+        'value'  => "q_PDO_FETCH_BOTH",
         'desc'   => "Controls the contents of the returned array as documented in PDOStatement::fetch().\n\nTo return an array consisting of all values of a single column from the result set, specify PDO::FETCH_COLUMN. You can specify which column you want with the column-index parameter.\n\nTo fetch only the unique values of a single column from the result set, bitwise-OR PDO::FETCH_COLUMN with PDO::FETCH_UNIQUE.\n\nTo return an associative array grouped by the values of a specified column, bitwise-OR PDO::FETCH_COLUMN with PDO::FETCH_GROUP.",
       ),
       array(
@@ -1033,7 +1034,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Explicit data type for the parameter using the PDO::PARAM_* constants.",
       ),
     ),
@@ -1062,7 +1063,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Explicit data type for the parameter using the PDO::PARAM_* constants. To return an INOUT parameter from a stored procedure, use the bitwise OR operator to set the PDO::PARAM_INPUT_OUTPUT bits for the data_type parameter.",
       ),
       array(
@@ -1102,7 +1103,7 @@ DefineFunction(
       array(
         'name'   => "type",
         'type'   => Int64,
-        'value'  => "q_pdo_PARAM_STR",
+        'value'  => "q_PDO_PARAM_STR",
         'desc'   => "Data type of the parameter, specified by the PDO::PARAM_* constants.",
       ),
       array(
@@ -1270,6 +1271,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "current",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1278,6 +1280,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "key",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1286,6 +1289,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "next",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1294,6 +1298,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "rewind",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1302,6 +1307,7 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "valid",
+    'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
     ),
@@ -1342,7 +1348,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "PDOException",
-    'parent' => "exception",
+    'parent' => "Exception",
     'desc'   => "Represents an error raised by PDO. You should not throw a PDOException from your own code. See Exceptions for more information about Exceptions in PHP.",
     'flags'  =>  HasDocComment,
   ));

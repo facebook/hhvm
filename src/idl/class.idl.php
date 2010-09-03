@@ -162,14 +162,14 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the name of the class of which object is an instance. Returns FALSE if object is not an object.",
+      'desc'   => "Returns the name of the class of which object is an instance. Returns FALSE if object is not an object.\n\nIf object is omitted when inside a class, the name of that class is returned.",
     ),
     'args'   => array(
       array(
         'name'   => "object",
         'type'   => Variant,
         'value'  => "null_variant",
-        'desc'   => "The tested object",
+        'desc'   => "The tested object. This parameter may be omitted when inside a class.",
       ),
     ),
   ));

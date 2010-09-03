@@ -244,7 +244,7 @@ public:
   void outputCPPPropertyClone(CodeGenerator &cg, AnalysisResultPtr ar,
                               bool dynamicObject = false);
   void outputCPPPropertyTable(CodeGenerator &cg, AnalysisResultPtr ar,
-      const char *parent,
+                              const char *parent, const char *parentName,
       ClassScope::Derivation dynamicObject = ClassScope::FromNormal);
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPStaticVariables(CodeGenerator &cg, AnalysisResultPtr ar);

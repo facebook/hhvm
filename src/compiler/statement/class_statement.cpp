@@ -319,8 +319,9 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   }
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassRealProp)) {
-    cg_printf("virtual Variant *o_realProp(CStrRef s, int flags, "
-              "CStrRef context = null_string) const;\n");
+    cg_printf("virtual Variant *o_realProp(CStrRef s, int flags,\n");
+    cg_printf("                            CStrRef context = null_string) "
+              "const;\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_%s 1\n", clsName);
   }
@@ -331,8 +332,8 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
   }
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassGet)) {
-    cg_printf("virtual Variant o_get(CStrRef s, bool error = true, "
-              "CStrRef context = null_string);\n");
+    cg_printf("virtual Variant o_get(CStrRef s, bool error = true,\n");
+    cg_printf("                      CStrRef context = null_string);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_get_%s 1\n", clsName);
   }
@@ -344,7 +345,8 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
 
   if (variables->hasJumpTable(VariableTable::JumpTableClassSet)) {
     cg_printf("virtual Variant o_set(CStrRef s, CVarRef v, "
-              "bool forInit = false, CStrRef context = null_string);\n");
+              "bool forInit = false,\n");
+    cg_printf("                      CStrRef context = null_string);\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_set_%s 1\n", clsName);
   }
@@ -401,12 +403,12 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_%s 1\n", clsName);
   }
   if (classScope->hasJumpTable(ClassScope::JumpTableInvoke)) {
-    cg_printf("virtual Variant o_invoke(MethodIndex methodIndex, const char *s,"
-              "CArrRef ps, int64 h,\n");
-    cg_printf("                         bool f = true);\n");
+    cg_printf("virtual Variant o_invoke(MethodIndex methodIndex, "
+              "const char *s, CArrRef ps,\n");
+    cg_printf("                         int64 h, bool f = true);\n");
     cg_printf("virtual Variant o_invoke_few_args(MethodIndex methodIndex, "
-              "const char *s, int64 h,\n");
-    cg_printf("                                  int count,\n");
+              "const char *s,\n");
+    cg_printf("                                  int64 h, int count,\n");
     cg_printf("                                  "
               "INVOKE_FEW_ARGS_DECL_ARGS);\n");
   } else {
@@ -480,6 +482,9 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         parCls = ar->findClass(m_parent);
         if (parCls && parCls->isRedeclaring()) parCls.reset();
       }
+      if (Option::GenerateCppLibCode) {
+        cg.printDocComment(classScope->getDocComment());
+      }
       cg_printf("class %s%s", Option::ClassPrefix, clsName);
       if (!m_parent.empty() && classScope->derivesDirectlyFrom(ar, m_parent)) {
         if (!parCls) {
@@ -512,7 +517,21 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         }
       }
       cg_indentBegin(" {\n");
+      cg_printf("public:\n");
 
+      cg.printSection("Properties");
+      classScope->getVariables()->outputCPPPropertyDecl(cg, ar,
+          classScope->derivesFromRedeclaring());
+
+      if (Option::GenerateCppLibCode) {
+        cg.printSection("Methods");
+        classScope->outputMethodWrappers(cg, ar);
+        cg.printSection(">>>>>>>>>> Internal Implementation <<<<<<<<<<");
+        cg_printf("// NOTE: Anything below is subject to change. "
+                  "Use everything above instead.\n");
+      }
+
+      cg.printSection("Class Map");
       if (Option::GenerateCPPMacros) {
         // Get all of this class's ancestors
         vector<string> bases;
@@ -587,9 +606,6 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf("static GlobalVariables *lazy_initializer"
                   "(GlobalVariables *g);\n");
       }
-
-      classScope->getVariables()->outputCPPPropertyDecl(cg, ar,
-          classScope->derivesFromRedeclaring());
 
       if (!classScope->getAttribute(ClassScope::HasConstructor)) {
         FunctionScopePtr func = classScope->findFunction(ar, "__construct",
@@ -719,7 +735,10 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           ClassScope::DirectFromRedeclared) {
         cg_printf("parent->init();\n");
       } else {
-        cg_printf("%s%s::init();\n", Option::ClassPrefix, m_parent.c_str());
+
+        ClassScopePtr parCls = ar->findClass(m_parent);
+        cg_printf("%s%s::init();\n", Option::ClassPrefix,
+                  parCls->getId(cg).c_str());
       }
     }
     if (classScope->getVariables()->

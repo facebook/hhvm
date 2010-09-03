@@ -55,21 +55,21 @@ extern StaticString s_sys_ss1fe107ad;
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_CLASS(unexpectedvalueexception);
-FORWARD_DECLARE_CLASS(overflowexception);
-FORWARD_DECLARE_CLASS(outofboundsexception);
-FORWARD_DECLARE_CLASS(logicexception);
-FORWARD_DECLARE_CLASS(rangeexception);
-FORWARD_DECLARE_CLASS(invalidargumentexception);
-FORWARD_DECLARE_CLASS(underflowexception);
-FORWARD_DECLARE_CLASS(outofrangeexception);
-FORWARD_DECLARE_CLASS(badmethodcallexception);
-FORWARD_DECLARE_CLASS(runtimeexception);
-FORWARD_DECLARE_CLASS(exception);
-FORWARD_DECLARE_CLASS(errorexception);
-FORWARD_DECLARE_CLASS(badfunctioncallexception);
-FORWARD_DECLARE_CLASS(lengthexception);
-FORWARD_DECLARE_CLASS(domainexception);
+FORWARD_DECLARE_CLASS(UnexpectedValueException);
+FORWARD_DECLARE_CLASS(OverflowException);
+FORWARD_DECLARE_CLASS(OutOfBoundsException);
+FORWARD_DECLARE_CLASS(LogicException);
+FORWARD_DECLARE_CLASS(RangeException);
+FORWARD_DECLARE_CLASS(InvalidArgumentException);
+FORWARD_DECLARE_CLASS(UnderflowException);
+FORWARD_DECLARE_CLASS(OutOfRangeException);
+FORWARD_DECLARE_CLASS(BadMethodCallException);
+FORWARD_DECLARE_CLASS(RuntimeException);
+FORWARD_DECLARE_CLASS(Exception);
+FORWARD_DECLARE_CLASS(ErrorException);
+FORWARD_DECLARE_CLASS(BadFunctionCallException);
+FORWARD_DECLARE_CLASS(LengthException);
+FORWARD_DECLARE_CLASS(DomainException);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

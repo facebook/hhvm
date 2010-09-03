@@ -404,7 +404,7 @@ TypePtr Type::combinedPrimType(TypePtr t1, TypePtr t2) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-string Type::getCPPDecl() {
+string Type::getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
   switch (m_kindOf) {
   case KindOfBoolean:     return "bool";
   case KindOfByte:        return "char";
@@ -418,17 +418,18 @@ string Type::getCPPDecl() {
   case KindOfPrimitive:   return "Primitive";
   case KindOfPlusOperand: return "PlusOperand";
   case KindOfSequence:    return "Sequence";
-  case KindOfObject:
+  case KindOfObject:{
     if (m_name.empty()) return "Object";
-    return string("p_") + m_name;
+    ClassScopePtr cls = ar->findClass(m_name);
+    return "p_" + cls->getId(cg);
+  }
   default:
     return "Variant";
-    break;
   }
 }
 
 void Type::outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf(getCPPDecl().c_str());
+  cg_printf(getCPPDecl(cg, ar).c_str());
 }
 
 void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar) {
@@ -449,7 +450,8 @@ void Type::outputCPPCast(CodeGenerator &cg, AnalysisResultPtr ar) {
     if (m_name.empty()) {
       cg_printf("toObject");
     } else {
-      cg_printf("%s%s", Option::SmartPtrPrefix, m_name.c_str());
+      ClassScopePtr cls = ar->findClass(m_name);
+      cg_printf("%s%s", Option::SmartPtrPrefix, cls->getId(cg).c_str());
     }
     break;
   default:

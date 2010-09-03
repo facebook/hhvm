@@ -22,41 +22,41 @@
 #include <php/classes/exception.fw.h>
 
 // Declarations
-#include <cls/unexpectedvalueexception.h>
-#include <cls/overflowexception.h>
-#include <cls/outofboundsexception.h>
-#include <cls/logicexception.h>
-#include <cls/rangeexception.h>
-#include <cls/invalidargumentexception.h>
-#include <cls/underflowexception.h>
-#include <cls/outofrangeexception.h>
-#include <cls/badmethodcallexception.h>
-#include <cls/runtimeexception.h>
-#include <cls/exception.h>
-#include <cls/errorexception.h>
-#include <cls/badfunctioncallexception.h>
-#include <cls/lengthexception.h>
-#include <cls/domainexception.h>
+#include <cls/UnexpectedValueException.h>
+#include <cls/OverflowException.h>
+#include <cls/OutOfBoundsException.h>
+#include <cls/LogicException.h>
+#include <cls/RangeException.h>
+#include <cls/InvalidArgumentException.h>
+#include <cls/UnderflowException.h>
+#include <cls/OutOfRangeException.h>
+#include <cls/BadMethodCallException.h>
+#include <cls/RuntimeException.h>
+#include <cls/Exception.h>
+#include <cls/ErrorException.h>
+#include <cls/BadFunctionCallException.h>
+#include <cls/LengthException.h>
+#include <cls/DomainException.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 Variant pm_php$classes$exception_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
-Object co_unexpectedvalueexception(CArrRef params, bool init = true);
-Object co_overflowexception(CArrRef params, bool init = true);
-Object co_outofboundsexception(CArrRef params, bool init = true);
-Object co_logicexception(CArrRef params, bool init = true);
-Object co_rangeexception(CArrRef params, bool init = true);
-Object co_invalidargumentexception(CArrRef params, bool init = true);
-Object co_underflowexception(CArrRef params, bool init = true);
-Object co_outofrangeexception(CArrRef params, bool init = true);
-Object co_badmethodcallexception(CArrRef params, bool init = true);
-Object co_runtimeexception(CArrRef params, bool init = true);
-Object co_exception(CArrRef params, bool init = true);
-Object co_errorexception(CArrRef params, bool init = true);
-Object co_badfunctioncallexception(CArrRef params, bool init = true);
-Object co_lengthexception(CArrRef params, bool init = true);
-Object co_domainexception(CArrRef params, bool init = true);
+Object co_UnexpectedValueException(CArrRef params, bool init = true);
+Object co_OverflowException(CArrRef params, bool init = true);
+Object co_OutOfBoundsException(CArrRef params, bool init = true);
+Object co_LogicException(CArrRef params, bool init = true);
+Object co_RangeException(CArrRef params, bool init = true);
+Object co_InvalidArgumentException(CArrRef params, bool init = true);
+Object co_UnderflowException(CArrRef params, bool init = true);
+Object co_OutOfRangeException(CArrRef params, bool init = true);
+Object co_BadMethodCallException(CArrRef params, bool init = true);
+Object co_RuntimeException(CArrRef params, bool init = true);
+Object co_Exception(CArrRef params, bool init = true);
+Object co_ErrorException(CArrRef params, bool init = true);
+Object co_BadFunctionCallException(CArrRef params, bool init = true);
+Object co_LengthException(CArrRef params, bool init = true);
+Object co_DomainException(CArrRef params, bool init = true);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

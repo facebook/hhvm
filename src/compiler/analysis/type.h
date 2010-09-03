@@ -152,7 +152,7 @@ public:
   /**
    * Generate type specifier in C++.
    */
-  std::string getCPPDecl();
+  std::string getCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDecl(CodeGenerator &cg, AnalysisResultPtr ar);
 
   /**

@@ -72,7 +72,7 @@ const ExtendedCommandMap &CmdUser::getCommandMap() {
 }
 
 void CmdUser::invokeList(DebuggerClient *client, const std::string &cls) {
-  p_debuggerclient pclient(NEW(c_debuggerclient)());
+  p_DebuggerClient pclient(NEW(c_DebuggerClient)());
   pclient->m_client = client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
@@ -81,7 +81,7 @@ void CmdUser::invokeList(DebuggerClient *client, const std::string &cls) {
 }
 
 bool CmdUser::invokeHelp(DebuggerClient *client, const std::string &cls) {
-  p_debuggerclient pclient(NEW(c_debuggerclient)());
+  p_DebuggerClient pclient(NEW(c_DebuggerClient)());
   pclient->m_client = client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
@@ -92,7 +92,7 @@ bool CmdUser::invokeHelp(DebuggerClient *client, const std::string &cls) {
 }
 
 bool CmdUser::invokeClient(DebuggerClient *client, const std::string &cls) {
-  p_debuggerclient pclient(NEW(c_debuggerclient)());
+  p_DebuggerClient pclient(NEW(c_DebuggerClient)());
   pclient->m_client = client;
   try {
     Object cmd = create_object(cls.c_str(), null_array);
@@ -104,7 +104,7 @@ bool CmdUser::invokeClient(DebuggerClient *client, const std::string &cls) {
 
 bool CmdUser::onServer(DebuggerProxy *proxy) {
   if (m_cmd.isNull()) return false;
-  p_debuggerproxy pproxy(NEW(c_debuggerproxy)());
+  p_DebuggerProxy pproxy(NEW(c_DebuggerProxy)());
   pproxy->m_proxy = proxy;
   try {
     Variant ret = m_cmd->o_invoke("onServer", CREATE_VECTOR1(pproxy), -1);

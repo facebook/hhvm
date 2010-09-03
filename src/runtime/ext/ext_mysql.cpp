@@ -1230,7 +1230,7 @@ Variant f_mysql_fetch_field(CVarRef result, int field /* = -1 */) {
   MySQLFieldInfo *info;
   if (!(info = res->fetchFieldInfo())) return false;
 
-  Object obj(NEW(c_stdclass)());
+  Object obj(NEW(c_stdClass)());
   obj->set("name",         *(info->name));
   obj->set("table",        *(info->table));
   obj->set("def",          *(info->def));

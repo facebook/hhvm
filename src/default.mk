@@ -21,7 +21,6 @@ clobber:
 	$(V)$(RM) $(filter-out $(SUB_PROGRAMS) $(SUB_LIB_TARGETS), $(TARGETS))
 	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.o"`)
 	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.d"`)
-	$(V)$(RM) $(shell echo `find $(OUT_DIR) -name "*.litstr"`)
 	$(V)$(RM) $(shell echo `find . -name "*~"`)
 	$(V)$(RMDIR) gen-cpp
 	$(V)for mdir in $(dir $(wildcard $(addsuffix /Makefile, \

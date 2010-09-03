@@ -12,7 +12,10 @@
 // Preamble: C++ code inserted at beginning of ext_{name}.h
 
 DefinePreamble(<<<CPP
-#include <libxml/tree.h>#include <libxml/xmlwriter.h>#include <libxml/uri.h>#include <runtime/base/file/file.h>
+#include <libxml/tree.h>
+#include <libxml/xmlwriter.h>
+#include <libxml/uri.h>
+#include <runtime/base/file/file.h>
 CPP
 );
 
@@ -1123,8 +1126,7 @@ DefineFunction(
 
 BeginClass(
   array(
-    'name'   => "xmlwriter",
-    'desc'   => "",
+    'name'   => "XMLWriter",
     'bases'  => array('Sweepable'),
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
@@ -1150,7 +1152,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "openmemory",
+    'name'   => "openMemory",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1159,7 +1161,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "openuri",
+    'name'   => "openURI",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1174,7 +1176,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setindentstring",
+    'name'   => "setIndentString",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1189,7 +1191,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "setindent",
+    'name'   => "setIndent",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1204,7 +1206,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startdocument",
+    'name'   => "startDocument",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1230,7 +1232,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startelement",
+    'name'   => "startElement",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1245,7 +1247,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startelementns",
+    'name'   => "startElementNS",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1268,7 +1270,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writeelementns",
+    'name'   => "writeElementNS",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1296,7 +1298,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writeelement",
+    'name'   => "writeElement",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1316,7 +1318,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "endelement",
+    'name'   => "endElement",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1325,7 +1327,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "fullendelement",
+    'name'   => "fullEndElement",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1334,7 +1336,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startattributens",
+    'name'   => "startAttributens",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1357,7 +1359,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startattribute",
+    'name'   => "startAttribute",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1372,7 +1374,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writeattributens",
+    'name'   => "writeAttributeNS",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1399,7 +1401,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writeattribute",
+    'name'   => "writeAttribute",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1418,7 +1420,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "endattribute",
+    'name'   => "endAttribute",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1427,7 +1429,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startcdata",
+    'name'   => "startCData",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1436,40 +1438,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writecdata",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Boolean,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "content",
-        'type'   => String,
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "endcdata",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Boolean,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "startcomment",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Boolean,
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "writecomment",
+    'name'   => "writeCData",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1484,7 +1453,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "endcomment",
+    'name'   => "endCData",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1493,7 +1462,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "enddocument",
+    'name'   => "startComment",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1502,7 +1471,40 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startpi",
+    'name'   => "writeComment",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+    'args'   => array(
+      array(
+        'name'   => "content",
+        'type'   => String,
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "endComment",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "endDocument",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "startPI",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1517,7 +1519,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writepi",
+    'name'   => "writePI",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1536,7 +1538,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "endpi",
+    'name'   => "endPI",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1560,7 +1562,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writeraw",
+    'name'   => "writeRaw",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1575,7 +1577,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startdtd",
+    'name'   => "startDTD",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1600,7 +1602,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writedtd",
+    'name'   => "writeDTD",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1630,7 +1632,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startdtdelement",
+    'name'   => "startDTDElement",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1645,7 +1647,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writedtdelement",
+    'name'   => "writeDTDElement",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1664,7 +1666,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "enddtdelement",
+    'name'   => "endDTDElement",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1673,7 +1675,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startdtdattlist",
+    'name'   => "startDTDAttlist",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1688,7 +1690,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writedtdattlist",
+    'name'   => "writeDTDAttlist",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1707,7 +1709,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "enddtdattlist",
+    'name'   => "endDTDAttlist",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1716,7 +1718,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "startdtdentity",
+    'name'   => "startDTDEntity",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1735,7 +1737,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "writedtdentity",
+    'name'   => "writeDTDEntity",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1774,7 +1776,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "enddtdentity",
+    'name'   => "endDTDEntity",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1783,7 +1785,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "enddtd",
+    'name'   => "endDTD",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
@@ -1808,7 +1810,7 @@ DefineFunction(
 
 DefineFunction(
   array(
-    'name'   => "outputmemory",
+    'name'   => "outputMemory",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,

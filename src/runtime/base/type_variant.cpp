@@ -1619,7 +1619,7 @@ Object Variant::toObject() const {
   case KindOfStaticString:
   case KindOfString:
     {
-      c_stdclass *obj = NEW(c_stdclass)();
+      c_stdClass *obj = NEW(c_stdClass)();
       obj->o_lval(s_scalar) = *this;
       return obj;
     }
@@ -1628,7 +1628,7 @@ Object Variant::toObject() const {
     ASSERT(false);
     break;
   }
-  return Object(NEW(c_stdclass)());
+  return Object(NEW(c_stdClass)());
 }
 
 Variant Variant::toKey() const {
@@ -2492,14 +2492,14 @@ ObjectOffset Variant::o_lval(CStrRef propName,
   } else if (m_type == KindOfVariant) {
     return m_data.pvar->o_lval(propName, context);
   } else if (isObjectConvertable()) {
-    set(Object(NEW(c_stdclass)()));
+    set(Object(NEW(c_stdClass)()));
     return Object(m_data.pobj).o_lval(propName, context);
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
     // Return an ObjectOffset blackhole
     Variant ret;
-    ret.set(Object(NEW(c_stdclass)()));
+    ret.set(Object(NEW(c_stdClass)()));
     return Object(ret.m_data.pobj).o_lval(propName, context);
   }
 }
@@ -3164,7 +3164,7 @@ Variant Variant::share(bool save) const {
   case KindOfObject:
     if (save) {
       // we have to return an object so to remember its type
-      c_stdclass *obj = NEW(c_stdclass)();
+      c_stdClass *obj = NEW(c_stdClass)();
       obj->o_set(s_s, f_serialize(*this));
       return obj;
     } else {

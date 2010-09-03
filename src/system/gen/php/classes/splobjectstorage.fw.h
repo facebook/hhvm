@@ -46,7 +46,7 @@ extern StaticArray s_sys_sa00000000;
 // 3. Constants
 
 // 4. Classes
-FORWARD_DECLARE_CLASS(splobjectstorage);
+FORWARD_DECLARE_CLASS(SplObjectStorage);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

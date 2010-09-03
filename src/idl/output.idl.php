@@ -131,7 +131,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
-      'desc'   => "No value is returned. ob_clean Output Control Functions Last updated: Fri, 13 Aug 2010  ",
+      'desc'   => "No value is returned. ob_clean Output Control Functions Last updated: Fri, 03 Sep 2010  ",
     ),
   ));
 

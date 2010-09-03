@@ -283,7 +283,7 @@ Variant invoke(const char *function, CArrRef params, int64 hash,
     return f_strlen(params[0]);
   }
   if (strcasecmp(function, "fault") == 0) {
-    return Object((NEW(c_soapfault)())->create("MyFault","My fault string"));
+    return Object((NEW(c_SoapFault)())->create("MyFault","My fault string"));
   }
 
   // for TestExtServer

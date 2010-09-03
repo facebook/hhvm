@@ -1111,7 +1111,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns an object containing field information. The properties of the object are:\n\nname - column name table - name of the table the column belongs to def - default value of the column max_length - maximum length of the column not_null - 1 if the column cannot be NULL primary_key - 1 if the column is a primary key unique_key - 1 if the column is a unique key multiple_key - 1 if the column is a non-unique key numeric - 1 if the column is numeric blob - 1 if the column is a BLOB type - the type of the column unsigned - 1 if the column is unsigned zerofill - 1 if the column is zero-filled",
+      'desc'   => "Returns an object containing field information. The properties of the object are:\n\nname - column name table - name of the table the column belongs to max_length - maximum length of the column not_null - 1 if the column cannot be NULL primary_key - 1 if the column is a primary key unique_key - 1 if the column is a unique key multiple_key - 1 if the column is a non-unique key numeric - 1 if the column is numeric blob - 1 if the column is a BLOB type - the type of the column unsigned - 1 if the column is unsigned zerofill - 1 if the column is zero-filled",
     ),
     'args'   => array(
       array(

@@ -44,103 +44,103 @@ IMPLEMENT_DEFAULT_EXTENSION(pdo);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO constants
 
-const int64 q_pdo_PARAM_BOOL               = PDO_PARAM_BOOL;
-const int64 q_pdo_PARAM_NULL               = PDO_PARAM_NULL;
-const int64 q_pdo_PARAM_INT                = PDO_PARAM_INT;
-const int64 q_pdo_PARAM_STR                = PDO_PARAM_STR;
-const int64 q_pdo_PARAM_LOB                = PDO_PARAM_LOB;
-const int64 q_pdo_PARAM_STMT               = PDO_PARAM_STMT;
-const int64 q_pdo_PARAM_INPUT_OUTPUT       = PDO_PARAM_INPUT_OUTPUT;
+const int64 q_PDO_PARAM_BOOL               = PDO_PARAM_BOOL;
+const int64 q_PDO_PARAM_NULL               = PDO_PARAM_NULL;
+const int64 q_PDO_PARAM_INT                = PDO_PARAM_INT;
+const int64 q_PDO_PARAM_STR                = PDO_PARAM_STR;
+const int64 q_PDO_PARAM_LOB                = PDO_PARAM_LOB;
+const int64 q_PDO_PARAM_STMT               = PDO_PARAM_STMT;
+const int64 q_PDO_PARAM_INPUT_OUTPUT       = PDO_PARAM_INPUT_OUTPUT;
 
-const int64 q_pdo_PARAM_EVT_ALLOC          = PDO_PARAM_EVT_ALLOC;
-const int64 q_pdo_PARAM_EVT_FREE           = PDO_PARAM_EVT_FREE;
-const int64 q_pdo_PARAM_EVT_EXEC_PRE       = PDO_PARAM_EVT_EXEC_PRE;
-const int64 q_pdo_PARAM_EVT_EXEC_POST      = PDO_PARAM_EVT_EXEC_POST;
-const int64 q_pdo_PARAM_EVT_FETCH_PRE      = PDO_PARAM_EVT_FETCH_PRE;
-const int64 q_pdo_PARAM_EVT_FETCH_POST     = PDO_PARAM_EVT_FETCH_POST;
-const int64 q_pdo_PARAM_EVT_NORMALIZE      = PDO_PARAM_EVT_NORMALIZE;
+const int64 q_PDO_PARAM_EVT_ALLOC          = PDO_PARAM_EVT_ALLOC;
+const int64 q_PDO_PARAM_EVT_FREE           = PDO_PARAM_EVT_FREE;
+const int64 q_PDO_PARAM_EVT_EXEC_PRE       = PDO_PARAM_EVT_EXEC_PRE;
+const int64 q_PDO_PARAM_EVT_EXEC_POST      = PDO_PARAM_EVT_EXEC_POST;
+const int64 q_PDO_PARAM_EVT_FETCH_PRE      = PDO_PARAM_EVT_FETCH_PRE;
+const int64 q_PDO_PARAM_EVT_FETCH_POST     = PDO_PARAM_EVT_FETCH_POST;
+const int64 q_PDO_PARAM_EVT_NORMALIZE      = PDO_PARAM_EVT_NORMALIZE;
 
-const int64 q_pdo_FETCH_USE_DEFAULT        = PDO_FETCH_USE_DEFAULT;
-const int64 q_pdo_FETCH_LAZY               = PDO_FETCH_LAZY;
-const int64 q_pdo_FETCH_ASSOC              = PDO_FETCH_ASSOC;
-const int64 q_pdo_FETCH_NUM                = PDO_FETCH_NUM;
-const int64 q_pdo_FETCH_BOTH               = PDO_FETCH_BOTH;
-const int64 q_pdo_FETCH_OBJ                = PDO_FETCH_OBJ;
-const int64 q_pdo_FETCH_BOUND              = PDO_FETCH_BOUND;
-const int64 q_pdo_FETCH_COLUMN             = PDO_FETCH_COLUMN;
-const int64 q_pdo_FETCH_CLASS              = PDO_FETCH_CLASS;
-const int64 q_pdo_FETCH_INTO               = PDO_FETCH_INTO;
-const int64 q_pdo_FETCH_FUNC               = PDO_FETCH_FUNC;
-const int64 q_pdo_FETCH_GROUP              = PDO_FETCH_GROUP;
-const int64 q_pdo_FETCH_UNIQUE             = PDO_FETCH_UNIQUE;
-const int64 q_pdo_FETCH_KEY_PAIR           = PDO_FETCH_KEY_PAIR;
-const int64 q_pdo_FETCH_CLASSTYPE          = PDO_FETCH_CLASSTYPE;
-const int64 q_pdo_FETCH_SERIALIZE          = PDO_FETCH_SERIALIZE;
-const int64 q_pdo_FETCH_PROPS_LATE         = PDO_FETCH_PROPS_LATE;
-const int64 q_pdo_FETCH_NAMED              = PDO_FETCH_NAMED;
+const int64 q_PDO_FETCH_USE_DEFAULT        = PDO_FETCH_USE_DEFAULT;
+const int64 q_PDO_FETCH_LAZY               = PDO_FETCH_LAZY;
+const int64 q_PDO_FETCH_ASSOC              = PDO_FETCH_ASSOC;
+const int64 q_PDO_FETCH_NUM                = PDO_FETCH_NUM;
+const int64 q_PDO_FETCH_BOTH               = PDO_FETCH_BOTH;
+const int64 q_PDO_FETCH_OBJ                = PDO_FETCH_OBJ;
+const int64 q_PDO_FETCH_BOUND              = PDO_FETCH_BOUND;
+const int64 q_PDO_FETCH_COLUMN             = PDO_FETCH_COLUMN;
+const int64 q_PDO_FETCH_CLASS              = PDO_FETCH_CLASS;
+const int64 q_PDO_FETCH_INTO               = PDO_FETCH_INTO;
+const int64 q_PDO_FETCH_FUNC               = PDO_FETCH_FUNC;
+const int64 q_PDO_FETCH_GROUP              = PDO_FETCH_GROUP;
+const int64 q_PDO_FETCH_UNIQUE             = PDO_FETCH_UNIQUE;
+const int64 q_PDO_FETCH_KEY_PAIR           = PDO_FETCH_KEY_PAIR;
+const int64 q_PDO_FETCH_CLASSTYPE          = PDO_FETCH_CLASSTYPE;
+const int64 q_PDO_FETCH_SERIALIZE          = PDO_FETCH_SERIALIZE;
+const int64 q_PDO_FETCH_PROPS_LATE         = PDO_FETCH_PROPS_LATE;
+const int64 q_PDO_FETCH_NAMED              = PDO_FETCH_NAMED;
 
-const int64 q_pdo_ATTR_AUTOCOMMIT          = PDO_ATTR_AUTOCOMMIT;
-const int64 q_pdo_ATTR_PREFETCH            = PDO_ATTR_PREFETCH;
-const int64 q_pdo_ATTR_TIMEOUT             = PDO_ATTR_TIMEOUT;
-const int64 q_pdo_ATTR_ERRMODE             = PDO_ATTR_ERRMODE;
-const int64 q_pdo_ATTR_SERVER_VERSION      = PDO_ATTR_SERVER_VERSION;
-const int64 q_pdo_ATTR_CLIENT_VERSION      = PDO_ATTR_CLIENT_VERSION;
-const int64 q_pdo_ATTR_SERVER_INFO         = PDO_ATTR_SERVER_INFO;
-const int64 q_pdo_ATTR_CONNECTION_STATUS   = PDO_ATTR_CONNECTION_STATUS;
-const int64 q_pdo_ATTR_CASE                = PDO_ATTR_CASE;
-const int64 q_pdo_ATTR_CURSOR_NAME         = PDO_ATTR_CURSOR_NAME;
-const int64 q_pdo_ATTR_CURSOR              = PDO_ATTR_CURSOR;
-const int64 q_pdo_ATTR_ORACLE_NULLS        = PDO_ATTR_ORACLE_NULLS;
-const int64 q_pdo_ATTR_PERSISTENT          = PDO_ATTR_PERSISTENT;
-const int64 q_pdo_ATTR_STATEMENT_CLASS     = PDO_ATTR_STATEMENT_CLASS;
-const int64 q_pdo_ATTR_FETCH_TABLE_NAMES   = PDO_ATTR_FETCH_TABLE_NAMES;
-const int64 q_pdo_ATTR_FETCH_CATALOG_NAMES = PDO_ATTR_FETCH_CATALOG_NAMES;
-const int64 q_pdo_ATTR_DRIVER_NAME         = PDO_ATTR_DRIVER_NAME;
-const int64 q_pdo_ATTR_STRINGIFY_FETCHES   = PDO_ATTR_STRINGIFY_FETCHES;
-const int64 q_pdo_ATTR_MAX_COLUMN_LEN      = PDO_ATTR_MAX_COLUMN_LEN;
-const int64 q_pdo_ATTR_EMULATE_PREPARES    = PDO_ATTR_EMULATE_PREPARES;
-const int64 q_pdo_ATTR_DEFAULT_FETCH_MODE  = PDO_ATTR_DEFAULT_FETCH_MODE;
+const int64 q_PDO_ATTR_AUTOCOMMIT          = PDO_ATTR_AUTOCOMMIT;
+const int64 q_PDO_ATTR_PREFETCH            = PDO_ATTR_PREFETCH;
+const int64 q_PDO_ATTR_TIMEOUT             = PDO_ATTR_TIMEOUT;
+const int64 q_PDO_ATTR_ERRMODE             = PDO_ATTR_ERRMODE;
+const int64 q_PDO_ATTR_SERVER_VERSION      = PDO_ATTR_SERVER_VERSION;
+const int64 q_PDO_ATTR_CLIENT_VERSION      = PDO_ATTR_CLIENT_VERSION;
+const int64 q_PDO_ATTR_SERVER_INFO         = PDO_ATTR_SERVER_INFO;
+const int64 q_PDO_ATTR_CONNECTION_STATUS   = PDO_ATTR_CONNECTION_STATUS;
+const int64 q_PDO_ATTR_CASE                = PDO_ATTR_CASE;
+const int64 q_PDO_ATTR_CURSOR_NAME         = PDO_ATTR_CURSOR_NAME;
+const int64 q_PDO_ATTR_CURSOR              = PDO_ATTR_CURSOR;
+const int64 q_PDO_ATTR_ORACLE_NULLS        = PDO_ATTR_ORACLE_NULLS;
+const int64 q_PDO_ATTR_PERSISTENT          = PDO_ATTR_PERSISTENT;
+const int64 q_PDO_ATTR_STATEMENT_CLASS     = PDO_ATTR_STATEMENT_CLASS;
+const int64 q_PDO_ATTR_FETCH_TABLE_NAMES   = PDO_ATTR_FETCH_TABLE_NAMES;
+const int64 q_PDO_ATTR_FETCH_CATALOG_NAMES = PDO_ATTR_FETCH_CATALOG_NAMES;
+const int64 q_PDO_ATTR_DRIVER_NAME         = PDO_ATTR_DRIVER_NAME;
+const int64 q_PDO_ATTR_STRINGIFY_FETCHES   = PDO_ATTR_STRINGIFY_FETCHES;
+const int64 q_PDO_ATTR_MAX_COLUMN_LEN      = PDO_ATTR_MAX_COLUMN_LEN;
+const int64 q_PDO_ATTR_EMULATE_PREPARES    = PDO_ATTR_EMULATE_PREPARES;
+const int64 q_PDO_ATTR_DEFAULT_FETCH_MODE  = PDO_ATTR_DEFAULT_FETCH_MODE;
 
-const int64 q_pdo_ERRMODE_SILENT           = PDO_ERRMODE_SILENT;
-const int64 q_pdo_ERRMODE_WARNING          = PDO_ERRMODE_WARNING;
-const int64 q_pdo_ERRMODE_EXCEPTION        = PDO_ERRMODE_EXCEPTION;
+const int64 q_PDO_ERRMODE_SILENT           = PDO_ERRMODE_SILENT;
+const int64 q_PDO_ERRMODE_WARNING          = PDO_ERRMODE_WARNING;
+const int64 q_PDO_ERRMODE_EXCEPTION        = PDO_ERRMODE_EXCEPTION;
 
-const int64 q_pdo_CASE_NATURAL             = PDO_CASE_NATURAL;
-const int64 q_pdo_CASE_LOWER               = PDO_CASE_LOWER;
-const int64 q_pdo_CASE_UPPER               = PDO_CASE_UPPER;
+const int64 q_PDO_CASE_NATURAL             = PDO_CASE_NATURAL;
+const int64 q_PDO_CASE_LOWER               = PDO_CASE_LOWER;
+const int64 q_PDO_CASE_UPPER               = PDO_CASE_UPPER;
 
-const int64 q_pdo_NULL_NATURAL             = PDO_NULL_NATURAL;
-const int64 q_pdo_NULL_EMPTY_STRING        = PDO_NULL_EMPTY_STRING;
-const int64 q_pdo_NULL_TO_STRING           = PDO_NULL_TO_STRING;
+const int64 q_PDO_NULL_NATURAL             = PDO_NULL_NATURAL;
+const int64 q_PDO_NULL_EMPTY_STRING        = PDO_NULL_EMPTY_STRING;
+const int64 q_PDO_NULL_TO_STRING           = PDO_NULL_TO_STRING;
 
-const StaticString q_pdo_ERR_NONE(LITSTR_INIT(PDO_ERR_NONE));
+const StaticString q_PDO_ERR_NONE(LITSTR_INIT(PDO_ERR_NONE));
 
-const int64 q_pdo_FETCH_ORI_NEXT           = PDO_FETCH_ORI_NEXT;
-const int64 q_pdo_FETCH_ORI_PRIOR          = PDO_FETCH_ORI_PRIOR;
-const int64 q_pdo_FETCH_ORI_FIRST          = PDO_FETCH_ORI_FIRST;
-const int64 q_pdo_FETCH_ORI_LAST           = PDO_FETCH_ORI_LAST;
-const int64 q_pdo_FETCH_ORI_ABS            = PDO_FETCH_ORI_ABS;
-const int64 q_pdo_FETCH_ORI_REL            = PDO_FETCH_ORI_REL;
+const int64 q_PDO_FETCH_ORI_NEXT           = PDO_FETCH_ORI_NEXT;
+const int64 q_PDO_FETCH_ORI_PRIOR          = PDO_FETCH_ORI_PRIOR;
+const int64 q_PDO_FETCH_ORI_FIRST          = PDO_FETCH_ORI_FIRST;
+const int64 q_PDO_FETCH_ORI_LAST           = PDO_FETCH_ORI_LAST;
+const int64 q_PDO_FETCH_ORI_ABS            = PDO_FETCH_ORI_ABS;
+const int64 q_PDO_FETCH_ORI_REL            = PDO_FETCH_ORI_REL;
 
-const int64 q_pdo_CURSOR_FWDONLY           = PDO_CURSOR_FWDONLY;
-const int64 q_pdo_CURSOR_SCROLL            = PDO_CURSOR_SCROLL;
+const int64 q_PDO_CURSOR_FWDONLY           = PDO_CURSOR_FWDONLY;
+const int64 q_PDO_CURSOR_SCROLL            = PDO_CURSOR_SCROLL;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-const int64 q_pdo_MYSQL_ATTR_USE_BUFFERED_QUERY =
+const int64 q_PDO_MYSQL_ATTR_USE_BUFFERED_QUERY =
   PDO_MYSQL_ATTR_USE_BUFFERED_QUERY;
-const int64 q_pdo_MYSQL_ATTR_LOCAL_INFILE = PDO_MYSQL_ATTR_LOCAL_INFILE;
-const int64 q_pdo_MYSQL_ATTR_MAX_BUFFER_SIZE =
+const int64 q_PDO_MYSQL_ATTR_LOCAL_INFILE = PDO_MYSQL_ATTR_LOCAL_INFILE;
+const int64 q_PDO_MYSQL_ATTR_MAX_BUFFER_SIZE =
   PDO_MYSQL_ATTR_MAX_BUFFER_SIZE;
-const int64 q_pdo_MYSQL_ATTR_INIT_COMMAND = PDO_MYSQL_ATTR_INIT_COMMAND;
-const int64 q_pdo_MYSQL_ATTR_READ_DEFAULT_FILE =
+const int64 q_PDO_MYSQL_ATTR_INIT_COMMAND = PDO_MYSQL_ATTR_INIT_COMMAND;
+const int64 q_PDO_MYSQL_ATTR_READ_DEFAULT_FILE =
   PDO_MYSQL_ATTR_READ_DEFAULT_FILE;
-const int64 q_pdo_MYSQL_ATTR_READ_DEFAULT_GROUP =
+const int64 q_PDO_MYSQL_ATTR_READ_DEFAULT_GROUP =
   PDO_MYSQL_ATTR_READ_DEFAULT_GROUP;
-const int64 q_pdo_MYSQL_ATTR_COMPRESS     = PDO_MYSQL_ATTR_COMPRESS;
-const int64 q_pdo_MYSQL_ATTR_DIRECT_QUERY = PDO_MYSQL_ATTR_DIRECT_QUERY;
-const int64 q_pdo_MYSQL_ATTR_FOUND_ROWS   = PDO_MYSQL_ATTR_FOUND_ROWS;
-const int64 q_pdo_MYSQL_ATTR_IGNORE_SPACE = PDO_MYSQL_ATTR_IGNORE_SPACE;
+const int64 q_PDO_MYSQL_ATTR_COMPRESS     = PDO_MYSQL_ATTR_COMPRESS;
+const int64 q_PDO_MYSQL_ATTR_DIRECT_QUERY = PDO_MYSQL_ATTR_DIRECT_QUERY;
+const int64 q_PDO_MYSQL_ATTR_FOUND_ROWS   = PDO_MYSQL_ATTR_FOUND_ROWS;
+const int64 q_PDO_MYSQL_ATTR_IGNORE_SPACE = PDO_MYSQL_ATTR_IGNORE_SPACE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // extension functions
@@ -454,7 +454,7 @@ public:
 static PDOErrorHash s_err_hash;
 
 void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
-  c_pdoexception *e = NEW(c_pdoexception)();
+  c_PDOException *e = NEW(c_PDOException)();
   e->m_code = code;
 
   va_list ap;
@@ -895,17 +895,17 @@ IMPLEMENT_STATIC_REQUEST_LOCAL(PDORequestData, s_pdo_request_data);
 ///////////////////////////////////////////////////////////////////////////////
 // PDO
 
-c_pdo::c_pdo() {
+c_PDO::c_PDO() {
 }
 
-c_pdo::~c_pdo() {
+c_PDO::~c_PDO() {
   m_dbh.reset(); // needed for sweeping
 }
 
-void c_pdo::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
+void c_PDO::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
                           CStrRef password /* = null_string */,
                           CArrRef options /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::__construct);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::__construct);
   String data_source = dsn;
 
   /* parse the data source name */
@@ -1033,9 +1033,9 @@ void c_pdo::t___construct(CStrRef dsn, CStrRef username /* = null_string */,
 }
 
 
-Variant c_pdo::t_prepare(CStrRef statement,
+Variant c_PDO::t_prepare(CStrRef statement,
                          CArrRef options /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::prepare);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::prepare);
   ASSERT(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1060,7 +1060,7 @@ Variant c_pdo::t_prepare(CStrRef statement,
     PDO_HANDLE_DBH_ERR(m_dbh);
     return false;
   }
-  c_pdostatement *pdostmt = ret.getTyped<c_pdostatement>();
+  c_PDOStatement *pdostmt = ret.getTyped<c_PDOStatement>();
 
   if (m_dbh->preparer(statement, &pdostmt->m_stmt, options)) {
     PDOStatement *stmt = pdostmt->m_stmt.get();
@@ -1079,8 +1079,8 @@ Variant c_pdo::t_prepare(CStrRef statement,
   return false;
 }
 
-bool c_pdo::t_begintransaction() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::begintransaction);
+bool c_PDO::t_begintransaction() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::begintransaction);
   if (m_dbh->in_txn) {
     throw_pdo_exception(null, null, "There is already an active transaction");
   }
@@ -1094,8 +1094,8 @@ bool c_pdo::t_begintransaction() {
   return false;
 }
 
-bool c_pdo::t_commit() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::commit);
+bool c_PDO::t_commit() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::commit);
   ASSERT(m_dbh->driver);
   if (!m_dbh->in_txn) {
     throw_pdo_exception(null, null, "There is no active transaction");
@@ -1108,8 +1108,8 @@ bool c_pdo::t_commit() {
   return false;
 }
 
-bool c_pdo::t_rollback() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::rollback);
+bool c_PDO::t_rollback() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::rollback);
   ASSERT(m_dbh->driver);
   if (!m_dbh->in_txn) {
     throw_pdo_exception(null, null, "There is no active transaction");
@@ -1122,8 +1122,8 @@ bool c_pdo::t_rollback() {
   return false;
 }
 
-bool c_pdo::t_setattribute(int64 attribute, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::setattribute);
+bool c_PDO::t_setattribute(int64 attribute, CVarRef value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::setattribute);
   ASSERT(m_dbh->driver);
 
 #define PDO_LONG_PARAM_CHECK                                           \
@@ -1238,8 +1238,8 @@ bool c_pdo::t_setattribute(int64 attribute, CVarRef value) {
   return false;
 }
 
-Variant c_pdo::t_getattribute(int64 attribute) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::getattribute);
+Variant c_PDO::t_getattribute(int64 attribute) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::getattribute);
   ASSERT(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1292,8 +1292,8 @@ Variant c_pdo::t_getattribute(int64 attribute) {
   return ret;
 }
 
-Variant c_pdo::t_exec(CStrRef query) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::exec);
+Variant c_PDO::t_exec(CStrRef query) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::exec);
   if (query.empty()) {
     pdo_raise_impl_error(m_dbh, NULL, "HY000",
                          "trying to execute an empty query");
@@ -1312,8 +1312,8 @@ Variant c_pdo::t_exec(CStrRef query) {
   return ret;
 }
 
-Variant c_pdo::t_lastinsertid(CStrRef seqname /* = null_string */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::lastinsertid);
+Variant c_PDO::t_lastinsertid(CStrRef seqname /* = null_string */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::lastinsertid);
   ASSERT(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1332,8 +1332,8 @@ Variant c_pdo::t_lastinsertid(CStrRef seqname /* = null_string */) {
   return ret;
 }
 
-Variant c_pdo::t_errorcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::errorcode);
+Variant c_PDO::t_errorcode() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::errorcode);
   ASSERT(m_dbh->driver);
   if (m_dbh->query_stmt) {
     return String(m_dbh->query_stmt->error_code, CopyString);
@@ -1350,8 +1350,8 @@ Variant c_pdo::t_errorcode() {
   return String(m_dbh->error_code, CopyString);
 }
 
-Array c_pdo::t_errorinfo() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::errorinfo);
+Array c_PDO::t_errorinfo() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::errorinfo);
   ASSERT(m_dbh->driver);
 
   Array ret;
@@ -1381,8 +1381,8 @@ Array c_pdo::t_errorinfo() {
   return ret;
 }
 
-Variant c_pdo::t_query(CStrRef sql) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::query);
+Variant c_PDO::t_query(CStrRef sql) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::query);
   ASSERT(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1395,7 +1395,7 @@ Variant c_pdo::t_query(CStrRef sql) {
        "failed to instantiate user supplied statement class");
     return null;
   }
-  c_pdostatement *pdostmt = ret.getTyped<c_pdostatement>();
+  c_PDOStatement *pdostmt = ret.getTyped<c_PDOStatement>();
 
   if (m_dbh->preparer(sql, &pdostmt->m_stmt, Array())) {
     PDOStatement *stmt = pdostmt->m_stmt.get();
@@ -1437,8 +1437,8 @@ Variant c_pdo::t_query(CStrRef sql) {
   return false;
 }
 
-Variant c_pdo::t_quote(CStrRef str, int64 paramtype /* = q_pdo_PARAM_STR */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::quote);
+Variant c_PDO::t_quote(CStrRef str, int64 paramtype /* = q_PDO_PARAM_STR */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::quote);
   ASSERT(m_dbh->driver);
   strcpy(m_dbh->error_code, PDO_ERR_NONE);
   m_dbh->query_stmt = NULL;
@@ -1457,27 +1457,27 @@ Variant c_pdo::t_quote(CStrRef str, int64 paramtype /* = q_pdo_PARAM_STR */) {
   return false;
 }
 
-Variant c_pdo::t___wakeup() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::__wakeup);
+Variant c_PDO::t___wakeup() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::__wakeup);
   throw_pdo_exception(null, null,
                       "You cannot serialize or unserialize PDO instances");
   return null;
 }
 
-Variant c_pdo::t___sleep() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::__sleep);
+Variant c_PDO::t___sleep() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::__sleep);
   throw_pdo_exception(null, null,
                       "You cannot serialize or unserialize PDO instances");
   return null;
 }
 
-Array c_pdo::ti_getavailabledrivers(const char* cls) {
-  STATIC_METHOD_INJECTION_BUILTIN(pdo, pdo::getavailabledrivers);
+Array c_PDO::ti_getavailabledrivers(const char* cls) {
+  STATIC_METHOD_INJECTION_BUILTIN(PDO, PDO::getavailabledrivers);
   return f_pdo_drivers();
 }
 
-Variant c_pdo::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdo, pdo::__destruct);
+Variant c_PDO::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDO, PDO::__destruct);
   return null;
 }
 
@@ -1794,7 +1794,7 @@ static bool do_fetch(sp_PDOStatement stmt, bool do_bind, Variant &ret,
     return false;
 
   case PDO_FETCH_OBJ:
-    ret = NEW(c_stdclass)();
+    ret = NEW(c_stdClass)();
     break;
 
   case PDO_FETCH_CLASS:
@@ -2591,22 +2591,22 @@ clean_up:
 ///////////////////////////////////////////////////////////////////////////////
 // PDOStatement
 
-c_pdostatement::c_pdostatement() : m_rowIndex(-1) {
+c_PDOStatement::c_PDOStatement() : m_rowIndex(-1) {
 }
 
-c_pdostatement::~c_pdostatement() {
+c_PDOStatement::~c_PDOStatement() {
   // needed for sweeping
   m_stmt.reset();
   m_row.reset();
 }
 
-void c_pdostatement::t___construct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::__construct);
+void c_PDOStatement::t___construct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::__construct);
   raise_error("You should not create a PDOStatement manually");
 }
 
-Variant c_pdostatement::t_execute(CArrRef params /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::execute);
+Variant c_PDOStatement::t_execute(CArrRef params /* = null_array */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::execute);
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
 
   if (!params.empty()) {
@@ -2677,10 +2677,10 @@ Variant c_pdostatement::t_execute(CArrRef params /* = null_array */) {
   return false;
 }
 
-Variant c_pdostatement::t_fetch(int64 how /* = q_pdo_FETCH_BOTH */,
-                                int64 orientation /* = q_pdo_FETCH_ORI_NEXT */,
+Variant c_PDOStatement::t_fetch(int64 how /* = q_PDO_FETCH_BOTH */,
+                                int64 orientation /* = q_PDO_FETCH_ORI_NEXT */,
                                 int64 offset /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::fetch);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::fetch);
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, how, false)) {
     return false;
@@ -2695,9 +2695,9 @@ Variant c_pdostatement::t_fetch(int64 how /* = q_pdo_FETCH_BOTH */,
   return ret;
 }
 
-Variant c_pdostatement::t_fetchobject(CStrRef class_name /* = null_string */,
+Variant c_PDOStatement::t_fetchobject(CStrRef class_name /* = null_string */,
                                       CVarRef ctor_args /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::fetchobject);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::fetchobject);
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!pdo_stmt_verify_mode(m_stmt, PDO_FETCH_CLASS, false)) {
     return false;
@@ -2740,8 +2740,8 @@ Variant c_pdostatement::t_fetchobject(CStrRef class_name /* = null_string */,
   return ret;
 }
 
-Variant c_pdostatement::t_fetchcolumn(int64 column_numner /* = 0 */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::fetchcolumn);
+Variant c_PDOStatement::t_fetchcolumn(int64 column_numner /* = 0 */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::fetchcolumn);
   strcpy(m_stmt->error_code, PDO_ERR_NONE);
   if (!do_fetch_common(m_stmt, PDO_FETCH_ORI_NEXT, 0, true)) {
     PDO_HANDLE_STMT_ERR(m_stmt);
@@ -2752,10 +2752,10 @@ Variant c_pdostatement::t_fetchcolumn(int64 column_numner /* = 0 */) {
   return ret;
 }
 
-Variant c_pdostatement::t_fetchall(int64 how /* = q_pdo_FETCH_BOTH */,
+Variant c_PDOStatement::t_fetchall(int64 how /* = q_PDO_FETCH_BOTH */,
                                    CVarRef class_name /* = null */,
                                    CVarRef ctor_args /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::fetchall);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::fetchall);
   if (!pdo_stmt_verify_mode(m_stmt, how, true)) {
     return false;
   }
@@ -2876,45 +2876,45 @@ Variant c_pdostatement::t_fetchall(int64 how /* = q_pdo_FETCH_BOTH */,
   return return_value;
 }
 
-bool c_pdostatement::t_bindvalue(CVarRef paramno, CVarRef param,
-                                 int64 type /* = q_pdo_PARAM_STR */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::bindvalue);
+bool c_PDOStatement::t_bindvalue(CVarRef paramno, CVarRef param,
+                                 int64 type /* = q_PDO_PARAM_STR */) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::bindvalue);
   return register_bound_param(paramno, param, type, 0, null, m_stmt, true);
 }
 
-bool c_pdostatement::t_bindparam(CVarRef paramno, Variant param,
-                                 int64 type /* = q_pdo_PARAM_STR */,
+bool c_PDOStatement::t_bindparam(CVarRef paramno, Variant param,
+                                 int64 type /* = q_PDO_PARAM_STR */,
                                  int64 max_value_len /* = 0 */,
                                  CVarRef driver_params /*= null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::bindparam);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::bindparam);
   return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, m_stmt, true);
 }
 
-bool c_pdostatement::t_bindcolumn(CVarRef paramno, Variant param,
-                                  int64 type /* = q_pdo_PARAM_STR */,
+bool c_PDOStatement::t_bindcolumn(CVarRef paramno, Variant param,
+                                  int64 type /* = q_PDO_PARAM_STR */,
                                   int64 max_value_len /* = 0 */,
                                   CVarRef driver_params /* = null */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::bindcolumn);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::bindcolumn);
   return register_bound_param(paramno, ref(param), type, max_value_len,
                               driver_params, m_stmt, false);
 }
 
-int64 c_pdostatement::t_rowcount() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::rowcount);
+int64 c_PDOStatement::t_rowcount() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::rowcount);
   return m_stmt->row_count;
 }
 
-Variant c_pdostatement::t_errorcode() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::errorcode);
+Variant c_PDOStatement::t_errorcode() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::errorcode);
   if (m_stmt->error_code[0] == '\0') {
     return null;
   }
   return String(m_stmt->error_code, CopyString);
 }
 
-Array c_pdostatement::t_errorinfo() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::errorinfo);
+Array c_PDOStatement::t_errorinfo() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::errorinfo);
   Array ret;
   ret.append(String(m_stmt->error_code, CopyString));
 
@@ -2933,8 +2933,8 @@ Array c_pdostatement::t_errorinfo() {
   return ret;
 }
 
-Variant c_pdostatement::t_setattribute(int64 attribute, CVarRef value) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::setattribute);
+Variant c_PDOStatement::t_setattribute(int64 attribute, CVarRef value) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::setattribute);
   if (!m_stmt->support(PDOStatement::MethodSetAttribute)) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
                          "This driver doesn't support setting attributes");
@@ -2949,8 +2949,8 @@ Variant c_pdostatement::t_setattribute(int64 attribute, CVarRef value) {
   return false;
 }
 
-Variant c_pdostatement::t_getattribute(int64 attribute) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::getattribute);
+Variant c_PDOStatement::t_getattribute(int64 attribute) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::getattribute);
   Variant ret;
   if (!m_stmt->support(PDOStatement::MethodGetAttribute)) {
     if (!generic_stmt_attr_get(m_stmt, ret, attribute)) {
@@ -2980,13 +2980,13 @@ Variant c_pdostatement::t_getattribute(int64 attribute) {
   return ret;
 }
 
-int64 c_pdostatement::t_columncount() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::columncount);
+int64 c_PDOStatement::t_columncount() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::columncount);
   return m_stmt->column_count;
 }
 
-Variant c_pdostatement::t_getcolumnmeta(int64 column) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::getcolumnmeta);
+Variant c_PDOStatement::t_getcolumnmeta(int64 column) {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::getcolumnmeta);
   if (column < 0) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "42P10",
                          "column number must be non-negative");
@@ -3018,14 +3018,14 @@ Variant c_pdostatement::t_getcolumnmeta(int64 column) {
   return ret;
 }
 
-bool c_pdostatement::t_setfetchmode(int _argc, int64 mode,
+bool c_PDOStatement::t_setfetchmode(int _argc, int64 mode,
                                     CArrRef _argv /* = null_array */) {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::setfetchmode);
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::setfetchmode);
   return pdo_stmt_set_fetch_mode(m_stmt, _argc, mode, _argv);
 }
 
-bool c_pdostatement::t_nextrowset() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::nextrowset);
+bool c_PDOStatement::t_nextrowset() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::nextrowset);
   if (!m_stmt->support(PDOStatement::MethodNextRowset)) {
     pdo_raise_impl_error(m_stmt->dbh, m_stmt, "IM001",
                          "driver does not support multiple rowsets");
@@ -3049,8 +3049,8 @@ bool c_pdostatement::t_nextrowset() {
   return true;
 }
 
-bool c_pdostatement::t_closecursor() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::closecursor);
+bool c_PDOStatement::t_closecursor() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::closecursor);
   if (!m_stmt->support(PDOStatement::MethodCursorCloser)) {
     /* emulate it by fetching and discarding rows */
     do {
@@ -3072,8 +3072,8 @@ bool c_pdostatement::t_closecursor() {
   return true;
 }
 
-Variant c_pdostatement::t_debugdumpparams() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::debugdumpparams);
+Variant c_PDOStatement::t_debugdumpparams() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::debugdumpparams);
   Variant fobj = File::Open("php://output", "w");
   if (same(fobj, false)) {
     return false;
@@ -3111,18 +3111,18 @@ Variant c_pdostatement::t_debugdumpparams() {
   return true;
 }
 
-Variant c_pdostatement::t_current() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::current);
+Variant c_PDOStatement::t_current() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::current);
   return m_row;
 }
 
-Variant c_pdostatement::t_key() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::key);
+Variant c_PDOStatement::t_key() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::key);
   return m_rowIndex;
 }
 
-Variant c_pdostatement::t_next() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::next);
+Variant c_PDOStatement::t_next() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::next);
   m_row = t_fetch(PDO_FETCH_BOTH);
   if (m_row.same(false)) {
     m_rowIndex = -1;
@@ -3132,51 +3132,51 @@ Variant c_pdostatement::t_next() {
   return null;
 }
 
-Variant c_pdostatement::t_rewind() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::rewind);
+Variant c_PDOStatement::t_rewind() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::rewind);
   m_rowIndex = -1;
   t_next();
   return null;
 }
 
-Variant c_pdostatement::t_valid() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::valid);
+Variant c_PDOStatement::t_valid() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::valid);
   return m_rowIndex >= 0;
 }
 
-Variant c_pdostatement::t___wakeup() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::__wakeup);
+Variant c_PDOStatement::t___wakeup() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::__wakeup);
   throw_pdo_exception(null, null, "You cannot serialize or unserialize "
                       "PDOStatement instances");
   return null;
 }
 
-Variant c_pdostatement::t___sleep() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::__sleep);
+Variant c_PDOStatement::t___sleep() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::__sleep);
   throw_pdo_exception(null, null, "You cannot serialize or unserialize "
                       "PDOStatement instances");
   return null;
 }
 
-Variant c_pdostatement::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdostatement, pdostatement::__destruct);
+Variant c_PDOStatement::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOStatement, PDOStatement::__destruct);
   return null;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // PDOException
 
-c_pdoexception::c_pdoexception() {
+c_PDOException::c_PDOException() {
 }
 
-c_pdoexception::~c_pdoexception() {
+c_PDOException::~c_PDOException() {
 }
 
-void c_pdoexception::t___construct() {
+void c_PDOException::t___construct() {
 }
 
-Variant c_pdoexception::t___destruct() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(pdoexception, pdoexception::__destruct);
+Variant c_PDOException::t___destruct() {
+  INSTANCE_METHOD_INJECTION_BUILTIN(PDOException, PDOException::__destruct);
   return null;
 }
 

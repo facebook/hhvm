@@ -350,6 +350,8 @@ void ObjectMethodExpression::outputCPPImpl(CodeGenerator &cg,
       TypePtr type = m_object->getType();
       if (type->isSpecificObject() && !m_name.empty() && m_valid) {
         objType = type->getName();
+        ClassScopePtr cls = ar->findClass(objType);
+        objType = cls->getId(cg);
       } else {
         objType = "ObjectData";
       }

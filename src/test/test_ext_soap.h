@@ -35,7 +35,7 @@ public:
   bool test_SoapServerFault();
 
 private:
-  sp_soapserver m_server;
+  p_SoapServer m_server;
 
   bool verify_response(CStrRef request, CStrRef expected);
 };

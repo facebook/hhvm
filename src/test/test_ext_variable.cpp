@@ -314,7 +314,7 @@ bool TestExtVariable::test_debug_zval_dump() {
 }
 
 bool TestExtVariable::test_serialize() {
-  Object obj(NEW(c_stdclass)());
+  Object obj(NEW(c_stdClass)());
   obj->o_set("name", "value");
   VS(f_serialize(obj), "O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
 

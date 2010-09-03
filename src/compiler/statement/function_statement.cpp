@@ -133,6 +133,8 @@ bool FunctionStatement::hasImpl() const {
 
 void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
+  CodeGenerator::Context context = cg.getContext();
+
   FunctionScopePtr funcScope = m_funcScope.lock();
   string fname = funcScope->getId(cg).c_str();
   bool pseudoMain = funcScope->inPseudoMain();
@@ -142,7 +144,7 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
 
   if (outputFFI(cg, ar)) return;
 
-  if (cg.getContext() == CodeGenerator::NoContext) {
+  if (context == CodeGenerator::NoContext) {
     string rname = cg.formatLabel(m_name);
     if (funcScope->isRedeclaring()) {
       cg_printf("g->%s%s = %s%s;\n",
@@ -161,19 +163,19 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     return;
   }
 
-  if (cg.getContext() == CodeGenerator::CppDeclaration &&
+  if (context == CodeGenerator::CppDeclaration &&
       !funcScope->isInlined()) return;
 
-  if (cg.getContext() == CodeGenerator::CppPseudoMain &&
+  if (context == CodeGenerator::CppPseudoMain &&
       !pseudoMain) return;
-  if (cg.getContext() == CodeGenerator::CppImplementation &&
+  if (context == CodeGenerator::CppImplementation &&
       (funcScope->isInlined() || pseudoMain)) return;
   ar->pushScope(funcScope);
 
   cg.setPHPLineNo(-1);
 
   if (pseudoMain && !Option::GenerateCPPMain) {
-    if (cg.getContext() == CodeGenerator::CppPseudoMain) {
+    if (context == CodeGenerator::CppPseudoMain) {
       if (cg.getOutput() != CodeGenerator::SystemCPP) {
         cg.setContext(CodeGenerator::NoContext); // no inner functions/classes
         funcScope->getVariables()->setAttribute(VariableTable::ForceGlobal);
@@ -183,14 +185,19 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
         ar->popScope();
         return;
       }
-    } else if (cg.getContext() == CodeGenerator::CppForwardDeclaration &&
+    } else if (context == CodeGenerator::CppForwardDeclaration &&
                cg.getOutput() != CodeGenerator::SystemCPP) {
       return;
     }
   }
 
-  if (cg.getContext() == CodeGenerator::CppImplementation) {
+  if (context == CodeGenerator::CppImplementation) {
     printSource(cg);
+  } else if (context == CodeGenerator::CppForwardDeclaration &&
+             Option::GenerateCppLibCode) {
+    cg_printf("\n");
+    printSource(cg);
+    cg.printDocComment(funcScope->getDocComment());
   }
 
   if (funcScope->isInlined()) cg_printf("inline ");
@@ -215,7 +222,6 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
     cg_printf(" %s%s(", Option::FunctionPrefix, fname.c_str());
   }
 
-  CodeGenerator::Context context = cg.getContext();
   switch (context) {
   case CodeGenerator::CppForwardDeclaration:
     funcScope->outputCPPParamsDecl(cg, ar, m_params, true);

@@ -96,7 +96,7 @@ public:
   bool classNameCtor() const {
     return getAttribute(classNameConstructor);
   }
-  std::string getOriginalName() const;
+  const std::string &getOriginalName() const;
 
 
   virtual std::string getId(CodeGenerator &cg) const;
@@ -290,6 +290,8 @@ public:
   bool hasConst(const std::string &name);
   void outputCPPHeader(CodeGenerator &cg, AnalysisResultPtr ar,
                        CodeGenerator::Output output);
+
+  void outputMethodWrappers(CodeGenerator &cg, AnalysisResultPtr ar);
 
   /**
    * This prints out all the support methods (invoke, create, destructor,

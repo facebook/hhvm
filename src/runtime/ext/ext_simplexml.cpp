@@ -578,7 +578,19 @@ Variant c_simplexmlelement::t_addchild(CStrRef qname,
   }
 
   Object child = create_element(m_doc, newnode, newns, false);
-  m_children.set(newname, child);
+  if (m_children.toArray().exists(newname)) {
+    Variant &tmp = m_children.lvalAt(newname);
+    if (tmp.isArray()) {
+      tmp.append(child);
+    } else {
+      Array arr;
+      arr.append(tmp);
+      arr.append(child);
+      m_children.set(newname, arr);
+    }
+  } else {
+    m_children.set(newname, child);
+  }
   return child;
 }
 

@@ -11437,6 +11437,34 @@ bool TestCodeRun::TestAssignment() {
 }
 
 bool TestCodeRun::TestSimpleXML() {
+  MVCR("<?php\n"
+       "function addChildNode(SimpleXMLElement $parent, "
+       "SimpleXMLElement $node) {\n"
+       "  $newchild = $parent->addChild($node->getName(), (string)$node);\n"
+       "  foreach ($node->attributes() as $name => $value) {\n"
+       "    $newchild->addAttribute($name, $value);\n"
+       "  }\n"
+       "  foreach ($node->children() as $child) {\n"
+       "    addChildNode($newchild, $child);\n"
+       "  }\n"
+       "}\n"
+       "\n"
+       "$xmlreq = '<a><item><node><sub>1st</sub>"
+       "<sub>2nd</sub></node></item></a>';\n"
+       "$quote = simplexml_load_string($xmlreq);\n"
+       "$req = new SimpleXMLElement('<node/>');\n"
+       "foreach ($quote->attributes() as $name => $value) {\n"
+       "  $req->addAttribute($name, $value);\n"
+       "}\n"
+       "foreach ($quote->children() as $child) {\n"
+       "  addChildNode($req, $child);\n"
+       "}\n"
+       "\n"
+       "$vertex = new SimpleXMLElement('<root/>');\n"
+       "addChildNode($vertex, $req);\n"
+       "var_dump($vertex->asXML());\n"
+      );
+
   MVCR("<?php $x = new SimpleXMLElement('<foo><bar>345.234</bar></foo>');"
        "var_dump((double)$x->bar);");
   MVCR("<?php $x = new SimpleXMLElement('<foo><bar></bar></foo>');"

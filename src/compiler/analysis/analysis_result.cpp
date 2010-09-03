@@ -1918,7 +1918,6 @@ void AnalysisResult::outputArrayCreateImpl(CodeGenerator &cg) {
       for (int i = 1; i <= num; i++) {
         cg_printf("k%d, ", i);
       }
-      cg_indentEnd("NULL,\n");
       cg_printf("};\n");
       cg_indentBegin("const Variant *values[] = {\n");
       for (int i = 1; i <= num; i++) {

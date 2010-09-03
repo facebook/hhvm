@@ -505,10 +505,18 @@ unsigned int ExpressionList::checkIntegerKeys(int64 &max) const {
     if (!ret) return 0;
     if (!value.isInteger()) return 0;
     int64 v = value.toInt64();
-    if (max < v) max = v;
+    if (i == 0) {
+      max = v;
+    } else if (max < v) {
+      max = v;
+    }
     keys.insert(v);
   }
-  if (max > 0) max++;
+  if (max >= 0) {
+    max++;
+  } else {
+    max = 0;
+  }
   return keys.size();
 }
 

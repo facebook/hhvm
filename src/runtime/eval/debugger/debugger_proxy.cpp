@@ -151,6 +151,16 @@ bool DebuggerProxy::blockUntilOwn(CmdInterrupt &cmd, bool check) {
     m_threads[self] = createThreadInfo(cmd.desc());
     while (!m_stopped && m_thread && m_thread != self) {
       wait(1);
+
+      // if for whatever reason, m_thread isn't debugging anymore (for example,
+      // it runs in Sticky mode, but it finishes running), kick it out.
+      if (!Debugger::IsThreadDebugging(m_thread)) {
+        m_threadMode = Normal;
+        m_thread = self;
+        m_newThread.reset();
+        m_jump.reset();
+        m_flow.reset();
+      }
     }
     m_threads.erase(self);
     if (m_stopped) return false;

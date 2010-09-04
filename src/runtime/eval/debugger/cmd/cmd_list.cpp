@@ -211,5 +211,13 @@ bool CmdList::onServer(DebuggerProxy *proxy) {
   return proxy->send(this);
 }
 
+Variant CmdList::GetSourceFile(DebuggerClient *client,
+                               const std::string &file) {
+  CmdList cmd;
+  cmd.m_file = file;
+  CmdListPtr res = client->xend<CmdList>(&cmd);
+  return res->m_code;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }}

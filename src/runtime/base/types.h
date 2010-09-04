@@ -175,6 +175,7 @@ public:
   bool debugger;       // whether there is a DebuggerProxy attached to me
   void *interrupt;     // current CmdInterrupt this thread's handling
 
+  void reset();
   void onSessionInit();
 };
 
@@ -203,6 +204,7 @@ public:
   ThreadInfo();
 
   void onSessionInit();
+  void onSessionExit();
 };
 
 extern void throw_infinite_recursion_exception();

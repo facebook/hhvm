@@ -27,6 +27,9 @@ class CmdList : public DebuggerCommand {
 public:
   CmdList() : DebuggerCommand(KindOfList) {}
 
+  static Variant GetSourceFile(DebuggerClient *client,
+                               const std::string &file);
+
   virtual void list(DebuggerClient *client);
   virtual bool help(DebuggerClient *client);
 

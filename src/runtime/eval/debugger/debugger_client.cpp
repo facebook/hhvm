@@ -63,7 +63,22 @@ static void debugger_signal_handler(int sig) {
 
 void DebuggerClient::onSignal(int sig) {
   if (m_inputState == TakingInterrupt) {
-    info("Pausing program execution, please wait...");
+    time_t now = time(0);
+
+    if (m_sigTime) {
+      int secWait = 10;
+      if (now - m_sigTime > secWait) {
+        error("Program is not responding. Please restart debugger to get a "
+              "new connection.");
+        quit();
+        return;
+      }
+      info("Please wait. If not responding in %d seconds, "
+           "press Ctrl-C again to quit.", secWait);
+    } else {
+      info("Pausing program execution, please wait...");
+      m_sigTime = now;
+    }
     m_signum = CmdSignal::SignalBreak;
   } else {
     rl_replace_line("", 0);
@@ -324,7 +339,7 @@ DebuggerClient::DebuggerClient()
     : m_tutorial(0),
       m_mainThread(this, &DebuggerClient::run), m_stopped(false),
       m_inputState(TakingCommand), m_runState(NotYet),
-      m_signum(CmdSignal::SignalNone),
+      m_signum(CmdSignal::SignalNone), m_sigTime(0),
       m_acLen(0), m_acIndex(0), m_acPos(0), m_acLiveListsDirty(true),
       m_threadId(0), m_listLine(0), m_listLineFocus(0), m_frame(0) {
 }
@@ -342,6 +357,10 @@ void DebuggerClient::reset() {
   m_acLiveLists.reset();
   m_machines.clear();
   m_machine.reset();
+}
+
+bool DebuggerClient::isLocal() {
+  return m_machines[0] == m_machine;
 }
 
 bool DebuggerClient::connect(const std::string &host, int port) {
@@ -761,6 +780,7 @@ void DebuggerClient::runImpl() {
           Logger::Error("%s: bad cmd type: %d", func, cmd->getType());
           return;
         }
+        m_sigTime = 0;
         if (!cmd->onClient(this)) {
           Logger::Error("%s: unable to process %d", func, cmd->getType());
           return;
@@ -860,6 +880,18 @@ bool DebuggerClient::console() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
+
+void DebuggerClient::shortCode(BreakPointInfoPtr bp) {
+  if (bp && !bp->m_file.empty() && bp->m_line1) {
+    Variant source = CmdList::GetSourceFile(this, bp->m_file);
+    if (source.isString()) {
+      code(source, bp->m_line1,
+           bp->m_line1 > 1 ? bp->m_line1 - 1 : bp->m_line1,
+           bp->m_line2 + 1,
+           bp->m_char1, bp->m_line2, bp->m_char2);
+    }
+  }
+}
 
 bool DebuggerClient::code(CStrRef source, int lineFocus, int line1 /* = 0 */,
                           int line2 /* = 0 */, int charFocus0 /* = 0 */,

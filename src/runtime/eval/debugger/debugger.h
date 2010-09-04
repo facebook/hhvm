@@ -39,6 +39,7 @@ public:
    */
   static void RegisterSandbox(const DSandboxInfo &sandbox);
   static void GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes);
+  static bool IsThreadDebugging(int64 id);
 
   /**
    * Add/remove/change DebuggerProxy.
@@ -83,7 +84,7 @@ private:
   StringToDSandboxInfoPtrMap m_sandboxes;
 
   /**
-   * m_threadInfos stores threads by sandbox id. These threads were started
+   * m_sandboxThreads stores threads by sandbox id. These threads were started
    * without finding a matched DebuggerProxy. Newly attached DebuggerProxy
    * can check this set to mark them with "debugger" flag on ThreadInfo's
    * RequestInjectionData. This way, these threads will start to interrupt.
@@ -92,10 +93,14 @@ private:
    * attached.
    */
   typedef std::set<ThreadInfo*> ThreadInfoSet;
+  typedef std::map<int64, ThreadInfo*> ThreadInfoMap;
   typedef std::map<std::string, ThreadInfoSet> StringToThreadInfoSet;
-  StringToThreadInfoSet m_threadInfos;
+  ThreadInfoMap m_threadInfos;
+  StringToThreadInfoSet m_sandboxThreads;
+
   void clearThreadInfos();
   void flagDebugger(const std::string &id);
+  bool isThreadDebugging(int64 id);
 
   void stop();
 

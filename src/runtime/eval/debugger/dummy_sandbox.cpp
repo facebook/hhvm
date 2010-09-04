@@ -63,14 +63,24 @@ void DummySandbox::run() {
       if (m_inited) {
         SystemGlobals *g = (SystemGlobals *)get_global_variables();
         SourceRootInfo sri(sandbox.m_user, sandbox.m_name);
-        sri.setServerVariables(g->gv__SERVER);
+        if (sandbox.m_path.empty()) {
+          sandbox.m_path = sri.path();
+        }
+        if (!sri.sandboxOn()) {
+          msg = "Invalid sandbox was specified. "
+            "PHP files may not be loaded properly.\n";
+          // force HPHP_SANDBOX_ID to be set, so we can still talk to client
+          g->gv__SERVER.set("HPHP_SANDBOX_ID", sandbox.id());
+        } else {
+          sri.setServerVariables(g->gv__SERVER);
+        }
 
         std::string doc = getStartupDoc(sandbox);
         bool error; string errorMsg;
         bool ret = hphp_invoke(g_context.get(), doc, false, null_array, null,
                                "", "", "", error, errorMsg);
         if (!ret || error) {
-          msg = "Unable to pre-load " + doc;
+          msg += "Unable to pre-load " + doc;
           if (!errorMsg.empty()) {
             msg += ": " + errorMsg;
           }
@@ -105,7 +115,7 @@ void DummySandbox::notifySignal(int signum) {
 
 std::string DummySandbox::getStartupDoc(const DSandboxInfo &sandbox) {
   string path;
-  if (!m_startupFile.empty()){
+  if (!m_startupFile.empty()) {
     // if relative path, prepend directory
     if (m_startupFile[0] != '/' && m_startupFile[0] != '~') {
       path = sandbox.m_path;

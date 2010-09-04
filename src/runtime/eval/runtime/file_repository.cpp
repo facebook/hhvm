@@ -88,7 +88,8 @@ Mutex FileRepository::s_locks[128];
 hphp_hash_map<std::string, PhpFile*, string_hash>
 FileRepository::m_files;
 
-PhpFile *FileRepository::checkoutFile(const std::string &rname, const struct stat &s) {
+PhpFile *FileRepository::checkoutFile(const std::string &rname,
+                                      const struct stat &s) {
   PhpFile *ret = NULL;
   Lock lock(s_lock);
   string name;
@@ -128,7 +129,8 @@ bool FileRepository::findFile(std::string &path, struct stat &s,
   return fileStat(path, s);
 }
 
-PhpFile *FileRepository::readFile(const std::string &name, const struct stat &s) {
+PhpFile *FileRepository::readFile(const std::string &name,
+                                  const struct stat &s) {
   vector<StaticStatementPtr> sts;
   const char *canoname = canonicalize(name);
   StatementPtr stmt = Parser::parseFile(canoname, sts);

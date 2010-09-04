@@ -60,6 +60,10 @@ void Debugger::GetRegisteredSandboxes(DSandboxInfoPtrVec &sandboxes) {
   s_debugger.getSandboxes(sandboxes);
 }
 
+bool Debugger::IsThreadDebugging(int64 id) {
+  return s_debugger.isThreadDebugging(id);
+}
+
 void Debugger::RegisterProxy(SmartPtr<Socket> socket, bool local) {
   s_debugger.addProxy(socket, local);
 }
@@ -181,24 +185,37 @@ String Debugger::ColorStderr(CStrRef s) {
 
 void Debugger::clearThreadInfos() {
   WriteLock lock(m_mutex);
-  m_threadInfos.clear();
+  m_sandboxThreads.clear();
 }
 
 void Debugger::stop() {
   WriteLock lock(m_mutex);
   m_proxies.clear();
-  m_threadInfos.clear();
+  m_sandboxThreads.clear();
+}
+
+bool Debugger::isThreadDebugging(int64 id) {
+  ReadLock lock(m_mutex);
+  if (id) {
+    ThreadInfo *ti = m_threadInfos[id];
+    ASSERT(ti);
+    if (ti) {
+      return ti->m_reqInjectionData.debugger;
+    }
+  }
+  return false;
 }
 
 void Debugger::addSandbox(const DSandboxInfo &sandbox) {
   WriteLock lock(m_mutex);
   string id = sandbox.id();
   ThreadInfo *ti = ThreadInfo::s_threadInfo.get();
+  m_threadInfos[(int64)pthread_self()] = ti;
   if (m_proxies[id]) {
     ti->m_reqInjectionData.debugger = true;
-    m_threadInfos[id].erase(ti);
+    m_sandboxThreads[id].erase(ti);
   } else {
-    m_threadInfos[id].insert(ti);
+    m_sandboxThreads[id].insert(ti);
   }
   DSandboxInfoPtr old = m_sandboxes[id];
   if (old) {
@@ -263,7 +280,7 @@ void Debugger::switchSandbox(DebuggerProxyPtr proxy,
 }
 
 void Debugger::flagDebugger(const std::string &id) {
-  ThreadInfoSet &infos = m_threadInfos[id];
+  ThreadInfoSet &infos = m_sandboxThreads[id];
   for (ThreadInfoSet::iterator iter = infos.begin();
        iter != infos.end(); ++iter) {
     (*iter)->m_reqInjectionData.debugger = true;

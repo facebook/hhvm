@@ -210,10 +210,19 @@ void BreakPointInfo::toggle() {
 }
 
 bool BreakPointInfo::valid() {
-  return m_valid &&
-    ((m_interrupt == BreakPointReached &&
-      ((m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty())) ||
-     (m_interrupt == ExceptionThrown && !m_class.empty()));
+  if (m_valid) {
+    switch (m_interrupt) {
+      case BreakPointReached:
+        return (m_line1 && m_line2) || !m_file.empty() || !m_funcs.empty();
+      case ExceptionThrown:
+        return !m_class.empty();
+      case RequestStarted:
+      case RequestEnded:
+      case PSPEnded:
+        return true;
+    }
+  }
+  return false;
 }
 
 bool BreakPointInfo::same(BreakPointInfoPtr bpi) {

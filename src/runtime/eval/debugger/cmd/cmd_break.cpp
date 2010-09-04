@@ -186,6 +186,14 @@ bool CmdBreak::help(DebuggerClient *client) {
     "different machines, sandboxes and threads."
   );
 
+  client->helpTitle("Hard Breakpoints");
+  client->helpSection(
+    "From within PHP code, you can place a function call hphpd_break() to "
+    "embed a breakpoint. You may also specify a condition as the function's "
+    "parameter, so it breaks when the condition is met. Please read about "
+    "this function for more details with '[i]nfo hphpd_break'."
+  );
+
   client->help("");
   return true;
 }

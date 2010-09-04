@@ -136,6 +136,13 @@ Then use those indices to clear or toggle their states. This list of
 breakpoints and their states will remain the same when switching to
 different machines, sandboxes and threads.
 
+    -------------------------- Hard Breakpoints --------------------------
+
+From within PHP code, you can place a function call hphpd_break() to
+embed a breakpoint. You may also specify a condition as the function's
+parameter, so it breaks when the condition is met. Please read about
+this function for more details with '[i]nfo hphpd_break'.
+
 
     -------------------------- Continue Command --------------------------
 

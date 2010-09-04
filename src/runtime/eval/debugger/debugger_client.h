@@ -141,6 +141,7 @@ public:
 
   bool code(CStrRef source, int lineFocus = 0, int line1 = 0, int line2 = 0,
             int charFocus0 = 0, int lineFocus1 = 0, int charFocus1 = 0);
+  void shortCode(BreakPointInfoPtr bp);
   char ask(const char *fmt, ...);
 
   std::string wrap(const std::string &s);
@@ -188,6 +189,7 @@ public:
   bool connectRPC(const std::string &host, int port);
   bool disconnect();
   bool initializeMachine();
+  bool isLocal();
 
   /**
    * Sandbox functions.
@@ -279,6 +281,7 @@ private:
   InputState m_inputState;
   RunState m_runState;
   int m_signum;
+  int m_sigTime;
 
   // auto-completion states
   int m_acLen;

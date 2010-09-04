@@ -1011,6 +1011,8 @@ void hphp_session_exit() {
     ServerStatsHelper ssh("free");
     free_global_variables();
   }
+
+  ThreadInfo::s_threadInfo->onSessionExit();
 }
 
 void hphp_process_exit() {

@@ -195,10 +195,12 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
               m_interrupt == HardBreakPoint) {
             client->info("Breakpoint %d reached %s", bp->index(),
                          m_bpi->site().c_str());
+            client->shortCode(m_bpi);
           } else {
             if (m_bpi->m_exceptionClass == BreakPointInfo::ErrorClassName) {
               client->info("Breakpoint %d reached: An error occurred %s",
                            bp->index(), m_bpi->site().c_str());
+              client->shortCode(m_bpi);
               client->error("Error Message: %s",
                             m_bpi->m_exceptionObject.c_str());
             } else {
@@ -206,6 +208,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
                            bp->index(),
                            m_bpi->m_exceptionClass.c_str(),
                            m_bpi->site().c_str());
+              client->shortCode(m_bpi);
               client->output(m_bpi->m_exceptionObject);
             }
           }
@@ -219,6 +222,7 @@ bool CmdInterrupt::onClient(DebuggerClient *client) {
       }
       if (!found) {
         client->info("Break %s", m_bpi->site().c_str());
+        client->shortCode(m_bpi);
       }
       break;
     }

@@ -57,6 +57,9 @@ bool CmdMachine::help(DebuggerClient *client) {
     "[m]achine [d]isconnect",             "debugging local script",
     "[m]achine [l]ist",                   "list all sandboxes",
     "[m]achine [a]ttach {index}",         "attach to a sandbox",
+    "[m]achine [a]ttach {sandbox}",       "attach to my sandbox by name",
+    "[m]achine [a]ttach {user} {sandbox}",
+    "attach to a sandbox by user and name",
     NULL
   );
   client->helpBody(
@@ -140,6 +143,11 @@ bool CmdMachine::AttachSandbox(DebuggerClient *client,
 
 bool CmdMachine::AttachSandbox(DebuggerClient *client,
                                DSandboxInfoPtr sandbox) {
+  if (client->isLocal()) {
+    client->error("Local script doesn't have sandbox to attach to.");
+    return true;
+  }
+
   CmdMachine cmd;
   cmd.m_body = "attach";
   cmd.m_sandboxes.push_back(sandbox);
@@ -209,28 +217,34 @@ bool CmdMachine::onClient(DebuggerClient *client) {
   }
 
   if (client->arg(1, "attach")) {
-    string snum = client->argValue(2);
-    if (!DebuggerClient::IsValidNumber(snum)) {
-      client->error("'[m]achine [a]attach' needs an {index} argument.");
-      client->tutorial(
-        "You will have to run '[m]achine [l]ist' first to see a list of valid "
-        "numbers or indices to specify."
-      );
-      return true;
-    }
+    DSandboxInfoPtr sandbox;
 
-    int num = atoi(snum.c_str());
-    DSandboxInfoPtr sandbox = client->getSandbox(num);
-    if (!sandbox) {
-      processList(client, false);
+    string snum = client->argValue(2);
+    if (DebuggerClient::IsValidNumber(snum)) {
+      int num = atoi(snum.c_str());
       sandbox = client->getSandbox(num);
       if (!sandbox) {
-        client->error("\"%s\" is not a valid sandbox index. Choose one from "
-                      "this list:", snum.c_str());
-        processList(client);
-        return true;
+        processList(client, false);
+        sandbox = client->getSandbox(num);
+        if (!sandbox) {
+          client->error("\"%s\" is not a valid sandbox index. Choose one from "
+                        "this list:", snum.c_str());
+          processList(client);
+          return true;
+        }
       }
+    } else if (client->argCount() == 2) {
+      sandbox = DSandboxInfoPtr(new DSandboxInfo());
+      sandbox->m_user = Process::GetCurrentUser();
+      sandbox->m_name = snum;
+    } else if (client->argCount() == 3) {
+      sandbox = DSandboxInfoPtr(new DSandboxInfo());
+      sandbox->m_user = snum;
+      sandbox->m_name = client->argValue(3);
+    } else {
+      return help(client);
     }
+
     return AttachSandbox(client, sandbox);
   }
 

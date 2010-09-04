@@ -95,6 +95,13 @@ public:
   virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
   virtual ArrayData *set(CVarRef k, CVarRef v, bool copy);
 
+  virtual ArrayData *add(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *addLval(int64   k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
+
   virtual ArrayData *remove(int64   k, bool copy);
   virtual ArrayData *remove(litstr  k, bool copy);
   virtual ArrayData *remove(CStrRef k, bool copy);
@@ -168,10 +175,11 @@ private:
   Bucket ** findForErase(Bucket * bucketPtr) const;
 
   bool nextInsert(CVarRef data);
-  bool addLval(int64 h, Variant **pDest, bool doFind = true);
-  bool addLval(StringData *key, int64 h, Variant **pDest, bool doFind = true);
-  bool add(int64 h, CVarRef data);
-  bool add(StringData *key, CVarRef data);
+  bool addLvalImpl(int64 h, Variant **pDest, bool doFind = true);
+  bool addLvalImpl(StringData *key, int64 h, Variant **pDest,
+                   bool doFind = true);
+  bool addVal(int64 h, CVarRef data);
+  bool addVal(StringData *key, CVarRef data);
 
   bool update(int64 h, CVarRef data);
   bool update(litstr key, CVarRef data);

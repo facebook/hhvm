@@ -129,14 +129,10 @@ class ArrayData : public Countable {
   /**
    * Getting value at specified key.
    */
-  virtual Variant get(int64   k,
-                      bool error = false) const = 0;
-  virtual Variant get(litstr  k,
-                      bool error = false) const = 0;
-  virtual Variant get(CStrRef k,
-                      bool error = false) const = 0;
-  virtual Variant get(CVarRef k,
-                      bool error = false) const = 0;
+  virtual Variant get(int64   k, bool error = false) const = 0;
+  virtual Variant get(litstr  k, bool error = false) const = 0;
+  virtual Variant get(CStrRef k, bool error = false) const = 0;
+  virtual Variant get(CVarRef k, bool error = false) const = 0;
 
   /**
    * Loading value at specified key to a variable, preserving reference,
@@ -183,6 +179,16 @@ class ArrayData : public Countable {
   virtual ArrayData *set(litstr  k, CVarRef v, bool copy) = 0;
   virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) = 0;
   virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) = 0;
+
+  /**
+   * Basically the same as set(), but for adding a new key to the array.
+   */
+  virtual ArrayData *add(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *addLval(int64   k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
 
   /**
    * Remove a value at specified key. If "copy" is true, make a copy first

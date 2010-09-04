@@ -324,6 +324,73 @@ class Array : public SmartPtr<ArrayData> {
 
   // defined in type_variant.h
   template<typename T>
+  CVarRef addImpl(const T &key, CVarRef v);
+
+  CVarRef add(bool    key, CVarRef v) {
+    return addImpl(key ? 1LL : 0LL, v);
+  }
+  CVarRef add(char    key, CVarRef v) {
+    return addImpl((int64)key, v);
+  }
+  CVarRef add(short   key, CVarRef v) {
+    return addImpl((int64)key, v);
+  }
+  CVarRef add(int     key, CVarRef v) {
+    return addImpl((int64)key, v);
+  }
+  CVarRef add(int64   key, CVarRef v) {
+    return addImpl(key, v);
+  }
+  CVarRef add(double  key, CVarRef v) {
+    return addImpl((int64)key, v);
+  }
+
+  CVarRef add(litstr  key, CVarRef v, bool isString = false);
+  CVarRef add(CStrRef key, CVarRef v, bool isString = false);
+
+  CVarRef add(CVarRef key, CVarRef v);
+
+  // defined in type_variant.h
+  template<typename T>
+  Variant &addLvalImpl(const T &key) {
+    if (!m_px) {
+      SmartPtr<ArrayData>::operator=(ArrayData::Create());
+    }
+    Variant *ret = NULL;
+    ArrayData *escalated = m_px->addLval(key, ret, m_px->getCount() > 1);
+    if (escalated) {
+      SmartPtr<ArrayData>::operator=(escalated);
+    }
+    ASSERT(ret);
+    return *ret;
+  }
+
+  Variant &addLval(bool    key) {
+    return addLvalImpl(key ? 1LL : 0LL);
+  }
+  Variant &addLval(char    key) {
+    return addLvalImpl((int64)key);
+  }
+  Variant &addLval(short   key) {
+    return addLvalImpl((int64)key);
+  }
+  Variant &addLval(int     key) {
+    return addLvalImpl((int64)key);
+  }
+  Variant &addLval(int64   key) {
+    return addLvalImpl(key);
+  }
+  Variant &addLval(double  key) {
+    return addLvalImpl((int64)key);
+  }
+
+  Variant &addLval(litstr  key, bool isString = false);
+  Variant &addLval(CStrRef key, bool isString = false);
+
+  Variant &addLval(CVarRef key);
+
+  // defined in type_variant.h
+  template<typename T>
   Variant refvalAt(const T &key);
 
   Variant refvalAt(CStrRef key, bool isString = false);

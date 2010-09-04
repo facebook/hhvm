@@ -57,8 +57,8 @@ Variant &c_SplObjectStorage::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage
 void c_SplObjectStorage::o_getArray(Array &props) const {
-  if (isInitialized(m_storage)) props.set(NAMSTR(s_sys_ss3d348351, "\000SplObjectStorage\000storage"), m_storage.isReferenced() ? ref(m_storage) : m_storage, true);
-  props.set(NAMSTR(s_sys_ss352fe1c6, "\000SplObjectStorage\000index"), m_index, true);
+  if (isInitialized(m_storage)) props.add(NAMSTR(s_sys_ss3d348351, "\000SplObjectStorage\000storage"), m_storage.isReferenced() ? ref(m_storage) : m_storage, true);
+  props.add(NAMSTR(s_sys_ss352fe1c6, "\000SplObjectStorage\000index"), m_index, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_SplObjectStorage

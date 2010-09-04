@@ -91,6 +91,13 @@ public:
   virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
   virtual ArrayData *set(CVarRef k, CVarRef v, bool copy);
 
+  virtual ArrayData *add(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *add(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *add(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *addLval(int64   k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CStrRef k, Variant *&ret, bool copy);
+  virtual ArrayData *addLval(CVarRef k, Variant *&ret, bool copy);
+
   virtual ArrayData *remove(int64   k, bool copy);
   virtual ArrayData *remove(litstr  k, bool copy);
   virtual ArrayData *remove(CStrRef k, bool copy);
@@ -160,9 +167,6 @@ private:
 
   Bucket  m_arBuckets[SARR_TABLE_SIZE];
 
-  static int int_ihash(int64 h) { return h & (SARR_TABLE_SIZE - 1); }
-  static int str_ihash(int   h) { return h & (SARR_TABLE_SIZE - 1); }
-
   void connect_to_global_dllist(int p, Bucket &b) {
     ASSERT(p >= 0 && p < SARR_TABLE_SIZE);
     b.prev = m_nListTail;
@@ -181,6 +185,7 @@ private:
 
   inline int find(int64 h) const;
   inline int find(const char *k, int len, int64 prehash) const;
+  inline int findEmpty(int64 h) const;
 
   SmallArray *copyImpl() const {
     SmallArray *a = NEW(SmallArray)(*this);
@@ -193,8 +198,8 @@ private:
   inline Bucket *addKey(int p, StringData *key);
 
   // no-op if the key already exists
-  inline bool add(int64 h, CVarRef data);
-  inline bool add(StringData *key, CVarRef data);
+  inline bool addVal(int64 h, CVarRef data);
+  inline bool addVal(StringData *key, CVarRef data);
 
   inline void erase(Bucket *pb);
   inline void nextInsert(CVarRef v);

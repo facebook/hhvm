@@ -130,6 +130,49 @@ public:
     return *this;
   }
 
+  ArrayInit &add(int64 name, CVarRef v, bool keyConverted = false) {
+    m_data->add(name, v, false);
+    return *this;
+  }
+
+  ArrayInit &add(litstr name, CVarRef v, bool keyConverted = false) {
+    return add(String(name), v, keyConverted);
+  }
+
+  ArrayInit &add(CStrRef name, CVarRef v, bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->add(name, v, false);
+    } else if (!name.isNull()) {
+      m_data->add(name.toKey(), v, false);
+    }
+    return *this;
+  }
+
+  ArrayInit &add(CVarRef name, CVarRef v, bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->add(name, v, false);
+    } else {
+      Variant k(name.toKey());
+      if (!k.isNull()) {
+        m_data->add(k, v, false);
+      }
+    }
+    return *this;
+  }
+
+  template<typename T>
+  ArrayInit &add(const T &name, CVarRef v, bool keyConverted = false) {
+    if (keyConverted) {
+      m_data->add(name, v, false);
+    } else {
+      Variant k(Variant(name).toKey());
+      if (!k.isNull()) {
+        m_data->add(k, v, false);
+      }
+    }
+    return *this;
+  }
+
   ArrayInit &setRef(int64 name, CVarRef v, bool keyConverted = false) {
     v.setContagious();
     m_data->set(name, v, false);

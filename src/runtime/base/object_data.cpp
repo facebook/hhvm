@@ -320,8 +320,14 @@ Array ObjectData::o_toArray() const {
   Array ret(ArrayData::Create());
   o_getArray(ret);
   if (o_properties && !o_properties->empty()) {
-    ret += (*o_properties);
-    return ret;
+    ASSERT((*o_properties)->supportValueRef());
+    for (ArrayIter it(*o_properties); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (value.isReferenced()) value.setContagious();
+      if (key.isNumeric()) ret.add(key.toInt64(), value);
+      else ret.add(key.toString(), value, true);
+    }
   }
   return ret;
 }

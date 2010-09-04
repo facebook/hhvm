@@ -43,13 +43,9 @@ SmallArray::SmallArray(unsigned int nSize, unsigned long n,
   m_nNextFreeElement(n) {
   const Variant **v = values;
   for (StringData **k = keys; *k; k++, v++) {
+    ASSERT((*k)->isStatic());
     int64 h = (*k)->getPrecomputedHash();
-    int start = str_ihash(h);
-    Bucket *pb = m_arBuckets + start;
-    while (pb->kind != Empty) {
-      pb++;
-      if (pb == m_arBuckets + SARR_TABLE_SIZE) pb = m_arBuckets;
-    }
+    Bucket *pb = m_arBuckets + findEmpty(h);
     pb->h = h;
     pb->key = *k;
     pb->kind = StrKey;
@@ -67,12 +63,7 @@ SmallArray::SmallArray(unsigned int nSize, unsigned long n,
   int64 *k = keys;
   for (const Variant **v = values; *v; v++, k++) {
     int64 h = *k;
-    int start = int_ihash(h);
-    Bucket *pb = m_arBuckets + start;
-    while (pb->kind != Empty) {
-      pb++;
-      if (pb == m_arBuckets + SARR_TABLE_SIZE) pb = m_arBuckets;
-    }
+    Bucket *pb = m_arBuckets + findEmpty(h);
     pb->h = h;
     pb->kind = IntKey;
     pb->data = **v;
@@ -288,7 +279,7 @@ CVarRef SmallArray::endRef() {
 
 // The find() function can always find a slot, as the load is never 100%.
 int SmallArray::find(int64 h) const {
-  int start = int_ihash(h);
+  int start = h & (SARR_TABLE_SIZE - 1);
   if (m_nNumOfElements == 0) return start;
   int ret = ArrayData::invalid_index;
   for (int i = start; i < SARR_TABLE_SIZE; i++) {
@@ -306,7 +297,7 @@ int SmallArray::find(int64 h) const {
 
 // The find() function can always find a slot, as the load is never 100%.
 int SmallArray::find(const char *k, int len, int64 prehash) const {
-  int start = str_ihash(prehash);
+  int start = prehash & (SARR_TABLE_SIZE - 1);
   if (m_nNumOfElements == 0) return start;
   int ret = ArrayData::invalid_index;
   for (int i = start; i < SARR_TABLE_SIZE; i++) {
@@ -330,6 +321,18 @@ int SmallArray::find(const char *k, int len, int64 prehash) const {
     if (ret < 0 && b.kind == Empty) ret = i;
   }
   return ret;
+}
+
+int SmallArray::findEmpty(int64 h) const {
+  int start = h & (SARR_TABLE_SIZE - 1);
+  for (int i = start; i < SARR_TABLE_SIZE; i++) {
+    if (m_arBuckets[i].kind == Empty) return i;
+  }
+  for (int i = 0; i < start; i++) {
+    if (m_arBuckets[i].kind == Empty) return i;
+  }
+  ASSERT(false);
+  return -1;
 }
 
 bool SmallArray::exists(int64 k) const {
@@ -480,10 +483,10 @@ ArrayData *SmallArray::escalateToZendArray() const {
     ASSERT(b.kind != Empty);
     if (b.data.isReferenced()) b.data.setContagious();
     if (b.kind == IntKey) {
-      ret->set(b.h, b.data, false);
+      ret->add(b.h, b.data, false);
     } else {
       ASSERT(b.key);
-      ret->set(String(b.key), b.data, false);
+      ret->add(String(b.key), b.data, false);
     }
   }
   // Set m_pos in the escalated array
@@ -792,6 +795,100 @@ ArrayData *SmallArray::set(CVarRef k, CVarRef v, bool copy) {
   return set(k.toString(), v, copy);
 }
 
+ArrayData *SmallArray::add(int64 k, CVarRef v, bool copy) {
+  ASSERT(!exists(k));
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->add(k, v, false);
+    return a;
+  }
+  if (copy) {
+    SmallArray *result = copyImpl();
+    Bucket *pb = result->addKey(findEmpty(k), k);
+    pb->data = v;
+    return result;
+  }
+  Bucket *pb = addKey(findEmpty(k), k);
+  pb->data = v;
+  return NULL;
+}
+
+ArrayData *SmallArray::add(CStrRef k, CVarRef v, bool copy) {
+  ASSERT(!exists(k));
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->add(k, v, false);
+    return a;
+  }
+  if (copy) {
+    SmallArray *result = copyImpl();
+    Bucket *pb = result->addKey(findEmpty(k->hash()), k.get());
+    pb->data = v;
+    return result;
+  }
+  Bucket *pb = addKey(findEmpty(k->hash()), k.get());
+  pb->data = v;
+  return NULL;
+}
+
+ArrayData *SmallArray::add(CVarRef k, CVarRef v, bool copy) {
+  ASSERT(!exists(k));
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->add(k, v, false);
+    return a;
+  }
+  if (k.isNumeric()) return add(k.toInt64(), v, copy);
+  return add(k.toString(), v, copy);
+}
+
+ArrayData *SmallArray::addLval(int64 k, Variant *&ret, bool copy) {
+  ASSERT(!exists(k));
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->addLval(k, ret, false);
+    return a;
+  }
+  if (copy) {
+    SmallArray *result = copyImpl();
+    Bucket *pb = result->addKey(findEmpty(k), k);
+    ret = &pb->data;
+    return result;
+  }
+  Bucket *pb = addKey(findEmpty(k), k);
+  ret = &pb->data;
+  return NULL;
+}
+
+ArrayData *SmallArray::addLval(CStrRef k, Variant *&ret, bool copy) {
+  ASSERT(!exists(k));
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->addLval(k, ret, false);
+    return a;
+  }
+  if (copy) {
+    SmallArray *result = copyImpl();
+    Bucket *pb = result->addKey(findEmpty(k->hash()), k.get());
+    ret = &pb->data;
+    return result;
+  }
+  Bucket *pb = addKey(findEmpty(k->hash()), k.get());
+  ret = &pb->data;
+  return NULL;
+}
+
+ArrayData *SmallArray::addLval(CVarRef k, Variant *&ret, bool copy) {
+  ASSERT(!exists(k));
+  if (m_nNumOfElements >= SARR_SIZE) {
+    ArrayData *a = escalateToZendArray();
+    a->addLval(k, ret, false);
+    return a;
+  }
+  if (k.isNumeric()) return addLval(k.toInt64(), ret, copy);
+  return addLval(k.toString(), ret, copy);
+}
+
 ArrayData *SmallArray::copy() const {
   return copyImpl();
 }
@@ -819,7 +916,7 @@ ArrayData *SmallArray::append(CVarRef v, bool copy) {
   return NULL;
 }
 
-bool SmallArray::add(int64 h, CVarRef data) {
+bool SmallArray::addVal(int64 h, CVarRef data) {
   int p = find(h);
   Bucket &b = m_arBuckets[p];
   if (b.kind != Empty) return false;
@@ -828,7 +925,7 @@ bool SmallArray::add(int64 h, CVarRef data) {
   return true;
 }
 
-bool SmallArray::add(StringData *key, CVarRef data) {
+bool SmallArray::addVal(StringData *key, CVarRef data) {
   int p = find(key->data(), key->size(), key->hash());
   Bucket &b = m_arBuckets[p];
   if (b.kind != Empty) return false;
@@ -858,10 +955,10 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
         CVarRef value = it.secondRef();
         if (value.isReferenced()) value.setContagious();
         if (key.isNumeric()) {
-          add(key.toInt64(), value);
+          addVal(key.toInt64(), value);
         } else {
           String strkey = key.toString();
-          add(strkey.get(), value);
+          addVal(strkey.get(), value);
         }
       }
     } else {
@@ -883,10 +980,10 @@ ArrayData *SmallArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
       for (ArrayIter it(elems); !it.end(); it.next()) {
         Variant key = it.first();
         if (key.isNumeric()) {
-          add(key.toInt64(), it.second());
+          addVal(key.toInt64(), it.second());
         } else {
           String strkey = key.toString();
-          add(strkey.get(), it.second());
+          addVal(strkey.get(), it.second());
         }
       }
     } else {

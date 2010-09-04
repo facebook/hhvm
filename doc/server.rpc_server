@@ -61,3 +61,28 @@ To summarize,
 1: just stdout as a string without JSON encoding
 2: both function's return and stdout in a JSON encoded array
 -1: none
+
+4. File invocation
+
+RPC server now supports direct invocation of a PHP file, under the same
+assumption that the request is stateless.
+
+There are two cases. First, the purpose of the RPC call is still to invoke a
+function, but the definition of the function is in a file that is not in the
+normal initialization path, defined by the WarmupDocument or the
+RequestInitDocument. In order to invoke the function reliably, you can add
+"file=..." to the request:
+
+  http://[server]:[port]/function_name?file=file_name.php&...
+
+The second case is that you can directly invoke a file, without calling a
+function:
+
+  http://[server]:[port]/?file=file_name.php&...
+
+or just
+
+  http://[server]:[port]/file_name.php?...
+
+In this case, you would probably want to use "output=1" for the file
+invocation, as a file does not return a value.

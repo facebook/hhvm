@@ -61,7 +61,8 @@ private:
   bool executePHPFunction(Transport *transport,
                           SourceRootInfo &sourceRootInfo);
 
-  String getSourceFilename(const char *path, SourceRootInfo &sourceRootInfo);
+  std::string getSourceFilename(const std::string &path,
+                                SourceRootInfo &sourceRootInfo);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

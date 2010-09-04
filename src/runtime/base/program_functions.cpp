@@ -830,9 +830,9 @@ ExecutionContext *hphp_context_init() {
 }
 
 static bool hphp_warmup(ExecutionContext *context,
-                        const std::string &warmupDoc,
-                        const std::string &reqInitFunc,
-                        const std::string &reqInitDoc, bool &error) {
+                        const string &warmupDoc,
+                        const string &reqInitFunc,
+                        const string &reqInitDoc, bool &error) {
   bool ret = true;
   error = false;
   std::string errorMsg;
@@ -905,9 +905,9 @@ bool hphp_invoke_simple(const std::string &filename) {
 
 bool hphp_invoke(ExecutionContext *context, const std::string &cmd,
                  bool func, CArrRef funcParams, Variant funcRet,
-                 const std::string &warmupDoc, const std::string &reqInitFunc,
-                 const std::string &reqInitDoc,
-                 bool &error, std::string &errorMsg) {
+                 const string &warmupDoc, const string &reqInitFunc,
+                 const string &reqInitDoc,
+                 bool &error, string &errorMsg) {
   bool isServer = (strcmp(RuntimeOption::ExecutionMode, "srv") == 0);
   error = false;
 

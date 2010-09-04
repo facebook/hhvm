@@ -105,17 +105,19 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   // reset timeout counter
   ThreadInfo::s_threadInfo->m_reqInjectionData.started = time(0);
 
-  std::string rpcFunc = transport->getCommand();
+  string rpcFunc = transport->getCommand();
   {
     ServerStatsHelper ssh("input");
     RequestURI reqURI(rpcFunc);
     HttpProtocol::PrepareSystemVariables(transport, reqURI, sourceRootInfo);
   }
 
+  bool isFile = rpcFunc.rfind('.') != string::npos;
+  string rpcFile;
   bool error = false;
 
   Array params;
-  std::string sparams = transport->getParam("params");
+  string sparams = transport->getParam("params");
   if (!sparams.empty()) {
     Variant jparams = f_json_decode(String(sparams), true);
     if (jparams.isArray()) {
@@ -162,15 +164,48 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
     }
     if (!warmupDoc.empty()) warmupDoc = canonicalize_path(warmupDoc, "", 0);
     if (!warmupDoc.empty()) {
-      warmupDoc = getSourceFilename(warmupDoc.c_str(), sourceRootInfo);
+      warmupDoc = getSourceFilename(warmupDoc, sourceRootInfo);
     }
+
     if (!reqInitDoc.empty()) reqInitDoc = canonicalize_path(reqInitDoc, "", 0);
     if (!reqInitDoc.empty()) {
-      reqInitDoc = getSourceFilename(reqInitDoc.c_str(), sourceRootInfo);
+        reqInitDoc = getSourceFilename(reqInitDoc, sourceRootInfo);
     }
-    bool ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
-                           warmupDoc, reqInitFunc, reqInitDoc,
-                           error, errorMsg);
+
+    bool ret = true;
+    if (isFile) {
+      rpcFile = rpcFunc;
+      rpcFunc.clear();
+    } else {
+      rpcFile = transport->getParam("file");
+    }
+    if (!rpcFile.empty()) {
+      // invoking a file through rpc
+      bool forbidden = false;
+      if (!RuntimeOption::ForbiddenFileExtensions.empty()) {
+        const char *ext = rpcFile.c_str() + rpcFile.rfind('.') + 1;
+        if (RuntimeOption::ForbiddenFileExtensions.find(ext) !=
+            RuntimeOption::ForbiddenFileExtensions.end()) {
+          forbidden = true;
+        }
+      }
+      if (!forbidden) {
+        rpcFile = canonicalize_path(rpcFile, "", 0);
+        rpcFile = getSourceFilename(rpcFile, sourceRootInfo);
+        ret = hphp_invoke(m_context, rpcFile, false, Array(), null,
+                          warmupDoc, reqInitFunc, reqInitDoc,
+                          error, errorMsg);
+      }
+      // no need to do the initialization for a second time
+      warmupDoc.clear();
+      reqInitFunc.clear();
+      reqInitDoc.clear();
+    }
+    if (ret && !rpcFunc.empty()) {
+      ret = hphp_invoke(m_context, rpcFunc, true, params, ref(funcRet),
+                        warmupDoc, reqInitFunc, reqInitDoc,
+                        error, errorMsg);
+    }
     if (ret) {
       String response;
       switch (output) {
@@ -200,16 +235,16 @@ bool RPCRequestHandler::executePHPFunction(Transport *transport,
   sourceRootInfo.clear();
 
   transport->onSendEnd();
-  ServerStats::LogPage(rpcFunc, code);
+  ServerStats::LogPage(isFile ? rpcFile : rpcFunc, code);
 
   m_context->onShutdownPostSend();
   m_context->restoreSession();
   return !error;
 }
 
-String RPCRequestHandler::getSourceFilename(const char *path,
+string RPCRequestHandler::getSourceFilename(const string &path,
                                             SourceRootInfo &sourceRootInfo) {
-  if (path[0] == '/') return path;
+  if (path.empty() || path[0] == '/') return path;
   // If it is not a sandbox, sourceRoot will be the same as
   // RuntimeOption::SourceRoot.
   string sourceRoot = sourceRootInfo.path();

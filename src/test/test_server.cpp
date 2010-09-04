@@ -566,6 +566,13 @@ bool TestServer::TestRPCServer() {
          "call_user_func?auth=test&p=\"A::f\"&p=100",
          8083);
 
+  // invoking a file, with NO json encoding
+  VSGETP("<?php\n"
+         "var_dump(100);\n",
+         "int(100)\n",
+         "?file=string&output=1&auth=test",
+         8083);
+
   return true;
 }
 

@@ -324,20 +324,20 @@ String f_serialize(CVarRef value) {
   return vs.serialize(value, true);
 }
 
-Variant f_unserialize(CStrRef str) {
+Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
   if (str.empty()) {
     return false;
   }
 
   istringstream in(std::string(str.data(), str.size()));
-  VariableUnserializer vu(in);
+  VariableUnserializer vu(in, type);
   Variant v;
   try {
     v = vu.unserialize();
   } catch (Exception &e) {
     raise_notice("Unable to unserialize: [%s]. [%s] %s.", (const char *)str,
-                    e.getStackTrace().hexEncode().c_str(),
-                    e.getMessage().c_str());
+                 e.getStackTrace().hexEncode().c_str(),
+                 e.getMessage().c_str());
     return false;
   }
   return v;

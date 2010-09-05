@@ -26,6 +26,7 @@
 #include <runtime/base/intercept.h>
 #include <runtime/base/runtime_error.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/variable_unserializer.h>
 #include <util/case_insensitive.h>
 #ifdef TAINTED
 #include <runtime/base/propagate_tainting.h>
@@ -673,8 +674,10 @@ Object f_clone(Object obj);
  * these two functions.
  */
 String f_serialize(CVarRef value);
-Variant f_unserialize(CStrRef str);
-
+Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type);
+inline Variant f_unserialize(CStrRef str) {
+  return unserialize_ex(str, VariableUnserializer::Serialize);
+}
 
 class LVariableTable;
 Variant include(CStrRef file, bool once = false,

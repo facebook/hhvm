@@ -24,7 +24,19 @@ namespace HPHP {
 
 class VariableUnserializer {
 public:
-  VariableUnserializer(std::istream &in) : m_in(in), m_key(false) {}
+  /**
+   * Supported formats.
+   */
+  enum Type {
+    Serialize,
+    APCSerialize,
+  };
+
+public:
+  VariableUnserializer(std::istream &in, Type type)
+      : m_type(type), m_in(in), m_key(false) {}
+
+  Type getType() const { return m_type;}
 
   Variant unserialize() {
     Variant v;
@@ -54,6 +66,7 @@ public:
   }
 
  private:
+  Type m_type;
   std::istream &m_in;
   std::vector<Variant*> m_refs;
   bool m_key;

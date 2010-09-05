@@ -809,7 +809,7 @@ public:
       p += namelen + 1;
       if (has_value) {
         istringstream in(std::string(p, endptr - p));
-        VariableUnserializer vu(in);
+        VariableUnserializer vu(in, VariableUnserializer::Serialize);
         try {
           g->gv__SESSION.set(key, vu.unserialize());
           if (in.tellg() > 0 && in.tellg() < endptr - p) {
@@ -872,7 +872,7 @@ public:
       q++;
       if (has_value) {
         istringstream in(std::string(q, endptr - q));
-        VariableUnserializer vu(in);
+        VariableUnserializer vu(in, VariableUnserializer::Serialize);
         try {
           g->gv__SESSION.set(key, vu.unserialize());
           if (in.tellg() > 0 && in.tellg() < endptr - q) {

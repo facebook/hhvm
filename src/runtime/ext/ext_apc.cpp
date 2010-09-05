@@ -953,7 +953,7 @@ String apc_serialize(CVarRef value) {
 }
 
 Variant apc_unserialize(CStrRef str) {
-  return f_unserialize(str);
+  return unserialize_ex(str, VariableUnserializer::APCSerialize);
 }
 
 void reserialize(istream &in, StringBuffer &buf) {

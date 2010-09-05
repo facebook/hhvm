@@ -326,6 +326,10 @@ bool TestExtVariable::test_serialize() {
 
 bool TestExtVariable::test_unserialize() {
   {
+    // this was crashing
+    f_unserialize(StringUtil::HexDecode("53203a20224c612072756f74612067697261207065722074757474692220204d203a20227365636f6e646f206d6520736920c3a820696e6361737472617461206461207175616c6368652070617274652122"));
+  }
+  {
     Variant v = f_unserialize("O:8:\"stdClass\":1:{s:4:\"name\";s:5:\"value\";}");
     VERIFY(v.is(KindOfObject));
     Object obj = v.toObject();

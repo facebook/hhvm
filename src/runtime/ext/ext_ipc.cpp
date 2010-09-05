@@ -225,7 +225,7 @@ bool f_msg_receive(CObjRef queue, int64 desiredmsgtype, Variant msgtype,
   msgtype = (int)MSGBUF_MTYPE(buffer);
   if (unserialize) {
     istringstream in((const char *)MSGBUF_MTEXT(buffer));
-    VariableUnserializer vu(in);
+    VariableUnserializer vu(in, VariableUnserializer::Serialize);
     try {
       message = vu.unserialize();
     } catch (Exception &e) {

@@ -2986,13 +2986,15 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
     }
     break;
   case 'S':
-    {
+    if (unserializer->getType() == VariableUnserializer::APCSerialize) {
       union {
         char buf[8];
         StringData *sd;
       } u;
       in.read(u.buf, 8);
       operator=(u.sd);
+    } else {
+      throw Exception("Unknown type '%c'", type);
     }
     break;
   case 'a':
@@ -3004,13 +3006,15 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
     }
     break;
   case 'A':
-    {
+    if (unserializer->getType() == VariableUnserializer::APCSerialize) {
       union {
         char buf[8];
         ArrayData *ad;
       } u;
       in.read(u.buf, 8);
       operator=(u.ad);
+    } else {
+      throw Exception("Unknown type '%c'", type);
     }
     break;
   case 'o':

@@ -39,7 +39,7 @@ public:
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   ExpressionPtr getObject() { return m_obj; }
   NamePtr getProperty() const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_obj;
   NamePtr m_name;

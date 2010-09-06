@@ -608,7 +608,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   }
   if (!m_extraCode.empty()) {
     string filename = Option::LambdaPrefix + "lambda";
-    Parser::ParseString(m_extraCode.c_str(), ar, filename.c_str());
+    Compiler::Parser::ParseString(m_extraCode.c_str(), ar, filename.c_str());
   }
   for (; i < m_fileScopes.size(); i++) {
     m_fileScopes[i]->analyzeProgram(ar);

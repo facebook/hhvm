@@ -30,7 +30,7 @@ class ExprStatement : public Statement {
 public:
   ExprStatement(STATEMENT_ARGS, ExpressionPtr exp);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_exp;
 };

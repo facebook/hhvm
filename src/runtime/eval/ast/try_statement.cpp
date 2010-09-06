@@ -43,10 +43,10 @@ bool CatchBlock::proc(CObjRef exn, VariableEnvironment &env) const {
   return false;
 }
 
-void CatchBlock::dump() const {
-  printf("catch (%s %s) {", m_ename.c_str(), m_vname.c_str());
-  if (m_body) m_body->dump();
-  printf("}");
+void CatchBlock::dump(std::ostream &out) const {
+  out << " catch (" << m_ename << " $" << m_vname << ") {\n";
+  if (m_body) m_body->dump(out);
+  out << "}";
 }
 
 TryStatement::TryStatement(STATEMENT_ARGS, StatementPtr body,
@@ -72,11 +72,12 @@ void TryStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void TryStatement::dump() const {
-  printf("try {");
-  m_body->dump();
-  printf("}");
-  dumpVector(m_catches, " ");
+void TryStatement::dump(std::ostream &out) const {
+  out << "try {\n";
+  m_body->dump(out);
+  out << "}";
+  dumpVector(out, m_catches, "");
+  out << "\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

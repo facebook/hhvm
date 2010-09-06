@@ -25,7 +25,7 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/fiber_reference_map.h>
 #include <runtime/base/zend/zend_string.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 using namespace std;
 

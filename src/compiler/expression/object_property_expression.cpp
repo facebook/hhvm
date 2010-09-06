@@ -25,7 +25,7 @@
 #include <compiler/option.h>
 #include <compiler/expression/simple_variable.h>
 #include <util/hash.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
 using namespace std;

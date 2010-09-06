@@ -44,11 +44,9 @@ Variant IncludeExpression::eval(VariableEnvironment &env) const {
   }
 }
 
-void IncludeExpression::dump() const {
-  printf("%s%s(", m_include ? "include" : "require",
-         m_once ? "_once" : "");
-  m_file->dump();
-  printf(")");
+void IncludeExpression::dump(std::ostream &out) const {
+  out << (m_include ? "include" : "require") << (m_once ? "_once" : "") << " ";
+  m_file->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

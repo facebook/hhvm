@@ -15,7 +15,7 @@
 */
 
 #include <runtime/eval/parser/parser.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 #include <runtime/eval/ast/array_element_expression.h>
 #include <runtime/eval/ast/array_expression.h>
@@ -63,7 +63,6 @@
 #include <runtime/eval/ast/try_statement.h>
 #include <runtime/eval/ast/unset_statement.h>
 #include <runtime/eval/ast/while_statement.h>
-
 #include <runtime/eval/ast/name.h>
 
 #include <util/preprocess.h>
@@ -85,68 +84,123 @@ using namespace boost;
   cls##StatementPtr(new cls##Statement(this, e))
 
 ///////////////////////////////////////////////////////////////////////////////
+
+void Token::reset() {
+  m_exp.reset();
+  m_stmt.reset();
+  m_name.reset();
+  m_mode = None;
+  if (m_data) {
+    m_data->dec();
+    m_data = NULL;
+  }
+  ScannerToken::reset();
+}
+
+StatementListStatementPtr Token::getStmtList() const {
+  return getStmt<StatementListStatement>();
+}
+
+ExpressionPtr &Token::exp() {
+  if (m_mode == None) {
+    m_mode = SingleExpression;
+  }
+  ASSERT(m_mode == SingleExpression);
+  return m_exp;
+}
+
+StatementPtr &Token::stmt() {
+  if (m_mode == None) {
+    m_mode = SingleStatement;
+  }
+  ASSERT(m_mode == SingleStatement);
+  return m_stmt;
+}
+
+NamePtr &Token::name() {
+  if (m_mode == None) {
+    m_mode = SingleName;
+  }
+  ASSERT(m_mode == SingleName);
+  return m_name;
+}
+
+#define GETTER(name, type, data)                        \
+  std::vector<type> &Token::data() {                    \
+    if (m_mode == None) {                               \
+      ASSERT(m_data == NULL);                           \
+      m_mode = name;                                    \
+      m_data = new CountableVector<type>();             \
+    }                                                   \
+    ASSERT(m_mode == name);                             \
+    return ((CountableVector<type>*)m_data)->m_vec;     \
+  }
+
+GETTER(IfBranch,       IfBranchPtr,       ifBranches )
+GETTER(Expression,     ExpressionPtr,     exprs      )
+GETTER(CaseStatement,  CaseStatementPtr,  cases      )
+GETTER(ListElement,    ListElementPtr,    listElems  )
+GETTER(ArrayPair,      ArrayPairPtr,      arrayPairs )
+GETTER(CatchBlock,     CatchBlockPtr,     catches    )
+GETTER(Parameter,      ParameterPtr,      params     )
+GETTER(Name,           NamePtr,           names      )
+GETTER(StaticVariable, StaticVariablePtr, staticVars )
+GETTER(Strings,        String,            strings    )
+
+void Token::operator=(Token &other) {
+  ASSERT(&other != this);
+
+  ScannerToken::operator=(other);
+  m_exp  = other.m_exp;
+  m_stmt = other.m_stmt;
+  m_name = other.m_name;
+  if (m_data) {
+    m_data->dec();
+  }
+  m_mode = other.m_mode;
+  m_data = other.m_data;
+  if (m_data) {
+    m_data->inc();
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // statics
 
-Mutex Parser::s_lock;
-
-StatementPtr Parser::parseString(const char *input,
+StatementPtr Parser::ParseString(const char *input,
                                  vector<StaticStatementPtr> &statics) {
-  Lock lock(s_lock);
   ASSERT(input);
-  istringstream iss(input);
-  stringstream ss;
-  istream *is = RuntimeOption::EnableXHP ? preprocessXHP(iss, ss, "") : &iss;
-  Scanner scanner(new ylmm::basic_buffer(*is, false, true), true, false);
+  int len = strlen(input);
+  Scanner scanner(input, len, RuntimeOption::ScannerType);
   Parser parser(scanner, "eval()'d code", statics);
   if (parser.parse()) {
-    scanner.flushFlex();
-    raise_error("Error parsing %s: %s", input,
-                parser.getMessage().c_str());
-    return StatementPtr();
+    return parser.getTree();
   }
-  StatementPtr s = parser.getTree();
-  return s;
+  raise_error("Error parsing %s: %s", input, parser.getMessage().c_str());
+  return StatementPtr();
 }
 
-StatementPtr Parser::parseFile(const char *input,
+StatementPtr Parser::ParseFile(const char *fileName,
                                vector<StaticStatementPtr> &statics) {
-  Lock lock(s_lock);
-  ASSERT(input);
-  ifstream iss(input);
-  StatementPtr s;
-  if (!iss.good()) return s;
-
-  stringstream ss;
-  istream *is = RuntimeOption::EnableXHP ? preprocessXHP(iss, ss, input) : &iss;
-  Scanner scanner(new ylmm::basic_buffer(*is, false, true),
-                  true, false);
-  Parser parser(scanner, input, statics);
-  if (parser.parse()) {
-    scanner.flushFlex();
-    raise_error("Error parsing %s: %s", input,
-                parser.getMessage().c_str());
-    return StatementPtr();
+  ASSERT(fileName);
+  try {
+    Scanner scanner(fileName, RuntimeOption::ScannerType);
+    Parser parser(scanner, fileName, statics);
+    if (parser.parse()) {
+      return parser.getTree();
+    }
+    raise_error("Error parsing %s: %s", fileName, parser.getMessage().c_str());
+  } catch (FileOpenException &e) {
+    // ignore
   }
-  s = parser.getTree();
-  return s;
-}
-
-///////////////////////////////////////////////////////////////////////////////
-String Location::toString() const {
-  StringBuffer buf;
-  buf.printf("%s:%d:%d", this->file, this->line1, this->char1);
-  return buf.detach();
+  return StatementPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Parser::Parser(Scanner &s, const char *fileName,
+Parser::Parser(Scanner &scanner, const char *fileName,
                vector<StaticStatementPtr> &statics)
-  : m_scanner(s), m_staticStatements(statics) {
-  m_messenger.error_stream(m_err);
-  m_messenger.message_stream(m_msg);
-  messenger(m_messenger);
-  m_fileName = fileName;
+    : ParserBase(scanner, fileName), m_staticStatements(statics) {
 }
 
 ClassStatementPtr Parser::currentClass() const {
@@ -160,27 +214,6 @@ StatementPtr Parser::getTree() const {
   return m_tree;
 }
 
-std::string Parser::getMessage() {
-  string ret;
-  ret += m_scanner.getError();
-  int line = m_scanner.getLine();
-  int column = m_scanner.getColumn();
-
-  ret += " (";
-  ret += string("Line: ") + lexical_cast<string>(line);
-  ret += ", Char: " + lexical_cast<string>(column) + "): ";
-  ret += m_err.str();
-  return ret;
-}
-
-void Parser::getLocation(Location &location) {
-  location.file = file();
-  location.line0 = line0();
-  location.char0 = char0();
-  location.line1 = line1();
-  location.char1 = char1();
-}
-
 void Parser::pushClass(ClassStatementPtr cl) { m_classes.push(cl); }
 bool Parser::haveClass() const { return !m_classes.empty(); }
 ClassStatementPtr Parser::peekClass() const { return m_classes.top(); }
@@ -191,37 +224,13 @@ bool Parser::haveFunc() const { return !m_funcs.empty(); }
 FunctionStatementPtr Parser::peekFunc() const { return m_funcs.top(); }
 void Parser::popFunc() { m_funcs.pop(); }
 
-const char *Parser::file() {
-  return m_fileName;
-}
-
-int Parser::line0() {
-  return _rule_location.first_line();
-}
-
-int Parser::char0() {
-  return _rule_location.first_column();
-}
-
-int Parser::line1() {
-  return _rule_location.last_line();
-}
-
-int Parser::char1() {
-  return _rule_location.last_column();
-}
-
-int Parser::scan(void *arg /* = NULL */) {
-  return m_scanner.getNextToken(token(), where());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // names
 
 void Parser::onName(Token &out, Token &name, Parser::NameKind kind) {
   out.reset();
-  if (kind == StringName) {
-    out->name() = Name::fromString(this, name.getText());
+  if (kind == StringName || kind == VarName) {
+    out->name() = Name::fromString(this, name.text());
   } else if (kind == ExprName) {
     out->name() = Name::fromExp(this, name->exp());
   } else if (kind == StaticClassExprName) {
@@ -236,30 +245,29 @@ void Parser::onName(Token &out, Token &name, Parser::NameKind kind) {
 
 void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
                               Token *value) {
-  out.reset();
   if (exprs) {
     out = *exprs;
+  } else {
+    out.reset();
   }
   ExpressionPtr exp;
   if (value) {
     exp = (*value)->exp();
   }
   out->staticVars().
-    push_back(StaticVariablePtr(new StaticVariable(this, var.getText(),
-                                                   exp)));
+    push_back(StaticVariablePtr(new StaticVariable(this, var.text(), exp)));
 }
 
 void Parser::onSimpleVariable(Token &out, Token &var) {
   out.reset();
-  if (var.getText() == "this" && haveClass()) {
+  if (var.text() == "this" && haveClass()) {
     out->exp() = NEW_EXP0(This);
   } else {
     int idx = -1;
     if (haveFunc()) {
-      idx = peekFunc()->declareVariable(var.getText());
+      idx = peekFunc()->declareVariable(var.text());
     }
-    out->exp() = NEW_EXP(Variable,
-                         Name::fromString(this, var.getText()), idx);
+    out->exp() = NEW_EXP(Variable, Name::fromString(this, var.text()), idx);
   }
 }
 
@@ -271,7 +279,7 @@ void Parser::onDynamicVariable(Token &out, Token &expr, bool encap) {
 void Parser::onIndirectRef(Token &out, Token &refCount, Token &var) {
   out.reset();
   out->exp() = var->exp();
-  for (int i = 0; i < refCount.num; i++) {
+  for (int i = 0; i < refCount.num(); i++) {
     out->exp() = createDynamicVariable(out->exp());
   }
 }
@@ -298,7 +306,7 @@ void Parser::onRefDim(Token &out, Token &var, Token &offset) {
   out.reset();
   if (!var->exp()) {
     ASSERT(false);
-    //var->exp() = NEW_EXP(ConstantExpression, var.getText());
+    //var->exp() = NEW_EXP(ConstantExpression, var.text());
   }
   LvalExpressionPtr lv = var->getExp<LvalExpression>();
   ASSERT(lv);
@@ -323,9 +331,10 @@ ExpressionPtr Parser::createDynamicVariable(ExpressionPtr exp) {
 }
 
 void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
-  out.reset();
   if (params) {
     out = *params;
+  } else {
+    out.reset();
   }
   ExpressionPtr param = expr->exp();
   if (ref) {
@@ -341,8 +350,8 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
   if (dynamic) {
     n = Name::fromExp(this, name->exp());
   } else {
-    n = Name::fromString(this, name.getText());
-    string s = name.getText();
+    const string &s = name.text();
+    n = Name::fromString(this, s);
     if((s == "func_num_args") ||
        (s == "func_get_args") ||
        (s == "func_get_arg")) {
@@ -371,7 +380,7 @@ void Parser::popObject(Token &out) {
 }
 
 void Parser::appendMethodParams(Token &params) {
-  if (params.num == 1) {
+  if (params.num() == 1) {
     ObjectPropertyExpressionPtr prop = (m_objects.back())->
       cast<ObjectPropertyExpression>();
     if (prop) {
@@ -389,7 +398,7 @@ void Parser::appendMethodParams(Token &params) {
 
 void Parser::appendProperty(Token &prop) {
   // Gross
-  if (prop->getMode() == TokenPayload::SingleName) {
+  if (prop->getMode() == Token::SingleName) {
     m_objects.back() = NEW_EXP(ObjectProperty, m_objects.back(), prop->name());
   } else {
     m_objects.back() = NEW_EXP(ObjectProperty, m_objects.back(),
@@ -412,14 +421,12 @@ void Parser::onEncapsList(Token &out, int type, Token &list) {
 }
 
 void Parser::addEncap(Token &out, Token &list, Token &expr, int type) {
-  out.reset();
   out = list;
   ExpressionPtr exp;
   if (type == -1) {
     exp = expr->exp();
   } else {
-    ScalarExpressionPtr scalar =
-      NEW_EXP(Scalar, T_STRING, expr.getText());
+    ScalarExpressionPtr scalar = NEW_EXP(Scalar, T_STRING, expr.text());
     exp = scalar;
   }
   out->exprs().push_back(exp);
@@ -428,41 +435,41 @@ void Parser::addEncap(Token &out, Token &list, Token &expr, int type) {
 void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
   out.reset();
   ExpressionPtr dim;
-  switch (offset.num) {
+  switch (offset.num()) {
   case T_STRING:
-    dim = NEW_EXP(Scalar, T_STRING, offset.getText());
+    dim = NEW_EXP(Scalar, T_STRING, offset.text());
     break;
   case T_NUM_STRING:
-    dim = NEW_EXP(Scalar, T_NUM_STRING, offset.getText());
+    dim = NEW_EXP(Scalar, T_NUM_STRING, offset.text());
     break;
   case T_VARIABLE:
-    dim = NEW_EXP(Variable, Name::fromString(this, offset.getText()));
+    dim = NEW_EXP(Variable, Name::fromString(this, offset.text()));
     break;
   default:
     ASSERT(false);
   }
 
-  LvalExpressionPtr arr = NEW_EXP(Variable,
-                                  Name::fromString(this, var.getText()));
+  LvalExpressionPtr arr =
+    NEW_EXP(Variable, Name::fromString(this, var.text()));
   out->exp() = NEW_EXP(ArrayElement, arr, dim);
 }
 
 void Parser::encapObjProp(Token &out, Token &var, Token &name) {
   out.reset();
   ExpressionPtr obj;
-  if (var.getText() == "this") {
+  if (var.text() == "this") {
     obj = NEW_EXP0(This);
   } else {
-    obj = NEW_EXP(Variable, Name::fromString(this, var.getText()));
+    obj = NEW_EXP(Variable, Name::fromString(this, var.text()));
   }
-  out->exp() = NEW_EXP(ObjectProperty, obj, Name::fromString(this,
-                                                             name.getText()));
+  out->exp() = NEW_EXP(ObjectProperty, obj,
+                       Name::fromString(this, name.text()));
 }
 
 void Parser::encapArray(Token &out, Token &var, Token &expr) {
   out.reset();
-  LvalExpressionPtr arr = NEW_EXP(Variable, Name::fromString(this,
-                                                             var.getText()));
+  LvalExpressionPtr arr =
+    NEW_EXP(Variable, Name::fromString(this, var.text()));
   out->exp() = NEW_EXP(ArrayElement, arr, expr->exp());
 }
 
@@ -471,7 +478,7 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
 
 void Parser::onConstant(Token &out, Token &constant) {
   out.reset();
-  string lower = Util::toLower(constant.getText());
+  string lower = Util::toLower(constant.text());
   if (lower == "true") {
     out->exp() = NEW_EXP(Scalar, true);
   } else if (lower == "false") {
@@ -479,20 +486,23 @@ void Parser::onConstant(Token &out, Token &constant) {
   } else if (lower == "null") {
     out->exp() = NEW_EXP0(Scalar);
   } else {
-    out->exp() = NEW_EXP(Constant, constant.getText());
+    out->exp() = NEW_EXP(Constant, constant.text());
   }
 }
 
 void Parser::onScalar(Token &out, int type, Token &scalar) {
   out.reset();
   ScalarExpressionPtr exp;
-  string stext = scalar.getText();
+  string stext = scalar.text();
+  int subtype = 0;
   switch (type) {
   case T_CLASS_C:
+    subtype = type;
     type = T_STRING;
     stext = haveClass() ? peekClass()->name() : "";
     break;
   case T_METHOD_C:
+    subtype = type;
     type = T_STRING;
     if (haveClass() && haveFunc()) {
       stext = peekClass()->name() + "::" + peekFunc()->name();
@@ -500,6 +510,7 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
     }
     // Fall through
   case T_FUNC_C:
+    if (type == T_FUNC_C) subtype = T_FUNC_C;
     type = T_STRING;
     stext = haveFunc() ? peekFunc()->name() : "";
   }
@@ -507,18 +518,18 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   case T_STRING:
   case T_LNUMBER:
   case T_DNUMBER:
-    exp = NEW_EXP(Scalar, type, stext);
+    exp = NEW_EXP(Scalar, type, stext, subtype);
     break;
   case T_CONSTANT_ENCAPSED_STRING:
     exp = NEW_EXP(Scalar, T_STRING, stext);
     break;
   case T_LINE: {
     exp = NEW_EXP(Scalar, T_LNUMBER,
-                  lexical_cast<string>(line1()));
+                  lexical_cast<string>(line1()), T_LINE);
     break;
   }
   case T_FILE: {
-    exp = NEW_EXP(Scalar, T_STRING, file());
+    exp = NEW_EXP(Scalar, T_STRING, file(), T_FILE);
     break;
   }
   default:
@@ -528,23 +539,25 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
 }
 
 void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
-  out.reset();
   if (exprs) {
     out = *exprs;
+  } else {
+    out.reset();
   }
   out->exprs().push_back(expr->exp());
 }
 
-void Parser::onListAssignment(Token &out, Token &vars, Token &expr) {
+void Parser::onListAssignment(Token &out, Token &vars, Token *expr) {
   out.reset();
   ListElementPtr le(new SubListElement(this, vars->listElems()));
-  out->exp() = NEW_EXP(ListAssignment, le, expr->exp());
+  out->exp() = NEW_EXP(ListAssignment, le, (*expr)->exp());
 }
 
 void Parser::onAListVar(Token &out, Token *list, Token *var) {
-  out.reset();
   if (list) {
     out = *list;
+  } else {
+    out.reset();
   }
   LvalExpressionPtr lv;
   if (var) {
@@ -554,21 +567,27 @@ void Parser::onAListVar(Token &out, Token *list, Token *var) {
   out->listElems().push_back(le);
 }
 void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
-  out.reset();
   if (list) {
     out = *list;
+  } else {
+    out.reset();
   }
   ListElementPtr le(new SubListElement(this, sublist->listElems()));
   out->listElems().push_back(le);
 }
 
+class InvalidLvalException : public FatalErrorException {
+public:
+  InvalidLvalException()
+      : FatalErrorException("Can't use function return/method value "
+                            "in write context") {}
+};
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref) {
   out.reset();
   LvalExpressionPtr lv = var->getExp<LvalExpression>();
   if (!lv) {
-    throw FatalErrorException("Can't use function return/method value in write "
-                              "context");
+    throw InvalidLvalException();
   }
   if (ref) {
     out->exp() = NEW_EXP(AssignmentRef, lv, expr->exp());
@@ -581,8 +600,7 @@ void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
   out.reset();
   LvalExpressionPtr lv = var->getExp<LvalExpression>();
   if (!lv) {
-    throw FatalErrorException("Can't use function/method return value in write "
-                              "context");
+    throw InvalidLvalException();
   }
   ExpressionPtr exp;
   exp = NEW_EXP(NewObject, name->name(), args->exprs());
@@ -616,8 +634,7 @@ void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
     {
       LvalExpressionPtr lv = operand->getExp<LvalExpression>();
       if (!lv) {
-        throw FatalErrorException("Can't use function/method return value in write "
-                                  "context");
+        throw InvalidLvalException();
       }
       out->exp() =  NEW_EXP(IncOp,operand->exp(), op == T_INC, front);
       break;
@@ -655,8 +672,7 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
     {
       LvalExpressionPtr lv = operand1->getExp<LvalExpression>();
       if (!lv) {
-        throw FatalErrorException("Can't use function/method return value in write "
-                                  "context");
+        throw InvalidLvalException();
       }
       out->exp() = NEW_EXP(AssignmentOp, op, lv, operand2->exp());
       break;
@@ -683,9 +699,10 @@ void Parser::onArray(Token &out, Token &pairs) {
 
 void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                          bool ref) {
-  out.reset();
   if (pairs) {
     out = *pairs;
+  } else {
+    out.reset();
   }
   ArrayPairPtr ap;
   if (ref) {
@@ -713,15 +730,15 @@ void Parser::onClassConst(Token &out, Token &className, Token &name,
     bool text) {
   out.reset();
   NamePtr cn = procStaticClassName(className, text);
-  out->exp() = NEW_EXP(ClassConstant, cn, name.getText());
+  out->exp() = NEW_EXP(ClassConstant, cn, name.text());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // function/method declaration
 
 void Parser::onFunctionStart(Token &name) {
-  FunctionStatementPtr func = NEW_STMT(Function, name.getText(),
-                                       m_scanner.getDocComment());
+  FunctionStatementPtr func = NEW_STMT(Function, name.text(),
+                                       m_scanner.detachDocComment());
   m_hasCallToGetArgs = false;
   pushFunc(func);
 }
@@ -732,31 +749,32 @@ void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
   FunctionStatementPtr func = peekFunc();
   ASSERT(func);
   StatementListStatementPtr body = stmt->getStmtList();
-  func->init(ref.num, params->params(), body, m_hasCallToGetArgs);
+  func->init(this, ref.num(), params->params(), body, m_hasCallToGetArgs);
   out->stmt() = func;
   popFunc();
 }
 
 void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
                      bool ref, Token *defValue) {
-  out.reset();
   if (params) {
     out = *params;
+  } else {
+    out.reset();
   }
   int idx = -1;
   if (haveFunc()) {
     FunctionStatementPtr func = peekFunc();
-    idx = func->declareVariable(var.getText());
+    idx = func->declareVariable(var.text());
   }
-  ParameterPtr p(new Parameter(this, type.getText(), var.getText(),
+  ParameterPtr p(new Parameter(this, type.text(), var.text(),
                                idx, ref, defValue ? (*defValue)->exp()
                                : ExpressionPtr(), out->params().size() + 1));
   out->params().push_back(p);
 }
 
 void Parser::onClassStart(int type, Token &name, Token *parent) {
-  ClassStatementPtr cs = NEW_STMT(Class, name.getText(),
-      parent ? parent->getText() : "", m_scanner.getDocComment());
+  ClassStatementPtr cs = NEW_STMT(Class, name.text(),
+      parent ? parent->text() : "", m_scanner.detachDocComment());
   pushClass(cs);
   int mod = 0;
   if (type == T_ABSTRACT) mod = ClassStatement::Abstract;
@@ -765,63 +783,67 @@ void Parser::onClassStart(int type, Token &name, Token *parent) {
   cs->setModifiers(mod);
 }
 
-void Parser::onClass(Token &out, Token &bases) {
+void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
+                     Token &baseInterface, Token &stmt) {
   out.reset();
   ClassStatementPtr cs = peekClass();
   popClass();
-  std::vector<String> &interfaceNames = bases->strings();
+  std::vector<String> &interfaceNames = baseInterface->strings();
   cs->addBases(interfaceNames);
   cs->finish();
   out->stmt() = cs;
 }
 
-void Parser::onInterface(Token &out, Token &bases) {
+void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
   out.reset();
   ClassStatementPtr cs = peekClass();
   popClass();
-  std::vector<String> &interfaceNames = bases->strings();
+  std::vector<String> &interfaceNames = base->strings();
   cs->addBases(interfaceNames);
   out->stmt() = cs;
 }
 
 void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
-  out.reset();
   if (names) {
     out = *names;
+  } else {
+    out.reset();
   }
-  out->strings().push_back(name.getText());
+  out->strings().push_back(name.text());
 }
 
-void Parser::onClassVariableStart(Token &mods) {
-  m_classVarMods = mods.num;
+void Parser::onClassVariableModifer(Token &mod) {
+  m_classVarMods = mod.num();
 }
 
-void Parser::onClassVariable(Token &name, Token *val) {
+void Parser::onClassVariable(Token &out, Token *exprs, Token &name,
+                             Token *val) {
   ClassStatementPtr cs = peekClass();
   ExpressionPtr v;
   if (val) {
     v = (*val)->exp();
   }
   cs->addVariable(ClassVariablePtr(
-    new ClassVariable(this, name.getText(), m_classVarMods, v,
-                      m_scanner.getDocComment(), cs.get())));
+    new ClassVariable(this, name.text(), m_classVarMods, v,
+                      m_scanner.detachDocComment(), cs.get())));
 }
 
-void Parser::onClassConstant(Token &name, Token &val) {
+void Parser::onClassConstant(Token &out, Token *exprs, Token &name,
+                             Token &val) {
   ClassStatementPtr cs = peekClass();
-  cs->addConstant(name.getText(), val->exp());
+  cs->addConstant(name.text(), val->exp());
 }
 
 void Parser::onMethodStart(Token &name, Token &modifiers) {
   ClassStatementPtr cs = peekClass();
-  FunctionStatementPtr func = NEW_STMT(Method, name.getText(), cs.get(),
-                                       modifiers.num,
-                                       m_scanner.getDocComment());
+  FunctionStatementPtr func = NEW_STMT(Method, name.text(), cs.get(),
+                                       modifiers.num(),
+                                       m_scanner.detachDocComment());
   m_hasCallToGetArgs = false;
   pushFunc(func);
 }
 
-void Parser::onMethod(Token &modifiers, Token &ref, Token &name,
+void Parser::onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
                       Token &params, Token &stmt) {
   ClassStatementPtr cs = peekClass();
   MethodStatementPtr ms = peekFunc()->cast<MethodStatement>();
@@ -830,18 +852,18 @@ void Parser::onMethod(Token &modifiers, Token &ref, Token &name,
   StatementListStatementPtr stmts = stmt->getStmtList();
   ms->resetLoc(this);
   if (stmts) stmts->resetLoc(this);
-  ms->init(ref.num, params->params(), stmts, m_hasCallToGetArgs);
+  ms->init(this, ref.num(), params->params(), stmts, m_hasCallToGetArgs);
   cs->addMethod(ms);
 }
 
 void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
   out.reset();
   if (modifiers) {
-    out.num = modifiers->num;
+    out.setNum(modifiers->num());
   }
 
   int mod = 0;
-  switch (modifier.num) {
+  switch (modifier.num()) {
   case T_PUBLIC:    mod = ClassStatement::Public;    break;
   case T_PROTECTED: mod = ClassStatement::Protected; break;
   case T_PRIVATE:   mod = ClassStatement::Private;   break;
@@ -850,31 +872,31 @@ void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
   case T_FINAL:     mod = ClassStatement::Final;     break;
   }
 
-  if ((out.num & ClassStatement::AccessMask) &&
+  if ((out.num() & ClassStatement::AccessMask) &&
       (mod & ClassStatement::AccessMask)) {
     raise_error("Multiple access type modifiers are not allowed "
                 "in %s on line %d", file(), line1());
   }
-  if ((out.num & ClassStatement::Static) && (mod & ClassStatement::Static)) {
+  if ((out.num() & ClassStatement::Static) && (mod & ClassStatement::Static)) {
     raise_error("Multiple static modifiers are not allowed "
                 "in %s on line %d", file(), line1());
   }
-  if ((out.num & ClassStatement::Abstract) &&
+  if ((out.num() & ClassStatement::Abstract) &&
       (mod & ClassStatement::Abstract)) {
     raise_error("Multiple abstract modifiers are not allowed "
                 "in %s on line %d", file(), line1());
   }
-  if ((out.num & ClassStatement::Final) && (mod & ClassStatement::Final)) {
+  if ((out.num() & ClassStatement::Final) && (mod & ClassStatement::Final)) {
     raise_error("Multiple final modifiers are not allowed "
                 "in %s on line %d", file(), line1());
   }
-  if (((out.num|mod) & (ClassStatement::Abstract|ClassStatement::Final)) ==
+  if (((out.num()|mod) & (ClassStatement::Abstract|ClassStatement::Final)) ==
       (ClassStatement::Abstract|ClassStatement::Final)) {
     raise_error("Cannot use the final modifier on an abstract class member "
                 "in %s on line %d", file(), line1());
   }
 
-  out.num |= mod;
+  out.setNum(out.num() | mod);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -959,7 +981,6 @@ void Parser::onIf(Token &out, Token &cond, Token &stmt, Token &elseifs,
 }
 
 void Parser::onElseIf(Token &out, Token &elseifs, Token &cond, Token &stmt) {
-  out.reset();
   out = elseifs;
   out->ifBranches().push_back(IfBranchPtr(new IfBranch(this,
                                                        cond->exp(),
@@ -990,7 +1011,6 @@ void Parser::onSwitch(Token &out, Token &expr, Token &cases) {
 }
 
 void Parser::onCase(Token &out, Token &cases, Token *cond, Token &stmt) {
-  out.reset();
   out = cases;
   out->cases().push_back(NEW_STMT(Case, cond ?
                                      (*cond)->exp() : ExpressionPtr(),
@@ -1021,14 +1041,15 @@ void Parser::onGlobal(Token &out, Token &expr) {
 }
 
 void Parser::onGlobalVar(Token &out, Token *exprs, Token &expr) {
-  out.reset();
   if (exprs) {
     out = *exprs;
+  } else {
+    out.reset();
   }
   std::vector<NamePtr> &names = out->names();
-  switch (expr.num) {
+  switch (expr.num()) {
   case 0:
-    names.push_back(Name::fromString(this, expr.getText()));
+    names.push_back(Name::fromString(this, expr.text()));
     break;
   case 1:
     names.push_back(Name::fromExp(this, expr->exp()));
@@ -1053,11 +1074,11 @@ void Parser::onStatic(Token &out, Token &expr) {
 void Parser::onEcho(Token &out, Token &expr, bool html) {
   out.reset();
   if (html) {
-    if (line1() == 2 && char1() == 0 && expr.getText().data()[0] == '#') {
+    if (line1() == 2 && char1() == 0 && expr.text().data()[0] == '#') {
       // skipping linux interpreter declaration
       out->stmt() = NEW_STMT0(StatementList);
     } else {
-      ExpressionPtr exp = NEW_EXP(Scalar, T_STRING, expr.getText());
+      ExpressionPtr exp = NEW_EXP(Scalar, T_STRING, expr.text());
       std::vector<ExpressionPtr> expList;
       expList.push_back(exp);
       out->stmt() = NEW_STMT(Echo, expList);
@@ -1081,7 +1102,7 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                        Token &stmt) {
   out.reset();
   if (value->exp()) {
-    if (value.num == 0) {
+    if (value.num() == 0) {
       out->stmt() = NEW_STMT(ForEach, arr->exp(),
                              name->getExp<LvalExpression>(),
                              value->getExp<LvalExpression>(), stmt->stmt());
@@ -1091,7 +1112,7 @@ void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
                              value->getExp<LvalExpression>(), stmt->stmt());
     }
   } else {
-    if (name.num == 0) {
+    if (name.num() == 0) {
       out->stmt() = NEW_STMT(ForEach, arr->exp(), LvalExpressionPtr(),
                            name->getExp<LvalExpression>(), stmt->stmt());
     } else {
@@ -1106,18 +1127,17 @@ void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
   out.reset();
   std::vector<CatchBlockPtr> &cs = catches->catches();
   cs.insert(cs.begin(),
-            CatchBlockPtr(new CatchBlock(this, className.getText(),
-                                         var.getText(), catchStmt->stmt())));
+            CatchBlockPtr(new CatchBlock(this, className.text(),
+                                         var.text(), catchStmt->stmt())));
   out->stmt() = NEW_STMT(Try, tryStmt->stmt(), cs);
 }
 
 void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
                      Token &stmt) {
-  out.reset();
   out = catches;
   out->catches().push_back(CatchBlockPtr(new CatchBlock(this,
-                                                        className.getText(),
-                                                        var.getText(),
+                                                        className.text(),
+                                                        var.text(),
                                                         stmt->stmt())));
 }
 
@@ -1145,12 +1165,12 @@ void Parser::addHphpNote(ConstructPtr c, const std::string &note) {
 
 void Parser::onHphpNoteExpr(Token &out, Token &note, Token &expr) {
   out.reset();
-  //addHphpNote(expr->exp(), note.getText());
+  //addHphpNote(expr->exp(), note.text());
   out->exp() = expr->exp();
 }
 void Parser::onHphpNoteStatement(Token &out, Token &note, Token &stmt) {
   out.reset();
-  //addHphpNote(stmt->stmt(), note.getText());
+  //addHphpNote(stmt->stmt(), note.text());
   out->stmt() = stmt->stmt();
 }
 
@@ -1165,12 +1185,12 @@ void Parser::addHphpSuppressError(Token &error) {
 NamePtr Parser::procStaticClassName(Token &className, bool text) {
   NamePtr cname;
   if (text) {
-    if (className.getText() == "self") {
+    if (className.text() == "self") {
       cname = Name::fromString(this, peekClass()->name(), true);
-    } else if (className.getText() == "parent") {
+    } else if (className.text() == "parent") {
       cname = Name::fromString(this, peekClass()->parent(), true);
     } else {
-      cname = Name::fromString(this, className.getText());
+      cname = Name::fromString(this, className.text());
     }
 
   } else {

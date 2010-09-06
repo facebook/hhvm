@@ -18,7 +18,6 @@
 #include "db_conn.h"
 #include "db_dataset.h"
 #include "util.h"
-#include "logger.h"
 
 using namespace std;
 
@@ -30,7 +29,7 @@ DBQuery::DBQuery(DBConn *conn, const char *sql, ...)
   ASSERT(sql && *sql);
   va_list ap;
   va_start(ap, sql);
-  Logger::VSNPrintf(m_base, sql, ap);
+  Util::string_vsnprintf(m_base, sql, ap);
   va_end(ap);
 }
 

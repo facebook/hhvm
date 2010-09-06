@@ -27,7 +27,7 @@
 #include <compiler/analysis/variable_table.h>
 #include <compiler/analysis/constant_table.h>
 #include <compiler/analysis/dependency_graph.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <runtime/base/class_info.h>
 #include <util/logger.h>
 #include <util/util.h>
@@ -404,15 +404,15 @@ bool BuiltinSymbols::Load(AnalysisResultPtr ar, bool extOnly /* = false */) {
       const char *baseName = s_strings.add(phpBaseName.c_str());
       const char *fileName = s_strings.add(phpFileName.c_str());
       try {
-        Scanner scanner(new ylmm::basic_buffer(fileName), true, false);
-        ParserPtr parser(new Parser(scanner, baseName, 0, ar));
-        if (parser->parse()) {
+        Scanner scanner(fileName, Option::ScannerType);
+        Compiler::Parser parser(scanner, baseName, ar);
+        if (!parser.parse()) {
           Logger::Error("Unable to parse file %s: %s", fileName,
-                        parser->getMessage().c_str());
+                        parser.getMessage().c_str());
           ASSERT(false);
         }
-      } catch (std::runtime_error) {
-        Logger::Error("Unable to open file %s", fileName);
+      } catch (FileOpenException &e) {
+        Logger::Error("%s", e.getMessage().c_str());
       }
     }
     ar->analyzeProgram(true);
@@ -480,15 +480,15 @@ AnalysisResultPtr BuiltinSymbols::LoadGlobalSymbols(const char *fileName) {
   fileName = s_strings.add(phpFileName.c_str());
 
   try {
-    Scanner scanner(new ylmm::basic_buffer(fileName), true, false);
-    ParserPtr parser(new Parser(scanner, baseName, 0, ar));
-    if (parser->parse()) {
+    Scanner scanner(fileName, Option::ScannerType);
+    Compiler::Parser parser(scanner, baseName, ar);
+    if (!parser.parse()) {
       ASSERT(false);
       Logger::Error("Unable to parse file %s: %s", fileName,
-                    parser->getMessage().c_str());
+                    parser.getMessage().c_str());
     }
-  } catch (std::runtime_error) {
-    Logger::Error("Unable to open file %s", fileName);
+  } catch (FileOpenException &e) {
+    Logger::Error("%s", e.getMessage().c_str());
   }
   ar->analyzeProgram(true);
   ar->inferTypes();

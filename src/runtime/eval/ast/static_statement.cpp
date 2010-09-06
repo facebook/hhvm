@@ -33,11 +33,14 @@ void StaticVariable::set(VariableEnvironment &env) const {
   env.flagStatic(m_name->get(env), m_name->hash());
 }
 
-void StaticVariable::dump() const {
-  m_name->dump();
+void StaticVariable::dump(std::ostream &out) const {
+  out << "$";
+  m_name->dump(out);
+  out << " = ";
   if (m_val) {
-    printf(" = ");
-    m_val->dump();
+    m_val->dump(out);
+  } else {
+    out << "null";
   }
 }
 
@@ -58,10 +61,10 @@ void StaticStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void StaticStatement::dump() const {
-  printf("static ");
-  dumpVector(m_vars, ", ");
-  printf(";");
+void StaticStatement::dump(std::ostream &out) const {
+  out << "static ";
+  dumpVector(out, m_vars);
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

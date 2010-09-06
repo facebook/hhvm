@@ -22,7 +22,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-static Mutex *locks;
+static Mutex *s_locks;
 
 static unsigned long callback_thread_id() {
   return (unsigned long)Process::GetThreadId();
@@ -30,27 +30,35 @@ static unsigned long callback_thread_id() {
 
 static void callback_locking(int mode, int type, const char *file, int line) {
   if (mode & CRYPTO_LOCK) {
-    locks[type].lock();
+    s_locks[type].lock();
   } else {
-    locks[type].unlock();
+    s_locks[type].unlock();
   }
 }
 
-static volatile bool isSSLInit = false;
-static Mutex lockSSLInit;
+static volatile bool s_isSSLInit = false;
+static Mutex s_lockSSLInit;
 
-void SSLInit::init() {
-  if (!isSSLInit) {
-    lockSSLInit.lock();
-    if (!isSSLInit) {
-      isSSLInit = true;
-      locks = new Mutex[CRYPTO_num_locks()];
+class SSLUnitializer {
+public:
+  ~SSLUnitializer() {
+    delete [] s_locks;
+  }
+};
+static SSLUnitializer s_ssl_uninitializer;
+
+void SSLInit::Init() {
+  if (!s_isSSLInit) {
+    s_lockSSLInit.lock();
+    if (!s_isSSLInit) {
+      s_isSSLInit = true;
+      s_locks = new Mutex[CRYPTO_num_locks()];
       CRYPTO_set_id_callback((unsigned long (*)())callback_thread_id);
       CRYPTO_set_locking_callback(
         (void (*)(int mode, int type, const char *file, int line))
         callback_locking);
     }
-    lockSSLInit.unlock();
+    s_lockSSLInit.unlock();
   }
 }
 

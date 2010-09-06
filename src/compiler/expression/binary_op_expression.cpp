@@ -18,7 +18,7 @@
 #include <compiler/expression/array_element_expression.h>
 #include <compiler/expression/object_property_expression.h>
 #include <compiler/expression/unary_op_expression.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/constant_expression.h>
 #include <runtime/base/complex_types.h>

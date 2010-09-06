@@ -362,26 +362,21 @@ bool Package::parseImpl(const char *fileName) {
   }
 
   try {
-    ifstream f(fullPath.c_str());
-    stringstream ss;
-    istream *is = Option::EnableXHP ? preprocessXHP(f, ss, fullPath) : &f;
-
-    Scanner scanner(new ylmm::basic_buffer(*is, false, true),
-                    m_bShortTags, m_bAspTags);
     Logger::Verbose("parsing %s ...", fullPath.c_str());
-    ParserPtr parser(new Parser(scanner, fileName, sb.st_size, m_ar));
-    if (parser->parse()) {
+    Scanner scanner(fullPath.c_str(), Option::ScannerType);
+    Compiler::Parser parser(scanner, fileName, m_ar, sb.st_size);
+    if (!parser.parse()) {
       throw Exception("Unable to parse file: %s\n%s", fullPath.c_str(),
-                      parser->getMessage().c_str());
+                      parser.getMessage().c_str());
     }
 
-    m_lineCount += parser->line1();
+    m_lineCount += parser.line1();
     struct stat fst;
     stat(fullPath.c_str(), &fst);
     m_charCount += fst.st_size;
 
-  } catch (std::runtime_error) {
-    Logger::Error("Unable to open file %s", fullPath.c_str());
+  } catch (FileOpenException &e) {
+    Logger::Error("%s", e.getMessage().c_str());
     return false;
   }
 

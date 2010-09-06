@@ -14,37 +14,40 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_PARSER_DEFINES_H__
-#define __EVAL_PARSER_DEFINES_H__
+#ifndef __HPHP_UTIL_PARSER_LOCATION_H__
+#define __HPHP_UTIL_PARSER_LOCATION_H__
 
-/* gross but necessary for ylmm */
-#define yyparse         eval_parse
-#define yylex           eval_lex
-#define yyerror         eval_error
-#define yylval          eval_lval
-#define yychar          eval_char
-#define yydebug         eval_debug
-#define yynerrs         eval_nerrs
+#include <util/base.h>
 
-#define yy_create_buffer eval__create_buffer
-#define yy_delete_buffer eval__delete_buffer
-#define yy_flex_debug eval__flex_debug
-#define yy_init_buffer eval__init_buffer
-#define yy_flush_buffer eval__flush_buffer
-#define yy_load_buffer_state eval__load_buffer_state
-#define yy_switch_to_buffer eval__switch_to_buffer
-#define yyin eval_in
-#define yyleng eval_leng
-#define yylineno eval_lineno
-#define yyout eval_out
-#define yyrestart eval_restart
-#define yytext eval_text
-#define yywrap eval_wrap
-#define yyalloc eval_alloc
-#define yyrealloc eval_realloc
-#define yyfree eval_free
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
 
-void _eval_scanner_reset();
+DECLARE_BOOST_TYPES(Location);
+class Location {
+public:
+  Location() : file(""), line0(0), char0(0), line1(0), char1(0) {}
 
-#endif /* __EVAL_PARSER_DEFINES_H__ */
+  const char *file;
+  int line0;
+  int char0;
+  int line1;
+  int char1;
 
+  void first(int line, char pos) {
+    line0 = line; char0 = pos;
+  }
+  void first(Location &loc) {
+    line0 = loc.line0; char0 = loc.char0;
+  }
+  void last(int line, char pos) {
+    line1 = line; char1 = pos;
+  }
+  void last(Location &loc) {
+    line1 = loc.line1; char1 = loc.char1;
+  }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+}
+
+#endif // __HPHP_UTIL_PARSER_LOCATION_H__

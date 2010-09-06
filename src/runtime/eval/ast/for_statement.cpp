@@ -41,17 +41,16 @@ void ForStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void ForStatement::dump() const {
-  printf("for (");
-  dumpVector(m_init, ", ");
-  printf("; ");
-  dumpVector(m_cond, ", ");
-  printf("; ");
-  dumpVector(m_next, ", ");
-  printf(") {");
-  if (m_body) m_body->dump();
-  printf("}");
-
+void ForStatement::dump(std::ostream &out) const {
+  out << "for (";
+  dumpVector(out, m_init);
+  out << "; ";
+  dumpVector(out, m_cond);
+  out << "; ";
+  dumpVector(out, m_next);
+  out << ") {";
+  if (m_body) m_body->dump(out);
+  out << "}\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

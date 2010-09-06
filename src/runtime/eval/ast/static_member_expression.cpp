@@ -42,10 +42,10 @@ Variant &StaticMemberExpression::lval(VariableEnvironment &env) const {
   return Variant::lvalInvalid();
 }
 
-void StaticMemberExpression::dump() const {
-  m_class->dump();
-  printf("::");
-  m_variable->dump();
+void StaticMemberExpression::dump(std::ostream &out) const {
+  m_class->dump(out);
+  out << "::$";
+  m_variable->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

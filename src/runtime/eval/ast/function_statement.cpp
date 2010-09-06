@@ -27,6 +27,7 @@
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/ast/function_call_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
+#include <runtime/eval/ast/scalar_expression.h>
 #include <runtime/eval/strict_mode.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/intercept.h>
@@ -99,18 +100,19 @@ void Parameter::bindDefault(VariableEnvironment &env) const {
   }
 }
 
-void Parameter::dump() const {
+void Parameter::dump(std::ostream &out) const {
   if (!m_type.empty()) {
-    printf("%s ", m_type.c_str());
+    out << m_type << " ";
   }
   if (m_ref) {
-    printf("&");
+    out << "&";
   }
-  m_name->dump();
+  out << "$";
+  m_name->dump(out);
 
   if (m_defVal) {
-    printf(" = ");
-    m_defVal->dump();
+    out << " = ";
+    m_defVal->dump(out);
   }
 }
 
@@ -149,8 +151,9 @@ bool Parameter::isOptional() const {
   return m_defVal;
 }
 
-void Parameter::dropDefault() {
-  m_defVal.reset();
+void Parameter::addNullDefault(void *parser) {
+  ASSERT(!m_defVal);
+  m_defVal = ScalarExpressionPtr(new ScalarExpression((Parser *)parser));
 }
 
 FunctionStatement::FunctionStatement(STATEMENT_ARGS, const string &name,
@@ -164,7 +167,8 @@ FunctionStatement::~FunctionStatement() {
   unregister_intercept_flag(&m_maybeIntercepted);
 }
 
-void FunctionStatement::init(bool ref, const vector<ParameterPtr> params,
+void FunctionStatement::init(void *parser, bool ref,
+                             const vector<ParameterPtr> params,
                              StatementListStatementPtr body,
                              bool has_call_to_get_args) {
   m_ref = ref;
@@ -172,14 +176,14 @@ void FunctionStatement::init(bool ref, const vector<ParameterPtr> params,
   m_body = body;
   m_hasCallToGetArgs = has_call_to_get_args;
 
-  bool seenNonOptional = false;
-  for (int i = m_params.size() - 1; i >= 0; --i) {
-    if (!seenNonOptional) {
-      if (!m_params[i]->isOptional()) {
-        seenNonOptional = true;
+  bool seenOptional = false;
+  for (unsigned int i = 0; i < m_params.size(); i++) {
+    if (!seenOptional) {
+      if (m_params[i]->isOptional()) {
+        seenOptional = true;
       }
-    } else if (m_params[i]->isOptional()) {
-      m_params[i]->dropDefault();
+    } else if (!m_params[i]->isOptional()) {
+      m_params[i]->addNullDefault(parser);
     }
     if (m_params[i]->isRef()) m_callInfo.m_refFlags |= 1 << i;
   }
@@ -343,12 +347,18 @@ Variant FunctionStatement::invokeImpl(VariableEnvironment &env,
   }
 }
 
-void FunctionStatement::dump() const {
-  printf("function %s%s(", m_ref ? "&" : "", m_name.c_str());
-  dumpVector(m_params, ", ");
-  printf(") {");
-  if (m_body) m_body->dump();
-  printf("}");
+void FunctionStatement::dump(std::ostream &out) const {
+  out << "function " << (m_ref ? "&" : "") << m_name << "(";
+  dumpVector(out, m_params);
+  out << ")";
+  if (m_body) {
+    out << " {\n";
+    m_body->dump(out);
+    out << "}";
+  } else {
+    out << ";";
+  }
+  out << "\n";
 }
 
 void FunctionStatement::getInfo(ClassInfo::MethodInfo &info) const {

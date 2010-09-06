@@ -31,12 +31,10 @@ Variant InstanceOfExpression::eval(VariableEnvironment &env) const {
   return instanceOf(obj, name);
 }
 
-void InstanceOfExpression::dump() const {
-  printf("instanceof(");
-  m_obj->dump();
-  printf(", ");
-  m_name->dump();
-  printf(")");
+void InstanceOfExpression::dump(std::ostream &out) const {
+  m_obj->dump(out);
+  out << " instanceof ";
+  m_name->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

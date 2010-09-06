@@ -36,7 +36,7 @@ class LvalListElement : public ListElement {
 public:
   LvalListElement(CONSTRUCT_ARGS, LvalExpressionPtr lval);
   virtual void set(VariableEnvironment &env, CVarRef val) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   LvalExpressionPtr m_lval;
 };
@@ -45,7 +45,7 @@ class SubListElement : public ListElement {
 public:
   SubListElement(CONSTRUCT_ARGS, const std::vector<ListElementPtr> &elems);
   virtual void set(VariableEnvironment &env, CVarRef val) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<ListElementPtr> m_elems;
 };
@@ -55,7 +55,7 @@ public:
   ListAssignmentExpression(EXPRESSION_ARGS, ListElementPtr lhs,
                            ExpressionPtr rhs);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ListElementPtr m_lhs;
   ExpressionPtr m_rhs;

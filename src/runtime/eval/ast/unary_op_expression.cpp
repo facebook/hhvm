@@ -15,7 +15,7 @@
 */
 
 #include <runtime/eval/ast/unary_op_expression.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <runtime/ext/ext_misc.h>
 #include <runtime/eval/eval.h>
 #include <runtime/eval/runtime/variable_environment.h>
@@ -71,45 +71,51 @@ Variant UnaryOpExpression::refval(VariableEnvironment &env,
   }
 }
 
-void UnaryOpExpression::dump() const {
+void UnaryOpExpression::dump(std::ostream &out) const {
   if (m_op == '(') {
-    printf("(");
-    m_exp->dump();
-    printf(")");
+    out << "(";
+    m_exp->dump(out);
+    out << ")";
     return;
   }
   if (m_front) {
-    dumpOp();
+    dumpOp(out);
   }
-  m_exp->dump();
+  if (m_exp) {
+    m_exp->dump(out);
+  }
+  switch (m_op) {
+    case T_EXIT:
+    case T_EMPTY:
+    case T_EVAL:
+      out << ")";
+  }
   if (!m_front) {
-    dumpOp();
+    dumpOp(out);
   }
 }
 
-void UnaryOpExpression::dumpOp() const {
-  const char* op = "<bad unop>";
+void UnaryOpExpression::dumpOp(std::ostream &out) const {
   switch (m_op) {
-  case '@': op = "@"; break;
-  case T_ISSET: op = "isset "; break;
-  case T_CLONE: op = "clone "; break;
-  case '+': op = "+"; break;
-  case '-': op = "-"; break;
-  case '!': op = "!"; break;
-  case '~': op = "~"; break;
-  case T_INT_CAST: op = "(int)"; break;
-  case T_DOUBLE_CAST: op = "(double)"; break;
-  case T_STRING_CAST: op = "(string)"; break;
-  case T_ARRAY_CAST: op = "(array)"; break;
-  case T_OBJECT_CAST: op = "(object)"; break;
-  case T_BOOL_CAST: op = "(bool)"; break;
-  case T_UNSET_CAST: op = "(unset)"; break;
-  case T_EXIT: op = "exit "; break;
-  case T_PRINT: op = "print "; break;
-  case T_EMPTY: op = "empty "; break;
-  case T_EVAL: op = "eval "; break;
+  case '@':           out << "@";        break;
+  case T_ISSET:       out << "isset ";   break;
+  case T_CLONE:       out << "clone ";   break;
+  case '+':           out << "+";        break;
+  case '-':           out << "-";        break;
+  case '!':           out << "!";        break;
+  case '~':           out << "~";        break;
+  case T_INT_CAST:    out << "(int)";    break;
+  case T_DOUBLE_CAST: out << "(double)"; break;
+  case T_STRING_CAST: out << "(string)"; break;
+  case T_ARRAY_CAST:  out << "(array)";  break;
+  case T_OBJECT_CAST: out << "(object)"; break;
+  case T_BOOL_CAST:   out << "(bool)";   break;
+  case T_UNSET_CAST:  out << "(unset)";  break;
+  case T_EXIT:        out << "exit(";    break;
+  case T_PRINT:       out << "print ";   break;
+  case T_EMPTY:       out << "empty(";   break;
+  case T_EVAL:        out << "eval(";    break;
   }
-  printf("%s", op);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

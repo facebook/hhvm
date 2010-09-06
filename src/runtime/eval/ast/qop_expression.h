@@ -30,7 +30,7 @@ public:
   QOpExpression(EXPRESSION_ARGS, ExpressionPtr cond, ExpressionPtr t,
                 ExpressionPtr f);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_cond;
   ExpressionPtr m_true;

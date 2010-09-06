@@ -31,7 +31,7 @@ public:
   NewObjectExpression(EXPRESSION_ARGS, NamePtr name,
                       const std::vector<ExpressionPtr> &params);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   NamePtr m_name;
 };

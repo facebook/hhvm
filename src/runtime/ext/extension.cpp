@@ -27,6 +27,17 @@ typedef std::map<std::string, Extension*, stdltistr> ExtensionMap;
 static ExtensionMap *s_registered_extensions = NULL;
 static bool s_modules_initialised = false;
 
+// just to make valgrind cleaner
+class ExtensionUninitializer {
+public:
+  ~ExtensionUninitializer() {
+    delete s_registered_extensions;
+  }
+};
+static ExtensionUninitializer s_extension_uninitializer;
+
+///////////////////////////////////////////////////////////////////////////////
+
 Extension::Extension(litstr name, const char *version /* = "" */)
     : m_name(name), m_version(version ? version : "") {
   if (s_registered_extensions == NULL) {

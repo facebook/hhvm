@@ -43,7 +43,7 @@ public:
   ArrayPairVal(CONSTRUCT_ARGS, ExpressionPtr key, ExpressionPtr val);
   ArrayPairVal(CONSTRUCT_ARGS, ExpressionPtr val);
   virtual void set(VariableEnvironment &env, Array &arr) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_val;
   Variant val(VariableEnvironment &env) const;
@@ -54,7 +54,7 @@ public:
   ArrayPairRef(CONSTRUCT_ARGS, ExpressionPtr key, LvalExpressionPtr val);
   ArrayPairRef(CONSTRUCT_ARGS, LvalExpressionPtr val);
   virtual void set(VariableEnvironment &env, Array &arr) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   LvalExpressionPtr m_val;
   Variant &val(VariableEnvironment &env) const;
@@ -64,7 +64,7 @@ class ArrayExpression : public Expression {
 public:
   ArrayExpression(EXPRESSION_ARGS, const std::vector<ArrayPairPtr> &elems);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<ArrayPairPtr> m_elems;
 };

@@ -19,6 +19,7 @@
 #include "stack_trace.h"
 #include "process.h"
 #include "exception.h"
+#include "util.h"
 #include "log_aggregator.h"
 #include "text_color.h"
 
@@ -61,35 +62,11 @@ IMPLEMENT_THREAD_LOCAL(Logger::ThreadData, Logger::s_threadData);
 
 Logger *Logger::s_logger = new Logger();
 
-void Logger::Printf(std::string &msg, const char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  VSNPrintf(msg, fmt, ap);
-  va_end(ap);
-}
-
-void Logger::VSNPrintf(std::string &msg, const char *fmt, va_list ap) {
-  int i = 0;
-  for (int len = 1024; msg.empty(); len <<= 1) {
-    va_list v;
-    va_copy(v, ap);
-
-    char *buf = (char*)malloc(len);
-    if (vsnprintf(buf, len, fmt, v) < len) {
-      msg = buf;
-    }
-    free(buf);
-
-    va_end(v);
-    if (++i > 10) break;
-  }
-}
-
 void Logger::Log(const char *fmt, va_list ap) {
   if (!UseLogAggregator && !UseLogFile) return;
 
   string msg;
-  VSNPrintf(msg, fmt, ap);
+  Util::string_vsnprintf(msg, fmt, ap);
   Log(msg, NULL);
 }
 
@@ -97,7 +74,7 @@ void Logger::LogEscapeMore(const char *fmt, va_list ap) {
   if (!UseLogAggregator && !UseLogFile) return;
 
   string msg;
-  VSNPrintf(msg, fmt, ap);
+  Util::string_vsnprintf(msg, fmt, ap);
   Log(msg, NULL, true, true);
 }
 

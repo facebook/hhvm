@@ -54,18 +54,23 @@ public:
     T* p = dynamic_cast<T*>(this);
     return AstPtr<T>(p);
   }
-  virtual void dump() const;
+
+  virtual bool skipDump() const { return false;}
+  virtual void dump(std::ostream &out) const = 0;
 
   template<class T>
-  static void dumpVector(const std::vector<T> &v, const char* delim) {
+  static void dumpVector(std::ostream &out, const std::vector<T> &v,
+                         const char* delim = ", ") {
     bool first = true;
     for (uint i = 0; i < v.size(); i++) {
-      if (first) {
-        first = false;
-      } else {
-        printf("%s", delim);
+      if (!v[i]->skipDump()) {
+        if (first) {
+          first = false;
+        } else {
+          out << delim;
+        }
+        v[i]->dump(out);
       }
-      v[i]->dump();
     }
   }
   const Location *loc() const { return &m_loc; }

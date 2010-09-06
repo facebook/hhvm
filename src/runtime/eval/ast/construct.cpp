@@ -34,10 +34,6 @@ void Construct::release() {
   delete this;
 }
 
-void Construct::dump() const {
-  printf("<AST node at %p>", this);
-}
-
 void Construct::dumpLoc() const {
   cerr << m_loc.file << ":" << m_loc.line1 << endl;
 }

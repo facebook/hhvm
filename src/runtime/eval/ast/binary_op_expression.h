@@ -30,7 +30,7 @@ public:
   BinaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp1, int op,
                      ExpressionPtr exp2);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;

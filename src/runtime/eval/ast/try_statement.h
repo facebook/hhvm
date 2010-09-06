@@ -34,7 +34,7 @@ public:
   bool match(CObjRef exn) const;
   const StatementPtr &body() const { return m_body; }
   const std::string &vname() const { return m_vname; }
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::string m_ename;
   std::string m_vname;
@@ -46,7 +46,7 @@ public:
   TryStatement(STATEMENT_ARGS, StatementPtr body,
                const std::vector<CatchBlockPtr> &catches);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<CatchBlockPtr> m_catches;
   StatementPtr m_body;

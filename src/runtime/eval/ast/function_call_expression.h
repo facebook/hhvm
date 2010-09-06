@@ -33,7 +33,7 @@ protected:
   FunctionCallExpression(EXPRESSION_ARGS,
                          const std::vector<ExpressionPtr> &params);
   std::vector<ExpressionPtr> m_params;
-  void dumpParams() const;
+  void dumpParams(std::ostream &out) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

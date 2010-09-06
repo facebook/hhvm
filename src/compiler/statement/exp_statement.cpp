@@ -20,7 +20,7 @@
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/include_expression.h>
 #include <compiler/option.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/expression/function_call.h>
 #include <compiler/analysis/analysis_result.h>
 

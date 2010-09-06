@@ -16,7 +16,7 @@
 
 #include <compiler/statement/case_statement.h>
 #include <compiler/expression/scalar_expression.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/option.h>
 
 using namespace HPHP;

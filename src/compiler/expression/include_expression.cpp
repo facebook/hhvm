@@ -15,7 +15,7 @@
 */
 
 #include <compiler/expression/include_expression.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/file_scope.h>

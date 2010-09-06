@@ -34,9 +34,9 @@ void ExprStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void ExprStatement::dump() const {
-  m_exp->dump();
-  printf(";");
+void ExprStatement::dump(std::ostream &out) const {
+  m_exp->dump(out);
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

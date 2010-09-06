@@ -31,7 +31,7 @@ class UnsetStatement : public Statement {
 public:
   UnsetStatement(STATEMENT_ARGS, const std::vector<ExpressionPtr> &vals);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<LvalExpressionPtr> m_vals;
 };

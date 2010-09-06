@@ -33,6 +33,7 @@ public:
                   const std::string &doc);
   // Eval is called at declaration, not invocation
   virtual void eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
   Variant invokeInstance(CObjRef obj, CArrRef params, bool check = true)
     const;
   Variant invokeStatic(const char* cls, CArrRef params, bool check = true)

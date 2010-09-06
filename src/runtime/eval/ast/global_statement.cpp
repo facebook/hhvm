@@ -36,10 +36,22 @@ void GlobalStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void GlobalStatement::dump() const {
-  printf("global ");
-  dumpVector(m_vars, ", ");
-  printf(";");
+void GlobalStatement::dump(std::ostream &out) const {
+  out << "global ";
+
+  for (uint i = 0; i < m_vars.size(); i++) {
+    if (i > 0) out << ", ";
+    if (m_vars[i]->getStatic().isNull()) {
+      out << "${";
+      m_vars[i]->dump(out);
+      out << "}";
+    } else {
+      out << "$";
+      m_vars[i]->dump(out);
+    }
+  }
+
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

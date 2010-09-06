@@ -90,7 +90,7 @@ bool TestCodeRun::GenerateFiles(const char *input,
   AnalysisResultPtr ar(new AnalysisResult());
   string path = string("runtime/tmp/") + subdir;
   ar->setOutputPath(path.c_str());
-  Parser::ParseString(input, ar);
+  Compiler::Parser::ParseString(input, ar);
   BuiltinSymbols::Load(ar);
   ar->loadBuiltins();
   ar->analyzeProgram();
@@ -5364,7 +5364,7 @@ bool TestCodeRun::TestUnset() {
       "var_dump($obj);"
       "unset($obj->a, $obj->b);"
       "var_dump($obj);");
-  MVCR("<?php;"
+  MVCR("<?php "
        "class X {"
        "  function __construct() { echo 'construct\n'; }"
        "  function __destruct() { echo 'destruct\n'; }"
@@ -6786,19 +6786,19 @@ bool TestCodeRun::TestCompilation() {
        "  return $x;"
        "}");
 
-  MVCR("<?php;"
+  MVCR("<?php "
        "function g() {}"
        "function test1() {"
        "  return '' . g();"
        "}");
 
-  MVCR("<?php;"
+  MVCR("<?php "
        "function g() {}"
        "function test1() {"
        "  return 0 + g();"
        "}");
 
-  MVCR("<?php;"
+  MVCR("<?php "
        "function g() {}"
        "function test1() {"
        "  return 1 * g();"
@@ -9502,7 +9502,7 @@ bool TestCodeRun::TestRedeclaredClasses() {
        "} catch (A $e) {"
        "  echo $e->a, '\n';"
        "}} test();");
-  MVCR("<?php;"
+  MVCR("<?php "
        "function nop($en,$es){};set_error_handler('nop');"
        "class X { function bar() { var_dump($this); } }"
        "if (1) {"

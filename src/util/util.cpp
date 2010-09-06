@@ -573,13 +573,13 @@ const char *Util::canonicalize(const char *addpath, size_t addlen) {
   return path;
 }
 
-std::string Util::escapeStringForCpp(const std::string &name,
+std::string Util::escapeStringForCPP(const char *input, int len,
                                      bool* binary /* = NULL */) {
   if (binary) *binary = false;
   string ret;
-  ret.reserve((name.length() << 1) + 2);
-  for (unsigned int i = 0; i < name.length(); i++) {
-    unsigned char ch = name[i];
+  ret.reserve((len << 1) + 2);
+  for (int i = 0; i < len; i++) {
+    unsigned char ch = input[i];
     switch (ch) {
       case '\n': ret += "\\n";  break;
       case '\r': ret += "\\r";  break;
@@ -607,6 +607,31 @@ std::string Util::escapeStringForCpp(const std::string &name,
   return ret;
 }
 
+std::string Util::escapeStringForPHP(const char *input, int len) {
+  string output;
+  output.reserve((len << 1) + 2);
+  output = "'";
+  for (int i = 0; i < len; i++) {
+    unsigned char ch = input[i];
+    switch (ch) {
+    case '\n': output += "'.\"\\n\".'";  break;
+    case '\r': output += "'.\"\\r\".'";  break;
+    case '\t': output += "'.\"\\t\".'";  break;
+    case '\'': output += "'.\"'\".'";    break;
+    case '\\': output += "'.\"\\\\\".'"; break;
+    default:
+      output += ch;
+      break;
+    }
+  }
+  output += "'";
+  replaceAll(output, ".''.", ".");
+  replaceAll(output, "''.", "");
+  replaceAll(output, ".''", "");
+  replaceAll(output, "\".\"", "");
+  return output;
+}
+
 const void *Util::buffer_duplicate(const void *src, int size) {
   char *s = (char *)malloc(size + 1); // '\0' in the end
   memcpy(s, src, size);
@@ -620,6 +645,30 @@ const void *Util::buffer_append(const void *buf1, int size1,
   memcpy((char *)s + size1, buf2, size2);
   s[size1 + size2] = '\0';
   return s;
+}
+
+void Util::string_printf(std::string &msg, const char *fmt, ...) {
+  va_list ap;
+  va_start(ap, fmt);
+  string_vsnprintf(msg, fmt, ap);
+  va_end(ap);
+}
+
+void Util::string_vsnprintf(std::string &msg, const char *fmt, va_list ap) {
+  int i = 0;
+  for (int len = 1024; msg.empty(); len <<= 1) {
+    va_list v;
+    va_copy(v, ap);
+
+    char *buf = (char*)malloc(len);
+    if (vsnprintf(buf, len, fmt, v) < len) {
+      msg = buf;
+    }
+    free(buf);
+
+    va_end(v);
+    if (++i > 10) break;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

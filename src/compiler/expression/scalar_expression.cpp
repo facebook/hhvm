@@ -17,7 +17,7 @@
 #include <sstream>
 #include <limits.h>
 #include <compiler/expression/scalar_expression.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
@@ -51,15 +51,15 @@ void (*ScalarExpression::m_hookHandler)
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  int type, const std::string &value, bool quoted /* = false */)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_type(type), m_value(value), m_quoted(quoted) {
+    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+      m_type(type), m_value(value), m_originalValue(value), m_quoted(quoted) {
 }
 
 ScalarExpression::ScalarExpression
 (EXPRESSION_CONSTRUCTOR_PARAMETERS,
  CVarRef value, bool quoted /* = true */)
-  : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_quoted(quoted), m_variant(value) {
+    : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
+      m_quoted(quoted), m_variant(value) {
   switch (value.getType()) {
   case KindOfStaticString:
   case KindOfString:
@@ -82,6 +82,7 @@ ScalarExpression::ScalarExpression
   if (m_type == T_DNUMBER && m_value.find_first_of(".eE", 0) == string::npos) {
     m_value += ".";
   }
+  m_originalValue = m_value;
 }
 
 ExpressionPtr ScalarExpression::clone() {
@@ -345,43 +346,26 @@ void ScalarExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     ASSERT(m_quoted); // fall through
   case T_STRING:
     if (m_quoted) {
-      string output;
-      output.reserve((m_value.length() << 1) + 2);
-      output = "'";
-      for (unsigned int i = 0; i < m_value.length(); i++) {
-        unsigned char ch = m_value[i];
-        switch (ch) {
-        case '\n': output += "'.\"\\n\".'";  break;
-        case '\r': output += "'.\"\\r\".'";  break;
-        case '\t': output += "'.\"\\t\".'";  break;
-        case '\'': output += "'.\"'\".'";    break;
-        case '\\': output += "'.\"\\\\\".'"; break;
-        default:
-          output += ch;
-          break;
-        }
-      }
-      output += "'";
-      Util::replaceAll(output, ".''.", ".");
-      Util::replaceAll(output, "''.", "");
-      Util::replaceAll(output, ".''", "");
-      Util::replaceAll(output, "\".\"", "");
+      string output = Util::escapeStringForPHP(m_originalValue);
       cg_printf("%s", output.c_str());
     } else {
-      cg_printf("%s", m_value.c_str());
+      cg_printf("%s", m_originalValue.c_str());
     }
     break;
   case T_NUM_STRING:
   case T_LNUMBER:
   case T_DNUMBER:
-    cg_printf("%s", m_value.c_str());
+    cg_printf("%s", m_originalValue.c_str());
     break;
   case T_LINE:
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
-    cg_printf("%s",
-              (cg.translatePredefined() ? m_translated : m_value).c_str());
+    if (cg.translatePredefined()) {
+      cg_printf("%s", m_translated.c_str());
+    } else {
+      cg_printf("%s", m_originalValue.c_str());
+    }
     break;
   default:
     ASSERT(false);

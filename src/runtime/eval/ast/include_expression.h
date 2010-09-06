@@ -30,7 +30,7 @@ public:
   IncludeExpression(EXPRESSION_ARGS, bool include, bool once,
                     ExpressionPtr file);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
   bool include() const { return m_include; }
   bool once() const { return m_once; }
 private:

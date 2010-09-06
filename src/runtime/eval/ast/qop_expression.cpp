@@ -33,12 +33,12 @@ Variant QOpExpression::eval(VariableEnvironment &env) const {
   }
 }
 
-void QOpExpression::dump() const {
-  m_cond->dump();
-  printf(" ? ");
-  m_true->dump();
-  printf(" : ");
-  m_false->dump();
+void QOpExpression::dump(std::ostream &out) const {
+  m_cond->dump(out);
+  out << " ? ";
+  m_true->dump(out);
+  out << " : ";
+  m_false->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

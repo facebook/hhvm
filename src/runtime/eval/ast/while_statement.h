@@ -30,7 +30,7 @@ class WhileStatement : public Statement {
 public:
   WhileStatement(STATEMENT_ARGS, ExpressionPtr cond, StatementPtr body);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_cond;
   StatementPtr m_body;

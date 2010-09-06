@@ -242,31 +242,7 @@ void SymbolTable::countTypes(std::map<std::string, int> &counts) {
 string SymbolTable::getEscapedText(Variant v, int &len) {
   VariableSerializer vs(VariableSerializer::Serialize);
   String str = vs.serialize(v, true);
-  string output;
-  for (int64 i = 0; i < str.length(); i++) {
-    unsigned char ch = str.charAt(i);
-    switch (ch) {
-    case '\n': output += "\\n";  break;
-    case '\r': output += "\\r";  break;
-    case '\t': output += "\\t";  break;
-    case '\a': output += "\\a";  break;
-    case '\b': output += "\\b";  break;
-    case '\f': output += "\\f";  break;
-    case '\v': output += "\\v";  break;
-    case '\"': output += "\\\""; break;
-    case '\\': output += "\\\\"; break;
-    case '?':  output += "\\?";  break;
-    default:
-      if (isprint(ch)) {
-        output += ch;
-      } else {
-        // output in octal notation
-        char buf[10];
-        snprintf(buf, sizeof(buf), "\\%03o", ch);
-        output += buf;
-      }
-    }
-  }
   len = str.length();
+  string output = Util::escapeStringForCPP(str.data(), len);
   return output;
 }

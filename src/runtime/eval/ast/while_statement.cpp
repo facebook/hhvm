@@ -34,12 +34,12 @@ void WhileStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void WhileStatement::dump() const {
-  printf("while (");
-  m_cond->dump();
-  printf(") {");
-  if (m_body) m_body->dump();
-  printf("}");
+void WhileStatement::dump(std::ostream &out) const {
+  out << "while (";
+  m_cond->dump(out);
+  out << ") {";
+  if (m_body) m_body->dump(out);
+  out << "}\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

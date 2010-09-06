@@ -40,6 +40,7 @@ CatchStatement::CatchStatement
   : Statement(STATEMENT_CONSTRUCTOR_PARAMETER_VALUES),
     m_variable(variable), m_stmt(stmt), m_valid(true) {
   m_className = Util::toLower(className);
+  m_originalClassName = className;
 }
 
 StatementPtr CatchStatement::clone() {
@@ -129,7 +130,8 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
 // code generation functions
 
 void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  cg_printf(" catch (%s $%s) ", m_className.c_str(), m_variable.c_str());
+  cg_printf(" catch (%s $%s) ", m_originalClassName.c_str(),
+            m_variable.c_str());
   cg_indentBegin("{\n");
   if (m_stmt) m_stmt->outputPHP(cg, ar);
   cg_indentEnd("}");

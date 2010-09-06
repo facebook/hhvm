@@ -644,20 +644,20 @@ int process(const ProgramOptions &po) {
 int lintTarget(const ProgramOptions &po) {
   int ret = 0;
   for (unsigned int i = 0; i < po.inputs.size(); i++) {
-    AnalysisResultPtr ar(new AnalysisResult());
     string filename = po.inputDir + "/" + po.inputs[i];
     try {
-      Scanner scanner(new ylmm::basic_buffer(filename.c_str()), true, false);
-      ParserPtr parser(new Parser(scanner, filename.c_str(), 0, ar));
-      if (parser->parse()) {
+      Scanner scanner(filename.c_str(), Option::ScannerType);
+      Compiler::Parser parser(scanner, filename.c_str(),
+                              AnalysisResultPtr(new AnalysisResult()));
+      if (!parser.parse()) {
         Logger::Error("Unable to parse file %s: %s", filename.c_str(),
-                      parser->getMessage().c_str());
+                      parser.getMessage().c_str());
         ret = 1;
       } else {
         Logger::Info("%s parsed successfully...", filename.c_str());
       }
-    } catch (std::runtime_error) {
-      Logger::Error("Unable to open file %s", filename.c_str());
+    } catch (FileOpenException &e) {
+      Logger::Error("%s", e.getMessage().c_str());
       ret = 1;
     }
   }

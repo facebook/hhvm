@@ -46,10 +46,10 @@ void UnsetStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void UnsetStatement::dump() const {
-  printf("unset(");
-  dumpVector(m_vals, ", ");
-  printf(");");
+void UnsetStatement::dump(std::ostream &out) const {
+  out << "unset(";
+  dumpVector(out, m_vals);
+  out << ");\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

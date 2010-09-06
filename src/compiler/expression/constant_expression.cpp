@@ -26,7 +26,7 @@
 #include <util/util.h>
 #include <compiler/option.h>
 #include <compiler/parser/parser.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/expression/scalar_expression.h>
 #include <runtime/ext/ext_misc.h>
 

@@ -3561,7 +3561,7 @@ bool c_RecursiveDirectoryIterator::o_get_call_info(MethodCallPackage &mcp, int64
   }
   return c_DirectoryIterator::o_get_call_info(mcp, hash);
 }
-c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
+c_RecursiveDirectoryIterator *c_RecursiveDirectoryIterator::create(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
   CountableHelper h(this);
   init();
@@ -3640,7 +3640,7 @@ void c_RecursiveDirectoryIterator::init() {
   c_DirectoryIterator::init();
 }
 /* SRC: classes/iterator.php line 764 */
-void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */
+void c_RecursiveDirectoryIterator::t___construct(Variant v_path, Variant v_flags //  = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveDirectoryIterator, RecursiveDirectoryIterator::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -5021,7 +5021,7 @@ bool c_RecursiveIteratorIterator::o_get_call_info(MethodCallPackage &mcp, int64 
   }
   return c_ObjectData::o_get_call_info(mcp, hash);
 }
-c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
+c_RecursiveIteratorIterator *c_RecursiveIteratorIterator::create(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
 ) {
   CountableHelper h(this);
@@ -5115,7 +5115,7 @@ struct ObjectStaticCallbacks cw_RecursiveIteratorIterator = {
 void c_RecursiveIteratorIterator::init() {
 }
 /* SRC: classes/iterator.php line 170 */
-void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */
+void c_RecursiveIteratorIterator::t___construct(Variant v_iterator, Variant v_mode //  = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */
 , Variant v_flags //  = 0LL
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(RecursiveIteratorIterator, RecursiveIteratorIterator::__construct);

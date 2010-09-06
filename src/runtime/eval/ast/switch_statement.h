@@ -36,7 +36,7 @@ public:
   bool match(VariableEnvironment &env, CVarRef value) const;
   virtual void eval(VariableEnvironment &env) const;
   bool isDefault() const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_match;
   StatementPtr m_body;
@@ -47,7 +47,7 @@ public:
   SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
                   const std::vector<CaseStatementPtr> &cases);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_source;
   std::vector<CaseStatementPtr> m_cases;

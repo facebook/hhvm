@@ -36,7 +36,8 @@ ParameterExpression::ParameterExpression
  const std::string &type, const std::string &name, bool ref,
  ExpressionPtr defaultValue)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_name(name), m_ref(ref), m_hasRTTI(false), m_defaultValue(defaultValue) {
+    m_originalType(type), m_name(name), m_ref(ref), m_hasRTTI(false),
+    m_defaultValue(defaultValue) {
   m_type = Util::toLower(type);
   if (m_defaultValue) {
     m_defaultValue->setContext(InParameterExpression);
@@ -181,7 +182,7 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 // code generation functions
 
 void ParameterExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (!m_type.empty()) cg_printf("%s ", m_type.c_str());
+  if (!m_type.empty()) cg_printf("%s ", m_originalType.c_str());
   if (m_ref) cg_printf("&");
   cg_printf("$%s", m_name.c_str());
   if (m_defaultValue) {

@@ -39,13 +39,14 @@ Variant EncapsListExpression::eval(VariableEnvironment &env) const {
   return result;
 }
 
-void EncapsListExpression::dump() const {
+void EncapsListExpression::dump(std::ostream &out) const {
   if (m_shell) {
-    printf("shell_exec");
+    out << "shell_exec(";
   }
-  printf("(");
-  dumpVector(m_encaps, ".");
-  printf(")");
+  dumpVector(out, m_encaps, " . ");
+  if (m_shell) {
+    out << ")";
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

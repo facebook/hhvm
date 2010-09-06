@@ -36,7 +36,7 @@
 #include <compiler/option.h>
 #include <compiler/expression/simple_variable.h>
 #include <compiler/parser/parser.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/externals.h>
 #include <runtime/base/execution_context.h>

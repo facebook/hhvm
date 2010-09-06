@@ -16,7 +16,7 @@
 
 #include <runtime/eval/ast/assignment_op_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -33,27 +33,27 @@ Variant AssignmentOpExpression::eval(VariableEnvironment &env) const {
   return m_lhs->setOp(env, m_op, rhs);
 }
 
-void AssignmentOpExpression::dump() const {
-  m_lhs->dump();
-  const char* op = "<bad op>";
+void AssignmentOpExpression::dump(std::ostream &out) const {
+  m_lhs->dump(out);
+  out << " ";
   switch (m_op) {
-  case '=': op = "=";  break;
-  case T_PLUS_EQUAL: op = "+="; break;
-  case T_MINUS_EQUAL: op = "-="; break;
-  case T_MUL_EQUAL: op = "*="; break;
-  case T_DIV_EQUAL: op = "/="; break;
-  case T_CONCAT_EQUAL: op = ".="; break;
-  case T_MOD_EQUAL: op = "%="; break;
-  case T_AND_EQUAL: op = "&="; break;
-  case T_OR_EQUAL: op = "|="; break;
-  case T_XOR_EQUAL: op = "^="; break;
-  case T_SL_EQUAL: op = "<<="; break;
-  case T_SR_EQUAL: op = ">>="; break;
+  case '=':            out << "=";   break;
+  case T_PLUS_EQUAL:   out << "+=";  break;
+  case T_MINUS_EQUAL:  out << "-=";  break;
+  case T_MUL_EQUAL:    out << "*=";  break;
+  case T_DIV_EQUAL:    out << "/=";  break;
+  case T_CONCAT_EQUAL: out << ".=";  break;
+  case T_MOD_EQUAL:    out << "%=";  break;
+  case T_AND_EQUAL:    out << "&=";  break;
+  case T_OR_EQUAL:     out << "|=";  break;
+  case T_XOR_EQUAL:    out << "^=";  break;
+  case T_SL_EQUAL:     out << "<<="; break;
+  case T_SR_EQUAL:     out << ">>="; break;
   default:
     ASSERT(false);
   }
-  printf(" %s ", op);
-  m_rhs->dump();
+  out << " ";
+  m_rhs->dump(out);
 }
 
 Variant AssignmentOpExpression::refval(VariableEnvironment &env,

@@ -18,6 +18,7 @@
 #define __EVAL_BASE_H__
 
 #include <util/base.h>
+#include <util/parser/location.h>
 #include <runtime/base/base_includes.h>
 #include <runtime/base/program_functions.h>
 #include <runtime/eval/base/ast_ptr.h>
@@ -35,15 +36,7 @@ namespace Eval {
 
 class VariableEnvironment;
 
-class Location {
-public:
-  const char *file;
-  int line0;
-  int char0;
-  int line1;
-  int char1;
-  String toString() const;
-};
+String location_to_string(const Location *loc);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

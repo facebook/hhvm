@@ -17,7 +17,7 @@
 #include <runtime/eval/ast/expression.h>
 #include <runtime/eval/ast/lval_expression.h>
 #include <runtime/eval/ast/name.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {

@@ -33,9 +33,9 @@ Variant ClassConstantExpression::eval(VariableEnvironment &env) const {
   return get_class_constant(cls.c_str(), m_constant.c_str());
 }
 
-void ClassConstantExpression::dump() const {
-  m_class->dump();
-  printf("::%s", m_constant.c_str());
+void ClassConstantExpression::dump(std::ostream &out) const {
+  m_class->dump(out);
+  out << "::" << m_constant;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

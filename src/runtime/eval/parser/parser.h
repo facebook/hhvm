@@ -18,53 +18,143 @@
 #define __EVAL_PARSER_H__
 
 #include <stack>
-
-#include <runtime/eval/parser/parser_defines.h>
-#include <util/ylmm/basic_parser.hh>
-#include <runtime/eval/parser/scanner.h>
+#include <util/parser/parser.h>
 #include <runtime/eval/base/eval_base.h>
+#include <runtime/eval/ast/statement.h>
+#include <runtime/eval/ast/function_statement.h>
+#include <runtime/eval/ast/static_statement.h>
+#include <runtime/eval/ast/class_statement.h>
+#include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/name.h>
 
-namespace HPHP {
-namespace Eval {
+#ifdef HPHP_PARSER_NS
+#undef HPHP_PARSER_NS
+#endif
+#define HPHP_PARSER_NS Eval
+
+namespace HPHP { namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(Location);
 DECLARE_AST_PTR(Statement);
 DECLARE_AST_PTR(ClassStatement);
 DECLARE_AST_PTR(FunctionStatement);
 DECLARE_AST_PTR(StaticStatement);
+DECLARE_AST_PTR(IfBranch);
+DECLARE_AST_PTR(StatementListStatement);
+DECLARE_AST_PTR(CaseStatement);
+DECLARE_AST_PTR(ListElement);
+DECLARE_AST_PTR(ArrayPair);
+DECLARE_AST_PTR(CatchBlock);
+DECLARE_AST_PTR(Parameter);
+DECLARE_AST_PTR(Name);
+DECLARE_AST_PTR(StaticVariable);
 
-class Parser : public ylmm::basic_parser<Token> {
+class Token : public ScannerToken {
 public:
-  static StatementPtr
-  parseString(const char *input,
-              std::vector<StaticStatementPtr> &statics);
-  static StatementPtr
-  parseFile(const char *input,
-            std::vector<StaticStatementPtr> &statics);
-public:
-  enum NameKind {
-    StringName,
-    ExprName,
-    StaticClassExprName,
-    StaticName
+  enum Mode {
+    None,
+    SingleExpression,
+    SingleStatement,
+    SingleName,
+    IfBranch,
+    CaseStatement,
+    Expression,
+    ListElement,
+    ArrayPair,
+    CatchBlock,
+    Parameter,
+    Name,
+    StaticVariable,
+    Strings
   };
-  static Mutex s_lock;
 
-  Parser(Scanner &s, const char *fileName,
+  Token() : m_mode(None), m_data(NULL) {
+  }
+  ~Token() {
+    reset();
+  }
+  void reset();
+
+  Token *operator->() {
+    return this;
+  }
+  void operator=(int num) {
+    m_num = num;
+  }
+  void operator=(Token &other);
+
+  template<class T>
+  AstPtr<T> getExp() const {
+    return m_exp ? m_exp->cast<T>() : AstPtr<T>();
+  }
+  template<class T>
+  AstPtr<T> getStmt() const {
+    return m_stmt ? m_stmt->cast<T>() : AstPtr<T>();
+  }
+  StatementListStatementPtr getStmtList() const;
+
+  ExpressionPtr &exp();
+  StatementPtr &stmt();
+  NamePtr &name();
+
+  Mode getMode() const { return m_mode; }
+
+  std::vector<IfBranchPtr       > &ifBranches ();
+  std::vector<ExpressionPtr     > &exprs      ();
+  std::vector<CaseStatementPtr  > &cases      ();
+  std::vector<ListElementPtr    > &listElems  ();
+  std::vector<ArrayPairPtr      > &arrayPairs ();
+  std::vector<CatchBlockPtr     > &catches    ();
+  std::vector<ParameterPtr      > &params     ();
+  std::vector<NamePtr           > &names      ();
+  std::vector<StaticVariablePtr > &staticVars ();
+  std::vector<String            > &strings    ();
+
+private:
+  ExpressionPtr m_exp;
+  StatementPtr m_stmt;
+  NamePtr m_name;
+
+  class Countable {
+  public:
+    Countable() : m_count(1) {}
+
+    void dec() { if (--m_count == 0) delete this;}
+    void inc() { ++m_count;}
+
+  private:
+    int m_count;
+  };
+
+  template<typename T>
+  class CountableVector : public Countable {
+  public:
+    std::vector<T> m_vec;
+  };
+
+  Mode m_mode;
+  Countable *m_data;
+};
+
+///////////////////////////////////////////////////////////////////////////////
+
+class Parser : public ParserBase {
+public:
+  static StatementPtr ParseString(const char *input,
+                                  std::vector<StaticStatementPtr> &statics);
+
+  static StatementPtr ParseFile(const char *fileName,
+                                std::vector<StaticStatementPtr> &statics);
+
+public:
+  Parser(Scanner &scanner, const char *fileName,
          std::vector<StaticStatementPtr> &statics);
-  // Gets
-  StatementPtr getTree() const;
-  std::string getMessage();
-  void getLocation(Location &location);
-  const char *file();
-  int line0();
-  int char0();
-  int line1();
-  int char1();
 
-  // implementing basic_parser
-  int scan(void *arg = NULL);
+  // implementing ParserBase
+  virtual bool parse();
+
+  // result
+  StatementPtr getTree() const;
 
   // parser handlers
   void saveParseTree(Token &tree);
@@ -93,7 +183,7 @@ public:
   void appendProperty(Token &prop);
   void appendRefDim(Token &offset);
 
-  void onListAssignment(Token &out, Token &vars, Token &expr);
+  void onListAssignment(Token &out, Token &vars, Token *expr);
   void onAListVar(Token &out, Token *list, Token *var);
   void onAListSub(Token &out, Token *list, Token &sublist);
   void onAssign(Token &out, Token &var, Token &expr, bool ref);
@@ -112,18 +202,21 @@ public:
   void onParam(Token &out, Token *params, Token &type, Token &var,
                bool ref, Token *defValue);
   void onClassStart(int type, Token &name, Token *parent);
-  void onClass(Token &out, Token &bases);
-  void onInterface(Token &out, Token &bases);
+  void onClass(Token &out, Token &type, Token &name, Token &base,
+               Token &baseInterface, Token &stmt);
+  void onInterface(Token &out, Token &name, Token &base, Token &stmt);
   void onInterfaceName(Token &out, Token *names, Token &name);
-  void onClassVariableStart(Token &mods);
-  void onClassVariable(Token &name, Token *val);
-  void onClassConstant(Token &name, Token &val);
+  void onClassVariableModifer(Token &mod);
+  void onClassVariableStart(Token &out, Token *modifiers, Token &decl) {}
+  void onClassVariable(Token &out, Token *exprs, Token &name, Token *val);
+  void onClassConstant(Token &out, Token *exprs, Token &name, Token &val);
   void onMethodStart(Token &name, Token &mods);
-  void onMethod(Token &modifiers, Token &ref, Token &name, Token &params,
-                Token &stmt);
+  void onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
+                Token &params, Token &stmt);
   void onMemberModifier(Token &out, Token *modifiers, Token &modifier);
   void onStatementListStart(Token &out);
   void addStatement(Token &out, Token &stmts, Token &new_stmt);
+  void onClassStatement(Token &out, Token &stmts, Token &new_stmt) {}
   void finishStatement(Token &out, Token &stmts);
   void onBlock(Token &out, Token &stmts);
   void onIf(Token &out, Token &cond, Token &stmt, Token &elseifs,
@@ -166,13 +259,7 @@ public:
   bool haveFunc() const;
   FunctionStatementPtr peekFunc() const;
 private:
-  std::ostringstream m_err;
-  std::ostringstream m_msg;
-  ylmm::basic_messenger<ylmm::basic_lock> m_messenger;
-
-  Scanner &m_scanner;
-  const char *m_fileName;
-  std::vector<ExpressionPtr> m_objects; // for parsing object property/method calls
+  std::vector<ExpressionPtr> m_objects; // for parsing obj prop/method calls
   std::stack<ClassStatementPtr> m_classes;
   std::stack<FunctionStatementPtr> m_funcs;
   std::vector<StaticStatementPtr> &m_staticStatements;
@@ -194,8 +281,6 @@ private:
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-}
-}
-
+}}
 
 #endif // __HPHP_PARSER_H__

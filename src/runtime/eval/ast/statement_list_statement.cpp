@@ -41,8 +41,8 @@ void StatementListStatement::add(StatementPtr stmt) {
   m_stmts.push_back(stmt);
 }
 
-void StatementListStatement::dump() const {
-  dumpVector(m_stmts, " ");
+void StatementListStatement::dump(std::ostream &out) const {
+  dumpVector(out, m_stmts, "");
 }
 
 void StatementListStatement::byteCode(ByteCodeProgram &code) const {

@@ -32,7 +32,7 @@ public:
                           ExpressionPtr rhs);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   LvalExpressionPtr m_lhs;
   ExpressionPtr m_rhs;

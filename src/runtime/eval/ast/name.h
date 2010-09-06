@@ -51,7 +51,7 @@ public:
   virtual int64 hashLwr() const;
   virtual String getStatic() const;
   virtual bool isSp() const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   int64 m_hash;
   int64 m_hashLwr;
@@ -63,7 +63,7 @@ class ExprName : public Name {
 public:
   ExprName(CONSTRUCT_ARGS, ExpressionPtr name);
   virtual String get(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 protected:
   ExpressionPtr m_name;
 };
@@ -78,7 +78,7 @@ class LateStaticName : public Name {
 public:
   LateStaticName(CONSTRUCT_ARGS);
   virtual String get(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

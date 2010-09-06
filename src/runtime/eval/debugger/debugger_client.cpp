@@ -931,7 +931,7 @@ char DebuggerClient::ask(const char *fmt, ...) {
   string msg;
   va_list ap;
   va_start(ap, fmt);
-  Logger::VSNPrintf(msg, fmt, ap); va_end(ap);
+  Util::string_vsnprintf(msg, fmt, ap); va_end(ap);
   if (UseColor && InfoColor) {
     msg = InfoColor + msg + ANSI_COLOR_END;
   }
@@ -944,7 +944,7 @@ void DebuggerClient::print(const char *fmt, ...) {
   string msg;
   va_list ap;
   va_start(ap, fmt);
-  Logger::VSNPrintf(msg, fmt, ap); va_end(ap);
+  Util::string_vsnprintf(msg, fmt, ap); va_end(ap);
   print(msg);
 }
 
@@ -976,7 +976,7 @@ void DebuggerClient::print(CStrRef msg) {
     string msg;                                                         \
     va_list ap;                                                         \
     va_start(ap, fmt);                                                  \
-    Logger::VSNPrintf(msg, fmt, ap); va_end(ap);                        \
+    Util::string_vsnprintf(msg, fmt, ap); va_end(ap);                   \
     name(msg);                                                          \
   }                                                                     \
   void DebuggerClient::name(const std::string &msg) {                   \

@@ -63,21 +63,10 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class DatabaseException : public Exception {
+class FileOpenException : public Exception {
 public:
-  DatabaseException(int code, const char *fmt, ...)
-      : m_code(code) {
-    va_list ap; va_start(ap, fmt); format(fmt, ap); va_end(ap);
-  }
-  int m_code;
-};
-
-class DBConnectionException : public DatabaseException {
-public:
-  DBConnectionException(int code, const char *ip, const char *database,
-                        const char *msg)
-      : DatabaseException(code, "Failed to connect to %s %s: %s (%d)",
-                          ip, database, msg, code) {
+  FileOpenException(const char *filename)
+      : Exception("Unable to open file %s", filename) {
   }
 };
 

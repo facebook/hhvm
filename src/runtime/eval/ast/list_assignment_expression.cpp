@@ -31,8 +31,8 @@ void LvalListElement::set(VariableEnvironment &env, CVarRef val) const {
   if (m_lval) m_lval->set(env, val);
 }
 
-void LvalListElement::dump() const {
-  if (m_lval) m_lval->dump();
+void LvalListElement::dump(std::ostream &out) const {
+  if (m_lval) m_lval->dump(out);
 }
 
 SubListElement::SubListElement(CONSTRUCT_ARGS,
@@ -48,8 +48,10 @@ void SubListElement::set(VariableEnvironment &env, CVarRef val) const {
   }
 }
 
-void SubListElement::dump() const {
-  Construct::dumpVector(m_elems, ", ");
+void SubListElement::dump(std::ostream &out) const {
+  out << "list(";
+  Construct::dumpVector(out, m_elems);
+  out << ")";
 }
 
 ListAssignmentExpression::ListAssignmentExpression(EXPRESSION_ARGS,
@@ -75,11 +77,10 @@ Variant ListAssignmentExpression::eval(VariableEnvironment &env) const {
   }
 }
 
-void ListAssignmentExpression::dump() const {
-  printf("list(");
-  m_lhs->dump();
-  printf(") = ");
-  m_rhs->dump();
+void ListAssignmentExpression::dump(std::ostream &out) const {
+  m_lhs->dump(out);
+  out << " = ";
+  m_rhs->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

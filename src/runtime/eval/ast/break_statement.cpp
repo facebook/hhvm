@@ -38,17 +38,17 @@ void BreakStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void BreakStatement::dump() const {
+void BreakStatement::dump(std::ostream &out) const {
   if (m_isBreak) {
-    printf("break");
+    out << "break";
   } else {
-    printf("continue");
+    out << "continue";
   }
   if (m_level) {
-    printf(" ");
-    m_level->dump();
+    out << " ";
+    m_level->dump(out);
   }
-  printf(";");
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

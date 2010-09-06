@@ -15,7 +15,7 @@
 */
 
 #include <runtime/eval/ast/isset_expression.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -34,10 +34,10 @@ Variant IssetExpression::eval(VariableEnvironment &env) const {
   return true;
 }
 
-void IssetExpression::dump() const {
-  printf("isset(");
-  dumpVector(m_exps, ", ");
-  printf(");");
+void IssetExpression::dump(std::ostream &out) const {
+  out << "isset(";
+  dumpVector(out, m_exps);
+  out << ")";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

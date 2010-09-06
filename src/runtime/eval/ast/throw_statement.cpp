@@ -29,10 +29,10 @@ void ThrowStatement::eval(VariableEnvironment &env) const {
   throw_exception(m_value->eval(env));
 }
 
-void ThrowStatement::dump() const {
-  printf("throw ");
-  m_value->dump();
-  printf(";");
+void ThrowStatement::dump(std::ostream &out) const {
+  out << "throw ";
+  m_value->dump(out);
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

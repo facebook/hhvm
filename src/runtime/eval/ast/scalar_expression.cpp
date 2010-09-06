@@ -15,7 +15,8 @@
 */
 
 #include <runtime/eval/ast/scalar_expression.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
+#include <util/util.h>
 
 namespace HPHP {
 namespace Eval {
@@ -23,8 +24,9 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
-                                   const string &value)
-  : Expression(EXPRESSION_PASS), m_value(value), m_binary(false) {
+                                   const string &value, int subtype /* = 0 */)
+    : Expression(EXPRESSION_PASS),
+      m_value(value), m_type(type), m_subtype(subtype), m_binary(false) {
   switch (type) {
   case T_NUM_STRING: {
     const char *s = value.c_str();
@@ -56,13 +58,14 @@ ScalarExpression::ScalarExpression(EXPRESSION_ARGS, int type,
 }
 
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS)
-  : Expression(EXPRESSION_PASS), m_kind(SNull) {}
+    : Expression(EXPRESSION_PASS), m_type(0), m_subtype(0), m_kind(SNull) {}
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, bool b)
-  : Expression(EXPRESSION_PASS), m_kind(SBool) {
+    : Expression(EXPRESSION_PASS), m_type(0), m_subtype(0), m_kind(SBool) {
   m_num.num = b ? 1 : 0;
 }
 ScalarExpression::ScalarExpression(EXPRESSION_ARGS, const string &s)
-  : Expression(EXPRESSION_PASS), m_value(s), m_kind(SString) {}
+    : Expression(EXPRESSION_PASS),
+      m_value(s), m_type(0), m_subtype(0), m_kind(SString) {}
 
 Variant ScalarExpression::eval(VariableEnvironment &env) const {
   return getValue();
@@ -90,25 +93,35 @@ Variant ScalarExpression::getValue() const {
   return Variant();
 }
 
-void ScalarExpression::dump() const {
+void ScalarExpression::dump(std::ostream &out) const {
+  switch (m_subtype) {
+    case T_CLASS_C:  out << "__CLASS__";    return;
+    case T_METHOD_C: out << "__METHOD__";   return;
+    case T_FUNC_C:   out << "__FUNCTION__"; return;
+    case T_FILE:     out << "__FILE__";     return;
+    case T_LINE:     out << "__LINE__";     return;
+  }
+
   switch (m_kind) {
-  case SNull:
-    printf("NULL");
-    break;
-  case SBool:
-    printf("%s", m_num.num ? "true" : "false");
-    break;
-  case SString:
-    printf("\"%s\"", m_value.c_str());
-    break;
-  case SInt:
-    printf("%lld", m_num.num);
-    break;
-  case SDouble:
-    printf("%f", m_num.dbl);
-    break;
-  default:
-    ASSERT(false);
+    case SNull:
+      out << "null";
+      break;
+    case SBool:
+      out << (m_num.num ? "true" : "false");
+      break;
+    case SString:
+      if (m_type == T_NUM_STRING) {
+        out << m_value;
+      } else {
+        out << Util::escapeStringForPHP(m_value);
+      }
+      break;
+    case SInt:
+    case SDouble:
+      out << m_value;
+      break;
+    default:
+      ASSERT(false);
   }
 }
 

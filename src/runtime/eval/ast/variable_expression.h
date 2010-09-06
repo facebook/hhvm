@@ -37,7 +37,7 @@ public:
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   NamePtr getName() const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   NamePtr m_name;
   int m_idx;

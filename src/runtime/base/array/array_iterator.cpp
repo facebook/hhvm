@@ -90,7 +90,7 @@ CVarRef ArrayIter::secondRef() {
 ///////////////////////////////////////////////////////////////////////////////
 // MutableArrayIter
 
-MutableArrayIter::MutableArrayIter(const Variant *var ,Variant *key,
+MutableArrayIter::MutableArrayIter(const Variant *var, Variant *key,
                                    Variant &val)
   : m_var(var), m_data(NULL), m_key(key), m_val(val), m_pos() {
   ASSERT(m_var);
@@ -102,7 +102,7 @@ MutableArrayIter::MutableArrayIter(const Variant *var ,Variant *key,
   }
 }
 
-MutableArrayIter::MutableArrayIter(ArrayData *data,Variant *key,
+MutableArrayIter::MutableArrayIter(ArrayData *data, Variant *key,
                                    Variant &val)
   : m_var(NULL), m_data(data), m_key(key), m_val(val), m_pos() {
   if (data) {

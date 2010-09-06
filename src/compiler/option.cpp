@@ -15,11 +15,12 @@
 */
 
 #include <compiler/option.h>
-#include <util/logger.h>
 #include <compiler/analysis/analysis_result.h>
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/variable_table.h>
+#include <util/parser/scanner.h>
+#include <util/logger.h>
 #include <util/db_query.h>
 #include <util/util.h>
 #include <boost/algorithm/string/trim.hpp>
@@ -178,7 +179,10 @@ std::string Option::JavaFFIRootPackage;
 
 std::string Option::ProgramName;
 
+bool Option::EnableShortTags = true;
+bool Option::EnableAspTags = false;
 bool Option::EnableXHP = false;
+int Option::ScannerType = Scanner::AllowShortTags;
 
 int Option::InvokeFewArgsCount = 6;
 bool Option::PrecomputeLiteralStrings = true;
@@ -354,7 +358,14 @@ void Option::Load(Hdf &config) {
     ScalarArrayOptimization = true;
     ScalarArrayCompression = true;
   }
+
+  EnableShortTags = config["EnableShortTags"].getBool(true);
+  if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
+  EnableAspTags = config["EnableAspTags"].getBool();
+  if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
   EnableXHP = config["EnableXHP"].getBool();
+  if (EnableXHP) ScannerType |= Scanner::PreprocessXHP;
+
   RTTIOutputFile = config["RTTIOutputFile"].getString();
   EnableEval = (EvalLevel)config["EnableEval"].getByte(0);
   AllDynamic = config["AllDynamic"].getBool(true);

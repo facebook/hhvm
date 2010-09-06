@@ -31,7 +31,7 @@ public:
   StaticMethodExpression(EXPRESSION_ARGS, const NamePtr &cname,
       const NamePtr &name, const std::vector<ExpressionPtr> &params);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 protected:
   NamePtr m_cname;
   bool m_construct;

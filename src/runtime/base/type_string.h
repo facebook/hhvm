@@ -380,6 +380,11 @@ class StringIMap :
  */
 class StaticString : public String {
 public:
+  static StringDataSet &TheStaticStringSet();
+  static void FinishInit();
+  static void ResetAll(); // only supposed to be called during program shutdown
+
+public:
   friend class StringUtil;
   friend class LiteralStringInitializer;
 
@@ -394,17 +399,12 @@ public:
   }
   StaticString& operator=(const StaticString &str);
 
-  static StringDataSet &TheStaticStringSet() { return s_stringSet; }
-  static void FinishInit() {
-    // release the memory
-    StringDataSet empty;
-    s_stringSet.swap(empty);
-  }
-
 private:
   void init(litstr s, int length);
+  void insert();
+
   StringData m_data;
-  static StringDataSet s_stringSet;
+  static StringDataSet *s_stringSet;
 };
 
 extern const StaticString empty_string;

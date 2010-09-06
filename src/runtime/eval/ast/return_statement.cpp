@@ -39,13 +39,13 @@ void ReturnStatement::eval(VariableEnvironment &env) const {
   env.setRet();
 }
 
-void ReturnStatement::dump() const {
-  printf("return");
+void ReturnStatement::dump(std::ostream &out) const {
+  out << "return";
   if (m_value) {
-    printf(" ");
-    m_value->dump();
+    out << " ";
+    m_value->dump(out);
   }
-  printf(";");
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

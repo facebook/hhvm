@@ -37,10 +37,10 @@ Variant AssignmentRefExpression::refval(VariableEnvironment &env,
   return ref(tmp);
 }
 
-void AssignmentRefExpression::dump() const {
-  m_lhs->dump();
-  printf(" = &");
-  m_rhs->dump();
+void AssignmentRefExpression::dump(std::ostream &out) const {
+  m_lhs->dump(out);
+  out << " = &";
+  m_rhs->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

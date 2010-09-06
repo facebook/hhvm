@@ -396,7 +396,13 @@ bool ExpressionList::canonCompare(ExpressionPtr e) const {
 void ExpressionList::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   for (unsigned int i = 0; i < m_exps.size(); i++) {
     if (i > 0) cg_printf(", ");
-    if (m_exps[i]) m_exps[i]->outputPHP(cg, ar);
+    ExpressionPtr exp = m_exps[i];
+    if (exp) {
+      if (exp->hasContext(RefParameter)) {
+        cg_printf("&");
+      }
+      exp->outputPHP(cg, ar);
+    }
   }
 }
 

@@ -30,10 +30,11 @@ public:
   ScalarExpression(EXPRESSION_ARGS);
   ScalarExpression(EXPRESSION_ARGS, bool b);
   ScalarExpression(EXPRESSION_ARGS, const std::string &s);
-  ScalarExpression(EXPRESSION_ARGS, int type, const std::string &val);
+  ScalarExpression(EXPRESSION_ARGS, int type, const std::string &val,
+                   int subtype = 0);
   virtual Variant eval(VariableEnvironment &env) const;
   Variant getValue() const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   enum Kind {
     SNull,
@@ -47,6 +48,8 @@ private:
     int64 num;
     double dbl;
   } m_num;
+  int m_type;
+  int m_subtype;
   Kind m_kind;
   bool m_quoted;
   bool m_binary;

@@ -34,7 +34,7 @@ public:
                    CVarRef value, bool quoted = true);
 
   // change case to lower so to make it case insensitive
-  void toLower(bool funcCall=false);
+  void toLower(bool funcCall = false);
 
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   virtual int getLocalEffects() const { return NoEffect; }
@@ -79,6 +79,7 @@ public:
 private:
   int m_type;
   std::string m_value;
+  std::string m_originalValue;
   std::string m_translated;
   bool m_quoted;
   Variant m_variant; // value created for compile time optimization

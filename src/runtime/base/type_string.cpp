@@ -703,7 +703,7 @@ StaticString::StaticString(litstr s) : m_data(s) {
   String::operator=(&m_data);
   m_px->setStatic();
   if (!checkStatic()) {
-    s_stringSet.insert(m_px);
+    s_stringSet->insert(m_px);
   }
 }
 
@@ -712,7 +712,7 @@ StaticString::StaticString(litstr s, int length)
   String::operator=(&m_data);
   m_px->setStatic();
   if (!checkStatic()) {
-    s_stringSet.insert(m_px);
+    s_stringSet->insert(m_px);
   }
 }
 
@@ -721,7 +721,7 @@ StaticString::StaticString(std::string s)
   String::operator=(&m_data);
   m_px->setStatic();
   if (!checkStatic()) {
-    s_stringSet.insert(m_px);
+    s_stringSet->insert(m_px);
   }
 }
 
@@ -730,7 +730,7 @@ StaticString::StaticString(const StaticString &str)
   String::operator=(&m_data);
   m_px->setStatic();
   if (!checkStatic()) {
-    s_stringSet.insert(m_px);
+    s_stringSet->insert(m_px);
   }
 }
 
@@ -749,11 +749,36 @@ void StaticString::init(litstr s, int length) {
   String::operator=(&m_data);
   m_px->setStatic();
   if (!checkStatic()) {
-    s_stringSet.insert(m_px);
+    s_stringSet->insert(m_px);
   }
 }
 
-StringDataSet StaticString::s_stringSet;
+StringDataSet &StaticString::TheStaticStringSet() {
+  if (s_stringSet == NULL) {
+    s_stringSet = new StringDataSet();
+  }
+  return *s_stringSet;
+}
+
+void StaticString::FinishInit() {
+  // release the memory
+  StringDataSet empty;
+  s_stringSet->swap(empty);
+}
+
+void StaticString::ResetAll() {
+  delete s_stringSet;
+}
+
+StringDataSet *StaticString::s_stringSet = NULL;
+
+class StaticStringUninitializer {
+public:
+  ~StaticStringUninitializer() {
+    StaticString::ResetAll();
+  }
+};
+static StaticStringUninitializer s_static_string_uninitializer;
 
 //////////////////////////////////////////////////////////////////////////////
 }

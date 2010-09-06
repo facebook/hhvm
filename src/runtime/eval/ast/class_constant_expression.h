@@ -31,7 +31,7 @@ public:
  ClassConstantExpression(EXPRESSION_ARGS, const NamePtr &cls,
                          const std::string &constant);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   NamePtr m_class;
   std::string m_constant;

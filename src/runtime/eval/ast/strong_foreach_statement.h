@@ -32,7 +32,7 @@ public:
                         LvalExpressionPtr key,
                         LvalExpressionPtr value, StatementPtr body);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   LvalExpressionPtr m_source;
   LvalExpressionPtr m_key;

@@ -48,9 +48,9 @@ Variant SimpleFunctionCallExpression::eval(VariableEnvironment &env) const {
   }
 }
 
-void SimpleFunctionCallExpression::dump() const {
-  m_name->dump();
-  dumpParams();
+void SimpleFunctionCallExpression::dump(std::ostream &out) const {
+  m_name->dump(out);
+  dumpParams(out);
 }
 
 ExpressionPtr

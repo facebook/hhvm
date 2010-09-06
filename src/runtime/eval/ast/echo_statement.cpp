@@ -35,10 +35,10 @@ void EchoStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void EchoStatement::dump() const {
-  printf("echo(");
-  dumpVector(m_args, ", ");
-  printf(");");
+void EchoStatement::dump(std::ostream &out) const {
+  out << "echo ";
+  dumpVector(out, m_args);
+  out << ";\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

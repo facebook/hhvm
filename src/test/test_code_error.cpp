@@ -41,8 +41,9 @@ bool TestCodeError::RunTests(const std::string &which) {
 bool TestCodeError::Verify(CodeError::ErrorType type, const char *src,
                            const char *file, int line, bool exists) {
   AnalysisResultPtr ar(new AnalysisResult());
-  Parser::ParseString("<?php ", ar, "f2"); // for TestPHPIncludeFileNotInLib
-  Parser::ParseString(src, ar, "f1");
+  // for TestPHPIncludeFileNotInLib
+  Compiler::Parser::ParseString("<?php ", ar, "f2");
+  Compiler::Parser::ParseString(src, ar, "f1");
   BuiltinSymbols::Load(ar);
   ar->analyzeProgram();
   ar->inferTypes();

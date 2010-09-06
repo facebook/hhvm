@@ -46,6 +46,7 @@ public:
   TypePtr getTypeSpec(AnalysisResultPtr ar);
 private:
   std::string m_type;
+  std::string m_originalType;
   std::string m_name;
   bool m_ref;
   bool m_hasRTTI;

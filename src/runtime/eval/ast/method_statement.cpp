@@ -237,6 +237,11 @@ Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
   return Variant();
 }
 
+void MethodStatement::dump(std::ostream &out) const {
+  ClassStatement::dumpModifiers(out, m_modifiers, false);
+  FunctionStatement::dump(out);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 }

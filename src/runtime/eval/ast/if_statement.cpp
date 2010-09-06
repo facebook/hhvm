@@ -39,12 +39,12 @@ Variant IfBranch::evalCond(VariableEnvironment &env) const {
   return m_cond->eval(env);
 }
 
-void IfBranch::dump() const {
-  printf("if (");
-  m_cond->dump();
-  printf(") {");
-  if (m_body) m_body->dump();
-  printf("}");
+void IfBranch::dump(std::ostream &out) const {
+  out << "if (";
+  m_cond->dump(out);
+  out << ") {";
+  if (m_body) m_body->dump(out);
+  out << "}";
 }
 
 IfStatement::IfStatement(STATEMENT_ARGS,
@@ -66,13 +66,14 @@ void IfStatement::eval(VariableEnvironment &env) const {
   if (m_else) EVAL_STMT(m_else, env);
 }
 
-void IfStatement::dump() const {
-  dumpVector(m_branches, " else ");
+void IfStatement::dump(std::ostream &out) const {
+  dumpVector(out, m_branches, "else");
   if (m_else) {
-    printf(" else {");
-    m_else->dump();
-    printf("}");
+    out << "else {";
+    m_else->dump(out);
+    out << "}";
   }
+  out << "\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

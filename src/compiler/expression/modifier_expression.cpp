@@ -15,7 +15,7 @@
 */
 
 #include <compiler/expression/modifier_expression.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 using namespace HPHP;
 using namespace std;
@@ -119,16 +119,26 @@ void ModifierExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     return;
   }
 
+  bool printed = false;
   for (unsigned int i = 0; i < m_modifiers.size(); i++) {
-    if (i > 0) cg_printf(" ");
-
     switch (m_modifiers[i]) {
-    case T_PUBLIC:    cg_printf("public");    break;
-    case T_PROTECTED: cg_printf("protected"); break;
-    case T_PRIVATE:   cg_printf("private");   break;
-    case T_STATIC:    cg_printf("static");    break;
-    case T_ABSTRACT:  cg_printf("abstract");  break;
-    case T_FINAL:     cg_printf("final");     break;
+    case T_PUBLIC:    cg_printf("public");    printed = true; break;
+    case T_PROTECTED: cg_printf("protected"); printed = true; break;
+    case T_PRIVATE:   cg_printf("private");   printed = true; break;
+    }
+  }
+  if (!printed) {
+    cg_printf("public");
+  }
+
+  for (unsigned int i = 0; i < m_modifiers.size(); i++) {
+    switch (m_modifiers[i]) {
+    case T_PUBLIC:    break;
+    case T_PROTECTED: break;
+    case T_PRIVATE:   break;
+    case T_STATIC:    cg_printf(" static");    break;
+    case T_ABSTRACT:  cg_printf(" abstract");  break;
+    case T_FINAL:     cg_printf(" final");     break;
     default:
       ASSERT(false);
     }

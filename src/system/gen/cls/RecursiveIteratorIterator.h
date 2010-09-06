@@ -61,8 +61,8 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: void t___construct(Variant v_iterator, Variant v_mode = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */, Variant v_flags = 0LL);
-  public: c_RecursiveIteratorIterator *create(Variant v_iterator, Variant v_mode = 0LL /* recursiveiteratoriterator::LEAVES_ONLY */, Variant v_flags = 0LL);
+  public: void t___construct(Variant v_iterator, Variant v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0LL);
+  public: c_RecursiveIteratorIterator *create(Variant v_iterator, Variant v_mode = 0LL /* RecursiveIteratorIterator::LEAVES_ONLY */, Variant v_flags = 0LL);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);

@@ -51,12 +51,12 @@ void ArrayPairVal::set(VariableEnvironment &env, Array &arr) const {
   }
 }
 
-void ArrayPairVal::dump() const {
+void ArrayPairVal::dump(std::ostream &out) const {
   if (m_key) {
-    m_key->dump();
-    printf(" => ");
+    m_key->dump(out);
+    out << " => ";
   }
-  m_val->dump();
+  m_val->dump(out);
 }
 
 ArrayPairRef::ArrayPairRef(CONSTRUCT_ARGS, ExpressionPtr key,
@@ -78,12 +78,13 @@ void ArrayPairRef::set(VariableEnvironment &env, Array &arr) const {
   }
 }
 
-void ArrayPairRef::dump() const {
+void ArrayPairRef::dump(std::ostream &out) const {
   if (m_key) {
-    m_key->dump();
-    printf(" => ");
+    m_key->dump(out);
+    out << " => ";
   }
-  m_val->dump();
+  out << "&";
+  m_val->dump(out);
 }
 
 ArrayExpression::ArrayExpression(EXPRESSION_ARGS,
@@ -100,10 +101,10 @@ Variant ArrayExpression::eval(VariableEnvironment &env) const {
   return arr;
 }
 
-void ArrayExpression::dump() const {
-  printf("array(");
-  dumpVector(m_elems, ", ");
-  printf(")");
+void ArrayExpression::dump(std::ostream &out) const {
+  out << "array(";
+  dumpVector(out, m_elems);
+  out << ")";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -42,7 +42,7 @@ public:
   void sinkStaticMember(Parser *parser, const NamePtr &className);
   LvalExpressionPtr getArr() const { return m_arr; }
   ExpressionPtr getIdx() const { return m_idx; }
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   LvalExpressionPtr m_arr;
   ExpressionPtr m_idx;

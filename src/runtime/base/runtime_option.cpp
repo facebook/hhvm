@@ -17,6 +17,10 @@
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/shared/shared_store.h>
+#include <runtime/base/server/access_log.h>
+#include <runtime/base/util/extended_logger.h>
+#include <runtime/base/fiber_async_func.h>
+#include <runtime/base/util/simple_counter.h>
 #include <util/util.h>
 #include <util/network.h>
 #include <util/logger.h>
@@ -24,10 +28,7 @@
 #include <util/process.h>
 #include <util/file_cache.h>
 #include <runtime/base/preg.h>
-#include <runtime/base/server/access_log.h>
-#include <runtime/base/util/extended_logger.h>
-#include <runtime/base/fiber_async_func.h>
-#include <runtime/base/util/simple_counter.h>
+#include <util/parser/scanner.h>
 
 using namespace std;
 
@@ -267,7 +268,11 @@ std::map<std::string, std::string> RuntimeOption::EnvVariables;
 std::string RuntimeOption::LightProcessFilePrefix;
 int RuntimeOption::LightProcessCount;
 
+bool RuntimeOption::EnableShortTags = true;
+bool RuntimeOption::EnableAspTags = false;
 bool RuntimeOption::EnableXHP = true;
+int RuntimeOption::ScannerType = 0;
+
 bool RuntimeOption::EnableStrict = false;
 int RuntimeOption::StrictLevel = 1; // StrictBasic, cf strict_mode.h
 bool RuntimeOption::StrictFatal = false;
@@ -836,7 +841,13 @@ void RuntimeOption::Load(Hdf &config) {
   }
   {
     Hdf eval = config["Eval"];
+    EnableShortTags= eval["EnableShortTags"].getBool(true);
+    if (EnableShortTags) ScannerType |= Scanner::AllowShortTags;
+    EnableAspTags = eval["EnableAspTags"].getBool();
+    if (EnableAspTags) ScannerType |= Scanner::AllowAspTags;
     EnableXHP = eval["EnableXHP"].getBool(true);
+    if (EnableXHP) ScannerType |= Scanner::PreprocessXHP;
+
     EnableStrict = eval["EnableStrict"].getBool();
     StrictLevel = eval["StrictLevel"].getInt32(1); // StrictBasic
     StrictFatal = eval["StrictFatal"].getBool();

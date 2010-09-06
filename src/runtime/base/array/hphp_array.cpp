@@ -174,7 +174,7 @@ void HphpArray::dumpDebugInfo() const {
       Variant v2(vs.serialize(v, true));
       String s = v2.toString().data();
       if (elms[i].key != NULL) {
-        String k = Util::escapeStringForCpp(elms[i].key->data());
+        String k = Util::escapeStringForCPP(elms[i].key->data());
         fprintf(stderr, "  [%3d] hash=0x%016llx key=\"%s\" data=(%.*s)\n",
                int(i), elms[i].h, k.data(), s.size()-1, s.data());
       } else {

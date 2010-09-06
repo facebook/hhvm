@@ -18,7 +18,7 @@
 #include <runtime/eval/ast/name.h>
 #include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -189,10 +189,10 @@ void ObjectPropertyExpression::unset(VariableEnvironment &env) const {
 
 NamePtr ObjectPropertyExpression::getProperty() const { return m_name; }
 
-void ObjectPropertyExpression::dump() const {
-  m_obj->dump();
-  printf("->");
-  m_name->dump();
+void ObjectPropertyExpression::dump(std::ostream &out) const {
+  m_obj->dump(out);
+  out << "->";
+  m_name->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

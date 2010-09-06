@@ -19,7 +19,7 @@
 #include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/ast/static_member_expression.h>
 #include <runtime/eval/ast/name.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -179,13 +179,13 @@ void ArrayElementExpression::sinkStaticMember(Parser *parser,
   ASSERT(false);
 }
 
-void ArrayElementExpression::dump() const {
-  m_arr->dump();
-  printf("[");
+void ArrayElementExpression::dump(std::ostream &out) const {
+  m_arr->dump(out);
+  out << "[";
   if (m_idx) {
-    m_idx->dump();
+    m_idx->dump(out);
   }
-  printf("]");
+  out << "]";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

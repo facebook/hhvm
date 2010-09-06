@@ -30,12 +30,12 @@ public:
   UnaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp, int op, bool front);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_exp;
   int m_op;
   bool m_front;
-  void dumpOp() const;
+  void dumpOp(std::ostream &out) const;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

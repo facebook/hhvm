@@ -80,10 +80,10 @@ Variant StaticMethodExpression::eval(VariableEnvironment &env) const {
   return ref(invoke_static_method(cname.data(), name.data(), getParams(env)));
 }
 
-void StaticMethodExpression::dump() const {
-  m_cname->dump();
-  printf("::");
-  SimpleFunctionCallExpression::dump();
+void StaticMethodExpression::dump(std::ostream &out) const {
+  m_cname->dump(out);
+  out << "::";
+  SimpleFunctionCallExpression::dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

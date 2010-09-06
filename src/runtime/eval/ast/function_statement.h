@@ -44,10 +44,10 @@ public:
   bool isRef() const { return m_ref; }
   void bind(VariableEnvironment &env, CVarRef val, bool ref = false) const;
   void bindDefault(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
   void getInfo(ClassInfo::ParameterInfo &info, VariableEnvironment &env) const;
   bool isOptional() const;
-  void dropDefault();
+  void addNullDefault(void *parser);
   int argNum() const { return m_argNum; }
 private:
   std::string m_type;
@@ -66,7 +66,7 @@ public:
   FunctionStatement(STATEMENT_ARGS, const std::string &name,
                     const std::string &doc);
   ~FunctionStatement();
-  void init(bool ref, const std::vector<ParameterPtr> params,
+  void init(void *parser, bool ref, const std::vector<ParameterPtr> params,
             StatementListStatementPtr body, bool has_call_to_get_args);
   const std::string &name() const { return m_name; }
   const std::string &lname() const { return m_lname; }
@@ -79,7 +79,7 @@ public:
                        const FunctionCallExpression *caller) const;
   Variant invokeImpl(VariableEnvironment &env, CArrRef params) const;
   virtual LVariableTable *getStaticVars(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
   void getInfo(ClassInfo::MethodInfo &info) const;
   bool refReturn() const { return m_ref; }
   const std::vector<ParameterPtr>& getParams() const { return m_params; }

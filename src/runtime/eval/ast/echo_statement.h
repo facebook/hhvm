@@ -30,7 +30,7 @@ class EchoStatement : public Statement {
 public:
   EchoStatement(STATEMENT_ARGS, const std::vector<ExpressionPtr> &args);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<ExpressionPtr> m_args;
 };

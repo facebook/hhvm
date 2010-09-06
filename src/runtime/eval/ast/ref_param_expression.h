@@ -34,7 +34,7 @@ public:
   virtual Variant set(VariableEnvironment &env, CVarRef val) const;
   virtual Variant setOp(VariableEnvironment &env, int op, CVarRef rhs) const;
   virtual void unset(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
   virtual bool isRefParam() const;
 private:
   LvalExpressionPtr m_lv;

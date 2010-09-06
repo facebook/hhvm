@@ -45,18 +45,20 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void ForEachStatement::dump() const {
-  printf("foreach (");
-  m_source->dump();
-  printf(" as ");
+void ForEachStatement::dump(std::ostream &out) const {
+  out << "foreach (";
+  m_source->dump(out);
+  out << " as ";
   if (m_key) {
-    m_key->dump();
-    printf(" => ");
+    m_key->dump(out);
+    out << " => ";
   }
-  m_value->dump();
-  printf(") {");
-  m_body->dump();
-  printf("}");
+  m_value->dump(out);
+  out << ") {";
+  if (m_body) {
+    m_body->dump(out);
+  }
+  out << "}\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

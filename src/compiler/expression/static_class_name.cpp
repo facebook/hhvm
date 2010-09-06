@@ -50,14 +50,7 @@ void StaticClassName::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_class) {
     m_class->outputPHP(cg, ar);
   } else {
-    if (ar && cg.getOutput() == CodeGenerator::PickledPHP) {
-      ClassScopePtr cls = ar->resolveClass(m_className);
-      if (cls) {
-        cg_printf("%s", cls->getName().c_str());
-        return;
-      }
-    }
-    cg_printf("%s", m_className.c_str());
+    cg_printf("%s", m_origClassName.c_str());
   }
 }
 

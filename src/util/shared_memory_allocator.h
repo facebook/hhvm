@@ -114,6 +114,7 @@ class SharedMemoryManager {
 public:
   // an app needs to call this during startup time
   static void Init(int size, bool clean);
+  static void Reset();
 
   // called by allocator class
   static boost::interprocess::managed_shared_memory *GetSegment() {

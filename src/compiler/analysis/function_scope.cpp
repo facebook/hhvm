@@ -32,7 +32,7 @@
 #include <util/util.h>
 #include <runtime/base/class_info.h>
 #include <runtime/base/builtin_functions.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <runtime/base/zend/zend_string.h>
 
 using namespace HPHP;

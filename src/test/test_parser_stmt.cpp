@@ -63,19 +63,19 @@ bool TestParserStmt::TestFunctionStatement() {
     "function test() {\n}\n");
 
   V("<?php function test() {return 0;}",
-    "function test() {\n  return 0;\n}\n");
+    "function test() {\nreturn 0;\n}\n");
 
   V("<?php function test() {return 0;return 1;}",
-    "function test() {\n  return 0;\n  return 1;\n}\n");
+    "function test() {\nreturn 0;\nreturn 1;\n}\n");
 
   V("<?php function &test() {return 0;}",
-    "function &test() {\n  return 0;\n}\n");
+    "function &test() {\nreturn 0;\n}\n");
 
   V("<?php function test($param) {return 0;}",
-    "function test($param) {\n  return 0;\n}\n");
+    "function test($param) {\nreturn 0;\n}\n");
 
   V("<?php function test ( $param1 ,  $param2 ) {return 0;}",
-    "function test($param1, $param2) {\n  return 0;\n}\n");
+    "function test($param1, $param2) {\nreturn 0;\n}\n");
 
 #ifdef HPHP_NOTE
   {
@@ -93,122 +93,131 @@ bool TestParserStmt::TestFunctionStatement() {
 
 bool TestParserStmt::TestClassStatement() {
   V("<?php class Test {}",
-    "class test {\n}\n");
+    "class Test {\n}\n");
 
   V("<?php class Test { public $data;}",
-    "class test {\n  public $data = null;\n}\n");
+    "class Test {\npublic $data = null;\n}\n");
 
   V("<?php abstract class Test { public $data;}",
-    "abstract class test {\n  public $data = null;\n}\n");
+    "abstract class Test {\npublic $data = null;\n}\n");
 
   V("<?php final class Test { public $data;}",
-    "final class test {\n  public $data = null;\n}\n");
+    "final class Test {\npublic $data = null;\n}\n");
 
   V("<?php class Test extends Base { public $data;}",
-    "class test extends base {\n  public $data = null;\n}\n");
+    "class Test extends Base {\npublic $data = null;\n}\n");
 
   V("<?php class Test implements Base { public $data;}",
-    "class test implements base {\n  public $data = null;\n}\n");
+    "class Test implements Base {\npublic $data = null;\n}\n");
 
   V("<?php class Test implements Base,Base2 { public $data;}",
-    "class test implements base, base2 {\n  public $data = null;\n}\n");
+    "class Test implements Base, Base2 {\npublic $data = null;\n}\n");
 
   V("<?php class Test { public $data; function test() {}}",
-    "class test {\n  public $data = null;\n  public function test() {\n  }\n}\n");
+    "class Test {\npublic $data = null;\n"
+    "public function test() {\n}\n}\n");
 
   V("<?php class Test { private $data; function test() {}}",
-    "class test {\n  private $data = null;\n  public function test() {\n  }\n}\n");
+    "class Test {\nprivate $data = null;\n"
+    "public function test() {\n}\n}\n");
 
   V("<?php class Test { function test() {}}",
-    "class test {\n  public function test() {\n  }\n}\n");
+    "class Test {\npublic function test() {\n}\n}\n");
 
   return true;
 }
 
 bool TestParserStmt::TestInterfaceStatement() {
   V("<?php interface Test {}",
-    "interface test {\n}\n");
+    "interface Test {\n}\n");
 
   V("<?php interface Test extends Base {}",
-    "interface test extends base {\n}\n");
+    "interface Test extends Base {\n}\n");
 
   V("<?php interface Test extends Base,Base1 {}",
-    "interface test extends base, base1 {\n}\n");
+    "interface Test extends Base, Base1 {\n}\n");
 
   V("<?php interface Test { function test();}",
-    "interface test {\n  public function test();\n}\n");
+    "interface Test {\npublic function test();\n}\n");
 
   V("<?php interface Test { function test(); function test2();}",
-    "interface test {\n  public function test();\n  public function test2();\n}\n");
+    "interface Test {\npublic function test();\n"
+    "public function test2();\n}\n");
 
   return true;
 }
 
 bool TestParserStmt::TestClassVariable() {
   V("<?php class Test { public $data;}",
-    "class test {\n  public $data = null;\n}\n");
+    "class Test {\npublic $data = null;\n}\n");
 
   V("<?php class Test { protected $data;}",
-    "class test {\n  protected $data = null;\n}\n");
+    "class Test {\nprotected $data = null;\n}\n");
 
   V("<?php class Test { private $data;}",
-    "class test {\n  private $data = null;\n}\n");
+    "class Test {\nprivate $data = null;\n}\n");
 
   V("<?php class Test { static $data;}",
-    "class test {\n  static $data = null;\n}\n");
+    "class Test {\npublic static $data = null;\n}\n");
 
   V("<?php class Test { abstract $data;}",
-    "class test {\n  abstract $data = null;\n}\n");
+    "class Test {\npublic abstract $data = null;\n}\n");
 
   V("<?php class Test { final $data;}",
-    "class test {\n  final $data = null;\n}\n");
+    "class Test {\npublic final $data = null;\n}\n");
 
   V("<?php class Test { private static $data;}",
-    "class test {\n  private static $data = null;\n}\n");
+    "class Test {\nprivate static $data = null;\n}\n");
 
   V("<?php class Test { private static $data=2;}",
-    "class test {\n  private static $data = 2;\n}\n");
+    "class Test {\nprivate static $data = 2;\n}\n");
 
-  V("<?php class Test { var $data,$data2;}",
-    "class test {\n  public $data = null, $data2 = null;\n}\n");
+  V2("<?php class Test { var $data,$data2;}",
+     "class Test {\npublic $data = null, $data2 = null;\n}\n",
+     "class Test {\npublic $data = null;\npublic $data2 = null;\n}\n");
 
-  V("<?php class Test { var $data,$data2=2;}",
-    "class test {\n  public $data = null, $data2 = 2;\n}\n");
+  V2("<?php class Test { var $data,$data2=2;}",
+     "class Test {\npublic $data = null, $data2 = 2;\n}\n",
+     "class Test {\npublic $data = null;\npublic $data2 = 2;\n}\n");
 
-  V("<?php class Test { var $data=2,$data2;}",
-    "class test {\n  public $data = 2, $data2 = null;\n}\n");
+  V2("<?php class Test { var $data=2,$data2;}",
+     "class Test {\npublic $data = 2, $data2 = null;\n}\n",
+     "class Test {\npublic $data = 2;\npublic $data2 = null;\n}\n");
 
-  V("<?php class Test { var $data=2,$data2=3;}",
-    "class test {\n  public $data = 2, $data2 = 3;\n}\n");
+  V2("<?php class Test { var $data=2,$data2=3;}",
+     "class Test {\npublic $data = 2, $data2 = 3;\n}\n",
+     "class Test {\npublic $data = 2;\npublic $data2 = 3;\n}\n");
 
   return true;
 }
 
 bool TestParserStmt::TestClassConstant() {
   V("<?php class Test { const DATA=1;}",
-    "class test {\n  const DATA = 1;\n}\n");
+    "class Test {\nconst DATA = 1;\n}\n");
 
   V("<?php class Test { const DATA=1,DATA2=2;}",
-    "class test {\n  const DATA = 1, DATA2 = 2;\n}\n");
+    "class Test {\nconst DATA = 1, DATA2 = 2;\n}\n");
 
   return true;
 }
 
 bool TestParserStmt::TestMethodStatement() {
-  V("<?php class A {function test();}",
-    "class a {\n  public function test();\n}\n");
+  V("<?php class A {abstract function test();}",
+    "class A {\npublic abstract function test();\n}\n");
   V("<?php class A {function test() {}}",
-    "class a {\n  public function test() {\n  }\n}\n");
+    "class A {\npublic function test() {\n}\n}\n");
   V("<?php class A {function test() {return 0;}}",
-    "class a {\n  public function test() {\n    return 0;\n  }\n}\n");
+    "class A {\npublic function test() {\nreturn 0;\n}\n}\n");
   V("<?php class A {function test() {return 0;return 1;}}",
-    "class a {\n  public function test() {\n    return 0;\n    return 1;\n  }\n}\n");
+    "class A {\npublic function test() {\nreturn 0;\n"
+    "return 1;\n}\n}\n");
   V("<?php class A {function &test() {return 0;}}",
-    "class a {\n  public function &test() {\n    return 0;\n  }\n}\n");
+    "class A {\npublic function &test() {\nreturn 0;\n}\n}\n");
   V("<?php class A {function test($param) {return 0;}}",
-    "class a {\n  public function test($param) {\n    return 0;\n  }\n}\n");
+    "class A {\npublic function test($param) {\nreturn 0;\n}\n}\n");
   V("<?php class A {function test ( $param1 ,  $param2 ) {return 0;}}",
-    "class a {\n  public function test($param1, $param2) {\n    return 0;\n  }\n}\n");
+    "class A {\npublic function test($param1, $param2) {\n"
+    "return 0;\n}\n}\n");
 
   return true;
 }
@@ -221,13 +230,13 @@ bool TestParserStmt::TestStatementList() {
     "return;\n");
 
   V("<?php function test() {} ; class Test {}",
-    "function test() {\n}\nclass test {\n}\n");
+    "function test() {\n}\nclass Test {\n}\n");
 
   V("<?php function test() {} ; class Test {} __halt_compiler();",
-    "function test() {\n}\nclass test {\n}\n");
+    "function test() {\n}\nclass Test {\n}\n");
 
   V("<?php ; __halt_compiler(); function test() {} class Test {}",
-    "function test() {\n}\nclass test {\n}\n");
+    "function test() {\n}\nclass Test {\n}\n");
 
   return true;
 }
@@ -237,19 +246,19 @@ bool TestParserStmt::TestBlockStatement() {
     "{\n}\n");
 
   V("<?php { return;}",
-    "{\n  return;\n}\n");
+    "{\nreturn;\n}\n");
 
   V("<?php { $a = 1;return;}",
-    "{\n  $a = 1;\n  return;\n}\n");
+    "{\n$a = 1;\nreturn;\n}\n");
 
   V("<?php declare(A=1) return;",
-    "{\n  return;\n}\n");
+    "{\nreturn;\n}\n");
 
   V("<?php declare(A=1): return; enddeclare;",
-    "{\n  return;\n}\n");
+    "{\nreturn;\n}\n");
 
   V("<?php declare(A=1): $a = 1;return; enddeclare;",
-    "{\n  $a = 1;\n  return;\n}\n");
+    "{\n$a = 1;\nreturn;\n}\n");
 
   return true;
 }
@@ -266,10 +275,10 @@ bool TestParserStmt::TestIfStatement() {
     "if (a > 1) {\n}\n");
 
   V("<?php if (a>1) { return;}",
-    "if (a > 1) {\n  return;\n}\n");
+    "if (a > 1) {\nreturn;\n}\n");
 
   V("<?php if (a>1) { return; return 2;}",
-    "if (a > 1) {\n  return;\n  return 2;\n}\n");
+    "if (a > 1) {\nreturn;\nreturn 2;\n}\n");
 
   V("<?php if (a>1); else;",
     "if (a > 1) {}\n");
@@ -278,10 +287,10 @@ bool TestParserStmt::TestIfStatement() {
     "if (a > 1) {}\nelse {\n}\n");
 
   V("<?php if (a>1); else { return;}",
-    "if (a > 1) {}\nelse {\n  return;\n}\n");
+    "if (a > 1) {}\nelse {\nreturn;\n}\n");
 
   V("<?php if (a>1); else { return; return 2;}",
-    "if (a > 1) {}\nelse {\n  return;\n  return 2;\n}\n");
+    "if (a > 1) {}\nelse {\nreturn;\nreturn 2;\n}\n");
 
   V("<?php if (a>1); elseif(b>2);",
     "if (a > 1) {}\nelseif (b > 2) {}\n");
@@ -290,22 +299,23 @@ bool TestParserStmt::TestIfStatement() {
     "if (a > 1) {}\nelseif (b > 2) {\n}\n");
 
   V("<?php if (a>1); elseif(b>2){ return;}",
-    "if (a > 1) {}\nelseif (b > 2) {\n  return;\n}\n");
+    "if (a > 1) {}\nelseif (b > 2) {\nreturn;\n}\n");
 
   V("<?php if (a>1); elseif(b>2){ return; return 2;}",
-    "if (a > 1) {}\nelseif (b > 2) {\n  return;\n  return 2;\n}\n");
+    "if (a > 1) {}\nelseif (b > 2) {\nreturn;\nreturn 2;\n}\n");
 
   V("<?php if (a>1); elseif(b>2); else {$a=2;}",
-    "if (a > 1) {}\nelseif (b > 2) {}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {}\nelseif (b > 2) {}\nelse {\n$a = 2;\n}\n");
 
   V("<?php if (a>1); elseif(b>2){} else {$a=2;}",
-    "if (a > 1) {}\nelseif (b > 2) {\n}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {}\nelseif (b > 2) {\n}\nelse {\n$a = 2;\n}\n");
 
   V("<?php if (a>1); elseif(b>2){ return;} else{$a=2;}",
-    "if (a > 1) {}\nelseif (b > 2) {\n  return;\n}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {}\nelseif (b > 2) {\nreturn;\n}\nelse {\n$a = 2;\n}\n");
 
   V("<?php if (a>1); elseif(b>2){ return; return 2;} else{$a=2;}",
-    "if (a > 1) {}\nelseif (b > 2) {\n  return;\n  return 2;\n}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {}\nelseif (b > 2) {\nreturn;\nreturn 2;\n}\n"
+    "else {\n$a = 2;\n}\n");
 
   // if-endif format
 
@@ -316,13 +326,13 @@ bool TestParserStmt::TestIfStatement() {
     "if (a > 1) {\n}\n");
 
   V("<?php if (a>1): {} endif;",
-    "if (a > 1) {\n  {\n  }\n}\n");
+    "if (a > 1) {\n{\n}\n}\n");
 
   V("<?php if (a>1): return; endif;",
-    "if (a > 1) {\n  return;\n}\n");
+    "if (a > 1) {\nreturn;\n}\n");
 
   V("<?php if (a>1): return; return 2; endif;",
-    "if (a > 1) {\n  return;\n  return 2;\n}\n");
+    "if (a > 1) {\nreturn;\nreturn 2;\n}\n");
 
   V("<?php if (a>1):; else: endif;",
     "if (a > 1) {\n}\n");
@@ -331,13 +341,13 @@ bool TestParserStmt::TestIfStatement() {
     "if (a > 1) {\n}\nelse {\n}\n");
 
   V("<?php if (a>1):; else: {} endif;",
-    "if (a > 1) {\n}\nelse {\n  {\n  }\n}\n");
+    "if (a > 1) {\n}\nelse {\n{\n}\n}\n");
 
   V("<?php if (a>1):; else: return; endif;",
-    "if (a > 1) {\n}\nelse {\n  return;\n}\n");
+    "if (a > 1) {\n}\nelse {\nreturn;\n}\n");
 
   V("<?php if (a>1):; else: return; return 2; endif;",
-    "if (a > 1) {\n}\nelse {\n  return;\n  return 2;\n}\n");
+    "if (a > 1) {\n}\nelse {\nreturn;\nreturn 2;\n}\n");
 
   V("<?php if (a>1):; elseif(b>2): endif;",
     "if (a > 1) {\n}\nelseif (b > 2) {}\n");
@@ -346,25 +356,26 @@ bool TestParserStmt::TestIfStatement() {
     "if (a > 1) {\n}\nelseif (b > 2) {\n}\n");
 
   V("<?php if (a>1):; elseif(b>2):{} endif;",
-    "if (a > 1) {\n}\nelseif (b > 2) {\n  {\n  }\n}\n");
+    "if (a > 1) {\n}\nelseif (b > 2) {\n{\n}\n}\n");
 
   V("<?php if (a>1):; elseif(b>2): return; endif;",
-    "if (a > 1) {\n}\nelseif (b > 2) {\n  return;\n}\n");
+    "if (a > 1) {\n}\nelseif (b > 2) {\nreturn;\n}\n");
 
   V("<?php if (a>1):; elseif(b>2): return; return 2; endif;",
-    "if (a > 1) {\n}\nelseif (b > 2) {\n  return;\n  return 2;\n}\n");
+    "if (a > 1) {\n}\nelseif (b > 2) {\nreturn;\nreturn 2;\n}\n");
 
   V("<?php if (a>1):; elseif(b>2):; else: $a=2; endif;",
-    "if (a > 1) {\n}\nelseif (b > 2) {\n}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {\n}\nelseif (b > 2) {\n}\nelse {\n$a = 2;\n}\n");
 
   V("<?php if (a>1):; elseif(b>2):{} else: $a=2; endif;",
-    "if (a > 1) {\n}\nelseif (b > 2) {\n  {\n  }\n}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {\n}\nelseif (b > 2) {\n{\n}\n}\nelse {\n$a = 2;\n}\n");
 
   V("<?php if (a>1):; elseif(b>2): return; else:$a=2; endif;",
-    "if (a > 1) {\n}\nelseif (b > 2) {\n  return;\n}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {\n}\nelseif (b > 2) {\nreturn;\n}\nelse {\n$a = 2;\n}\n");
 
   V("<?php if (a>1):; elseif(b>2): return; return 2; else:$a=2; endif;",
-    "if (a > 1) {\n}\nelseif (b > 2) {\n  return;\n  return 2;\n}\nelse {\n  $a = 2;\n}\n");
+    "if (a > 1) {\n}\nelseif (b > 2) {\nreturn;\nreturn 2;\n}\n"
+    "else {\n$a = 2;\n}\n");
 
   return true;
 }
@@ -377,7 +388,7 @@ bool TestParserStmt::TestWhileStatement() {
     "while (true) {\n}\n");
 
   V("<?php while (true) { return;}",
-    "while (true) {\n  return;\n}\n");
+    "while (true) {\nreturn;\n}\n");
 
   V("<?php while (true): endwhile;",
     "while (true) {}\n");
@@ -386,10 +397,10 @@ bool TestParserStmt::TestWhileStatement() {
     "while (true) {\n}\n");
 
   V("<?php while (true): {} endwhile;",
-    "while (true) {\n  {\n  }\n}\n");
+    "while (true) {\n{\n}\n}\n");
 
   V("<?php while (true): return; endwhile;",
-    "while (true) {\n  return;\n}\n");
+    "while (true) {\nreturn;\n}\n");
 
   return true;
 }
@@ -402,7 +413,7 @@ bool TestParserStmt::TestDoStatement() {
     "do {\n}\nwhile (true);\n");
 
   V("<?php do {$a=1;} while (true);",
-    "do {\n  $a = 1;\n}\nwhile (true);\n");
+    "do {\n$a = 1;\n}\nwhile (true);\n");
 
   return true;
 }
@@ -415,7 +426,7 @@ bool TestParserStmt::TestForStatement() {
     "for ($i = 1; $i < 10; $i++) {\n}\n");
 
   V("<?php for ($i = 1; $i < 10; $i++) { return;}",
-    "for ($i = 1; $i < 10; $i++) {\n  return;\n}\n");
+    "for ($i = 1; $i < 10; $i++) {\nreturn;\n}\n");
 
   V("<?php for ($i = 1; $i < 10; $i++): endfor;",
     "for ($i = 1; $i < 10; $i++) {}\n");
@@ -424,13 +435,13 @@ bool TestParserStmt::TestForStatement() {
     "for ($i = 1; $i < 10; $i++) {\n}\n");
 
   V("<?php for ($i = 1; $i < 10; $i++): {} endfor;",
-    "for ($i = 1; $i < 10; $i++) {\n  {\n  }\n}\n");
+    "for ($i = 1; $i < 10; $i++) {\n{\n}\n}\n");
 
   V("<?php for ($i = 1; $i < 10; $i++): return; endfor;",
-    "for ($i = 1; $i < 10; $i++) {\n  return;\n}\n");
+    "for ($i = 1; $i < 10; $i++) {\nreturn;\n}\n");
 
   V("<?php for ($i = 1,$j = 2; $i < 10; $i++,$j++): return; endfor;",
-    "for ($i = 1, $j = 2; $i < 10; $i++, $j++) {\n  return;\n}\n");
+    "for ($i = 1, $j = 2; $i < 10; $i++, $j++) {\nreturn;\n}\n");
 
   return true;
 }
@@ -446,7 +457,7 @@ bool TestParserStmt::TestSwitchStatement() {
     "switch ($a) {\ncase 1:\n}\n");
 
   V("<?php switch($a) { case 1: $a = 1; break; }",
-    "switch ($a) {\ncase 1:\n  $a = 1;\n  break;\n}\n");
+    "switch ($a) {\ncase 1:\n$a = 1;\nbreak;\n}\n");
 
   V("<?php switch($a) { default: }",
     "switch ($a) {\ndefault:\n}\n");
@@ -455,13 +466,13 @@ bool TestParserStmt::TestSwitchStatement() {
     "switch ($a) {\ndefault:\n}\n");
 
   V("<?php switch($a) { default: $a = 1; break; }",
-    "switch ($a) {\ndefault:\n  $a = 1;\n  break;\n}\n");
+    "switch ($a) {\ndefault:\n$a = 1;\nbreak;\n}\n");
 
   V("<?php switch($a) { case 1: $a = 0; case 2: $a = 1; break; }",
-    "switch ($a) {\ncase 1:\n  $a = 0;\ncase 2:\n  $a = 1;\n  break;\n}\n");
+    "switch ($a) {\ncase 1:\n$a = 0;\ncase 2:\n$a = 1;\nbreak;\n}\n");
 
   V("<?php switch($a) { case 1: $a = 0; default: $a = 1; break; }",
-    "switch ($a) {\ncase 1:\n  $a = 0;\ndefault:\n  $a = 1;\n  break;\n}\n");
+    "switch ($a) {\ncase 1:\n$a = 0;\ndefault:\n$a = 1;\nbreak;\n}\n");
 
   V("<?php switch($a) { default;; }",
     "switch ($a) {\ndefault:\n}\n");
@@ -593,11 +604,8 @@ bool TestParserStmt::TestForEachStatement() {
   V("<?php foreach ($a + $b as $b => $c) ;",
     "foreach ($a + $b as $b => $c) {}\n");
 
-  V("<?php foreach ($a + $b as $b => &$c) ;",
-    "foreach ($a + $b as $b => &$c) {}\n");
-
-  V("<?php foreach ($a + $b as $b => &$c) : $a = 1; $b = 2; endforeach;",
-    "foreach ($a + $b as $b => &$c) {\n  $a = 1;\n  $b = 2;\n}\n");
+  V("<?php foreach ($a + $b as $b => $c) : $a = 1; $b = 2; endforeach;",
+    "foreach ($a + $b as $b => $c) {\n$a = 1;\n$b = 2;\n}\n");
 
   V("<?php foreach ($a as &$name => &$b) ;",
     "foreach ($a as $name => &$b) {}\n");
@@ -610,13 +618,32 @@ bool TestParserStmt::TestForEachStatement() {
 
 bool TestParserStmt::TestCatchStatement() {
   V("<?php try { } catch (Exception $e) {}",
-    "try {\n} catch (exception $e) {\n}\n");
+    "try {\n} catch (Exception $e) {\n}\n");
 
   V("<?php try { $a = 1;} catch (Exception $e) {$b=2;}",
-    "try {\n  $a = 1;\n} catch (exception $e) {\n  $b = 2;\n}\n");
+    "try {\n$a = 1;\n} catch (Exception $e) {\n$b = 2;\n}\n");
 
-  V("<?php try { $a = 1;} catch (Exception $e) {$b=2;} catch (Exception2 $e2) { $c =3;}",
-    "try {\n  $a = 1;\n} catch (exception $e) {\n  $b = 2;\n} catch (exception2 $e2) {\n  $c = 3;\n}\n");
+  V("<?php try { $a = 1;} catch (Exception $e) {$b=2;} "
+    "catch (Exception2 $e2) { $c =3;}",
+    "try {\n$a = 1;\n} catch (Exception $e) {\n$b = 2;\n} "
+    "catch (Exception2 $e2) {\n$c = 3;\n}\n");
+
+  V("<?php class MyException extends Exception {} "
+    "class MyMyException extends MyException {} "
+    "try { var_dump(123); } catch (MyMyException $e) { \n"
+    "} catch (MyException $e) { \n"
+    "} catch (Exception $e) {}\n",
+    "class MyException extends Exception {\n"
+    "}\n"
+    "class MyMyException extends MyException {\n"
+    "}\n"
+    "try {\n"
+    "var_dump(123);\n"
+    "} catch (MyMyException $e) {\n"
+    "} catch (MyException $e) {\n"
+    "} catch (Exception $e) {\n"
+    "}\n"
+   );
 
   return true;
 }

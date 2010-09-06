@@ -31,7 +31,7 @@ class IfBranch : public Construct {
 public:
   IfBranch(CONSTRUCT_ARGS, ExpressionPtr cond, StatementPtr body);
   bool proc(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
   Variant evalCond(VariableEnvironment &env) const;
   const ExpressionPtr &cond() { return m_cond; }
   const StatementPtr &body() { return m_body; }
@@ -45,7 +45,7 @@ public:
   IfStatement(STATEMENT_ARGS, const std::vector<IfBranchPtr> &branches,
               StatementPtr els);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<IfBranchPtr> m_branches;
   StatementPtr m_else;

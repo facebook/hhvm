@@ -25,7 +25,7 @@
 #include <compiler/statement/method_statement.h>
 #include <compiler/statement/class_statement.h>
 #include <compiler/statement/return_statement.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/simple_variable.h>

@@ -1,12 +1,21 @@
 %{
-#include <runtime/eval/parser/hphp.tab.hpp>
-#include <runtime/eval/parser/scanner.h>
-#define YLMM_SCANNER_CLASS HPHP::Eval::Scanner
-#include <util/ylmm/lexmm.hh>
-#include <errno.h>
-#define SETTOKEN _scanner->setToken(yytext, yyleng, yytext, yyleng)
-// STEPPOS is for tokens that we don't need the string of.
-#define STEPPOS _scanner->setToken(yytext, yyleng, yytext, yyleng, false)
+#include <util/parser/scanner.h>
+
+// macros for flex
+#define YYSTYPE HPHP::ScannerToken
+#define YYLTYPE HPHP::Location
+#define YY_EXTRA_TYPE HPHP::Scanner*
+#define _scanner yyextra
+#define YY_INPUT(buf,result,max) _scanner->read(buf,result,max)
+#define YY_FATAL_ERROR(msg) \
+  do { \
+    struct yyguts_t *yyg = (struct yyguts_t *)yyscanner; \
+    _scanner->error(msg); \
+  } while (0) \
+
+// macros for rules
+#define SETTOKEN _scanner->setToken(yytext, yyleng)
+#define STEPPOS  _scanner->stepPos(yytext, yyleng)
 %}
 
 %x ST_IN_HTML
@@ -128,7 +137,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 
 <ST_IN_SCRIPTING>"->" {
         STEPPOS;
-        yy_push_state(ST_LOOKING_FOR_PROPERTY);
+        yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);
         return T_OBJECT_OPERATOR;
 }
 
@@ -139,13 +148,13 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
         SETTOKEN;
-        yy_pop_state();
+        yy_pop_state(yyscanner);
         return T_STRING;
 }
 
 <ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
         yyless(0);
-        yy_pop_state();
+        yy_pop_state(yyscanner);
 }
 
 <ST_IN_SCRIPTING>"::"                {STEPPOS;return T_PAAMAYIM_NEKUDOTAYIM;}
@@ -203,7 +212,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>"isset"              {STEPPOS; return T_ISSET;}
 <ST_IN_SCRIPTING>"empty"              {STEPPOS; return T_EMPTY;}
 <ST_IN_SCRIPTING>"__halt_compiler"    {STEPPOS; return T_HALT_COMPILER;}
-<ST_IN_SCRIPTING>"static"             {STEPPOS; return T_STATIC;}
+<ST_IN_SCRIPTING>"static"             {SETTOKEN; return T_STATIC;}
 <ST_IN_SCRIPTING>"abstract"           {STEPPOS; return T_ABSTRACT;}
 <ST_IN_SCRIPTING>"final"              {STEPPOS; return T_FINAL;}
 <ST_IN_SCRIPTING>"private"            {STEPPOS; return T_PRIVATE;}
@@ -243,33 +252,34 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 
 <ST_IN_SCRIPTING>"{" {
         STEPPOS;
-        yy_push_state(ST_IN_SCRIPTING);
+        yy_push_state(ST_IN_SCRIPTING, yyscanner);
         return '{';
 }
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"${" {
         STEPPOS;
-        yy_push_state(ST_LOOKING_FOR_VARNAME);
+        yy_push_state(ST_LOOKING_FOR_VARNAME, yyscanner);
         return T_DOLLAR_OPEN_CURLY_BRACES;
 }
 
 <ST_IN_SCRIPTING>"}" {
         STEPPOS;
-        if (yy_start_stack_ptr) yy_pop_state();
+        struct yyguts_t * yyg = (struct yyguts_t*)yyscanner;
+        if (yyg->yy_start_stack_ptr) yy_pop_state(yyscanner);
         return '}';
 }
 
 <ST_LOOKING_FOR_VARNAME>{LABEL} {
         SETTOKEN;
-        yy_pop_state();
-        yy_push_state(ST_IN_SCRIPTING);
+        yy_pop_state(yyscanner);
+        yy_push_state(ST_IN_SCRIPTING, yyscanner);
         return T_STRING_VARNAME;
 }
 
 <ST_LOOKING_FOR_VARNAME>{ANY_CHAR} {
         yyless(0);
-        yy_pop_state();
-        yy_push_state(ST_IN_SCRIPTING);
+        yy_pop_state(yyscanner);
+        yy_push_state(ST_IN_SCRIPTING, yyscanner);
 }
 
 <ST_IN_SCRIPTING>{LNUM} {
@@ -314,13 +324,14 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         return T_DNUMBER;
 }
 
-<ST_IN_SCRIPTING>"__CLASS__"            { STEPPOS; return T_CLASS_C; }
-<ST_IN_SCRIPTING>"__FUNCTION__"         { STEPPOS; return T_FUNC_C;  }
-<ST_IN_SCRIPTING>"__METHOD__"           { STEPPOS; return T_METHOD_C;}
-<ST_IN_SCRIPTING>"__LINE__"             { STEPPOS; return T_LINE;    }
-<ST_IN_SCRIPTING>"__FILE__"             { STEPPOS; return T_FILE;    }
+<ST_IN_SCRIPTING>"__CLASS__"            { SETTOKEN; return T_CLASS_C; }
+<ST_IN_SCRIPTING>"__FUNCTION__"         { SETTOKEN; return T_FUNC_C;  }
+<ST_IN_SCRIPTING>"__METHOD__"           { SETTOKEN; return T_METHOD_C;}
+<ST_IN_SCRIPTING>"__LINE__"             { SETTOKEN; return T_LINE;    }
+<ST_IN_SCRIPTING>"__FILE__"             { SETTOKEN; return T_FILE;    }
 
 <INITIAL>"#"[^\n]*"\n" {
+        yyleng = 0;
         STEPPOS;
         BEGIN(ST_IN_HTML);
         return T_INLINE_HTML;
@@ -381,20 +392,20 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x7f-\xff] {
         yyless(yyleng - 3);
-        yy_push_state(ST_LOOKING_FOR_PROPERTY);
+        yy_push_state(ST_LOOKING_FOR_PROPERTY, yyscanner);
         _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1);
         return T_VARIABLE;
 }
 
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
         yyless(yyleng - 1);
-        yy_push_state(ST_VAR_OFFSET);
+        yy_push_state(ST_VAR_OFFSET, yyscanner);
         _scanner->setToken(yytext, yyleng, yytext+1, yyleng-1);
         return T_VARIABLE;
 }
 
 <ST_VAR_OFFSET>"]" {
-        yy_pop_state();
+        yy_pop_state(yyscanner);
         return ']';
 }
 
@@ -408,7 +419,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
         /* Invalid rule to return a more explicit parse error with proper
            line number */
         yyless(0);
-        yy_pop_state();
+        yy_pop_state(yyscanner);
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
@@ -529,8 +540,8 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>(b?["]{DOUBLE_QUOTES_CHARS}*("{"*|"$"*)["]) {
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         std::string strval =
-          _scanner->scanEscapeString(yytext + bprefix + 1,
-                                     yyleng - bprefix - 2, '"');
+          _scanner->escape(yytext + bprefix + 1,
+                           yyleng - bprefix - 2, '"');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_CONSTANT_ENCAPSED_STRING;
 }
@@ -538,8 +549,8 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>(b?[']([^'\\]|("\\"{ANY_CHAR}))*[']) {
         int bprefix = (yytext[0] != '\'') ? 1 : 0;
         std::string strval =
-          _scanner->scanEscapeString(yytext + bprefix + 1,
-                                     yyleng - bprefix - 2, '\'');
+          _scanner->escape(yytext + bprefix + 1,
+                           yyleng - bprefix - 2, '\'');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_CONSTANT_ENCAPSED_STRING;
 }
@@ -613,7 +624,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
                 }
                 yyless(len + 1);
                 std::string strval =
-                  _scanner->scanEscapeString(yytext, len, 0);
+                  _scanner->escape(yytext, len, 0);
                 _scanner->setToken(yytext, yyleng,
                                    strval.c_str(), strval.length());
                 BEGIN(ST_END_HEREDOC);
@@ -636,46 +647,46 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
         _scanner->setToken(yytext, 1, yytext, 1);
-        yy_push_state(ST_IN_SCRIPTING);
+        yy_push_state(ST_IN_SCRIPTING, yyscanner);
         yyless(1);
         return T_CURLY_OPEN;
 }
 
 <ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}+ {
-        std::string strval = _scanner->scanEscapeString(yytext, yyleng, '"');
+        std::string strval = _scanner->escape(yytext, yyleng, '"');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_DOUBLE_QUOTES>{DOUBLE_QUOTES_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)["])) {
         yyless(yyleng - 1);
-        std::string strval = _scanner->scanEscapeString(yytext, yyleng, '"');
+        std::string strval = _scanner->escape(yytext, yyleng, '"');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_BACKQUOTE>{BACKQUOTE_CHARS}+ {
-        std::string strval = _scanner->scanEscapeString(yytext, yyleng, '`');
+        std::string strval = _scanner->escape(yytext, yyleng, '`');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_BACKQUOTE>{BACKQUOTE_CHARS}*("{"{2,}|"$"{2,}|(("{"+|"$"+)[`])) {
         yyless(yyleng - 1);
-        std::string strval = _scanner->scanEscapeString(yytext, yyleng, '`');
+        std::string strval = _scanner->escape(yytext, yyleng, '`');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)? {
-        std::string strval = _scanner->scanEscapeString(yytext, yyleng, 0);
+        std::string strval = _scanner->escape(yytext, yyleng, 0);
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_ENCAPSED_AND_WHITESPACE;
 }
 
 <ST_HEREDOC>{HEREDOC_CHARS}*({HEREDOC_NEWLINE}+({LABEL}";"?)?)?("{"{2,}|"$"{2,}) {
         yyless(yyleng - 1);
-        std::string strval = _scanner->scanEscapeString(yytext, yyleng, 0);
+        std::string strval = _scanner->escape(yytext, yyleng, 0);
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
         return T_ENCAPSED_AND_WHITESPACE;
 }
@@ -701,17 +712,34 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 }
 
 %%
-void _eval_scanner_init() {
-  BEGIN(INITIAL);
+
+namespace HPHP {
+  void Scanner::init() {
+    yylex_init_extra(this, &m_yyscanner);
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    BEGIN(INITIAL);
+  }
+
+  int Scanner::scan() {
+    return yylex(m_token, m_loc, m_yyscanner);
+  }
+
+  void Scanner::reset() {
+    void *yyscanner = (void *)m_yyscanner;
+    struct yyguts_t *yyg = (struct yyguts_t *)m_yyscanner;
+    YY_FLUSH_BUFFER;
+    yylex_destroy(m_yyscanner);
+  }
+
+  static void suppress_unused_errors() {
+    yyunput(0,0,0);
+    yy_top_state(0);
+    suppress_unused_errors();
+  }
 }
 
-static void suppress_defined_but_not_used_warnings() {
-  yy_fatal_error(0);
-  yyunput(0, 0);
-  yy_top_state();
-  suppress_defined_but_not_used_warnings();
-}
-
-void _eval_scanner_reset() {
-   YY_FLUSH_BUFFER;
+extern "C" {
+  int yywrap(yyscan_t yyscanner) {
+    return 1;
+  }
 }

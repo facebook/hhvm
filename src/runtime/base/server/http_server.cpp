@@ -78,7 +78,7 @@ HttpServer::HttpServer()
   }
 
   if (RuntimeOption::EnableSSL) {
-    SSLInit::init();
+    SSLInit::Init();
     m_pageServer->enableSSL(RuntimeOption::SSLCertificateFile,
                             RuntimeOption::SSLCertificateKeyFile,
                             RuntimeOption::SSLPort);

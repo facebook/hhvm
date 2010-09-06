@@ -16,7 +16,7 @@
 
 #include <runtime/eval/ast/function_call_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -36,10 +36,10 @@ Array FunctionCallExpression::getParams(VariableEnvironment &env) const {
   return params;
 }
 
-void FunctionCallExpression::dumpParams() const {
-  printf("(");
-  dumpVector(m_params, ", ");
-  printf(")");
+void FunctionCallExpression::dumpParams(std::ostream &out) const {
+  out << "(";
+  dumpVector(out, m_params);
+  out << ")";
 }
 
 bool FunctionCallExpression::exist(VariableEnvironment &env, int op) const {

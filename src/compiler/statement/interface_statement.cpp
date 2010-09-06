@@ -271,7 +271,7 @@ void InterfaceStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
   if (ar) ar->pushScope(classScope);
 
-  cg_printf("interface %s", m_name.c_str());
+  cg_printf("interface %s", m_originalName.c_str());
   if (m_base) {
     cg_printf(" extends ");
     m_base->outputPHP(cg, ar);

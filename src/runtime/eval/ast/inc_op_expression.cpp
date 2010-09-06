@@ -16,7 +16,7 @@
 
 #include <runtime/eval/ast/inc_op_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -40,19 +40,13 @@ Variant IncOpExpression::refval(VariableEnvironment &env,
   }
 }
 
-void IncOpExpression::dump() const {
+void IncOpExpression::dump(std::ostream &out) const {
   if (m_front) {
-    if (m_inc)
-      printf("++");
-    else
-      printf("--");
+    out << (m_inc ? "++" : "--");
   }
-  m_exp->dump();
+  m_exp->dump(out);
   if (!m_front) {
-    if (m_inc)
-      printf("++");
-    else
-      printf("--");
+    out << (m_inc ? "++" : "--");
   }
 }
 

@@ -62,10 +62,10 @@ Variant ObjectMethodExpression::eval(VariableEnvironment &env) const {
                                                      m_name->hashLwr(), true));
 }
 
-void ObjectMethodExpression::dump() const {
-  m_obj->dump();
-  printf("->");
-  SimpleFunctionCallExpression::dump();
+void ObjectMethodExpression::dump(std::ostream &out) const {
+  m_obj->dump(out);
+  out << "->";
+  SimpleFunctionCallExpression::dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

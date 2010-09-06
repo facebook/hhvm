@@ -277,7 +277,11 @@ public:
   static int LightProcessCount;
 
   // Eval options
+  static bool EnableShortTags;
+  static bool EnableAspTags;
   static bool EnableXHP;
+  static int ScannerType;
+
   static bool EnableStrict;
   static int StrictLevel;
   static bool StrictFatal;

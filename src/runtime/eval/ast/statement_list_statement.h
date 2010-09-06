@@ -33,7 +33,7 @@ public:
   virtual void eval(VariableEnvironment &env) const;
   void add(StatementPtr stmt);
   const std::vector<StatementPtr> &stmts() const { return m_stmts; }
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 
   virtual void byteCode(ByteCodeProgram &code) const;
 private:

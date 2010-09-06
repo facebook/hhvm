@@ -1,23 +1,109 @@
 %{
-#include <runtime/eval/parser/parser.h>
+#include "parser.h"
 
-using namespace HPHP;
-using namespace HPHP::Eval;
-
-#define YYSTYPE Token
+// macros for bison
+#define YYSTYPE HPHP::HPHP_PARSER_NS::Token
 #define YYSTYPE_IS_TRIVIAL 1
-#define YLMM_PARSER_CLASS Parser
-#define YLMM_LEX_STATIC_LOCATION
+#define YYLTYPE HPHP::Location
+#define YYLTYPE_IS_TRIVIAL 1
 #define YYERROR_VERBOSE
 #define YYINITDEPTH 500
-#include <util/ylmm/yaccmm.hh>
+#define YYLEX_PARAM _p
 
-#define _p _parser
-#define BEXP(e...) _parser->onBinaryOpExp(e);
-#define UEXP(e...) _parser->onUnaryOpExp(e);
+#ifdef yyerror
+#undef yyerror
+#endif
+#define yyerror _p->fatal
+
+#ifdef YYLLOC_DEFAULT
+# undef YYLLOC_DEFAULT
+#endif
+#define YYRHSLOC(Rhs, K) ((Rhs)[K])
+#define YYLLOC_DEFAULT(Current, Rhs, N)                                 \
+  do                                                                    \
+    if (YYID (N)) {                                                     \
+      (Current).first(YYRHSLOC (Rhs, 1));                               \
+      (Current).last (YYRHSLOC (Rhs, N));                               \
+    } else {                                                            \
+      (Current).line0 = (Current).line1 = YYRHSLOC (Rhs, 0).line1;      \
+      (Current).char0 = (Current).char1 = YYRHSLOC (Rhs, 0).char1;      \
+    }                                                                   \
+  while (YYID (0));                                                     \
+  _p->setRuleLocation(&Current);
+
+#define YYCOPY(To, From, Count)                  \
+  do {                                           \
+    YYSIZE_T yyi;                                \
+    for (yyi = 0; yyi < (Count); yyi++) {        \
+      (To)[yyi] = (From)[yyi];                   \
+    }                                            \
+    if (From != From ## a) {                     \
+      YYSTACK_FREE (From);                       \
+    }                                            \
+  }                                              \
+  while (YYID (0))
+
+#define YYCOPY_RESET(To, From, Count)           \
+  do                                            \
+    {                                           \
+      YYSIZE_T yyi;                             \
+      for (yyi = 0; yyi < (Count); yyi++) {     \
+        (To)[yyi] = (From)[yyi];                \
+        (From)[yyi].reset();                    \
+      }                                         \
+      if (From != From ## a) {                  \
+        YYSTACK_FREE (From);                    \
+      }                                         \
+    }                                           \
+  while (YYID (0))
+
+#define YYTOKEN_RESET(From, Count)              \
+  do                                            \
+    {                                           \
+      YYSIZE_T yyi;                             \
+      for (yyi = 0; yyi < (Count); yyi++) {     \
+        (From)[yyi].reset();                    \
+      }                                         \
+      if (From != From ## a) {                  \
+        YYSTACK_FREE (From);                    \
+      }                                         \
+    }                                           \
+  while (YYID (0))
+
+# define YYSTACK_RELOCATE_RESET(Stack_alloc, Stack)                     \
+  do                                                                    \
+    {                                                                   \
+      YYSIZE_T yynewbytes;                                              \
+      YYCOPY_RESET (&yyptr->Stack_alloc, Stack, yysize);                \
+      Stack = &yyptr->Stack_alloc;                                      \
+      yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
+      yyptr += yynewbytes / sizeof (*yyptr);                            \
+    }                                                                   \
+  while (YYID (0))
+
+#define YYSTACK_CLEANUP                         \
+  YYTOKEN_RESET (yyvs, yystacksize);            \
+  if (yyvs != yyvsa) {                          \
+    YYSTACK_FREE (yyvs);                        \
+  }                                             \
+  if (yyls != yylsa) {                          \
+    YYSTACK_FREE (yyls);                        \
+  }                                             \
+
+
+// macros for rules
+#define BEXP(e...) _p->onBinaryOpExp(e);
+#define UEXP(e...) _p->onUnaryOpExp(e);
+using namespace HPHP::HPHP_PARSER_NS;
+
+static int yylex(YYSTYPE *token, HPHP::Location *loc, Parser *_p) {
+  return _p->scan(token, loc);
+}
 %}
 
 %expect 2
+%define api.pure
+%parse-param {HPHP::HPHP_PARSER_NS::Parser *_p}
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','
@@ -245,7 +331,7 @@ additional_catches:
     fully_qualified_class_name
     T_VARIABLE ')'
     '{' inner_statement_list '}'       { _p->onCatch($$, $1, $4, $5, $8);}
-|                                      { $$.reset(); }
+  |                                    { $$.reset(); }
 ;
 
 unset_variables:
@@ -269,14 +355,13 @@ function_declaration_statement:
 
 class_declaration_statement:
     class_entry_type T_STRING
-    extends_from                       { _p->onClassStart($1.num, $2, &$3);}
+    extends_from                       { _p->onClassStart($1.num(), $2, &$3);}
     implements_list '{'
-    class_statement_list '}'           { _p->onClass($$,$5);}
+    class_statement_list '}'           { _p->onClass($$,$1,$2,$3,$5,$7);}
 
-| T_INTERFACE T_STRING                 { _p->onClassStart(T_INTERFACE, $2,
-                                        NULL);}
+  | T_INTERFACE T_STRING               { _p->onClassStart(T_INTERFACE, $2, 0);}
     interface_extends_list '{'
-    class_statement_list '}'           { _p->onInterface($$,$4);}
+    class_statement_list '}'           { _p->onInterface($$,$2,$4,$6);}
 ;
 class_entry_type:
     T_CLASS                            { $$ = T_CLASS;}
@@ -410,15 +495,15 @@ function_call_parameter_list:
   |                                    { $$.reset();}
 ;
 non_empty_fcall_parameter_list:
-    expr_without_variable              { _p->onCallParam($$,NULL,$1,false);}
-  | variable                           { _p->onCallParam($$,NULL,$1,false);}
-  | '&' w_variable                     { _p->onCallParam($$,NULL,$2,true);}
+    expr_without_variable              { _p->onCallParam($$,NULL,$1,0);}
+  | variable                           { _p->onCallParam($$,NULL,$1,0);}
+  | '&' w_variable                     { _p->onCallParam($$,NULL,$2,1);}
   | non_empty_fcall_parameter_list ','
-    expr_without_variable              { _p->onCallParam($$,&$1,$3,false);}
+    expr_without_variable              { _p->onCallParam($$,&$1,$3,0);}
   | non_empty_fcall_parameter_list ','
-    variable                           { _p->onCallParam($$,&$1,$3,false);}
+    variable                           { _p->onCallParam($$,&$1,$3,0);}
   | non_empty_fcall_parameter_list ','
-    '&' w_variable                     { _p->onCallParam($$,&$1,$4,true);}
+    '&' w_variable                     { _p->onCallParam($$,&$1,$4,1);}
 ;
 
 global_var_list:
@@ -432,28 +517,28 @@ global_var:
 ;
 
 static_var_list:
-    static_var_list ',' T_VARIABLE     { _p->onStaticVariable($$,&$1,$3,NULL);}
+    static_var_list ',' T_VARIABLE     { _p->onStaticVariable($$,&$1,$3,0);}
   | static_var_list ',' T_VARIABLE
     '=' static_scalar                  { _p->onStaticVariable($$,&$1,$3,&$5);}
-  | T_VARIABLE                         { _p->onStaticVariable($$,NULL,$1,NULL);}
-  | T_VARIABLE '=' static_scalar       { _p->onStaticVariable($$,NULL,$1,&$3);}
+  | T_VARIABLE                         { _p->onStaticVariable($$,0,$1,0);}
+  | T_VARIABLE '=' static_scalar       { _p->onStaticVariable($$,0,$1,&$3);}
 ;
 
 class_statement_list:
     class_statement_list
-    class_statement                    { }
-  |                                    { }
+    class_statement                    { _p->onClassStatement($$, $1, $2);}
+  |                                    { $$.reset();}
 ;
 class_statement:
-    variable_modifiers                 { _p->onClassVariableStart($1); }
-    class_variable_declaration ';'
-  | class_constant_declaration ';'     { }
+    variable_modifiers                 { _p->onClassVariableModifer($1);}
+    class_variable_declaration ';'     { _p->onClassVariableStart($$,&$1,$3);}
+  | class_constant_declaration ';'     { _p->onClassVariableStart($$,NULL,$1);}
   | method_modifiers
     is_reference T_STRING '('          { _p->onMethodStart($3, $1);}
-    parameter_list ')' method_body     { _p->onMethod($1,$2,$3,$6,$8);}
+    parameter_list ')' method_body     { _p->onMethod($$,$1,$2,$3,$6,$8);}
   | T_HPHP_NOTE method_modifiers
-    is_reference T_STRING '('          { _p->onMethodStart($4,$2);}
-    parameter_list ')' method_body     { _p->onMethod($2,$3,$4,$7,$9);
+    is_reference T_STRING '('          { _p->onMethodStart($4, $2);}
+    parameter_list ')' method_body     { _p->onMethod($$,$2,$3,$4,$7,$9);
                                          _p->onHphpNoteStatement($$,$1,$$);}
 ;
 method_body:
@@ -485,16 +570,16 @@ member_modifier:
 ;
 class_variable_declaration:
     class_variable_declaration ','
-    T_VARIABLE                         { _p->onClassVariable($3,NULL);}
+    T_VARIABLE                         { _p->onClassVariable($$,&$1,$3,0);}
   | class_variable_declaration ','
-    T_VARIABLE '=' static_scalar       { _p->onClassVariable($3,&$5);}
-  | T_VARIABLE                         { _p->onClassVariable($1,NULL);}
-  | T_VARIABLE '=' static_scalar       { _p->onClassVariable($1,&$3);}
+    T_VARIABLE '=' static_scalar       { _p->onClassVariable($$,&$1,$3,&$5);}
+  | T_VARIABLE                         { _p->onClassVariable($$,0,$1,0);}
+  | T_VARIABLE '=' static_scalar       { _p->onClassVariable($$,0,$1,&$3);}
 ;
 class_constant_declaration:
     class_constant_declaration ','
-    T_STRING '=' static_scalar         { _p->onClassConstant($3,$5);}
-  | T_CONST T_STRING '=' static_scalar { _p->onClassConstant($2,$4);}
+    T_STRING '=' static_scalar         { _p->onClassConstant($$,&$1,$3,$5);}
+  | T_CONST T_STRING '=' static_scalar { _p->onClassConstant($$,0,$2,$4);}
 ;
 
 echo_expr_list:
@@ -513,7 +598,7 @@ non_empty_for_expr:
 
 expr_without_variable:
     T_LIST '(' assignment_list ')'
-    '=' expr                           { _p->onListAssignment($$, $3, $6);}
+    '=' expr                           { _p->onListAssignment($$, $3, &$6);}
   | variable '=' expr                  { _p->onAssign($$, $1, $3, 0);}
   | variable '=' '&' variable          { _p->onAssign($$, $1, $4, 1);}
   | variable '=' '&' T_NEW
@@ -603,27 +688,23 @@ function_call:
     function_call_parameter_list ')'   { _p->onCall($$,1,$3,$5,&$1);}
 ;
 static_class_name:
-    T_STRING                           { _p->onName($$, $1,
-                                          Parser::StringName);}
-  | T_STATIC                           { _p->onName($$, $1,
-                                          Parser::StaticName);}
+    T_STRING                           { _p->onName($$,$1,Parser::StringName);}
+  | T_STATIC                           { _p->onName($$,$1,Parser::StaticName);}
   | reference_variable                 { _p->onName($$, $1,
-                                          Parser::StaticClassExprName);}
+                                         Parser::StaticClassExprName);}
 ;
 fully_qualified_class_name:
     T_STRING                           { $$ = $1;}
 ;
 class_name_reference:
-    T_STRING                           { _p->onName($$, $1,
-                                          Parser::StringName);}
-  | dynamic_class_name_reference       { _p->onName($$, $1,
-                                          Parser::ExprName);}
+    T_STRING                           { _p->onName($$,$1,Parser::StringName);}
+  | dynamic_class_name_reference       { _p->onName($$,$1,Parser::ExprName);}
 ;
 dynamic_class_name_reference:
     base_variable                      { _p->pushObject($1);}
     T_OBJECT_OPERATOR object_property
     object_properties                  { _p->popObject($$);}
-  | base_variable                      { $$ = $1; }
+  | base_variable                      { $$ = $1;}
 ;
 object_properties:
     object_properties
@@ -647,15 +728,15 @@ ctor_arguments:
 ;
 
 common_scalar:
-    T_LNUMBER                          { _p->onScalar($$, T_LNUMBER, $1);}
-  | T_DNUMBER                          { _p->onScalar($$, T_DNUMBER, $1);}
+    T_LNUMBER                          { _p->onScalar($$, T_LNUMBER,  $1);}
+  | T_DNUMBER                          { _p->onScalar($$, T_DNUMBER,  $1);}
   | T_CONSTANT_ENCAPSED_STRING         { _p->onScalar($$,
-                                         T_CONSTANT_ENCAPSED_STRING, $1);}
-  | T_LINE                             { _p->onScalar($$, T_LINE, $1);}
-  | T_FILE                             { _p->onScalar($$, T_FILE, $1);}
-  | T_CLASS_C                          { _p->onScalar($$, T_CLASS_C, $1);}
+                                         T_CONSTANT_ENCAPSED_STRING,  $1);}
+  | T_LINE                             { _p->onScalar($$, T_LINE,     $1);}
+  | T_FILE                             { _p->onScalar($$, T_FILE,     $1);}
+  | T_CLASS_C                          { _p->onScalar($$, T_CLASS_C,  $1);}
   | T_METHOD_C                         { _p->onScalar($$, T_METHOD_C, $1);}
-  | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C, $1);}
+  | T_FUNC_C                           { _p->onScalar($$, T_FUNC_C,   $1);}
 ;
 static_scalar:
     common_scalar                      { $$ = $1;}
@@ -668,12 +749,12 @@ static_scalar:
 ;
 static_class_constant:
     T_STRING T_PAAMAYIM_NEKUDOTAYIM
-    T_STRING                           { _p->onClassConst($$, $1, $3, true);}
+    T_STRING                           { _p->onClassConst($$, $1, $3, 1);}
 ;
 scalar:
     T_STRING                           { _p->onConstant($$, $1);}
   | T_STRING_VARNAME                   { _p->onConstant($$, $1);}
-  | class_constant                     { $$ = $1}
+  | class_constant                     { $$ = $1;}
   | common_scalar                      { $$ = $1;}
   | '"' encaps_list '"'                { _p->onEncapsList($$,'"',$2);}
   | '\'' encaps_list '\''              { _p->onEncapsList($$,'\'',$2);}
@@ -693,12 +774,12 @@ possible_comma:
 non_empty_static_array_pair_list:
     non_empty_static_array_pair_list
     ',' static_scalar T_DOUBLE_ARROW
-    static_scalar                      { _p->onArrayPair($$,&$1,&$3,$5,false);}
+    static_scalar                      { _p->onArrayPair($$,&$1,&$3,$5,0);}
   | non_empty_static_array_pair_list
-    ',' static_scalar                  { _p->onArrayPair($$,&$1,NULL,$3,false);}
+    ',' static_scalar                  { _p->onArrayPair($$,&$1,  0,$3,0);}
   | static_scalar T_DOUBLE_ARROW
-    static_scalar                      { _p->onArrayPair($$,NULL,&$1,$3,false);}
-  | static_scalar                      { _p->onArrayPair($$,NULL,NULL,$1,false);}
+    static_scalar                      { _p->onArrayPair($$,  0,&$1,$3,0);}
+  | static_scalar                      { _p->onArrayPair($$,  0,  0,$1,0);}
 ;
 
 expr:
@@ -733,7 +814,7 @@ variable_property:
 ;
 method_or_not:
     '('
-    function_call_parameter_list ')'   { $$ = $2; $$.num = 1;}
+    function_call_parameter_list ')'   { $$ = $2; $$ = 1;}
   |                                    { $$.reset();}
 ;
 
@@ -783,9 +864,8 @@ object_dim_list:
   | variable_name                      { _p->appendProperty($1);}
 ;
 variable_name:
-    T_STRING                           {_p->onName($$, $1,
-                                         Parser::StringName);}
-  | '{' expr '}'                       {_p->onName($$, $2, Parser::ExprName);}
+    T_STRING                           {_p->onName($$,$1,Parser::VarName);}
+  | '{' expr '}'                       {_p->onName($$,$2,Parser::ExprName);}
 ;
 
 simple_indirect_reference:
@@ -801,7 +881,6 @@ assignment_list:
   |                                    { _p->onAListVar($$,NULL,NULL);}
   | variable                           { _p->onAListVar($$,NULL,&$1);}
   | T_LIST '(' assignment_list ')'     { _p->onAListSub($$,NULL,$3);}
-
 ;
 
 array_pair_list:
@@ -811,17 +890,17 @@ array_pair_list:
 ;
 non_empty_array_pair_list:
     non_empty_array_pair_list
-    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,false);}
-  | non_empty_array_pair_list ',' expr { _p->onArrayPair($$,&$1,NULL,$3,false);}
-  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,NULL,&$1,$3,false);}
-  | expr                               { _p->onArrayPair($$,NULL,NULL,$1,false);}
+    ',' expr T_DOUBLE_ARROW expr       { _p->onArrayPair($$,&$1,&$3,$5,0);}
+  | non_empty_array_pair_list ',' expr { _p->onArrayPair($$,&$1,  0,$3,0);}
+  | expr T_DOUBLE_ARROW expr           { _p->onArrayPair($$,  0,&$1,$3,0);}
+  | expr                               { _p->onArrayPair($$,  0,  0,$1,0);}
   | non_empty_array_pair_list
     ',' expr T_DOUBLE_ARROW
-    '&' w_variable                     { _p->onArrayPair($$,&$1,&$3,$6,true);}
+    '&' w_variable                     { _p->onArrayPair($$,&$1,&$3,$6,1);}
   | non_empty_array_pair_list ','
-    '&' w_variable                     { _p->onArrayPair($$,&$1,NULL,$4,true);}
-  | expr T_DOUBLE_ARROW '&' w_variable { _p->onArrayPair($$,NULL,&$1,$4,true);}
-  | '&' w_variable                     { _p->onArrayPair($$,NULL,NULL,$2,true);}
+    '&' w_variable                     { _p->onArrayPair($$,&$1,  0,$4,1);}
+  | expr T_DOUBLE_ARROW '&' w_variable { _p->onArrayPair($$,  0,&$1,$4,1);}
+  | '&' w_variable                     { _p->onArrayPair($$,  0,  0,$2,1);}
 ;
 
 encaps_list:
@@ -865,8 +944,9 @@ isset_variables:
 
 class_constant:
   static_class_name
-  T_PAAMAYIM_NEKUDOTAYIM T_STRING      { _p->onClassConst($$, $1, $3, false);}
+  T_PAAMAYIM_NEKUDOTAYIM T_STRING      { _p->onClassConst($$, $1, $3, 0);}
 ;
 %%
-
-static int __attribute__((unused)) suppress_warning = yydebug;
+bool Parser::parse() {
+  return yyparse(this) == 0;
+}

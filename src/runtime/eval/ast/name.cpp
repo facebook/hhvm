@@ -74,8 +74,8 @@ int64 StringName::hashLwr() const {
 
 bool StringName::isSp() const { return m_isSp; }
 
-void StringName::dump() const {
-  printf("%s", m_name.data());
+void StringName::dump(std::ostream &out) const {
+  out << m_name;
 }
 
 ExprName::ExprName(CONSTRUCT_ARGS, ExpressionPtr name)
@@ -85,10 +85,10 @@ String ExprName::get(VariableEnvironment &env) const {
   return m_name->eval(env).toString();
 }
 
-void ExprName::dump() const {
-  printf("${");
-  m_name->dump();
-  printf("}");
+void ExprName::dump(std::ostream &out) const {
+  if (m_name) {
+    m_name->dump(out);
+  }
 }
 
 StaticClassExprName::StaticClassExprName(CONSTRUCT_ARGS, ExpressionPtr name)
@@ -104,8 +104,8 @@ String LateStaticName::get(VariableEnvironment &env) const {
   return FrameInjection::GetStaticClassName(NULL);
 }
 
-void LateStaticName::dump() const {
-  printf("static");
+void LateStaticName::dump(std::ostream &out) const {
+  out << "static";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

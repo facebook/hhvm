@@ -34,7 +34,7 @@ public:
                const std::vector<ExpressionPtr> &next,
                StatementPtr body);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<ExpressionPtr> m_init;
   std::vector<ExpressionPtr> m_cond;

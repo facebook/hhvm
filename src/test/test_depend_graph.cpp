@@ -48,8 +48,8 @@ bool TestDependGraph::VerifyDependency(DependencyGraph::KindOf kindOf,
   Option::IncludeRoots["$_SERVER['PHP_ROOT']"] = "";
   AnalysisResultPtr ar(new AnalysisResult());
   BuiltinSymbols::Load(ar);
-  Parser::ParseString(input1, ar, "f1");
-  if (input2) Parser::ParseString(input2, ar, "f2");
+  Compiler::Parser::ParseString(input1, ar, "f1");
+  if (input2) Compiler::Parser::ParseString(input2, ar, "f2");
   ar->analyzeProgram();
   ar->inferTypes();
   DependencyGraphPtr dg = ar->getDependencyGraph();

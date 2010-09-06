@@ -30,7 +30,7 @@ class InstanceOfExpression : public Expression {
 public:
   InstanceOfExpression(EXPRESSION_ARGS, ExpressionPtr obj, NamePtr name);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_obj;
   NamePtr m_name;

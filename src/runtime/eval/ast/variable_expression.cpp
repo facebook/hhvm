@@ -93,7 +93,7 @@ Variant VariableExpression::set(VariableEnvironment &env, CVarRef val) const {
   Variant &lhs = lval(env);
   if (RuntimeOption::EnableStrict) {
     if (!checkCompatibleAssignment(lhs, val)) {
-      throw_strict(TypeVariableChangeException(this->loc()->toString()),
+      throw_strict(TypeVariableChangeException(location_to_string(loc())),
                    StrictMode::StrictHardCore);
     }
   }
@@ -105,7 +105,7 @@ Variant VariableExpression::setOp(VariableEnvironment &env, int op, CVarRef rhs)
   Variant &lhs = lval(env);
   if (RuntimeOption::EnableStrict) {
     if (!checkCompatibleAssignment(lhs, rhs)) {
-      throw_strict(TypeVariableChangeException(this->loc()->toString()),
+      throw_strict(TypeVariableChangeException(location_to_string(loc())),
                    StrictMode::StrictHardCore);
     }
   }
@@ -121,9 +121,15 @@ NamePtr VariableExpression::getName() const {
   return m_name;
 }
 
-void VariableExpression::dump() const {
-  printf("$");
-  m_name->dump();
+void VariableExpression::dump(std::ostream &out) const {
+  if (m_name->getStatic().isNull()) {
+    out << "${";
+    m_name->dump(out);
+    out << "}";
+  } else {
+    out << "$";
+    m_name->dump(out);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

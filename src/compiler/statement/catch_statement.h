@@ -39,6 +39,7 @@ public:
   const std::string &getVariable() const { return m_variable; }
 private:
   std::string m_className;
+  std::string m_originalClassName;
   std::string m_variable;
   StatementPtr m_stmt;
   bool m_valid;

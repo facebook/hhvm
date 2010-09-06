@@ -15,7 +15,7 @@
 */
 
 #include <compiler/parser/parser.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/analysis/file_scope.h>
 
 #include <compiler/expression/expression_list.h>
@@ -75,7 +75,6 @@
 
 #include <util/preprocess.h>
 
-using namespace HPHP;
 using namespace std;
 using namespace boost;
 
@@ -88,66 +87,37 @@ using namespace boost;
 #define NEW_STMT(cls, e...)                                     \
   cls##Ptr(new cls(getLocation(), Statement::KindOf##cls, ##e))
 
+namespace HPHP { namespace Compiler {
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
 StatementListPtr Parser::ParseString(const char *input, AnalysisResultPtr ar,
                                      const char *fileName /* = NULL */) {
   ASSERT(input);
-  istringstream iss(input);
-  stringstream ss;
-  istream *is = Option::EnableXHP ? preprocessXHP(iss, ss, fileName) : &iss;
-
-  Scanner scanner(new ylmm::basic_buffer(*is, false, true), true, false);
   if (!fileName || !*fileName) fileName = "string";
-  ParserPtr parser(new Parser(scanner, fileName, strlen(input), ar));
-  if (parser->parse()) {
-    printf("Error parsing %s: %s\n%s\n", fileName,
-           parser->getMessage().c_str(), input);
-    return StatementListPtr();
+
+  int len = strlen(input);
+  Scanner scanner(input, len, Option::ScannerType, fileName);
+  Parser parser(scanner, fileName, ar, len);
+  if (parser.parse()) {
+    return parser.getTree();
   }
-  return parser->getTree();
+  printf("Error parsing %s: %s\n%s\n", fileName,
+         parser.getMessage().c_str(), input);
+  return StatementListPtr();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
-Parser::Parser(Scanner &s, const char *fileName, int fileSize,
-               AnalysisResultPtr ar)
-  : m_scanner(s), m_ar(ar) {
-  m_messenger.error_stream(m_err);
-  m_messenger.message_stream(m_msg);
-  messenger(m_messenger);
-  m_fileName = fileName ? fileName : "";
-
+Parser::Parser(Scanner &scanner, const char *fileName,
+               AnalysisResultPtr ar, int fileSize /* = 0 */)
+    : ParserBase(scanner, fileName), m_ar(ar) {
   FileScopePtr fileScope(new FileScope(m_fileName, fileSize));
   m_ar->setFileScope(fileScope);
 }
 
-std::string Parser::getMessage() {
-  string ret;
-  ret += m_scanner.getError();
-  int line = m_scanner.getLine();
-  int column = m_scanner.getColumn();
-
-  ret += " (";
-  ret += string("Line: ") + lexical_cast<string>(line);
-  ret += ", Char: " + lexical_cast<string>(column) + "): ";
-  ret += m_err.str() + "\n";
-  return ret;
-}
-
-LocationPtr Parser::getLocation() {
-  LocationPtr location(new Location());
-  location->file = file();
-  location->line0 = line0();
-  location->char0 = char0();
-  location->line1 = line1();
-  location->char1 = char1();
-  return location;
-}
-
 void Parser::pushComment() {
-  m_comments.push_back(m_scanner.getDocComment());
+  m_comments.push_back(m_scanner.detachDocComment());
 }
 
 std::string Parser::popComment() {
@@ -156,34 +126,39 @@ std::string Parser::popComment() {
   return ret;
 }
 
-const char *Parser::file() {
-  return m_fileName;
-}
-
-int Parser::line0() {
-  return _rule_location.first_line();
-}
-
-int Parser::char0() {
-  return _rule_location.first_column();
-}
-
-int Parser::line1() {
-  return _rule_location.last_line();
-}
-
-int Parser::char1() {
-  return _rule_location.last_column();
-}
-
-int Parser::scan(void *arg /* = NULL */) {
-  return m_scanner.getNextToken(token(), where());
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // variables
 
-void Parser::onVariable(Token *out, Token *exprs, Token *var, Token *value,
+void Parser::onName(Token &out, Token &name, NameKind kind) {
+  switch (kind) {
+    case StringName:
+    case StaticName:
+      onScalar(out, T_STRING, name);
+      break;
+    case StaticClassExprName:
+    case ExprName:
+    case VarName:
+      out = name;
+      break;
+  }
+}
+
+void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
+                              Token *value) {
+  onVariable(out, exprs, var, value);
+}
+
+void Parser::onClassVariable(Token &out, Token *exprs, Token &var,
+                             Token *value) {
+  onVariable(out, exprs, var, value);
+}
+
+void Parser::onClassConstant(Token &out, Token *exprs, Token &var,
+                             Token &value) {
+  onVariable(out, exprs, var, &value, true);
+}
+
+void Parser::onVariable(Token &out, Token *exprs, Token &var, Token *value,
                         bool constant /* = false */) {
   ExpressionPtr expList;
   if (exprs) {
@@ -199,8 +174,7 @@ void Parser::onVariable(Token *out, Token *exprs, Token *var, Token *value,
   }
   if (value) {
     exp = NEW_EXP(AssignmentExpression, exp, value->exp, false);
-  }
-  else {
+  } else {
     // implicit null, #147156
     static const std::string s_null ("null");
     ExpressionPtr null_exp (NEW_EXP(ConstantExpression, s_null));
@@ -210,22 +184,22 @@ void Parser::onVariable(Token *out, Token *exprs, Token *var, Token *value,
   out->exp = expList;
 }
 
-void Parser::onSimpleVariable(Token *out, Token *var) {
+void Parser::onSimpleVariable(Token &out, Token &var) {
   out->exp = NEW_EXP(SimpleVariable, var->text());
 }
 
-void Parser::onDynamicVariable(Token *out, Token *expr, bool encap) {
+void Parser::onDynamicVariable(Token &out, Token &expr, bool encap) {
   out->exp = getDynamicVariable(expr->exp, encap);
 }
 
-void Parser::onIndirectRef(Token *out, Token *refCount, Token *var) {
+void Parser::onIndirectRef(Token &out, Token &refCount, Token &var) {
   out->exp = var->exp;
-  for (int i = 0; i < refCount->num; i++) {
+  for (int i = 0; i < refCount->num(); i++) {
     out->exp = createDynamicVariable(out->exp);
   }
 }
 
-void Parser::onStaticMember(Token *out, Token *cls, Token *name) {
+void Parser::onStaticMember(Token &out, Token &cls, Token &name) {
   if (name->exp->is(Expression::KindOfArrayElementExpression) &&
       dynamic_pointer_cast<ArrayElementExpression>(name->exp)->
       appendClass(cls->exp)) {
@@ -235,7 +209,7 @@ void Parser::onStaticMember(Token *out, Token *cls, Token *name) {
   }
 }
 
-void Parser::onRefDim(Token *out, Token *var, Token *offset) {
+void Parser::onRefDim(Token &out, Token &var, Token &offset) {
   if (!var->exp) {
     var->exp = NEW_EXP(ConstantExpression, var->text());
   }
@@ -262,7 +236,7 @@ ExpressionPtr Parser::createDynamicVariable(ExpressionPtr exp) {
   return NEW_EXP(DynamicVariable, exp);
 }
 
-void Parser::onCallParam(Token *out, Token *params, Token *expr, bool ref) {
+void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
   if (!params) {
     out->exp = NEW_EXP0(ExpressionList);
   } else {
@@ -271,12 +245,11 @@ void Parser::onCallParam(Token *out, Token *params, Token *expr, bool ref) {
   if (ref) {
     expr->exp->setContext(Expression::RefParameter);
     expr->exp->setContext(Expression::RefValue);
-
   }
   out->exp->addElement(expr->exp);
 }
 
-void Parser::onCall(Token *out, bool dynamic, Token *name, Token *params,
+void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
                     Token *cls) {
   ExpressionPtr clsExp;
   if (cls) {
@@ -298,23 +271,21 @@ void Parser::onCall(Token *out, bool dynamic, Token *name, Token *params,
 ///////////////////////////////////////////////////////////////////////////////
 // object property and method calls
 
-void Parser::pushObject(Token *base) {
+void Parser::pushObject(Token &base) {
   m_objects.push_back(base->exp);
 }
 
-void Parser::popObject(Token *out) {
+void Parser::popObject(Token &out) {
   out->exp = m_objects.back();
   m_objects.pop_back();
 }
 
-void Parser::appendMethodParams(Token *params) {
+void Parser::appendMethodParams(Token &params) {
   ExpressionListPtr paramsExp;
-  if (params) {
-    if (params->exp) {
-      paramsExp = dynamic_pointer_cast<ExpressionList>(params->exp);
-    } else if (params->num == 1) {
-      paramsExp = NEW_EXP0(ExpressionList);
-    }
+  if (params->exp) {
+    paramsExp = dynamic_pointer_cast<ExpressionList>(params->exp);
+  } else if (params->num() == 1) {
+    paramsExp = NEW_EXP0(ExpressionList);
   }
   if (paramsExp) {
     ObjectPropertyExpressionPtr prop =
@@ -331,7 +302,7 @@ void Parser::appendMethodParams(Token *params) {
   }
 }
 
-void Parser::appendProperty(Token *prop) {
+void Parser::appendProperty(Token &prop) {
   if (!prop->exp) {
     prop->exp = NEW_EXP(ScalarExpression, T_STRING, prop->text());
   }
@@ -339,7 +310,7 @@ void Parser::appendProperty(Token *prop) {
                              prop->exp);
 }
 
-void Parser::appendRefDim(Token *offset) {
+void Parser::appendRefDim(Token &offset) {
   m_objects.back() = NEW_EXP(ArrayElementExpression, m_objects.back(),
                              offset->exp);
 }
@@ -347,12 +318,12 @@ void Parser::appendRefDim(Token *offset) {
 ///////////////////////////////////////////////////////////////////////////////
 // encapsed expressions
 
-void Parser::onEncapsList(Token *out, int type, Token *list) {
+void Parser::onEncapsList(Token &out, int type, Token &list) {
   out->exp = NEW_EXP(EncapsListExpression, type,
                      dynamic_pointer_cast<ExpressionList>(list->exp));
 }
 
-void Parser::addEncap(Token *out, Token *list, Token *expr, int type) {
+void Parser::addEncap(Token &out, Token &list, Token &expr, int type) {
   ExpressionListPtr expList;
   if (list->exp) {
     expList = dynamic_pointer_cast<ExpressionList>(list->exp);
@@ -372,9 +343,9 @@ void Parser::addEncap(Token *out, Token *list, Token *expr, int type) {
   out->exp = expList;
 }
 
-void Parser::encapRefDim(Token *out, Token *var, Token *offset) {
+void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
   ExpressionPtr dim;
-  switch (offset->num) {
+  switch (offset->num()) {
   case T_STRING:
     dim = NEW_EXP(ScalarExpression, T_STRING, offset->text(), true);
     break;
@@ -392,14 +363,14 @@ void Parser::encapRefDim(Token *out, Token *var, Token *offset) {
   out->exp = NEW_EXP(ArrayElementExpression, arr, dim);
 }
 
-void Parser::encapObjProp(Token *out, Token *var, Token *name) {
+void Parser::encapObjProp(Token &out, Token &var, Token &name) {
   ExpressionPtr obj = NEW_EXP(SimpleVariable, var->text());
 
   ExpressionPtr prop = NEW_EXP(ScalarExpression, T_STRING, name->text());
   out->exp = NEW_EXP(ObjectPropertyExpression, obj, prop);
 }
 
-void Parser::encapArray(Token *out, Token *var, Token *expr) {
+void Parser::encapArray(Token &out, Token &var, Token &expr) {
   ExpressionPtr arr = NEW_EXP(SimpleVariable, var->text());
   out->exp = NEW_EXP(ArrayElementExpression, arr, expr->exp);
 }
@@ -407,18 +378,22 @@ void Parser::encapArray(Token *out, Token *var, Token *expr) {
 ///////////////////////////////////////////////////////////////////////////////
 // expressions
 
-void Parser::onConstant(Token *out, Token *constant) {
+void Parser::onConstant(Token &out, Token &constant) {
   out->exp = NEW_EXP(ConstantExpression, constant->text());
 }
 
-void Parser::onScalar(Token *out, int type, Token *scalar) {
+void Parser::onScalar(Token &out, int type, Token &scalar) {
+  if (type == T_FILE) {
+    onUnaryOpExp(out, scalar, T_FILE, true);
+    return;
+  }
+
   ScalarExpressionPtr exp;
   switch (type) {
   case T_STRING:
   case T_LNUMBER:
   case T_DNUMBER:
   case T_LINE:
-  case T_FILE:
   case T_CLASS_C:
   case T_METHOD_C:
   case T_FUNC_C:
@@ -434,7 +409,7 @@ void Parser::onScalar(Token *out, int type, Token *scalar) {
   out->exp = exp;
 }
 
-void Parser::onExprListElem(Token *out, Token *exprs, Token *expr) {
+void Parser::onExprListElem(Token &out, Token *exprs, Token &expr) {
   ExpressionPtr expList;
   if (exprs && exprs->exp) {
     expList = exprs->exp;
@@ -445,29 +420,47 @@ void Parser::onExprListElem(Token *out, Token *exprs, Token *expr) {
   out->exp = expList;
 }
 
-void Parser::onListAssignment(Token *out, Token *vars, Token *expr) {
+void Parser::onListAssignment(Token &out, Token &vars, Token *expr) {
   out->exp = NEW_EXP(ListAssignment,
                      dynamic_pointer_cast<ExpressionList>(vars->exp),
                      expr ? expr->exp : ExpressionPtr());
 }
 
-void Parser::onAssign(Token *out, Token *var, Token *expr, bool ref) {
+void Parser::onAListVar(Token &out, Token *list, Token *var) {
+  Token empty_list, empty_var;
+  if (!var) {
+    empty_var.exp = ExpressionPtr();
+    var = &empty_var;
+  }
+  if (!list) {
+    empty_list.exp = NEW_EXP0(ExpressionList);
+    list = &empty_list;
+  }
+  onExprListElem(out, list, *var);
+}
+
+void Parser::onAListSub(Token &out, Token *list, Token &sublist) {
+  onListAssignment(out, sublist, NULL);
+  onExprListElem(out, list, out);
+}
+
+void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref) {
   out->exp = NEW_EXP(AssignmentExpression, var->exp, expr->exp, ref);
 }
 
-void Parser::onAssignNew(Token *out, Token *var, Token *name, Token *args) {
+void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
   ExpressionPtr exp =
     NEW_EXP(NewObjectExpression, name->exp,
             dynamic_pointer_cast<ExpressionList>(args->exp));
-  out->exp = NEW_EXP(AssignmentExpression, var->exp, exp, true);
+  out->exp = NEW_EXP(AssignmentExpression, var->exp, exp, false);
 }
 
-void Parser::onNewObject(Token *out, Token *name, Token *args) {
+void Parser::onNewObject(Token &out, Token &name, Token &args) {
   out->exp = NEW_EXP(NewObjectExpression, name->exp,
                      dynamic_pointer_cast<ExpressionList>(args->exp));
 }
 
-void Parser::onUnaryOpExp(Token *out, Token *operand, int op, bool front) {
+void Parser::onUnaryOpExp(Token &out, Token &operand, int op, bool front) {
   switch (op) {
   case T_INCLUDE:
   case T_INCLUDE_ONCE:
@@ -490,16 +483,20 @@ void Parser::onUnaryOpExp(Token *out, Token *operand, int op, bool front) {
   }
 }
 
-void Parser::onBinaryOpExp(Token *out, Token *operand1, Token *operand2,
+void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
                            int op) {
   out->exp = NEW_EXP(BinaryOpExpression, operand1->exp, operand2->exp, op);
 }
 
-void Parser::onQOp(Token *out, Token *exprCond, Token *expYes, Token *expNo) {
+void Parser::onQOp(Token &out, Token &exprCond, Token &expYes, Token &expNo) {
   out->exp = NEW_EXP(QOpExpression, exprCond->exp, expYes->exp, expNo->exp);
 }
 
-void Parser::onArrayPair(Token *out, Token *pairs, Token *name, Token *value,
+void Parser::onArray(Token &out, Token &pairs) {
+  onUnaryOpExp(out, pairs, T_ARRAY, true);
+}
+
+void Parser::onArrayPair(Token &out, Token *pairs, Token *name, Token &value,
                          bool ref) {
   ExpressionPtr expList;
   if (pairs) {
@@ -512,7 +509,7 @@ void Parser::onArrayPair(Token *out, Token *pairs, Token *name, Token *value,
   out->exp = expList;
 }
 
-void Parser::onClassConst(Token *out, Token *cls, Token *name) {
+void Parser::onClassConst(Token &out, Token &cls, Token &name, bool text) {
   if (!cls->exp) {
     cls->exp = NEW_EXP(ScalarExpression, T_STRING, cls->text());
   }
@@ -522,18 +519,22 @@ void Parser::onClassConst(Token *out, Token *cls, Token *name) {
 ///////////////////////////////////////////////////////////////////////////////
 // function/method declaration
 
-void Parser::onFunctionStart() {
+void Parser::onFunctionStart(Token &name) {
   m_ar->getFileScope()->pushAttribute();
   pushComment();
 }
 
-void Parser::onFunction(Token *out, Token *ref, Token *name, Token *params,
-                        Token *stmt) {
+void Parser::onMethodStart(Token &name, Token &mods) {
+  onFunctionStart(name);
+}
+
+void Parser::onFunction(Token &out, Token &ref, Token &name, Token &params,
+                        Token &stmt) {
   if (!stmt->stmt) {
     stmt->stmt = NEW_STMT0(StatementList);
   }
   FunctionStatementPtr func = NEW_STMT
-    (FunctionStatement, ref->num, name->text(),
+    (FunctionStatement, ref->num(), name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp),
      dynamic_pointer_cast<StatementList>(stmt->stmt),
      m_ar->getFileScope()->popAttribute(),
@@ -545,7 +546,7 @@ void Parser::onFunction(Token *out, Token *ref, Token *name, Token *params,
   }
 }
 
-void Parser::onParam(Token *out, Token *params, Token *type, Token *var,
+void Parser::onParam(Token &out, Token *params, Token &type, Token &var,
                      bool ref, Token *defValue) {
   ExpressionPtr expList;
   if (params) {
@@ -559,19 +560,19 @@ void Parser::onParam(Token *out, Token *params, Token *type, Token *var,
   out->exp = expList;
 }
 
-void Parser::onClassStart() {
+void Parser::onClassStart(int type, Token &name, Token *parent) {
   pushComment();
 }
 
-void Parser::onClass(Token *out, Token *type, Token *name, Token *base,
-                     Token *baseInterface, Token *stmt) {
+void Parser::onClass(Token &out, Token &type, Token &name, Token &base,
+                     Token &baseInterface, Token &stmt) {
   StatementListPtr stmtList;
   if (stmt->stmt) {
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
   ClassStatementPtr cls = NEW_STMT
-    (ClassStatement, type->num, name->text(), base->text(),
+    (ClassStatement, type->num(), name->text(), base->text(),
      dynamic_pointer_cast<ExpressionList>(baseInterface->exp),
      popComment(), stmtList);
   out->stmt = cls;
@@ -581,7 +582,7 @@ void Parser::onClass(Token *out, Token *type, Token *name, Token *base,
   }
 }
 
-void Parser::onInterface(Token *out, Token *name, Token *base, Token *stmt) {
+void Parser::onInterface(Token &out, Token &name, Token &base, Token &stmt) {
   StatementListPtr stmtList;
   if (stmt->stmt) {
     stmtList = dynamic_pointer_cast<StatementList>(stmt->stmt);
@@ -594,7 +595,7 @@ void Parser::onInterface(Token *out, Token *name, Token *base, Token *stmt) {
   intf->onParse(m_ar);
 }
 
-void Parser::onInterfaceName(Token *out, Token *names, Token *name) {
+void Parser::onInterfaceName(Token &out, Token *names, Token &name) {
   ExpressionPtr expList;
   if (names) {
     expList = names->exp;
@@ -605,7 +606,7 @@ void Parser::onInterfaceName(Token *out, Token *names, Token *name) {
   out->exp = expList;
 }
 
-void Parser::onClassVariable(Token *out, Token *modifiers, Token *decl) {
+void Parser::onClassVariableStart(Token &out, Token *modifiers, Token &decl) {
   if (modifiers) {
     ModifierExpressionPtr exp = modifiers->exp ?
       dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
@@ -619,41 +620,41 @@ void Parser::onClassVariable(Token *out, Token *modifiers, Token *decl) {
   }
 }
 
-void Parser::onMethod(Token *out, Token *modifiers, Token *ref, Token *name,
-                      Token *params, Token *stmt) {
-  ModifierExpressionPtr exp = (modifiers && modifiers->exp) ?
+void Parser::onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
+                      Token &params, Token &stmt) {
+  ModifierExpressionPtr exp = modifiers->exp ?
     dynamic_pointer_cast<ModifierExpression>(modifiers->exp)
     : NEW_EXP0(ModifierExpression);
 
   StatementListPtr stmts;
-  if (!stmt->stmt && stmt->num == 1) {
+  if (!stmt->stmt && stmt->num() == 1) {
     stmts = NEW_STMT0(StatementList);
   } else {
     stmts = dynamic_pointer_cast<StatementList>(stmt->stmt);
   }
 
   out->stmt = NEW_STMT
-    (MethodStatement, exp, ref->num, name->text(),
+    (MethodStatement, exp, ref->num(), name->text(),
      dynamic_pointer_cast<ExpressionList>(params->exp), stmts,
      m_ar->getFileScope()->popAttribute(),
      popComment());
 }
 
-void Parser::onMemberModifier(Token *out, Token *modifiers, Token *modifier) {
+void Parser::onMemberModifier(Token &out, Token *modifiers, Token &modifier) {
   ModifierExpressionPtr expList;
   if (modifiers) {
     expList = dynamic_pointer_cast<ModifierExpression>(modifiers->exp);
   } else {
     expList = NEW_EXP0(ModifierExpression);
   }
-  expList->add(modifier->num);
+  expList->add(modifier->num());
   out->exp = expList;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // statements
 
-void Parser::saveParseTree(Token *tree) {
+void Parser::saveParseTree(Token &tree) {
   if (tree->stmt) {
     m_tree = dynamic_pointer_cast<StatementList>(tree->stmt);
   } else {
@@ -666,8 +667,12 @@ void Parser::saveParseTree(Token *tree) {
   m_ar->popScope();
 }
 
-void Parser::addStatement(Token *out, Token *stmts, Token *new_stmt) {
-  if (!stmts || !stmts->stmt) {
+void Parser::onStatementListStart(Token &out) {
+  out.reset();
+}
+
+void Parser::addStatement(Token &out, Token &stmts, Token &new_stmt) {
+  if (!stmts->stmt) {
     out->stmt = NEW_STMT0(StatementList);
   } else {
     out->stmt = stmts->stmt;
@@ -677,7 +682,7 @@ void Parser::addStatement(Token *out, Token *stmts, Token *new_stmt) {
   }
 }
 
-void Parser::finishStatement(Token *out, Token *stmts) {
+void Parser::finishStatement(Token &out, Token &stmts) {
   if (!stmts->stmt) {
     out->stmt = NEW_STMT0(StatementList);
   } else {
@@ -685,7 +690,7 @@ void Parser::finishStatement(Token *out, Token *stmts) {
   }
 }
 
-void Parser::onBlock(Token *out, Token *stmts) {
+void Parser::onBlock(Token &out, Token &stmts) {
   if (!stmts->stmt) {
     stmts->stmt = NEW_STMT0(StatementList);
   } else if (!stmts->stmt->is(Statement::KindOfStatementList)) {
@@ -697,8 +702,8 @@ void Parser::onBlock(Token *out, Token *stmts) {
                        dynamic_pointer_cast<StatementList>(stmts->stmt));
 }
 
-void Parser::onIf(Token *out, Token *cond, Token *stmt, Token *elseifs,
-                  Token *elseStmt) {
+void Parser::onIf(Token &out, Token &cond, Token &stmt, Token &elseifs,
+                  Token &elseStmt) {
   StatementPtr stmtList;
   if (!elseifs->stmt) {
     stmtList = NEW_STMT0(StatementList);
@@ -722,7 +727,7 @@ void Parser::onIf(Token *out, Token *cond, Token *stmt, Token *elseifs,
                        dynamic_pointer_cast<StatementList>(stmtList));
 }
 
-void Parser::onElseIf(Token *out, Token *elseifs, Token *cond, Token *stmt) {
+void Parser::onElseIf(Token &out, Token &elseifs, Token &cond, Token &stmt) {
   if (!elseifs->stmt) {
     out->stmt = NEW_STMT0(StatementList);
   } else {
@@ -735,7 +740,7 @@ void Parser::onElseIf(Token *out, Token *elseifs, Token *cond, Token *stmt) {
   out->stmt->addElement(NEW_STMT(IfBranchStatement, cond->exp, stmt->stmt));
 }
 
-void Parser::onWhile(Token *out, Token *cond, Token *stmt) {
+void Parser::onWhile(Token &out, Token &cond, Token &stmt) {
   if (stmt->stmt && stmt->stmt->is(Statement::KindOfStatementList)) {
     stmt->stmt = NEW_STMT(BlockStatement,
                           dynamic_pointer_cast<StatementList>(stmt->stmt));
@@ -743,12 +748,12 @@ void Parser::onWhile(Token *out, Token *cond, Token *stmt) {
   out->stmt = NEW_STMT(WhileStatement, cond->exp, stmt->stmt);
 }
 
-void Parser::onDo(Token *out, Token *stmt, Token *cond) {
+void Parser::onDo(Token &out, Token &stmt, Token &cond) {
   out->stmt = NEW_STMT(DoStatement, stmt->stmt, cond->exp);
 }
 
-void Parser::onFor(Token *out, Token *expr1, Token *expr2, Token *expr3,
-                   Token *stmt) {
+void Parser::onFor(Token &out, Token &expr1, Token &expr2, Token &expr3,
+                   Token &stmt) {
   if (stmt->stmt && stmt->stmt->is(Statement::KindOfStatementList)) {
     stmt->stmt = NEW_STMT(BlockStatement,
                           dynamic_pointer_cast<StatementList>(stmt->stmt));
@@ -757,12 +762,12 @@ void Parser::onFor(Token *out, Token *expr1, Token *expr2, Token *expr3,
                        stmt->stmt);
 }
 
-void Parser::onSwitch(Token *out, Token *expr, Token *cases) {
+void Parser::onSwitch(Token &out, Token &expr, Token &cases) {
   out->stmt = NEW_STMT(SwitchStatement, expr->exp,
                        dynamic_pointer_cast<StatementList>(cases->stmt));
 }
 
-void Parser::onCase(Token *out, Token *cases, Token *cond, Token *stmt) {
+void Parser::onCase(Token &out, Token &cases, Token *cond, Token &stmt) {
   if (!cases->stmt) {
     out->stmt = NEW_STMT0(StatementList);
   } else {
@@ -773,31 +778,31 @@ void Parser::onCase(Token *out, Token *cases, Token *cond, Token *stmt) {
                                  stmt->stmt));
 }
 
-void Parser::onBreak(Token *out, Token *expr) {
+void Parser::onBreak(Token &out, Token *expr) {
   out->stmt = NEW_STMT(BreakStatement, expr ? expr->exp : ExpressionPtr());
 }
 
-void Parser::onContinue(Token *out, Token *expr) {
+void Parser::onContinue(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ContinueStatement, expr ? expr->exp : ExpressionPtr());
 }
 
-void Parser::onReturn(Token *out, Token *expr) {
+void Parser::onReturn(Token &out, Token *expr) {
   out->stmt = NEW_STMT(ReturnStatement, expr ? expr->exp : ExpressionPtr());
 }
 
-void Parser::onGlobal(Token *out, Token *expr) {
+void Parser::onGlobal(Token &out, Token &expr) {
   out->stmt = NEW_STMT(GlobalStatement,
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
 }
 
-void Parser::onGlobalVar(Token *out, Token *exprs, Token *expr) {
+void Parser::onGlobalVar(Token &out, Token *exprs, Token &expr) {
   ExpressionPtr expList;
   if (exprs && exprs->exp) {
     expList = exprs->exp;
   } else {
     expList = NEW_EXP0(ExpressionList);
   }
-  switch (expr->num) {
+  switch (expr->num()) {
   case 0:
     expList->addElement(NEW_EXP(SimpleVariable, expr->text()));
     break;
@@ -810,12 +815,12 @@ void Parser::onGlobalVar(Token *out, Token *exprs, Token *expr) {
   out->exp = expList;
 }
 
-void Parser::onStatic(Token *out, Token *expr) {
+void Parser::onStatic(Token &out, Token &expr) {
   out->stmt = NEW_STMT(StaticStatement,
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
 }
 
-void Parser::onEcho(Token *out, Token *expr, bool html) {
+void Parser::onEcho(Token &out, Token &expr, bool html) {
   if (html) {
     LocationPtr loc = getLocation();
     if (loc->line1 == 2 && loc->char1 == 0 && expr->text()[0] == '#') {
@@ -834,28 +839,28 @@ void Parser::onEcho(Token *out, Token *expr, bool html) {
   }
 }
 
-void Parser::onUnset(Token *out, Token *expr) {
+void Parser::onUnset(Token &out, Token &expr) {
   out->stmt = NEW_STMT(UnsetStatement,
                        dynamic_pointer_cast<ExpressionList>(expr->exp));
   m_ar->getFileScope()->setAttribute(FileScope::ContainsUnset);
 }
 
-void Parser::onExpStatement(Token *out, Token *expr) {
+void Parser::onExpStatement(Token &out, Token &expr) {
   out->stmt = NEW_STMT(ExpStatement, expr->exp);
 }
 
-void Parser::onForEach(Token *out, Token *arr, Token *name, Token *value,
-                       Token *stmt) {
+void Parser::onForEach(Token &out, Token &arr, Token &name, Token &value,
+                       Token &stmt) {
   if (stmt->stmt && stmt->stmt->is(Statement::KindOfStatementList)) {
     stmt->stmt = NEW_STMT(BlockStatement,
                           dynamic_pointer_cast<StatementList>(stmt->stmt));
   }
-  out->stmt = NEW_STMT(ForEachStatement, arr->exp, name->exp, name->num == 1,
-                       value->exp, value->num == 1, stmt->stmt);
+  out->stmt = NEW_STMT(ForEachStatement, arr->exp, name->exp, name->num() == 1,
+                       value->exp, value->num() == 1, stmt->stmt);
 }
 
-void Parser::onTry(Token *out, Token *tryStmt, Token *className, Token *var,
-                   Token *catchStmt, Token *catches) {
+void Parser::onTry(Token &out, Token &tryStmt, Token &className, Token &var,
+                   Token &catchStmt, Token &catches) {
   StatementPtr stmtList;
   if (catches->stmt) {
     stmtList = catches->stmt;
@@ -868,12 +873,20 @@ void Parser::onTry(Token *out, Token *tryStmt, Token *className, Token *var,
                        dynamic_pointer_cast<StatementList>(stmtList));
 }
 
-void Parser::onCatch(Token *out, Token *className, Token *var, Token *stmt) {
-  out->stmt = NEW_STMT(CatchStatement, className->text(), var->text(),
-                       stmt->stmt);
+void Parser::onCatch(Token &out, Token &catches, Token &className, Token &var,
+                     Token &stmt) {
+  StatementPtr stmtList;
+  if (catches->stmt) {
+    stmtList = catches->stmt;
+  } else {
+    stmtList = NEW_STMT0(StatementList);
+  }
+  stmtList->addElement(NEW_STMT(CatchStatement, className->text(),
+                                var->text(), stmt->stmt));
+  out->stmt = stmtList;
 }
 
-void Parser::onThrow(Token *out, Token *expr) {
+void Parser::onThrow(Token &out, Token &expr) {
   out->stmt = NEW_STMT(ThrowStatement, expr->exp);
 }
 
@@ -890,22 +903,25 @@ void Parser::addHphpNote(ConstructPtr c, const std::string &note) {
   }
 }
 
-void Parser::onHphpNoteExpr(Token *out, Token *note, Token *expr) {
+void Parser::onHphpNoteExpr(Token &out, Token &note, Token &expr) {
   addHphpNote(expr->exp, note->text());
   out->exp = expr->exp;
 }
-void Parser::onHphpNoteStatement(Token *out, Token *note, Token *stmt) {
+void Parser::onHphpNoteStatement(Token &out, Token &note, Token &stmt) {
   addHphpNote(stmt->stmt, note->text());
   out->stmt = stmt->stmt;
 }
 
-void Parser::addHphpDeclare(Token *declare) {
+void Parser::addHphpDeclare(Token &declare) {
   m_ar->getFileScope()->addDeclare(declare->text());
 }
 
-void Parser::addHphpSuppressError(Token *error) {
+void Parser::addHphpSuppressError(Token &error) {
   CodeError::ErrorType e;
   if (CodeError::lookupErrorType(error->text(), e)) {
     m_ar->getFileScope()->addSuppressError(e);
   }
 }
+
+///////////////////////////////////////////////////////////////////////////////
+}}

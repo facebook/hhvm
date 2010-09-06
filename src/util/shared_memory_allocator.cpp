@@ -24,6 +24,15 @@ const char *SharedMemoryManager::Name = "HPHPSharedMemory";
 boost::interprocess::managed_shared_memory *
 SharedMemoryManager::Segment = NULL;
 
+// just to make valgrind cleaner
+class SharedMemoryManagerUninitializer {
+public:
+  ~SharedMemoryManagerUninitializer() {
+    SharedMemoryManager::Reset();
+  }
+};
+static SharedMemoryManagerUninitializer s_smm_uninitializer;
+
 void SharedMemoryManager::Init(int size, bool clean) {
   try {
     if (Segment == NULL) {
@@ -36,6 +45,10 @@ void SharedMemoryManager::Init(int size, bool clean) {
   } catch (std::exception &e) {
     throw Exception(e.what()); // so we have stacktrace
   }
+}
+
+void SharedMemoryManager::Reset() {
+  delete Segment;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

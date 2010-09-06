@@ -48,9 +48,9 @@ void RefParamExpression::unset(VariableEnvironment &env) const {
   m_lv->unset(env);
 }
 
-void RefParamExpression::dump() const {
-  printf("&");
-  m_lv->dump();
+void RefParamExpression::dump(std::ostream &out) const {
+  out << "&";
+  m_lv->dump(out);
 }
 
 bool RefParamExpression::isRefParam() const {

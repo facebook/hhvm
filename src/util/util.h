@@ -21,6 +21,7 @@
 #include <string>
 #include <map>
 #include <stdlib.h>
+#include <stdarg.h>
 
 /**
  * Simple utility functions.
@@ -117,8 +118,6 @@ bool isPowerOfTwo(int value);
  */
 int roundUpToPowerOfTwo(int value);
 
-std::string escapeStringForCpp(const std::string &name, bool* binary = NULL);
-
 /**
  * Duplicate a buffer of given size, null-terminate the result.
  */
@@ -129,6 +128,26 @@ const void *buffer_duplicate(const void *src, int size);
  */
 const void *buffer_append(const void *buf1, int size1,
                           const void *buf2, int size2);
+
+/**
+ * printf into a std::string.
+ */
+void string_printf(std::string &msg, const char *fmt, ...);
+void string_vsnprintf(std::string &msg, const char *fmt, va_list ap);
+
+/**
+ * Escaping strings for code generation.
+ */
+std::string escapeStringForCPP(const char *input, int len,
+                               bool* binary = NULL);
+inline std::string escapeStringForCPP(const std::string &input,
+                                      bool* binary = NULL) {
+  return escapeStringForCPP(input.data(), input.length(), binary);
+}
+std::string escapeStringForPHP(const char *input, int len);
+inline std::string escapeStringForPHP(const std::string &input) {
+  return escapeStringForPHP(input.data(), input.length());
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }}

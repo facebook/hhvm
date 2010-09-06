@@ -38,7 +38,7 @@ bool TestTransformer::VerifyTransformer(const char *input, const char *output,
 
   AnalysisResultPtr ar(new AnalysisResult());
   BuiltinSymbols::Load(ar);
-  Parser::ParseString(input, ar);
+  Compiler::Parser::ParseString(input, ar);
   ar->analyzeProgram();
   ar->inferTypes();
   ostringstream code;

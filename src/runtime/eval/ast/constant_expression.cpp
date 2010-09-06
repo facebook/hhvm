@@ -30,8 +30,8 @@ Variant ConstantExpression::eval(VariableEnvironment &env) const {
   return get_constant(m_constant);
 }
 
-void ConstantExpression::dump() const {
-  printf("%s", m_constant.c_str());
+void ConstantExpression::dump(std::ostream &out) const {
+  out << m_constant;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

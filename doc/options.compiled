@@ -691,8 +691,9 @@ users can use the same machine serving their own source files.
 = HPHPi Settings
 
   Eval {
-    # XHP extension
-    EnableXHP = true
+    EnableShortTags = true   # is <? allowed
+    EnableAspTags = false    # is <% %> allowed
+    EnableXHP = true         # XHP extension
 
     # error level, strict mode is a lot more picky about coding errors
     EnableStrict = false

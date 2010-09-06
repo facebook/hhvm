@@ -314,7 +314,10 @@ public:
 
   static std::string ProgramName;
 
+  static bool EnableShortTags;
+  static bool EnableAspTags;
   static bool EnableXHP;
+  static int ScannerType;
 
   /**
    * "Dynamic" means a function or a method can be invoked dynamically.

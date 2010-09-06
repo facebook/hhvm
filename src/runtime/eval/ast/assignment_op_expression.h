@@ -34,7 +34,7 @@ public:
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
   LvalExpressionPtr getLhs() const { return m_lhs; }
   ExpressionPtr getRhs() const { return m_rhs; }
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   int m_op;
   LvalExpressionPtr m_lhs;

@@ -57,14 +57,15 @@ void ClassVariable::setStatic(VariableEnvironment &env, LVariableTable &st)
   }
 }
 
-void ClassVariable::dump() const {
-  ClassStatement::printModifiers(m_modifiers);
-  printf("$%s", m_name.c_str());
+void ClassVariable::dump(std::ostream &out) const {
+  ClassStatement::dumpModifiers(out, m_modifiers, true);
+  out << "$" << m_name << " = ";
   if (m_value) {
-    printf(" = ");
-    m_value->dump();
+    m_value->dump(out);
+  } else {
+    out << "null";
   }
-  printf(";");
+  out << ";";
 }
 
 void ClassVariable::getInfo(ClassInfo::PropertyInfo &info) const {
@@ -451,23 +452,70 @@ bool ClassStatement::getConstant(Variant &res, const char *c,
   return false;
 }
 
-void ClassStatement::dump() const {
-  printf("class %s {", m_name.c_str());
-  for (hphp_const_char_imap<MethodStatementPtr>::const_iterator it =
-         m_methods.begin(); it != m_methods.end(); ++it) {
-    it->second->dump();
+void ClassStatement::dump(std::ostream &out) const {
+  if (m_modifiers & Abstract) {
+    out << "abstract ";
   }
-  printf("}");
+  if (m_modifiers & Final) {
+    out << "final ";
+  }
+  if (m_modifiers & Interface) {
+    out << "interface ";
+  } else {
+    out << "class ";
+  }
+  out << m_name;
+  if (!m_parent.empty()) {
+    out << " extends " << m_parent;
+  }
+  if (!m_basesVec.empty()) {
+    if (m_modifiers & Interface) {
+      out << " extends ";
+    } else {
+      out << " implements ";
+    }
+    for (unsigned int i = 0; i < m_basesVec.size(); i++) {
+      if (i > 0) out << ", ";
+      out << m_basesVec[i];
+    }
+  }
+  out << " {\n";
+  if (!m_constants.empty()) {
+    out << "const ";
+    bool first = true;
+    for (map<string, ExpressionPtr>::const_iterator iter = m_constants.begin();
+         iter != m_constants.end(); ++iter) {
+      if (first) {
+        first = false;
+      } else {
+        out << ", ";
+      }
+      out << iter->first << " = ";
+      iter->second->dump(out);
+    }
+    out << ";\n";
+  }
+  for (unsigned int i = 0; i < m_variablesVec.size(); i++) {
+    m_variablesVec[i]->dump(out);
+    out << "\n";
+  }
+  for (unsigned int i = 0; i < m_methodsVec.size(); i++) {
+    m_methodsVec[i]->dump(out);
+  }
+  out << "}\n";
 }
 
-void ClassStatement::printModifiers(int m) {
-  if (m & Public) printf("public ");
-  if (m & Protected) printf("protected ");
-  if (m & Private) printf("private ");
-  if (m & Static) printf("static ");
-  if (m & Abstract) printf("abstract ");
-  if (m & Final) printf("final ");
-  if (m & Interface) printf("interface ");
+void ClassStatement::dumpModifiers(std::ostream &out, int m, bool variable) {
+  if (m & Protected) {
+    out << "protected ";
+  } else if (m & Private) {
+    out << "private ";
+  } else {
+    out << "public ";
+  }
+  if (m & Static)   out << "static ";
+  if (m & Abstract) out << "abstract ";
+  if (m & Final)    out << "final ";
 }
 
 void ClassStatement::getPropertyInfo(ClassInfoEvaled &owner)  const {
@@ -959,7 +1007,7 @@ void ClassStatementMarker::eval(VariableEnvironment &env) const {
   ce->semanticCheck();
 }
 
-void ClassStatementMarker::dump() const {
+void ClassStatementMarker::dump(std::ostream &out) const {
 }
 
 ///////////////////////////////////////////////////////////////////////////////

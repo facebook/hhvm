@@ -23,7 +23,7 @@
 #include <compiler/analysis/code_error.h>
 #include <util/util.h>
 #include <util/hash.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/option.h>
 

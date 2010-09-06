@@ -41,7 +41,7 @@ public:
       ExpressionPtr value, const std::string &doc, ClassStatement *cls);
   void set(VariableEnvironment &env, EvalObjectData *self) const;
   void setStatic(VariableEnvironment &env, LVariableTable &statics) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
   const std::string &name() const { return m_name; }
   void getInfo(ClassInfo::PropertyInfo &info) const;
   int getModifiers() const { return m_modifiers; }
@@ -111,8 +111,8 @@ public:
   bool getConstant(Variant &res, const char *c,
                    bool recursive = false) const;
 
-  virtual void dump() const;
-  static void printModifiers(int m);
+  virtual void dump(std::ostream &out) const;
+  static void dumpModifiers(std::ostream &out, int m, bool variable);
 
   void getPropertyInfo(ClassInfoEvaled &owner) const;
   void getInfo(ClassInfoEvaled &info) const;
@@ -159,7 +159,8 @@ class ClassStatementMarker : public Statement {
 public:
   ClassStatementMarker(STATEMENT_ARGS, ClassStatement *cls);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual bool skipDump() const { return true;}
+  virtual void dump(std::ostream &out) const;
 protected:
   ClassStatement *m_class;
 };

@@ -4453,7 +4453,7 @@ Array c_ReflectionClass::t_getmethods(CVarRef v_filter //  = 65535LL
           const p_ReflectionMethod &tmp5((t_getmethod(v_name)));
           v_m = tmp5;
         }
-        if (((((((toBoolean(bitwise_and(v_filter, 256LL /* reflectionmethod::IS_PUBLIC */)) && v_m->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* reflectionmethod::IS_PROTECTED */)) && v_m->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* reflectionmethod::IS_PRIVATE */)) && v_m->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* reflectionmethod::IS_STATIC */)) && toBoolean(v_m->t_isstatic()))) || (toBoolean(bitwise_and(v_filter, 4LL /* reflectionmethod::IS_FINAL */)) && toBoolean(v_m->t_isfinal()))) || (toBoolean(bitwise_and(v_filter, 2LL /* reflectionmethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))) {
+        if (((((((toBoolean(bitwise_and(v_filter, 256LL /* ReflectionMethod::IS_PUBLIC */)) && v_m->t_ispublic()) || (toBoolean(bitwise_and(v_filter, 512LL /* ReflectionMethod::IS_PROTECTED */)) && v_m->t_isprotected())) || (toBoolean(bitwise_and(v_filter, 1024LL /* ReflectionMethod::IS_PRIVATE */)) && v_m->t_isprivate())) || (toBoolean(bitwise_and(v_filter, 1LL /* ReflectionMethod::IS_STATIC */)) && toBoolean(v_m->t_isstatic()))) || (toBoolean(bitwise_and(v_filter, 4LL /* ReflectionMethod::IS_FINAL */)) && toBoolean(v_m->t_isfinal()))) || (toBoolean(bitwise_and(v_filter, 2LL /* ReflectionMethod::IS_ABSTRACT */)) && toBoolean(v_m->t_isabstract())))) {
           {
             {
               p_ReflectionMethod tmp6((v_m));

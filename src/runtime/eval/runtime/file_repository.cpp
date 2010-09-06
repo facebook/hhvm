@@ -127,7 +127,7 @@ PhpFile *FileRepository::readFile(const std::string &name,
                                   const struct stat &s) {
   vector<StaticStatementPtr> sts;
   const char *canoname = canonicalize(name);
-  StatementPtr stmt = Parser::parseFile(canoname, sts);
+  StatementPtr stmt = Parser::ParseFile(canoname, sts);
   if (stmt) {
     PhpFile *p = new PhpFile(stmt, sts, s);
     return p;

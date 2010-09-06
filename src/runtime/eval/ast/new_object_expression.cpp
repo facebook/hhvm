@@ -38,10 +38,10 @@ Variant NewObjectExpression::eval(VariableEnvironment &env) const {
   return o;
 }
 
-void NewObjectExpression::dump() const {
-  printf("new ");
-  m_name->dump();
-  dumpParams();
+void NewObjectExpression::dump(std::ostream &out) const {
+  out << "new ";
+  m_name->dump(out);
+  dumpParams(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

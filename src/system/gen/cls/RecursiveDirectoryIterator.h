@@ -61,8 +61,8 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: void t___construct(Variant v_path, Variant v_flags = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */);
-  public: c_RecursiveDirectoryIterator *create(Variant v_path, Variant v_flags = 16LL /* recursivedirectoryiterator::CURRENT_AS_FILEINFO */);
+  public: void t___construct(Variant v_path, Variant v_flags = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
+  public: c_RecursiveDirectoryIterator *create(Variant v_path, Variant v_flags = 16LL /* RecursiveDirectoryIterator::CURRENT_AS_FILEINFO */);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);

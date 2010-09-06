@@ -30,7 +30,7 @@
 #include <runtime/ext/ext_iconv.h>
 #include <unicode/coll.h> // icu
 #include <runtime/base/zend/zend_qsort.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 using namespace std;
 

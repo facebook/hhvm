@@ -268,37 +268,7 @@ std::string CodeGenerator::formatLabel(const std::string &name) {
 
 std::string CodeGenerator::escapeLabel(const std::string &name,
                                        bool *binary /* = NULL */) {
-  if (binary) *binary = false;
-
-  string ret;
-  ret.reserve((name.length() << 1) + 2);
-  for (unsigned int i = 0; i < name.length(); i++) {
-    unsigned char ch = name[i];
-    switch (ch) {
-      case '\n': ret += "\\n";  break;
-      case '\r': ret += "\\r";  break;
-      case '\t': ret += "\\t";  break;
-      case '\a': ret += "\\a";  break;
-      case '\b': ret += "\\b";  break;
-      case '\f': ret += "\\f";  break;
-      case '\v': ret += "\\v";  break;
-      case '\0': ret += "\\000";if (binary) *binary = true; break;
-      case '\"': ret += "\\\""; break;
-      case '\\': ret += "\\\\"; break;
-      case '?':  ret += "\\?";  break; // avoiding trigraph errors
-      default:
-        if (isprint(ch)) {
-          ret += ch;
-        } else {
-          // output in octal notation
-          char buf[10];
-          snprintf(buf, sizeof(buf), "\\%03o", ch);
-          ret += buf;
-        }
-        break;
-    }
-  }
-  return ret;
+  return Util::escapeStringForCPP(name, binary);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

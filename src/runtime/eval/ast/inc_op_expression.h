@@ -31,7 +31,7 @@ public:
   IncOpExpression(EXPRESSION_ARGS, LvalExpressionPtr exp, bool inc, bool front);
   virtual Variant eval(VariableEnvironment &env) const;
   virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   LvalExpressionPtr m_exp;
   bool m_inc;

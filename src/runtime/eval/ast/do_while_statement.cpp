@@ -34,12 +34,12 @@ void DoWhileStatement::eval(VariableEnvironment &env) const {
  } while (m_cond->eval(env));
 }
 
-void DoWhileStatement::dump() const {
-  printf("do {");
-  if (m_body) m_body->dump();
-  printf("} while(");
-  m_cond->dump();
-  printf(");");
+void DoWhileStatement::dump(std::ostream &out) const {
+  out << "do {";
+  if (m_body) m_body->dump(out);
+  out << "}\nwhile (";
+  m_cond->dump(out);
+  out << ");\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -30,7 +30,7 @@ class ThrowStatement : public Statement {
 public:
   ThrowStatement(STATEMENT_ARGS, ExpressionPtr value);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_value;
 };

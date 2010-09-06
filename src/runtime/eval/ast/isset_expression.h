@@ -29,7 +29,7 @@ class IssetExpression : public Expression {
 public:
   IssetExpression(EXPRESSION_ARGS, const std::vector<ExpressionPtr> &exps);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<ExpressionPtr> m_exps;
 };

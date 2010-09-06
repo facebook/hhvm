@@ -156,6 +156,14 @@ Still under development, but this option specifies where to store runtime
 type information collected by RTTI profiler. We intend to use this information
 to compile better code, similar to g++'s PGO.
 
+= EnableShortTags
+
+Default is true. Is &lt;? allowed with PHP code?
+
+= EnableAspTags
+
+Default is false. Is &lt;% %&gt; allowed with PHP code?
+
 = EnableXHP
 
 Whether to enable XHP extension. XHP adds some syntax sugar to allow better and

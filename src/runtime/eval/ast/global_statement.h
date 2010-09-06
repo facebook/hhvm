@@ -31,7 +31,7 @@ public:
   GlobalStatement(STATEMENT_ARGS, const std::vector<NamePtr> &vars);
   GlobalStatement(STATEMENT_ARGS);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   std::vector<NamePtr> m_vars;
 };

@@ -16,7 +16,7 @@
 
 #include <runtime/eval/ast/this_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -49,8 +49,8 @@ Variant ThisExpression::set(VariableEnvironment &env, CVarRef val) const {
   throw FatalErrorException("Cannot re-assign $this");
 }
 
-void ThisExpression::dump() const {
-  printf("$this");
+void ThisExpression::dump(std::ostream &out) const {
+  out << "$this";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -16,7 +16,7 @@
 
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/expression/object_property_expression.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/file_scope.h>
@@ -448,7 +448,7 @@ void UnaryOpExpression::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
     case '~':             cg_printf("~");             break;
     case '(':             cg_printf("(");             break;
     case T_INT_CAST:      cg_printf("(int)");         break;
-    case T_DOUBLE_CAST:   cg_printf("(real)");        break;
+    case T_DOUBLE_CAST:   cg_printf("(double)");      break;
     case T_STRING_CAST:   cg_printf("(string)");      break;
     case T_ARRAY_CAST:    cg_printf("(array)");       break;
     case T_OBJECT_CAST:   cg_printf("(object)");      break;

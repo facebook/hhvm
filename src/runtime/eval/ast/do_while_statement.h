@@ -30,7 +30,7 @@ class DoWhileStatement : public Statement {
 public:
   DoWhileStatement(STATEMENT_ARGS, StatementPtr body, ExpressionPtr cond);
   virtual void eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   ExpressionPtr m_cond;
   StatementPtr m_body;

@@ -47,6 +47,7 @@ public:
 private:
   int m_type;
   std::string m_parent;
+  std::string m_originalParent;
   bool m_ignored;
 
   void outputCPPClassDecl(CodeGenerator &cg, AnalysisResultPtr ar,

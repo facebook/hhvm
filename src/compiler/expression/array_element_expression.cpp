@@ -23,7 +23,7 @@
 #include <compiler/option.h>
 #include <compiler/expression/static_member_expression.h>
 #include <compiler/analysis/function_scope.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <runtime/base/complex_types.h>
 
 using namespace HPHP;

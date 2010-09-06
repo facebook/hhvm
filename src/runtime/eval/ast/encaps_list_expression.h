@@ -30,7 +30,7 @@ public:
   EncapsListExpression(EXPRESSION_ARGS, std::vector<ExpressionPtr> encaps,
                        bool shell);
   Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 protected:
   std::vector<ExpressionPtr> m_encaps;
   bool m_shell;

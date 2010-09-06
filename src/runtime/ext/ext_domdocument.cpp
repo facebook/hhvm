@@ -50,7 +50,7 @@ extern void libxml_add_error(const std::string &msg);
 static void php_libxml_internal_error_handler(int error_type, void *ctx,
                                               const char *fmt, va_list ap) {
   string msg;
-  Logger::VSNPrintf(msg, fmt, ap);
+  Util::string_vsnprintf(msg, fmt, ap);
 
   /* remove any trailing \n */
   while (!msg.empty() && msg[msg.size() - 1] == '\n') {

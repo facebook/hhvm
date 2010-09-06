@@ -15,7 +15,7 @@
 */
 
 #include <compiler/statement/class_statement.h>
-#include <compiler/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 #include <compiler/expression/expression_list.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/expression/scalar_expression.h>
@@ -48,6 +48,7 @@ ClassStatement::ClassStatement
                        name, base, docComment, stmt),
     m_type(type), m_ignored(false) {
   m_parent = Util::toLower(parent);
+  m_originalParent = parent;
 }
 
 StatementPtr ClassStatement::clone() {
@@ -232,10 +233,10 @@ void ClassStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   default:
     ASSERT(false);
   }
-  cg_printf("class %s", m_name.c_str());
+  cg_printf("class %s", m_originalName.c_str());
 
   if (!m_parent.empty()) {
-    cg_printf(" extends %s", m_parent.c_str());
+    cg_printf(" extends %s", m_originalParent.c_str());
   }
 
   if (m_base) {

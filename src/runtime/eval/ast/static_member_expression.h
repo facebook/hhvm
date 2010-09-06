@@ -31,7 +31,7 @@ public:
   StaticMemberExpression(EXPRESSION_ARGS, const NamePtr &cls,
       const NamePtr &variable);
   virtual Variant &lval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
 private:
   NamePtr m_class;
   NamePtr m_variable;

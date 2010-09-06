@@ -19,27 +19,79 @@
 #include <compiler/code_generator.h>
 #include <compiler/statement/statement_list.h>
 #include <compiler/analysis/analysis_result.h>
+#include <runtime/eval/parser/parser.h>
+#include <util/util.h>
 
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
 
+static void strip_empty_block(std::string &s) {
+  if (s.size() >= 2 && s[0] == '{' && s[s.size() - 1] == '}') {
+    s = s.substr(1, s.size() - 2);
+  }
+}
+
+bool TestParser::SameCode(std::string code1, std::string code2) {
+  Util::replaceAll(code1, "\n", "");
+  Util::replaceAll(code2, "\n", "");
+
+  // hphpi has more concise way of handling empty block statements
+  Util::replaceAll(code1, "{{}}", "{}");
+  Util::replaceAll(code2, "{{}}", "{}");
+  Util::replaceAll(code1, "else {}", "");
+  Util::replaceAll(code2, "else {}", "");
+  strip_empty_block(code1);
+  strip_empty_block(code2);
+
+  return code1 == code2;
+}
+
 bool TestParser::VerifyParser(const char *input, const char *output,
-                              const char *file /* = "" */,
-                              int line /* = 0 */) {
+                              const char *file /* = "" */, int line /* = 0 */,
+                              const char *output2 /* = NULL */) {
   ASSERT(input);
   ASSERT(output);
+  if (output2 == NULL) output2 = output;
 
-  AnalysisResultPtr ar(new AnalysisResult());
-  StatementListPtr tree = Parser::ParseString(input, ar);
-  ostringstream code;
-  CodeGenerator cg(&code);
-  tree->outputPHP(cg, ar);
-  if (code.str() != output) {
-    printf("%s:%d\nParsing: [%s]\nExpecting %d: [%s]\nGot %d: [%s]\n",
-           file, line, input, (int)strlen(output), output,
-           (int)code.str().length(), code.str().c_str());
-    return false;
+  string oldTab = Option::Tab;
+  Option::Tab = "";
+
+  bool ret = true;
+  {
+    AnalysisResultPtr ar(new AnalysisResult());
+    StatementListPtr tree = Compiler::Parser::ParseString(input, ar);
+    ostringstream code;
+    CodeGenerator cg(&code);
+    tree->outputPHP(cg, ar);
+    if (!SameCode(code.str(), output)) {
+      printf("======================================\n"
+             "[Compiler] %s:%d:\n"
+             "======================================\n",
+             file, line);
+      printf("[%s]\nExpecting %d: [%s]\nGot %d: [%s]\n",
+             input, (int)strlen(output), output,
+             (int)code.str().length(), code.str().c_str());
+      ret = false;
+    }
   }
-  return true;
+  {
+    std::vector<Eval::StaticStatementPtr> statics;
+    Eval::StatementPtr tree = Eval::Parser::ParseString(input, statics);
+    ostringstream code;
+    tree->dump(code);
+    if (!SameCode(code.str(), output2)) {
+      printf("======================================\n"
+             "[Interpreter] %s:%d:\n"
+             "======================================\n",
+             file, line);
+      printf("[%s]\nExpecting %d: [%s]\nGot %d: [%s]\n",
+             input, (int)strlen(output2), output2,
+             (int)code.str().length(), code.str().c_str());
+      ret = false;
+    }
+  }
+
+  Option::Tab = oldTab;
+  return ret;
 }

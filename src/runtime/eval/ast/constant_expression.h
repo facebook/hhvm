@@ -29,7 +29,7 @@ class ConstantExpression : public Expression {
 public:
   ConstantExpression(EXPRESSION_ARGS, const std::string &constant);
   virtual Variant eval(VariableEnvironment &env) const;
-  virtual void dump() const;
+  virtual void dump(std::ostream &out) const;
   const std::string &getName() const { return m_constant; }
 private:
   std::string m_constant;

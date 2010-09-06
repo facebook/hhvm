@@ -42,15 +42,15 @@ bool CaseStatement::isDefault() const {
   return !m_match;
 }
 
-void CaseStatement::dump() const {
+void CaseStatement::dump(std::ostream &out) const {
   if (m_match) {
-    printf("case ");
-    m_match->dump();
+    out << "\ncase ";
+    m_match->dump(out);
   } else {
-    printf("default");
+    out << "\ndefault";
   }
-  printf(": ");
-  m_body->dump();
+  out << ":\n";
+  m_body->dump(out);
 }
 
 SwitchStatement::SwitchStatement(STATEMENT_ARGS, ExpressionPtr source,
@@ -80,12 +80,16 @@ void SwitchStatement::eval(VariableEnvironment &env) const {
   }
 }
 
-void SwitchStatement::dump() const {
-  printf("switch (");
-  m_source->dump();
-  printf(") {");
-  dumpVector(m_cases, " ");
-  printf("}");
+void SwitchStatement::dump(std::ostream &out) const {
+  out << "switch (";
+  m_source->dump(out);
+  out << ") {";
+  if (m_cases.empty()) {
+    out << "\n";
+  } else {
+    dumpVector(out, m_cases, "");
+  }
+  out << "}\n";
 }
 
 ///////////////////////////////////////////////////////////////////////////////

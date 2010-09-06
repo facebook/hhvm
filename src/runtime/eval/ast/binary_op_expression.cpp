@@ -16,7 +16,7 @@
 
 #include <runtime/eval/ast/binary_op_expression.h>
 #include <runtime/eval/ast/variable_expression.h>
-#include <runtime/eval/parser/hphp.tab.hpp>
+#include <util/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -76,39 +76,39 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
   }
 }
 
-void BinaryOpExpression::dump() const {
-  m_exp1->dump();
-  const char* op = "<bad op>";
+void BinaryOpExpression::dump(std::ostream &out) const {
+  m_exp1->dump(out);
+  out << " ";
   switch (m_op) {
-  case T_LOGICAL_OR: op = "OR"; break;
-  case T_BOOLEAN_OR: op = "||"; break;
-  case T_LOGICAL_AND: op = "AND"; break;
-  case T_BOOLEAN_AND: op = "&&"; break;
-  case T_LOGICAL_XOR: op = "XOR"; break;
-  case '|': op = "|"; break;
-  case '&': op = "&"; break;
-  case '^': op = "^"; break;
-  case '.': op = "."; break;
-  case '+': op = "+"; break;
-  case '-': op = "-"; break;
-  case '*': op = "*"; break;
-  case '/': op = "/"; break;
-  case '%': op = "%"; break;
-  case T_SL: op = "<<"; break;
-  case T_SR: op = ">>"; break;
-  case T_IS_IDENTICAL: op = "==="; break;
-  case T_IS_NOT_IDENTICAL: op = "!=="; break;
-  case T_IS_EQUAL: op = "=="; break;
-  case T_IS_NOT_EQUAL: op = "!="; break;
-  case '<': op = "<"; break;
-  case T_IS_SMALLER_OR_EQUAL: op = "<="; break;
-  case '>': op = ">"; break;
-  case T_IS_GREATER_OR_EQUAL: op = ">="; break;
+  case T_LOGICAL_OR:          out << "or";  break;
+  case T_BOOLEAN_OR:          out << "||";  break;
+  case T_LOGICAL_AND:         out << "and"; break;
+  case T_BOOLEAN_AND:         out << "&&";  break;
+  case T_LOGICAL_XOR:         out << "xor"; break;
+  case '|':                   out << "|";   break;
+  case '&':                   out << "&";   break;
+  case '^':                   out << "^";   break;
+  case '.':                   out << ".";   break;
+  case '+':                   out << "+";   break;
+  case '-':                   out << "-";   break;
+  case '*':                   out << "*";   break;
+  case '/':                   out << "/";   break;
+  case '%':                   out << "%";   break;
+  case T_SL:                  out << "<<";  break;
+  case T_SR:                  out << ">>";  break;
+  case T_IS_IDENTICAL:        out << "==="; break;
+  case T_IS_NOT_IDENTICAL:    out << "!=="; break;
+  case T_IS_EQUAL:            out << "==";  break;
+  case T_IS_NOT_EQUAL:        out << "!=";  break;
+  case '<':                   out << "<";   break;
+  case T_IS_SMALLER_OR_EQUAL: out << "<=";  break;
+  case '>':                   out << ">";   break;
+  case T_IS_GREATER_OR_EQUAL: out << ">=";  break;
   default:
     ASSERT(false);
   }
-  printf(" %s ", op);
-  m_exp2->dump();
+  out << " ";
+  m_exp2->dump(out);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

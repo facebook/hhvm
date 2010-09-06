@@ -60,6 +60,7 @@ public:
   static int NoticeFrequency; // output 1 out of NoticeFrequency notices
   static int WarningFrequency;
   static int64 SerializationSizeLimit;
+  static int64 StringOffsetLimit;
 
   static std::string AccessLogDefaultFormat;
   static std::vector<std::pair<std::string, std::string> > AccessLogs;

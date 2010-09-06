@@ -18,6 +18,7 @@
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/util/exceptions.h>
+#include <runtime/base/util/alloc.h>
 #include <math.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_strtod.h>
@@ -250,9 +251,11 @@ void StringData::setChar(int offset, CStrRef substring) {
       } else {
         removeChar(offset);
       }
+    } else if (offset > RuntimeOption::StringOffsetLimit) {
+      throw OffsetOutOfRangeException();
     } else {
       int newlen = offset + 1;
-      char *buf = (char *)malloc(newlen + 1);
+      char *buf = (char *)Util::safe_malloc(newlen + 1);
       memset(buf, ' ', newlen);
       buf[newlen] = 0;
       memcpy(buf, data(), len);

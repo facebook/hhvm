@@ -107,6 +107,10 @@ flood error logs.
     MaxRSS = 0
     MaxRSSPollingCycle = 0    # in seconds, how often to check max memory
     DropCacheCycle = 0        # in seconds, how often to drop disk cache
+    MaxSQLRowCount = 0
+    MaxMemcacheKeyCount = 0
+    SerializationSizeLimit = 0
+    StringOffsetLimit = 10 * 1024 * 1024
   }
 
 = Server

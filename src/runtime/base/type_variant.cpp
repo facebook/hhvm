@@ -2524,7 +2524,7 @@ ObjectOffset Variant::o_lval(CStrRef propName,
     }                                                                   \
     /* Fall through */                                                  \
   case KindOfNull:                                                      \
-    set(ArrayData::Create(ToKey(key), v));                                     \
+    set(ArrayData::Create(ToKey(key), v));                              \
     break;                                                              \
   case KindOfVariant:                                                   \
     m_data.pvar->set(key, v);                                           \
@@ -2534,7 +2534,7 @@ ObjectOffset Variant::o_lval(CStrRef propName,
     {                                                                   \
       String s = toString();                                            \
       if (s.empty()) {                                                  \
-        set(Array::Create(ToKey(key), v));                                     \
+        set(Array::Create(ToKey(key), v));                              \
       } else {                                                          \
         s.lvalAt(key) = v;                                              \
         set(s);                                                         \

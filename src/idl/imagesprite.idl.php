@@ -91,7 +91,7 @@ CPP
 BeginClass(
   array(
     'name'   => "ImageSprite",
-    'desc'   => "TODO",
+    'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 

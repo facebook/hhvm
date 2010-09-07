@@ -1596,6 +1596,7 @@ BeginClass(
   array(
     'name'   => "DOMNode",
     'bases'  => array('Sweepable'),
+    'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
@@ -1641,7 +1642,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The cloned node. DOMNode::getLineNo DOMNode::appendChild Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "The cloned node.",
     ),
     'args'   => array(
       array(
@@ -2390,6 +2391,7 @@ BeginClass(
   array(
     'name'   => "DOMCDATASection",
     'parent' => "DOMText",
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -3100,6 +3102,7 @@ BeginClass(
   array(
     'name'   => "DOMDocumentFragment",
     'parent' => "DOMNode",
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -3213,6 +3216,7 @@ BeginClass(
   array(
     'name'   => "DOMElement",
     'parent' => "DOMNode",
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -3742,6 +3746,7 @@ BeginClass(
   array(
     'name'   => "DOMEntityReference",
     'parent' => "DOMNode",
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -3778,6 +3783,7 @@ BeginClass(
   array(
     'name'   => "DOMNotation",
     'parent' => "DOMNode",
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -3842,6 +3848,7 @@ BeginClass(
   array(
     'name'   => "DOMProcessingInstruction",
     'parent' => "DOMNode",
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -3918,6 +3925,7 @@ BeginClass(
     'name'   => "DOMNodeIterator",
     'ifaces' => array('Iterator'),
     'bases'  => array('Sweepable'),
+    'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
@@ -4005,6 +4013,7 @@ BeginClass(
     'name'   => "DOMNamedNodeMap",
     'ifaces' => array('IteratorAggregate'),
     'bases'  => array('dom_iterable'),
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -4138,6 +4147,7 @@ BeginClass(
     'name'   => "DOMNodeList",
     'ifaces' => array('IteratorAggregate'),
     'bases'  => array('dom_iterable'),
+    'desc'   => "",
     'flags'  =>  HasDocComment,
   ));
 
@@ -4471,7 +4481,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. DOMXPath::registerPhpFunctions DOMXPath::query Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(

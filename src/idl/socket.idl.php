@@ -670,7 +670,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. socket_strerror socket_set_option Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(

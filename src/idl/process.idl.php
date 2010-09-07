@@ -74,7 +74,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
-      'desc'   => "Returns FALSE on error and does not return on success. pcntl_fork pcntl_alarm Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns FALSE on error and does not return on success.",
     ),
     'args'   => array(
       array(
@@ -537,7 +537,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
-      'desc'   => "Returns the termination status of the process that was run. proc_get_status passthru Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns the termination status of the process that was run.",
     ),
     'args'   => array(
       array(

@@ -29,7 +29,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Includes and Functions
 Variant pm_php$classes$splfile_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
+
+// Redeclared Functions
+
+// Dynamic Class Declarations
 Object co_SplFileObject(CArrRef params, bool init = true);
 Object co_SplFileInfo(CArrRef params, bool init = true);
 

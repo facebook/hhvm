@@ -25,9 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 923 */
 class c_AppendIterator : public ExtObjectData {
+  public:
 
   // Properties
-  public: Variant m_iterators;
+  Variant m_iterators;
 
   // Class Map
   BEGIN_CLASS_MAP(AppendIterator)

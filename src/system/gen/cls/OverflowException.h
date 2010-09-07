@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 233 */
 class c_OverflowException : public c_RuntimeException {
+  public:
 
   // Properties
 

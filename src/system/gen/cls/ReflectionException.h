@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 27 */
 class c_ReflectionException : public c_Exception {
+  public:
 
   // Properties
 

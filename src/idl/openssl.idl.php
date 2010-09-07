@@ -571,7 +571,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. openssl_pkey_free openssl_pkey_export_to_file Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(
@@ -657,7 +657,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error. openssl_pkey_get_public openssl_pkey_get_details Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error.",
     ),
     'args'   => array(
       array(
@@ -701,7 +701,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error. openssl_pkey_new openssl_pkey_get_private Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns a positive key resource identifier on success, or FALSE on error.",
     ),
     'args'   => array(
       array(
@@ -1106,7 +1106,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "The structure of the returned data is (deliberately) not yet documented, as it is still subject to change. openssl_x509_read openssl_x509_free Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "The structure of the returned data is (deliberately) not yet documented, as it is still subject to change.",
     ),
     'args'   => array(
       array(
@@ -1129,7 +1129,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns a resource identifier on success or FALSE on failure. Database Extensions openssl_x509_parse Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns a resource identifier on success or FALSE on failure.",
     ),
     'args'   => array(
       array(

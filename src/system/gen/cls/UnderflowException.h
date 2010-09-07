@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 250 */
 class c_UnderflowException : public c_RuntimeException {
+  public:
 
   // Properties
 

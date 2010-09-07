@@ -25,9 +25,10 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 268 */
 class c_ErrorException : public c_Exception {
+  public:
 
   // Properties
-  public: Variant m_severity;
+  Variant m_severity;
 
   // Class Map
   BEGIN_CLASS_MAP(ErrorException)

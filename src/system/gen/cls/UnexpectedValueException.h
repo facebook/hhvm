@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 259 */
 class c_UnexpectedValueException : public c_RuntimeException {
+  public:
 
   // Properties
 

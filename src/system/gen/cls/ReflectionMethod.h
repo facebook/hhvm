@@ -26,10 +26,11 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 1556 */
 class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
+  public:
 
   // Properties
-  public: Variant m_name;
-  public: Variant m_class;
+  Variant m_name;
+  Variant m_class;
 
   // Class Map
   BEGIN_CLASS_MAP(ReflectionMethod)

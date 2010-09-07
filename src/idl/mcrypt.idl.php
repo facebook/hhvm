@@ -375,7 +375,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "Returns the decrypted data as a string. mcrypt_ecb mcrypt_create_iv Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns the decrypted data as a string.",
     ),
     'args'   => array(
       array(

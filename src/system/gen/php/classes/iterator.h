@@ -43,7 +43,12 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
+// Includes and Functions
 Variant pm_php$classes$iterator_php(bool incOnce = false, LVariableTable* variables = NULL, Globals *globals = get_globals());
+
+// Redeclared Functions
+
+// Dynamic Class Declarations
 Object co_ArrayIterator(CArrRef params, bool init = true);
 Object co_AppendIterator(CArrRef params, bool init = true);
 Object co_RecursiveDirectoryIterator(CArrRef params, bool init = true);

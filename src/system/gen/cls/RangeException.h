@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 241 */
 class c_RangeException : public c_RuntimeException {
+  public:
 
   // Properties
 

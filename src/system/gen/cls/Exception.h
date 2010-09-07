@@ -24,13 +24,14 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 10 */
 class c_Exception : public ExtObjectData {
+  public:
 
   // Properties
-  public: Variant m_message;
-  public: Variant m_code;
-  public: Variant m_file;
-  public: Variant m_line;
-  public: Variant m_trace;
+  Variant m_message;
+  Variant m_code;
+  Variant m_file;
+  Variant m_line;
+  Variant m_trace;
 
   // Class Map
   BEGIN_CLASS_MAP(Exception)

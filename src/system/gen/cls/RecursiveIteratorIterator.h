@@ -26,6 +26,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 164 */
 class c_RecursiveIteratorIterator : public ExtObjectData {
+  public:
 
   // Properties
 

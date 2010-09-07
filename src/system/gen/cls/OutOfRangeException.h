@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 209 */
 class c_OutOfRangeException : public c_LogicException {
+  public:
 
   // Properties
 

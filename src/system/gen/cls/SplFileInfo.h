@@ -24,6 +24,7 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 11 */
 class c_SplFileInfo : public ExtObjectData {
+  public:
 
   // Properties
 

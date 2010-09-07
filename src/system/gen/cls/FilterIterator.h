@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 888 */
 class c_FilterIterator : public ExtObjectData {
+  public:
 
   // Properties
 

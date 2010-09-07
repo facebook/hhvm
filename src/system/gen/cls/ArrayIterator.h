@@ -27,10 +27,11 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 326 */
 class c_ArrayIterator : public ExtObjectData {
+  public:
 
   // Properties
-  public: Variant m_arr;
-  public: Variant m_flags;
+  Variant m_arr;
+  Variant m_flags;
 
   // Class Map
   BEGIN_CLASS_MAP(ArrayIterator)

@@ -142,6 +142,7 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "DebuggerProxy",
+    'desc'   => "",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'footer' => <<<EOT
 
@@ -209,6 +210,7 @@ EndClass(
 BeginClass(
   array(
     'name'   => "DebuggerClient",
+    'desc'   => "",
     'flags'  =>  HasDocComment | HipHopSpecific,
     'footer' => <<<EOT
 

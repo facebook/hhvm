@@ -998,6 +998,7 @@ function get_class_doc_comments($class) {
 // phpnet
 
 function phpnet_clean($text) {
+  $text = preg_replace('#<!--UdmComment.*?/UdmComment-->#s', '', $text);
   $text = preg_replace('#<div class="example-contents">.*?</div>#s',
                        '<>', $text);
   $text = preg_replace('#<p class="para">#', '<>', $text);

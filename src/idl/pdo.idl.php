@@ -688,7 +688,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. PDOStatement PDO::rollBack Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(
@@ -745,7 +745,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "If a sequence name was not specified for the name parameter, PDO::lastInsertId() returns a string representing the row ID of the last row that was inserted into the database.\n\nIf a sequence name was specified for the name parameter, PDO::lastInsertId() returns a string representing the last value retrieved from the specified sequence object.\n\nIf the PDO driver does not support this capability, PDO::lastInsertId() triggers an IM001 SQLSTATE. PDO::prepare PDO::getAvailableDrivers Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "If a sequence name was not specified for the name parameter, PDO::lastInsertId() returns a string representing the row ID of the last row that was inserted into the database.\n\nIf a sequence name was specified for the name parameter, PDO::lastInsertId() returns a string representing the last value retrieved from the specified sequence object.\n\nIf the PDO driver does not support this capability, PDO::lastInsertId() triggers an IM001 SQLSTATE.",
     ),
     'args'   => array(
       array(

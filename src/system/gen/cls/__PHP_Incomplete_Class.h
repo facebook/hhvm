@@ -24,6 +24,7 @@ namespace HPHP {
 
 /* SRC: classes/stdclass.php line 8 */
 class c___PHP_Incomplete_Class : public ExtObjectData {
+  public:
 
   // Properties
 

@@ -715,6 +715,7 @@ BeginClass(
     'name'   => "SimpleXMLElementIterator",
     'ifaces' => array('Iterator'),
     'bases'  => array('Sweepable'),
+    'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 

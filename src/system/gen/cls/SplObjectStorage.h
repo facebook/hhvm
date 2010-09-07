@@ -26,10 +26,11 @@ namespace HPHP {
 
 /* SRC: classes/splobjectstorage.php line 12 */
 class c_SplObjectStorage : public ExtObjectData {
+  public:
 
   // Properties
-  public: Variant m_storage;
-  public: int64 m_index;
+  Variant m_storage;
+  int64 m_index;
 
   // Class Map
   BEGIN_CLASS_MAP(SplObjectStorage)

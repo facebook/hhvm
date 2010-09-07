@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 225 */
 class c_OutOfBoundsException : public c_RuntimeException {
+  public:
 
   // Properties
 

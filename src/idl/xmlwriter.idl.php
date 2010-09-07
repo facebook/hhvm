@@ -1128,6 +1128,7 @@ BeginClass(
   array(
     'name'   => "XMLWriter",
     'bases'  => array('Sweepable'),
+    'desc'   => "",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 

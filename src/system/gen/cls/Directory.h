@@ -24,10 +24,11 @@ namespace HPHP {
 
 /* SRC: classes/directory.php line 3 */
 class c_Directory : public ExtObjectData {
+  public:
 
   // Properties
-  public: Variant m_path;
-  public: Variant m_handle;
+  Variant m_path;
+  Variant m_handle;
 
   // Class Map
   BEGIN_CLASS_MAP(Directory)

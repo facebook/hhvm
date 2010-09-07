@@ -28,6 +28,7 @@ namespace HPHP {
 
 /* SRC: classes/splfile.php line 383 */
 class c_SplFileObject : public c_SplFileInfo {
+  public:
 
   // Properties
 

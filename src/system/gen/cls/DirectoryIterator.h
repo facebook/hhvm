@@ -27,6 +27,7 @@ namespace HPHP {
 
 /* SRC: classes/iterator.php line 645 */
 class c_DirectoryIterator : public c_SplFileInfo {
+  public:
 
   // Properties
 

@@ -24,9 +24,10 @@ namespace HPHP {
 
 /* SRC: classes/reflection.php line 248 */
 class c_ReflectionFunctionAbstract : public ExtObjectData {
+  public:
 
   // Properties
-  public: Variant m_info;
+  Variant m_info;
 
   // Class Map
   BEGIN_CLASS_MAP(ReflectionFunctionAbstract)

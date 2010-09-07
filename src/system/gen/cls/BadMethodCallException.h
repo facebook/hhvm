@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 175 */
 class c_BadMethodCallException : public c_BadFunctionCallException {
+  public:
 
   // Properties
 

@@ -75,7 +75,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it frees the parser and returns TRUE. xml_parser_get_option xml_parser_create Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or else it frees the parser and returns TRUE.",
     ),
     'args'   => array(
       array(
@@ -93,7 +93,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Int32,
-      'desc'   => "Returns 1 on success or 0 on failure.\n\nFor unsuccessful parses, error information can be retrieved with xml_get_error_code(), xml_error_string(), xml_get_current_line_number(), xml_get_current_column_number() and xml_get_current_byte_index().\n\nEntity errors are reported at the end of the data thus only if is_final is set and TRUE. xml_parser_create_ns xml_parse_into_struct Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns 1 on success or 0 on failure.\n\nFor unsuccessful parses, error information can be retrieved with xml_get_error_code(), xml_error_string(), xml_get_current_line_number(), xml_get_current_column_number() and xml_get_current_byte_index().\n\nEntity errors are reported at the end of the data thus only if is_final is set and TRUE.",
     ),
     'args'   => array(
       array(
@@ -200,7 +200,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or if the option could not be set. Else the option is set and TRUE is returned. xml_set_character_data_handler xml_parser_get_option Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "This function returns FALSE if parser does not refer to a valid parser, or if the option could not be set. Else the option is set and TRUE is returned.",
     ),
     'args'   => array(
       array(
@@ -228,7 +228,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. xml_set_default_handler xml_parser_set_option Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(
@@ -272,7 +272,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure. xml_set_end_namespace_decl_handler xml_set_default_handler Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
       array(
@@ -562,7 +562,7 @@ DefineFunction(
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "Returns the UTF-8 translation of data. xml_error_string utf8_decode Last updated: Fri, 03 Sep 2010  ",
+      'desc'   => "Returns the UTF-8 translation of data.",
     ),
     'args'   => array(
       array(

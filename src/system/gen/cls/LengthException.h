@@ -25,6 +25,7 @@ namespace HPHP {
 
 /* SRC: classes/exception.php line 201 */
 class c_LengthException : public c_LogicException {
+  public:
 
   // Properties
 

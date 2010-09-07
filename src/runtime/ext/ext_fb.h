@@ -43,6 +43,7 @@ void f_xhprof_enable(int flags, CArrRef args = null_array);
 Variant f_xhprof_disable();
 void f_xhprof_sample_enable();
 Variant f_xhprof_sample_disable();
+Variant f_xhprof_run_trace(CStrRef, int flags = 0);
 void f_fb_load_local_databases(CArrRef servers);
 Array f_fb_parallel_query(CArrRef sql_map, int max_thread = 50, bool combine_result = true, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);
 Array f_fb_crossall_query(CStrRef sql, int max_thread = 50, bool retry_query_on_fail = true, int connect_timeout = -1, int read_timeout = -1, bool timeout_in_ms = false);

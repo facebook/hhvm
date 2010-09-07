@@ -52,6 +52,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <zlib.h>
 
 // Append the delimiter
 #define HP_STACK_DELIM        "==>"
@@ -292,29 +293,27 @@ public:
 static MachineInfo s_machine;
 
 static inline uint64
-tv_to_cycles(const struct timeval& tv, int cpuid)
+tv_to_cycles(const struct timeval& tv, int64 MHz)
 {
-  return (((uint64)tv.tv_sec * 1000000) + tv.tv_usec)
-                                 * s_machine.m_cpu_frequencies[cpuid];
+  return (((uint64)tv.tv_sec * 1000000) + tv.tv_usec) * MHz;
 }
 
 static inline uint64
-cycles_to_usec(uint64 cycles, int cpuid)
+to_usec(int64 cycles, int64 MHz)
 {
-  int64 freq = s_machine.m_cpu_frequencies[cpuid];
-  return (cycles + freq/2) / freq;
+  return (cycles + MHz/2) / MHz;
 }
 
 static esyscall vtsc_syscall("vtsc");
 
-static inline uint64 vtsc(int cpuid) {
+static inline uint64 vtsc(int64 MHz) {
   if (vtsc_syscall.num > 0) {
     return syscall(vtsc_syscall.num);
   }
   struct rusage usage;
   getrusage(RUSAGE_SELF, &usage);
   return
-    tv_to_cycles(usage.ru_utime, cpuid) + tv_to_cycles(usage.ru_stime, cpuid);
+    tv_to_cycles(usage.ru_utime, MHz) + tv_to_cycles(usage.ru_stime, MHz);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -409,9 +408,10 @@ public:
     }
 
     // bind to a random cpu so that we can use rdtsc instruction.
-    m_cur_cpu_id = rand() % s_machine.m_cpu_num;
+    int cur_cpu_id = rand() % s_machine.m_cpu_num;
     GET_AFFINITY(0, sizeof(cpu_set_t), &m_prev_mask);
-    MachineInfo::BindToCPU(m_cur_cpu_id);
+    MachineInfo::BindToCPU(cur_cpu_id);
+    m_MHz = s_machine.m_cpu_frequencies[cur_cpu_id];
 
     memset(m_func_hash_counters, 0, sizeof(m_func_hash_counters));
   }
@@ -454,32 +454,37 @@ public:
     }
   }
 
-  template<class phpret, class StatsMap>
-  bool extractStats(phpret& ret, StatsMap& m_stats, bool cpu, bool memory)
+  template<class phpret, class Name, class Counts>
+  static void returnVals(phpret& ret, const Name& name, const Counts& counts,
+                  bool cpu, bool memory, int64 MHz)
   {
-    for (typename StatsMap::const_iterator iter = m_stats.begin();
-         iter != m_stats.end(); ++iter) {
-      const typename StatsMap::mapped_type &counts = iter->second;
-      Array arr;
-      arr.set("ct",  counts.count);
-      arr.set("wt",  cycles_to_usec(counts.wall_time, m_cur_cpu_id));
-      if (cpu) {
-        arr.set("cpu", cycles_to_usec(counts.cpu, m_cur_cpu_id));
-      }
-      if (memory) {
-        arr.set("mu",  counts.memory);
-        arr.set("pmu", counts.peak_memory);
-      }
-      ret.set(String(iter->first), arr);
+    Array arr;
+    arr.set("ct",  counts.count);
+    arr.set("wt",  to_usec(counts.wall_time, MHz));
+    if (cpu) {
+      arr.set("cpu", to_usec(counts.cpu, MHz));
+    }
+    if (memory) {
+      arr.set("mu",  counts.memory);
+      arr.set("pmu", counts.peak_memory);
+    }
+    ret.set(String(name), arr);
+  }
+
+  template<class phpret, class StatsMap>
+  static bool extractStats(phpret& ret, StatsMap& stats,
+                           bool cpu, bool memory, int64 MHz)
+  {
+    for (typename StatsMap::const_iterator iter = stats.begin();
+         iter != stats.end(); ++iter) {
+      returnVals(ret, iter->first, iter->second, cpu, memory, MHz);
     }
     return true;
   }
 
-protected:
-  uint32    m_cur_cpu_id; // cpu id current process is bound to
+  int64    m_MHz; // cpu freq for either the local cpu or the saved trace
   Frame    *m_stack;      // top of the profile stack
 
-private:
   static bool s_rand_initialized;
 
   cpu_set_t m_prev_mask;               // saved cpu affinity
@@ -606,14 +611,14 @@ public:
 
   virtual void beginFrameEx() {
     m_stack->m_tsc_start = tsc();
-    m_stack->m_vtsc_start = vtsc(m_cur_cpu_id);
+    m_stack->m_vtsc_start = vtsc(m_MHz);
   }
 
   virtual void endFrameEx() {
     CountMap &counts = m_stats[m_stack->m_name];
     counts.count++;
     counts.tsc += tsc() - m_stack->m_tsc_start;
-    counts.vtsc += vtsc(m_cur_cpu_id) - m_stack->m_vtsc_start;
+    counts.vtsc += vtsc(m_MHz) - m_stack->m_vtsc_start;
   }
 
 private:
@@ -634,8 +639,8 @@ private:
       char buf[512];
       snprintf(buf, sizeof(buf),
                ",\"ct\": %lld,\"wt\": %lld,\"ut\": %lld,\"st\": 0",
-               counts.count, cycles_to_usec(counts.tsc, m_cur_cpu_id),
-               cycles_to_usec(counts.vtsc, m_cur_cpu_id));
+               counts.count, to_usec(counts.tsc, m_MHz),
+               to_usec(counts.vtsc, m_MHz));
       print(buf);
 
       print("},\n");
@@ -664,12 +669,13 @@ private:
 
 public:
   enum Flag {
-    TrackBuiltins = 1,
-    TrackCPU      = 2,
-    TrackMemory   = 4,
-    TrackVtsc     = 8,
-    Trace         = 16,
-    MeasureXhprofDisable = 32,
+    TrackBuiltins = 0x1,
+    TrackCPU      = 0x2,
+    TrackMemory   = 0x4,
+    TrackVtsc     = 0x8,
+    Trace         = 0x10,
+    MeasureXhprofDisable = 0x20,
+    GetTrace = 0x40,
   };
 
 public:
@@ -680,7 +686,7 @@ public:
     m_stack->m_tsc_start = tsc();
 
     if (m_flags & TrackCPU) {
-      m_stack->m_vtsc_start = vtsc(m_cur_cpu_id);
+      m_stack->m_vtsc_start = vtsc(m_MHz);
     }
 
     if (m_flags & TrackMemory) {
@@ -699,7 +705,7 @@ public:
     counts.wall_time += tsc() - m_stack->m_tsc_start;
 
     if (m_flags & TrackCPU) {
-      counts.cpu += vtsc(m_cur_cpu_id) - m_stack->m_vtsc_start;
+      counts.cpu += vtsc(m_MHz) - m_stack->m_vtsc_start;
     }
 
     if (m_flags & TrackMemory) {
@@ -713,7 +719,8 @@ public:
   }
 
   virtual void writeStats(Array &ret) {
-    extractStats(ret, m_stats, m_flags & TrackCPU, m_flags & TrackMemory);
+    extractStats(ret, m_stats,
+                 m_flags & TrackCPU, m_flags & TrackMemory, m_MHz);
   }
 
 private:
@@ -732,10 +739,10 @@ public:
   };
   typedef vector<std::pair<char *, int> >Recursion;
   vector<std::pair<char *, int> >recursion;
-  map<const char *, unsigned>functionLevel;
   vector<Frame> stack;
 
-  walkTraceClass() : arc_buff_len(200), arc_buff((char*)malloc(200)) {}
+  walkTraceClass() : arc_buff_len(200), arc_buff((char*)malloc(200)) {};
+
   ~walkTraceClass() {
     free((void*)arc_buff);
     if (recursion.size() > 1) {
@@ -770,7 +777,7 @@ public:
     st.peak_memory += tr->peak_memory - fr.trace->peak_memory;
   }
 
-  void popFrame(TraceIt trace, std::vector<Frame>& stack, Stats& stats)
+  void popFrame(TraceIt tIt, std::vector<Frame>& stack, Stats& stats)
   {
     Frame callee = stack.back();
     stack.pop_back();
@@ -795,10 +802,11 @@ public:
     }
     *cp = 0;
     arc = arc_buff;
-    incStats(arc, trace, callee, stats);
+    incStats(arc, tIt, callee, stats);
   }
 
-  void walk(TraceIt begin, TraceIt end, Stats& stats)
+  void walk(TraceIt begin, TraceIt end, Stats& stats,
+            map<const char *, unsigned> &functionLevel)
   {
     recursion.push_back(make_pair((char *)NULL, 0));
     while (begin != end && !begin->symbol) {
@@ -838,46 +846,74 @@ public:
   }
 };
 
-template<class TraceIt, class Stats, class Tracer>
+template<class Iter>
+struct Finalize {
+  Iter final_val;
+  Finalize(Iter val) : final_val(val) {}
+  Iter finish() { return final_val; }
+};
+
+template<class TraceIt, class Stats, class Tracer, class Fmap>
 static void
-walkTrace(TraceIt begin, TraceIt end, Stats& stats, Tracer& tracer)
+walkTrace(TraceIt begin, TraceIt end,
+          Stats& stats,
+          Tracer& tracer,
+          Fmap &map)
 {
   walkTraceClass<TraceIt, Stats>walker;
-  walker.walk(begin, end, stats);
+  walker.walk(begin, end, stats, map);
   walker.finishTrace(tracer.finish(), stats);
 }
+
+struct TraceData {
+  int64 wall_time;
+  int64 cpu;
+  int64 memory;
+  int64 peak_memory;
+
+  void clear() {
+    wall_time = cpu = memory = peak_memory = 0;
+  }
+  void set(int64 w, int64 c, int64 m, int64 p) {
+    wall_time = w;
+    cpu = c;
+    memory = m;
+    peak_memory = p;
+  }
+};
+
+struct TraceEntry : TraceData {
+  int64 symbol;
+};
+
+struct TraceEnt : TraceData {
+    const char *symbol; // null on function return
+};
 
 ///////////////////////////////////////////////////////////////////////////////
 // TraceProfiler
 
+static char *xhprof_trace_header = "xhprof trace v0\n%d bytes\n";
+static char *xhprof_trace_speed = "%d MHz\n";
+
 class TraceProfiler : public Profiler {
 public:
-  struct TraceEnt {
-    const char *symbol; // null on function return
-    int64 wall_time;
-    int64 cpu;
-    int64 memory;
-    int64 peak_memory;
-  };
   typedef std::deque<TraceEnt> Trace;
   Trace trace;
   enum Flag {
-    TrackBuiltins = 1,
-    TrackCPU      = 2,
-    TrackMemory   = 4,
-    TrackVtsc     = 8,
-    MeasureXhprofDisable = 32,
+    TrackBuiltins = 0x1,
+    TrackCPU      = 0x2,
+    TrackMemory   = 0x4,
+    TrackVtsc     = 0x8,
+    // Trace         = 0x10,    // don't need this one.  it's always on
+    MeasureXhprofDisable = 0x20,
+    GetTrace = 0x40,
   };
 
-  class CountMap {
+  class CountMap : public TraceData {
   public:
-    CountMap() : count(0), wall_time(0), cpu(0), memory(0), peak_memory(0) {}
-
     int64 count;
-    int64 wall_time;
-    int64 cpu;
-    int64 memory;
-    int64 peak_memory;
+    CountMap() : count(0)  { clear(); }
   };
   typedef __gnu_cxx::hash_map<std::string, CountMap, string_hash> StatsMap;
   StatsMap m_stats; // outcome
@@ -894,10 +930,14 @@ public:
 
   void collectStats(const char *symbol, TraceEnt& te) {
     te.symbol = symbol;
+    collectStats((TraceData&)te);
+  }
+
+  void collectStats(TraceData& te) {
     te.wall_time = tsc();
     te.cpu = 0;
     if (m_flags & TrackCPU) {
-      te.cpu = vtsc(m_cur_cpu_id);
+      te.cpu = vtsc(m_MHz);
     }
     if (m_flags & TrackMemory) {
       MemoryManager *mm = MemoryManager::TheMemoryManager().get();
@@ -918,22 +958,203 @@ public:
 
   Trace::iterator finish() {
     TraceEnt te;
-    if (m_flags & MeasureXhprofDisable) {
-      // add a new trace point reflecting the cost of measurement
-      collectStats(NULL, te);
-    } else {
-      // duplicate the last trace point to exclude measurement cost
-      te = trace.back();
-      te.symbol = NULL;
-    }
+    collectStats(NULL, te);
+    te = trace.back();
+    te.symbol = NULL;
     trace.push_front(te);
     return trace.begin();
   }
 
   virtual void writeStats(Array &ret) {
-    walkTrace(trace.begin(), trace.end(), m_stats, *this);
-    extractStats(ret, m_stats, m_flags & TrackCPU, m_flags & TrackMemory);
+    bool cpu = m_flags & TrackCPU;
+    bool memory =  m_flags & TrackMemory;
+    map<const char *, unsigned>fmap;
+    TraceEnt my_begin = trace.back();
+    walkTrace(trace.begin(), trace.end(), m_stats, *this, fmap);
+    extractStats(ret, m_stats, cpu, memory, m_MHz);
+    if (m_flags & GetTrace) {
+      String traceData;
+      packTraceData(fmap, traceData, m_MHz);
+      ret.set("(compressed_trace)", traceData);
+    }
+    trace.clear();
+    if (m_flags & MeasureXhprofDisable) {
+      CountMap my_end;
+      collectStats((TraceData&)my_end);
+      my_end.count = 1;
+      my_end.cpu -= my_begin.cpu;
+      my_end.wall_time -= my_begin.wall_time;
+      my_end.memory -= my_begin.memory;
+      my_end.peak_memory -= my_begin.peak_memory;
+      returnVals(ret, "xhprof_post_processing()", my_end, cpu, memory, m_MHz);
+    }
   }
+
+  void extendBuffer(z_stream &strm, char *&buff, int &size) {
+    int old_size = size;
+    size *= 1.1;
+    buff = (char *)realloc(buff, size);
+    strm.next_out = (Bytef*)(buff + old_size);
+    strm.avail_out = size - old_size;
+  }
+
+  void deflater(z_stream &strm, int mode, char *&buff, int &size) {
+    while (deflate(&strm, Z_FULL_FLUSH),
+           strm.avail_out == 0)
+    {
+      extendBuffer(strm, buff, size);
+    }
+  }
+
+  template<class fm>
+  void packTraceData(fm &fmap, String& traceData, int MHz) {
+    typename fm::iterator fmIt;
+    int symbol_len = 0;
+
+    char speed_buff[50];
+    sprintf(speed_buff, xhprof_trace_speed, MHz);
+    int speed_len = strlen(speed_buff);
+
+    // size the buffer for holding function names
+    for (fmIt = fmap.begin(); fmIt != fmap.end(); ++fmIt) {
+       // record the length of each name
+       fmIt->second = strlen(fmIt->first) + 1;
+       symbol_len += fmIt->second;
+    }
+    ++symbol_len;
+    char namebuff[symbol_len];
+    char *cp = namebuff;
+    int index = 0;
+
+    // copy function names, and give each function an index number
+    for (fmIt = fmap.begin(); fmIt != fmap.end(); ++fmIt) {
+       int len = fmIt->second;
+       memcpy((void *)cp, (void *)fmIt->first, len);
+       cp += len;
+       // this index will go in the trace
+       fmIt->second = index++;
+    }
+    *cp = '\0';    // an extra null
+
+    // compress, starting with the list of functions
+    z_stream strm;
+    int ret;
+
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    ret = deflateInit(&strm, -1);
+    if (ret != Z_OK) {
+      return;
+    }
+
+    int trace_size = trace.size() * sizeof(TraceEnt);
+
+    // estimates, experimentally determined
+    int dp_size = symbol_len/3 + trace_size/5;
+    char *dp_buff = (char*) malloc(dp_size);
+
+    sprintf(dp_buff, xhprof_trace_header, speed_len + symbol_len + trace_size);
+    strm.next_out = (Bytef*)strchr(dp_buff, 0);
+    strm.avail_out = dp_size - ((char *)strm.next_out - dp_buff);
+
+    strm.next_in = (Bytef*)speed_buff;
+    strm.avail_in = speed_len;
+    deflater(strm, Z_NO_FLUSH, dp_buff, dp_size);
+
+    strm.next_in = (Bytef*)namebuff;
+    strm.avail_in = symbol_len;
+    deflater(strm, Z_FULL_FLUSH, dp_buff, dp_size);
+
+    const int zlibChunkSize = 256000;
+    const int traceChunk = zlibChunkSize/sizeof(TraceEntry);
+    TraceEntry *te_buff = (TraceEntry*)malloc(traceChunk*sizeof(TraceEntry));
+
+    Trace::iterator it = trace.begin();
+
+    // map null strings to -1
+    fmap[NULL] = -1;
+
+    while (it != trace.end()) {
+      TraceEntry *te = te_buff;
+      TraceEntry *te_end = te + traceChunk;
+
+      while (te != te_end && it != trace.end()) {
+        te->symbol = fmap[it->symbol];
+        *(TraceData*)te = TraceData(*it);
+        ++it;
+        ++te;
+      }
+      strm.next_in = (Bytef*)te_buff;
+      strm.avail_in = (te - te_buff) * sizeof(*te);
+      deflater(strm, Z_NO_FLUSH, dp_buff, dp_size);
+    }
+    free(te_buff);
+
+    strm.next_in = (Bytef*)namebuff;
+    while ((ret = deflate(&strm, Z_FINISH)) != Z_STREAM_END)
+    {
+      extendBuffer(strm, dp_buff, dp_size);
+    }
+    traceData = String(dp_buff, dp_size - strm.avail_out, AttachString);
+  }
+
+  static String
+  unpackTraceData(CStrRef packedTrace) {
+    const char *input = packedTrace.c_str();
+    int64 input_length = packedTrace.size();
+
+    int output_length;
+    char *output = 0;
+
+    if (sscanf(input, xhprof_trace_header, &output_length) != 1) {
+      return String("", 0, AttachLiteral);
+    }
+    char *zipped_begin;
+    if (!(zipped_begin = strchr(input, '\n'))
+        || !(zipped_begin = strchr(zipped_begin + 1, '\n'))) {
+      goto error2_out;
+    }
+    ++zipped_begin;
+
+    int ret;
+    z_stream strm;
+
+    strm.zalloc = Z_NULL;
+    strm.zfree = Z_NULL;
+    strm.opaque = Z_NULL;
+    strm.avail_in = 0;
+    strm.next_in = Z_NULL;
+    ret = inflateInit(&strm);
+    if (ret != Z_OK) {
+      goto error2_out;
+    }
+
+    output = (char *)malloc(output_length);
+
+    strm.avail_in = input_length - (zipped_begin - input);
+    strm.next_in = (Bytef*)zipped_begin;
+    strm.avail_out = output_length;
+    strm.next_out = (Bytef*)output;
+    switch (inflate(&strm, Z_NO_FLUSH)) {
+    case Z_NEED_DICT:
+    case Z_DATA_ERROR:
+    case Z_MEM_ERROR:
+      goto error_out;
+    }
+    if (strm.avail_out) {
+      goto error_out;
+    }
+    inflateEnd(&strm);
+
+    return String(output, output_length, AttachString);
+  error_out:
+    free(output);
+    inflateEnd(&strm);
+  error2_out:
+    return String("", 0, AttachLiteral);
+  }
+
 
 private:
   uint32 m_flags;
@@ -957,7 +1178,6 @@ public:
     struct timeval  now;
     uint64 truncated_us;
     uint64 truncated_tsc;
-    int64 cpu_freq = s_machine.m_cpu_frequencies[m_cur_cpu_id];
 
     // Init the last_sample in tsc
     m_last_sample_tsc = tsc();
@@ -969,14 +1189,14 @@ public:
 
     // Subtract truncated time from last_sample_tsc
     truncated_us  = get_us_interval(&m_last_sample_time, &now);
-    truncated_tsc = truncated_us * cpu_freq;
+    truncated_tsc = truncated_us * m_MHz;
     if (m_last_sample_tsc > truncated_tsc) {
       // just to be safe while subtracting unsigned ints
       m_last_sample_tsc -= truncated_tsc;
     }
 
     // Convert sampling interval to ticks
-    m_sampling_interval_tsc = SAMPLING_INTERVAL * cpu_freq;
+    m_sampling_interval_tsc = SAMPLING_INTERVAL * m_MHz;
   }
 
   virtual void beginFrameEx() {
@@ -1206,6 +1426,66 @@ Variant f_xhprof_sample_disable() {
 #endif
 }
 
+Variant f_xhprof_run_trace(CStrRef packedTrace, int flags) {
+#ifdef HOTPROFILER
+
+  String traceData = TraceProfiler::unpackTraceData(packedTrace);
+
+  // we really don't want to copy this
+  char *syms = const_cast<char*>(traceData.c_str());
+
+  int MHz;
+  if (sscanf(syms, xhprof_trace_speed, &MHz) != 1) {
+    return null;
+  }
+
+  vector<char *>symbols;
+  char *sym = strchr(syms, '\n') + 1;
+  char *esym = strchr(sym, '\0');
+  while (sym != esym) {
+    symbols.push_back(sym);
+    sym = esym + 1;
+    esym = strchr(sym, '\0');
+  }
+
+  // these iterators walk over the same memory, transforming ints to
+  // pointers.  not sure this is
+
+  typedef union trace_overlay {
+    TraceEntry indexed;
+    TraceEnt pointer;
+  } TraceOverlayUnion;
+
+  TraceOverlayUnion *begin = (TraceOverlayUnion*)(esym + 1);
+  TraceOverlayUnion *end = (TraceOverlayUnion*)(syms + traceData.size());
+
+  for (TraceOverlayUnion *toup = begin; toup != end; ++toup) {
+    int symIndex = toup->indexed.symbol;
+    if (symIndex >= 0 && (uint64)symIndex < symbols.size()) {
+      toup->pointer.symbol = symbols[toup->indexed.symbol];
+    } else if (symIndex == -1) {
+      toup->pointer.symbol = NULL;
+    } else {
+      // corrupt trace
+      return null;
+    }
+  }
+
+  map<const char *, unsigned>fmap;
+  Finalize<TraceEnt*>trace_complete = &end[-1].pointer;
+  Array result;
+  TraceProfiler::StatsMap stats;
+  walkTrace(&begin->pointer, &end->pointer,
+            stats, trace_complete, fmap);
+  Profiler::extractStats(result, stats,
+                         flags & HierarchicalProfiler::TrackCPU,
+                         flags & HierarchicalProfiler::TrackMemory, MHz);
+  return result;
+#else
+  return null;
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // constants
 const int64 k_XHPROF_FLAGS_NO_BUILTINS = HierarchicalProfiler::TrackBuiltins;
@@ -1215,6 +1495,7 @@ const int64 k_XHPROF_FLAGS_VTSC = HierarchicalProfiler::TrackVtsc;
 const int64 k_XHPROF_FLAGS_TRACE = HierarchicalProfiler::Trace;
 const int64 k_XHPROF_FLAGS_MEASURE_XHPROF_DISABLE
                                   = HierarchicalProfiler::MeasureXhprofDisable;
+const int64 k_XHPROF_FLAGS_GET_TRACE = HierarchicalProfiler::GetTrace;
 
 ///////////////////////////////////////////////////////////////////////////////
 // injected code

@@ -18847,6 +18847,18 @@ Variant i_hphp_splfileinfo_gettype(CArrRef params) {
     return (f_hphp_splfileinfo_gettype(arg0));
   }
 }
+Variant i_xhprof_run_trace(CArrRef params) {
+  FUNCTION_INJECTION(xhprof_run_trace);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("xhprof_run_trace", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    return (f_xhprof_run_trace(arg0, arg1));
+  }
+}
 Variant i_xmlwriter_start_document(CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_start_document);
   int count __attribute__((__unused__)) = params.size();
@@ -18966,18 +18978,6 @@ Variant i_newpixelwands(CArrRef params) {
     return (f_newpixelwands(arg0));
   }
 }
-Variant i_getcwd(CArrRef params) {
-  FUNCTION_INJECTION(getcwd);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  return (f_getcwd());
-}
-Variant i_posix_getrlimit(CArrRef params) {
-  FUNCTION_INJECTION(posix_getrlimit);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
-  return (f_posix_getrlimit());
-}
 Variant i_mb_get_info(CArrRef params) {
   FUNCTION_INJECTION(mb_get_info);
   int count __attribute__((__unused__)) = params.size();
@@ -18989,6 +18989,18 @@ Variant i_mb_get_info(CArrRef params) {
     CVarRef arg0((ad->getValue(pos)));
     return (f_mb_get_info(arg0));
   }
+}
+Variant i_getcwd(CArrRef params) {
+  FUNCTION_INJECTION(getcwd);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  return (f_getcwd());
+}
+Variant i_posix_getrlimit(CArrRef params) {
+  FUNCTION_INJECTION(posix_getrlimit);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
+  return (f_posix_getrlimit());
 }
 Variant i_fputcsv(CArrRef params) {
   FUNCTION_INJECTION(fputcsv);
@@ -26839,6 +26851,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1842:
       HASH_INVOKE(0x2B1C192C419B8732LL, drawgetexception);
+      break;
+    case 1850:
+      HASH_INVOKE(0x404236CC5ABD973ALL, xhprof_run_trace);
       break;
     case 1855:
       HASH_INVOKE(0x650E641CC0E3873FLL, connection_aborted);
@@ -61424,6 +61439,26 @@ Variant ei_hphp_splfileinfo_gettype(Eval::VariableEnvironment &env, const Eval::
   }
   return (x_hphp_splfileinfo_gettype(a0));
 }
+Variant ei_xhprof_run_trace(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("xhprof_run_trace", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_xhprof_run_trace(a0, a1));
+}
 Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -61617,6 +61652,23 @@ Variant ei_newpixelwands(Eval::VariableEnvironment &env, const Eval::FunctionCal
   }
   return (x_newpixelwands(a0));
 }
+Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("mb_get_info", 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 0) return (x_mb_get_info());
+  else return (x_mb_get_info(a0));
+}
 Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -61640,23 +61692,6 @@ Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionC
     (*it)->eval(env);
   }
   return (x_posix_getrlimit());
-}
-Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 1) return throw_toomany_arguments("mb_get_info", 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  if (count <= 0) return (x_mb_get_info());
-  else return (x_mb_get_info(a0));
 }
 Variant ei_fputcsv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -73354,6 +73389,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1842:
       HASH_INVOKE_FROM_EVAL(0x2B1C192C419B8732LL, drawgetexception);
+      break;
+    case 1850:
+      HASH_INVOKE_FROM_EVAL(0x404236CC5ABD973ALL, xhprof_run_trace);
       break;
     case 1855:
       HASH_INVOKE_FROM_EVAL(0x650E641CC0E3873FLL, connection_aborted);

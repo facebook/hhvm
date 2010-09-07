@@ -478,6 +478,29 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "xhprof_run_trace",
+    'desc'   => "Re-runs a prior trace and generates xhprof output.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Profile result.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "packedTrace",
+        'type'   => String,
+        'desc'   => "A packed trace returned from xhprof_disable.",
+      ),
+      array(
+        'name'   => "flags",
+        'type'   => Int32,
+        'desc'   => "One of those XHPROF_FLAGS_ constant to specify what to profile.",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "xhprof_sample_enable",
     'desc'   => "Starts sampling based xhprof profiling. For details on how to use this function, please refer to http://mirror.facebook.net/facebook/xhprof/doc.html.",
     'flags'  =>  HasDocComment | HipHopSpecific,

@@ -105,6 +105,11 @@ inline Variant x_xhprof_disable() {
   return f_xhprof_disable();
 }
 
+inline Variant x_xhprof_run_trace(CStrRef packedTrace, int flags) {
+  FUNCTION_INJECTION_BUILTIN(xhprof_run_trace);
+  return f_xhprof_run_trace(packedTrace, flags);
+}
+
 inline void x_xhprof_sample_enable() {
   FUNCTION_INJECTION_BUILTIN(xhprof_sample_enable);
   f_xhprof_sample_enable();

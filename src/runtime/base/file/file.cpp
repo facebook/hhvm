@@ -109,6 +109,10 @@ bool File::IsVirtualDirectory(CStrRef filename) {
   return false;
 }
 
+bool File::IsPlainFilePath(CStrRef filename) {
+  return filename.find("://") == String::npos;
+}
+
 Variant File::Open(CStrRef filename, CStrRef mode,
                    CArrRef options /* = null_array */) {
   static const char http_prefix[] = "http://";

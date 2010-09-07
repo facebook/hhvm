@@ -38,6 +38,7 @@ public:
                       CArrRef options = null_array);
 
   static bool IsVirtualDirectory(CStrRef filename);
+  static bool IsPlainFilePath(CStrRef filename);
 
 public:
   File(bool pipe = false);

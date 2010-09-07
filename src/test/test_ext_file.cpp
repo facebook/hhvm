@@ -596,10 +596,16 @@ bool TestExtFile::test_copy() {
     f_unlink("test/test_ext_file2.tmp");
     VERIFY(!f_file_exists("test/test_ext_file2.tmp"));
   }
+  if (f_file_exists("test/test_ext_file3.tmp")) {
+    f_unlink("test/test_ext_file3.tmp");
+    VERIFY(!f_file_exists("test/test_ext_file3.tmp"));
+  }
   f_touch("test/test_ext_file.tmp");
   f_copy("test/test_ext_file.tmp", "test/test_ext_file2.tmp");
   VERIFY(f_file_exists("test/test_ext_file2.tmp"));
   VERIFY(f_file_exists("test/test_ext_file.tmp"));
+  f_copy("http://facebook.com", "test/test_ext_file3.tmp");
+  VERIFY(f_file_exists("test/test_ext_file3.tmp"));
   return Count(true);
 }
 

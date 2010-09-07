@@ -668,30 +668,32 @@ Variant Variant::array_iter_each() {
 
 ///////////////////////////////////////////////////////////////////////////////
 // unary plus
-Variant Variant::operator+() {
+Variant Variant::operator+() const {
   if (is(KindOfArray)) {
     throw BadArrayOperandException();
   }
   if (isDouble()) {
-    set(toDouble());
-  } else if (isIntVal()) {
-    set(toInt64());
-  } else if (isString()) {
+    return toDouble();
+  }
+  if (isIntVal()) {
+    return toInt64();
+  }
+  if (isString()) {
     String s = toString();
     DataType ret = KindOfNull;
     int64 lval; double dval;
     ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
     if (ret == KindOfDouble) {
-      set(dval);
-    } else if (ret == KindOfInt64) {
-      set(lval);
-    } else {
-      set(toInt64());
+      return dval;
     }
-  } else {
-    ASSERT(false);
+    if (ret == KindOfInt64) {
+      return lval;
+    }
+    return toInt64();
   }
-  return *this;
+
+  ASSERT(false);
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -821,14 +823,14 @@ Variant &Variant::operator+=(double n) {
 ///////////////////////////////////////////////////////////////////////////////
 // minus
 
-Variant Variant::operator-() {
+Variant Variant::operator-() const {
   if (is(KindOfArray)) {
     throw BadArrayOperandException();
   }
   if (isDouble()) {
-    set(-toDouble());
+    return -toDouble();
   } else if (isIntVal()) {
-    set(-toInt64());
+    return -toInt64();
   } else {
     if (isString()) {
       String s = toString();
@@ -836,11 +838,11 @@ Variant Variant::operator-() {
       int64 lval; double dval;
       ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
       if (ret == KindOfDouble) {
-        set(-dval);
+        return -dval;
       } else if (ret == KindOfInt64) {
-        set(-lval);
+        return -lval;
       } else {
-        set(-toInt64());
+        return -toInt64();
       }
     } else {
       ASSERT(false);

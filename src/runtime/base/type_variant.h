@@ -291,7 +291,7 @@ class Variant {
     return *this;
   }
 
-  Variant  operator +  ();
+  Variant  operator +  () const;
   Variant unary_plus() const { return Variant(*this).operator+();}
   Variant  operator +  (CVarRef v) const;
   Variant &operator += (CVarRef v);
@@ -302,7 +302,7 @@ class Variant {
   Variant &operator += (double  n);
 
   Variant negate() const { return Variant(*this).operator-();}
-  Variant  operator -  ();
+  Variant  operator -  () const;
   Variant  operator -  (CVarRef v) const;
   Variant &operator -= (CVarRef v);
   Variant &operator -= (char    n) { return operator-=((int64)n);}

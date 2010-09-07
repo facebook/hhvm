@@ -171,7 +171,7 @@ ObjectData *c_ArrayIterator::dynCreate(CArrRef params, bool construct /* = true 
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -188,7 +188,7 @@ void c_ArrayIterator::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -294,7 +294,7 @@ Variant c_ArrayIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -408,7 +408,7 @@ Variant c_ArrayIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_offsetset(arg0, arg1));
         }
       }
@@ -514,7 +514,7 @@ Variant c_ArrayIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -580,7 +580,7 @@ Variant c_ArrayIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_offsetset(arg0, arg1));
         }
       }
@@ -2007,7 +2007,7 @@ Variant c_AppendIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___call(arg0, arg1));
         }
       }
@@ -2058,7 +2058,7 @@ Variant c_AppendIterator::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___call(arg0, arg1));
         }
       }
@@ -2783,7 +2783,7 @@ ObjectData *c_RecursiveDirectoryIterator::dynCreate(CArrRef params, bool constru
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -2800,7 +2800,7 @@ void c_RecursiveDirectoryIterator::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -2960,7 +2960,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const ch
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -3099,9 +3099,9 @@ Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const ch
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }
@@ -3233,9 +3233,9 @@ Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const ch
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }
@@ -3324,7 +3324,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const ch
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -5564,9 +5564,9 @@ Variant c_DirectoryIterator::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }
@@ -5680,9 +5680,9 @@ Variant c_DirectoryIterator::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }
@@ -7561,12 +7561,12 @@ ObjectData *c_RecursiveIteratorIterator::dynCreate(CArrRef params, bool construc
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2));
     } while (false);
   }
@@ -7583,12 +7583,12 @@ void c_RecursiveIteratorIterator::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2));
   } while (false);
 }
@@ -7663,9 +7663,9 @@ Variant c_RecursiveIteratorIterator::o_invoke(MethodIndex methodIndex, const cha
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2), null);
         }
       }
@@ -7730,9 +7730,9 @@ Variant c_RecursiveIteratorIterator::o_invoke(MethodIndex methodIndex, const cha
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2), null);
         }
       }

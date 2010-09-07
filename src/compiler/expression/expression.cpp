@@ -589,8 +589,10 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   bool isLvalue = (m_context & LValue);
+  bool isTemp = isTemporary();
   if (dstType && srcType && !isLvalue &&
       Type::IsCastNeeded(ar, srcType, dstType)) {
+    isTemp = true;
   } else {
     killCast = true;
     dstType = srcType;
@@ -609,7 +611,7 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
 
   bool constRef = dstType &&
     ((m_context & (RefValue|RefParameter)) ||
-     (isTemporary() && !dstType->isPrimitive()) ||
+     (isTemp && !dstType->isPrimitive()) ||
      (isLvalue && dynamic_cast<FunctionCall*>(this)));
 
   ar->wrapExpressionBegin(cg);

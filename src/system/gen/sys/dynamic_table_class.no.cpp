@@ -1322,7 +1322,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -1373,7 +1373,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -1403,7 +1403,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -1417,11 +1417,11 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -1463,13 +1463,13 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -1514,7 +1514,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -1557,11 +1557,11 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -1573,7 +1573,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -1617,7 +1617,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -1716,7 +1716,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -1733,13 +1733,13 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -1751,7 +1751,7 @@ Variant c_DOMDocumentFragment::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -3086,7 +3086,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -3137,7 +3137,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -3149,7 +3149,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -3161,7 +3161,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -3197,7 +3197,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -3211,11 +3211,11 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -3257,13 +3257,13 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -3319,8 +3319,8 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -3332,7 +3332,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -3350,7 +3350,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -3393,11 +3393,11 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -3409,7 +3409,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -3453,7 +3453,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -3469,7 +3469,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -3573,7 +3573,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -3586,7 +3586,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -3602,8 +3602,8 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -3616,13 +3616,13 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -3645,7 +3645,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -3661,7 +3661,7 @@ Variant c_DOMText::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -5325,7 +5325,7 @@ Variant c_DebuggerClient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_arg(arg0, arg1));
         }
       }
@@ -5337,7 +5337,7 @@ Variant c_DebuggerClient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_helpcmds(count, arg0, arg1), null);
           return (t_helpcmds(count,arg0, arg1, params.slice(2, count - 2, false)), null);
         }
@@ -5496,11 +5496,11 @@ Variant c_DebuggerClient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_code(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_code(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_code(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_code(arg0, arg1, arg2, arg3), null);
         }
       }
@@ -5692,7 +5692,7 @@ Variant c_DebuggerClient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_helpcmds(count, arg0, arg1), null);
           return (t_helpcmds(count,arg0, arg1, params.slice(2, count - 2, false)), null);
         }
@@ -5816,7 +5816,7 @@ Variant c_DebuggerClient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_arg(arg0, arg1));
         }
       }
@@ -5865,11 +5865,11 @@ Variant c_DebuggerClient::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_code(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_code(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_code(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_code(arg0, arg1, arg2, arg3), null);
         }
       }
@@ -7605,7 +7605,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -7656,7 +7656,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -7668,7 +7668,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -7680,7 +7680,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -7715,7 +7715,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -7729,11 +7729,11 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -7775,13 +7775,13 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -7837,8 +7837,8 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -7850,7 +7850,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -7868,7 +7868,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -7911,11 +7911,11 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -7927,7 +7927,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -7971,7 +7971,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -7987,7 +7987,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -8090,7 +8090,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -8103,7 +8103,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -8119,8 +8119,8 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -8133,13 +8133,13 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -8162,7 +8162,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -8178,7 +8178,7 @@ Variant c_DOMCDATASection::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -10104,7 +10104,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -10155,7 +10155,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -10185,7 +10185,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -10199,11 +10199,11 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -10245,13 +10245,13 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -10296,7 +10296,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -10328,11 +10328,11 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -10344,7 +10344,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -10388,7 +10388,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -10478,7 +10478,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -10495,13 +10495,13 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -10513,7 +10513,7 @@ Variant c_DOMDocumentType::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -11729,7 +11729,7 @@ ObjectData *c_SQLite3Stmt::dynCreate(CArrRef params, bool construct /* = true */
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     }
   }
@@ -11742,7 +11742,7 @@ void c_SQLite3Stmt::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   }
 }
@@ -11800,7 +11800,7 @@ Variant c_SQLite3Stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -11825,10 +11825,10 @@ Variant c_SQLite3Stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          if (count <= 2) return (t_bindparam(arg0, ref(arg1)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_bindparam(arg0, ref(arg1), arg2));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          if (count <= 2) return (t_bindparam(arg0, arg1));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_bindparam(arg0, arg1, arg2));
         }
       }
       break;
@@ -11857,9 +11857,9 @@ Variant c_SQLite3Stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_bindvalue(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_bindvalue(arg0, arg1, arg2));
         }
       }
@@ -11889,9 +11889,9 @@ Variant c_SQLite3Stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_bindvalue(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_bindvalue(arg0, arg1, arg2));
         }
       }
@@ -11922,10 +11922,10 @@ Variant c_SQLite3Stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          if (count <= 2) return (t_bindparam(arg0, ref(arg1)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_bindparam(arg0, ref(arg1), arg2));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          if (count <= 2) return (t_bindparam(arg0, arg1));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_bindparam(arg0, arg1, arg2));
         }
       }
       break;
@@ -11942,7 +11942,7 @@ Variant c_SQLite3Stmt::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -12584,7 +12584,7 @@ Variant c_DOMNodeList::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -12635,7 +12635,7 @@ Variant c_DOMNodeList::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -13157,7 +13157,7 @@ Variant c_Normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_normalize(o_getClassName(), arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_normalize(o_getClassName(), arg0, arg1));
         }
       }
@@ -13170,7 +13170,7 @@ Variant c_Normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_isnormalized(o_getClassName(), arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_isnormalized(o_getClassName(), arg0, arg1));
         }
       }
@@ -13189,7 +13189,7 @@ Variant c_Normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_normalize(o_getClassName(), arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_normalize(o_getClassName(), arg0, arg1));
         }
       }
@@ -13208,7 +13208,7 @@ Variant c_Normalizer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_isnormalized(o_getClassName(), arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_isnormalized(o_getClassName(), arg0, arg1));
         }
       }
@@ -13308,7 +13308,7 @@ Variant c_Normalizer::os_invoke(const char *c, MethodIndex methodIndex, const ch
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_normalize(c, arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_normalize(c, arg0, arg1));
         }
       }
@@ -13321,7 +13321,7 @@ Variant c_Normalizer::os_invoke(const char *c, MethodIndex methodIndex, const ch
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_isnormalized(c, arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_isnormalized(c, arg0, arg1));
         }
       }
@@ -13340,7 +13340,7 @@ Variant c_Normalizer::os_invoke(const char *c, MethodIndex methodIndex, const ch
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_isnormalized(c, arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_isnormalized(c, arg0, arg1));
         }
       }
@@ -13353,7 +13353,7 @@ Variant c_Normalizer::os_invoke(const char *c, MethodIndex methodIndex, const ch
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (ti_normalize(c, arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_normalize(c, arg0, arg1));
         }
       }
@@ -13776,7 +13776,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -13827,7 +13827,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -13839,7 +13839,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -13851,7 +13851,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -13881,7 +13881,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -13895,11 +13895,11 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -13941,13 +13941,13 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -14003,8 +14003,8 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -14016,7 +14016,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -14028,7 +14028,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -14060,11 +14060,11 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -14076,7 +14076,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -14120,7 +14120,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -14136,7 +14136,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -14230,7 +14230,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -14243,7 +14243,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -14259,8 +14259,8 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -14273,13 +14273,13 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -14291,7 +14291,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -14307,7 +14307,7 @@ Variant c_DOMCharacterData::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -15861,7 +15861,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -15912,7 +15912,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -15947,7 +15947,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -15961,11 +15961,11 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -16007,13 +16007,13 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -16058,7 +16058,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -16090,11 +16090,11 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -16106,7 +16106,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -16150,7 +16150,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -16245,7 +16245,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -16262,13 +16262,13 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -16280,7 +16280,7 @@ Variant c_DOMEntityReference::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -19389,9 +19389,9 @@ Variant c_DOMImplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t_createdocument());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_createdocument(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_createdocument(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createdocument(arg0, arg1, arg2));
         }
       }
@@ -19405,9 +19405,9 @@ Variant c_DOMImplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t_createdocumenttype());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_createdocumenttype(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_createdocumenttype(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createdocumenttype(arg0, arg1, arg2));
         }
       }
@@ -19431,7 +19431,7 @@ Variant c_DOMImplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_hasfeature(arg0, arg1));
         }
       }
@@ -19451,9 +19451,9 @@ Variant c_DOMImplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t_createdocumenttype());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_createdocumenttype(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_createdocumenttype(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createdocumenttype(arg0, arg1, arg2));
         }
       }
@@ -19467,7 +19467,7 @@ Variant c_DOMImplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_hasfeature(arg0, arg1));
         }
       }
@@ -19481,9 +19481,9 @@ Variant c_DOMImplementation::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t_createdocument());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_createdocument(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_createdocument(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createdocument(arg0, arg1, arg2));
         }
       }
@@ -19917,22 +19917,22 @@ ObjectData *c_SoapHeader::dynCreate(CArrRef params, bool construct /* = true */)
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count <= 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 4) {
         (t___construct(arg0, arg1, arg2, arg3));
         break;
       }
-      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3, arg4));
     } while (false);
   }
@@ -19945,22 +19945,22 @@ void c_SoapHeader::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) {
       (t___construct(arg0, arg1, arg2, arg3));
       break;
     }
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3, arg4));
   } while (false);
 }
@@ -20033,13 +20033,13 @@ Variant c_SoapHeader::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -20061,13 +20061,13 @@ Variant c_SoapHeader::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -20395,7 +20395,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -20446,7 +20446,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -20476,7 +20476,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -20490,11 +20490,11 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -20536,13 +20536,13 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -20587,7 +20587,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -20619,11 +20619,11 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -20635,7 +20635,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -20679,7 +20679,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -20769,7 +20769,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -20786,13 +20786,13 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -20804,7 +20804,7 @@ Variant c_DOMNotation::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -22508,7 +22508,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -22559,7 +22559,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -22571,7 +22571,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -22583,7 +22583,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -22619,7 +22619,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -22633,11 +22633,11 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -22679,13 +22679,13 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -22741,8 +22741,8 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -22754,7 +22754,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -22766,7 +22766,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -22798,11 +22798,11 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -22814,7 +22814,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -22858,7 +22858,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -22874,7 +22874,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_deletedata(arg0, arg1));
         }
       }
@@ -22974,7 +22974,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_substringdata(arg0, arg1));
         }
       }
@@ -22987,7 +22987,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -23003,8 +23003,8 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacedata(arg0, arg1, arg2));
         }
       }
@@ -23017,13 +23017,13 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -23035,7 +23035,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -23051,7 +23051,7 @@ Variant c_DOMComment::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertdata(arg0, arg1));
         }
       }
@@ -24630,9 +24630,9 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_createfunction(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createfunction(arg0, arg1, arg2));
         }
       }
@@ -24690,10 +24690,10 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 3) return (t_createaggregate(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createaggregate(arg0, arg1, arg2, arg3));
         }
       }
@@ -24706,9 +24706,9 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_open(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_open(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_open(arg0, arg1, arg2), null);
         }
       }
@@ -24726,10 +24726,10 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 3) return (t_openblob(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openblob(arg0, arg1, arg2, arg3));
         }
       }
@@ -24759,7 +24759,7 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_querysingle(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_querysingle(arg0, arg1));
         }
       }
@@ -24787,10 +24787,10 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 3) return (t_openblob(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openblob(arg0, arg1, arg2, arg3));
         }
       }
@@ -24802,10 +24802,10 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 3) return (t_createaggregate(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createaggregate(arg0, arg1, arg2, arg3));
         }
       }
@@ -24818,9 +24818,9 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_open(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_open(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_open(arg0, arg1, arg2), null);
         }
       }
@@ -24849,9 +24849,9 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_createfunction(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createfunction(arg0, arg1, arg2));
         }
       }
@@ -24899,7 +24899,7 @@ Variant c_SQLite3::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_querysingle(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_querysingle(arg0, arg1));
         }
       }
@@ -25998,7 +25998,7 @@ ObjectData *c_DOMAttr::dynCreate(CArrRef params, bool construct /* = true */) {
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -26015,7 +26015,7 @@ void c_DOMAttr::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -26075,7 +26075,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -26132,7 +26132,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -26157,7 +26157,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -26169,7 +26169,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -26183,11 +26183,11 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -26229,13 +26229,13 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -26280,7 +26280,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -26312,11 +26312,11 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -26328,7 +26328,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -26372,7 +26372,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -26417,7 +26417,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -26473,7 +26473,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -26490,13 +26490,13 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -26508,7 +26508,7 @@ Variant c_DOMAttr::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -27780,27 +27780,27 @@ ObjectData *c_SoapVar::dynCreate(CArrRef params, bool construct /* = true */) {
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count <= 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 4) {
         (t___construct(arg0, arg1, arg2, arg3));
         break;
       }
-      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 5) {
         (t___construct(arg0, arg1, arg2, arg3, arg4));
         break;
       }
-      CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
     } while (false);
   }
@@ -27813,27 +27813,27 @@ void c_SoapVar::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) {
       (t___construct(arg0, arg1, arg2, arg3));
       break;
     }
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) {
       (t___construct(arg0, arg1, arg2, arg3, arg4));
       break;
     }
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
   } while (false);
 }
@@ -27911,15 +27911,15 @@ Variant c_SoapVar::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
         }
       }
@@ -27941,15 +27941,15 @@ Variant c_SoapVar::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
         }
       }
@@ -28310,7 +28310,7 @@ Variant c_DOMNamedNodeMap::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -28345,7 +28345,7 @@ Variant c_DOMNamedNodeMap::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getnameditemns(arg0, arg1));
         }
       }
@@ -28373,7 +28373,7 @@ Variant c_DOMNamedNodeMap::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -28407,7 +28407,7 @@ Variant c_DOMNamedNodeMap::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getnameditemns(arg0, arg1));
         }
       }
@@ -29605,22 +29605,22 @@ ObjectData *c_SimpleXMLElement::dynCreate(CArrRef params, bool construct /* = tr
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 4) {
         (t___construct(arg0, arg1, arg2, arg3));
         break;
       }
-      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3, arg4));
     } while (false);
   }
@@ -29637,22 +29637,22 @@ void c_SimpleXMLElement::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) {
       (t___construct(arg0, arg1, arg2, arg3));
       break;
     }
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3, arg4));
   } while (false);
 }
@@ -29721,9 +29721,9 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addattribute(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addattribute(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addattribute(arg0, arg1, arg2), null);
         }
       }
@@ -29764,7 +29764,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -29777,13 +29777,13 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -29812,7 +29812,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_registerxpathnamespace(arg0, arg1));
         }
       }
@@ -29906,7 +29906,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t_children());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_children(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_children(arg0, arg1));
         }
       }
@@ -29919,9 +29919,9 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addchild(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addchild(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addchild(arg0, arg1, arg2));
         }
       }
@@ -29952,7 +29952,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t_attributes());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_attributes(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_attributes(arg0, arg1));
         }
       }
@@ -29964,7 +29964,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_offsetset(arg0, arg1), null);
         }
       }
@@ -30023,9 +30023,9 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addchild(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addchild(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addchild(arg0, arg1, arg2));
         }
       }
@@ -30037,7 +30037,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -30050,9 +30050,9 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addattribute(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addattribute(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addattribute(arg0, arg1, arg2), null);
         }
       }
@@ -30097,7 +30097,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t_attributes());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_attributes(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_attributes(arg0, arg1));
         }
       }
@@ -30110,13 +30110,13 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -30158,7 +30158,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t_children());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_children(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_children(arg0, arg1));
         }
       }
@@ -30199,7 +30199,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_offsetset(arg0, arg1), null);
         }
       }
@@ -30222,7 +30222,7 @@ Variant c_SimpleXMLElement::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_registerxpathnamespace(arg0, arg1));
         }
       }
@@ -31636,21 +31636,21 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addserver(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addserver(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_addserver(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_addserver(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t_addserver(arg0, arg1, arg2, arg3, arg4));
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 6) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5));
-          CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 7) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-          CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 8) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-          CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
         }
       }
@@ -31662,11 +31662,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_set(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_set(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_set(arg0, arg1, arg2, arg3));
         }
       }
@@ -31679,15 +31679,15 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_setserverparams(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_setserverparams(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_setserverparams(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_setserverparams(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t_setserverparams(arg0, arg1, arg2, arg3, arg4));
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setserverparams(arg0, arg1, arg2, arg3, arg4, arg5));
         }
       }
@@ -31712,7 +31712,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_increment(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_increment(arg0, arg1));
         }
       }
@@ -31725,7 +31725,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_decrement(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_decrement(arg0, arg1));
         }
       }
@@ -31739,9 +31739,9 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           if (count <= 0) return (t_getstats());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_getstats(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_getstats(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getstats(arg0, arg1, arg2));
         }
       }
@@ -31754,7 +31754,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_getserverstatus(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getserverstatus(arg0, arg1));
         }
       }
@@ -31784,7 +31784,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_setcompressthreshold(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setcompressthreshold(arg0, arg1));
         }
       }
@@ -31798,8 +31798,8 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_get(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          return (t_get(arg0, ref(arg1)));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          return (t_get(arg0, arg1));
         }
       }
       break;
@@ -31810,11 +31810,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_add(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_add(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_add(arg0, arg1, arg2, arg3));
         }
       }
@@ -31827,11 +31827,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_pconnect(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_pconnect(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_pconnect(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_pconnect(arg0, arg1, arg2, arg3));
         }
       }
@@ -31850,7 +31850,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_delete(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_delete(arg0, arg1));
         }
       }
@@ -31863,11 +31863,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_connect(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_connect(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_connect(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_connect(arg0, arg1, arg2, arg3));
         }
       }
@@ -31891,11 +31891,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_replace(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_replace(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replace(arg0, arg1, arg2, arg3));
         }
       }
@@ -31909,9 +31909,9 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           if (count <= 0) return (t_getextendedstats());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_getextendedstats(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_getextendedstats(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getextendedstats(arg0, arg1, arg2));
         }
       }
@@ -31935,11 +31935,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_replace(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_replace(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replace(arg0, arg1, arg2, arg3));
         }
       }
@@ -31952,7 +31952,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_increment(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_increment(arg0, arg1));
         }
       }
@@ -31973,11 +31973,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_add(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_add(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_add(arg0, arg1, arg2, arg3));
         }
       }
@@ -31990,7 +31990,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_getserverstatus(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getserverstatus(arg0, arg1));
         }
       }
@@ -32003,7 +32003,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_setcompressthreshold(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setcompressthreshold(arg0, arg1));
         }
       }
@@ -32016,7 +32016,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_delete(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_delete(arg0, arg1));
         }
       }
@@ -32036,9 +32036,9 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           if (count <= 0) return (t_getstats());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_getstats(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_getstats(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getstats(arg0, arg1, arg2));
         }
       }
@@ -32051,7 +32051,7 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_decrement(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_decrement(arg0, arg1));
         }
       }
@@ -32069,11 +32069,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_set(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_set(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_set(arg0, arg1, arg2, arg3));
         }
       }
@@ -32087,9 +32087,9 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           if (count <= 0) return (t_getextendedstats());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_getextendedstats(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_getextendedstats(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getextendedstats(arg0, arg1, arg2));
         }
       }
@@ -32102,21 +32102,21 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addserver(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addserver(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_addserver(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_addserver(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t_addserver(arg0, arg1, arg2, arg3, arg4));
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 6) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5));
-          CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 7) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-          CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 8) return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-          CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addserver(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
         }
       }
@@ -32130,8 +32130,8 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_get(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          return (t_get(arg0, ref(arg1)));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          return (t_get(arg0, arg1));
         }
       }
       break;
@@ -32149,11 +32149,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_pconnect(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_pconnect(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_pconnect(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_pconnect(arg0, arg1, arg2, arg3));
         }
       }
@@ -32178,15 +32178,15 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_setserverparams(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_setserverparams(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_setserverparams(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_setserverparams(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t_setserverparams(arg0, arg1, arg2, arg3, arg4));
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setserverparams(arg0, arg1, arg2, arg3, arg4, arg5));
         }
       }
@@ -32199,11 +32199,11 @@ Variant c_Memcache::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_connect(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_connect(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_connect(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_connect(arg0, arg1, arg2, arg3));
         }
       }
@@ -33777,7 +33777,7 @@ ObjectData *c_DOMProcessingInstruction::dynCreate(CArrRef params, bool construct
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -33794,7 +33794,7 @@ void c_DOMProcessingInstruction::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -33854,7 +33854,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -33905,7 +33905,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -33930,7 +33930,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -33942,7 +33942,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -33956,11 +33956,11 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -34002,13 +34002,13 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -34053,7 +34053,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -34085,11 +34085,11 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -34101,7 +34101,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -34145,7 +34145,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -34190,7 +34190,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -34242,7 +34242,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -34259,13 +34259,13 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -34277,7 +34277,7 @@ Variant c_DOMProcessingInstruction::o_invoke(MethodIndex methodIndex, const char
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -35641,14 +35641,14 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          if (count <= 2) return (t_bindcolumn(arg0, ref(arg1)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_bindcolumn(arg0, ref(arg1), arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 4) return (t_bindcolumn(arg0, ref(arg1), arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_bindcolumn(arg0, ref(arg1), arg2, arg3, arg4));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          if (count <= 2) return (t_bindcolumn(arg0, arg1));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 3) return (t_bindcolumn(arg0, arg1, arg2));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 4) return (t_bindcolumn(arg0, arg1, arg2, arg3));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_bindcolumn(arg0, arg1, arg2, arg3, arg4));
         }
       }
       break;
@@ -35678,14 +35678,14 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          if (count <= 2) return (t_bindparam(arg0, ref(arg1)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_bindparam(arg0, ref(arg1), arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 4) return (t_bindparam(arg0, ref(arg1), arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_bindparam(arg0, ref(arg1), arg2, arg3, arg4));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          if (count <= 2) return (t_bindparam(arg0, arg1));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 3) return (t_bindparam(arg0, arg1, arg2));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 4) return (t_bindparam(arg0, arg1, arg2, arg3));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_bindparam(arg0, arg1, arg2, arg3, arg4));
         }
       }
       break;
@@ -35702,7 +35702,7 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -35734,7 +35734,7 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t_fetchobject());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fetchobject(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fetchobject(arg0, arg1));
         }
       }
@@ -35746,9 +35746,9 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_bindvalue(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_bindvalue(arg0, arg1, arg2));
         }
       }
@@ -35762,9 +35762,9 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t_fetchall());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fetchall(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_fetchall(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fetchall(arg0, arg1, arg2));
         }
       }
@@ -35778,9 +35778,9 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t_fetch());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fetch(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_fetch(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fetch(arg0, arg1, arg2));
         }
       }
@@ -35830,9 +35830,9 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t_fetchall());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fetchall(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_fetchall(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fetchall(arg0, arg1, arg2));
         }
       }
@@ -35844,9 +35844,9 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_bindvalue(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_bindvalue(arg0, arg1, arg2));
         }
       }
@@ -35876,7 +35876,7 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -35919,14 +35919,14 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          if (count <= 2) return (t_bindparam(arg0, ref(arg1)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_bindparam(arg0, ref(arg1), arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 4) return (t_bindparam(arg0, ref(arg1), arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_bindparam(arg0, ref(arg1), arg2, arg3, arg4));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          if (count <= 2) return (t_bindparam(arg0, arg1));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 3) return (t_bindparam(arg0, arg1, arg2));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 4) return (t_bindparam(arg0, arg1, arg2, arg3));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_bindparam(arg0, arg1, arg2, arg3, arg4));
         }
       }
       break;
@@ -35966,14 +35966,14 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          if (count <= 2) return (t_bindcolumn(arg0, ref(arg1)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 3) return (t_bindcolumn(arg0, ref(arg1), arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          if (count == 4) return (t_bindcolumn(arg0, ref(arg1), arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_bindcolumn(arg0, ref(arg1), arg2, arg3, arg4));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          if (count <= 2) return (t_bindcolumn(arg0, arg1));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 3) return (t_bindcolumn(arg0, arg1, arg2));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+          if (count == 4) return (t_bindcolumn(arg0, arg1, arg2, arg3));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_bindcolumn(arg0, arg1, arg2, arg3, arg4));
         }
       }
       HASH_GUARD_LITSTR(0x0E1814AA3327229DLL, NAMSTR(s_sys_ss3327229d, "fetchobject")) {
@@ -35984,7 +35984,7 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t_fetchobject());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fetchobject(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fetchobject(arg0, arg1));
         }
       }
@@ -36072,9 +36072,9 @@ Variant c_PDOStatement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t_fetch());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fetch(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_fetch(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fetch(arg0, arg1, arg2));
         }
       }
@@ -37644,7 +37644,7 @@ ObjectData *c_SoapClient::dynCreate(CArrRef params, bool construct /* = true */)
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -37661,7 +37661,7 @@ void c_SoapClient::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -37717,11 +37717,11 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 4) return (t___dorequest(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___dorequest(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -37752,7 +37752,7 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___setcookie(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___setcookie(arg0, arg1));
         }
       }
@@ -37765,14 +37765,14 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___soapcall(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___soapcall(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___soapcall(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          return (t___soapcall(arg0, arg1, arg2, arg3, ref(arg4)));
+          CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          return (t___soapcall(arg0, arg1, arg2, arg3, arg4));
         }
       }
       break;
@@ -37808,7 +37808,7 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -37844,7 +37844,7 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___call(arg0, arg1));
         }
       }
@@ -37872,7 +37872,7 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___call(arg0, arg1));
         }
       }
@@ -37902,11 +37902,11 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 4) return (t___dorequest(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___dorequest(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -37917,7 +37917,7 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___setcookie(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___setcookie(arg0, arg1));
         }
       }
@@ -37934,14 +37934,14 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___soapcall(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___soapcall(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___soapcall(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          return (t___soapcall(arg0, arg1, arg2, arg3, ref(arg4)));
+          CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          return (t___soapcall(arg0, arg1, arg2, arg3, arg4));
         }
       }
       break;
@@ -37981,7 +37981,7 @@ Variant c_SoapClient::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -38849,7 +38849,7 @@ ObjectData *c_SoapParam::dynCreate(CArrRef params, bool construct /* = true */) 
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     }
   }
@@ -38862,7 +38862,7 @@ void c_SoapParam::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   }
 }
@@ -38920,7 +38920,7 @@ Variant c_SoapParam::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -38942,7 +38942,7 @@ Variant c_SoapParam::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -39222,7 +39222,7 @@ ObjectData *c_DateTime::dynCreate(CArrRef params, bool construct /* = true */) {
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -39243,7 +39243,7 @@ void c_DateTime::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -39308,8 +39308,8 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setdate(arg0, arg1, arg2));
         }
       }
@@ -39333,9 +39333,9 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_settime(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_settime(arg0, arg1, arg2));
         }
       }
@@ -39349,7 +39349,7 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -39367,9 +39367,9 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_setisodate(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setisodate(arg0, arg1, arg2));
         }
       }
@@ -39420,8 +39420,8 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setdate(arg0, arg1, arg2));
         }
       }
@@ -39449,9 +39449,9 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_setisodate(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setisodate(arg0, arg1, arg2));
         }
       }
@@ -39463,9 +39463,9 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_settime(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_settime(arg0, arg1, arg2));
         }
       }
@@ -39499,7 +39499,7 @@ Variant c_DateTime::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -40302,8 +40302,8 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValueRef(pos)));
-          return (t_sortwithsortkeys(ref(arg0)));
+          CVarRef arg0(ref(ad->getValueRef(pos)));
+          return (t_sortwithsortkeys(arg0));
         }
       }
       break;
@@ -40331,10 +40331,10 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValueRef(pos)));
-          if (count <= 1) return (t_sort(ref(arg0)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_sort(ref(arg0), arg1));
+          CVarRef arg0(ref(ad->getValueRef(pos)));
+          if (count <= 1) return (t_sort(arg0));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_sort(arg0, arg1));
         }
       }
       break;
@@ -40357,10 +40357,10 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValueRef(pos)));
-          if (count <= 1) return (t_asort(ref(arg0)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_asort(ref(arg0), arg1));
+          CVarRef arg0(ref(ad->getValueRef(pos)));
+          if (count <= 1) return (t_asort(arg0));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_asort(arg0, arg1));
         }
       }
       break;
@@ -40393,7 +40393,7 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -40423,7 +40423,7 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_compare(arg0, arg1));
         }
       }
@@ -40470,10 +40470,10 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValueRef(pos)));
-          if (count <= 1) return (t_sort(ref(arg0)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_sort(ref(arg0), arg1));
+          CVarRef arg0(ref(ad->getValueRef(pos)));
+          if (count <= 1) return (t_sort(arg0));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_sort(arg0, arg1));
         }
       }
       HASH_GUARD_LITSTR(0x1D5B8B8144F4AB8ALL, NAMSTR(s_sys_ss44f4ab8a, "setattribute")) {
@@ -40482,7 +40482,7 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -40494,8 +40494,8 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValueRef(pos)));
-          return (t_sortwithsortkeys(ref(arg0)));
+          CVarRef arg0(ref(ad->getValueRef(pos)));
+          return (t_sortwithsortkeys(arg0));
         }
       }
       break;
@@ -40506,10 +40506,10 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
         {
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-          CVarRef arg0((ad->getValueRef(pos)));
-          if (count <= 1) return (t_asort(ref(arg0)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          return (t_asort(ref(arg0), arg1));
+          CVarRef arg0(ref(ad->getValueRef(pos)));
+          if (count <= 1) return (t_asort(arg0));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          return (t_asort(arg0, arg1));
         }
       }
       break;
@@ -40526,7 +40526,7 @@ Variant c_Collator::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_compare(arg0, arg1));
         }
       }
@@ -41711,17 +41711,17 @@ ObjectData *c_PDO::dynCreate(CArrRef params, bool construct /* = true */) {
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3));
     } while (false);
   }
@@ -41738,17 +41738,17 @@ void c_PDO::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3));
   } while (false);
 }
@@ -41864,11 +41864,11 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3), null);
         }
       }
@@ -41910,7 +41910,7 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_quote(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_quote(arg0, arg1));
         }
       }
@@ -41922,7 +41922,7 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -41941,7 +41941,7 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_prepare(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_prepare(arg0, arg1));
         }
       }
@@ -41977,7 +41977,7 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -42031,11 +42031,11 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3), null);
         }
       }
@@ -42071,7 +42071,7 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_quote(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_quote(arg0, arg1));
         }
       }
@@ -42084,7 +42084,7 @@ Variant c_PDO::o_invoke(MethodIndex methodIndex, const char *s, CArrRef params, 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_prepare(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_prepare(arg0, arg1));
         }
       }
@@ -43180,9 +43180,9 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_addstring(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addstring(arg0, arg1, arg2));
         }
       }
@@ -43231,11 +43231,11 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_css(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_css(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_css(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_css(arg0, arg1, arg2, arg3));
         }
       }
@@ -43249,9 +43249,9 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_output());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_output(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_output(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_output(arg0, arg1, arg2));
         }
       }
@@ -43294,9 +43294,9 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addurl(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addurl(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addurl(arg0, arg1, arg2));
         }
       }
@@ -43309,7 +43309,7 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addfile(arg0, arg1));
         }
       }
@@ -43358,7 +43358,7 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addfile(arg0, arg1));
         }
       }
@@ -43400,9 +43400,9 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_addstring(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addstring(arg0, arg1, arg2));
         }
       }
@@ -43415,11 +43415,11 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_css(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_css(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_css(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_css(arg0, arg1, arg2, arg3));
         }
       }
@@ -43432,9 +43432,9 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_addurl(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_addurl(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_addurl(arg0, arg1, arg2));
         }
       }
@@ -43452,9 +43452,9 @@ Variant c_ImageSprite::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_output());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_output(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_output(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_output(arg0, arg1, arg2));
         }
       }
@@ -44366,7 +44366,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -44417,7 +44417,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -44447,7 +44447,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -44461,11 +44461,11 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -44507,13 +44507,13 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -44558,7 +44558,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -44590,11 +44590,11 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -44606,7 +44606,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -44650,7 +44650,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -44740,7 +44740,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -44757,13 +44757,13 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -44775,7 +44775,7 @@ Variant c_DOMEntity::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -46036,10 +46036,10 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 3) return (t_writeelementns(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeelementns(arg0, arg1, arg2, arg3));
         }
       }
@@ -46077,9 +46077,9 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t_startdocument());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_startdocument(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_startdocument(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startdocument(arg0, arg1, arg2));
         }
       }
@@ -46091,7 +46091,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startdtdentity(arg0, arg1));
         }
       }
@@ -46120,7 +46120,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeattribute(arg0, arg1));
         }
       }
@@ -46145,11 +46145,11 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_writedtd(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_writedtd(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_writedtd(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtd(arg0, arg1, arg2, arg3));
         }
       }
@@ -46173,8 +46173,8 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startattributens(arg0, arg1, arg2));
         }
       }
@@ -46197,8 +46197,8 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startelementns(arg0, arg1, arg2));
         }
       }
@@ -46238,7 +46238,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtdelement(arg0, arg1));
         }
       }
@@ -46250,9 +46250,9 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeattributens(arg0, arg1, arg2, arg3));
         }
       }
@@ -46264,7 +46264,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writepi(arg0, arg1));
         }
       }
@@ -46299,7 +46299,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_writeelement(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeelement(arg0, arg1));
         }
       }
@@ -46328,15 +46328,15 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_writedtdentity(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_writedtdentity(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_writedtdentity(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t_writedtdentity(arg0, arg1, arg2, arg3, arg4));
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtdentity(arg0, arg1, arg2, arg3, arg4, arg5));
         }
       }
@@ -46355,9 +46355,9 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_startdtd(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_startdtd(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startdtd(arg0, arg1, arg2));
         }
       }
@@ -46403,7 +46403,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtdattlist(arg0, arg1));
         }
       }
@@ -46502,9 +46502,9 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_startdtd(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_startdtd(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startdtd(arg0, arg1, arg2));
         }
       }
@@ -46517,11 +46517,11 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_writedtd(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_writedtd(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_writedtd(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtd(arg0, arg1, arg2, arg3));
         }
       }
@@ -46566,7 +46566,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_writeelement(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeelement(arg0, arg1));
         }
       }
@@ -46601,7 +46601,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtdattlist(arg0, arg1));
         }
       }
@@ -46649,9 +46649,9 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t_startdocument());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_startdocument(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_startdocument(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startdocument(arg0, arg1, arg2));
         }
       }
@@ -46692,15 +46692,15 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_writedtdentity(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_writedtdentity(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_writedtdentity(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t_writedtdentity(arg0, arg1, arg2, arg3, arg4));
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtdentity(arg0, arg1, arg2, arg3, arg4, arg5));
         }
       }
@@ -46718,7 +46718,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeattribute(arg0, arg1));
         }
       }
@@ -46734,8 +46734,8 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startattributens(arg0, arg1, arg2));
         }
       }
@@ -46747,7 +46747,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writedtdelement(arg0, arg1));
         }
       }
@@ -46759,9 +46759,9 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeattributens(arg0, arg1, arg2, arg3));
         }
       }
@@ -46777,7 +46777,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writepi(arg0, arg1));
         }
       }
@@ -46789,10 +46789,10 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 3) return (t_writeelementns(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_writeelementns(arg0, arg1, arg2, arg3));
         }
       }
@@ -46821,7 +46821,7 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startdtdentity(arg0, arg1));
         }
       }
@@ -46861,8 +46861,8 @@ Variant c_XMLWriter::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_startelementns(arg0, arg1, arg2));
         }
       }
@@ -49336,7 +49336,7 @@ ObjectData *c_DOMException::dynCreate(CArrRef params, bool construct /* = true *
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -49357,7 +49357,7 @@ void c_DOMException::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -49431,7 +49431,7 @@ Variant c_DOMException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -49539,7 +49539,7 @@ Variant c_DOMException::o_invoke(MethodIndex methodIndex, const char *s, CArrRef
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -50172,7 +50172,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -50196,7 +50196,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_query(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_query(arg0, arg1));
         }
       }
@@ -50209,7 +50209,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_evaluate(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_evaluate(arg0, arg1));
         }
       }
@@ -50244,7 +50244,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_registernamespace(arg0, arg1));
         }
       }
@@ -50280,7 +50280,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -50293,7 +50293,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_query(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_query(arg0, arg1));
         }
       }
@@ -50305,7 +50305,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_registernamespace(arg0, arg1));
         }
       }
@@ -50327,7 +50327,7 @@ Variant c_DOMXPath::o_invoke(MethodIndex methodIndex, const char *s, CArrRef par
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_evaluate(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_evaluate(arg0, arg1));
         }
       }
@@ -50900,7 +50900,7 @@ ObjectData *c_SoapServer::dynCreate(CArrRef params, bool construct /* = true */)
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -50917,7 +50917,7 @@ void c_SoapServer::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -50988,7 +50988,7 @@ Variant c_SoapServer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -51051,13 +51051,13 @@ Variant c_SoapServer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_fault(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_fault(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_fault(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fault(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -51087,13 +51087,13 @@ Variant c_SoapServer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_fault(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_fault(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_fault(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fault(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -51184,7 +51184,7 @@ Variant c_SoapServer::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -51922,7 +51922,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -51973,7 +51973,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -52003,7 +52003,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -52017,11 +52017,11 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -52063,13 +52063,13 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -52114,7 +52114,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -52146,11 +52146,11 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -52162,7 +52162,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -52206,7 +52206,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -52296,7 +52296,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -52313,13 +52313,13 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -52331,7 +52331,7 @@ Variant c_DOMNode::o_invoke(MethodIndex methodIndex, const char *s, CArrRef para
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -53555,7 +53555,7 @@ ObjectData *c_DOMDocument::dynCreate(CArrRef params, bool construct /* = true */
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -53576,7 +53576,7 @@ void c_DOMDocument::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -53637,7 +53637,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -53688,7 +53688,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getelementsbytagnamens(arg0, arg1));
         }
       }
@@ -53783,7 +53783,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -53797,7 +53797,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_savexml());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_savexml(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_savexml(arg0, arg1));
         }
       }
@@ -53810,7 +53810,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_createprocessinginstruction(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createprocessinginstruction(arg0, arg1));
         }
       }
@@ -53836,7 +53836,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -53848,7 +53848,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_registernodeclass(arg0, arg1));
         }
       }
@@ -53861,7 +53861,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_load(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_load(arg0, arg1));
         }
       }
@@ -53873,7 +53873,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createattributens(arg0, arg1));
         }
       }
@@ -53885,7 +53885,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -53899,11 +53899,11 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -53922,7 +53922,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_createelement(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createelement(arg0, arg1));
         }
       }
@@ -53934,9 +53934,9 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_createelementns(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createelementns(arg0, arg1, arg2));
         }
       }
@@ -53960,7 +53960,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_importnode(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_importnode(arg0, arg1));
         }
       }
@@ -54013,7 +54013,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_loadxml(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_loadxml(arg0, arg1));
         }
       }
@@ -54026,13 +54026,13 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -54045,7 +54045,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_save(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_save(arg0, arg1));
         }
       }
@@ -54124,7 +54124,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -54206,11 +54206,11 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -54243,7 +54243,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -54290,7 +54290,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_save(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_save(arg0, arg1));
         }
       }
@@ -54302,7 +54302,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -54312,7 +54312,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createattributens(arg0, arg1));
         }
       }
@@ -54351,7 +54351,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_createelement(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createelement(arg0, arg1));
         }
       }
@@ -54384,7 +54384,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_importnode(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_importnode(arg0, arg1));
         }
       }
@@ -54410,7 +54410,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_loadxml(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_loadxml(arg0, arg1));
         }
       }
@@ -54434,7 +54434,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -54489,7 +54489,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getelementsbytagnamens(arg0, arg1));
         }
       }
@@ -54557,7 +54557,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -54568,7 +54568,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_load(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_load(arg0, arg1));
         }
       }
@@ -54604,7 +54604,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_savexml());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_savexml(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_savexml(arg0, arg1));
         }
       }
@@ -54622,9 +54622,9 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t_createelementns(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createelementns(arg0, arg1, arg2));
         }
       }
@@ -54637,7 +54637,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_createprocessinginstruction(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_createprocessinginstruction(arg0, arg1));
         }
       }
@@ -54666,7 +54666,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_registernodeclass(arg0, arg1));
         }
       }
@@ -54677,13 +54677,13 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -54701,7 +54701,7 @@ Variant c_DOMDocument::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -57753,27 +57753,27 @@ ObjectData *c_SoapFault::dynCreate(CArrRef params, bool construct /* = true */) 
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count <= 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 4) {
         (t___construct(arg0, arg1, arg2, arg3));
         break;
       }
-      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 5) {
         (t___construct(arg0, arg1, arg2, arg3, arg4));
         break;
       }
-      CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
     } while (false);
   }
@@ -57786,27 +57786,27 @@ void c_SoapFault::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) {
       (t___construct(arg0, arg1, arg2, arg3));
       break;
     }
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) {
       (t___construct(arg0, arg1, arg2, arg3, arg4));
       break;
     }
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3, arg4, arg5));
   } while (false);
 }
@@ -57896,15 +57896,15 @@ Variant c_SoapFault::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
         }
       }
@@ -58010,15 +58010,15 @@ Variant c_SoapFault::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count <= 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 5) return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
-          CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4, arg5), null);
         }
       }
@@ -58630,12 +58630,12 @@ ObjectData *c_DOMElement::dynCreate(CArrRef params, bool construct /* = true */)
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2));
     } while (false);
   }
@@ -58652,12 +58652,12 @@ void c_DOMElement::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2));
   } while (false);
 }
@@ -58722,7 +58722,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -58745,8 +58745,8 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setidattributens(arg0, arg1, arg2));
         }
       }
@@ -58780,7 +58780,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getelementsbytagnamens(arg0, arg1));
         }
       }
@@ -58792,7 +58792,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getattributenodens(arg0, arg1));
         }
       }
@@ -58832,7 +58832,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -58857,9 +58857,9 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2), null);
         }
       }
@@ -58882,7 +58882,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -58894,7 +58894,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_hasattributens(arg0, arg1));
         }
       }
@@ -58908,11 +58908,11 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -58941,8 +58941,8 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattributens(arg0, arg1, arg2));
         }
       }
@@ -58965,7 +58965,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getattributens(arg0, arg1));
         }
       }
@@ -58977,7 +58977,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_removeattributens(arg0, arg1));
         }
       }
@@ -59012,7 +59012,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setidattribute(arg0, arg1));
         }
       }
@@ -59025,13 +59025,13 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -59054,7 +59054,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setidattributenode(arg0, arg1));
         }
       }
@@ -59066,7 +59066,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -59111,7 +59111,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }
@@ -59159,11 +59159,11 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           if (count <= 0) return (t_c14n());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_c14n(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14n(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14n(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14n(arg0, arg1, arg2, arg3));
         }
       }
@@ -59173,7 +59173,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattribute(arg0, arg1));
         }
       }
@@ -59185,7 +59185,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_replacechild(arg0, arg1));
         }
       }
@@ -59208,7 +59208,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_removeattributens(arg0, arg1));
         }
       }
@@ -59220,8 +59220,8 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setidattributens(arg0, arg1, arg2));
         }
       }
@@ -59245,7 +59245,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___set(arg0, arg1));
         }
       }
@@ -59257,7 +59257,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setidattribute(arg0, arg1));
         }
       }
@@ -59273,7 +59273,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getattributenodens(arg0, arg1));
         }
       }
@@ -59285,7 +59285,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getattributens(arg0, arg1));
         }
       }
@@ -59326,7 +59326,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_insertbefore(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_insertbefore(arg0, arg1));
         }
       }
@@ -59353,7 +59353,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getelementsbytagnamens(arg0, arg1));
         }
       }
@@ -59363,7 +59363,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setidattributenode(arg0, arg1));
         }
       }
@@ -59397,7 +59397,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_hasattributens(arg0, arg1));
         }
       }
@@ -59409,8 +59409,8 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setattributens(arg0, arg1, arg2));
         }
       }
@@ -59460,9 +59460,9 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2), null);
         }
       }
@@ -59536,13 +59536,13 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_c14nfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_c14nfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t_c14nfile(arg0, arg1, arg2));
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t_c14nfile(arg0, arg1, arg2, arg3));
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_c14nfile(arg0, arg1, arg2, arg3, arg4));
         }
       }
@@ -59554,7 +59554,7 @@ Variant c_DOMElement::o_invoke(MethodIndex methodIndex, const char *s, CArrRef p
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_issupported(arg0, arg1));
         }
       }

@@ -49,10 +49,10 @@ Variant i_hphp_splfileobject___construct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject___construct(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -64,7 +64,7 @@ Variant i_dom_document_create_comment(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_comment(arg0, arg1));
   }
 }
@@ -100,7 +100,7 @@ Variant i_curl_multi_remove_handle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_curl_multi_remove_handle(arg0, arg1));
   }
 }
@@ -112,9 +112,9 @@ Variant i_memcache_get_server_status(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_get_server_status(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_get_server_status(arg0, arg1, arg2));
   }
 }
@@ -126,9 +126,9 @@ Variant i_mysql_result(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mysql_result(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_result(arg0, arg1, arg2));
   }
 }
@@ -174,7 +174,7 @@ Variant i_pixelsetmagentaquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetmagentaquantum(arg0, arg1), null);
   }
 }
@@ -192,8 +192,8 @@ Variant i_natsort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_natsort(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_natsort(arg0));
   }
 }
 Variant i_socket_accept(CArrRef params) {
@@ -215,7 +215,7 @@ Variant i_vprintf(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_vprintf(arg0, arg1));
   }
 }
@@ -227,8 +227,8 @@ Variant i_collator_set_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_collator_set_attribute(arg0, arg1, arg2));
   }
 }
@@ -252,9 +252,9 @@ Variant i_header(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_header(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_header(arg0, arg1), null);
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_header(arg0, arg1, arg2), null);
   }
 }
@@ -266,8 +266,8 @@ Variant i_dom_element_has_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_has_attribute_ns(arg0, arg1, arg2));
   }
 }
@@ -301,7 +301,7 @@ Variant i_magicksetimagebias(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagebias(arg0, arg1));
   }
 }
@@ -330,7 +330,7 @@ Variant i_bcmod(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcmod(arg0, arg1));
   }
 }
@@ -353,7 +353,7 @@ Variant i_drawsetfontstretch(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfontstretch(arg0, arg1), null);
   }
 }
@@ -371,7 +371,7 @@ Variant i_hphp_splfileinfo_setfileclass(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileinfo_setfileclass(arg0, arg1), null);
   }
 }
@@ -418,9 +418,9 @@ Variant i_evhttp_async_get(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_evhttp_async_get(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_evhttp_async_get(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_evhttp_async_get(arg0, arg1, arg2));
   }
 }
@@ -433,15 +433,15 @@ Variant i_ldap_parse_result(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 3) return (f_ldap_parse_result(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 4) return (f_ldap_parse_result(arg0, arg1, ref(arg2), ref(arg3)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 5) return (f_ldap_parse_result(arg0, arg1, ref(arg2), ref(arg3), ref(arg4)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_ldap_parse_result(arg0, arg1, ref(arg2), ref(arg3), ref(arg4), ref(arg5)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_ldap_parse_result(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_ldap_parse_result(arg0, arg1, arg2, arg3));
+    CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 5) return (f_ldap_parse_result(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_ldap_parse_result(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
 Variant i_drawgettextantialias(CArrRef params) {
@@ -463,7 +463,7 @@ Variant i_array_fill_keys(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_fill_keys(arg0, arg1));
   }
 }
@@ -476,10 +476,10 @@ Variant i_openssl_seal(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_seal(arg0, ref(arg1), ref(arg2), arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_seal(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_socket_clear_error(CArrRef params) {
@@ -525,7 +525,7 @@ Variant i_xml_set_start_namespace_decl_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_start_namespace_decl_handler(arg0, arg1));
   }
 }
@@ -549,7 +549,7 @@ Variant i_sizeof(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_sizeof(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_sizeof(arg0, arg1));
   }
 }
@@ -561,9 +561,9 @@ Variant i_mb_convert_case(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_convert_case(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_convert_case(arg0, arg1, arg2));
   }
 }
@@ -575,9 +575,9 @@ Variant i_fb_set_taint(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_fb_set_taint(ref(arg0), arg1), null);
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_fb_set_taint(arg0, arg1), null);
   }
 }
 Variant i_dir(CArrRef params) {
@@ -599,7 +599,7 @@ Variant i_array_combine(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_combine(arg0, arg1));
   }
 }
@@ -611,9 +611,9 @@ Variant i_strpos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_strpos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strpos(arg0, arg1, arg2));
   }
 }
@@ -626,7 +626,7 @@ Variant i_array_reverse(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_array_reverse(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_reverse(arg0, arg1));
   }
 }
@@ -649,7 +649,7 @@ Variant i_msg_set_queue(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_msg_set_queue(arg0, arg1));
   }
 }
@@ -683,9 +683,9 @@ Variant i_bcmul(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_bcmul(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcmul(arg0, arg1, arg2));
   }
 }
@@ -697,8 +697,8 @@ Variant i_openlog(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openlog(arg0, arg1, arg2), null);
   }
 }
@@ -716,13 +716,13 @@ Variant i_socket_select(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 4) return (f_socket_select(ref(arg0), ref(arg1), ref(arg2), arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_socket_select(ref(arg0), ref(arg1), ref(arg2), arg3, arg4));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 4) return (f_socket_select(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_socket_select(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_magickraiseimage(CArrRef params) {
@@ -733,11 +733,11 @@ Variant i_magickraiseimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickraiseimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -749,9 +749,9 @@ Variant i_gzputs(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_gzputs(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzputs(arg0, arg1, arg2));
   }
 }
@@ -763,7 +763,7 @@ Variant i_strpbrk(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strpbrk(arg0, arg1));
   }
 }
@@ -775,7 +775,7 @@ Variant i_shm_remove_var(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_shm_remove_var(arg0, arg1));
   }
 }
@@ -821,7 +821,7 @@ Variant i_htmlspecialchars_decode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_htmlspecialchars_decode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_htmlspecialchars_decode(arg0, arg1));
   }
 }
@@ -861,8 +861,8 @@ Variant i_end(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_end(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_end(arg0));
   }
 }
 Variant i_stream_get_line(CArrRef params) {
@@ -874,9 +874,9 @@ Variant i_stream_get_line(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_stream_get_line(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_stream_get_line(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_get_line(arg0, arg1, arg2));
   }
 }
@@ -899,8 +899,8 @@ Variant i_magickrollimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickrollimage(arg0, arg1, arg2));
   }
 }
@@ -912,8 +912,8 @@ Variant i_ldap_sort(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_sort(arg0, arg1, arg2));
   }
 }
@@ -925,8 +925,8 @@ Variant i_imagetruecolortopalette(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagetruecolortopalette(arg0, arg1, arg2));
   }
 }
@@ -960,8 +960,8 @@ Variant i_magicksetimageblueprimary(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageblueprimary(arg0, arg1, arg2));
   }
 }
@@ -996,7 +996,7 @@ Variant i_syslog(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_syslog(arg0, arg1), null);
   }
 }
@@ -1019,9 +1019,9 @@ Variant i_bcpow(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_bcpow(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcpow(arg0, arg1, arg2));
   }
 }
@@ -1046,8 +1046,8 @@ Variant i_php_check_syntax(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_php_check_syntax(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_php_check_syntax(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_php_check_syntax(arg0, arg1));
   }
 }
 Variant i_mysql_connect_with_db(CArrRef params) {
@@ -1060,19 +1060,19 @@ Variant i_mysql_connect_with_db(CArrRef params) {
     if (count <= 0) return (f_mysql_connect_with_db());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mysql_connect_with_db(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mysql_connect_with_db(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mysql_connect_with_db(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mysql_connect_with_db(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_mysql_connect_with_db(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_mysql_connect_with_db(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 7) return (f_mysql_connect_with_db(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_connect_with_db(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -1117,11 +1117,11 @@ Variant i_pixelsetquantumcolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_pixelsetquantumcolor(arg0, arg1, arg2, arg3), null);
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetquantumcolor(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -1166,8 +1166,8 @@ Variant i_dom_node_replace_child(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_replace_child(arg0, arg1, arg2));
   }
 }
@@ -1179,11 +1179,11 @@ Variant i_strspn(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_strspn(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_strspn(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strspn(arg0, arg1, arg2, arg3));
   }
 }
@@ -1262,7 +1262,7 @@ Variant i_mcrypt_generic(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_generic(arg0, arg1));
   }
 }
@@ -1285,7 +1285,7 @@ Variant i_xml_set_end_namespace_decl_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_end_namespace_decl_handler(arg0, arg1));
   }
 }
@@ -1297,9 +1297,9 @@ Variant i_openssl_x509_export_to_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_openssl_x509_export_to_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_x509_export_to_file(arg0, arg1, arg2));
   }
 }
@@ -1311,7 +1311,7 @@ Variant i_imagesetstyle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagesetstyle(arg0, arg1));
   }
 }
@@ -1323,9 +1323,9 @@ Variant i_drawcolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawcolor(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -1338,7 +1338,7 @@ Variant i_get_headers(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_get_headers(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_get_headers(arg0, arg1));
   }
 }
@@ -1351,7 +1351,7 @@ Variant i_mysql_drop_db(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_drop_db(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_drop_db(arg0, arg1));
   }
 }
@@ -1374,10 +1374,10 @@ Variant i_magickresampleimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickresampleimage(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -1396,7 +1396,7 @@ Variant i_strtok(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_strtok(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strtok(arg0, arg1));
   }
 }
@@ -1408,7 +1408,7 @@ Variant i_array_key_exists(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_key_exists(arg0, arg1));
   }
 }
@@ -1431,7 +1431,7 @@ Variant i_strstr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strstr(arg0, arg1));
   }
 }
@@ -1454,7 +1454,7 @@ Variant i_memcache_setoptimeout(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_setoptimeout(arg0, arg1));
   }
 }
@@ -1466,11 +1466,11 @@ Variant i_stream_filter_append(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_filter_append(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_stream_filter_append(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_filter_append(arg0, arg1, arg2, arg3));
   }
 }
@@ -1482,8 +1482,8 @@ Variant i_dom_characterdata_insert_data(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_characterdata_insert_data(arg0, arg1, arg2));
   }
 }
@@ -1495,8 +1495,8 @@ Variant i_hphp_get_property(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_get_property(arg0, arg1, arg2));
   }
 }
@@ -1508,9 +1508,9 @@ Variant i_dom_characterdata_replace_data(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_characterdata_replace_data(arg0, arg1, arg2, arg3));
   }
 }
@@ -1522,10 +1522,10 @@ Variant i_magickgetcharheight(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgetcharheight(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetcharheight(arg0, arg1, arg2, arg3));
   }
 }
@@ -1537,10 +1537,10 @@ Variant i_imagerotate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_imagerotate(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagerotate(arg0, arg1, arg2, arg3));
   }
 }
@@ -1552,10 +1552,10 @@ Variant i_magickcompositeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcompositeimage(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -1568,11 +1568,11 @@ Variant i_openssl_sign(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 3) return (f_openssl_sign(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_sign(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_openssl_sign(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_sign(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_version_compare(CArrRef params) {
@@ -1583,9 +1583,9 @@ Variant i_version_compare(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_version_compare(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_version_compare(arg0, arg1, arg2));
   }
 }
@@ -1641,11 +1641,11 @@ Variant i_imagestring(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagestring(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -1705,8 +1705,8 @@ Variant i_idn_to_unicode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_idn_to_unicode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_idn_to_unicode(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_idn_to_unicode(arg0, arg1));
   }
 }
 Variant i_lchown(CArrRef params) {
@@ -1717,7 +1717,7 @@ Variant i_lchown(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_lchown(arg0, arg1));
   }
 }
@@ -1729,12 +1729,12 @@ Variant i_drawcomposite(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawcomposite(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -1758,7 +1758,7 @@ Variant i_imagecolortransparent(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagecolortransparent(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolortransparent(arg0, arg1));
   }
 }
@@ -1770,8 +1770,8 @@ Variant i_socket_get_option(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_get_option(arg0, arg1, arg2));
   }
 }
@@ -1783,7 +1783,7 @@ Variant i_stream_filter_register(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_filter_register(arg0, arg1));
   }
 }
@@ -1814,7 +1814,7 @@ Variant i_md5(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_md5(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_md5(arg0, arg1));
   }
 }
@@ -1832,7 +1832,7 @@ Variant i_dom_namednodemap_item(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_namednodemap_item(arg0, arg1));
   }
 }
@@ -1844,9 +1844,9 @@ Variant i_bcsub(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_bcsub(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcsub(arg0, arg1, arg2));
   }
 }
@@ -1859,7 +1859,7 @@ Variant i_xmlwriter_flush(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_xmlwriter_flush(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_flush(arg0, arg1));
   }
 }
@@ -1872,7 +1872,7 @@ Variant i_sha1_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_sha1_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_sha1_file(arg0, arg1));
   }
 }
@@ -1891,7 +1891,7 @@ Variant i_date(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_date(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date(arg0, arg1));
   }
 }
@@ -1903,11 +1903,11 @@ Variant i_evhttp_post(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_evhttp_post(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_evhttp_post(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_evhttp_post(arg0, arg1, arg2, arg3));
   }
 }
@@ -1921,7 +1921,7 @@ Variant i_ldap_connect(CArrRef params) {
     if (count <= 0) return (f_ldap_connect());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_ldap_connect(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_connect(arg0, arg1));
   }
 }
@@ -1933,8 +1933,8 @@ Variant i_shuffle(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_shuffle(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_shuffle(arg0));
   }
 }
 Variant i_mcrypt_module_get_algo_block_size(CArrRef params) {
@@ -1946,7 +1946,7 @@ Variant i_mcrypt_module_get_algo_block_size(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_module_get_algo_block_size(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_get_algo_block_size(arg0, arg1));
   }
 }
@@ -1958,7 +1958,7 @@ Variant i_hphp_splfileobject_ftruncate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_ftruncate(arg0, arg1));
   }
 }
@@ -1970,8 +1970,8 @@ Variant i_key(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_key(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_key(arg0));
   }
 }
 Variant i_xmlwriter_start_dtd_entity(CArrRef params) {
@@ -1982,8 +1982,8 @@ Variant i_xmlwriter_start_dtd_entity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_dtd_entity(arg0, arg1, arg2));
   }
 }
@@ -1996,9 +1996,9 @@ Variant i_readfile(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_readfile(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_readfile(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_readfile(arg0, arg1, arg2));
   }
 }
@@ -2021,9 +2021,9 @@ Variant i_magickmodulateimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickmodulateimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -2036,7 +2036,7 @@ Variant i_mysql_set_charset(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_set_charset(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_set_charset(arg0, arg1));
   }
 }
@@ -2048,9 +2048,9 @@ Variant i_fb_unset_taint(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_fb_unset_taint(ref(arg0), arg1), null);
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_fb_unset_taint(arg0, arg1), null);
   }
 }
 Variant i_dom_document_xinclude(CArrRef params) {
@@ -2062,7 +2062,7 @@ Variant i_dom_document_xinclude(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_dom_document_xinclude(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_xinclude(arg0, arg1));
   }
 }
@@ -2108,9 +2108,9 @@ Variant i_hash_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_hash_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_file(arg0, arg1, arg2));
   }
 }
@@ -2124,10 +2124,10 @@ Variant i_is_callable(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_is_callable(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_is_callable(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_is_callable(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_is_callable(arg0, arg1, arg2));
   }
 }
 Variant i_asin(CArrRef params) {
@@ -2150,11 +2150,11 @@ Variant i_openssl_public_encrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 3) return (f_openssl_public_encrypt(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_public_encrypt(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_openssl_public_encrypt(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_public_encrypt(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_curl_multi_init(CArrRef params) {
@@ -2183,7 +2183,7 @@ Variant i_json_encode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_json_encode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_json_encode(arg0, arg1));
   }
 }
@@ -2196,7 +2196,7 @@ Variant i_show_source(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_show_source(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_show_source(arg0, arg1));
   }
 }
@@ -2209,7 +2209,7 @@ Variant i_mcrypt_module_self_test(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_module_self_test(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_self_test(arg0, arg1));
   }
 }
@@ -2221,7 +2221,7 @@ Variant i_sscanf(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_sscanf(count, arg0, arg1));
     return (f_sscanf(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -2235,7 +2235,7 @@ Variant i_chop(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_chop(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_chop(arg0, arg1));
   }
 }
@@ -2248,9 +2248,9 @@ Variant i_mb_convert_variables(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 3) return (f_mb_convert_variables(count, arg0, arg1, ref(arg2)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_mb_convert_variables(count, arg0, arg1, arg2));
     return (f_mb_convert_variables(count,arg0, arg1, ref(arg2), params.slice(3, count - 3, false)));
   }
 }
@@ -2296,9 +2296,9 @@ Variant i_magickadaptivethresholdimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickadaptivethresholdimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -2310,8 +2310,8 @@ Variant i_each(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_each(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_each(arg0));
   }
 }
 Variant i_magickremoveimageprofiles(CArrRef params) {
@@ -2345,11 +2345,11 @@ Variant i_xbox_send_message(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 3) return (f_xbox_send_message(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_xbox_send_message(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_xbox_send_message(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_xbox_send_message(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_thrift_protocol_write_binary(CArrRef params) {
@@ -2360,11 +2360,11 @@ Variant i_thrift_protocol_write_binary(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_thrift_protocol_write_binary(arg0, arg1, arg2, arg3, arg4, arg5), null);
   }
 }
@@ -2387,13 +2387,13 @@ Variant i_drawpathellipticarcabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathellipticarcabsolute(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7), null);
   }
 }
@@ -2405,7 +2405,7 @@ Variant i_pixelsetgreen(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetgreen(arg0, arg1), null);
   }
 }
@@ -2428,7 +2428,7 @@ Variant i_pixelsetalphaquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetalphaquantum(arg0, arg1), null);
   }
 }
@@ -2440,7 +2440,7 @@ Variant i_stream_bucket_append(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_bucket_append(arg0, arg1), null);
   }
 }
@@ -2465,8 +2465,8 @@ Variant i_system(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_system(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_system(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_system(arg0, arg1));
   }
 }
 Variant i_mb_parse_str(CArrRef params) {
@@ -2479,8 +2479,8 @@ Variant i_mb_parse_str(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_parse_str(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_mb_parse_str(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_mb_parse_str(arg0, arg1));
   }
 }
 Variant i_dom_characterdata_append_data(CArrRef params) {
@@ -2491,7 +2491,7 @@ Variant i_dom_characterdata_append_data(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_characterdata_append_data(arg0, arg1));
   }
 }
@@ -2504,7 +2504,7 @@ Variant i_log(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_log(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_log(arg0, arg1));
   }
 }
@@ -2516,9 +2516,9 @@ Variant i_memcache_decrement(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_decrement(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_decrement(arg0, arg1, arg2));
   }
 }
@@ -2530,7 +2530,7 @@ Variant i_drawskewx(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawskewx(arg0, arg1), null);
   }
 }
@@ -2565,7 +2565,7 @@ Variant i_drawskewy(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawskewy(arg0, arg1), null);
   }
 }
@@ -2588,7 +2588,7 @@ Variant i_magicksetresourcelimit(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetresourcelimit(arg0, arg1));
   }
 }
@@ -2611,8 +2611,8 @@ Variant i_hphp_splfileobject_fwrite(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_fwrite(arg0, arg1, arg2));
   }
 }
@@ -2664,8 +2664,8 @@ Variant i_drawpathlinetorelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathlinetorelative(arg0, arg1, arg2), null);
   }
 }
@@ -2711,7 +2711,7 @@ Variant i_magicksetfilename(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_magicksetfilename(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetfilename(arg0, arg1));
   }
 }
@@ -2724,7 +2724,7 @@ Variant i_magickappendimages(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_magickappendimages(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickappendimages(arg0, arg1));
   }
 }
@@ -2749,7 +2749,7 @@ Variant i_mb_ereg_search(CArrRef params) {
     if (count <= 0) return (f_mb_ereg_search());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mb_ereg_search(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_ereg_search(arg0, arg1));
   }
 }
@@ -2773,9 +2773,9 @@ Variant i_chunk_split(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_chunk_split(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_chunk_split(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_chunk_split(arg0, arg1, arg2));
   }
 }
@@ -2799,7 +2799,7 @@ Variant i_i18n_loc_set_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_i18n_loc_set_attribute(arg0, arg1));
   }
 }
@@ -2839,7 +2839,7 @@ Variant i_dom_element_has_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_has_attribute(arg0, arg1));
   }
 }
@@ -2851,7 +2851,7 @@ Variant i_strrchr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strrchr(arg0, arg1));
   }
 }
@@ -2863,7 +2863,7 @@ Variant i_xmlwriter_start_dtd_element(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_dtd_element(arg0, arg1));
   }
 }
@@ -2876,11 +2876,11 @@ Variant i_str_ireplace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_str_ireplace(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_str_ireplace(arg0, arg1, arg2, ref(arg3)));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_str_ireplace(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_magickpainttransparentimage(CArrRef params) {
@@ -2891,11 +2891,11 @@ Variant i_magickpainttransparentimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_magickpainttransparentimage(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_magickpainttransparentimage(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickpainttransparentimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -2907,7 +2907,7 @@ Variant i_drawsettextundercolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsettextundercolor(arg0, arg1), null);
   }
 }
@@ -2952,10 +2952,10 @@ Variant i_magickgetstringwidth(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgetstringwidth(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetstringwidth(arg0, arg1, arg2, arg3));
   }
 }
@@ -2980,9 +2980,9 @@ Variant i_ldap_parse_reference(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_ldap_parse_reference(arg0, arg1, ref(arg2)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_ldap_parse_reference(arg0, arg1, arg2));
   }
 }
 Variant i_ctype_xdigit(CArrRef params) {
@@ -3005,7 +3005,7 @@ Variant i_gmstrftime(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gmstrftime(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gmstrftime(arg0, arg1));
   }
 }
@@ -3028,7 +3028,7 @@ Variant i_stream_socket_get_name(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_socket_get_name(arg0, arg1));
   }
 }
@@ -3040,9 +3040,9 @@ Variant i_socket_set_option(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_set_option(arg0, arg1, arg2, arg3));
   }
 }
@@ -3054,8 +3054,8 @@ Variant i_array_multisort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_array_multisort(count, ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_array_multisort(count, arg0));
     return (f_array_multisort(count,ref(arg0), params.slice(1, count - 1, false)));
   }
 }
@@ -3067,14 +3067,14 @@ Variant i_imagepsbbox(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_imagepsbbox(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_imagepsbbox(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_imagepsbbox(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepsbbox(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -3086,7 +3086,7 @@ Variant i_drawpathlinetoverticalabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathlinetoverticalabsolute(arg0, arg1), null);
   }
 }
@@ -3110,10 +3110,10 @@ Variant i_mb_ereg(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_ereg(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_mb_ereg(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_mb_ereg(arg0, arg1, arg2));
   }
 }
 Variant i_decoct(CArrRef params) {
@@ -3135,9 +3135,9 @@ Variant i_xml_parse(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_xml_parse(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_parse(arg0, arg1, arg2));
   }
 }
@@ -3160,12 +3160,12 @@ Variant i_drawaffine(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawaffine(arg0, arg1, arg2, arg3, arg4, arg5, arg6), null);
   }
 }
@@ -3183,8 +3183,8 @@ Variant i_magicksetimagewhitepoint(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagewhitepoint(arg0, arg1, arg2));
   }
 }
@@ -3196,7 +3196,7 @@ Variant i_dom_document_get_elements_by_tag_name(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_get_elements_by_tag_name(arg0, arg1));
   }
 }
@@ -3219,8 +3219,8 @@ Variant i_imagecolorat(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorat(arg0, arg1, arg2));
   }
 }
@@ -3233,7 +3233,7 @@ Variant i_magickgetimageextrema(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_magickgetimageextrema(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetimageextrema(arg0, arg1));
   }
 }
@@ -3245,9 +3245,9 @@ Variant i_dom_node_insert_before(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_dom_node_insert_before(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_insert_before(arg0, arg1, arg2));
   }
 }
@@ -3272,15 +3272,15 @@ Variant i_mktime(CArrRef params) {
     if (count <= 0) return (f_mktime());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mktime(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mktime(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mktime(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mktime(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_mktime(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mktime(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -3293,11 +3293,11 @@ Variant i_sem_get(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_sem_get(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_sem_get(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_sem_get(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_sem_get(arg0, arg1, arg2, arg3));
   }
 }
@@ -3309,7 +3309,7 @@ Variant i_drawsetstrokelinejoin(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokelinejoin(arg0, arg1), null);
   }
 }
@@ -3321,7 +3321,7 @@ Variant i_array_intersect(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_intersect(count, arg0, arg1));
     return (f_array_intersect(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -3334,9 +3334,9 @@ Variant i_mailparse_msg_extract_whole_part_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mailparse_msg_extract_whole_part_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mailparse_msg_extract_whole_part_file(arg0, arg1, arg2));
   }
 }
@@ -3348,11 +3348,11 @@ Variant i_mb_strrichr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_strrichr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_strrichr(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strrichr(arg0, arg1, arg2, arg3));
   }
 }
@@ -3364,12 +3364,12 @@ Variant i_socket_sendto(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 5) return (f_socket_sendto(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_sendto(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -3382,7 +3382,7 @@ Variant i_memcache_flush(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_memcache_flush(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_flush(arg0, arg1));
   }
 }
@@ -3394,7 +3394,7 @@ Variant i_mb_output_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_output_handler(arg0, arg1));
   }
 }
@@ -3417,8 +3417,8 @@ Variant i_drawpathcurvetoquadraticbeziersmoothabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetoquadraticbeziersmoothabsolute(arg0, arg1, arg2), null);
   }
 }
@@ -3452,8 +3452,8 @@ Variant i_pos(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_pos(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_pos(arg0));
   }
 }
 Variant i_pagelet_server_is_enabled(CArrRef params) {
@@ -3476,10 +3476,10 @@ Variant i_imagecolorexactalpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorexactalpha(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -3491,7 +3491,7 @@ Variant i_pow(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pow(arg0, arg1));
   }
 }
@@ -3514,7 +3514,7 @@ Variant i_imagecolorsforindex(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorsforindex(arg0, arg1));
   }
 }
@@ -3538,7 +3538,7 @@ Variant i_dom_node_clone_node(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_dom_node_clone_node(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_clone_node(arg0, arg1));
   }
 }
@@ -3561,8 +3561,8 @@ Variant i_socket_create(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_create(arg0, arg1, arg2));
   }
 }
@@ -3574,8 +3574,8 @@ Variant i_xmlwriter_write_pi(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_pi(arg0, arg1, arg2));
   }
 }
@@ -3593,11 +3593,11 @@ Variant i_mb_stripos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_stripos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_stripos(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_stripos(arg0, arg1, arg2, arg3));
   }
 }
@@ -3609,7 +3609,7 @@ Variant i_magickpingimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickpingimage(arg0, arg1));
   }
 }
@@ -3621,10 +3621,10 @@ Variant i_bcpowmod(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_bcpowmod(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcpowmod(arg0, arg1, arg2, arg3));
   }
 }
@@ -3636,7 +3636,7 @@ Variant i_timezone_offset_get(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_timezone_offset_get(arg0, arg1));
   }
 }
@@ -3648,7 +3648,7 @@ Variant i_dom_document_create_text_node(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_text_node(arg0, arg1));
   }
 }
@@ -3666,8 +3666,8 @@ Variant i_hphp_splfileobject_fseek(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_fseek(arg0, arg1, arg2));
   }
 }
@@ -3713,7 +3713,7 @@ Variant i_imagegrabwindow(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagegrabwindow(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagegrabwindow(arg0, arg1));
   }
 }
@@ -3725,12 +3725,12 @@ Variant i_memcache_add(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_memcache_add(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_memcache_add(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_add(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -3742,7 +3742,7 @@ Variant i_magickstereoimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickstereoimage(arg0, arg1));
   }
 }
@@ -3776,13 +3776,13 @@ Variant i_openssl_csr_sign(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_openssl_csr_sign(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_openssl_csr_sign(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_csr_sign(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -3795,12 +3795,12 @@ Variant i_openssl_pkcs12_export(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 4) return (f_openssl_pkcs12_export(arg0, ref(arg1), arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_pkcs12_export(arg0, ref(arg1), arg2, arg3, arg4));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 4) return (f_openssl_pkcs12_export(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_pkcs12_export(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_magickgetquantumdepth(CArrRef params) {
@@ -3818,7 +3818,7 @@ Variant i_socket_listen(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_socket_listen(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_listen(arg0, arg1));
   }
 }
@@ -3832,8 +3832,8 @@ Variant i_parse_str(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_parse_str(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_parse_str(arg0, ref(arg1)), null);
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_parse_str(arg0, arg1), null);
   }
 }
 Variant i_sin(CArrRef params) {
@@ -3855,7 +3855,7 @@ Variant i_dom_node_append_child(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_append_child(arg0, arg1));
   }
 }
@@ -3878,9 +3878,9 @@ Variant i_copy(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_copy(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_copy(arg0, arg1, arg2));
   }
 }
@@ -3892,11 +3892,11 @@ Variant i_imagechar(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagechar(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -3908,7 +3908,7 @@ Variant i_magicksetimagebackgroundcolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagebackgroundcolor(arg0, arg1));
   }
 }
@@ -3920,8 +3920,8 @@ Variant i_ldap_mod_add(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_mod_add(arg0, arg1, arg2));
   }
 }
@@ -3978,10 +3978,10 @@ Variant i_pcntl_wait(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_pcntl_wait(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_pcntl_wait(ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_pcntl_wait(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_pcntl_wait(arg0, arg1));
   }
 }
 Variant i_hypot(CArrRef params) {
@@ -3992,7 +3992,7 @@ Variant i_hypot(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hypot(arg0, arg1));
   }
 }
@@ -4005,7 +4005,7 @@ Variant i_parse_url(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_parse_url(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_parse_url(arg0, arg1));
   }
 }
@@ -4017,7 +4017,7 @@ Variant i_magickreadimageblob(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickreadimageblob(arg0, arg1));
   }
 }
@@ -4030,10 +4030,10 @@ Variant i_eregi(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_eregi(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_eregi(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_eregi(arg0, arg1, arg2));
   }
 }
 Variant i_pixelsetcolorcount(CArrRef params) {
@@ -4044,7 +4044,7 @@ Variant i_pixelsetcolorcount(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetcolorcount(arg0, arg1), null);
   }
 }
@@ -4056,10 +4056,10 @@ Variant i_drawpathcurvetoquadraticbezierrelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetoquadraticbezierrelative(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -4110,7 +4110,7 @@ Variant i_magickcontrastimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcontrastimage(arg0, arg1));
   }
 }
@@ -4123,9 +4123,9 @@ Variant i_pcntl_setpriority(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_pcntl_setpriority(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_pcntl_setpriority(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pcntl_setpriority(arg0, arg1, arg2));
   }
 }
@@ -4159,9 +4159,9 @@ Variant i_imageconvolution(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imageconvolution(arg0, arg1, arg2, arg3));
   }
 }
@@ -4195,10 +4195,10 @@ Variant i_newpixelregioniterator(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_newpixelregioniterator(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -4210,7 +4210,7 @@ Variant i_array_intersect_assoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_intersect_assoc(count, arg0, arg1));
     return (f_array_intersect_assoc(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -4230,7 +4230,7 @@ Variant i_hebrev(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_hebrev(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hebrev(arg0, arg1));
   }
 }
@@ -4265,7 +4265,7 @@ Variant i_mb_strwidth(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_strwidth(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strwidth(arg0, arg1));
   }
 }
@@ -4299,9 +4299,9 @@ Variant i_dom_document_create_processing_instruction(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_dom_document_create_processing_instruction(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_processing_instruction(arg0, arg1, arg2));
   }
 }
@@ -4324,11 +4324,11 @@ Variant i_mb_stristr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_stristr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_stristr(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_stristr(arg0, arg1, arg2, arg3));
   }
 }
@@ -4340,8 +4340,8 @@ Variant i_array_diff_ukey(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_diff_ukey(count, arg0, arg1, arg2));
     return (f_array_diff_ukey(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -4365,7 +4365,7 @@ Variant i_magicksetimagemattecolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagemattecolor(arg0, arg1));
   }
 }
@@ -4388,7 +4388,7 @@ Variant i_fb_call_user_func_safe_return(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fb_call_user_func_safe_return(count, arg0, arg1));
     return (f_fb_call_user_func_safe_return(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -4401,7 +4401,7 @@ Variant i_magickwriteimagesfile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickwriteimagesfile(arg0, arg1));
   }
 }
@@ -4424,11 +4424,11 @@ Variant i_imageftbbox(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_imageftbbox(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imageftbbox(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -4485,7 +4485,7 @@ Variant i_magickedgeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickedgeimage(arg0, arg1));
   }
 }
@@ -4509,7 +4509,7 @@ Variant i_array_rand(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_array_rand(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_rand(arg0, arg1));
   }
 }
@@ -4521,8 +4521,8 @@ Variant i_ldap_mod_del(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_mod_del(arg0, arg1, arg2));
   }
 }
@@ -4534,9 +4534,9 @@ Variant i_range(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_range(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_range(arg0, arg1, arg2));
   }
 }
@@ -4548,13 +4548,13 @@ Variant i_levenshtein(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_levenshtein(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_levenshtein(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_levenshtein(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_levenshtein(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -4588,10 +4588,10 @@ Variant i_hash_hmac(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_hash_hmac(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_hmac(arg0, arg1, arg2, arg3));
   }
 }
@@ -4605,7 +4605,7 @@ Variant i_get_html_translation_table(CArrRef params) {
     if (count <= 0) return (f_get_html_translation_table());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_get_html_translation_table(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_get_html_translation_table(arg0, arg1));
   }
 }
@@ -4618,7 +4618,7 @@ Variant i_user_error(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_user_error(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_user_error(arg0, arg1));
   }
 }
@@ -4694,7 +4694,7 @@ Variant i_var_export(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_var_export(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_var_export(arg0, arg1));
   }
 }
@@ -4706,11 +4706,11 @@ Variant i_mb_strcut(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_strcut(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_strcut(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strcut(arg0, arg1, arg2, arg3));
   }
 }
@@ -4744,7 +4744,7 @@ Variant i_dom_text_split_text(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_text_split_text(arg0, arg1));
   }
 }
@@ -4756,11 +4756,11 @@ Variant i_openssl_pkey_export_to_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_openssl_pkey_export_to_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_openssl_pkey_export_to_file(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_pkey_export_to_file(arg0, arg1, arg2, arg3));
   }
 }
@@ -4783,9 +4783,9 @@ Variant i_imagecolorclosesthwb(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorclosesthwb(arg0, arg1, arg2, arg3));
   }
 }
@@ -4797,7 +4797,7 @@ Variant i_ldap_get_attributes(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_get_attributes(arg0, arg1));
   }
 }
@@ -4809,7 +4809,7 @@ Variant i_date_modify(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_modify(arg0, arg1), null);
   }
 }
@@ -4821,7 +4821,7 @@ Variant i_hphp_splfileinfo_setinfoclass(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileinfo_setinfoclass(arg0, arg1), null);
   }
 }
@@ -4856,7 +4856,7 @@ Variant i_pixelsetblue(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetblue(arg0, arg1), null);
   }
 }
@@ -4881,10 +4881,10 @@ Variant i_flock(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_flock(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_flock(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_flock(arg0, arg1, arg2));
   }
 }
 Variant i_hphp_splfileobject_ftell(CArrRef params) {
@@ -4917,7 +4917,7 @@ Variant i_magicksetformat(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetformat(arg0, arg1));
   }
 }
@@ -4929,7 +4929,7 @@ Variant i_array_map(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_map(count, arg0, arg1));
     return (f_array_map(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -4942,10 +4942,10 @@ Variant i_magicksharpenimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magicksharpenimage(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksharpenimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -4968,7 +4968,7 @@ Variant i_date_timezone_set(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_timezone_set(arg0, arg1), null);
   }
 }
@@ -4981,9 +4981,9 @@ Variant i_mb_ereg_search_init(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_ereg_search_init(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mb_ereg_search_init(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_ereg_search_init(arg0, arg1, arg2));
   }
 }
@@ -4995,10 +4995,10 @@ Variant i_drawcircle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawcircle(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -5022,7 +5022,7 @@ Variant i_image_type_to_extension(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_image_type_to_extension(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_image_type_to_extension(arg0, arg1));
   }
 }
@@ -5046,7 +5046,7 @@ Variant i_magicksetimagecompression(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagecompression(arg0, arg1));
   }
 }
@@ -5058,11 +5058,11 @@ Variant i_mcrypt_decrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_mcrypt_decrypt(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_decrypt(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -5085,8 +5085,8 @@ Variant i_natcasesort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_natcasesort(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_natcasesort(arg0));
   }
 }
 Variant i_intl_get_error_message(CArrRef params) {
@@ -5104,10 +5104,10 @@ Variant i_memcache_get(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_get(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_memcache_get(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_memcache_get(arg0, arg1, arg2));
   }
 }
 Variant i_array_chunk(CArrRef params) {
@@ -5118,9 +5118,9 @@ Variant i_array_chunk(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_chunk(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_chunk(arg0, arg1, arg2));
   }
 }
@@ -5133,10 +5133,10 @@ Variant i_collator_asort(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_collator_asort(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_collator_asort(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_collator_asort(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_collator_asort(arg0, arg1, arg2));
   }
 }
 Variant i_imagefilledpolygon(CArrRef params) {
@@ -5147,9 +5147,9 @@ Variant i_imagefilledpolygon(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefilledpolygon(arg0, arg1, arg2, arg3));
   }
 }
@@ -5206,9 +5206,9 @@ Variant i_touch(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_touch(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_touch(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_touch(arg0, arg1, arg2));
   }
 }
@@ -5231,7 +5231,7 @@ Variant i_magicksetimagebordercolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagebordercolor(arg0, arg1));
   }
 }
@@ -5254,10 +5254,10 @@ Variant i_magickspliceimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickspliceimage(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -5269,9 +5269,9 @@ Variant i_define(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_define(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_define(arg0, arg1, arg2));
   }
 }
@@ -5284,10 +5284,10 @@ Variant i_headers_sent(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     if (count <= 0) return (f_headers_sent());
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count == 1) return (f_headers_sent(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_headers_sent(ref(arg0), ref(arg1)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count == 1) return (f_headers_sent(arg0));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_headers_sent(arg0, arg1));
   }
 }
 Variant i_stream_context_get_options(CArrRef params) {
@@ -5310,9 +5310,9 @@ Variant i_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_file(arg0, arg1, arg2));
   }
 }
@@ -5325,11 +5325,11 @@ Variant i_memcache_get_extended_stats(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_memcache_get_extended_stats(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_memcache_get_extended_stats(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_memcache_get_extended_stats(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_get_extended_stats(arg0, arg1, arg2, arg3));
   }
 }
@@ -5341,7 +5341,7 @@ Variant i_hphp_crash_log(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_crash_log(arg0, arg1), null);
   }
 }
@@ -5353,10 +5353,10 @@ Variant i_imagecolorresolvealpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorresolvealpha(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -5368,9 +5368,9 @@ Variant i_strtr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_strtr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strtr(arg0, arg1, arg2));
   }
 }
@@ -5406,9 +5406,9 @@ Variant i_end_user_func_async(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_end_user_func_async(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_end_user_func_async(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_end_user_func_async(arg0, arg1, arg2));
   }
 }
@@ -5431,7 +5431,7 @@ Variant i_dom_node_lookup_prefix(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_lookup_prefix(arg0, arg1));
   }
 }
@@ -5443,7 +5443,7 @@ Variant i_time_nanosleep(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_time_nanosleep(arg0, arg1));
   }
 }
@@ -5455,7 +5455,7 @@ Variant i_magicksetimageunits(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageunits(arg0, arg1));
   }
 }
@@ -5478,8 +5478,8 @@ Variant i_array_pad(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_pad(arg0, arg1, arg2));
   }
 }
@@ -5514,7 +5514,7 @@ Variant i_highlight_string(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_highlight_string(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_highlight_string(arg0, arg1));
   }
 }
@@ -5526,7 +5526,7 @@ Variant i_hphp_invoke(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_invoke(arg0, arg1));
   }
 }
@@ -5549,7 +5549,7 @@ Variant i_xmlwriter_start_element(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_element(arg0, arg1));
   }
 }
@@ -5569,12 +5569,12 @@ Variant i_exif_thumbnail(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_exif_thumbnail(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 2) return (f_exif_thumbnail(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_exif_thumbnail(arg0, ref(arg1), ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_exif_thumbnail(arg0, ref(arg1), ref(arg2), ref(arg3)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_exif_thumbnail(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_exif_thumbnail(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_exif_thumbnail(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_collator_get_error_message(CArrRef params) {
@@ -5619,12 +5619,12 @@ Variant i_substr_compare(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_substr_compare(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_substr_compare(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_substr_compare(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -5637,7 +5637,7 @@ Variant i_xbox_post_message(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_xbox_post_message(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xbox_post_message(arg0, arg1));
   }
 }
@@ -5649,7 +5649,7 @@ Variant i_fb_rename_function(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fb_rename_function(arg0, arg1));
   }
 }
@@ -5661,11 +5661,11 @@ Variant i_array_walk_recursive(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 2) return (f_array_walk_recursive(ref(arg0), arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_array_walk_recursive(ref(arg0), arg1, arg2));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_array_walk_recursive(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_array_walk_recursive(arg0, arg1, arg2));
   }
 }
 Variant i_mysql_list_processes(CArrRef params) {
@@ -5688,11 +5688,11 @@ Variant i_imagedashedline(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagedashedline(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -5721,9 +5721,9 @@ Variant i_mb_substr_count(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_substr_count(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_substr_count(arg0, arg1, arg2));
   }
 }
@@ -5746,10 +5746,10 @@ Variant i_magickgettextdescent(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgettextdescent(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgettextdescent(arg0, arg1, arg2, arg3));
   }
 }
@@ -5761,7 +5761,7 @@ Variant i_drawsetstrokealpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokealpha(arg0, arg1), null);
   }
 }
@@ -5774,7 +5774,7 @@ Variant i_apc_delete_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_delete_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_delete_file(arg0, arg1));
   }
 }
@@ -5786,9 +5786,9 @@ Variant i_strrpos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_strrpos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strrpos(arg0, arg1, arg2));
   }
 }
@@ -5800,7 +5800,7 @@ Variant i_array_diff_assoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_diff_assoc(count, arg0, arg1));
     return (f_array_diff_assoc(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -5813,8 +5813,8 @@ Variant i_magickclippathimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickclippathimage(arg0, arg1, arg2));
   }
 }
@@ -5826,9 +5826,9 @@ Variant i_xmlwriter_write_element(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_xmlwriter_write_element(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_element(arg0, arg1, arg2));
   }
 }
@@ -5840,7 +5840,7 @@ Variant i_dom_document_schema_validate_xml(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_schema_validate_xml(arg0, arg1));
   }
 }
@@ -5864,10 +5864,10 @@ Variant i_ereg(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_ereg(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_ereg(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_ereg(arg0, arg1, arg2));
   }
 }
 Variant i_curl_multi_info_read(CArrRef params) {
@@ -5880,8 +5880,8 @@ Variant i_curl_multi_info_read(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_curl_multi_info_read(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_curl_multi_info_read(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_curl_multi_info_read(arg0, arg1));
   }
 }
 Variant i_magickthresholdimage(CArrRef params) {
@@ -5892,9 +5892,9 @@ Variant i_magickthresholdimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_magickthresholdimage(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickthresholdimage(arg0, arg1, arg2));
   }
 }
@@ -5918,7 +5918,7 @@ Variant i_mb_strlen(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_strlen(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strlen(arg0, arg1));
   }
 }
@@ -5941,13 +5941,13 @@ Variant i_imagecopy(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecopy(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -5959,7 +5959,7 @@ Variant i_pixelsetcolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetcolor(arg0, arg1), null);
   }
 }
@@ -5988,10 +5988,10 @@ Variant i_mb_ereg_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_mb_ereg_replace(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_ereg_replace(arg0, arg1, arg2, arg3));
   }
 }
@@ -6014,9 +6014,9 @@ Variant i_magickfximage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_magickfximage(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickfximage(arg0, arg1, arg2));
   }
 }
@@ -6034,9 +6034,9 @@ Variant i_hash(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_hash(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash(arg0, arg1, arg2));
   }
 }
@@ -6048,9 +6048,9 @@ Variant i_uasort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_uasort(ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_uasort(arg0, arg1));
   }
 }
 Variant i_pixelgetalpha(CArrRef params) {
@@ -6072,7 +6072,7 @@ Variant i_drawsettextencoding(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsettextencoding(arg0, arg1), null);
   }
 }
@@ -6090,7 +6090,7 @@ Variant i_is_subclass_of(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_is_subclass_of(arg0, arg1));
   }
 }
@@ -6113,7 +6113,7 @@ Variant i_hphp_get_static_property(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_get_static_property(arg0, arg1));
   }
 }
@@ -6125,8 +6125,8 @@ Variant i_array_pop(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_array_pop(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_array_pop(arg0));
   }
 }
 Variant i_magickgetimagecolors(CArrRef params) {
@@ -6161,7 +6161,7 @@ Variant i_class_exists(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_class_exists(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_class_exists(arg0, arg1));
   }
 }
@@ -6190,7 +6190,7 @@ Variant i_imagecolordeallocate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolordeallocate(arg0, arg1));
   }
 }
@@ -6208,8 +6208,8 @@ Variant i_drawpathlinetoabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathlinetoabsolute(arg0, arg1, arg2), null);
   }
 }
@@ -6233,9 +6233,9 @@ Variant i_json_decode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_json_decode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_json_decode(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_json_decode(arg0, arg1, arg2));
   }
 }
@@ -6248,13 +6248,13 @@ Variant i_preg_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_preg_replace(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_preg_replace(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_preg_replace(arg0, arg1, arg2, arg3, ref(arg4)));
+    CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_preg_replace(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_hphp_splfileinfo_getmtime(CArrRef params) {
@@ -6276,7 +6276,7 @@ Variant i_fmod(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fmod(arg0, arg1));
   }
 }
@@ -6300,9 +6300,9 @@ Variant i_pagelet_server_task_start(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_pagelet_server_task_start(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_pagelet_server_task_start(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pagelet_server_task_start(arg0, arg1, arg2));
   }
 }
@@ -6315,9 +6315,9 @@ Variant i_hash_init(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_hash_init(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_hash_init(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_init(arg0, arg1, arg2));
   }
 }
@@ -6329,11 +6329,11 @@ Variant i_mb_strripos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_strripos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_strripos(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strripos(arg0, arg1, arg2, arg3));
   }
 }
@@ -6356,9 +6356,9 @@ Variant i_hphp_splfileobject_setcsvcontrol(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_setcsvcontrol(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -6398,8 +6398,8 @@ Variant i_magickcharcoalimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcharcoalimage(arg0, arg1, arg2));
   }
 }
@@ -6412,9 +6412,9 @@ Variant i_scandir(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_scandir(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_scandir(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_scandir(arg0, arg1, arg2));
   }
 }
@@ -6448,7 +6448,7 @@ Variant i_drawsetfontweight(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfontweight(arg0, arg1), null);
   }
 }
@@ -6472,8 +6472,8 @@ Variant i_collator_sort_with_sort_keys(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_collator_sort_with_sort_keys(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_collator_sort_with_sort_keys(arg0, arg1));
   }
 }
 Variant i_socket_shutdown(CArrRef params) {
@@ -6485,7 +6485,7 @@ Variant i_socket_shutdown(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_socket_shutdown(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_shutdown(arg0, arg1));
   }
 }
@@ -6498,7 +6498,7 @@ Variant i_mcrypt_create_iv(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_create_iv(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_create_iv(arg0, arg1));
   }
 }
@@ -6576,11 +6576,11 @@ Variant i_magickannotateimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickannotateimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -6599,13 +6599,13 @@ Variant i_session_set_cookie_params(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_session_set_cookie_params(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_session_set_cookie_params(arg0, arg1), null);
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_session_set_cookie_params(arg0, arg1, arg2), null);
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_session_set_cookie_params(arg0, arg1, arg2, arg3), null);
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_session_set_cookie_params(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -6623,12 +6623,12 @@ Variant i_drawellipse(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawellipse(arg0, arg1, arg2, arg3, arg4, arg5, arg6), null);
   }
 }
@@ -6640,11 +6640,11 @@ Variant i_xmlwriter_write_element_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_xmlwriter_write_element_ns(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_element_ns(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -6656,7 +6656,7 @@ Variant i_magicksetcompressionquality(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetcompressionquality(arg0, arg1));
   }
 }
@@ -6668,7 +6668,7 @@ Variant i_magickaddnoiseimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickaddnoiseimage(arg0, arg1));
   }
 }
@@ -6691,7 +6691,7 @@ Variant i_magickseparateimagechannel(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickseparateimagechannel(arg0, arg1));
   }
 }
@@ -6703,9 +6703,9 @@ Variant i_array_push(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 2) return (f_array_push(count, ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_array_push(count, arg0, arg1));
     return (f_array_push(count,ref(arg0), arg1, params.slice(2, count - 2, false)));
   }
 }
@@ -6729,9 +6729,9 @@ Variant i_uksort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_uksort(ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_uksort(arg0, arg1));
   }
 }
 Variant i_mysql_set_timeout(CArrRef params) {
@@ -6744,7 +6744,7 @@ Variant i_mysql_set_timeout(CArrRef params) {
     if (count <= 0) return (f_mysql_set_timeout());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mysql_set_timeout(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_set_timeout(arg0, arg1));
   }
 }
@@ -6756,9 +6756,9 @@ Variant i_hash_update_stream(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_hash_update_stream(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_update_stream(arg0, arg1, arg2));
   }
 }
@@ -6772,9 +6772,9 @@ Variant i_ob_start(CArrRef params) {
     if (count <= 0) return (f_ob_start());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_ob_start(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_ob_start(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ob_start(arg0, arg1, arg2));
   }
 }
@@ -6821,7 +6821,7 @@ Variant i_ldap_next_reference(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_next_reference(arg0, arg1));
   }
 }
@@ -6845,7 +6845,7 @@ Variant i_checkdnsrr(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_checkdnsrr(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_checkdnsrr(arg0, arg1));
   }
 }
@@ -6857,10 +6857,10 @@ Variant i_openssl_verify(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_openssl_verify(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_verify(arg0, arg1, arg2, arg3));
   }
 }
@@ -6933,7 +6933,7 @@ Variant i_imagelayereffect(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagelayereffect(arg0, arg1));
   }
 }
@@ -6952,7 +6952,7 @@ Variant i_glob(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_glob(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_glob(arg0, arg1));
   }
 }
@@ -6966,10 +6966,10 @@ Variant i_exec(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_exec(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 2) return (f_exec(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_exec(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_exec(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_exec(arg0, arg1, arg2));
   }
 }
 Variant i_apd_continue(CArrRef params) {
@@ -6987,7 +6987,7 @@ Variant i_magickgetimagedepth(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_magickgetimagedepth(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetimagedepth(arg0, arg1));
   }
 }
@@ -7022,11 +7022,11 @@ Variant i_mb_strpos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_strpos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_strpos(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strpos(arg0, arg1, arg2, arg3));
   }
 }
@@ -7038,8 +7038,8 @@ Variant i_xmlwriter_write_dtd_attlist(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_dtd_attlist(arg0, arg1, arg2));
   }
 }
@@ -7051,8 +7051,8 @@ Variant i_xml_set_element_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_element_handler(arg0, arg1, arg2));
   }
 }
@@ -7075,7 +7075,7 @@ Variant i_ldap_get_entries(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_get_entries(arg0, arg1));
   }
 }
@@ -7087,7 +7087,7 @@ Variant i_ob_iconv_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ob_iconv_handler(arg0, arg1));
   }
 }
@@ -7111,7 +7111,7 @@ Variant i_pathinfo(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_pathinfo(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pathinfo(arg0, arg1));
   }
 }
@@ -7123,7 +7123,7 @@ Variant i_magickaffinetransformimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickaffinetransformimage(arg0, arg1));
   }
 }
@@ -7136,11 +7136,11 @@ Variant i_fb_stubout_intercept_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_fb_stubout_intercept_handler(arg0, arg1, arg2, arg3, ref(arg4)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_fb_stubout_intercept_handler(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_ob_get_status(CArrRef params) {
@@ -7210,9 +7210,9 @@ Variant i_ldap_bind(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_ldap_bind(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_ldap_bind(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_bind(arg0, arg1, arg2));
   }
 }
@@ -7224,7 +7224,7 @@ Variant i_pixelsetbluequantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetbluequantum(arg0, arg1), null);
   }
 }
@@ -7236,7 +7236,7 @@ Variant i_magickreadimagefile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickreadimagefile(arg0, arg1));
   }
 }
@@ -7271,7 +7271,7 @@ Variant i_mysql_real_escape_string(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_real_escape_string(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_real_escape_string(arg0, arg1));
   }
 }
@@ -7283,11 +7283,11 @@ Variant i_magickframeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickframeimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -7310,9 +7310,9 @@ Variant i_imagefill(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefill(arg0, arg1, arg2, arg3));
   }
 }
@@ -7324,9 +7324,9 @@ Variant i_hphp_set_property(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_set_property(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -7339,7 +7339,7 @@ Variant i_readgzfile(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_readgzfile(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_readgzfile(arg0, arg1));
   }
 }
@@ -7351,12 +7351,12 @@ Variant i_memcache_set(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_memcache_set(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_memcache_set(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_set(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -7368,8 +7368,8 @@ Variant i_magicksampleimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksampleimage(arg0, arg1, arg2));
   }
 }
@@ -7394,8 +7394,8 @@ Variant i_idn_to_utf8(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_idn_to_utf8(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_idn_to_utf8(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_idn_to_utf8(arg0, arg1));
   }
 }
 Variant i_sql_regcase(CArrRef params) {
@@ -7417,9 +7417,9 @@ Variant i_in_array(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_in_array(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_in_array(arg0, arg1, arg2));
   }
 }
@@ -7431,10 +7431,10 @@ Variant i_drawpathcurvetoquadraticbezierabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetoquadraticbezierabsolute(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -7447,7 +7447,7 @@ Variant i_apache_getenv(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apache_getenv(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apache_getenv(arg0, arg1));
   }
 }
@@ -7459,9 +7459,9 @@ Variant i_socket_set_timeout(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_socket_set_timeout(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_set_timeout(arg0, arg1, arg2));
   }
 }
@@ -7501,7 +7501,7 @@ Variant i_set_file_buffer(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_set_file_buffer(arg0, arg1));
   }
 }
@@ -7513,8 +7513,8 @@ Variant i_magicksetimageredprimary(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageredprimary(arg0, arg1, arg2));
   }
 }
@@ -7537,7 +7537,7 @@ Variant i_ftok(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ftok(arg0, arg1));
   }
 }
@@ -7549,9 +7549,9 @@ Variant i_mysql_list_fields(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mysql_list_fields(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_list_fields(arg0, arg1, arg2));
   }
 }
@@ -7563,7 +7563,7 @@ Variant i_stream_wrapper_register(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_wrapper_register(arg0, arg1));
   }
 }
@@ -7575,7 +7575,7 @@ Variant i_pixelsetredquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetredquantum(arg0, arg1), null);
   }
 }
@@ -7593,9 +7593,9 @@ Variant i_magickgammaimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_magickgammaimage(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgammaimage(arg0, arg1, arg2));
   }
 }
@@ -7607,7 +7607,7 @@ Variant i_pixelsetcyan(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetcyan(arg0, arg1), null);
   }
 }
@@ -7630,7 +7630,7 @@ Variant i_key_exists(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_key_exists(arg0, arg1));
   }
 }
@@ -7643,11 +7643,11 @@ Variant i_htmlentities(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_htmlentities(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_htmlentities(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_htmlentities(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_htmlentities(arg0, arg1, arg2, arg3));
   }
 }
@@ -7670,11 +7670,11 @@ Variant i_xmlwriter_start_dtd(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_xmlwriter_start_dtd(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_xmlwriter_start_dtd(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_dtd(arg0, arg1, arg2, arg3));
   }
 }
@@ -7716,17 +7716,17 @@ Variant i_mysql_pconnect_with_db(CArrRef params) {
     if (count <= 0) return (f_mysql_pconnect_with_db());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mysql_pconnect_with_db(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mysql_pconnect_with_db(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mysql_pconnect_with_db(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mysql_pconnect_with_db(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_mysql_pconnect_with_db(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_mysql_pconnect_with_db(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_pconnect_with_db(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -7738,7 +7738,7 @@ Variant i_imagepsslantfont(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepsslantfont(arg0, arg1));
   }
 }
@@ -7761,11 +7761,11 @@ Variant i_mb_strstr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_strstr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_strstr(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strstr(arg0, arg1, arg2, arg3));
   }
 }
@@ -7789,7 +7789,7 @@ Variant i_mysql_field_table(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_field_table(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_field_table(arg0, arg1));
   }
 }
@@ -7801,7 +7801,7 @@ Variant i_magicksetimagescene(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagescene(arg0, arg1));
   }
 }
@@ -7824,7 +7824,7 @@ Variant i_setlocale(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_setlocale(count, arg0, arg1));
     return (f_setlocale(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -7837,7 +7837,7 @@ Variant i_drawpushclippath(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpushclippath(arg0, arg1), null);
   }
 }
@@ -7882,7 +7882,7 @@ Variant i_drawsetfillopacity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfillopacity(arg0, arg1), null);
   }
 }
@@ -7907,17 +7907,17 @@ Variant i_setrawcookie(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_setrawcookie(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_setrawcookie(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_setrawcookie(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_setrawcookie(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_setrawcookie(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_setrawcookie(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_setrawcookie(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -7930,9 +7930,9 @@ Variant i_evhttp_get(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_evhttp_get(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_evhttp_get(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_evhttp_get(arg0, arg1, arg2));
   }
 }
@@ -7946,8 +7946,8 @@ Variant i_getimagesize(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_getimagesize(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_getimagesize(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_getimagesize(arg0, arg1));
   }
 }
 Variant i_ldap_modify(CArrRef params) {
@@ -7958,8 +7958,8 @@ Variant i_ldap_modify(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_modify(arg0, arg1, arg2));
   }
 }
@@ -7971,18 +7971,18 @@ Variant i_ldap_search(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_ldap_search(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_ldap_search(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_ldap_search(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_ldap_search(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 7) return (f_ldap_search(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_search(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -7994,7 +7994,7 @@ Variant i_strcasecmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strcasecmp(arg0, arg1));
   }
 }
@@ -8028,11 +8028,11 @@ Variant i_fopen(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fopen(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_fopen(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fopen(arg0, arg1, arg2, arg3));
   }
 }
@@ -8111,7 +8111,7 @@ Variant i_mailparse_msg_parse(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mailparse_msg_parse(arg0, arg1));
   }
 }
@@ -8123,7 +8123,7 @@ Variant i_xmlwriter_text(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_text(arg0, arg1));
   }
 }
@@ -8135,7 +8135,7 @@ Variant i_pixelsetindex(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetindex(arg0, arg1), null);
   }
 }
@@ -8176,7 +8176,7 @@ Variant i_dom_xpath_register_php_functions(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_dom_xpath_register_php_functions(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_xpath_register_php_functions(arg0, arg1));
   }
 }
@@ -8188,8 +8188,8 @@ Variant i_magicksteganoimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksteganoimage(arg0, arg1, arg2));
   }
 }
@@ -8245,7 +8245,7 @@ Variant i_call_user_func_array(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_call_user_func_array(arg0, arg1));
   }
 }
@@ -8263,9 +8263,9 @@ Variant i_memcache_set_compress_threshold(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_set_compress_threshold(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_set_compress_threshold(arg0, arg1, arg2));
   }
 }
@@ -8277,9 +8277,9 @@ Variant i_dom_element_set_id_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_set_id_attribute_ns(arg0, arg1, arg2, arg3));
   }
 }
@@ -8302,8 +8302,8 @@ Variant i_array_shift(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_array_shift(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_array_shift(arg0));
   }
 }
 Variant i_magicksetimageformat(CArrRef params) {
@@ -8314,7 +8314,7 @@ Variant i_magicksetimageformat(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageformat(arg0, arg1));
   }
 }
@@ -8332,7 +8332,7 @@ Variant i_drawsetstrokemiterlimit(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokemiterlimit(arg0, arg1), null);
   }
 }
@@ -8345,9 +8345,9 @@ Variant i_mb_convert_kana(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_convert_kana(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mb_convert_kana(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_convert_kana(arg0, arg1, arg2));
   }
 }
@@ -8371,7 +8371,7 @@ Variant i_preg_quote(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_preg_quote(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_preg_quote(arg0, arg1));
   }
 }
@@ -8389,9 +8389,9 @@ Variant i_magickconvolveimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_magickconvolveimage(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickconvolveimage(arg0, arg1, arg2));
   }
 }
@@ -8404,7 +8404,7 @@ Variant i_curl_getinfo(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_curl_getinfo(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_curl_getinfo(arg0, arg1));
   }
 }
@@ -8418,14 +8418,14 @@ Variant i_pfsockopen(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_pfsockopen(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_pfsockopen(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_pfsockopen(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 4) return (f_pfsockopen(arg0, arg1, ref(arg2), ref(arg3)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_pfsockopen(arg0, arg1, ref(arg2), ref(arg3), arg4));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_pfsockopen(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_pfsockopen(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_pfsockopen(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_dom_element_get_elements_by_tag_name_ns(CArrRef params) {
@@ -8436,8 +8436,8 @@ Variant i_dom_element_get_elements_by_tag_name_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_get_elements_by_tag_name_ns(arg0, arg1, arg2));
   }
 }
@@ -8493,9 +8493,9 @@ Variant i_socket_write(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_socket_write(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_write(arg0, arg1, arg2));
   }
 }
@@ -8507,7 +8507,7 @@ Variant i_forward_static_call_array(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_forward_static_call_array(arg0, arg1));
   }
 }
@@ -8519,7 +8519,7 @@ Variant i_stream_bucket_new(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_bucket_new(arg0, arg1));
   }
 }
@@ -8548,7 +8548,7 @@ Variant i_array_diff_key(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_diff_key(count, arg0, arg1));
     return (f_array_diff_key(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -8567,7 +8567,7 @@ Variant i_fread(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fread(arg0, arg1));
   }
 }
@@ -8579,8 +8579,8 @@ Variant i_override_function(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_override_function(arg0, arg1, arg2));
   }
 }
@@ -8603,7 +8603,7 @@ Variant i_pixelsetred(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetred(arg0, arg1), null);
   }
 }
@@ -8626,7 +8626,7 @@ Variant i_drawsetvectorgraphics(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetvectorgraphics(arg0, arg1));
   }
 }
@@ -8666,7 +8666,7 @@ Variant i_popen(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_popen(arg0, arg1));
   }
 }
@@ -8678,7 +8678,7 @@ Variant i_ldap_next_entry(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_next_entry(arg0, arg1));
   }
 }
@@ -8713,7 +8713,7 @@ Variant i_magickdrawimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickdrawimage(arg0, arg1));
   }
 }
@@ -8725,11 +8725,11 @@ Variant i_mcrypt_cbc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_mcrypt_cbc(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_cbc(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -8741,11 +8741,11 @@ Variant i_session_set_save_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_session_set_save_handler(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -8757,7 +8757,7 @@ Variant i_dom_element_get_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_get_attribute(arg0, arg1));
   }
 }
@@ -8769,7 +8769,7 @@ Variant i_imagecreatetruecolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecreatetruecolor(arg0, arg1));
   }
 }
@@ -8803,7 +8803,7 @@ Variant i_magickreadimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickreadimage(arg0, arg1));
   }
 }
@@ -8815,7 +8815,7 @@ Variant i_dom_node_is_default_namespace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_is_default_namespace(arg0, arg1));
   }
 }
@@ -8839,11 +8839,11 @@ Variant i_mcrypt_cfb(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_mcrypt_cfb(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_cfb(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -8911,7 +8911,7 @@ Variant i_hphp_directoryiterator_seek(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_directoryiterator_seek(arg0, arg1), null);
   }
 }
@@ -8923,8 +8923,8 @@ Variant i_ldap_get_values(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_get_values(arg0, arg1, arg2));
   }
 }
@@ -8947,7 +8947,7 @@ Variant i_magickgetimagechannelmean(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetimagechannelmean(arg0, arg1));
   }
 }
@@ -8971,7 +8971,7 @@ Variant i_imagegd(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagegd(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagegd(arg0, arg1));
   }
 }
@@ -8983,7 +8983,7 @@ Variant i_socket_set_blocking(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_set_blocking(arg0, arg1));
   }
 }
@@ -8995,7 +8995,7 @@ Variant i_dom_element_get_elements_by_tag_name(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_get_elements_by_tag_name(arg0, arg1));
   }
 }
@@ -9007,11 +9007,11 @@ Variant i_posix_mknod(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_posix_mknod(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_posix_mknod(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_posix_mknod(arg0, arg1, arg2, arg3));
   }
 }
@@ -9023,11 +9023,11 @@ Variant i_apc_define_constants(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_apc_define_constants(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_apc_define_constants(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_define_constants(arg0, arg1, arg2, arg3));
   }
 }
@@ -9039,7 +9039,7 @@ Variant i_posix_kill(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_posix_kill(arg0, arg1));
   }
 }
@@ -9063,7 +9063,7 @@ Variant i_mcrypt_get_block_size(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_get_block_size(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_get_block_size(arg0, arg1));
   }
 }
@@ -9075,7 +9075,7 @@ Variant i_magickmorphimages(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickmorphimages(arg0, arg1));
   }
 }
@@ -9093,11 +9093,11 @@ Variant i_magickquantizeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickquantizeimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -9109,7 +9109,7 @@ Variant i_imagesavealpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagesavealpha(arg0, arg1));
   }
 }
@@ -9121,7 +9121,7 @@ Variant i_drawsetfontfamily(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfontfamily(arg0, arg1));
   }
 }
@@ -9134,7 +9134,7 @@ Variant i_drawsettextantialias(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_drawsettextantialias(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsettextantialias(arg0, arg1), null);
   }
 }
@@ -9146,7 +9146,7 @@ Variant i_pixelsetgreenquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetgreenquantum(arg0, arg1), null);
   }
 }
@@ -9159,7 +9159,7 @@ Variant i_bcsqrt(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_bcsqrt(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcsqrt(arg0, arg1));
   }
 }
@@ -9171,9 +9171,9 @@ Variant i_pcntl_signal(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_pcntl_signal(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pcntl_signal(arg0, arg1, arg2));
   }
 }
@@ -9185,11 +9185,11 @@ Variant i_mcrypt_ecb(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_mcrypt_ecb(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_ecb(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -9201,7 +9201,7 @@ Variant i_pixelsetcyanquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetcyanquantum(arg0, arg1), null);
   }
 }
@@ -9213,11 +9213,11 @@ Variant i_array_walk(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 2) return (f_array_walk(ref(arg0), arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_array_walk(ref(arg0), arg1, arg2));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_array_walk(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_array_walk(arg0, arg1, arg2));
   }
 }
 Variant i_getmxrr(CArrRef params) {
@@ -9229,10 +9229,10 @@ Variant i_getmxrr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_getmxrr(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_getmxrr(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_getmxrr(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_getmxrr(arg0, arg1, arg2));
   }
 }
 Variant i_magickqueryfonts(CArrRef params) {
@@ -9265,8 +9265,8 @@ Variant i_dom_element_get_attribute_node_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_get_attribute_node_ns(arg0, arg1, arg2));
   }
 }
@@ -9279,8 +9279,8 @@ Variant i_xml_set_object(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_xml_set_object(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_xml_set_object(arg0, arg1));
   }
 }
 Variant i_ctype_print(CArrRef params) {
@@ -9302,9 +9302,9 @@ Variant i_gzwrite(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_gzwrite(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzwrite(arg0, arg1, arg2));
   }
 }
@@ -9327,7 +9327,7 @@ Variant i_magickaddimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickaddimage(arg0, arg1));
   }
 }
@@ -9345,7 +9345,7 @@ Variant i_chgrp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_chgrp(arg0, arg1));
   }
 }
@@ -9368,8 +9368,8 @@ Variant i_reset(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_reset(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_reset(arg0));
   }
 }
 Variant i_set_include_path(CArrRef params) {
@@ -9403,10 +9403,10 @@ Variant i_openssl_x509_export(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_openssl_x509_export(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_x509_export(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_openssl_x509_export(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_x509_export(arg0, arg1, arg2));
   }
 }
 Variant i_magickcolorizeimage(CArrRef params) {
@@ -9417,8 +9417,8 @@ Variant i_magickcolorizeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcolorizeimage(arg0, arg1, arg2));
   }
 }
@@ -9430,13 +9430,13 @@ Variant i_imagettftext(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagettftext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -9448,11 +9448,11 @@ Variant i_mb_strrchr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_strrchr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_strrchr(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strrchr(arg0, arg1, arg2, arg3));
   }
 }
@@ -9464,7 +9464,7 @@ Variant i_magickgetimageprofile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetimageprofile(arg0, arg1));
   }
 }
@@ -9476,11 +9476,11 @@ Variant i_file_put_contents(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_file_put_contents(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_file_put_contents(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_file_put_contents(arg0, arg1, arg2, arg3));
   }
 }
@@ -9492,9 +9492,9 @@ Variant i_iconv_mime_encode(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_iconv_mime_encode(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_mime_encode(arg0, arg1, arg2));
   }
 }
@@ -9517,9 +9517,9 @@ Variant i_fwrite(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fwrite(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fwrite(arg0, arg1, arg2));
   }
 }
@@ -9531,7 +9531,7 @@ Variant i_atan2(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_atan2(arg0, arg1));
   }
 }
@@ -9543,7 +9543,7 @@ Variant i_is_a(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_is_a(arg0, arg1));
   }
 }
@@ -9556,7 +9556,7 @@ Variant i_idate(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_idate(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_idate(arg0, arg1));
   }
 }
@@ -9568,7 +9568,7 @@ Variant i_posix_initgroups(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_posix_initgroups(arg0, arg1));
   }
 }
@@ -9580,12 +9580,12 @@ Variant i_arsort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_arsort(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 2) return (f_arsort(ref(arg0), arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_arsort(ref(arg0), arg1, arg2));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_arsort(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_arsort(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_arsort(arg0, arg1, arg2));
   }
 }
 Variant i_dom_characterdata_substring_data(CArrRef params) {
@@ -9596,8 +9596,8 @@ Variant i_dom_characterdata_substring_data(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_characterdata_substring_data(arg0, arg1, arg2));
   }
 }
@@ -9621,7 +9621,7 @@ Variant i_apc_delete(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_delete(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_delete(arg0, arg1));
   }
 }
@@ -9633,11 +9633,11 @@ Variant i_magicklevelimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_magicklevelimage(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicklevelimage(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -9650,7 +9650,7 @@ Variant i_openssl_x509_parse(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_openssl_x509_parse(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_x509_parse(arg0, arg1));
   }
 }
@@ -9662,7 +9662,7 @@ Variant i_dom_nodelist_item(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_nodelist_item(arg0, arg1));
   }
 }
@@ -9674,7 +9674,7 @@ Variant i_magickcommentimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcommentimage(arg0, arg1));
   }
 }
@@ -9697,7 +9697,7 @@ Variant i_magicksetimagedelay(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagedelay(arg0, arg1));
   }
 }
@@ -9709,8 +9709,8 @@ Variant i_magickposterizeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickposterizeimage(arg0, arg1, arg2));
   }
 }
@@ -9722,7 +9722,7 @@ Variant i_dom_namednodemap_get_named_item(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_namednodemap_get_named_item(arg0, arg1));
   }
 }
@@ -9734,8 +9734,8 @@ Variant i_dom_element_get_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_get_attribute_ns(arg0, arg1, arg2));
   }
 }
@@ -9749,10 +9749,10 @@ Variant i_stream_socket_accept(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_stream_socket_accept(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_stream_socket_accept(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_stream_socket_accept(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_stream_socket_accept(arg0, arg1, arg2));
   }
 }
 Variant i_magickqueryconfigureoption(CArrRef params) {
@@ -9774,10 +9774,10 @@ Variant i_magickevaluateimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickevaluateimage(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickevaluateimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -9818,15 +9818,15 @@ Variant i_fb_crossall_query(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_fb_crossall_query(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_fb_crossall_query(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_fb_crossall_query(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_fb_crossall_query(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_fb_crossall_query(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fb_crossall_query(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -9838,9 +9838,9 @@ Variant i_fseek(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fseek(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fseek(arg0, arg1, arg2));
   }
 }
@@ -9852,7 +9852,7 @@ Variant i_call_user_func_array_async(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_call_user_func_array_async(arg0, arg1));
   }
 }
@@ -9865,9 +9865,9 @@ Variant i_apc_compile_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_compile_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_apc_compile_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_compile_file(arg0, arg1, arg2));
   }
 }
@@ -9879,17 +9879,17 @@ Variant i_memcache_set_server_params(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_set_server_params(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_memcache_set_server_params(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_memcache_set_server_params(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_memcache_set_server_params(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_memcache_set_server_params(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_set_server_params(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -9901,7 +9901,7 @@ Variant i_magicksetpassphrase(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetpassphrase(arg0, arg1));
   }
 }
@@ -9936,8 +9936,8 @@ Variant i_magickrotateimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickrotateimage(arg0, arg1, arg2));
   }
 }
@@ -9950,11 +9950,11 @@ Variant i_fgetcsv(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_fgetcsv(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_fgetcsv(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_fgetcsv(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fgetcsv(arg0, arg1, arg2, arg3));
   }
 }
@@ -9966,11 +9966,11 @@ Variant i_magickcolorfloodfillimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcolorfloodfillimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -9993,15 +9993,15 @@ Variant i_imagecopyresized(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg9((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg9((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecopyresized(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
   }
 }
@@ -10024,7 +10024,7 @@ Variant i_magickblackthresholdimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickblackthresholdimage(arg0, arg1));
   }
 }
@@ -10036,11 +10036,11 @@ Variant i_mcrypt_encrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_mcrypt_encrypt(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_encrypt(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -10052,8 +10052,8 @@ Variant i_magicksetimagegreenprimary(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagegreenprimary(arg0, arg1, arg2));
   }
 }
@@ -10065,9 +10065,9 @@ Variant i_xmlwriter_start_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_attribute_ns(arg0, arg1, arg2, arg3));
   }
 }
@@ -10108,8 +10108,8 @@ Variant i_array_uintersect(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_uintersect(count, arg0, arg1, arg2));
     return (f_array_uintersect(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -10122,7 +10122,7 @@ Variant i_xml_set_unparsed_entity_decl_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_unparsed_entity_decl_handler(arg0, arg1));
   }
 }
@@ -10151,13 +10151,13 @@ Variant i_stream_select(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 4) return (f_stream_select(ref(arg0), ref(arg1), ref(arg2), arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_stream_select(ref(arg0), ref(arg1), ref(arg2), arg3, arg4));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 4) return (f_stream_select(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_stream_select(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_get_resource_type(CArrRef params) {
@@ -10207,8 +10207,8 @@ Variant i_dom_document_create_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_attribute_ns(arg0, arg1, arg2));
   }
 }
@@ -10220,7 +10220,7 @@ Variant i_drawsetfillalpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfillalpha(arg0, arg1), null);
   }
 }
@@ -10232,9 +10232,9 @@ Variant i_mb_convert_encoding(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_convert_encoding(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_convert_encoding(arg0, arg1, arg2));
   }
 }
@@ -10258,15 +10258,15 @@ Variant i_proc_open(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 3) return (f_proc_open(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 4) return (f_proc_open(arg0, arg1, ref(arg2), arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 5) return (f_proc_open(arg0, arg1, ref(arg2), arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_proc_open(arg0, arg1, ref(arg2), arg3, arg4, arg5));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_proc_open(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_proc_open(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 5) return (f_proc_open(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_proc_open(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
 Variant i_hphp_splfileobject_fgetss(CArrRef params) {
@@ -10277,7 +10277,7 @@ Variant i_hphp_splfileobject_fgetss(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_fgetss(arg0, arg1));
   }
 }
@@ -10302,12 +10302,12 @@ Variant i_socket_server(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_socket_server(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_socket_server(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_socket_server(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_socket_server(arg0, arg1, ref(arg2), ref(arg3)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_socket_server(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_socket_server(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_magickremoveimageprofile(CArrRef params) {
@@ -10318,7 +10318,7 @@ Variant i_magickremoveimageprofile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickremoveimageprofile(arg0, arg1));
   }
 }
@@ -10330,8 +10330,8 @@ Variant i_xmlwriter_write_dtd_element(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_dtd_element(arg0, arg1, arg2));
   }
 }
@@ -10355,9 +10355,9 @@ Variant i_image2wbmp(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_image2wbmp(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_image2wbmp(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_image2wbmp(arg0, arg1, arg2));
   }
 }
@@ -10370,7 +10370,7 @@ Variant i_join(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_join(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_join(arg0, arg1));
   }
 }
@@ -10382,7 +10382,7 @@ Variant i_magicksetimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimage(arg0, arg1));
   }
 }
@@ -10405,9 +10405,9 @@ Variant i_preg_grep(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_preg_grep(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_preg_grep(arg0, arg1, arg2));
   }
 }
@@ -10430,8 +10430,8 @@ Variant i_stream_socket_pair(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_socket_pair(arg0, arg1, arg2));
   }
 }
@@ -10450,7 +10450,7 @@ Variant i_mysql_fetch_field(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_fetch_field(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_fetch_field(arg0, arg1));
   }
 }
@@ -10462,7 +10462,7 @@ Variant i_chmod(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_chmod(arg0, arg1));
   }
 }
@@ -10474,10 +10474,10 @@ Variant i_magickgettextascent(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgettextascent(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgettextascent(arg0, arg1, arg2, arg3));
   }
 }
@@ -10501,12 +10501,12 @@ Variant i_mail(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_mail(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mail(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mail(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -10541,7 +10541,7 @@ Variant i_imagesetthickness(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagesetthickness(arg0, arg1));
   }
 }
@@ -10553,11 +10553,11 @@ Variant i_str_pad(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_str_pad(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_str_pad(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_str_pad(arg0, arg1, arg2, arg3));
   }
 }
@@ -10569,10 +10569,10 @@ Variant i_openssl_pkcs7_decrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_openssl_pkcs7_decrypt(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_pkcs7_decrypt(arg0, arg1, arg2, arg3));
   }
 }
@@ -10585,9 +10585,9 @@ Variant i_pagelet_server_task_result(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_pagelet_server_task_result(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_pagelet_server_task_result(arg0, arg1, arg2));
   }
 }
 Variant i_asinh(CArrRef params) {
@@ -10609,9 +10609,9 @@ Variant i_mailparse_msg_extract_part(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mailparse_msg_extract_part(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mailparse_msg_extract_part(arg0, arg1, arg2));
   }
 }
@@ -10645,10 +10645,10 @@ Variant i_magickcropimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcropimage(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -10660,7 +10660,7 @@ Variant i_ob_gzhandler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ob_gzhandler(arg0, arg1));
   }
 }
@@ -10683,7 +10683,7 @@ Variant i_drawcomment(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawcomment(arg0, arg1), null);
   }
 }
@@ -10696,8 +10696,8 @@ Variant i_call_user_method(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_call_user_method(count, arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_call_user_method(count, arg0, arg1));
     return (f_call_user_method(count,arg0, ref(arg1), params.slice(2, count - 2, false)));
   }
 }
@@ -10720,9 +10720,9 @@ Variant i_mb_split(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_split(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_split(arg0, arg1, arg2));
   }
 }
@@ -10734,9 +10734,9 @@ Variant i_imagepolygon(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepolygon(arg0, arg1, arg2, arg3));
   }
 }
@@ -10749,7 +10749,7 @@ Variant i_mysql_field_name(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_field_name(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_field_name(arg0, arg1));
   }
 }
@@ -10761,9 +10761,9 @@ Variant i_fputs(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fputs(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fputs(arg0, arg1, arg2));
   }
 }
@@ -10775,10 +10775,10 @@ Variant i_imagecolorallocatealpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorallocatealpha(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -10790,11 +10790,11 @@ Variant i_substr_count(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_substr_count(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_substr_count(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_substr_count(arg0, arg1, arg2, arg3));
   }
 }
@@ -10806,7 +10806,7 @@ Variant i_ldap_first_reference(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_first_reference(arg0, arg1));
   }
 }
@@ -10818,8 +10818,8 @@ Variant i_clock_settime(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_clock_settime(arg0, arg1, arg2));
   }
 }
@@ -10831,8 +10831,8 @@ Variant i_dom_namednodemap_get_named_item_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_namednodemap_get_named_item_ns(arg0, arg1, arg2));
   }
 }
@@ -10844,7 +10844,7 @@ Variant i_ftruncate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ftruncate(arg0, arg1));
   }
 }
@@ -10891,7 +10891,7 @@ Variant i_mysql_unbuffered_query(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_unbuffered_query(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_unbuffered_query(arg0, arg1));
   }
 }
@@ -10903,8 +10903,8 @@ Variant i_dom_characterdata_delete_data(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_characterdata_delete_data(arg0, arg1, arg2));
   }
 }
@@ -10916,9 +10916,9 @@ Variant i_hphp_recursiveiteratoriterator___construct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_recursiveiteratoriterator___construct(arg0, arg1, arg2, arg3));
   }
 }
@@ -10931,7 +10931,7 @@ Variant i_hash_final(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_hash_final(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_final(arg0, arg1));
   }
 }
@@ -10943,9 +10943,9 @@ Variant i_imagecolorresolve(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorresolve(arg0, arg1, arg2, arg3));
   }
 }
@@ -10957,9 +10957,9 @@ Variant i_dom_document_import_node(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_dom_document_import_node(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_import_node(arg0, arg1, arg2));
   }
 }
@@ -10971,9 +10971,9 @@ Variant i_date_date_set(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_date_set(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -10985,7 +10985,7 @@ Variant i_pixelsetyellow(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetyellow(arg0, arg1), null);
   }
 }
@@ -11008,7 +11008,7 @@ Variant i_mcrypt_get_key_size(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_get_key_size(arg0, arg1));
   }
 }
@@ -11020,7 +11020,7 @@ Variant i_drawsettextalignment(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsettextalignment(arg0, arg1), null);
   }
 }
@@ -11054,7 +11054,7 @@ Variant i_ldap_count_entries(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_count_entries(arg0, arg1));
   }
 }
@@ -11066,8 +11066,8 @@ Variant i_ereg_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ereg_replace(arg0, arg1, arg2));
   }
 }
@@ -11114,11 +11114,11 @@ Variant i_fb_rpc_intercept_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_fb_rpc_intercept_handler(arg0, arg1, arg2, arg3, ref(arg4)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_fb_rpc_intercept_handler(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_fb_intercept(CArrRef params) {
@@ -11129,9 +11129,9 @@ Variant i_fb_intercept(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fb_intercept(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fb_intercept(arg0, arg1, arg2));
   }
 }
@@ -11149,13 +11149,13 @@ Variant i_array_splice(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 2) return (f_array_splice(ref(arg0), arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 3) return (f_array_splice(ref(arg0), arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_array_splice(ref(arg0), arg1, arg2, arg3));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_array_splice(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_array_splice(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_array_splice(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_ftell(CArrRef params) {
@@ -11177,9 +11177,9 @@ Variant i_magicksetimagedepth(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_magicksetimagedepth(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagedepth(arg0, arg1, arg2));
   }
 }
@@ -11192,9 +11192,9 @@ Variant i_apc_load_constants(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_load_constants(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_apc_load_constants(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_load_constants(arg0, arg1, arg2));
   }
 }
@@ -11212,7 +11212,7 @@ Variant i_magicklabelimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicklabelimage(arg0, arg1));
   }
 }
@@ -11224,7 +11224,7 @@ Variant i_hphp_log(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_log(arg0, arg1));
   }
 }
@@ -11237,9 +11237,9 @@ Variant i_stream_get_contents(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_stream_get_contents(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_stream_get_contents(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_get_contents(arg0, arg1, arg2));
   }
 }
@@ -11262,7 +11262,7 @@ Variant i_chown(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_chown(arg0, arg1));
   }
 }
@@ -11274,10 +11274,10 @@ Variant i_hash_hmac_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_hash_hmac_file(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_hmac_file(arg0, arg1, arg2, arg3));
   }
 }
@@ -11300,7 +11300,7 @@ Variant i_link(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_link(arg0, arg1));
   }
 }
@@ -11312,8 +11312,8 @@ Variant i_fb_utf8ize(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_fb_utf8ize(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_fb_utf8ize(arg0));
   }
 }
 Variant i_drawsetfillpatternurl(CArrRef params) {
@@ -11324,7 +11324,7 @@ Variant i_drawsetfillpatternurl(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfillpatternurl(arg0, arg1));
   }
 }
@@ -11336,8 +11336,8 @@ Variant i_iconv(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv(arg0, arg1, arg2));
   }
 }
@@ -11350,7 +11350,7 @@ Variant i_highlight_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_highlight_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_highlight_file(arg0, arg1));
   }
 }
@@ -11363,9 +11363,9 @@ Variant i_iconv_mime_decode_headers(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_iconv_mime_decode_headers(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_iconv_mime_decode_headers(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_mime_decode_headers(arg0, arg1, arg2));
   }
 }
@@ -11400,8 +11400,8 @@ Variant i_ldap_get_values_len(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_get_values_len(arg0, arg1, arg2));
   }
 }
@@ -11424,15 +11424,15 @@ Variant i_openssl_pkcs7_verify(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_openssl_pkcs7_verify(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_openssl_pkcs7_verify(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_openssl_pkcs7_verify(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_openssl_pkcs7_verify(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_pkcs7_verify(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -11455,9 +11455,9 @@ Variant i_hphp_splfileobject_fgetcsv(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_fgetcsv(arg0, arg1, arg2, arg3));
   }
 }
@@ -11469,11 +11469,11 @@ Variant i_stream_socket_recvfrom(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_socket_recvfrom(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_stream_socket_recvfrom(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_socket_recvfrom(arg0, arg1, arg2, arg3));
   }
 }
@@ -11513,11 +11513,11 @@ Variant i_mcrypt_ofb(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_mcrypt_ofb(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_ofb(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -11529,7 +11529,7 @@ Variant i_imageantialias(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imageantialias(arg0, arg1));
   }
 }
@@ -11541,9 +11541,9 @@ Variant i_hphp_splfileinfo_openfile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileinfo_openfile(arg0, arg1, arg2, arg3));
   }
 }
@@ -11568,8 +11568,8 @@ Variant i_idn_to_ascii(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_idn_to_ascii(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_idn_to_ascii(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_idn_to_ascii(arg0, arg1));
   }
 }
 Variant i_error_log(CArrRef params) {
@@ -11581,11 +11581,11 @@ Variant i_error_log(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_error_log(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_error_log(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_error_log(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_error_log(arg0, arg1, arg2, arg3));
   }
 }
@@ -11597,7 +11597,7 @@ Variant i_hash_update(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_update(arg0, arg1));
   }
 }
@@ -11616,7 +11616,7 @@ Variant i_md5_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_md5_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_md5_file(arg0, arg1));
   }
 }
@@ -11640,13 +11640,13 @@ Variant i_file_get_contents(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_file_get_contents(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_file_get_contents(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_file_get_contents(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_file_get_contents(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_file_get_contents(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -11660,7 +11660,7 @@ Variant i_uniqid(CArrRef params) {
     if (count <= 0) return (f_uniqid());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_uniqid(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_uniqid(arg0, arg1));
   }
 }
@@ -11672,8 +11672,8 @@ Variant i_strncasecmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strncasecmp(arg0, arg1, arg2));
   }
 }
@@ -11685,13 +11685,13 @@ Variant i_magicksetimagepixels(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagepixels(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -11716,7 +11716,7 @@ Variant i_xml_parser_create_ns(CArrRef params) {
     if (count <= 0) return (f_xml_parser_create_ns());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_xml_parser_create_ns(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_parser_create_ns(arg0, arg1));
   }
 }
@@ -11728,7 +11728,7 @@ Variant i_ldap_delete(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_delete(arg0, arg1));
   }
 }
@@ -11740,9 +11740,9 @@ Variant i_fnmatch(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fnmatch(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fnmatch(arg0, arg1, arg2));
   }
 }
@@ -11766,7 +11766,7 @@ Variant i_metaphone(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_metaphone(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_metaphone(arg0, arg1));
   }
 }
@@ -11801,7 +11801,7 @@ Variant i_magickcyclecolormapimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcyclecolormapimage(arg0, arg1));
   }
 }
@@ -11830,8 +11830,8 @@ Variant i_hphp_recursivedirectoryiterator___construct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_recursivedirectoryiterator___construct(arg0, arg1, arg2));
   }
 }
@@ -11843,7 +11843,7 @@ Variant i_magicksetimagevirtualpixelmethod(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagevirtualpixelmethod(arg0, arg1));
   }
 }
@@ -11856,10 +11856,10 @@ Variant i_socket_getpeername(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_socket_getpeername(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_socket_getpeername(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_socket_getpeername(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_socket_getpeername(arg0, arg1, arg2));
   }
 }
 Variant i_memcache_close(CArrRef params) {
@@ -11893,8 +11893,8 @@ Variant i_drawtranslate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawtranslate(arg0, arg1, arg2), null);
   }
 }
@@ -11918,15 +11918,15 @@ Variant i_imagefilter(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_imagefilter(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_imagefilter(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_imagefilter(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_imagefilter(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefilter(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -11949,9 +11949,9 @@ Variant i_dom_xpath_query(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_dom_xpath_query(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_xpath_query(arg0, arg1, arg2));
   }
 }
@@ -11963,7 +11963,7 @@ Variant i_hphpd_install_user_command(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphpd_install_user_command(arg0, arg1));
   }
 }
@@ -11975,8 +11975,8 @@ Variant i_dom_element_set_id_attribute_node(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_set_id_attribute_node(arg0, arg1, arg2));
   }
 }
@@ -12010,7 +12010,7 @@ Variant i_drawsetclippath(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetclippath(arg0, arg1));
   }
 }
@@ -12022,11 +12022,11 @@ Variant i_magickconstituteimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickconstituteimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -12049,9 +12049,9 @@ Variant i_iterator_apply(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_iterator_apply(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iterator_apply(arg0, arg1, arg2));
   }
 }
@@ -12063,9 +12063,9 @@ Variant i_apache_setenv(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_apache_setenv(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apache_setenv(arg0, arg1, arg2));
   }
 }
@@ -12077,7 +12077,7 @@ Variant i_dom_node_is_same_node(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_is_same_node(arg0, arg1));
   }
 }
@@ -12117,7 +12117,7 @@ Variant i_ldap_first_entry(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_first_entry(arg0, arg1));
   }
 }
@@ -12130,7 +12130,7 @@ Variant i_curl_multi_select(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_curl_multi_select(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_curl_multi_select(arg0, arg1));
   }
 }
@@ -12142,7 +12142,7 @@ Variant i_magickswirlimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickswirlimage(arg0, arg1));
   }
 }
@@ -12156,7 +12156,7 @@ Variant i_mb_ereg_search_regs(CArrRef params) {
     if (count <= 0) return (f_mb_ereg_search_regs());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mb_ereg_search_regs(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_ereg_search_regs(arg0, arg1));
   }
 }
@@ -12236,7 +12236,7 @@ Variant i_mcrypt_module_get_supported_key_sizes(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_module_get_supported_key_sizes(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_get_supported_key_sizes(arg0, arg1));
   }
 }
@@ -12249,13 +12249,13 @@ Variant i_preg_replace_callback(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_preg_replace_callback(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_preg_replace_callback(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_preg_replace_callback(arg0, arg1, arg2, arg3, ref(arg4)));
+    CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_preg_replace_callback(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_dom_document_create_element(CArrRef params) {
@@ -12266,9 +12266,9 @@ Variant i_dom_document_create_element(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_dom_document_create_element(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_element(arg0, arg1, arg2));
   }
 }
@@ -12325,12 +12325,12 @@ Variant i_asort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_asort(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 2) return (f_asort(ref(arg0), arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_asort(ref(arg0), arg1, arg2));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_asort(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_asort(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_asort(arg0, arg1, arg2));
   }
 }
 Variant i_apd_echo(CArrRef params) {
@@ -12400,16 +12400,16 @@ Variant i_stream_socket_client(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_stream_socket_client(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 2) return (f_stream_socket_client(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_stream_socket_client(arg0, ref(arg1), ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 4) return (f_stream_socket_client(arg0, ref(arg1), ref(arg2), arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 5) return (f_stream_socket_client(arg0, ref(arg1), ref(arg2), arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_stream_socket_client(arg0, ref(arg1), ref(arg2), arg3, arg4, arg5));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_stream_socket_client(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_stream_socket_client(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_stream_socket_client(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 5) return (f_stream_socket_client(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_stream_socket_client(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
 Variant i_drawsetstrokedasharray(CArrRef params) {
@@ -12421,7 +12421,7 @@ Variant i_drawsetstrokedasharray(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_drawsetstrokedasharray(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokedasharray(arg0, arg1), null);
   }
 }
@@ -12466,11 +12466,11 @@ Variant i_array_slice(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_slice(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_array_slice(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_slice(arg0, arg1, arg2, arg3));
   }
 }
@@ -12483,7 +12483,7 @@ Variant i_count_chars(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_count_chars(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_count_chars(arg0, arg1));
   }
 }
@@ -12506,9 +12506,9 @@ Variant i_array_uintersect_uassoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_array_uintersect_uassoc(count, arg0, arg1, arg2, arg3));
     return (f_array_uintersect_uassoc(count,arg0, arg1, arg2, arg3, params.slice(4, count - 4, false)));
   }
@@ -12521,7 +12521,7 @@ Variant i_drawsetstrokewidth(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokewidth(arg0, arg1), null);
   }
 }
@@ -12533,7 +12533,7 @@ Variant i_posix_mkfifo(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_posix_mkfifo(arg0, arg1));
   }
 }
@@ -12557,11 +12557,11 @@ Variant i_memcache_connect(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_memcache_connect(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_memcache_connect(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_memcache_connect(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_connect(arg0, arg1, arg2, arg3));
   }
 }
@@ -12585,11 +12585,11 @@ Variant i_mkdir(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mkdir(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mkdir(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mkdir(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mkdir(arg0, arg1, arg2, arg3));
   }
 }
@@ -12601,8 +12601,8 @@ Variant i_magicksetsize(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetsize(arg0, arg1, arg2));
   }
 }
@@ -12625,11 +12625,11 @@ Variant i_iconv_substr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_iconv_substr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_iconv_substr(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_substr(arg0, arg1, arg2, arg3));
   }
 }
@@ -12641,7 +12641,7 @@ Variant i_xml_set_external_entity_ref_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_external_entity_ref_handler(arg0, arg1));
   }
 }
@@ -12653,9 +12653,9 @@ Variant i_mb_decode_numericentity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_decode_numericentity(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_decode_numericentity(arg0, arg1, arg2));
   }
 }
@@ -12667,7 +12667,7 @@ Variant i_ldap_next_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_next_attribute(arg0, arg1));
   }
 }
@@ -12691,9 +12691,9 @@ Variant i_imagejpeg(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagejpeg(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_imagejpeg(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagejpeg(arg0, arg1, arg2));
   }
 }
@@ -12705,7 +12705,7 @@ Variant i_imagesetbrush(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagesetbrush(arg0, arg1));
   }
 }
@@ -12718,7 +12718,7 @@ Variant i_mb_strtoupper(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_strtoupper(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strtoupper(arg0, arg1));
   }
 }
@@ -12741,11 +12741,11 @@ Variant i_mb_strrpos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_strrpos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_strrpos(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strrpos(arg0, arg1, arg2, arg3));
   }
 }
@@ -12757,8 +12757,8 @@ Variant i_collator_compare(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_collator_compare(arg0, arg1, arg2));
   }
 }
@@ -12771,9 +12771,9 @@ Variant i_extract(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_extract(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_extract(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_extract(arg0, arg1, arg2));
   }
 }
@@ -12798,7 +12798,7 @@ Variant i_get_browser(CArrRef params) {
     if (count <= 0) return (f_get_browser());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_get_browser(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_get_browser(arg0, arg1));
   }
 }
@@ -12811,9 +12811,9 @@ Variant i_html_entity_decode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_html_entity_decode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_html_entity_decode(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_html_entity_decode(arg0, arg1, arg2));
   }
 }
@@ -12831,11 +12831,11 @@ Variant i_preg_split(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_preg_split(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_preg_split(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_preg_split(arg0, arg1, arg2, arg3));
   }
 }
@@ -12847,7 +12847,7 @@ Variant i_magickpreviewimages(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickpreviewimages(arg0, arg1));
   }
 }
@@ -12912,7 +12912,7 @@ Variant i_gzinflate(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzinflate(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzinflate(arg0, arg1));
   }
 }
@@ -12924,14 +12924,14 @@ Variant i_openssl_pkcs7_sign(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 5) return (f_openssl_pkcs7_sign(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_openssl_pkcs7_sign(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_pkcs7_sign(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -12961,7 +12961,7 @@ Variant i_gzfile(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzfile(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzfile(arg0, arg1));
   }
 }
@@ -12985,11 +12985,11 @@ Variant i_stream_socket_sendto(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_socket_sendto(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_stream_socket_sendto(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_socket_sendto(arg0, arg1, arg2, arg3));
   }
 }
@@ -13052,7 +13052,7 @@ Variant i_drawsetstrokeantialias(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_drawsetstrokeantialias(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokeantialias(arg0, arg1), null);
   }
 }
@@ -13086,8 +13086,8 @@ Variant i_magicksetimageresolution(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageresolution(arg0, arg1, arg2));
   }
 }
@@ -13099,9 +13099,9 @@ Variant i_mysql_db_name(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mysql_db_name(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_db_name(arg0, arg1, arg2));
   }
 }
@@ -13135,10 +13135,10 @@ Variant i_ksort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_ksort(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_ksort(ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_ksort(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_ksort(arg0, arg1));
   }
 }
 Variant i_thrift_protocol_read_binary(CArrRef params) {
@@ -13149,8 +13149,8 @@ Variant i_thrift_protocol_read_binary(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_thrift_protocol_read_binary(arg0, arg1, arg2));
   }
 }
@@ -13169,7 +13169,7 @@ Variant i_strip_tags(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_strip_tags(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strip_tags(arg0, arg1));
   }
 }
@@ -13220,8 +13220,8 @@ Variant i_next(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_next(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_next(arg0));
   }
 }
 Variant i_shm_detach(CArrRef params) {
@@ -13244,9 +13244,9 @@ Variant i_shm_attach(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_shm_attach(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_shm_attach(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_shm_attach(arg0, arg1, arg2));
   }
 }
@@ -13269,7 +13269,7 @@ Variant i_dom_document_save_html_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_save_html_file(arg0, arg1));
   }
 }
@@ -13282,10 +13282,10 @@ Variant i_similar_text(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_similar_text(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_similar_text(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_similar_text(arg0, arg1, arg2));
   }
 }
 Variant i_hphp_get_thread_id(CArrRef params) {
@@ -13302,10 +13302,10 @@ Variant i_imagecreatefromgd2part(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecreatefromgd2part(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -13317,8 +13317,8 @@ Variant i_dom_element_set_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_set_attribute(arg0, arg1, arg2));
   }
 }
@@ -13331,7 +13331,7 @@ Variant i_iterator_to_array(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_iterator_to_array(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iterator_to_array(arg0, arg1));
   }
 }
@@ -13372,8 +13372,8 @@ Variant i_hphp_set_static_property(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_set_static_property(arg0, arg1, arg2), null);
   }
 }
@@ -13386,7 +13386,7 @@ Variant i_unlink(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_unlink(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_unlink(arg0, arg1));
   }
 }
@@ -13398,9 +13398,9 @@ Variant i_mcrypt_module_open(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_open(arg0, arg1, arg2, arg3));
   }
 }
@@ -13423,8 +13423,8 @@ Variant i_base_convert(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_base_convert(arg0, arg1, arg2));
   }
 }
@@ -13459,7 +13459,7 @@ Variant i_xmlwriter_start_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_attribute(arg0, arg1));
   }
 }
@@ -13484,7 +13484,7 @@ Variant i_gzgets(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzgets(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzgets(arg0, arg1));
   }
 }
@@ -13502,8 +13502,8 @@ Variant i_array_intersect_uassoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_intersect_uassoc(count, arg0, arg1, arg2));
     return (f_array_intersect_uassoc(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -13517,7 +13517,7 @@ Variant i_basename(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_basename(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_basename(arg0, arg1));
   }
 }
@@ -13529,10 +13529,10 @@ Variant i_krsort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_krsort(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_krsort(ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_krsort(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_krsort(arg0, arg1));
   }
 }
 Variant i_clock_gettime(CArrRef params) {
@@ -13544,9 +13544,9 @@ Variant i_clock_gettime(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_clock_gettime(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_clock_gettime(arg0, arg1, arg2));
   }
 }
 Variant i_pushdrawingwand(CArrRef params) {
@@ -13568,11 +13568,11 @@ Variant i_imageline(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imageline(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -13584,9 +13584,9 @@ Variant i_socket_read(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_socket_read(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_read(arg0, arg1, arg2));
   }
 }
@@ -13598,16 +13598,16 @@ Variant i_xmlwriter_write_dtd_entity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_xmlwriter_write_dtd_entity(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_xmlwriter_write_dtd_entity(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_xmlwriter_write_dtd_entity(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_xmlwriter_write_dtd_entity(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_dtd_entity(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -13619,7 +13619,7 @@ Variant i_mysql_tablename(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_tablename(arg0, arg1));
   }
 }
@@ -13632,10 +13632,10 @@ Variant i_collator_sort(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_collator_sort(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_collator_sort(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_collator_sort(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_collator_sort(arg0, arg1, arg2));
   }
 }
 Variant i_magickwriteimage(CArrRef params) {
@@ -13646,7 +13646,7 @@ Variant i_magickwriteimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickwriteimage(arg0, arg1));
   }
 }
@@ -13659,7 +13659,7 @@ Variant i_mcrypt_module_get_algo_key_size(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_module_get_algo_key_size(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_get_algo_key_size(arg0, arg1));
   }
 }
@@ -13671,9 +13671,9 @@ Variant i_hash_update_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_hash_update_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hash_update_file(arg0, arg1, arg2));
   }
 }
@@ -13685,8 +13685,8 @@ Variant i_magickembossimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickembossimage(arg0, arg1, arg2));
   }
 }
@@ -13711,9 +13711,9 @@ Variant i_gzencode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzencode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_gzencode(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzencode(arg0, arg1, arg2));
   }
 }
@@ -13725,8 +13725,8 @@ Variant i_checkdate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_checkdate(arg0, arg1, arg2));
   }
 }
@@ -13738,7 +13738,7 @@ Variant i_magickimplodeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickimplodeimage(arg0, arg1));
   }
 }
@@ -13784,9 +13784,9 @@ Variant i_iconv_mime_decode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_iconv_mime_decode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_iconv_mime_decode(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_mime_decode(arg0, arg1, arg2));
   }
 }
@@ -13810,7 +13810,7 @@ Variant i_mcrypt_module_is_block_algorithm(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_module_is_block_algorithm(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_is_block_algorithm(arg0, arg1));
   }
 }
@@ -13835,14 +13835,14 @@ Variant i_fsockopen(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_fsockopen(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_fsockopen(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_fsockopen(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 4) return (f_fsockopen(arg0, arg1, ref(arg2), ref(arg3)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_fsockopen(arg0, arg1, ref(arg2), ref(arg3), arg4));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_fsockopen(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_fsockopen(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_fsockopen(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_usort(CArrRef params) {
@@ -13853,9 +13853,9 @@ Variant i_usort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_usort(ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_usort(arg0, arg1));
   }
 }
 Variant i_pixelsetiteratorrow(CArrRef params) {
@@ -13866,7 +13866,7 @@ Variant i_pixelsetiteratorrow(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetiteratorrow(arg0, arg1));
   }
 }
@@ -13900,7 +13900,7 @@ Variant i_dom_document_create_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_attribute(arg0, arg1));
   }
 }
@@ -13913,9 +13913,9 @@ Variant i_ldap_get_option(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_ldap_get_option(arg0, arg1, ref(arg2)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_ldap_get_option(arg0, arg1, arg2));
   }
 }
 Variant i_socket_recv(CArrRef params) {
@@ -13927,10 +13927,10 @@ Variant i_socket_recv(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_socket_recv(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_socket_recv(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_sys_getloadavg(CArrRef params) {
@@ -13947,11 +13947,11 @@ Variant i_evhttp_async_post(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_evhttp_async_post(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_evhttp_async_post(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_evhttp_async_post(arg0, arg1, arg2, arg3));
   }
 }
@@ -13963,7 +13963,7 @@ Variant i_hphp_recursivedirectoryiterator_seek(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_recursivedirectoryiterator_seek(arg0, arg1), null);
   }
 }
@@ -14003,7 +14003,7 @@ Variant i_magicksolarizeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksolarizeimage(arg0, arg1));
   }
 }
@@ -14021,8 +14021,8 @@ Variant i_array_uintersect_assoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_uintersect_assoc(count, arg0, arg1, arg2));
     return (f_array_uintersect_assoc(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -14046,7 +14046,7 @@ Variant i_magickgetimagecolormapcolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetimagecolormapcolor(arg0, arg1));
   }
 }
@@ -14069,9 +14069,9 @@ Variant i_settype(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_settype(ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_settype(arg0, arg1));
   }
 }
 Variant i_posix_access(CArrRef params) {
@@ -14083,7 +14083,7 @@ Variant i_posix_access(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_posix_access(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_posix_access(arg0, arg1));
   }
 }
@@ -14095,9 +14095,9 @@ Variant i_explode(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_explode(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_explode(arg0, arg1, arg2));
   }
 }
@@ -14142,10 +14142,10 @@ Variant i_magickgaussianblurimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgaussianblurimage(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgaussianblurimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -14157,9 +14157,9 @@ Variant i_apd_set_session_trace_socket(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apd_set_session_trace_socket(arg0, arg1, arg2, arg3));
   }
 }
@@ -14171,11 +14171,11 @@ Variant i_openssl_pkcs12_export_to_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_openssl_pkcs12_export_to_file(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_pkcs12_export_to_file(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -14199,11 +14199,11 @@ Variant i_openssl_private_decrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 3) return (f_openssl_private_decrypt(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_private_decrypt(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_openssl_private_decrypt(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_private_decrypt(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_dom_document_save(CArrRef params) {
@@ -14214,9 +14214,9 @@ Variant i_dom_document_save(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_dom_document_save(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_save(arg0, arg1, arg2));
   }
 }
@@ -14239,7 +14239,7 @@ Variant i_output_add_rewrite_var(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_output_add_rewrite_var(arg0, arg1));
   }
 }
@@ -14251,7 +14251,7 @@ Variant i_xmlwriter_write_cdata(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_cdata(arg0, arg1));
   }
 }
@@ -14308,8 +14308,8 @@ Variant i_array_udiff(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_udiff(count, arg0, arg1, arg2));
     return (f_array_udiff(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -14336,7 +14336,7 @@ Variant i_stream_context_create(CArrRef params) {
     if (count <= 0) return (f_stream_context_create());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_stream_context_create(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_context_create(arg0, arg1));
   }
 }
@@ -14371,7 +14371,7 @@ Variant i_interface_exists(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_interface_exists(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_interface_exists(arg0, arg1));
   }
 }
@@ -14383,7 +14383,7 @@ Variant i_hphp_directoryiterator___construct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_directoryiterator___construct(arg0, arg1));
   }
 }
@@ -14395,8 +14395,8 @@ Variant i_drawpathmovetorelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathmovetorelative(arg0, arg1, arg2), null);
   }
 }
@@ -14447,10 +14447,10 @@ Variant i_png2wbmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_png2wbmp(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -14462,9 +14462,9 @@ Variant i_drawmatte(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawmatte(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -14476,7 +14476,7 @@ Variant i_imagecolormatch(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolormatch(arg0, arg1));
   }
 }
@@ -14488,10 +14488,10 @@ Variant i_drawrectangle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawrectangle(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -14504,17 +14504,17 @@ Variant i_fb_parallel_query(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_fb_parallel_query(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_fb_parallel_query(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_fb_parallel_query(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_fb_parallel_query(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_fb_parallel_query(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_fb_parallel_query(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fb_parallel_query(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -14526,7 +14526,7 @@ Variant i_dom_document_create_entity_reference(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_entity_reference(arg0, arg1));
   }
 }
@@ -14549,11 +14549,11 @@ Variant i_stream_context_set_option(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_context_set_option(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_stream_context_set_option(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_context_set_option(arg0, arg1, arg2, arg3));
   }
 }
@@ -14565,12 +14565,12 @@ Variant i_drawpathcurvetorelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetorelative(arg0, arg1, arg2, arg3, arg4, arg5, arg6), null);
   }
 }
@@ -14662,7 +14662,7 @@ Variant i_assert_options(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_assert_options(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_assert_options(arg0, arg1));
   }
 }
@@ -14686,7 +14686,7 @@ Variant i_rmdir(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_rmdir(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_rmdir(arg0, arg1));
   }
 }
@@ -14715,8 +14715,8 @@ Variant i_magickscaleimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickscaleimage(arg0, arg1, arg2));
   }
 }
@@ -14739,10 +14739,10 @@ Variant i_magicknewimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magicknewimage(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicknewimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -14776,7 +14776,7 @@ Variant i_hphp_splfileobject_setflags(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_setflags(arg0, arg1), null);
   }
 }
@@ -14788,8 +14788,8 @@ Variant i_date_sun_info(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_sun_info(arg0, arg1, arg2));
   }
 }
@@ -14812,10 +14812,10 @@ Variant i_magickresizeimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickresizeimage(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -14828,9 +14828,9 @@ Variant i_parse_ini_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_parse_ini_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_parse_ini_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_parse_ini_file(arg0, arg1, arg2));
   }
 }
@@ -14853,7 +14853,7 @@ Variant i_imagepsencodefont(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepsencodefont(arg0, arg1));
   }
 }
@@ -14865,8 +14865,8 @@ Variant i_ldap_set_option(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_set_option(arg0, arg1, arg2));
   }
 }
@@ -14902,9 +14902,9 @@ Variant i_pcntl_exec(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_pcntl_exec(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_pcntl_exec(arg0, arg1), null);
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pcntl_exec(arg0, arg1, arg2), null);
   }
 }
@@ -14916,7 +14916,7 @@ Variant i_xmlwriter_set_indent_string(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_set_indent_string(arg0, arg1));
   }
 }
@@ -14939,7 +14939,7 @@ Variant i_strcoll(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strcoll(arg0, arg1));
   }
 }
@@ -14951,7 +14951,7 @@ Variant i_write_hdf_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_write_hdf_file(arg0, arg1));
   }
 }
@@ -14963,9 +14963,9 @@ Variant i_socket_send(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_send(arg0, arg1, arg2, arg3));
   }
 }
@@ -14983,9 +14983,9 @@ Variant i_hphp_splfileobject_fscanf(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_fscanf(arg0, arg1, arg2, arg3));
   }
 }
@@ -15004,10 +15004,10 @@ Variant i_mb_eregi(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_eregi(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_mb_eregi(arg0, arg1, ref(arg2)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_mb_eregi(arg0, arg1, arg2));
   }
 }
 Variant i_pixelgetgreen(CArrRef params) {
@@ -15047,8 +15047,8 @@ Variant i_ldap_mod_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_mod_replace(arg0, arg1, arg2));
   }
 }
@@ -15071,11 +15071,11 @@ Variant i_stream_filter_prepend(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_filter_prepend(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_stream_filter_prepend(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_filter_prepend(arg0, arg1, arg2, arg3));
   }
 }
@@ -15087,9 +15087,9 @@ Variant i_substr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_substr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_substr(arg0, arg1, arg2));
   }
 }
@@ -15101,7 +15101,7 @@ Variant i_magickcombineimages(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcombineimages(arg0, arg1));
   }
 }
@@ -15124,7 +15124,7 @@ Variant i_unpack(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_unpack(arg0, arg1));
   }
 }
@@ -15147,12 +15147,12 @@ Variant i_magickgetimagepixels(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetimagepixels(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -15175,10 +15175,10 @@ Variant i_substr_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_substr_replace(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_substr_replace(arg0, arg1, arg2, arg3));
   }
 }
@@ -15196,13 +15196,13 @@ Variant i_xmlwriter_write_dtd(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_xmlwriter_write_dtd(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_xmlwriter_write_dtd(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_xmlwriter_write_dtd(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_dtd(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -15215,7 +15215,7 @@ Variant i_mysql_select_db(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_select_db(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_select_db(arg0, arg1));
   }
 }
@@ -15262,10 +15262,10 @@ Variant i_drawpathcurvetosmoothrelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetosmoothrelative(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -15288,9 +15288,9 @@ Variant i_imagettfbbox(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagettfbbox(arg0, arg1, arg2, arg3));
   }
 }
@@ -15315,7 +15315,7 @@ Variant i_msg_get_queue(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_msg_get_queue(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_msg_get_queue(arg0, arg1));
   }
 }
@@ -15333,7 +15333,7 @@ Variant i_magickmedianfilterimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickmedianfilterimage(arg0, arg1));
   }
 }
@@ -15346,9 +15346,9 @@ Variant i_xbox_task_result(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_xbox_task_result(arg0, arg1, ref(arg2)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_xbox_task_result(arg0, arg1, arg2));
   }
 }
 Variant i_mcrypt_generic_deinit(CArrRef params) {
@@ -15370,7 +15370,7 @@ Variant i_method_exists(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_method_exists(arg0, arg1));
   }
 }
@@ -15382,7 +15382,7 @@ Variant i_money_format(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_money_format(arg0, arg1));
   }
 }
@@ -15405,7 +15405,7 @@ Variant i_dom_element_remove_attribute_node(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_remove_attribute_node(arg0, arg1));
   }
 }
@@ -15417,8 +15417,8 @@ Variant i_array_udiff_assoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_udiff_assoc(count, arg0, arg1, arg2));
     return (f_array_udiff_assoc(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -15475,7 +15475,7 @@ Variant i_magicksetinterlacescheme(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetinterlacescheme(arg0, arg1));
   }
 }
@@ -15509,11 +15509,11 @@ Variant i_call_user_func_array_rpc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_call_user_func_array_rpc(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -15554,7 +15554,7 @@ Variant i_base64_decode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_base64_decode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_base64_decode(arg0, arg1));
   }
 }
@@ -15568,7 +15568,7 @@ Variant i_rand(CArrRef params) {
     if (count <= 0) return (f_rand());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_rand(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_rand(arg0, arg1));
   }
 }
@@ -15592,7 +15592,7 @@ Variant i_stream_encoding(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_stream_encoding(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_encoding(arg0, arg1));
   }
 }
@@ -15672,13 +15672,13 @@ Variant i_openssl_pkcs7_encrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_openssl_pkcs7_encrypt(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_openssl_pkcs7_encrypt(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_pkcs7_encrypt(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -15691,11 +15691,11 @@ Variant i_read_exif_data(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_read_exif_data(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_read_exif_data(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_read_exif_data(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_read_exif_data(arg0, arg1, arg2, arg3));
   }
 }
@@ -15707,7 +15707,7 @@ Variant i_drawsetstrokeopacity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokeopacity(arg0, arg1), null);
   }
 }
@@ -15719,12 +15719,12 @@ Variant i_drawroundrectangle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawroundrectangle(arg0, arg1, arg2, arg3, arg4, arg5, arg6), null);
   }
 }
@@ -15760,7 +15760,7 @@ Variant i_date_create(CArrRef params) {
     if (count <= 0) return (f_date_create());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_date_create(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_create(arg0, arg1));
   }
 }
@@ -15772,11 +15772,11 @@ Variant i_strcspn(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_strcspn(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_strcspn(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strcspn(arg0, arg1, arg2, arg3));
   }
 }
@@ -15821,10 +15821,10 @@ Variant i_magickgetstringheight(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgetstringheight(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetstringheight(arg0, arg1, arg2, arg3));
   }
 }
@@ -15836,7 +15836,7 @@ Variant i_dom_document_relaxng_validate_xml(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_relaxng_validate_xml(arg0, arg1));
   }
 }
@@ -15860,7 +15860,7 @@ Variant i_strtotime(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_strtotime(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strtotime(arg0, arg1));
   }
 }
@@ -15872,8 +15872,8 @@ Variant i_dom_element_set_id_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_set_id_attribute(arg0, arg1, arg2));
   }
 }
@@ -15919,7 +15919,7 @@ Variant i_strnatcasecmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strnatcasecmp(arg0, arg1));
   }
 }
@@ -15931,8 +15931,8 @@ Variant i_magicksetsamplingfactors(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetsamplingfactors(arg0, arg1, arg2));
   }
 }
@@ -15945,7 +15945,7 @@ Variant i_openssl_pkey_get_private(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_openssl_pkey_get_private(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_pkey_get_private(arg0, arg1));
   }
 }
@@ -15968,9 +15968,9 @@ Variant i_iconv_strrpos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_iconv_strrpos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_strrpos(arg0, arg1, arg2));
   }
 }
@@ -15983,7 +15983,7 @@ Variant i_collator_get_locale(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_collator_get_locale(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_collator_get_locale(arg0, arg1));
   }
 }
@@ -15995,10 +15995,10 @@ Variant i_drawsetviewbox(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetviewbox(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -16010,7 +16010,7 @@ Variant i_magicksetimagecompressionquality(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagecompressionquality(arg0, arg1));
   }
 }
@@ -16045,8 +16045,8 @@ Variant i_magicktransformimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicktransformimage(arg0, arg1, arg2));
   }
 }
@@ -16069,7 +16069,7 @@ Variant i_ini_alter(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ini_alter(arg0, arg1));
   }
 }
@@ -16093,8 +16093,8 @@ Variant i_magicksetimageprofile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageprofile(arg0, arg1, arg2));
   }
 }
@@ -16107,7 +16107,7 @@ Variant i_mysql_field_seek(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_field_seek(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_field_seek(arg0, arg1));
   }
 }
@@ -16163,7 +16163,7 @@ Variant i_array_diff(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_diff(count, arg0, arg1));
     return (f_array_diff(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -16199,13 +16199,13 @@ Variant i_simplexml_load_string(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_simplexml_load_string(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_simplexml_load_string(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_simplexml_load_string(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_simplexml_load_string(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_simplexml_load_string(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -16217,12 +16217,12 @@ Variant i_magickunsharpmaskimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 5) return (f_magickunsharpmaskimage(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickunsharpmaskimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -16267,7 +16267,7 @@ Variant i_hphp_splfileobject_setmaxlinelen(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_setmaxlinelen(arg0, arg1), null);
   }
 }
@@ -16279,7 +16279,7 @@ Variant i_array_intersect_key(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_intersect_key(count, arg0, arg1));
     return (f_array_intersect_key(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -16293,7 +16293,7 @@ Variant i_array_change_key_case(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_array_change_key_case(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_change_key_case(arg0, arg1));
   }
 }
@@ -16305,7 +16305,7 @@ Variant i_ldap_first_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_first_attribute(arg0, arg1));
   }
 }
@@ -16340,8 +16340,8 @@ Variant i_drawpoint(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpoint(arg0, arg1, arg2), null);
   }
 }
@@ -16353,7 +16353,7 @@ Variant i_strnatcmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strnatcmp(arg0, arg1));
   }
 }
@@ -16365,7 +16365,7 @@ Variant i_property_exists(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_property_exists(arg0, arg1));
   }
 }
@@ -16400,14 +16400,14 @@ Variant i_imagecopymergegray(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecopymergegray(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
   }
 }
@@ -16452,9 +16452,9 @@ Variant i_rename(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_rename(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_rename(arg0, arg1, arg2));
   }
 }
@@ -16466,7 +16466,7 @@ Variant i_date_format(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_format(arg0, arg1));
   }
 }
@@ -16489,8 +16489,8 @@ Variant i_magickshaveimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickshaveimage(arg0, arg1, arg2));
   }
 }
@@ -16502,7 +16502,7 @@ Variant i_dom_element_set_attribute_node_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_set_attribute_node_ns(arg0, arg1));
   }
 }
@@ -16515,7 +16515,7 @@ Variant i_xmlwriter_output_memory(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_xmlwriter_output_memory(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_output_memory(arg0, arg1));
   }
 }
@@ -16533,7 +16533,7 @@ Variant i_magickwhitethresholdimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickwhitethresholdimage(arg0, arg1));
   }
 }
@@ -16545,7 +16545,7 @@ Variant i_drawpolyline(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpolyline(arg0, arg1), null);
   }
 }
@@ -16579,8 +16579,8 @@ Variant i_prev(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_prev(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_prev(arg0));
   }
 }
 Variant i_imagegammacorrect(CArrRef params) {
@@ -16591,8 +16591,8 @@ Variant i_imagegammacorrect(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagegammacorrect(arg0, arg1, arg2));
   }
 }
@@ -16605,11 +16605,11 @@ Variant i_str_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_str_replace(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_str_replace(arg0, arg1, arg2, ref(arg3)));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_str_replace(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_dom_node_lookup_namespace_uri(CArrRef params) {
@@ -16620,7 +16620,7 @@ Variant i_dom_node_lookup_namespace_uri(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_lookup_namespace_uri(arg0, arg1));
   }
 }
@@ -16633,10 +16633,10 @@ Variant i_fb_unserialize(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_fb_unserialize(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_fb_unserialize(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_fb_unserialize(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_fb_unserialize(arg0, arg1, arg2));
   }
 }
 Variant i_clock_getres(CArrRef params) {
@@ -16648,9 +16648,9 @@ Variant i_clock_getres(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_clock_getres(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_clock_getres(arg0, arg1, arg2));
   }
 }
 Variant i_magicktrimimage(CArrRef params) {
@@ -16661,7 +16661,7 @@ Variant i_magicktrimimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicktrimimage(arg0, arg1));
   }
 }
@@ -16673,7 +16673,7 @@ Variant i_hphp_splfileinfo_getpathinfo(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileinfo_getpathinfo(arg0, arg1));
   }
 }
@@ -16713,7 +16713,7 @@ Variant i_ldap_explode_dn(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_explode_dn(arg0, arg1));
   }
 }
@@ -16754,7 +16754,7 @@ Variant i_mb_strtolower(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_strtolower(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strtolower(arg0, arg1));
   }
 }
@@ -16768,7 +16768,7 @@ Variant i_localtime(CArrRef params) {
     if (count <= 0) return (f_localtime());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_localtime(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_localtime(arg0, arg1));
   }
 }
@@ -16781,10 +16781,10 @@ Variant i_fb_thrift_unserialize(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_fb_thrift_unserialize(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_fb_thrift_unserialize(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_fb_thrift_unserialize(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_fb_thrift_unserialize(arg0, arg1, arg2));
   }
 }
 Variant i_sha1(CArrRef params) {
@@ -16796,7 +16796,7 @@ Variant i_sha1(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_sha1(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_sha1(arg0, arg1));
   }
 }
@@ -16808,7 +16808,7 @@ Variant i_collator_set_strength(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_collator_set_strength(arg0, arg1));
   }
 }
@@ -16821,7 +16821,7 @@ Variant i_implode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_implode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_implode(arg0, arg1));
   }
 }
@@ -16833,10 +16833,10 @@ Variant i_date_isodate_set(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_date_isodate_set(arg0, arg1, arg2), null);
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_isodate_set(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -16848,10 +16848,10 @@ Variant i_magickpaintopaqueimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickpaintopaqueimage(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickpaintopaqueimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -16863,12 +16863,12 @@ Variant i_mb_strimwidth(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_mb_strimwidth(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mb_strimwidth(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_strimwidth(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -16880,7 +16880,7 @@ Variant i_drawsetfont(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfont(arg0, arg1));
   }
 }
@@ -16892,7 +16892,7 @@ Variant i_xml_set_default_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_default_handler(arg0, arg1));
   }
 }
@@ -16904,10 +16904,10 @@ Variant i_magickchopimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickchopimage(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -16920,11 +16920,11 @@ Variant i_wordwrap(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_wordwrap(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_wordwrap(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_wordwrap(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_wordwrap(arg0, arg1, arg2, arg3));
   }
 }
@@ -16937,9 +16937,9 @@ Variant i_gzgetss(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzgetss(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_gzgetss(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzgetss(arg0, arg1, arg2));
   }
 }
@@ -16992,7 +16992,7 @@ Variant i_mb_ereg_search_pos(CArrRef params) {
     if (count <= 0) return (f_mb_ereg_search_pos());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mb_ereg_search_pos(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_ereg_search_pos(arg0, arg1));
   }
 }
@@ -17004,9 +17004,9 @@ Variant i_bccomp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_bccomp(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bccomp(arg0, arg1, arg2));
   }
 }
@@ -17029,7 +17029,7 @@ Variant i_magicksetimagecompose(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagecompose(arg0, arg1));
   }
 }
@@ -17043,7 +17043,7 @@ Variant i_apc_bin_dump(CArrRef params) {
     if (count <= 0) return (f_apc_bin_dump());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_apc_bin_dump(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_bin_dump(arg0, arg1));
   }
 }
@@ -17077,11 +17077,11 @@ Variant i_stream_copy_to_stream(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_copy_to_stream(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_stream_copy_to_stream(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_copy_to_stream(arg0, arg1, arg2, arg3));
   }
 }
@@ -17115,7 +17115,7 @@ Variant i_drawpolygon(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpolygon(arg0, arg1), null);
   }
 }
@@ -17129,17 +17129,17 @@ Variant i_mysql_connect(CArrRef params) {
     if (count <= 0) return (f_mysql_connect());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mysql_connect(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mysql_connect(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mysql_connect(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mysql_connect(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_mysql_connect(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_mysql_connect(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_connect(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -17151,7 +17151,7 @@ Variant i_xmlwriter_write_raw(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_raw(arg0, arg1));
   }
 }
@@ -17164,9 +17164,9 @@ Variant i_fgetss(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_fgetss(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_fgetss(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fgetss(arg0, arg1, arg2));
   }
 }
@@ -17178,12 +17178,12 @@ Variant i_drawarc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawarc(arg0, arg1, arg2, arg3, arg4, arg5, arg6), null);
   }
 }
@@ -17196,7 +17196,7 @@ Variant i_set_error_handler(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_set_error_handler(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_set_error_handler(arg0, arg1));
   }
 }
@@ -17209,9 +17209,9 @@ Variant i_str_word_count(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_str_word_count(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_str_word_count(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_str_word_count(arg0, arg1, arg2));
   }
 }
@@ -17223,7 +17223,7 @@ Variant i_drawsetcliprule(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetcliprule(arg0, arg1), null);
   }
 }
@@ -17236,9 +17236,9 @@ Variant i_openssl_pkcs12_read(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_pkcs12_read(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_pkcs12_read(arg0, arg1, arg2));
   }
 }
 Variant i_ldap_list(CArrRef params) {
@@ -17249,18 +17249,18 @@ Variant i_ldap_list(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_ldap_list(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_ldap_list(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_ldap_list(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_ldap_list(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 7) return (f_ldap_list(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_list(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -17278,7 +17278,7 @@ Variant i_drawsettextdecoration(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsettextdecoration(arg0, arg1), null);
   }
 }
@@ -17313,7 +17313,7 @@ Variant i_magicksetimageindex(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageindex(arg0, arg1));
   }
 }
@@ -17325,10 +17325,10 @@ Variant i_ldap_rename(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_rename(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -17362,8 +17362,8 @@ Variant i_drawscale(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawscale(arg0, arg1, arg2), null);
   }
 }
@@ -17375,7 +17375,7 @@ Variant i_drawrotate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawrotate(arg0, arg1), null);
   }
 }
@@ -17387,7 +17387,7 @@ Variant i_getservbyname(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_getservbyname(arg0, arg1));
   }
 }
@@ -17422,9 +17422,9 @@ Variant i_imagecolorclosest(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorclosest(arg0, arg1, arg2, arg3));
   }
 }
@@ -17437,9 +17437,9 @@ Variant i_magickwriteimages(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_magickwriteimages(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_magickwriteimages(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickwriteimages(arg0, arg1, arg2));
   }
 }
@@ -17451,7 +17451,7 @@ Variant i_pixelsetalpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetalpha(arg0, arg1), null);
   }
 }
@@ -17463,7 +17463,7 @@ Variant i_magicksetimageiterations(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageiterations(arg0, arg1));
   }
 }
@@ -17475,8 +17475,8 @@ Variant i_drawpathmovetoabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathmovetoabsolute(arg0, arg1, arg2), null);
   }
 }
@@ -17500,9 +17500,9 @@ Variant i_parse_ini_string(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_parse_ini_string(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_parse_ini_string(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_parse_ini_string(arg0, arg1, arg2));
   }
 }
@@ -17514,10 +17514,10 @@ Variant i_imagefilltoborder(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefilltoborder(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -17529,7 +17529,7 @@ Variant i_xml_set_notation_decl_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_notation_decl_handler(arg0, arg1));
   }
 }
@@ -17574,23 +17574,23 @@ Variant i_memcache_add_server(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_add_server(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_memcache_add_server(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_memcache_add_server(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_memcache_add_server(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_memcache_add_server(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 7) return (f_memcache_add_server(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 8) return (f_memcache_add_server(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 9) return (f_memcache_add_server(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
-    CVarRef arg9((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg9((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_add_server(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
   }
 }
@@ -17602,7 +17602,7 @@ Variant i_dom_node_remove_child(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_remove_child(arg0, arg1));
   }
 }
@@ -17615,7 +17615,7 @@ Variant i_imageinterlace(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imageinterlace(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imageinterlace(arg0, arg1));
   }
 }
@@ -17628,13 +17628,13 @@ Variant i_preg_match_all(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 3) return (f_preg_match_all(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 4) return (f_preg_match_all(arg0, arg1, ref(arg2), arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_preg_match_all(arg0, arg1, ref(arg2), arg3, arg4));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_preg_match_all(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_preg_match_all(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_preg_match_all(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_proc_terminate(CArrRef params) {
@@ -17646,7 +17646,7 @@ Variant i_proc_terminate(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_proc_terminate(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_proc_terminate(arg0, arg1));
   }
 }
@@ -17659,11 +17659,11 @@ Variant i_apc_bin_loadfile(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_bin_loadfile(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_apc_bin_loadfile(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_apc_bin_loadfile(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_bin_loadfile(arg0, arg1, arg2, arg3));
   }
 }
@@ -17681,12 +17681,12 @@ Variant i_drawpathcurvetoabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetoabsolute(arg0, arg1, arg2, arg3, arg4, arg5, arg6), null);
   }
 }
@@ -17710,14 +17710,14 @@ Variant i_preg_match(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_preg_match(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_preg_match(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 4) return (f_preg_match(arg0, arg1, ref(arg2), arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_preg_match(arg0, arg1, ref(arg2), arg3, arg4));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_preg_match(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_preg_match(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_preg_match(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_timezone_abbreviations_list(CArrRef params) {
@@ -17734,7 +17734,7 @@ Variant i_magickradialblurimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickradialblurimage(arg0, arg1));
   }
 }
@@ -17763,7 +17763,7 @@ Variant i_magickwriteimagefile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickwriteimagefile(arg0, arg1));
   }
 }
@@ -17787,11 +17787,11 @@ Variant i_exif_read_data(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_exif_read_data(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_exif_read_data(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_exif_read_data(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_exif_read_data(arg0, arg1, arg2, arg3));
   }
 }
@@ -17837,7 +17837,7 @@ Variant i_apache_note(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apache_note(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apache_note(arg0, arg1));
   }
 }
@@ -17860,7 +17860,7 @@ Variant i_drawbezier(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawbezier(arg0, arg1), null);
   }
 }
@@ -17883,7 +17883,7 @@ Variant i_ldap_set_rebind_proc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_set_rebind_proc(arg0, arg1));
   }
 }
@@ -17895,7 +17895,7 @@ Variant i_drawsetstrokecolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokecolor(arg0, arg1), null);
   }
 }
@@ -17907,7 +17907,7 @@ Variant i_drawpathlinetohorizontalrelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathlinetohorizontalrelative(arg0, arg1), null);
   }
 }
@@ -17921,15 +17921,15 @@ Variant i_gmmktime(CArrRef params) {
     if (count <= 0) return (f_gmmktime());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_gmmktime(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_gmmktime(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_gmmktime(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_gmmktime(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_gmmktime(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gmmktime(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -17942,7 +17942,7 @@ Variant i_gmdate(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gmdate(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gmdate(arg0, arg1));
   }
 }
@@ -17973,10 +17973,10 @@ Variant i_apc_fetch(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_fetch(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 2) return (f_apc_fetch(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_apc_fetch(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_apc_fetch(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_apc_fetch(arg0, arg1, arg2));
   }
 }
 Variant i_fileowner(CArrRef params) {
@@ -17998,14 +17998,14 @@ Variant i_imagecopymerge(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecopymerge(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
   }
 }
@@ -18034,11 +18034,11 @@ Variant i_imagestringup(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagestringup(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -18078,9 +18078,9 @@ Variant i_imagecolorexact(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorexact(arg0, arg1, arg2, arg3));
   }
 }
@@ -18104,17 +18104,17 @@ Variant i_setcookie(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_setcookie(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_setcookie(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_setcookie(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_setcookie(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_setcookie(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_setcookie(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_setcookie(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
   }
 }
@@ -18155,7 +18155,7 @@ Variant i_addcslashes(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_addcslashes(arg0, arg1));
   }
 }
@@ -18167,9 +18167,9 @@ Variant i_magicksetimageoption(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageoption(arg0, arg1, arg2, arg3));
   }
 }
@@ -18181,7 +18181,7 @@ Variant i_xmlwriter_write_comment(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_comment(arg0, arg1));
   }
 }
@@ -18204,9 +18204,9 @@ Variant i_dom_element_set_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_set_attribute_ns(arg0, arg1, arg2, arg3));
   }
 }
@@ -18218,9 +18218,9 @@ Variant i_dom_xpath_evaluate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_dom_xpath_evaluate(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_xpath_evaluate(arg0, arg1, arg2));
   }
 }
@@ -18243,7 +18243,7 @@ Variant i_xml_set_processing_instruction_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_processing_instruction_handler(arg0, arg1));
   }
 }
@@ -18261,9 +18261,9 @@ Variant i_memcache_delete(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_delete(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_delete(arg0, arg1, arg2));
   }
 }
@@ -18286,7 +18286,7 @@ Variant i_magickspreadimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickspreadimage(arg0, arg1));
   }
 }
@@ -18298,8 +18298,8 @@ Variant i_array_fill(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_fill(arg0, arg1, arg2));
   }
 }
@@ -18311,7 +18311,7 @@ Variant i_dom_element_set_attribute_node(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_set_attribute_node(arg0, arg1));
   }
 }
@@ -18323,12 +18323,12 @@ Variant i_memcache_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_memcache_replace(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_memcache_replace(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_replace(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -18340,7 +18340,7 @@ Variant i_stream_set_write_buffer(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_set_write_buffer(arg0, arg1));
   }
 }
@@ -18380,10 +18380,10 @@ Variant i_imagecolorset(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorset(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -18395,11 +18395,11 @@ Variant i_openssl_x509_checkpurpose(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_openssl_x509_checkpurpose(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_openssl_x509_checkpurpose(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_x509_checkpurpose(arg0, arg1, arg2, arg3));
   }
 }
@@ -18411,10 +18411,10 @@ Variant i_drawpathcurvetosmoothabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetosmoothabsolute(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -18426,8 +18426,8 @@ Variant i_array_intersect_ukey(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_intersect_ukey(count, arg0, arg1, arg2));
     return (f_array_intersect_ukey(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -18441,9 +18441,9 @@ Variant i_timezone_name_from_abbr(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_timezone_name_from_abbr(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_timezone_name_from_abbr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_timezone_name_from_abbr(arg0, arg1, arg2));
   }
 }
@@ -18455,11 +18455,11 @@ Variant i_imagefilledellipse(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefilledellipse(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -18501,7 +18501,7 @@ Variant i_intval(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_intval(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_intval(arg0, arg1));
   }
 }
@@ -18524,8 +18524,8 @@ Variant i_dom_document_get_elements_by_tag_name_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_get_elements_by_tag_name_ns(arg0, arg1, arg2));
   }
 }
@@ -18537,7 +18537,7 @@ Variant i_iconv_set_encoding(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_set_encoding(arg0, arg1));
   }
 }
@@ -18549,11 +18549,11 @@ Variant i_magickmattefloodfillimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickmattefloodfillimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -18565,7 +18565,7 @@ Variant i_mailparse_msg_get_part(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mailparse_msg_get_part(arg0, arg1));
   }
 }
@@ -18579,7 +18579,7 @@ Variant i_mb_check_encoding(CArrRef params) {
     if (count <= 0) return (f_mb_check_encoding());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mb_check_encoding(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_check_encoding(arg0, arg1));
   }
 }
@@ -18591,7 +18591,7 @@ Variant i_ldap_get_dn(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_get_dn(arg0, arg1));
   }
 }
@@ -18615,7 +18615,7 @@ Variant i_magicksetimagefilename(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_magicksetimagefilename(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagefilename(arg0, arg1));
   }
 }
@@ -18640,7 +18640,7 @@ Variant i_mysql_list_tables(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_list_tables(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_list_tables(arg0, arg1));
   }
 }
@@ -18664,7 +18664,7 @@ Variant i_ltrim(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_ltrim(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ltrim(arg0, arg1));
   }
 }
@@ -18676,7 +18676,7 @@ Variant i_magicktextureimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicktextureimage(arg0, arg1));
   }
 }
@@ -18688,9 +18688,9 @@ Variant i_mb_ereg_match(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_ereg_match(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_ereg_match(arg0, arg1, arg2));
   }
 }
@@ -18714,9 +18714,9 @@ Variant i_imagecolorallocate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorallocate(arg0, arg1, arg2, arg3));
   }
 }
@@ -18763,7 +18763,7 @@ Variant i_count(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_count(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_count(arg0, arg1));
   }
 }
@@ -18816,11 +18816,11 @@ Variant i_openssl_private_encrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 3) return (f_openssl_private_encrypt(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_private_encrypt(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_openssl_private_encrypt(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_private_encrypt(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_xhprof_enable(CArrRef params) {
@@ -18832,7 +18832,7 @@ Variant i_xhprof_enable(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_xhprof_enable(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xhprof_enable(arg0, arg1), null);
   }
 }
@@ -18855,7 +18855,7 @@ Variant i_xhprof_run_trace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xhprof_run_trace(arg0, arg1));
   }
 }
@@ -18868,11 +18868,11 @@ Variant i_xmlwriter_start_document(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_xmlwriter_start_document(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_xmlwriter_start_document(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_xmlwriter_start_document(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_document(arg0, arg1, arg2, arg3));
   }
 }
@@ -18923,8 +18923,8 @@ Variant i_dom_element_remove_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_remove_attribute_ns(arg0, arg1, arg2));
   }
 }
@@ -18948,12 +18948,12 @@ Variant i_openssl_csr_new(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_openssl_csr_new(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 3) return (f_openssl_csr_new(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_csr_new(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_openssl_csr_new(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_openssl_csr_new(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_csr_new(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_xbox_task_start(CArrRef params) {
@@ -19010,11 +19010,11 @@ Variant i_fputcsv(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fputcsv(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_fputcsv(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fputcsv(arg0, arg1, arg2, arg3));
   }
 }
@@ -19026,7 +19026,7 @@ Variant i_stream_bucket_prepend(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_bucket_prepend(arg0, arg1), null);
   }
 }
@@ -19068,11 +19068,11 @@ Variant i_memcache_get_stats(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_memcache_get_stats(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_memcache_get_stats(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_memcache_get_stats(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_get_stats(arg0, arg1, arg2, arg3));
   }
 }
@@ -19095,11 +19095,11 @@ Variant i_imagecharup(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecharup(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -19122,8 +19122,8 @@ Variant i_magickwaveimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickwaveimage(arg0, arg1, arg2));
   }
 }
@@ -19146,8 +19146,8 @@ Variant i_dom_node_is_supported(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_node_is_supported(arg0, arg1, arg2));
   }
 }
@@ -19172,7 +19172,7 @@ Variant i_mt_rand(CArrRef params) {
     if (count <= 0) return (f_mt_rand());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mt_rand(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mt_rand(arg0, arg1));
   }
 }
@@ -19246,9 +19246,9 @@ Variant i_stream_set_timeout(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_set_timeout(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_set_timeout(arg0, arg1, arg2));
   }
 }
@@ -19271,9 +19271,9 @@ Variant i_memcache_increment(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_memcache_increment(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_increment(arg0, arg1, arg2));
   }
 }
@@ -19285,7 +19285,7 @@ Variant i_pixelsetblack(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetblack(arg0, arg1), null);
   }
 }
@@ -19297,10 +19297,10 @@ Variant i_magickgetcharwidth(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgetcharwidth(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetcharwidth(arg0, arg1, arg2, arg3));
   }
 }
@@ -19312,9 +19312,9 @@ Variant i_magickshearimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickshearimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -19326,11 +19326,11 @@ Variant i_stream_socket_enable_crypto(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stream_socket_enable_crypto(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_stream_socket_enable_crypto(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_socket_enable_crypto(arg0, arg1, arg2, arg3));
   }
 }
@@ -19344,14 +19344,14 @@ Variant i_stream_socket_server(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_stream_socket_server(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 2) return (f_stream_socket_server(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_stream_socket_server(arg0, ref(arg1), ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 4) return (f_stream_socket_server(arg0, ref(arg1), ref(arg2), arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_stream_socket_server(arg0, ref(arg1), ref(arg2), arg3, arg4));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_stream_socket_server(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_stream_socket_server(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_stream_socket_server(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_stream_socket_server(arg0, arg1, arg2, arg3, arg4));
   }
 }
 Variant i_apd_set_pprof_trace(CArrRef params) {
@@ -19364,7 +19364,7 @@ Variant i_apd_set_pprof_trace(CArrRef params) {
     if (count <= 0) return (f_apd_set_pprof_trace());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_apd_set_pprof_trace(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apd_set_pprof_trace(arg0, arg1));
   }
 }
@@ -19376,7 +19376,7 @@ Variant i_ini_set(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ini_set(arg0, arg1));
   }
 }
@@ -19388,12 +19388,12 @@ Variant i_sort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_sort(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 2) return (f_sort(ref(arg0), arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_sort(ref(arg0), arg1, arg2));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_sort(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_sort(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_sort(arg0, arg1, arg2));
   }
 }
 Variant i_drawgetfont(CArrRef params) {
@@ -19438,7 +19438,7 @@ Variant i_magicksetimagerenderingintent(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagerenderingintent(arg0, arg1));
   }
 }
@@ -19450,7 +19450,7 @@ Variant i_magickreducenoiseimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickreducenoiseimage(arg0, arg1));
   }
 }
@@ -19462,10 +19462,10 @@ Variant i_magickblurimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickblurimage(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickblurimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -19483,8 +19483,8 @@ Variant i_magicktintimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicktintimage(arg0, arg1, arg2));
   }
 }
@@ -19508,7 +19508,7 @@ Variant i_strftime(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_strftime(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strftime(arg0, arg1));
   }
 }
@@ -19520,9 +19520,9 @@ Variant i_xmlwriter_start_element_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_element_ns(arg0, arg1, arg2, arg3));
   }
 }
@@ -19578,12 +19578,12 @@ Variant i_apc_bin_dumpfile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_apc_bin_dumpfile(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_apc_bin_dumpfile(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_bin_dumpfile(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -19596,11 +19596,11 @@ Variant i_xml_parse_into_struct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 3) return (f_xml_parse_into_struct(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_xml_parse_into_struct(arg0, arg1, ref(arg2), ref(arg3)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_xml_parse_into_struct(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_xml_parse_into_struct(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_icu_transliterate(CArrRef params) {
@@ -19611,7 +19611,7 @@ Variant i_icu_transliterate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_icu_transliterate(arg0, arg1));
   }
 }
@@ -19623,10 +19623,10 @@ Variant i_mb_eregi_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_mb_eregi_replace(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_eregi_replace(arg0, arg1, arg2, arg3));
   }
 }
@@ -19649,9 +19649,9 @@ Variant i_array_unshift(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 2) return (f_array_unshift(count, ref(arg0), arg1));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_array_unshift(count, arg0, arg1));
     return (f_array_unshift(count,ref(arg0), arg1, params.slice(2, count - 2, false)));
   }
 }
@@ -19709,7 +19709,7 @@ Variant i_round(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_round(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_round(arg0, arg1));
   }
 }
@@ -19750,11 +19750,11 @@ Variant i_memcache_pconnect(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_memcache_pconnect(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_memcache_pconnect(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_memcache_pconnect(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_memcache_pconnect(arg0, arg1, arg2, arg3));
   }
 }
@@ -19788,7 +19788,7 @@ Variant i_fprintf(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fprintf(count, arg0, arg1));
     return (f_fprintf(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -19824,8 +19824,8 @@ Variant i_magickmapimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickmapimage(arg0, arg1, arg2));
   }
 }
@@ -19843,7 +19843,7 @@ Variant i_pixelsetopacityquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetopacityquantum(arg0, arg1), null);
   }
 }
@@ -19877,8 +19877,8 @@ Variant i_mcrypt_generic_init(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_generic_init(arg0, arg1, arg2));
   }
 }
@@ -19901,7 +19901,7 @@ Variant i_hphp_splfileinfo_getfileinfo(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileinfo_getfileinfo(arg0, arg1));
   }
 }
@@ -19924,11 +19924,11 @@ Variant i_imagerectangle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagerectangle(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -19940,10 +19940,10 @@ Variant i_call_user_func_rpc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 5) return (f_call_user_func_rpc(count, arg0, arg1, arg2, arg3, arg4));
     return (f_call_user_func_rpc(count,arg0, arg1, arg2, arg3, arg4, params.slice(5, count - 5, false)));
   }
@@ -19978,7 +19978,7 @@ Variant i_imagepsextendfont(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepsextendfont(arg0, arg1));
   }
 }
@@ -20007,10 +20007,10 @@ Variant i_magickqueryfontmetrics(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickqueryfontmetrics(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickqueryfontmetrics(arg0, arg1, arg2, arg3));
   }
 }
@@ -20033,14 +20033,14 @@ Variant i_imagefilledarc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefilledarc(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
   }
 }
@@ -20064,8 +20064,8 @@ Variant i_xmlwriter_write_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_attribute(arg0, arg1, arg2));
   }
 }
@@ -20077,13 +20077,13 @@ Variant i_imagearc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagearc(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -20095,7 +20095,7 @@ Variant i_magickreadimages(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickreadimages(arg0, arg1));
   }
 }
@@ -20135,7 +20135,7 @@ Variant i_stream_socket_shutdown(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_socket_shutdown(arg0, arg1));
   }
 }
@@ -20159,15 +20159,15 @@ Variant i_msg_send(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_msg_send(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_msg_send(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_msg_send(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_msg_send(arg0, arg1, arg2, arg3, arg4, ref(arg5)));
+    CVarRef arg5(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_msg_send(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
 Variant i_getmygid(CArrRef params) {
@@ -20184,7 +20184,7 @@ Variant i_dom_document_get_element_by_id(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_get_element_by_id(arg0, arg1));
   }
 }
@@ -20196,9 +20196,9 @@ Variant i_array_udiff_uassoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 4) return (f_array_udiff_uassoc(count, arg0, arg1, arg2, arg3));
     return (f_array_udiff_uassoc(count,arg0, arg1, arg2, arg3, params.slice(4, count - 4, false)));
   }
@@ -20211,7 +20211,7 @@ Variant i_strptime(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strptime(arg0, arg1));
   }
 }
@@ -20223,8 +20223,8 @@ Variant i_array_diff_uassoc(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_array_diff_uassoc(count, arg0, arg1, arg2));
     return (f_array_diff_uassoc(count,arg0, arg1, arg2, params.slice(3, count - 3, false)));
   }
@@ -20237,7 +20237,7 @@ Variant i_xml_set_character_data_handler(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_set_character_data_handler(arg0, arg1));
   }
 }
@@ -20250,10 +20250,10 @@ Variant i_pcntl_waitpid(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_pcntl_waitpid(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_pcntl_waitpid(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_pcntl_waitpid(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_pcntl_waitpid(arg0, arg1, arg2));
   }
 }
 Variant i_array_replace_recursive(CArrRef params) {
@@ -20288,7 +20288,7 @@ Variant i_drawsetstrokepatternurl(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokepatternurl(arg0, arg1));
   }
 }
@@ -20300,8 +20300,8 @@ Variant i_ldap_add(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_add(arg0, arg1, arg2));
   }
 }
@@ -20324,7 +20324,7 @@ Variant i_drawsetfillrule(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfillrule(arg0, arg1), null);
   }
 }
@@ -20354,11 +20354,11 @@ Variant i_imagegd2(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagegd2(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_imagegd2(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_imagegd2(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagegd2(arg0, arg1, arg2, arg3));
   }
 }
@@ -20370,7 +20370,7 @@ Variant i_imagecreate(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecreate(arg0, arg1));
   }
 }
@@ -20383,10 +20383,10 @@ Variant i_socket_create_pair(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_socket_create_pair(arg0, arg1, arg2, ref(arg3)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_socket_create_pair(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_openssl_x509_check_private_key(CArrRef params) {
@@ -20397,7 +20397,7 @@ Variant i_openssl_x509_check_private_key(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_x509_check_private_key(arg0, arg1));
   }
 }
@@ -20409,7 +20409,7 @@ Variant i_collator_get_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_collator_get_attribute(arg0, arg1));
   }
 }
@@ -20421,8 +20421,8 @@ Variant i_shm_put_var(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_shm_put_var(arg0, arg1, arg2));
   }
 }
@@ -20440,7 +20440,7 @@ Variant i_hphp_splfileobject_seek(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_seek(arg0, arg1), null);
   }
 }
@@ -20452,7 +20452,7 @@ Variant i_stream_set_blocking(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_set_blocking(arg0, arg1));
   }
 }
@@ -20475,7 +20475,7 @@ Variant i_xml_parser_get_option(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_parser_get_option(arg0, arg1));
   }
 }
@@ -20487,9 +20487,9 @@ Variant i_array_search(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_search(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_search(arg0, arg1, arg2));
   }
 }
@@ -20535,7 +20535,7 @@ Variant i_trim(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_trim(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_trim(arg0, arg1));
   }
 }
@@ -20558,9 +20558,9 @@ Variant i_magickprofileimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_magickprofileimage(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickprofileimage(arg0, arg1, arg2));
   }
 }
@@ -20578,7 +20578,7 @@ Variant i_mysql_data_seek(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_data_seek(arg0, arg1));
   }
 }
@@ -20602,7 +20602,7 @@ Variant i_class_implements(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_class_implements(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_class_implements(arg0, arg1));
   }
 }
@@ -20615,7 +20615,7 @@ Variant i_hebrevc(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_hebrevc(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hebrevc(arg0, arg1));
   }
 }
@@ -20628,7 +20628,7 @@ Variant i_get_meta_tags(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_get_meta_tags(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_get_meta_tags(arg0, arg1));
   }
 }
@@ -20663,7 +20663,7 @@ Variant i_mysql_create_db(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_create_db(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_create_db(arg0, arg1));
   }
 }
@@ -20699,17 +20699,17 @@ Variant i_msg_receive(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 5) return (f_msg_receive(arg0, arg1, ref(arg2), arg3, ref(arg4)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 6) return (f_msg_receive(arg0, arg1, ref(arg2), arg3, ref(arg4), arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 7) return (f_msg_receive(arg0, arg1, ref(arg2), arg3, ref(arg4), arg5, arg6));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_msg_receive(arg0, arg1, ref(arg2), arg3, ref(arg4), arg5, arg6, ref(arg7)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 5) return (f_msg_receive(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 6) return (f_msg_receive(arg0, arg1, arg2, arg3, arg4, arg5));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 7) return (f_msg_receive(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
+    CVarRef arg7(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_msg_receive(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
 Variant i_is_integer(CArrRef params) {
@@ -20748,12 +20748,12 @@ Variant i_mb_send_mail(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_mb_send_mail(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mb_send_mail(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_send_mail(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -20765,7 +20765,7 @@ Variant i_hphp_splfileinfo___construct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileinfo___construct(arg0, arg1));
   }
 }
@@ -20812,9 +20812,9 @@ Variant i_evhttp_set_cache(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_evhttp_set_cache(arg0, arg1), null);
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_evhttp_set_cache(arg0, arg1, arg2), null);
   }
 }
@@ -20826,7 +20826,7 @@ Variant i_magickoilpaintimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickoilpaintimage(arg0, arg1));
   }
 }
@@ -20838,9 +20838,9 @@ Variant i_strripos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_strripos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strripos(arg0, arg1, arg2));
   }
 }
@@ -20852,8 +20852,8 @@ Variant i_magicksetimagecolormapcolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagecolormapcolor(arg0, arg1, arg2));
   }
 }
@@ -20876,7 +20876,7 @@ Variant i_magicksetimagegamma(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagegamma(arg0, arg1));
   }
 }
@@ -20890,15 +20890,15 @@ Variant i_mysql_pconnect(CArrRef params) {
     if (count <= 0) return (f_mysql_pconnect());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_mysql_pconnect(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mysql_pconnect(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mysql_pconnect(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mysql_pconnect(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_mysql_pconnect(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_pconnect(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -20910,9 +20910,9 @@ Variant i_stripos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_stripos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stripos(arg0, arg1, arg2));
   }
 }
@@ -20925,9 +20925,9 @@ Variant i_http_build_query(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_http_build_query(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_http_build_query(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_http_build_query(arg0, arg1, arg2));
   }
 }
@@ -20939,11 +20939,11 @@ Variant i_apc_add(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_apc_add(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_apc_add(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_add(arg0, arg1, arg2, arg3));
   }
 }
@@ -20956,7 +20956,7 @@ Variant i_iconv_strlen(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_iconv_strlen(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_strlen(arg0, arg1));
   }
 }
@@ -20968,7 +20968,7 @@ Variant i_vsprintf(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_vsprintf(arg0, arg1));
   }
 }
@@ -20991,9 +20991,9 @@ Variant i_mailparse_msg_extract_part_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mailparse_msg_extract_part_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mailparse_msg_extract_part_file(arg0, arg1, arg2));
   }
 }
@@ -21005,8 +21005,8 @@ Variant i_dom_xpath_register_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_xpath_register_ns(arg0, arg1, arg2));
   }
 }
@@ -21030,7 +21030,7 @@ Variant i_imagegif(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagegif(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagegif(arg0, arg1));
   }
 }
@@ -21042,8 +21042,8 @@ Variant i_eregi_replace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_eregi_replace(arg0, arg1, arg2));
   }
 }
@@ -21078,7 +21078,7 @@ Variant i_pixelsetblackquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetblackquantum(arg0, arg1), null);
   }
 }
@@ -21090,10 +21090,10 @@ Variant i_jpeg2wbmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_jpeg2wbmp(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -21105,7 +21105,7 @@ Variant i_mcrypt_get_iv_size(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_get_iv_size(arg0, arg1));
   }
 }
@@ -21118,7 +21118,7 @@ Variant i_mysql_fetch_array(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_fetch_array(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_fetch_array(arg0, arg1));
   }
 }
@@ -21141,9 +21141,9 @@ Variant i_magickborderimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickborderimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -21156,7 +21156,7 @@ Variant i_mcrypt_module_is_block_mode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_module_is_block_mode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_is_block_mode(arg0, arg1));
   }
 }
@@ -21168,11 +21168,11 @@ Variant i_mb_substr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_substr(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_substr(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_substr(arg0, arg1, arg2, arg3));
   }
 }
@@ -21207,8 +21207,8 @@ Variant i_mailparse_stream_encode(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mailparse_stream_encode(arg0, arg1, arg2));
   }
 }
@@ -21220,7 +21220,7 @@ Variant i_drawsetstrokedashoffset(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokedashoffset(arg0, arg1), null);
   }
 }
@@ -21249,7 +21249,7 @@ Variant i_pixelsetyellowquantum(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetyellowquantum(arg0, arg1), null);
   }
 }
@@ -21261,10 +21261,10 @@ Variant i_dom_document_create_element_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_dom_document_create_element_ns(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_element_ns(arg0, arg1, arg2, arg3));
   }
 }
@@ -21277,11 +21277,11 @@ Variant i_openssl_public_decrypt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count <= 3) return (f_openssl_public_decrypt(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_public_decrypt(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_openssl_public_decrypt(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_public_decrypt(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_convert_uuencode(CArrRef params) {
@@ -21315,7 +21315,7 @@ Variant i_mysql_field_len(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_field_len(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_field_len(arg0, arg1));
   }
 }
@@ -21327,7 +21327,7 @@ Variant i_drawsetclipunits(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetclipunits(arg0, arg1), null);
   }
 }
@@ -21339,7 +21339,7 @@ Variant i_mdecrypt_generic(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mdecrypt_generic(arg0, arg1));
   }
 }
@@ -21362,7 +21362,7 @@ Variant i_xmlwriter_start_pi(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_pi(arg0, arg1));
   }
 }
@@ -21375,7 +21375,7 @@ Variant i_mysql_field_type(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_field_type(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_field_type(arg0, arg1));
   }
 }
@@ -21387,10 +21387,10 @@ Variant i_apc_cas(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_apc_cas(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_cas(arg0, arg1, arg2, arg3));
   }
 }
@@ -21403,7 +21403,7 @@ Variant i_getopt(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_getopt(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_getopt(arg0, arg1));
   }
 }
@@ -21426,7 +21426,7 @@ Variant i_drawsetgravity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetgravity(arg0, arg1), null);
   }
 }
@@ -21449,11 +21449,11 @@ Variant i_magickquantizeimages(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickquantizeimages(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -21483,7 +21483,7 @@ Variant i_stream_context_set_param(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_context_set_param(arg0, arg1));
   }
 }
@@ -21495,7 +21495,7 @@ Variant i_drawpathlinetohorizontalabsolute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathlinetohorizontalabsolute(arg0, arg1), null);
   }
 }
@@ -21508,10 +21508,10 @@ Variant i_openssl_csr_export(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_openssl_csr_export(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_csr_export(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_openssl_csr_export(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_csr_export(arg0, arg1, arg2));
   }
 }
 Variant i_socket_connect(CArrRef params) {
@@ -21522,9 +21522,9 @@ Variant i_socket_connect(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_socket_connect(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_connect(arg0, arg1, arg2));
   }
 }
@@ -21580,7 +21580,7 @@ Variant i_str_repeat(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_str_repeat(arg0, arg1));
   }
 }
@@ -21593,7 +21593,7 @@ Variant i_stream_resolve_include_path(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_stream_resolve_include_path(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_resolve_include_path(arg0, arg1));
   }
 }
@@ -21605,18 +21605,18 @@ Variant i_ldap_read(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_ldap_read(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_ldap_read(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_ldap_read(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 6) return (f_ldap_read(arg0, arg1, arg2, arg3, arg4, arg5));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 7) return (f_ldap_read(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_read(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
   }
 }
@@ -21630,12 +21630,12 @@ Variant i_apc_dec(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_dec(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_apc_dec(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_apc_dec(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_apc_dec(arg0, arg1, ref(arg2), arg3));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_apc_dec(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_apc_dec(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_posix_get_last_error(CArrRef params) {
@@ -21674,7 +21674,7 @@ Variant i_curl_setopt_array(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_curl_setopt_array(arg0, arg1));
   }
 }
@@ -21687,13 +21687,13 @@ Variant i_socket_recvfrom(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 5) return (f_socket_recvfrom(arg0, ref(arg1), arg2, arg3, ref(arg4)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_socket_recvfrom(arg0, ref(arg1), arg2, arg3, ref(arg4), ref(arg5)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 5) return (f_socket_recvfrom(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_socket_recvfrom(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
 Variant i_imagepstext(CArrRef params) {
@@ -21704,21 +21704,21 @@ Variant i_imagepstext(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 8) return (f_imagepstext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 9) return (f_imagepstext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
-    CVarRef arg9((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg9((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 10) return (f_imagepstext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
-    CVarRef arg10((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg10((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 11) return (f_imagepstext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10));
-    CVarRef arg11((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg11((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepstext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11));
   }
 }
@@ -21731,13 +21731,13 @@ Variant i_mb_encode_mimeheader(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_encode_mimeheader(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mb_encode_mimeheader(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_mb_encode_mimeheader(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_mb_encode_mimeheader(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_encode_mimeheader(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -21750,10 +21750,10 @@ Variant i_socket_getsockname(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_socket_getsockname(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_socket_getsockname(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_socket_getsockname(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_socket_getsockname(arg0, arg1, arg2));
   }
 }
 Variant i_imagecreatefromstring(CArrRef params) {
@@ -21775,8 +21775,8 @@ Variant i_vfprintf(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_vfprintf(arg0, arg1, arg2));
   }
 }
@@ -21788,10 +21788,10 @@ Variant i_magickcompareimages(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickcompareimages(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickcompareimages(arg0, arg1, arg2, arg3));
   }
 }
@@ -21803,7 +21803,7 @@ Variant i_fscanf(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_fscanf(count, arg0, arg1));
     return (f_fscanf(count,arg0, arg1, params.slice(2, count - 2, false)));
   }
@@ -21816,7 +21816,7 @@ Variant i_stristr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stristr(arg0, arg1));
   }
 }
@@ -21828,8 +21828,8 @@ Variant i_xml_parser_set_option(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xml_parser_set_option(arg0, arg1, arg2));
   }
 }
@@ -21841,7 +21841,7 @@ Variant i_dom_document_schema_validate_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_schema_validate_file(arg0, arg1));
   }
 }
@@ -21853,7 +21853,7 @@ Variant i_magicksetimageinterlacescheme(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimageinterlacescheme(arg0, arg1));
   }
 }
@@ -21865,7 +21865,7 @@ Variant i_dom_element_get_attribute_node(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_get_attribute_node(arg0, arg1));
   }
 }
@@ -21877,7 +21877,7 @@ Variant i_dom_document_create_cdatasection(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_create_cdatasection(arg0, arg1));
   }
 }
@@ -21900,7 +21900,7 @@ Variant i_magicksetimagetype(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagetype(arg0, arg1));
   }
 }
@@ -21924,15 +21924,15 @@ Variant i_date_sunrise(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_date_sunrise(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_date_sunrise(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_date_sunrise(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_date_sunrise(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_date_sunrise(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_sunrise(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -21951,9 +21951,9 @@ Variant i_mb_detect_encoding(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mb_detect_encoding(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mb_detect_encoding(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_detect_encoding(arg0, arg1, arg2));
   }
 }
@@ -21988,7 +21988,7 @@ Variant i_imagepalettecopy(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepalettecopy(arg0, arg1), null);
   }
 }
@@ -22011,7 +22011,7 @@ Variant i_rename_function(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_rename_function(arg0, arg1));
   }
 }
@@ -22024,7 +22024,7 @@ Variant i_gzcompress(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzcompress(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzcompress(arg0, arg1));
   }
 }
@@ -22047,9 +22047,9 @@ Variant i_bcadd(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_bcadd(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcadd(arg0, arg1, arg2));
   }
 }
@@ -22061,8 +22061,8 @@ Variant i_curl_setopt(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_curl_setopt(arg0, arg1, arg2));
   }
 }
@@ -22074,7 +22074,7 @@ Variant i_imagealphablending(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagealphablending(arg0, arg1));
   }
 }
@@ -22097,9 +22097,9 @@ Variant i_drawannotation(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawannotation(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -22117,7 +22117,7 @@ Variant i_magicksetimagedispose(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagedispose(arg0, arg1));
   }
 }
@@ -22129,7 +22129,7 @@ Variant i_drawsetfontsize(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfontsize(arg0, arg1), null);
   }
 }
@@ -22174,9 +22174,9 @@ Variant i_hphp_invoke_method(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_invoke_method(arg0, arg1, arg2, arg3));
   }
 }
@@ -22217,7 +22217,7 @@ Variant i_mysql_field_flags(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_field_flags(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_field_flags(arg0, arg1));
   }
 }
@@ -22240,7 +22240,7 @@ Variant i_strchr(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strchr(arg0, arg1));
   }
 }
@@ -22264,7 +22264,7 @@ Variant i_class_parents(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_class_parents(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_class_parents(arg0, arg1));
   }
 }
@@ -22276,10 +22276,10 @@ Variant i_date_time_set(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_date_time_set(arg0, arg1, arg2), null);
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_time_set(arg0, arg1, arg2, arg3), null);
   }
 }
@@ -22291,11 +22291,11 @@ Variant i_iconv_strpos(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_iconv_strpos(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_iconv_strpos(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iconv_strpos(arg0, arg1, arg2, arg3));
   }
 }
@@ -22336,9 +22336,9 @@ Variant i_dom_document_savexml(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_dom_document_savexml(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_dom_document_savexml(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_savexml(arg0, arg1, arg2));
   }
 }
@@ -22351,7 +22351,7 @@ Variant i_trigger_error(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_trigger_error(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_trigger_error(arg0, arg1));
   }
 }
@@ -22365,7 +22365,7 @@ Variant i_pcntl_getpriority(CArrRef params) {
     if (count <= 0) return (f_pcntl_getpriority());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_pcntl_getpriority(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pcntl_getpriority(arg0, arg1));
   }
 }
@@ -22383,7 +22383,7 @@ Variant i_strcmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strcmp(arg0, arg1));
   }
 }
@@ -22406,7 +22406,7 @@ Variant i_hphp_instanceof(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_instanceof(arg0, arg1));
   }
 }
@@ -22419,7 +22419,7 @@ Variant i_import_request_variables(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_import_request_variables(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_import_request_variables(arg0, arg1));
   }
 }
@@ -22448,9 +22448,9 @@ Variant i_spliti(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_spliti(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_spliti(arg0, arg1, arg2));
   }
 }
@@ -22498,8 +22498,8 @@ Variant i_passthru(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_passthru(arg0), null);
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_passthru(arg0, ref(arg1)), null);
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_passthru(arg0, arg1), null);
   }
 }
 Variant i_magickmontageimage(CArrRef params) {
@@ -22510,11 +22510,11 @@ Variant i_magickmontageimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickmontageimage(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -22534,7 +22534,7 @@ Variant i_apc_cache_info(CArrRef params) {
     if (count <= 0) return (f_apc_cache_info());
     CVarRef arg0((ad->getValue(pos)));
     if (count == 1) return (f_apc_cache_info(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_cache_info(arg0, arg1));
   }
 }
@@ -22546,8 +22546,8 @@ Variant i_convert_cyr_string(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_convert_cyr_string(arg0, arg1, arg2));
   }
 }
@@ -22571,10 +22571,10 @@ Variant i_drawline(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawline(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
@@ -22586,7 +22586,7 @@ Variant i_drawsetfillcolor(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfillcolor(arg0, arg1), null);
   }
 }
@@ -22598,9 +22598,9 @@ Variant i_gzopen(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_gzopen(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzopen(arg0, arg1, arg2));
   }
 }
@@ -22612,7 +22612,7 @@ Variant i_getservbyport(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_getservbyport(arg0, arg1));
   }
 }
@@ -22646,7 +22646,7 @@ Variant i_curl_multi_add_handle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_curl_multi_add_handle(arg0, arg1));
   }
 }
@@ -22693,9 +22693,9 @@ Variant i_imagewbmp(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagewbmp(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_imagewbmp(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagewbmp(arg0, arg1, arg2));
   }
 }
@@ -22707,7 +22707,7 @@ Variant i_shm_get_var(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_shm_get_var(arg0, arg1));
   }
 }
@@ -22753,7 +22753,7 @@ Variant i_array_filter(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_array_filter(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_filter(arg0, arg1));
   }
 }
@@ -22766,7 +22766,7 @@ Variant i_mysql_query(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_query(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_query(arg0, arg1));
   }
 }
@@ -22779,7 +22779,7 @@ Variant i_crypt(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_crypt(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_crypt(arg0, arg1));
   }
 }
@@ -22813,7 +22813,7 @@ Variant i_move_uploaded_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_move_uploaded_file(arg0, arg1));
   }
 }
@@ -22826,8 +22826,8 @@ Variant i_hphp_splfileobject_flock(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_hphp_splfileobject_flock(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_hphp_splfileobject_flock(arg0, arg1));
   }
 }
 Variant i_imagecopyresampled(CArrRef params) {
@@ -22838,15 +22838,15 @@ Variant i_imagecopyresampled(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg9((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg9((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecopyresampled(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9));
   }
 }
@@ -22880,7 +22880,7 @@ Variant i_imagesettile(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagesettile(arg0, arg1));
   }
 }
@@ -22904,7 +22904,7 @@ Variant i_fgets(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_fgets(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fgets(arg0, arg1));
   }
 }
@@ -22916,7 +22916,7 @@ Variant i_tempnam(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_tempnam(arg0, arg1));
   }
 }
@@ -22928,9 +22928,9 @@ Variant i_bcdiv(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_bcdiv(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_bcdiv(arg0, arg1, arg2));
   }
 }
@@ -22942,7 +22942,7 @@ Variant i_hphp_splfileinfo_getbasename(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileinfo_getbasename(arg0, arg1));
   }
 }
@@ -22954,12 +22954,12 @@ Variant i_rsort(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    if (count <= 1) return (f_rsort(ref(arg0)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 2) return (f_rsort(ref(arg0), arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_rsort(ref(arg0), arg1, arg2));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    if (count <= 1) return (f_rsort(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_rsort(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_rsort(arg0, arg1, arg2));
   }
 }
 Variant i_drawgettextdecoration(CArrRef params) {
@@ -23005,12 +23005,12 @@ Variant i_apc_inc(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_inc(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_apc_inc(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_apc_inc(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_apc_inc(arg0, arg1, ref(arg2), arg3));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_apc_inc(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_apc_inc(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_hphp_create_object(CArrRef params) {
@@ -23021,7 +23021,7 @@ Variant i_hphp_create_object(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_create_object(arg0, arg1));
   }
 }
@@ -23044,15 +23044,15 @@ Variant i_imagefttext(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 8) return (f_imagefttext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-    CVarRef arg8((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg8((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefttext(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
   }
 }
@@ -23070,9 +23070,9 @@ Variant i_ldap_compare(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_ldap_compare(arg0, arg1, arg2, arg3));
   }
 }
@@ -23086,12 +23086,12 @@ Variant i_dns_get_record(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_dns_get_record(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_dns_get_record(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count == 3) return (f_dns_get_record(arg0, arg1, ref(arg2)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_dns_get_record(arg0, arg1, ref(arg2), ref(arg3)));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_dns_get_record(arg0, arg1, arg2));
+    CVarRef arg3(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_dns_get_record(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_openssl_get_privatekey(CArrRef params) {
@@ -23103,7 +23103,7 @@ Variant i_openssl_get_privatekey(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_openssl_get_privatekey(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_get_privatekey(arg0, arg1));
   }
 }
@@ -23116,11 +23116,11 @@ Variant i_imagepng(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagepng(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_imagepng(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_imagepng(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagepng(arg0, arg1, arg2, arg3));
   }
 }
@@ -23132,9 +23132,9 @@ Variant i_socket_bind(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_socket_bind(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_bind(arg0, arg1, arg2));
   }
 }
@@ -23163,7 +23163,7 @@ Variant i_drawsetstrokelinecap(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetstrokelinecap(arg0, arg1), null);
   }
 }
@@ -23175,10 +23175,10 @@ Variant i_xmlwriter_write_attribute_ns(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_write_attribute_ns(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -23191,9 +23191,9 @@ Variant i_array_keys(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_array_keys(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_array_keys(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_keys(arg0, arg1, arg2));
   }
 }
@@ -23206,9 +23206,9 @@ Variant i_call_user_method_array(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_call_user_method_array(arg0, ref(arg1), arg2));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_call_user_method_array(arg0, arg1, arg2));
   }
 }
 Variant i_magickmagnifyimage(CArrRef params) {
@@ -23281,7 +23281,7 @@ Variant i_gzread(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzread(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzread(arg0, arg1));
   }
 }
@@ -23293,13 +23293,13 @@ Variant i_drawpathellipticarcrelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg6((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg7((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg7((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathellipticarcrelative(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7), null);
   }
 }
@@ -23311,9 +23311,9 @@ Variant i_openssl_csr_export_to_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_openssl_csr_export_to_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_csr_export_to_file(arg0, arg1, arg2));
   }
 }
@@ -23325,7 +23325,7 @@ Variant i_magicksetimagecolorspace(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetimagecolorspace(arg0, arg1));
   }
 }
@@ -23359,8 +23359,8 @@ Variant i_strncmp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_strncmp(arg0, arg1, arg2));
   }
 }
@@ -23384,7 +23384,7 @@ Variant i_pixelsetmagenta(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetmagenta(arg0, arg1), null);
   }
 }
@@ -23396,7 +23396,7 @@ Variant i_dom_element_remove_attribute(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_element_remove_attribute(arg0, arg1));
   }
 }
@@ -23431,10 +23431,10 @@ Variant i_openssl_open(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_open(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_open(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_apc_bin_load(CArrRef params) {
@@ -23446,9 +23446,9 @@ Variant i_apc_bin_load(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_apc_bin_load(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_apc_bin_load(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_bin_load(arg0, arg1, arg2));
   }
 }
@@ -23460,8 +23460,8 @@ Variant i_current(CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValueRef(pos)));
-    return (f_current(ref(arg0)));
+    CVarRef arg0(ref(ad->getValueRef(pos)));
+    return (f_current(arg0));
   }
 }
 Variant i_stream_register_wrapper(CArrRef params) {
@@ -23472,7 +23472,7 @@ Variant i_stream_register_wrapper(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_stream_register_wrapper(arg0, arg1));
   }
 }
@@ -23484,7 +23484,7 @@ Variant i_hphp_stats(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_stats(arg0, arg1), null);
   }
 }
@@ -23497,7 +23497,7 @@ Variant i_opendir(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_opendir(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_opendir(arg0, arg1));
   }
 }
@@ -23521,7 +23521,7 @@ Variant i_mcrypt_module_is_block_algorithm_mode(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mcrypt_module_is_block_algorithm_mode(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mcrypt_module_is_block_algorithm_mode(arg0, arg1));
   }
 }
@@ -23533,7 +23533,7 @@ Variant i_posix_setpgid(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_posix_setpgid(arg0, arg1));
   }
 }
@@ -23546,10 +23546,10 @@ Variant i_dns_get_mx(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_dns_get_mx(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_dns_get_mx(arg0, ref(arg1), ref(arg2)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_dns_get_mx(arg0, arg1));
+    CVarRef arg2(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_dns_get_mx(arg0, arg1, arg2));
   }
 }
 Variant i_headers_list(CArrRef params) {
@@ -23621,8 +23621,8 @@ Variant i_magicksetresolution(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetresolution(arg0, arg1, arg2));
   }
 }
@@ -23645,7 +23645,7 @@ Variant i_dom_document_relaxng_validate_file(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dom_document_relaxng_validate_file(arg0, arg1));
   }
 }
@@ -23668,11 +23668,11 @@ Variant i_apc_store(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_apc_store(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_apc_store(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_apc_store(arg0, arg1, arg2, arg3));
   }
 }
@@ -23718,9 +23718,9 @@ Variant i_magickmotionblurimage(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickmotionblurimage(arg0, arg1, arg2, arg3));
   }
 }
@@ -23744,8 +23744,8 @@ Variant i_magicksetwandsize(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicksetwandsize(arg0, arg1, arg2));
   }
 }
@@ -23758,11 +23758,11 @@ Variant i_number_format(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_number_format(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_number_format(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_number_format(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_number_format(arg0, arg1, arg2, arg3));
   }
 }
@@ -23774,9 +23774,9 @@ Variant i_array_reduce(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_array_reduce(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_array_reduce(arg0, arg1, arg2));
   }
 }
@@ -23788,7 +23788,7 @@ Variant i_xmlwriter_start_dtd_attlist(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_start_dtd_attlist(arg0, arg1));
   }
 }
@@ -23835,9 +23835,9 @@ Variant i_mysql_fetch_object(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_mysql_fetch_object(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_mysql_fetch_object(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_fetch_object(arg0, arg1, arg2));
   }
 }
@@ -23849,7 +23849,7 @@ Variant i_drawpathlinetoverticalrelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathlinetoverticalrelative(arg0, arg1), null);
   }
 }
@@ -23873,15 +23873,15 @@ Variant i_date_sunset(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_date_sunset(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_date_sunset(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_date_sunset(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_date_sunset(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 5) return (f_date_sunset(arg0, arg1, arg2, arg3, arg4));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_date_sunset(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -23893,7 +23893,7 @@ Variant i_symlink(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_symlink(arg0, arg1));
   }
 }
@@ -23905,9 +23905,9 @@ Variant i_imagesetpixel(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagesetpixel(arg0, arg1, arg2, arg3));
   }
 }
@@ -23931,9 +23931,9 @@ Variant i_split(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_split(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_split(arg0, arg1, arg2));
   }
 }
@@ -23945,7 +23945,7 @@ Variant i_drawsetfontstyle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawsetfontstyle(arg0, arg1), null);
   }
 }
@@ -23968,9 +23968,9 @@ Variant i_mysql_db_query(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mysql_db_query(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mysql_db_query(arg0, arg1, arg2));
   }
 }
@@ -23982,10 +23982,10 @@ Variant i_imagecolorclosestalpha(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagecolorclosestalpha(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -23998,7 +23998,7 @@ Variant i_gzuncompress(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzuncompress(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzuncompress(arg0, arg1));
   }
 }
@@ -24022,7 +24022,7 @@ Variant i_socket_create_listen(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_socket_create_listen(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_socket_create_listen(arg0, arg1));
   }
 }
@@ -24056,9 +24056,9 @@ Variant i_iptcembed(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_iptcembed(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_iptcembed(arg0, arg1, arg2));
   }
 }
@@ -24082,7 +24082,7 @@ Variant i_rtrim(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_rtrim(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_rtrim(arg0, arg1));
   }
 }
@@ -24095,7 +24095,7 @@ Variant i_print_r(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_print_r(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_print_r(arg0, arg1));
   }
 }
@@ -24107,8 +24107,8 @@ Variant i_drawpathcurvetoquadraticbeziersmoothrelative(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetoquadraticbeziersmoothrelative(arg0, arg1, arg2), null);
   }
 }
@@ -24121,12 +24121,12 @@ Variant i_openssl_pkey_export(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    if (count <= 2) return (f_openssl_pkey_export(arg0, ref(arg1)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    if (count == 3) return (f_openssl_pkey_export(arg0, ref(arg1), arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    return (f_openssl_pkey_export(arg0, ref(arg1), arg2, arg3));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_openssl_pkey_export(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_openssl_pkey_export(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_openssl_pkey_export(arg0, arg1, arg2, arg3));
   }
 }
 Variant i_abs(CArrRef params) {
@@ -24166,8 +24166,8 @@ Variant i_curl_multi_exec(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-    return (f_curl_multi_exec(arg0, ref(arg1)));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_curl_multi_exec(arg0, arg1));
   }
 }
 Variant i_htmlspecialchars(CArrRef params) {
@@ -24179,11 +24179,11 @@ Variant i_htmlspecialchars(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_htmlspecialchars(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_htmlspecialchars(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_htmlspecialchars(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_htmlspecialchars(arg0, arg1, arg2, arg3));
   }
 }
@@ -24196,9 +24196,9 @@ Variant i_imagexbm(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_imagexbm(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_imagexbm(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagexbm(arg0, arg1, arg2));
   }
 }
@@ -24238,11 +24238,11 @@ Variant i_imageellipse(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imageellipse(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -24265,7 +24265,7 @@ Variant i_pixelsetopacity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_pixelsetopacity(arg0, arg1), null);
   }
 }
@@ -24277,7 +24277,7 @@ Variant i_lchgrp(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_lchgrp(arg0, arg1));
   }
 }
@@ -24290,13 +24290,13 @@ Variant i_simplexml_load_file(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_simplexml_load_file(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_simplexml_load_file(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) return (f_simplexml_load_file(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) return (f_simplexml_load_file(arg0, arg1, arg2, arg3));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_simplexml_load_file(arg0, arg1, arg2, arg3, arg4));
   }
 }
@@ -24325,9 +24325,9 @@ Variant i_gzseek(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_gzseek(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzseek(arg0, arg1, arg2));
   }
 }
@@ -24339,10 +24339,10 @@ Variant i_magickgetmaxtextadvance(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 3) return (f_magickgetmaxtextadvance(arg0, arg1, arg2));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magickgetmaxtextadvance(arg0, arg1, arg2, arg3));
   }
 }
@@ -24365,11 +24365,11 @@ Variant i_imagefilledrectangle(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_imagefilledrectangle(arg0, arg1, arg2, arg3, arg4, arg5));
   }
 }
@@ -24381,11 +24381,11 @@ Variant i_drawpushpattern(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
-    CVarRef arg5((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpushpattern(arg0, arg1, arg2, arg3, arg4, arg5), null);
   }
 }
@@ -24397,7 +24397,7 @@ Variant i_xmlwriter_set_indent(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_xmlwriter_set_indent(arg0, arg1));
   }
 }
@@ -24410,7 +24410,7 @@ Variant i_openssl_csr_get_subject(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_openssl_csr_get_subject(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_openssl_csr_get_subject(arg0, arg1));
   }
 }
@@ -24434,7 +24434,7 @@ Variant i_gzdeflate(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_gzdeflate(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzdeflate(arg0, arg1));
   }
 }
@@ -24447,7 +24447,7 @@ Variant i_dns_check_record(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_dns_check_record(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_dns_check_record(arg0, arg1));
   }
 }
@@ -24460,9 +24460,9 @@ Variant i_magicknegateimage(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_magicknegateimage(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) return (f_magicknegateimage(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_magicknegateimage(arg0, arg1, arg2));
   }
 }
@@ -24486,7 +24486,7 @@ Variant i_create_function(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_create_function(arg0, arg1));
   }
 }
@@ -24499,7 +24499,7 @@ Variant i_str_split(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     if (count <= 1) return (f_str_split(arg0));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_str_split(arg0, arg1));
   }
 }
@@ -24545,9 +24545,9 @@ Variant i_mb_encode_numericentity(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count <= 2) return (f_mb_encode_numericentity(arg0, arg1));
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_mb_encode_numericentity(arg0, arg1, arg2));
   }
 }
@@ -24559,7 +24559,7 @@ Variant i_fb_call_user_func_array_safe(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_fb_call_user_func_array_safe(arg0, arg1));
   }
 }

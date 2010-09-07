@@ -1096,7 +1096,7 @@ Variant c_ReflectionObject::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getstaticpropertyvalue(arg0, arg1));
         }
       }
@@ -1200,7 +1200,7 @@ Variant c_ReflectionObject::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -1344,7 +1344,7 @@ Variant c_ReflectionObject::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setstaticpropertyvalue(arg0, arg1), null);
         }
       }
@@ -1497,7 +1497,7 @@ Variant c_ReflectionObject::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getstaticpropertyvalue(arg0, arg1));
         }
       }
@@ -1651,7 +1651,7 @@ Variant c_ReflectionObject::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -1669,7 +1669,7 @@ Variant c_ReflectionObject::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setstaticpropertyvalue(arg0, arg1), null);
         }
       }
@@ -2234,7 +2234,7 @@ Variant c_ReflectionObject::os_invoke(const char *c, MethodIndex methodIndex, co
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -2252,7 +2252,7 @@ Variant c_ReflectionObject::os_invoke(const char *c, MethodIndex methodIndex, co
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -3727,7 +3727,7 @@ Variant c_ReflectionException::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -3831,7 +3831,7 @@ Variant c_ReflectionException::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4520,7 +4520,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getstaticpropertyvalue(arg0, arg1));
         }
       }
@@ -4624,7 +4624,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -4762,7 +4762,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_test(arg0, arg1));
         }
       }
@@ -4780,7 +4780,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setstaticpropertyvalue(arg0, arg1), null);
         }
       }
@@ -4944,7 +4944,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t_getstaticpropertyvalue(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_getstaticpropertyvalue(arg0, arg1));
         }
       }
@@ -5098,7 +5098,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_test(arg0, arg1));
         }
       }
@@ -5110,7 +5110,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -5128,7 +5128,7 @@ Variant c_ReflectionClass::o_invoke(MethodIndex methodIndex, const char *s, CArr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setstaticpropertyvalue(arg0, arg1), null);
         }
       }
@@ -5724,7 +5724,7 @@ Variant c_ReflectionClass::os_invoke(const char *c, MethodIndex methodIndex, con
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -5742,7 +5742,7 @@ Variant c_ReflectionClass::os_invoke(const char *c, MethodIndex methodIndex, con
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -7765,7 +7765,7 @@ Object c_ReflectionClass::t_newinstance(int num_args, Array args /* = Array() */
 Object c_ReflectionClass::t_newinstanceargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::newInstanceArgs);
   {
-    String tmp1((toString(m_name)));
+    const String &tmp1((toString(m_name)));
     const Array &tmp2((toArray(x_array_values(v_args))));
     return x_hphp_create_object(tmp1, tmp2);
   }
@@ -7843,7 +7843,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   {
     bool tmp9;
     {
-      String tmp10((toString(v_cls)));
+      const String &tmp10((toString(v_cls)));
       const String &tmp11((toString(t_fetch(NAMSTR(s_sys_ss2d13045e, "parent")))));
       int tmp12((x_strcasecmp(tmp10, tmp11)));
       tmp9 = (equal(tmp12, 0LL));
@@ -8213,7 +8213,7 @@ Variant c_ReflectionExtension::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -8285,7 +8285,7 @@ Variant c_ReflectionExtension::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -8503,7 +8503,7 @@ Variant c_ReflectionExtension::os_invoke(const char *c, MethodIndex methodIndex,
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -8521,7 +8521,7 @@ Variant c_ReflectionExtension::os_invoke(const char *c, MethodIndex methodIndex,
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -9186,7 +9186,7 @@ ObjectData *c_ReflectionMethod::dynCreate(CArrRef params, bool construct /* = tr
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     }
   }
@@ -9199,7 +9199,7 @@ void c_ReflectionMethod::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   }
 }
@@ -9311,7 +9311,7 @@ Variant c_ReflectionMethod::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9335,7 +9335,7 @@ Variant c_ReflectionMethod::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_invokeargs(arg0, arg1));
         }
       }
@@ -9359,8 +9359,8 @@ Variant c_ReflectionMethod::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1, arg2));
         }
       }
@@ -9456,7 +9456,7 @@ Variant c_ReflectionMethod::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_invokeargs(arg0, arg1));
         }
       }
@@ -9508,7 +9508,7 @@ Variant c_ReflectionMethod::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9564,8 +9564,8 @@ Variant c_ReflectionMethod::o_invoke(MethodIndex methodIndex, const char *s, CAr
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1, arg2));
         }
       }
@@ -10004,8 +10004,8 @@ Variant c_ReflectionMethod::os_invoke(const char *c, MethodIndex methodIndex, co
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1, arg2));
         }
       }
@@ -10023,8 +10023,8 @@ Variant c_ReflectionMethod::os_invoke(const char *c, MethodIndex methodIndex, co
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1, arg2));
         }
       }
@@ -11060,8 +11060,8 @@ Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
   x_array_shift(ref(v_args));
   {
     Variant tmp2((v_obj));
-    String tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-    String tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+    const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
     return x_hphp_invoke_method(tmp2, tmp3, tmp4, toArray(v_args));
   }
 } /* function */
@@ -11070,8 +11070,8 @@ Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invokeArgs);
   {
     Variant tmp1((v_obj));
-    String tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-    String tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+    const String &tmp3((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
     const Array &tmp4((toArray(x_array_values(v_args))));
     return x_hphp_invoke_method(tmp1, tmp2, tmp3, tmp4);
   }
@@ -11293,7 +11293,7 @@ ObjectData *c_ReflectionProperty::dynCreate(CArrRef params, bool construct /* = 
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     }
   }
@@ -11306,7 +11306,7 @@ void c_ReflectionProperty::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   }
 }
@@ -11401,7 +11401,7 @@ Variant c_ReflectionProperty::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -11419,8 +11419,8 @@ Variant c_ReflectionProperty::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1, arg2));
         }
       }
@@ -11450,7 +11450,7 @@ Variant c_ReflectionProperty::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setvalue(arg0, arg1));
         }
       }
@@ -11502,8 +11502,8 @@ Variant c_ReflectionProperty::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1, arg2));
         }
       }
@@ -11543,7 +11543,7 @@ Variant c_ReflectionProperty::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setvalue(arg0, arg1));
         }
       }
@@ -11573,7 +11573,7 @@ Variant c_ReflectionProperty::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -11792,8 +11792,8 @@ Variant c_ReflectionProperty::os_invoke(const char *c, MethodIndex methodIndex, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1, arg2));
         }
       }
@@ -11811,8 +11811,8 @@ Variant c_ReflectionProperty::os_invoke(const char *c, MethodIndex methodIndex, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1, arg2));
         }
       }
@@ -12517,8 +12517,8 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
   if (toBoolean(t_isstatic())) {
     {
       {
-        String tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-        String tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
         return x_hphp_get_static_property(tmp1, tmp2);
       }
     }
@@ -12526,9 +12526,9 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
   if (toBoolean(v_obj)) {
     {
       {
-        Object tmp3((toObject(v_obj)));
-        String tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-        String tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+        const Object &tmp3((toObject(v_obj)));
+        const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+        const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
         return x_hphp_get_property(tmp3, tmp4, tmp5);
       }
     }
@@ -12541,16 +12541,16 @@ Variant c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   if (toBoolean(t_isstatic())) {
     {
       {
-        String tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-        String tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+        const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+        const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
         return (x_hphp_set_static_property(tmp1, tmp2, v_value), null);
       }
     }
   }
   {
-    Object tmp3((toObject(v_obj)));
-    String tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-    String tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const Object &tmp3((toObject(v_obj)));
+    const String &tmp4((toString(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+    const String &tmp5((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
     x_hphp_set_property(tmp3, tmp4, tmp5, v_value);
   }
   return null;
@@ -12781,7 +12781,7 @@ Variant c_ReflectionFunction::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -12929,7 +12929,7 @@ Variant c_ReflectionFunction::o_invoke(MethodIndex methodIndex, const char *s, C
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1));
         }
       }
@@ -13212,7 +13212,7 @@ Variant c_ReflectionFunction::os_invoke(const char *c, MethodIndex methodIndex, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -13230,7 +13230,7 @@ Variant c_ReflectionFunction::os_invoke(const char *c, MethodIndex methodIndex, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1));
         }
       }
@@ -13913,7 +13913,7 @@ Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */)
     v_args = tmp1;
   }
   {
-    String tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp2((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
     return x_hphp_invoke(tmp2, v_args);
   }
 } /* function */
@@ -13921,7 +13921,7 @@ Variant c_ReflectionFunction::t_invoke(int num_args, Array args /* = Array() */)
 Variant c_ReflectionFunction::t_invokeargs(CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::invokeArgs);
   {
-    String tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
+    const String &tmp1((toString(m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true))));
     const Array &tmp2((toArray(x_array_values(v_args))));
     return x_hphp_invoke(tmp1, tmp2);
   }
@@ -14032,7 +14032,7 @@ ObjectData *c_ReflectionParameter::dynCreate(CArrRef params, bool construct /* =
       ArrayData *ad(params.get());
       ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
       CVarRef arg0((ad->getValue(pos)));
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     }
   }
@@ -14045,7 +14045,7 @@ void c_ReflectionParameter::dynConstruct(CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   }
 }
@@ -14108,7 +14108,7 @@ Variant c_ReflectionParameter::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -14126,8 +14126,8 @@ Variant c_ReflectionParameter::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1, arg2));
         }
       }
@@ -14199,8 +14199,8 @@ Variant c_ReflectionParameter::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(o_getClassName(), arg0, arg1, arg2));
         }
       }
@@ -14262,7 +14262,7 @@ Variant c_ReflectionParameter::o_invoke(MethodIndex methodIndex, const char *s, 
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -14455,8 +14455,8 @@ Variant c_ReflectionParameter::os_invoke(const char *c, MethodIndex methodIndex,
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1, arg2));
         }
       }
@@ -14474,8 +14474,8 @@ Variant c_ReflectionParameter::os_invoke(const char *c, MethodIndex methodIndex,
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (ti_export(c, arg0, arg1, arg2));
         }
       }

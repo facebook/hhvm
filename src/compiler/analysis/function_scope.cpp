@@ -938,9 +938,10 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
     for (int i = 0; i < m_minParam; i++) {
       cg_printf("CVarRef arg%d(", i);
       if (!guarded) cg_printf("count <= %d ? null_variant : ", i);
-      cg_printf("(%sad->getValue%s(pos)));\n",
-                i ? "pos = ad->iter_advance(pos)," : "",
-                isRefParam(i) ? "Ref" : "");
+      cg_printf("%s(ad->getValue%s(pos%s)));\n",
+                isRefParam(i) ? "ref" : "",
+                isRefParam(i) ? "Ref" : "",
+                i ? " = ad->iter_advance(pos)" : "");
     }
   }
 
@@ -981,7 +982,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
           cg_printf("null_variant");
         }
       } else {
-        cg_printf("ref(arg%d)", i);
+        cg_printf("arg%d", i);
       }
     } else {
       if (fewArgs) {
@@ -1007,9 +1008,11 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
       }
     }
     if (!fewArgs) {
-      cg_printf("CVarRef arg%d((%sad->getValue%s(pos)));\n",
-                iMax, iMax ? "pos = ad->iter_advance(pos)," : "",
-                isRefParam(iMax) ? "Ref" : "");
+      cg_printf("CVarRef arg%d(%s(ad->getValue%s(pos%s)));\n",
+                iMax,
+                isRefParam(iMax) ? "ref" : "",
+                isRefParam(iMax) ? "Ref" : "",
+                iMax ? " = ad->iter_advance(pos)" : "");
     }
     if (++iMax < maxParam || variable) {
       cg_printf("if (count == %d) ", iMax);
@@ -1026,7 +1029,7 @@ void FunctionScope::outputCPPDynamicInvoke(CodeGenerator &cg,
             cg_printf("null_variant");
           }
         } else {
-          cg_printf("ref(arg%d)", i);
+          cg_printf("arg%d", i);
         }
       } else {
         if (fewArgs) {
@@ -1434,7 +1437,7 @@ void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
 }
 
 void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
-                                        AnalysisResultPtr ar) {      
+                                        AnalysisResultPtr ar) {
   cg_printf("\n");
   if (m_stmt) {
     m_stmt->printSource(cg);
@@ -1502,7 +1505,7 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
                   Option::ObjectPrefix, m_name.c_str());
       }
     }
-    
+
     cg_indentEnd("}\n");
   }
 }

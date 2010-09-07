@@ -120,7 +120,7 @@ Variant c_UnexpectedValueException::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -224,7 +224,7 @@ Variant c_UnexpectedValueException::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -775,7 +775,7 @@ Variant c_OverflowException::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -879,7 +879,7 @@ Variant c_OverflowException::o_invoke(MethodIndex methodIndex, const char *s, CA
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -1430,7 +1430,7 @@ Variant c_OutOfBoundsException::o_invoke(MethodIndex methodIndex, const char *s,
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -1534,7 +1534,7 @@ Variant c_OutOfBoundsException::o_invoke(MethodIndex methodIndex, const char *s,
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -2085,7 +2085,7 @@ Variant c_LogicException::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -2189,7 +2189,7 @@ Variant c_LogicException::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -2740,7 +2740,7 @@ Variant c_RangeException::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -2844,7 +2844,7 @@ Variant c_RangeException::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -3395,7 +3395,7 @@ Variant c_InvalidArgumentException::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -3499,7 +3499,7 @@ Variant c_InvalidArgumentException::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4050,7 +4050,7 @@ Variant c_UnderflowException::o_invoke(MethodIndex methodIndex, const char *s, C
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4154,7 +4154,7 @@ Variant c_UnderflowException::o_invoke(MethodIndex methodIndex, const char *s, C
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4705,7 +4705,7 @@ Variant c_OutOfRangeException::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -4809,7 +4809,7 @@ Variant c_OutOfRangeException::o_invoke(MethodIndex methodIndex, const char *s, 
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -5360,7 +5360,7 @@ Variant c_BadMethodCallException::o_invoke(MethodIndex methodIndex, const char *
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -5464,7 +5464,7 @@ Variant c_BadMethodCallException::o_invoke(MethodIndex methodIndex, const char *
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -6015,7 +6015,7 @@ Variant c_RuntimeException::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -6119,7 +6119,7 @@ Variant c_RuntimeException::o_invoke(MethodIndex methodIndex, const char *s, CAr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -6738,7 +6738,7 @@ ObjectData *c_Exception::dynCreate(CArrRef params, bool construct /* = true */) 
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1));
     } while (false);
   }
@@ -6759,7 +6759,7 @@ void c_Exception::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1));
   } while (false);
 }
@@ -6824,7 +6824,7 @@ Variant c_Exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -6928,7 +6928,7 @@ Variant c_Exception::o_invoke(MethodIndex methodIndex, const char *s, CArrRef pa
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -7414,8 +7414,8 @@ void c_Exception::t___init__() {
             if (!tmp5) {
               bool tmp6 = ((toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)), NAMSTR(s_sys_ss55f425c0, "__init__"))) && toBoolean(x_strcasecmp(toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true)), NAMSTR(s_sys_ss229c615f, "__construct")))));
               if (tmp6) {
-                String tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true))));
-                String tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+                const String &tmp7((toString(v_top.rvalAt(NAMSTR(s_sys_ss58ba5adc, "function"), true, true))));
+                const String &tmp8((toString(v_top.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
                 tmp6 = (toBoolean(x_strcasecmp(tmp7, tmp8)));
               }
               tmp5 = (tmp6);
@@ -7524,8 +7524,8 @@ String c_Exception::t_gettraceasstring() {
             tmp4_buf.append("): ", 3);
             Variant tmp5;
             if (isset(v_frame, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
-              String tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
-              String tmp7((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1fe107ad, "type"), true, true))));
+              const String &tmp6((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true))));
+              const String &tmp7((toString(v_frame.rvalAt(NAMSTR(s_sys_ss1fe107ad, "type"), true, true))));
               tmp5 = (concat(tmp6, tmp7));
             } else {
               tmp5 = (NAMSTR(s_sys_ss00000000, ""));
@@ -7669,22 +7669,22 @@ ObjectData *c_ErrorException::dynCreate(CArrRef params, bool construct /* = true
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 4) {
         (t___construct(arg0, arg1, arg2, arg3));
         break;
       }
-      CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3, arg4));
     } while (false);
   }
@@ -7705,22 +7705,22 @@ void c_ErrorException::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 4) {
       (t___construct(arg0, arg1, arg2, arg3));
       break;
     }
-    CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3, arg4));
   } while (false);
 }
@@ -7796,13 +7796,13 @@ Variant c_ErrorException::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -7912,13 +7912,13 @@ Variant c_ErrorException::o_invoke(MethodIndex methodIndex, const char *s, CArrR
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 4) return (t___construct(arg0, arg1, arg2, arg3), null);
-          CVarRef arg4((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3, arg4), null);
         }
       }
@@ -8574,7 +8574,7 @@ Variant c_BadFunctionCallException::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -8678,7 +8678,7 @@ Variant c_BadFunctionCallException::o_invoke(MethodIndex methodIndex, const char
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9229,7 +9229,7 @@ Variant c_LengthException::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9333,7 +9333,7 @@ Variant c_LengthException::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9884,7 +9884,7 @@ Variant c_DomainException::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }
@@ -9988,7 +9988,7 @@ Variant c_DomainException::o_invoke(MethodIndex methodIndex, const char *s, CArr
           if (count <= 0) return (t___construct(), null);
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1), null);
         }
       }

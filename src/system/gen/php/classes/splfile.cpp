@@ -131,17 +131,17 @@ ObjectData *c_SplFileObject::dynCreate(CArrRef params, bool construct /* = true 
         (t___construct(arg0));
         break;
       }
-      CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 2) {
         (t___construct(arg0, arg1));
         break;
       }
-      CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
       if (count == 3) {
         (t___construct(arg0, arg1, arg2));
         break;
       }
-      CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+      CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
       (t___construct(arg0, arg1, arg2, arg3));
     } while (false);
   }
@@ -158,17 +158,17 @@ void c_SplFileObject::dynConstruct(CArrRef params) {
       (t___construct(arg0));
       break;
     }
-    CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 2) {
       (t___construct(arg0, arg1));
       break;
     }
-    CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     if (count == 3) {
       (t___construct(arg0, arg1, arg2));
       break;
     }
-    CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     (t___construct(arg0, arg1, arg2, arg3));
   } while (false);
 }
@@ -270,7 +270,7 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fseek(arg0, arg1));
         }
       }
@@ -319,9 +319,9 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           if (count <= 0) return (t_fgetcsv());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fgetcsv(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_fgetcsv(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fgetcsv(arg0, arg1, arg2));
         }
       }
@@ -353,9 +353,9 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           if (count <= 0) return (t_setcsvcontrol());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_setcsvcontrol(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_setcsvcontrol(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setcsvcontrol(arg0, arg1, arg2));
         }
       }
@@ -409,11 +409,11 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3), null);
         }
       }
@@ -561,8 +561,8 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          return (t_flock(arg0, ref(arg1)));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          return (t_flock(arg0, arg1));
         }
       }
       break;
@@ -615,7 +615,7 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fwrite(arg0, arg1));
         }
       }
@@ -647,9 +647,9 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }
@@ -696,8 +696,8 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValueRef(pos)));
-          return (t_flock(arg0, ref(arg1)));
+          CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+          return (t_flock(arg0, arg1));
         }
       }
       HASH_GUARD_LITSTR(0x1D3B08AA0AF50F06LL, NAMSTR(s_sys_ss0af50f06, "getType")) {
@@ -843,9 +843,9 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }
@@ -927,7 +927,7 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fseek(arg0, arg1));
         }
       }
@@ -953,9 +953,9 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           if (count <= 0) return (t_fgetcsv());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_fgetcsv(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_fgetcsv(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fgetcsv(arg0, arg1, arg2));
         }
       }
@@ -975,9 +975,9 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           if (count <= 0) return (t_setcsvcontrol());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_setcsvcontrol(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_setcsvcontrol(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_setcsvcontrol(arg0, arg1, arg2));
         }
       }
@@ -1014,11 +1014,11 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
           if (count <= 1) return (t___construct(arg0), null);
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t___construct(arg0, arg1), null);
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 3) return (t___construct(arg0, arg1, arg2), null);
-          CVarRef arg3((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
           return (t___construct(arg0, arg1, arg2, arg3), null);
         }
       }
@@ -1048,7 +1048,7 @@ Variant c_SplFileObject::o_invoke(MethodIndex methodIndex, const char *s, CArrRe
           ArrayData *ad(params.get());
           ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
           CVarRef arg0((ad->getValue(pos)));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_fwrite(arg0, arg1));
         }
       }
@@ -4180,9 +4180,9 @@ Variant c_SplFileInfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }
@@ -4363,9 +4363,9 @@ Variant c_SplFileInfo::o_invoke(MethodIndex methodIndex, const char *s, CArrRef 
           if (count <= 0) return (t_openfile());
           CVarRef arg0((ad->getValue(pos)));
           if (count == 1) return (t_openfile(arg0));
-          CVarRef arg1((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
           if (count == 2) return (t_openfile(arg0, arg1));
-          CVarRef arg2((pos = ad->iter_advance(pos),ad->getValue(pos)));
+          CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
           return (t_openfile(arg0, arg1, arg2));
         }
       }

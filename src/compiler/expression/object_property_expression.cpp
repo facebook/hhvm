@@ -68,6 +68,7 @@ void ObjectPropertyExpression::setContext(Context context) {
     case Expression::DeepAssignmentLHS:
     case Expression::DeepOprLValue:
     case Expression::ExistContext:
+    case Expression::UnsetContext:
     case Expression::DeepReference:
       m_object->setContext(context);
       break;

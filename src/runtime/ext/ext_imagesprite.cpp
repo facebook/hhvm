@@ -513,7 +513,7 @@ Object c_ImageSprite::t_clear(CVarRef files /* = null */) {
     }
   } else if (files.isString()) {
     String path(files.toString());
-    if (m_image_data[path.c_str()] == NULL) {
+    if (m_image_data.find(path.c_str()) == m_image_data.end()) {
       return this;
     }
     m_current = false;
@@ -1161,6 +1161,7 @@ Variant c_ImageSprite::t___destruct() {
     ImageSprite::Image *val = iter->second;
     if (val != NULL) {
       delete val;
+      // Cleared later
     }
   }
 

@@ -1110,7 +1110,7 @@ public:
     if (sscanf(input, xhprof_trace_header, &output_length) != 1) {
       return String("", 0, AttachLiteral);
     }
-    char *zipped_begin;
+    const char *zipped_begin;
     if (!(zipped_begin = strchr(input, '\n'))
         || !(zipped_begin = strchr(zipped_begin + 1, '\n'))) {
       goto error2_out;

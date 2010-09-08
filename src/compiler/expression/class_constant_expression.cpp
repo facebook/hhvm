@@ -118,40 +118,40 @@ ExpressionPtr ClassConstantExpression::preOptimize(AnalysisResultPtr ar) {
     if (cls->isVolatile() || cls->isRedeclaring()) return ExpressionPtr();
   }
   ConstantTablePtr constants = cls->getConstants();
-  if (constants->isRecursivelyDeclared(ar, m_varName)) {
-    ConstructPtr decl = constants->getValue(m_varName);
-    if (decl) {
-      ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
-      if (!m_visited) {
-        m_visited = true;
-        ar->pushScope(cls);
-        ExpressionPtr optExp = value->preOptimize(ar);
-        ar->popScope();
-        m_visited = false;
-        if (optExp) value = optExp;
-      }
-      if (value->isScalar()) {
+  ClassScopePtr defClass = cls;
+  ConstructPtr decl = constants->getValueRecur(ar, m_varName, defClass);
+  if (decl) {
+    cls = defClass;
+    ExpressionPtr value = dynamic_pointer_cast<Expression>(decl);
+    if (!m_visited) {
+      m_visited = true;
+      ar->pushScope(cls);
+      ExpressionPtr optExp = value->preOptimize(ar);
+      ar->popScope();
+      m_visited = false;
+      if (optExp) value = optExp;
+    }
+    if (value->isScalar()) {
+      // inline the value
+      if (value->is(Expression::KindOfScalarExpression)) {
+        ScalarExpressionPtr exp =
+          dynamic_pointer_cast<ScalarExpression>(Clone(value));
+        bool annotate = Option::FlAnnotate;
+        Option::FlAnnotate = false; // avoid nested comments on getText()
+        exp->setComment(getText());
+        Option::FlAnnotate = annotate;
+        exp->setLocation(getLocation());
+        return exp;
+      } else if (value->is(Expression::KindOfConstantExpression)) {
         // inline the value
-        if (value->is(Expression::KindOfScalarExpression)) {
-          ScalarExpressionPtr exp =
-            dynamic_pointer_cast<ScalarExpression>(Clone(value));
-          bool annotate = Option::FlAnnotate;
-          Option::FlAnnotate = false; // avoid nested comments on getText()
-          exp->setComment(getText());
-          Option::FlAnnotate = annotate;
-          exp->setLocation(getLocation());
-          return exp;
-        } else if (value->is(Expression::KindOfConstantExpression)) {
-          // inline the value
-          ConstantExpressionPtr exp =
-            dynamic_pointer_cast<ConstantExpression>(Clone(value));
-          bool annotate = Option::FlAnnotate;
-          Option::FlAnnotate = false; // avoid nested comments
-          exp->setComment(getText());
-          Option::FlAnnotate = annotate;
-          exp->setLocation(getLocation());
-          return exp;
-        }
+        ConstantExpressionPtr exp =
+          dynamic_pointer_cast<ConstantExpression>(Clone(value));
+        bool annotate = Option::FlAnnotate;
+        Option::FlAnnotate = false; // avoid nested comments
+        exp->setComment(getText());
+        Option::FlAnnotate = annotate;
+        exp->setLocation(getLocation());
+        return exp;
       }
     }
   }
@@ -189,14 +189,15 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
     ar->getScope()->getVariables()->
       setAttribute(VariableTable::NeedGlobalPointer);
   }
-  if (cls->getConstants()->isRecursivelyDeclared(ar, m_varName)) {
+  ClassScopePtr defClass = cls;
+  ConstructPtr decl =
+    cls->getConstants()->getDeclarationRecur(ar, m_varName, defClass);
+  if (decl) { // No decl means an extension class.
+    cls = defClass;
     string name = m_className + "::" + m_varName;
-    ConstructPtr decl = cls->getConstants()->getDeclaration(m_varName);
-    if (decl) { // No decl means an extension class.
-      ar->getDependencyGraph()->add(DependencyGraph::KindOfConstant,
-                                    ar->getName(),
-                                    name, shared_from_this(), name, decl);
-    }
+    ar->getDependencyGraph()->add(DependencyGraph::KindOfConstant,
+                                  ar->getName(),
+                                  name, shared_from_this(), name, decl);
     m_valid = true;
   }
   BlockScope *defScope;

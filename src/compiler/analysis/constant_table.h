@@ -103,6 +103,11 @@ public:
   bool hasJumpTable() const { return !m_emptyJumpTable;}
 
   bool isRecursivelyDeclared(AnalysisResultPtr ar, const std::string &name);
+  ConstructPtr getValueRecur(AnalysisResultPtr ar, const std::string &name,
+                             ClassScopePtr &defClass);
+  ConstructPtr getDeclarationRecur(AnalysisResultPtr ar,
+                                   const std::string &name,
+                                   ClassScopePtr &defClass);
 
 protected:
   std::set<std::string> m_dynamic; // non-scalar or redeclared or marked up

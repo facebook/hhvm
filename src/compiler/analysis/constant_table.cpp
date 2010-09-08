@@ -88,6 +88,31 @@ bool ConstantTable::isRecursivelyDeclared(AnalysisResultPtr ar,
   return false;
 }
 
+ConstructPtr ConstantTable::getValueRecur(AnalysisResultPtr ar,
+                                          const std::string &name,
+                                          ClassScopePtr &defClass) {
+  if (ConstructPtr value = getValue(name)) return value;
+  ClassScopePtr parent = findParent(ar, name);
+  if (parent) {
+    defClass = parent;
+    return parent->getConstants()->getValueRecur(ar, name, defClass);
+  }
+  return ConstructPtr();
+}
+
+ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultPtr ar,
+                                                const std::string &name,
+                                                ClassScopePtr &defClass) {
+  ConstructPtr decl = getDeclaration(name);
+  if (decl) return decl;
+  ClassScopePtr parent = findParent(ar, name);
+  if (parent) {
+    defClass = parent;
+    return parent->getConstants()->getDeclarationRecur(ar, name, defClass);
+  }
+  return ConstructPtr();
+}
+
 TypePtr ConstantTable::checkBases(const std::string &name, TypePtr type,
                                   bool coerce, AnalysisResultPtr ar,
                                   ConstructPtr construct,

@@ -58,6 +58,7 @@ public:
   void reset();
   void clear() { reset();}
   void resize(int size);
+  void release();
 
   /**
    * Increase internal buffer to at least "size" longer, and return the write

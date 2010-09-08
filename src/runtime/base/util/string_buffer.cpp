@@ -157,6 +157,13 @@ void StringBuffer::reset() {
 #endif
 }
 
+void StringBuffer::release() {
+  if (m_buffer) {
+    free(m_buffer);
+    m_buffer = NULL;
+  }
+}
+
 void StringBuffer::resize(int size) {
   ASSERT(size >= 0 && size < m_size);
   if (size >= 0 && size < m_size) {

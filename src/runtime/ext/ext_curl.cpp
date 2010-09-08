@@ -640,6 +640,8 @@ private:
 };
 IMPLEMENT_OBJECT_ALLOCATION_NO_DEFAULT_SWEEP(CurlResource);
 void CurlResource::sweep() {
+  m_write.buf.release();
+  m_write_header.buf.release();
   close();
 }
 

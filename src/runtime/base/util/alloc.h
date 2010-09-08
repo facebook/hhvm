@@ -19,17 +19,26 @@
 
 #include <stdlib.h>
 
+#ifndef NO_TCMALLOC
 #include <google/malloc_extension.h>
+#endif
+
+#ifndef NO_JEMALLOC
 #include <jemalloc/jemalloc.h>
+#endif
 
 extern "C" {
+#ifndef NO_TCMALLOC
 #define MallocExtensionInstance _ZN15MallocExtension8instanceEv
   MallocExtension* MallocExtensionInstance() __attribute__((weak));
+#endif
 
+#ifndef NO_JEMALLOC
   int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
           size_t newlen) __attribute__((weak));
   void malloc_stats_print(void (*write_cb)(void *, const char *),
           void *cbopaque, const char *opts) __attribute__((weak));
+#endif
 }
 
 namespace HPHP { namespace Util {

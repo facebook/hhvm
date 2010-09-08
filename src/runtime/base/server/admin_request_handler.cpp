@@ -141,12 +141,16 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "    cutoff        optional, default 20 seconds, ignore newer allocs\n"
 #endif
       ;
+#ifndef NO_TCMALLOC
         if (MallocExtensionInstance) {
           usage.append(
               "/free-mem:        ask tcmalloc to release memory to system\n"
               "/tcmalloc-stats:  get internal tcmalloc stats\n"
               );
         }
+#endif
+
+#ifndef NO_JEMALLOC
         if (mallctl) {
           usage.append(
               "/jemalloc-stats:  get internal jemalloc stats\n"
@@ -165,6 +169,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
       transport->sendString(usage);
       break;
     }
+#endif
 
     if (!RuntimeOption::AdminPassword.empty() &&
         RuntimeOption::AdminPassword != transport->getParam("auth")) {
@@ -223,6 +228,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         handleAPCSizeRequest(cmd, transport)) {
       break;
     }
+
+#ifndef NO_TCMALLOC
     if (MallocExtensionInstance) {
       if (cmd == "free-mem") {
         MallocExtensionInstance()->ReleaseFreeMemory();
@@ -249,6 +256,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         break;
       }
     }
+#endif
+
+#ifndef NO_JEMALLOC
     if (mallctl) {
       if (cmd == "jemalloc-stats") {
         // Force jemalloc to update stats cached for use by mallctl().
@@ -339,6 +349,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         transport->sendString("OK\n");
         break;
       }
+#endif
     }
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);

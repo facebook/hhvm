@@ -149,11 +149,6 @@ ZendArray::~ZendArray() {
   if (!m_linear && m_arBuckets) {
     free(m_arBuckets);
   }
-  // If there are any strong iterators pointing to this array, they need
-  // to be invalidated.
-  if (!m_strongIterators.empty()) {
-    freeStrongIterators();
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1237,14 +1232,6 @@ rehashNeeded:
   rehash();
 }
 
-void ZendArray::freeStrongIterators() {
-  int sz = m_strongIterators.size();
-  for (int i = 0; i < sz; ++i) {
-    m_strongIterators[i]->container = NULL;
-  }
-  m_strongIterators.clear();
-}
-
 void ZendArray::onSetStatic() {
   for (Bucket *p = m_pListHead; p; p = p->pListNext) {
     if (p->key) {
@@ -1252,13 +1239,6 @@ void ZendArray::onSetStatic() {
     }
     p->data.setStatic();
   }
-}
-
-void ZendArray::newFullPos(FullPos &pos) {
-  ASSERT(pos.container == NULL);
-  m_strongIterators.push(&pos);
-  pos.container = (ArrayData*)this;
-  getFullPos(pos);
 }
 
 void ZendArray::getFullPos(FullPos &pos) {
@@ -1278,34 +1258,6 @@ bool ZendArray::setFullPos(const FullPos &pos) {
     return true;
   }
   return false;
-}
-
-void ZendArray::freeFullPos(FullPos &pos) {
-  ASSERT(pos.container == (ArrayData*)this);
-  int sz = m_strongIterators.size();
-  if (sz > 0) {
-    // Common case: pos is at the end of the list
-    if (m_strongIterators[sz-1] == &pos) {
-      m_strongIterators.pop();
-      pos.container = NULL;
-      return;
-    }
-    // Unusual case: somehow the strong iterator for an foreach loop
-    // was freed before a strong iterator from a nested foreach loop,
-    // so do a linear search for pos
-    for (int k = sz-2; k >= 0; --k) {
-      if (m_strongIterators[k] == &pos) {
-        // Swap pos with the last element in the list and then pop
-        m_strongIterators[k] = m_strongIterators[sz-1];
-        m_strongIterators.pop();
-        pos.container = NULL;
-        return;
-      }
-    }
-  }
-  // If the strong iterator list was empty or if pos could not be
-  // found in the strong iterator list, then we are in a bad state
-  ASSERT(false);
 }
 
 CVarRef ZendArray::currentRef() {

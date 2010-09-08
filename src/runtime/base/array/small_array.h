@@ -155,6 +155,7 @@ private:
   int8            m_nNumOfElements;
   int8            m_nListHead;
   int8            m_nListTail;
+  int8            m_siPastEnd;
   unsigned long   m_nNextFreeElement;
 
   Bucket  m_arBuckets[SARR_TABLE_SIZE];
@@ -170,7 +171,11 @@ private:
     if (b.prev >= 0) m_arBuckets[(int)b.prev].next = p;
     if (m_nListHead < 0) m_nListHead = p;
     if (m_pos < 0) m_pos = p;
+
+    if (m_siPastEnd) updateStrongIterators(p);
   }
+
+  void updateStrongIterators(int p);
 
   ArrayData *escalateToZendArray() const;
 

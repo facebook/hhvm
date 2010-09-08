@@ -21,7 +21,6 @@
 #include <runtime/base/array/array_data.h>
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/complex_types.h>
-#include <util/pointer_list.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -110,10 +109,8 @@ public:
   virtual void renumber();
   virtual void onSetStatic();
 
-  virtual void newFullPos(FullPos &pos);
   virtual void getFullPos(FullPos &pos);
   virtual bool setFullPos(const FullPos &pos);
-  virtual void freeFullPos(FullPos &pos);
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
@@ -160,7 +157,6 @@ private:
   Bucket         * m_pListHead;
   Bucket         * m_pListTail;
   Bucket         **m_arBuckets;
-  PointerList<FullPos> m_strongIterators;
   char             m_siPastEnd;
   char             m_linear;
 
@@ -186,8 +182,6 @@ private:
 
   void resize();
   void rehash();
-
-  void freeStrongIterators();
 
   void prepareBucketHeadsForWrite();
 

@@ -48,6 +48,11 @@ ArrayData *ArrayData::Create(CVarRef name, CVarRef value) {
 }
 
 ArrayData::~ArrayData() {
+  // If there are any strong iterators pointing to this array, they need
+  // to be invalidated.
+  if (!m_strongIterators.empty()) {
+    freeStrongIterators();
+  }
 }
 
 void ArrayData::fetchValue(ssize_t pos, Variant & v) const {
@@ -180,21 +185,57 @@ ArrayData *ArrayData::dequeue(Variant &value) {
 
 void ArrayData::newFullPos(FullPos &pos) {
   ASSERT(pos.container == NULL);
+  m_strongIterators.push(&pos);
   pos.container = (ArrayData*)this;
   getFullPos(pos);
 }
+
+void ArrayData::freeFullPos(FullPos &pos) {
+  ASSERT(pos.container == (ArrayData*)this);
+  int sz = m_strongIterators.size();
+  if (sz > 0) {
+    // Common case: pos is at the end of the list
+    if (m_strongIterators[sz - 1] == &pos) {
+      m_strongIterators.pop();
+      pos.container = NULL;
+      return;
+    }
+    // Unusual case: somehow the strong iterator for an foreach loop
+    // was freed before a strong iterator from a nested foreach loop,
+    // so do a linear search for pos
+    for (int k = sz - 2; k >= 0; --k) {
+      if (m_strongIterators[k] == &pos) {
+        // Swap pos with the last element in the list and then pop
+        m_strongIterators[k] = m_strongIterators[sz - 1];
+        m_strongIterators.pop();
+        pos.container = NULL;
+        return;
+      }
+    }
+  }
+  // If the strong iterator list was empty or if pos could not be
+  // found in the strong iterator list, then we are in a bad state
+  ASSERT(false);
+}
+
 void ArrayData::getFullPos(FullPos &pos) {
   ASSERT(pos.container == (ArrayData*)this);
   pos.primary = ArrayData::invalid_index;
 }
+
 bool ArrayData::setFullPos(const FullPos &pos) {
   ASSERT(pos.container == (ArrayData*)this);
   return false;
 }
-void ArrayData::freeFullPos(FullPos &pos) {
-  ASSERT(pos.container == (ArrayData*)this);
-  pos.container = NULL;
+
+void ArrayData::freeStrongIterators() {
+  int sz = m_strongIterators.size();
+  for (int i = 0; i < sz; ++i) {
+    m_strongIterators[i]->container = NULL;
+  }
+  m_strongIterators.clear();
 }
+
 CVarRef ArrayData::currentRef() {
   if (m_pos >= 0 && m_pos < size()) {
     return getValueRef(m_pos);

@@ -233,13 +233,44 @@ Variant SmallArray::each() {
 }
 
 void SmallArray::getFullPos(FullPos &pos) {
-  // it should have been escalated
-  throw FatalErrorException("SmallArray should have been escalated");
+  ASSERT(pos.container == (ArrayData *)this);
+  ASSERT(m_pos == ArrayData::invalid_index ||
+         m_pos >= 0 && m_pos < SARR_TABLE_SIZE &&
+         m_arBuckets[m_pos].kind != Empty);
+  pos.primary = m_pos;
+  if (pos.primary == ArrayData::invalid_index) {
+    // Record that there is a strong iterator out there
+    // that is past the end
+    m_siPastEnd = 1;
+  }
 }
 
 bool SmallArray::setFullPos(const FullPos &pos) {
-  // it should have been escalated
-  throw FatalErrorException("SmallArray should have been escalated");
+  ASSERT(pos.container == (ArrayData *) this);
+  if (pos.primary >= 0) {
+    Bucket &b = m_arBuckets[pos.primary];
+    if (b.kind != Empty) m_pos = pos.primary;
+  }
+  return m_pos >= 0;
+}
+
+void SmallArray::updateStrongIterators(int p) {
+  ASSERT(m_siPastEnd);
+  m_siPastEnd = 0;
+  int sz = m_strongIterators.size();
+  bool shouldWarn = false;
+  for (int i = 0; i < sz; i++) {
+    if (m_strongIterators[i]->primary == ArrayData::invalid_index) {
+      m_strongIterators[i]->primary = p;
+      shouldWarn = true;
+    }
+  }
+  if (shouldWarn) {
+    raise_warning("An element was added to an array while a foreach "
+                  "by reference loop was iterating over the last "
+                  "element of the array. This may lead to "
+                  "unexpeced results.");
+  }
 }
 
 CVarRef SmallArray::currentRef() {
@@ -438,10 +469,6 @@ ssize_t SmallArray::getIndex(CVarRef k) const {
 // append/insert/update
 
 ArrayData *SmallArray::escalate(bool mutableIteration /* = false */) const {
-  if (mutableIteration) {
-    // Let ZendArray handle all the quirky cases.
-    return escalateToZendArray();
-  }
   // SmallArray doesn't need to be escalated for most of the time.
   return const_cast<SmallArray *>(this);
 }
@@ -890,6 +917,12 @@ ArrayData *SmallArray::prepend(CVarRef v, bool copy) {
     return a;
   }
 
+  // To match PHP-like semantics, we invalidate all strong iterators
+  // when an element is added to the beginning of the array
+  if (!m_strongIterators.empty()) {
+    freeStrongIterators();
+  }
+
   int p = 0;
   while (m_arBuckets[p].kind != Empty) p++;
   Bucket &b = m_arBuckets[p];
@@ -945,6 +978,24 @@ void SmallArray::erase(Bucket *pb) {
            m_pos >= 0 && m_pos < SARR_TABLE_SIZE);
   }
   m_nNumOfElements--;
+
+  bool nextElementUnsetInsideForeachByReference = false;
+  int p = pb - m_arBuckets;
+  int sz = m_strongIterators.size();
+  for (int i = 0; i < sz; ++i) {
+    if (m_strongIterators[i]->primary == p) {
+      nextElementUnsetInsideForeachByReference = true;
+      m_strongIterators[i]->primary = pb->next;
+      if (m_strongIterators[i]->primary == ArrayData::invalid_index) {
+        m_siPastEnd = 1;
+      }
+    }
+  }
+  if (nextElementUnsetInsideForeachByReference) {
+    if (RuntimeOption::FatalOnWeirdForEach) {
+      raise_error("Cannot unset the next element inside foreach by reference");
+    }
+  }
 }
 
 ArrayData *SmallArray::remove(int64 k, bool copy) {
@@ -1032,6 +1083,12 @@ ArrayData *SmallArray::dequeue(Variant &value) {
     SmallArray *a = copyImpl();
     a->dequeue(value);
     return a;
+  }
+
+  // To match PHP-like semantics, we invalidate all strong iterators
+  // when an element is removed from the beginning of the array
+  if (!m_strongIterators.empty()) {
+    freeStrongIterators();
   }
 
   ASSERT(m_nListHead >= 0 && m_nListHead < SARR_TABLE_SIZE &&

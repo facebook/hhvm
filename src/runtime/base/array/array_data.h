@@ -20,6 +20,7 @@
 #include <runtime/base/util/countable.h>
 #include <runtime/base/types.h>
 #include <runtime/base/macros.h>
+#include <util/pointer_list.h>
 #include <climits>
 
 namespace HPHP {
@@ -198,10 +199,10 @@ class ArrayData : public Countable {
   virtual ssize_t iter_advance(ssize_t prev) const;
   virtual ssize_t iter_rewind(ssize_t prev) const;
 
-  virtual void newFullPos(FullPos &pos);
+  void newFullPos(FullPos &pos);
+  void freeFullPos(FullPos &pos);
   virtual void getFullPos(FullPos &pos);
   virtual bool setFullPos(const FullPos &pos);
-  virtual void freeFullPos(FullPos &pos);
   virtual CVarRef currentRef();
   virtual CVarRef endRef();
 
@@ -278,12 +279,15 @@ class ArrayData : public Countable {
 
  protected:
   ssize_t m_pos;
+  PointerList<FullPos> m_strongIterators;
 
   /**
    * Helpers.
    */
   static void dumpKey(std::ostream &out, int indent, unsigned int index);
   static void dumpKey(std::ostream &out, int indent, CStrRef key);
+
+  void freeStrongIterators();
 
 #ifdef FAST_REFCOUNT_FOR_VARIANT
  private:

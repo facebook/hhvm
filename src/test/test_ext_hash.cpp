@@ -32,6 +32,8 @@ bool TestExtHash::RunTests(const std::string &which) {
   RUN_TEST(test_hash_update_file);
   RUN_TEST(test_hash_update_stream);
   RUN_TEST(test_hash_update);
+  RUN_TEST(test_furchash_hphp_ext);
+  RUN_TEST(test_furchash_hphp_ext_supported);
 
   return ret;
 }
@@ -172,4 +174,14 @@ bool TestExtHash::test_hash_update_stream() {
 
 bool TestExtHash::test_hash_update() {
   return test_hash_init();
+}
+
+bool TestExtHash::test_furchash_hphp_ext() {
+  VS(f_furchash_hphp_ext("15minutesoffame", 15, 86), 25);
+  return Count(true);
+}
+
+bool TestExtHash::test_furchash_hphp_ext_supported() {
+  // Nothing much to test here, unless duplicating the function logic
+  return Count(true);
 }

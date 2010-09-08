@@ -312,6 +312,45 @@ DefineFunction(
   ));
 
 
+DefineFunction(
+  array(
+    'name'   => "furchash_hphp_ext",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Int32,
+      'desc'   => "Returns a number in the range of 0-(nPart-1)",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "key",
+        'type'   => String,
+        'desc'   => "The key to hash",
+      ),
+      array(
+        'name'   => "len",
+        'type'   => Int32,
+        'desc'   => "Number of bytes to use from the hash",
+      ),
+      array(
+        'name'   => "nPart",
+        'type'   => Int32,
+        'desc'   => "The number of buckets",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
+    'name'   => "furchash_hphp_ext_supported",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "Returns whether furchash extension is supported",
+    ),
+    'args'   => array(
+    ),
+  ));
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

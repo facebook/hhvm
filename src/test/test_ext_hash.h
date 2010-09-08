@@ -37,6 +37,8 @@ class TestExtHash : public TestCppExt {
   bool test_hash_update_file();
   bool test_hash_update_stream();
   bool test_hash_update();
+  bool test_furchash_hphp_ext();
+  bool test_furchash_hphp_ext_supported();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

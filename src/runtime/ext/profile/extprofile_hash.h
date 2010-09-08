@@ -75,6 +75,16 @@ inline bool x_hash_update(CObjRef context, CStrRef data) {
   return f_hash_update(context, data);
 }
 
+inline int x_furchash_hphp_ext(CStrRef key, int len, int nPart) {
+  FUNCTION_INJECTION_BUILTIN(furchash_hphp_ext);
+  return f_furchash_hphp_ext(key, len, nPart);
+}
+
+inline bool x_furchash_hphp_ext_supported() {
+  FUNCTION_INJECTION_BUILTIN(furchash_hphp_ext_supported);
+  return f_furchash_hphp_ext_supported();
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

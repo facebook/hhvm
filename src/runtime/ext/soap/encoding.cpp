@@ -1150,11 +1150,11 @@ static bool get_zval_property(Variant &object, const char* name,
   String sname(name);
   if (object.isObject()) {
     Object obj = object.toObject();
-    if (!obj->o_exists(sname)) {
-      return false;
+    if (Variant *t = obj->o_weakLval(sname)) {
+      if (ret) *ret = ref(*t);
+      return true;
     }
-    if (ret) *ret = ref(obj->o_lval(sname));
-    return true;
+    return false;
   }
   if (object.isArray()) {
     Array arr = object.toArray();

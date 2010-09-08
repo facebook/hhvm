@@ -623,8 +623,10 @@ class Variant {
 
   Variant o_get(CStrRef propName, bool error = true,
                 CStrRef context = null_string) const;
+  Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
   Variant o_getPublic(CStrRef propName, bool error = true) const;
-  ObjectOffset o_lval(CStrRef propName, CStrRef context = null_string);
+  Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
+                  CStrRef context = null_string);
 
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
   Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);
@@ -693,6 +695,9 @@ class Variant {
   CVarRef setOpEqual(int op, CStrRef key, CVarRef v, bool isString = false);
   CVarRef setOpEqual(int op, CVarRef key, CVarRef v);
   CVarRef appendOpEqual(int op, CVarRef v);
+
+  template<typename T, int op>
+  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
   template<typename T>
   void removeImpl(const T &key, bool isString = false) {
@@ -872,7 +877,6 @@ class Variant {
   CVarRef set(StringData  *v);
   CVarRef set(ArrayData   *v);
   CVarRef set(ObjectData  *v);
-  CVarRef set(const ObjectOffset& v);
 
   CVarRef set(CStrRef v) { return set(v.get()); }
   CVarRef set(CArrRef v) { return set(v.get()); }
@@ -1043,6 +1047,11 @@ class Variant {
     CT_ASSERT(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET);
 #endif
   }
+};
+
+template<int op> class AssignOp {
+public:
+  static Variant assign(Variant &var, CVarRef val);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

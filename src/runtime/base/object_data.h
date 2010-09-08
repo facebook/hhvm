@@ -48,11 +48,9 @@ class VariableEnvironment;
  * 3. Dynamic methods:
  *    o_invoke() -> t___call() as fallback
  * 4. Auto-generated jump-tables:
- *    o_exists()
- *    o_get()
- *    o_set()
- *    o_lval()
- *    o_invoke()
+ *    o_realProp()
+ *    o_realPropPublic()
+ *    o_realPropPrivate() # non-virtual, only as needed
  */
 class ObjectData : public Countable {
  public:
@@ -63,6 +61,7 @@ class ObjectData : public Countable {
     UseSet        = 8,  // __set()
     UseGet        = 16, // __get()
     UseUnset      = 32, // __unset()
+    HasLval       = 64, // defines ___lval
   };
   enum {
     RealPropCreate = 1,   // Property should be created if it doesnt exist
@@ -171,8 +170,8 @@ class ObjectData : public Countable {
   Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
   Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
                 CStrRef context = null_string);
-  virtual Variant &o_lval(CStrRef s, CStrRef context = null_string);
-  virtual Variant &o_lvalPublic(CStrRef s);
+  Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
+  Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
 
   virtual void o_setArray(CArrRef properties);
   virtual void o_getArray(Array &props) const {}
@@ -261,7 +260,7 @@ class ObjectData : public Countable {
   virtual Variant t___call(Variant v_name, Variant v_arguments);
   virtual Variant t___set(Variant v_name, Variant v_value);
   virtual Variant t___get(Variant v_name);
-  virtual Variant &___lval(Variant v_name);
+  virtual Variant *___lval(Variant v_name);
   virtual Variant &___offsetget_lval(Variant v_name);
   virtual bool t___isset(Variant v_name);
   virtual Variant t___unset(Variant v_name);
@@ -270,6 +269,9 @@ class ObjectData : public Countable {
   virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
+
+  template<typename T, int op>
+  T o_assign_op(CStrRef propName, CVarRef val, CStrRef context = null_string);
 
   /**
    * Marshaling/Unmarshaling between request thread and fiber thread.

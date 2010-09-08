@@ -51,13 +51,10 @@ class c_ReflectionObject : public c_ReflectionClass {
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ReflectionObject 1
-  virtual Variant &o_lval(CStrRef s, CStrRef context = null_string);
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ReflectionObject 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionObject 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ReflectionObject 1
 
   // DECLARE_COMMON_INVOKE
   static Variant os_invoke(const char *c, MethodIndex methodIndex,

@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/inc_op_expression.h>
 #include <runtime/eval/ast/lval_expression.h>
+#include <runtime/eval/parser/hphp.tab.hpp>
 
 namespace HPHP {
 namespace Eval {
@@ -26,21 +27,8 @@ IncOpExpression::IncOpExpression(EXPRESSION_ARGS, LvalExpressionPtr exp,
   : Expression(EXPRESSION_PASS), m_exp(exp), m_inc(inc), m_front(front) {}
 
 Variant IncOpExpression::eval(VariableEnvironment &env) const {
-  Variant &v = m_exp->lval(env);
   SET_LINE;
-  if (m_inc) {
-    if (m_front) {
-      return ++v;
-    } else {
-      return v++;
-    }
-  } else {
-    if (m_front) {
-      return --v;
-    } else {
-      return v--;
-    }
-  }
+  return m_exp->setOp(env, m_inc ? T_INC : T_DEC, m_front ? null : Variant(0));
 }
 
 Variant IncOpExpression::refval(VariableEnvironment &env,

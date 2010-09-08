@@ -47,13 +47,10 @@ class c_SplFileInfo : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileInfo 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_SplFileInfo 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_SplFileInfo 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileInfo 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileInfo 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileInfo 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileInfo 1

@@ -4479,7 +4479,6 @@ bool TestCodeRun::TestObjectMagicMethod() {
       "isset($a['57']);"
       "isset($a['6.5']);");
 
-#if 0
   MVCR("<?php "
        "class foo"
        "{"
@@ -4488,7 +4487,6 @@ bool TestCodeRun::TestObjectMagicMethod() {
        "}"
        "$foo = new foo; $a = $foo->x = 'baz'; $b = $foo->x .= 'bar';"
        "var_dump($a,$b);");
-#endif
 
   MVCR("<?php\n"
        "class A {\n"
@@ -4503,6 +4501,20 @@ bool TestCodeRun::TestObjectMagicMethod() {
        "  var_dump($a);\n"
        "}\n"
        "test();\n");
+
+  MVCR("<?php ;"
+       "class X {"
+       "  public $real = 1;"
+       "  function __get($name) { echo 'get:'; var_dump($name); return 'abc'; }"
+       "  function __set($name, $val) { echo 'set:'; var_dump($name,$val); }"
+       "}"
+       "function test($x) {"
+       "  ++$x->foo;"
+       "  var_dump($x->bar++);"
+       "  $x->real++;"
+       "  var_dump($x);"
+       "}"
+       "test(new X);");
 
   return true;
 }

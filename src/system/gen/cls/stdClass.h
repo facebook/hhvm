@@ -47,13 +47,10 @@ class c_stdClass : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_stdClass 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_stdClass 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_stdClass 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_stdClass 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_stdClass 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_stdClass 1

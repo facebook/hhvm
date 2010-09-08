@@ -52,13 +52,10 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveIteratorIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_RecursiveIteratorIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveIteratorIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_RecursiveIteratorIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RecursiveIteratorIterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveIteratorIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RecursiveIteratorIterator 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveIteratorIterator 1

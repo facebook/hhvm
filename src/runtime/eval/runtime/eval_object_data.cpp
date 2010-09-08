@@ -163,26 +163,10 @@ void EvalObjectData::o_setArray(CArrRef props) {
       int subLen = k.find('\0', 1) + 1;
       String cls = k.substr(1, subLen - 2);
       String key = k.substr(subLen);
-      props->load(k, o_lval(key, cls));
+      props->load(k, o_lval(key, Variant(), cls));
     }
   }
   DynamicObjectData::o_setArray(props);
-}
-
-Variant &EvalObjectData::o_lval(CStrRef s,
-                                CStrRef context /* = null_string */) {
-  CStrRef c = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  if (m_privates.exists(c, true)) {
-    Variant &priv = m_privates.lvalAt(c, false, true);
-    if (priv.getArrayData()->exists(s)) {
-      return priv.lvalAt(s, false, true);
-    }
-  }
-  int mods;
-  if (!m_cls.getClass()->attemptPropertyAccess(s, c, mods)) {
-    m_cls.getClass()->failPropertyAccess(s, c, mods);
-  }
-  return DynamicObjectData::o_lval(s, c);
 }
 
 void EvalObjectData::o_setPrivate(const char *cls, const char *s, int64 hash,
@@ -483,16 +467,6 @@ ObjectData* EvalObjectData::cloneImpl() {
   return e;
 }
 
-Variant &EvalObjectData::___lval(Variant v_name) {
-  const MethodStatement *ms = getMethodStatement("__get");
-  if (ms) {
-    Variant &v = get_globals()->__lvalProxy;
-    v = ms->invokeInstance(Object(root), CREATE_VECTOR1(v_name), false);
-    return v;
-  } else {
-    return DynamicObjectData::___lval(v_name);
-  }
-}
 Variant &EvalObjectData::___offsetget_lval(Variant v_name) {
   const MethodStatement *ms = getMethodStatement("offsetget");
   if (ms) {

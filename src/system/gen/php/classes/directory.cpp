@@ -92,34 +92,6 @@ Variant * c_Directory::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_Directory
-Variant& c_Directory::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Directory
-Variant& c_Directory::o_lvalPublic(CStrRef s) {
-  int64 hash = s->hash();
-  switch (hash & 3) {
-    case 0:
-      HASH_RETURN_NAMSTR(0x1429F792A6880074LL, s_sys_ss5977ff8c, m_path,
-                         4);
-      break;
-    case 2:
-      HASH_RETURN_NAMSTR(0x5C4CA333F4541532LL, s_sys_ss0babeace, m_handle,
-                         6);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Directory
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Directory
-Variant& c_Directory::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Directory
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
 Variant c_Directory::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);

@@ -19,7 +19,6 @@
 
 #include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/complex_types.h>
-#include <runtime/base/object_offset.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////

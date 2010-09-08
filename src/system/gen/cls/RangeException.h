@@ -50,13 +50,10 @@ class c_RangeException : public c_RuntimeException {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RangeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_RangeException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RangeException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RangeException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RangeException 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RangeException 1

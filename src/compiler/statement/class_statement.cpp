@@ -331,18 +331,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_%s 1\n", clsName);
   }
 
-  if (variables->hasJumpTable(VariableTable::JumpTableClassLval)) {
-    cg_printf("virtual Variant &o_lval(CStrRef s, "
-              "CStrRef context = null_string);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_lval_%s 1\n", clsName);
-  }
-  if (variables->hasNonStaticPrivate()) {
-    cg_printf("Variant &o_lvalPrivate(CStrRef s);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_%s 1\n", clsName);
-  }
-
   cg.printSection("DECLARE_INSTANCE_PUBLIC_PROP_OPS");
   cg_printf("public:\n");
   if (variables->hasJumpTable(VariableTable::JumpTableClassRealPropPublic)) {
@@ -350,11 +338,6 @@ void ClassStatement::outputCPPClassDecl(CodeGenerator &cg,
               "int flags) const;\n");
   } else {
     cg_printf("#define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_%s 1\n", clsName);
-  }
-  if (variables->hasJumpTable(VariableTable::JumpTableClassLvalPublic)) {
-    cg_printf("virtual Variant &o_lvalPublic(CStrRef s);\n");
-  } else {
-    cg_printf("#define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_%s 1\n", clsName);
   }
 
   cg.printSection("DECLARE_COMMON_INVOKE");

@@ -266,13 +266,13 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
         !(present & VariableTable::VariableStatic) &&
         (getOriginalScope(ar) == cls ||
          !(present & VariableTable::VariablePrivate))) {
-      m_valid = true;
+      m_valid = m_object->getType()->isSpecificObject();
       m_class = cls;
     }
   }
 
   // get() will return Variant
-  if (!m_valid || !m_object->getType()->isSpecificObject()) {
+  if (!m_valid) {
     m_actualType = Type::Variant;
     return m_actualType;
   }
@@ -328,6 +328,16 @@ bool ObjectPropertyExpression::directVariantProxy(AnalysisResultPtr ar) {
   return false;
 }
 
+void ObjectPropertyExpression::preOutputStash(CodeGenerator &cg,
+                                              AnalysisResultPtr ar,
+                                              int state) {
+  if (!m_valid && (m_context & (LValue | RefValue | UnsetContext))) {
+    m_lvalTmp = genCPPTemp(cg, ar);
+    cg_printf("Variant %s;\n", m_lvalTmp.c_str());
+  }
+  Expression::preOutputStash(cg, ar, state);
+}
+
 bool ObjectPropertyExpression::preOutputCPP(CodeGenerator &cg,
                                             AnalysisResultPtr ar, int state) {
   return preOutputOffsetLHS(cg, ar, state);
@@ -349,7 +359,8 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
   string func = Option::ObjectPrefix;
   const char *error = ", true";
   ClassScopePtr cls = ar->getClassScope();
-  const char *context = "";
+  std::string context = "";
+
   if (cg.getOutput() != CodeGenerator::SystemCPP) {
     if (cls) {
       context = ", s_class_name";
@@ -367,6 +378,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     if (m_context & (LValue | RefValue | UnsetContext)) {
       func += "lval";
       error = "";
+      context = ", " + (m_lvalTmp.empty() ? "Variant()" : m_lvalTmp) + context;
     } else {
       func += "get";
       if (!cls || !cls->getVariables()->hasPrivate()) {
@@ -374,12 +386,6 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
         context = "";
       }
     }
-  }
-
-  bool linemap = false;
-  if (strcmp(error, ", true") == 0) {
-    // existence check for object properties
-    linemap = outputLineMap(cg, ar, true);
   }
 
   bool useGetThis = false;
@@ -392,39 +398,18 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
     }
   }
 
-  if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
+  if (m_valid) {
+    assert(m_object->getType()->isSpecificObject());
+    if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
+    if (!bThis) {
+      ASSERT(!directVariant);
+      m_object->outputCPP(cg, ar);
+      cg_printf("->");
+    }
     ScalarExpressionPtr name =
       dynamic_pointer_cast<ScalarExpression>(m_property);
-    const char *propName = name->getString().c_str();
-    if (m_valid && m_object->getType()->isSpecificObject()) {
-      if (doExist) cg_printf(doExist > 0 ? "isset(" : "empty(");
-      if (!bThis) {
-        ASSERT(!directVariant);
-        m_object->outputCPP(cg, ar);
-        cg_printf("->");
-      }
-      cg_printf("%s%s", Option::PropertyPrefix, propName);
-      if (doExist) cg_printf(")");
-    } else {
-      if (!bThis) {
-        if (directVariant) {
-          TypePtr expectedType = m_object->getExpectedType();
-          ASSERT(expectedType->is(Type::KindOfObject));
-          // Clear m_expectedType to avoid type cast (toObject).
-          m_object->setExpectedType(TypePtr());
-          m_object->outputCPP(cg, ar);
-          m_object->setExpectedType(expectedType);
-        } else {
-          m_object->outputCPP(cg, ar);
-        }
-        cg_printf(op);
-      } else {
-        if (useGetThis) cg_printf("GET_THIS_DOT()");
-      }
-      cg_printf("%s(", func.c_str());
-      cg_printString(propName, ar);
-      cg_printf("%s%s)", error, context);
-    }
+    cg_printf("%s%s", Option::PropertyPrefix, name->getString().c_str());
+    if (doExist) cg_printf(")");
   } else {
     if (!bThis) {
       if (directVariant) {
@@ -442,11 +427,20 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       if (useGetThis) cg_printf("GET_THIS_DOT()");
     }
     cg_printf("%s(", func.c_str());
-    m_property->outputCPP(cg, ar);
-    cg_printf("%s%s)", error, context);
+    outputCPPProperty(cg, ar);
+    cg_printf("%s%s)", error, context.c_str());
   }
+}
 
-  if (linemap) cg_printf(")");
+void ObjectPropertyExpression::outputCPPProperty(CodeGenerator &cg,
+                                                 AnalysisResultPtr ar) {
+  if (m_property->getKindOf() == Expression::KindOfScalarExpression) {
+    ScalarExpressionPtr name =
+      dynamic_pointer_cast<ScalarExpression>(m_property);
+    cg_printString(name->getString(), ar);
+  } else {
+    m_property->outputCPP(cg, ar);
+  }
 }
 
 void ObjectPropertyExpression::outputCPPExistTest(CodeGenerator &cg,
@@ -464,13 +458,6 @@ void ObjectPropertyExpression::outputCPPUnset(CodeGenerator &cg,
     cg_printf("->");
   }
   cg_printf("o_unset(");
-  bool direct = m_property->isUnquotedScalar();
-  if (direct) {
-    cg_printf("\"");
-  }
-  m_property->outputCPP(cg, ar);
-  if (direct) {
-    cg_printf("\"");
-  }
+  outputCPPProperty(cg, ar);
   cg_printf(")");
 }

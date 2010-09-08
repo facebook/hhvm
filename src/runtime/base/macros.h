@@ -126,13 +126,10 @@ namespace HPHP {
   Variant *o_realPropPrivate(CStrRef s, int flags) const;               \
   virtual void o_getArray(Array &props) const;                          \
   virtual void o_setArray(CArrRef props);                               \
-  virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string); \
-  Variant &o_lvalPrivate(CStrRef s);                                    \
 
 #define DECLARE_INSTANCE_PUBLIC_PROP_OPS                                \
   public:                                                               \
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;        \
-  virtual Variant &o_lvalPublic(CStrRef s);                             \
 
 #define DECLARE_COMMON_INVOKES                                          \
   static Variant os_invoke(const char *c, MethodIndex methodIndex,      \

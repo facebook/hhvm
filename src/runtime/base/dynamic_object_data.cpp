@@ -119,18 +119,6 @@ void DynamicObjectData::o_setArray(CArrRef props) {
   }
 }
 
-Variant &DynamicObjectData::o_lval(CStrRef propName,
-                                   CStrRef context /* = null_string */) {
-  if (!parent.isNull()) {
-    return parent->o_lval(propName, context);
-  } else {
-    if (o_properties && o_properties->exists(propName, true)) {
-      return o_properties->lvalAt(propName, false, true);
-    }
-    return root->___lval(propName);
-  }
-}
-
 Array DynamicObjectData::o_toArray() const {
   if (!parent.isNull()) {
     return parent->o_toArray();
@@ -450,14 +438,6 @@ Variant DynamicObjectData::t___clone() {
     return parent->t___clone();
   } else {
     return ObjectData::t___clone();
-  }
-}
-
-Variant &DynamicObjectData::___lval(Variant v_name) {
-  if (!parent.isNull()) {
-    return parent->___lval(v_name);
-  } else {
-    return ObjectData::___lval(v_name);
   }
 }
 

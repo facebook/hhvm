@@ -50,13 +50,10 @@ class c_OutOfBoundsException : public c_RuntimeException {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_OutOfBoundsException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_OutOfBoundsException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_OutOfBoundsException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_OutOfBoundsException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_OutOfBoundsException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_OutOfBoundsException 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_OutOfBoundsException 1

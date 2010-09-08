@@ -36,42 +36,35 @@ Variant LvalExpression::set(VariableEnvironment &env, CVarRef val) const {
 Variant LvalExpression::setOpVariant(Variant &lhs, int op, CVarRef rhs) const {
   switch (op) {
   case T_PLUS_EQUAL:
-    lhs += rhs;
-    break;
+    return AssignOp<T_PLUS_EQUAL>::assign(lhs, rhs);
   case T_MINUS_EQUAL:
-    lhs -= rhs;
-    break;
+    return AssignOp<T_MINUS_EQUAL>::assign(lhs, rhs);
   case T_MUL_EQUAL:
-    lhs *= rhs;
-    break;
+    return AssignOp<T_MUL_EQUAL>::assign(lhs, rhs);
   case T_DIV_EQUAL:
-    lhs /= rhs;
-    break;
+    return AssignOp<T_DIV_EQUAL>::assign(lhs, rhs);
   case T_CONCAT_EQUAL:
-    concat_assign(lhs, rhs);
-    break;
+    return AssignOp<T_CONCAT_EQUAL>::assign(lhs, rhs);
   case T_MOD_EQUAL:
-    lhs %= rhs;
-    break;
+    return AssignOp<T_MOD_EQUAL>::assign(lhs, rhs);
   case T_AND_EQUAL:
-    lhs &= rhs;
-    break;
+    return AssignOp<T_AND_EQUAL>::assign(lhs, rhs);
   case T_OR_EQUAL:
-    lhs |= rhs;
-    break;
+    return AssignOp<T_OR_EQUAL>::assign(lhs, rhs);
   case T_XOR_EQUAL:
-    lhs ^= rhs;
-    break;
+    return AssignOp<T_XOR_EQUAL>::assign(lhs, rhs);
   case T_SL_EQUAL:
-    lhs <<= rhs;
-    break;
+    return AssignOp<T_SL_EQUAL>::assign(lhs, rhs);
   case T_SR_EQUAL:
-    lhs >>= rhs;
-    break;
+    return AssignOp<T_SR_EQUAL>::assign(lhs, rhs);
+  case T_INC:
+    return AssignOp<T_INC>::assign(lhs, rhs);
+  case T_DEC:
+    return AssignOp<T_DEC>::assign(lhs, rhs);
   default:
     ASSERT(false);
   }
-  return lhs;
+  return null;
 }
 
 Variant LvalExpression::setOp(VariableEnvironment &env, int op, CVarRef rhs)

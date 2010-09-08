@@ -234,16 +234,18 @@ Variant ObjectData::o_set(CStrRef propName, CVarRef v,
   if (Variant *t = o_realProp(propName, flags, context)) {
     if (!useSet || t->isInitialized()) {
       *t = v;
+      return v;
     }
-    return null;
   }
 
   if (useSet) {
     AttributeClearer a(UseSet, this);
-    return t___set(propName, v);
+    t___set(propName, v);
+    return v;
   }
 
-  return o_setError(propName, context);
+  o_setError(propName, context);
+  return v;
 }
 
 void ObjectData::o_setArray(CArrRef properties) {
@@ -277,19 +279,42 @@ CVarRef ObjectData::set(CStrRef s, CVarRef v) {
   return v;
 }
 
-Variant &ObjectData::o_lval(CStrRef propName,
+Variant &ObjectData::o_lval(CStrRef propName, CVarRef tmpForGet,
                             CStrRef context /* = null_string */) {
-  return o_lvalPublic(propName);
-}
-
-Variant &ObjectData::o_lvalPublic(CStrRef propName) {
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
   }
-  if (o_properties) {
-    return o_properties->lvalAt(propName, false, true);
+  bool useGet = getAttribute(UseGet);
+  int flags = useGet ? RealPropWrite : RealPropCreate | RealPropWrite;
+
+  if (Variant *t = o_realProp(propName, flags, context)) {
+    if (!useGet || t->isInitialized()) {
+      return *t;
+    }
   }
-  return ___lval(propName);
+
+  ASSERT(useGet);
+
+  AttributeClearer a(UseGet, this);
+  if (getAttribute(HasLval)) {
+    return *___lval(propName);
+  }
+
+  Variant &ret = const_cast<Variant&>(tmpForGet);
+  ret = t___get(propName);
+
+  return ret;
+}
+
+Variant *ObjectData::o_weakLval(CStrRef propName,
+                                CStrRef context /* = null_string */) {
+  if (Variant *t = o_realProp(propName, RealPropWrite|RealPropUnchecked,
+                              context)) {
+    if (t->isInitialized()) {
+      return t;
+    }
+  }
+  return NULL;
 }
 
 Array ObjectData::o_toArray() const {
@@ -384,7 +409,8 @@ Array ObjectData::o_toIterArray(CStrRef context,
     }
     if (visible && o_propExists(prop->name, context)) {
       if (getRef) {
-        Variant &ov = o_lval(prop->name, context);
+        Variant tmp;
+        Variant &ov = o_lval(prop->name, tmp, context);
         Variant &av = ret.lvalAt(prop->name, false, true);
         av = ref(ov);
       } else {
@@ -847,6 +873,7 @@ Variant ObjectData::o_unset(CStrRef prop, CStrRef context) {
   return null;
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // magic methods that user classes can override, and these are default handlers
 // or actions to take:
@@ -871,16 +898,16 @@ Variant ObjectData::t___get(Variant v_name) {
   return null;
 }
 
-Variant &ObjectData::___lval(Variant v_name) {
+Variant *ObjectData::___lval(Variant v_name) {
+  return NULL;
+}
+Variant &ObjectData::___offsetget_lval(Variant v_name) {
   if (!o_properties) {
     // this is needed, since a lval() is actually going to create a null
     // element in properties array
     o_properties = NEW(Array)();
   }
   return o_properties->lvalAt(v_name, false, true);
-}
-Variant &ObjectData::___offsetget_lval(Variant v_name) {
-  return ___lval(v_name);
 }
 bool ObjectData::t___isset(Variant v_name) {
   return false;

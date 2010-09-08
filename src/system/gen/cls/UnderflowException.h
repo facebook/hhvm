@@ -50,13 +50,10 @@ class c_UnderflowException : public c_RuntimeException {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_UnderflowException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_UnderflowException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_UnderflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_UnderflowException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_UnderflowException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_UnderflowException 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_UnderflowException 1

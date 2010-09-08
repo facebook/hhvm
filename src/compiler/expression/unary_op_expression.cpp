@@ -15,6 +15,7 @@
 */
 
 #include <compiler/expression/unary_op_expression.h>
+#include <compiler/expression/object_property_expression.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/analysis/dependency_graph.h>
 #include <compiler/analysis/code_error.h>
@@ -607,8 +608,29 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return Expression::preOutputCPP(cg, ar, state);
 }
 
+bool UnaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
+                                             AnalysisResultPtr ar) {
+  if (m_exp->is(Expression::KindOfObjectPropertyExpression)) {
+    ObjectPropertyExpressionPtr var(
+      dynamic_pointer_cast<ObjectPropertyExpression>(m_exp));
+    if (var->isValid()) return false;
+    var->getObject()->outputCPP(cg, ar);
+    cg_printf(".o_assign_op<%s,%d>(",
+              isUnused() ? "void" : "Variant", m_op);
+    var->outputCPPProperty(cg, ar);
+    cg_printf(", %s, %s)",
+              isUnused() || m_front ? "null_variant" : "Variant(0)",
+              ar->getClassScope() ? "s_class_name" : "empty_string");
+    return true;
+  }
+  return false;
+}
+
 void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
+  if ((m_op == T_INC || m_op == T_DEC) && outputCPPImplOpEqual(cg, ar)) {
+    return;
+  }
   if (m_op == T_ARRAY &&
       (getContext() & (RefValue|LValue)) == 0 &&
       !ar->getInsideScalarArray()) {

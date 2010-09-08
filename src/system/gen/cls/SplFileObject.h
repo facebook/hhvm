@@ -56,13 +56,10 @@ class c_SplFileObject : public c_SplFileInfo {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_SplFileObject 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_SplFileObject 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_SplFileObject 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileObject 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_SplFileObject 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileObject 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_SplFileObject 1

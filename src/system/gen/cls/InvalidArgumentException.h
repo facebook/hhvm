@@ -50,13 +50,10 @@ class c_InvalidArgumentException : public c_LogicException {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_InvalidArgumentException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_InvalidArgumentException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_InvalidArgumentException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_InvalidArgumentException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_InvalidArgumentException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_InvalidArgumentException 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_InvalidArgumentException 1

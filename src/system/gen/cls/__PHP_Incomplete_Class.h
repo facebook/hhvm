@@ -47,13 +47,10 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY___PHP_Incomplete_Class 1
   #define OMIT_JUMP_TABLE_CLASS_realProp___PHP_Incomplete_Class 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_lval___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE___PHP_Incomplete_Class 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC___PHP_Incomplete_Class 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___PHP_Incomplete_Class 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE___PHP_Incomplete_Class 1

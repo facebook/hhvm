@@ -459,15 +459,7 @@ void StatementList::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         MethodStatementPtr methodStmt =
           dynamic_pointer_cast<MethodStatement>(stmt);
         std::string methodName = methodStmt->getName();
-        if (methodName == "__get") {
-          FunctionScopePtr funcScope = methodStmt->getFunctionScope();
-          std::string name = funcScope->getName();
-          funcScope->setName("__lval");
-          methodStmt->setName("__lval");
-          methodStmt->outputCPP(cg, ar);
-          funcScope->setName(name);
-          methodStmt->setName("__get");
-        } else if (methodName == "offsetget") {
+        if (methodName == "offsetget") {
           ClassScopePtr cls = ar->getClassScope();
           std::string arrayAccess("arrayaccess");
           if (cls->derivesFrom(ar, arrayAccess, false, false)) {

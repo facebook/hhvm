@@ -856,12 +856,9 @@ void Expression::outputCPPInternal(CodeGenerator &cg, AnalysisResultPtr ar) {
       cg_printf("ref(");
       closeParen++;
     }
-    bool isArray = is(Expression::KindOfArrayElementExpression);
-    bool isOP = is(Expression::KindOfObjectPropertyExpression);
-    if (isOP || isArray) {
+    if (is(Expression::KindOfArrayElementExpression)) {
       if (((m_context & LValue) && !(m_context & NoLValueWrapper)) ||
-          ((m_context & RefValue) && (!(m_context & InvokeArgument) || isOP)) ||
-          ((m_context & UnsetContext) && !(m_context & LValue) && isOP)) {
+          ((m_context & RefValue) && !(m_context & InvokeArgument))) {
         cg_printf("lval(");
         closeParen++;
       }

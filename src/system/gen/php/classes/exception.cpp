@@ -65,21 +65,6 @@ Variant * c_UnexpectedValueException::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_UnexpectedValueException
-Variant& c_UnexpectedValueException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_UnexpectedValueException
-Variant& c_UnexpectedValueException::o_lvalPublic(CStrRef s) {
-  return c_RuntimeException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_UnexpectedValueException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_UnexpectedValueException
-Variant& c_UnexpectedValueException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_UnexpectedValueException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
 Variant c_UnexpectedValueException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
@@ -720,21 +705,6 @@ Variant * c_OverflowException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_OverflowException
-Variant& c_OverflowException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_OverflowException
-Variant& c_OverflowException::o_lvalPublic(CStrRef s) {
-  return c_RuntimeException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_OverflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_OverflowException
-Variant& c_OverflowException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_OverflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
 Variant c_OverflowException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
@@ -1375,21 +1345,6 @@ Variant * c_OutOfBoundsException::o_realPropPrivate(CStrRef s, int flags) const 
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_OutOfBoundsException
-Variant& c_OutOfBoundsException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_OutOfBoundsException
-Variant& c_OutOfBoundsException::o_lvalPublic(CStrRef s) {
-  return c_RuntimeException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_OutOfBoundsException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_OutOfBoundsException
-Variant& c_OutOfBoundsException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_OutOfBoundsException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
 Variant c_OutOfBoundsException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
@@ -2030,21 +1985,6 @@ Variant * c_LogicException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_LogicException
-Variant& c_LogicException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_LogicException
-Variant& c_LogicException::o_lvalPublic(CStrRef s) {
-  return c_Exception::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_LogicException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_LogicException
-Variant& c_LogicException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_LogicException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
 Variant c_LogicException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
@@ -2685,21 +2625,6 @@ Variant * c_RangeException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_RangeException
-Variant& c_RangeException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RangeException
-Variant& c_RangeException::o_lvalPublic(CStrRef s) {
-  return c_RuntimeException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RangeException
-Variant& c_RangeException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
 Variant c_RangeException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
@@ -3340,21 +3265,6 @@ Variant * c_InvalidArgumentException::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_InvalidArgumentException
-Variant& c_InvalidArgumentException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_InvalidArgumentException
-Variant& c_InvalidArgumentException::o_lvalPublic(CStrRef s) {
-  return c_LogicException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_InvalidArgumentException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_InvalidArgumentException
-Variant& c_InvalidArgumentException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_InvalidArgumentException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
 Variant c_InvalidArgumentException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
@@ -3995,21 +3905,6 @@ Variant * c_UnderflowException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_UnderflowException
-Variant& c_UnderflowException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_UnderflowException
-Variant& c_UnderflowException::o_lvalPublic(CStrRef s) {
-  return c_RuntimeException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_UnderflowException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_UnderflowException
-Variant& c_UnderflowException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_UnderflowException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
 Variant c_UnderflowException::os_constant(const char *s) {
   return c_RuntimeException::os_constant(s);
@@ -4650,21 +4545,6 @@ Variant * c_OutOfRangeException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_OutOfRangeException
-Variant& c_OutOfRangeException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_OutOfRangeException
-Variant& c_OutOfRangeException::o_lvalPublic(CStrRef s) {
-  return c_LogicException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_OutOfRangeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_OutOfRangeException
-Variant& c_OutOfRangeException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_OutOfRangeException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
 Variant c_OutOfRangeException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
@@ -5305,21 +5185,6 @@ Variant * c_BadMethodCallException::o_realPropPrivate(CStrRef s, int flags) cons
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_BadMethodCallException
-Variant& c_BadMethodCallException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_BadMethodCallException
-Variant& c_BadMethodCallException::o_lvalPublic(CStrRef s) {
-  return c_BadFunctionCallException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_BadMethodCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_BadMethodCallException
-Variant& c_BadMethodCallException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_BadMethodCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
 Variant c_BadMethodCallException::os_constant(const char *s) {
   return c_BadFunctionCallException::os_constant(s);
@@ -5960,21 +5825,6 @@ Variant * c_RuntimeException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_RuntimeException
-Variant& c_RuntimeException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RuntimeException
-Variant& c_RuntimeException::o_lvalPublic(CStrRef s) {
-  return c_Exception::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RuntimeException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RuntimeException
-Variant& c_RuntimeException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RuntimeException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
 Variant c_RuntimeException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
@@ -6666,46 +6516,6 @@ Variant * c_Exception::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_Exception
-Variant& c_Exception::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Exception
-Variant& c_Exception::o_lvalPublic(CStrRef s) {
-  int64 hash = s->hash();
-  switch (hash & 15) {
-    case 7:
-      HASH_RETURN_NAMSTR(0x3CCB986B2CF0A747LL, s_sys_ss2cf0a747, m_trace,
-                         5);
-      break;
-    case 9:
-      HASH_RETURN_NAMSTR(0x58C72230857ACDB9LL, s_sys_ss7a853247, m_code,
-                         4);
-      break;
-    case 10:
-      HASH_RETURN_NAMSTR(0x04AB35CACF8C8C9ALL, s_sys_ss30737366, m_line,
-                         4);
-      break;
-    case 11:
-      HASH_RETURN_NAMSTR(0x0247CDBB94C9D47BLL, s_sys_ss6b362b85, m_message,
-                         7);
-      break;
-    case 15:
-      HASH_RETURN_NAMSTR(0x7863294A8F33D14FLL, s_sys_ss70cc2eb1, m_file,
-                         4);
-      break;
-    default:
-      break;
-  }
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Exception
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Exception
-Variant& c_Exception::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Exception
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
 Variant c_Exception::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -7438,7 +7248,7 @@ void c_Exception::t___init__() {
           }
         }
         {
-          const Variant &tmp12((x_array_shift(ref(lval(m_trace)))));
+          const Variant &tmp12((x_array_shift(ref(m_trace))));
           v_frame = tmp12;
         }
       }
@@ -7610,30 +7420,6 @@ Variant * c_ErrorException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_ErrorException
-Variant& c_ErrorException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ErrorException
-Variant& c_ErrorException::o_lvalPublic(CStrRef s) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x4FDAA620FA5F15F9LL, s_sys_ss05a0ea07, m_severity,
-                         8);
-      break;
-    default:
-      break;
-  }
-  return c_Exception::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ErrorException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ErrorException
-Variant& c_ErrorException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ErrorException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
 Variant c_ErrorException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
@@ -8519,21 +8305,6 @@ Variant * c_BadFunctionCallException::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_BadFunctionCallException
-Variant& c_BadFunctionCallException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_BadFunctionCallException
-Variant& c_BadFunctionCallException::o_lvalPublic(CStrRef s) {
-  return c_LogicException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_BadFunctionCallException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_BadFunctionCallException
-Variant& c_BadFunctionCallException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_BadFunctionCallException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
 Variant c_BadFunctionCallException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
@@ -9174,21 +8945,6 @@ Variant * c_LengthException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_LengthException
-Variant& c_LengthException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_LengthException
-Variant& c_LengthException::o_lvalPublic(CStrRef s) {
-  return c_LogicException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_LengthException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_LengthException
-Variant& c_LengthException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_LengthException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
 Variant c_LengthException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);
@@ -9829,21 +9585,6 @@ Variant * c_DomainException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DomainException
-Variant& c_DomainException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DomainException
-Variant& c_DomainException::o_lvalPublic(CStrRef s) {
-  return c_LogicException::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DomainException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DomainException
-Variant& c_DomainException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DomainException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
 Variant c_DomainException::os_constant(const char *s) {
   return c_LogicException::os_constant(s);

@@ -21,7 +21,6 @@
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/string_offset.h>
-#include <runtime/base/object_offset.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/base/intercept.h>
 #include <runtime/base/runtime_error.h>
@@ -413,8 +412,6 @@ inline Variant &concat_assign(Variant &v1, CStrRef s2) {
   return v1;
 }
 
-String concat_assign(ObjectOffset v1, CStrRef s2);
-
 inline String &concat_assign(const StringOffset &s1, litstr s2) {
   return concat_assign(s1.lval(), s2);
 }
@@ -433,9 +430,6 @@ inline Variant &concat_assign_rev(litstr s2, Variant &v1) {
   return concat_assign(v1, s2);
 }
 inline Variant &concat_assign_rev(CStrRef s2, Variant &v1) {
-  return concat_assign(v1, s2);
-}
-inline String concat_assign_rev(CStrRef s2, ObjectOffset v1) {
   return concat_assign(v1, s2);
 }
 inline String &concat_assign_rev(litstr s2, const StringOffset &s1) {
@@ -512,7 +506,6 @@ bool isset(CVarRef v, litstr  offset, bool isString = false);
 bool isset(CVarRef v, CStrRef offset, bool isString = false);
 
 inline Variant unset(Variant &v)               { v.unset();   return null;}
-inline Variant unset(const ObjectOffset &v)    { v.unset();   return null;}
 inline Variant unset(CVarRef v)                {              return null;}
 inline Variant setNull(Variant &v)             { v.setNull(); return null;}
 inline Variant unset(Object &v)                { v.reset();   return null;}
@@ -542,7 +535,6 @@ inline Variant &lval(CVarRef  v) { // in case generating lval(1)
   throw FatalErrorException("taking reference from an r-value");
 }
 inline String  &lval(const StringOffset  &v) { return v.lval();}
-inline Variant &lval(const ObjectOffset  &v) { return v.lval();}
 
 template<class T>
 Variant &unsetLval(Variant &v, const T &key) {
@@ -574,7 +566,6 @@ Variant &unsetLval(Array &v, const T &key) {
  *   a = b;      // weak binding: a will copy or copy-on-write
  */
 inline CVarRef ref(CVarRef v) { v.setContagious(); return v;}
-inline CVarRef ref(const ObjectOffset  &v) { return ref(v.lval());}
 
 ///////////////////////////////////////////////////////////////////////////////
 // misc functions

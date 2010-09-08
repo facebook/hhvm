@@ -105,39 +105,6 @@ Variant * c_SplObjectStorage::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SplObjectStorage
-Variant& c_SplObjectStorage::o_lval(CStrRef prop, CStrRef context) {
-  CStrRef s = context.isNull() ? FrameInjection::GetClassName(false) : context;
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_GUARD_STRING(0x5BA243B9FBA7A64FLL, SplObjectStorage) { return o_lvalPrivate(prop); }
-      break;
-    default:
-      break;
-  }
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplObjectStorage
-Variant& c_SplObjectStorage::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplObjectStorage
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplObjectStorage
-Variant& c_SplObjectStorage::o_lvalPrivate(CStrRef s) {
-  int64 hash = s->hash();
-  switch (hash & 1) {
-    case 1:
-      HASH_RETURN_NAMSTR(0x17AC96477E2B6DC3LL, s_sys_ss7e2b6dc3, m_storage,
-                         7);
-      break;
-    default:
-      break;
-  }
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplObjectStorage
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplObjectStorage
 Variant c_SplObjectStorage::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -757,7 +724,7 @@ void c_SplObjectStorage::t_rewind() {
 bool c_SplObjectStorage::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::valid);
   {
-    const Variant &tmp1((x_key(ref(lval(m_storage)))));
+    const Variant &tmp1((x_key(ref(m_storage))));
     return !same(tmp1, false);
   }
 } /* function */
@@ -769,12 +736,12 @@ int64 c_SplObjectStorage::t_key() {
 /* SRC: classes/splobjectstorage.php line 62 */
 Variant c_SplObjectStorage::t_current() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::current);
-  return x_current(ref(lval(m_storage)));
+  return x_current(ref(m_storage));
 } /* function */
 /* SRC: classes/splobjectstorage.php line 74 */
 void c_SplObjectStorage::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplObjectStorage, SplObjectStorage::next);
-  x_next(ref(lval(m_storage)));
+  x_next(ref(m_storage));
   m_index++;
 } /* function */
 /* SRC: classes/splobjectstorage.php line 87 */
@@ -849,7 +816,7 @@ void c_SplObjectStorage::t_detach(CVarRef v_obj) {
           {
             if (same(v_object, v_obj)) {
               {
-                lval(m_storage).weakRemove(v_idx);
+                m_storage.weakRemove(v_idx);
                 o_root_invoke_few_args(/* rewind */ MethodIndex(9, 1) /* rewind */ ,  "rewind", 0x1670096FDE27AF6ALL, 0);
                 return;
               }

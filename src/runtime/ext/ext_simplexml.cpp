@@ -262,6 +262,7 @@ c_SimpleXMLElement::c_SimpleXMLElement()
     : m_node(NULL), m_is_text(false), m_free_text(false),
       m_is_attribute(false), m_is_children(false), m_is_property(false),
       m_xpath(NULL) {
+  setAttribute(HasLval);
   m_children = Array::Create();
 }
 
@@ -664,8 +665,8 @@ String c_SimpleXMLElement::t___tostring() {
   return "";
 }
 
-Variant &c_SimpleXMLElement::___lval(Variant v_name) {
-  return m_children.lvalAt(v_name);
+Variant *c_SimpleXMLElement::___lval(Variant v_name) {
+  return &m_children.lvalAt(v_name);
 }
 
 Variant c_SimpleXMLElement::t___get(Variant name) {

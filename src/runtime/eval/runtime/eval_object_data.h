@@ -46,7 +46,6 @@ public:
   virtual void o_setArray(CArrRef props);
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;
-  virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string);
   void o_setPrivate(const char *cls, const char *s, int64 hash, CVarRef v);
 
   virtual Variant o_getError(CStrRef prop, CStrRef context);
@@ -88,7 +87,6 @@ public:
   virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
-  virtual Variant &___lval(Variant v_name);
   virtual Variant &___offsetget_lval(Variant v_name);
 
 protected:

@@ -73,7 +73,6 @@ class ResourceData;
  * objects will help to store temporary information to make the task easier.
  */
 class StringOffset;
-class ObjectOffset;
 
 /**
  * Miscellaneous objects to help arrays to construct or to iterate.

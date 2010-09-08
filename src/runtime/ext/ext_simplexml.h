@@ -100,7 +100,7 @@ class c_SimpleXMLElement :
   virtual int64 o_toInt64() const;
   virtual double o_toDouble() const;
   virtual Array o_toArray() const;
-  virtual Variant &___lval(Variant v_name);
+  virtual Variant *___lval(Variant v_name);
  private:
   xmlXPathContextPtr m_xpath;
 };

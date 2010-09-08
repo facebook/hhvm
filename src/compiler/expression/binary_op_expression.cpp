@@ -16,6 +16,7 @@
 
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/expression/array_element_expression.h>
+#include <compiler/expression/object_property_expression.h>
 #include <compiler/expression/unary_op_expression.h>
 #include <compiler/parser/hphp.tab.hpp>
 #include <compiler/expression/scalar_expression.h>
@@ -972,38 +973,54 @@ bool BinaryOpExpression::isOpEqual() {
 
 bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
                                               AnalysisResultPtr ar) {
-  if (!m_exp1->is(Expression::KindOfArrayElementExpression)) return false;
-  ArrayElementExpressionPtr exp =
-    dynamic_pointer_cast<ArrayElementExpression>(m_exp1);
-  if (exp->isSuperGlobal() || exp->isDynamicGlobal()) return false;
+  if (m_exp1->is(Expression::KindOfArrayElementExpression)) {
+    ArrayElementExpressionPtr exp =
+      dynamic_pointer_cast<ArrayElementExpression>(m_exp1);
+    if (exp->isSuperGlobal() || exp->isDynamicGlobal()) return false;
 
-  // turning $a['elem'] Op= $b into $a.setOpEqual('elem', $b);
-  exp->getVariable()->outputCPP(cg, ar);
-  if (exp->getOffset()) {
-    cg_printf(".setOpEqual(%d, ", m_op);
-    exp->getOffset()->outputCPP(cg, ar);
-    cg_printf(", (");
-  } else {
-    cg_printf(".appendOpEqual(%d, (", m_op);
-  }
-  m_exp2->outputCPP(cg, ar);
-  cg_printf(")");
-  ExpressionPtr off = exp->getOffset();
-  if (off) {
-    ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(off);
-    if (sc) {
-      if (sc->isLiteralString()) {
-        String s(sc->getLiteralString());
-        int64 n;
-        if (!s.get()->isStrictlyInteger(n)) {
-          cg_printf(", true"); // skip toKey() at run time
+    // turning $a['elem'] Op= $b into $a.setOpEqual('elem', $b);
+    exp->getVariable()->outputCPP(cg, ar);
+    if (exp->getOffset()) {
+      cg_printf(".setOpEqual(%d, ", m_op);
+      exp->getOffset()->outputCPP(cg, ar);
+      cg_printf(", (");
+    } else {
+      cg_printf(".appendOpEqual(%d, (", m_op);
+    }
+    m_exp2->outputCPP(cg, ar);
+    cg_printf(")");
+    ExpressionPtr off = exp->getOffset();
+    if (off) {
+      ScalarExpressionPtr sc = dynamic_pointer_cast<ScalarExpression>(off);
+      if (sc) {
+        if (sc->isLiteralString()) {
+          String s(sc->getLiteralString());
+          int64 n;
+          if (!s.get()->isStrictlyInteger(n)) {
+            cg_printf(", true"); // skip toKey() at run time
+          }
         }
       }
     }
-  }
-  cg_printf(")");
+    cg_printf(")");
 
-  return true;
+    return true;
+  }
+  if (m_exp1->is(Expression::KindOfObjectPropertyExpression)) {
+    ObjectPropertyExpressionPtr var(
+      dynamic_pointer_cast<ObjectPropertyExpression>(m_exp1));
+    if (var->isValid()) return false;
+    var->getObject()->outputCPP(cg, ar);
+    cg_printf(".o_assign_op<%s,%d>(",
+              isUnused() ? "void" : "Variant", m_op);
+    var->outputCPPProperty(cg, ar);
+    cg_printf(", ");
+    m_exp2->outputCPP(cg, ar);
+    cg_printf(", %s)", ar->getClassScope() ? "s_class_name" : "empty_string");
+    return true;
+  }
+
+  return false;
 }
 
 void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,

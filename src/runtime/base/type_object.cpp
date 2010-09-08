@@ -15,7 +15,6 @@
 */
 
 #include <runtime/base/complex_types.h>
-#include <runtime/base/object_offset.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_serializer.h>
 #include <system/gen/php/classes/stdclass.h>
@@ -68,12 +67,20 @@ Variant Object::o_getPublic(CStrRef propName, bool error /* = true */) const {
   return m_px->o_getPublic(propName, error);
 }
 
-ObjectOffset Object::o_lval(CStrRef propName,
-                            CStrRef context /* = null_string */) {
+Variant Object::o_set(CStrRef propName, CVarRef val,
+                      CStrRef context /* = null_string */) {
   if (!m_px) {
     operator=(NEW(c_stdClass)());
   }
-  return ObjectOffset(m_px, propName, context);
+  return m_px->o_set(propName, val, false, context);
+}
+
+Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
+                        CStrRef context /* = null_string */) {
+  if (!m_px) {
+    operator=(NEW(c_stdClass)());
+  }
+  return m_px->o_lval(propName, tmpForGet, context);
 }
 
 bool Object::o_isset(CStrRef propName,

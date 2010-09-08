@@ -127,7 +127,7 @@ static void set_function_info(Array &ret, const ClassInfo::MethodInfo *info,
         ASSERT(p->attribute & ClassInfo::IsOptional);
         if (*p->value == '\x01') {
           Object v((NEW(c_stdClass)())->create());
-          v.o_lval("msg") = String("unable to eval ") + defText;
+          v.o_set("msg", String("unable to eval ") + defText);
           param.set("default", v);
         } else {
           param.set("default", f_unserialize(p->value));

@@ -532,21 +532,6 @@ Variant * c_PDOException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PDOException
-Variant& c_PDOException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_PDOException
-Variant& c_PDOException::o_lvalPublic(CStrRef s) {
-  return c_Exception::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_PDOException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_PDOException
-Variant& c_PDOException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_PDOException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOException
 Variant c_PDOException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
@@ -1233,21 +1218,6 @@ Variant * c_DOMDocumentFragment::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMDocumentFragment
-Variant& c_DOMDocumentFragment::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMDocumentFragment
-Variant& c_DOMDocumentFragment::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMDocumentFragment
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMDocumentFragment
-Variant& c_DOMDocumentFragment::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMDocumentFragment
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentFragment
 Variant c_DOMDocumentFragment::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -2974,21 +2944,6 @@ Variant * c_DOMText::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMText
-Variant& c_DOMText::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMText
-Variant& c_DOMText::o_lvalPublic(CStrRef s) {
-  return c_DOMCharacterData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMText
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMText
-Variant& c_DOMText::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMText
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMText
 Variant c_DOMText::os_constant(const char *s) {
   return c_DOMCharacterData::os_constant(s);
@@ -5208,21 +5163,6 @@ Variant * c_DebuggerClient::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DebuggerClient
-Variant& c_DebuggerClient::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DebuggerClient
-Variant& c_DebuggerClient::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DebuggerClient
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DebuggerClient
-Variant& c_DebuggerClient::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DebuggerClient
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerClient
 Variant c_DebuggerClient::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -7502,21 +7442,6 @@ Variant * c_DOMCDATASection::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMCDATASection
-Variant& c_DOMCDATASection::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMCDATASection
-Variant& c_DOMCDATASection::o_lvalPublic(CStrRef s) {
-  return c_DOMText::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMCDATASection
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMCDATASection
-Variant& c_DOMCDATASection::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMCDATASection
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCDATASection
 Variant c_DOMCDATASection::os_constant(const char *s) {
   return c_DOMText::os_constant(s);
@@ -9721,21 +9646,6 @@ Variant * c_Locale::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_Locale
-Variant& c_Locale::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Locale
-Variant& c_Locale::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Locale
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Locale
-Variant& c_Locale::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Locale
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Locale
 Variant c_Locale::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -10015,21 +9925,6 @@ Variant * c_DOMDocumentType::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMDocumentType
-Variant& c_DOMDocumentType::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMDocumentType
-Variant& c_DOMDocumentType::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMDocumentType
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMDocumentType
-Variant& c_DOMDocumentType::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMDocumentType
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocumentType
 Variant c_DOMDocumentType::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -11692,21 +11587,6 @@ Variant * c_SQLite3Stmt::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SQLite3Stmt
-Variant& c_SQLite3Stmt::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SQLite3Stmt
-Variant& c_SQLite3Stmt::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SQLite3Stmt
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SQLite3Stmt
-Variant& c_SQLite3Stmt::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SQLite3Stmt
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Stmt
 Variant c_SQLite3Stmt::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -12485,21 +12365,6 @@ Variant * c_DOMNodeList::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNodeList
-Variant& c_DOMNodeList::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNodeList
-Variant& c_DOMNodeList::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNodeList
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNodeList
-Variant& c_DOMNodeList::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNodeList
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeList
 Variant c_DOMNodeList::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -13036,21 +12901,6 @@ Variant * c_Normalizer::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_Normalizer
-Variant& c_Normalizer::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Normalizer
-Variant& c_Normalizer::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Normalizer
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Normalizer
-Variant& c_Normalizer::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Normalizer
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Normalizer
 Variant c_Normalizer::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -13687,21 +13537,6 @@ Variant * c_DOMCharacterData::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMCharacterData
-Variant& c_DOMCharacterData::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMCharacterData
-Variant& c_DOMCharacterData::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMCharacterData
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMCharacterData
-Variant& c_DOMCharacterData::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMCharacterData
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMCharacterData
 Variant c_DOMCharacterData::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -15758,21 +15593,6 @@ Variant * c_DOMEntityReference::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMEntityReference
-Variant& c_DOMEntityReference::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMEntityReference
-Variant& c_DOMEntityReference::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMEntityReference
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMEntityReference
-Variant& c_DOMEntityReference::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMEntityReference
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntityReference
 Variant c_DOMEntityReference::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -17467,21 +17287,6 @@ Variant * c_SimpleXMLElementIterator::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SimpleXMLElementIterator
-Variant& c_SimpleXMLElementIterator::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SimpleXMLElementIterator
-Variant& c_SimpleXMLElementIterator::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SimpleXMLElementIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SimpleXMLElementIterator
-Variant& c_SimpleXMLElementIterator::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SimpleXMLElementIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElementIterator
 Variant c_SimpleXMLElementIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -18018,21 +17823,6 @@ Variant * c_DateTimeZone::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DateTimeZone
-Variant& c_DateTimeZone::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DateTimeZone
-Variant& c_DateTimeZone::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DateTimeZone
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DateTimeZone
-Variant& c_DateTimeZone::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DateTimeZone
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTimeZone
 Variant c_DateTimeZone::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -18754,21 +18544,6 @@ Variant * c_DOMNodeIterator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNodeIterator
-Variant& c_DOMNodeIterator::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNodeIterator
-Variant& c_DOMNodeIterator::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNodeIterator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNodeIterator
-Variant& c_DOMNodeIterator::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNodeIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNodeIterator
 Variant c_DOMNodeIterator::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -19305,21 +19080,6 @@ Variant * c_DOMImplementation::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMImplementation
-Variant& c_DOMImplementation::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMImplementation
-Variant& c_DOMImplementation::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMImplementation
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMImplementation
-Variant& c_DOMImplementation::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMImplementation
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMImplementation
 Variant c_DOMImplementation::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -19880,21 +19640,6 @@ Variant * c_SoapHeader::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapHeader
-Variant& c_SoapHeader::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapHeader
-Variant& c_SoapHeader::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapHeader
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapHeader
-Variant& c_SoapHeader::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapHeader
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapHeader
 Variant c_SoapHeader::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -20306,21 +20051,6 @@ Variant * c_DOMNotation::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNotation
-Variant& c_DOMNotation::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNotation
-Variant& c_DOMNotation::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNotation
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNotation
-Variant& c_DOMNotation::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNotation
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNotation
 Variant c_DOMNotation::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -21983,21 +21713,6 @@ Variant * c_DebuggerProxy::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DebuggerProxy
-Variant& c_DebuggerProxy::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DebuggerProxy
-Variant& c_DebuggerProxy::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DebuggerProxy
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DebuggerProxy
-Variant& c_DebuggerProxy::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DebuggerProxy
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DebuggerProxy
 Variant c_DebuggerProxy::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -22396,21 +22111,6 @@ Variant * c_DOMComment::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMComment
-Variant& c_DOMComment::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMComment
-Variant& c_DOMComment::o_lvalPublic(CStrRef s) {
-  return c_DOMCharacterData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMComment
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMComment
-Variant& c_DOMComment::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMComment
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMComment
 Variant c_DOMComment::os_constant(const char *s) {
   return c_DOMCharacterData::os_constant(s);
@@ -24514,21 +24214,6 @@ Variant * c_SQLite3::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SQLite3
-Variant& c_SQLite3::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SQLite3
-Variant& c_SQLite3::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SQLite3
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SQLite3
-Variant& c_SQLite3::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SQLite3
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3
 Variant c_SQLite3::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -25957,21 +25642,6 @@ Variant * c_DOMAttr::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMAttr
-Variant& c_DOMAttr::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMAttr
-Variant& c_DOMAttr::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMAttr
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMAttr
-Variant& c_DOMAttr::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMAttr
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMAttr
 Variant c_DOMAttr::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -27743,21 +27413,6 @@ Variant * c_SoapVar::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapVar
-Variant& c_SoapVar::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapVar
-Variant& c_SoapVar::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapVar
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapVar
-Variant& c_SoapVar::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapVar
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapVar
 Variant c_SoapVar::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -28200,21 +27855,6 @@ Variant * c_DOMNamedNodeMap::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNamedNodeMap
-Variant& c_DOMNamedNodeMap::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNamedNodeMap
-Variant& c_DOMNamedNodeMap::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNamedNodeMap
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNamedNodeMap
-Variant& c_DOMNamedNodeMap::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNamedNodeMap
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNamedNodeMap
 Variant c_DOMNamedNodeMap::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -28901,21 +28541,6 @@ Variant * c_SQLite3Result::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SQLite3Result
-Variant& c_SQLite3Result::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SQLite3Result
-Variant& c_SQLite3Result::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SQLite3Result
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SQLite3Result
-Variant& c_SQLite3Result::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SQLite3Result
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SQLite3Result
 Variant c_SQLite3Result::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -29564,21 +29189,6 @@ Variant * c_SimpleXMLElement::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SimpleXMLElement
-Variant& c_SimpleXMLElement::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SimpleXMLElement
-Variant& c_SimpleXMLElement::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SimpleXMLElement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SimpleXMLElement
-Variant& c_SimpleXMLElement::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SimpleXMLElement
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SimpleXMLElement
 Variant c_SimpleXMLElement::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -31553,21 +31163,6 @@ Variant * c_Memcache::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_Memcache
-Variant& c_Memcache::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Memcache
-Variant& c_Memcache::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Memcache
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Memcache
-Variant& c_Memcache::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Memcache
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Memcache
 Variant c_Memcache::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -33736,21 +33331,6 @@ Variant * c_DOMProcessingInstruction::o_realPropPrivate(CStrRef s, int flags) co
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMProcessingInstruction
-Variant& c_DOMProcessingInstruction::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMProcessingInstruction
-Variant& c_DOMProcessingInstruction::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMProcessingInstruction
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMProcessingInstruction
-Variant& c_DOMProcessingInstruction::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMProcessingInstruction
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMProcessingInstruction
 Variant c_DOMProcessingInstruction::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -35476,21 +35056,6 @@ Variant * c_PDOStatement::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PDOStatement
-Variant& c_PDOStatement::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_PDOStatement
-Variant& c_PDOStatement::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_PDOStatement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_PDOStatement
-Variant& c_PDOStatement::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_PDOStatement
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDOStatement
 Variant c_PDOStatement::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -37603,21 +37168,6 @@ Variant * c_SoapClient::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapClient
-Variant& c_SoapClient::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapClient
-Variant& c_SoapClient::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapClient
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapClient
-Variant& c_SoapClient::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapClient
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapClient
 Variant c_SoapClient::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -38812,21 +38362,6 @@ Variant * c_SoapParam::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapParam
-Variant& c_SoapParam::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapParam
-Variant& c_SoapParam::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapParam
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapParam
-Variant& c_SoapParam::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapParam
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapParam
 Variant c_SoapParam::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -39145,21 +38680,6 @@ Variant * c_DateTime::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DateTime
-Variant& c_DateTime::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DateTime
-Variant& c_DateTime::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DateTime
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DateTime
-Variant& c_DateTime::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DateTime
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DateTime
 Variant c_DateTime::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -40130,21 +39650,6 @@ Variant * c_Collator::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_Collator
-Variant& c_Collator::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Collator
-Variant& c_Collator::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_Collator
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Collator
-Variant& c_Collator::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_Collator
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_Collator
 Variant c_Collator::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -41438,21 +40943,6 @@ Variant * c_PDO::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PDO
-Variant& c_PDO::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_PDO
-Variant& c_PDO::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_PDO
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_PDO
-Variant& c_PDO::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_PDO
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_PDO
 Variant c_PDO::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -43098,21 +42588,6 @@ Variant * c_ImageSprite::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_ImageSprite
-Variant& c_ImageSprite::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ImageSprite
-Variant& c_ImageSprite::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ImageSprite
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ImageSprite
-Variant& c_ImageSprite::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ImageSprite
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_ImageSprite
 Variant c_ImageSprite::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -44277,21 +43752,6 @@ Variant * c_DOMEntity::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMEntity
-Variant& c_DOMEntity::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMEntity
-Variant& c_DOMEntity::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMEntity
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMEntity
-Variant& c_DOMEntity::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMEntity
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMEntity
 Variant c_DOMEntity::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -45954,21 +45414,6 @@ Variant * c_XMLWriter::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_XMLWriter
-Variant& c_XMLWriter::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_XMLWriter
-Variant& c_XMLWriter::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_XMLWriter
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_XMLWriter
-Variant& c_XMLWriter::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_XMLWriter
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_XMLWriter
 Variant c_XMLWriter::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -49291,21 +48736,6 @@ Variant * c_DOMException::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMException
-Variant& c_DOMException::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMException
-Variant& c_DOMException::o_lvalPublic(CStrRef s) {
-  return c_Exception::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMException
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMException
-Variant& c_DOMException::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMException
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMException
 Variant c_DOMException::os_constant(const char *s) {
   return c_Exception::os_constant(s);
@@ -50070,21 +49500,6 @@ Variant * c_DOMXPath::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMXPath
-Variant& c_DOMXPath::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMXPath
-Variant& c_DOMXPath::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMXPath
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMXPath
-Variant& c_DOMXPath::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMXPath
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMXPath
 Variant c_DOMXPath::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -50859,21 +50274,6 @@ Variant * c_SoapServer::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapServer
-Variant& c_SoapServer::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapServer
-Variant& c_SoapServer::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapServer
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapServer
-Variant& c_SoapServer::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapServer
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapServer
 Variant c_SoapServer::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -51833,21 +51233,6 @@ Variant * c_DOMNode::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMNode
-Variant& c_DOMNode::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNode
-Variant& c_DOMNode::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMNode
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNode
-Variant& c_DOMNode::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMNode
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMNode
 Variant c_DOMNode::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -53510,21 +52895,6 @@ Variant * c_DOMDocument::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMDocument
-Variant& c_DOMDocument::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMDocument
-Variant& c_DOMDocument::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMDocument
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMDocument
-Variant& c_DOMDocument::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMDocument
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMDocument
 Variant c_DOMDocument::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);
@@ -57431,21 +56801,6 @@ Variant * c_LibXMLError::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_LibXMLError
-Variant& c_LibXMLError::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_LibXMLError
-Variant& c_LibXMLError::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_LibXMLError
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_LibXMLError
-Variant& c_LibXMLError::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_LibXMLError
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_LibXMLError
 Variant c_LibXMLError::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -57716,21 +57071,6 @@ Variant * c_SoapFault::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SoapFault
-Variant& c_SoapFault::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapFault
-Variant& c_SoapFault::o_lvalPublic(CStrRef s) {
-  return c_Exception::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SoapFault
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapFault
-Variant& c_SoapFault::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SoapFault
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SoapFault
 Variant c_SoapFault::os_constant(const char *s) {
   return c_Exception::os_constant(s);
@@ -58589,21 +57929,6 @@ Variant * c_DOMElement::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_DOMElement
-Variant& c_DOMElement::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMElement
-Variant& c_DOMElement::o_lvalPublic(CStrRef s) {
-  return c_DOMNode::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_DOMElement
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMElement
-Variant& c_DOMElement::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_DOMElement
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_DOMElement
 Variant c_DOMElement::os_constant(const char *s) {
   return c_DOMNode::os_constant(s);

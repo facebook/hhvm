@@ -409,10 +409,6 @@ CVarRef Variant::set(ObjectData *v) {
   return *this;
 }
 
-CVarRef Variant::set(const ObjectOffset& v) {
-  return (*this = static_cast<Variant>(v));
-}
-
 void Variant::split() {
   switch (m_type) {
   case KindOfVariant: m_data.pvar->split();     break;
@@ -1622,7 +1618,7 @@ Object Variant::toObject() const {
   case KindOfString:
     {
       c_stdClass *obj = NEW(c_stdClass)();
-      obj->o_lval(s_scalar) = *this;
+      obj->o_set(s_scalar, *this, false);
       return obj;
     }
   case KindOfArray:   return m_data.parr->toObject();
@@ -2291,6 +2287,25 @@ Variant Variant::o_getPublic(CStrRef propName, bool error /* = true */) const {
   return null_variant;
 }
 
+Variant Variant::o_set(CStrRef propName, CVarRef val,
+                       CStrRef context /* = null_string */) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+
+  if (m_type == KindOfObject) {
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_set(propName, val, context);
+  } else if (isObjectConvertable()) {
+    set(Object(NEW(c_stdClass)()));
+  } else {
+    // Raise a warning
+    raise_warning("Attempt to assign property of non-object");
+    return val;
+  }
+  return m_data.pobj->o_set(propName, val, false, context);
+}
+
 Variant Variant::o_invoke(MethodIndex methodIndex, const char *s,
                           CArrRef params, int64 hash) {
   if (m_type == KindOfObject) {
@@ -2505,23 +2520,19 @@ Variant Variant::o_root_invoke_few_args_mil(const char *s, int64 hash,
                                 INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
-
-ObjectOffset Variant::o_lval(CStrRef propName,
-                             CStrRef context /* = null_string */) {
+Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
+                         CStrRef context /* = null_string */) {
   if (m_type == KindOfObject) {
-    return Object(m_data.pobj).o_lval(propName, context);
+    return m_data.pobj->o_lval(propName, tmpForGet, context);
   } else if (m_type == KindOfVariant) {
-    return m_data.pvar->o_lval(propName, context);
+    return m_data.pvar->o_lval(propName, tmpForGet, context);
   } else if (isObjectConvertable()) {
     set(Object(NEW(c_stdClass)()));
-    return Object(m_data.pobj).o_lval(propName, context);
+    return m_data.pobj->o_lval(propName, tmpForGet, context);
   } else {
     // Raise a warning
     raise_warning("Attempt to assign property of non-object");
-    // Return an ObjectOffset blackhole
-    Variant ret;
-    ret.set(Object(NEW(c_stdClass)()));
-    return Object(ret.m_data.pobj).o_lval(propName, context);
+    return const_cast<Variant&>(tmpForGet);
   }
 }
 
@@ -3106,12 +3117,13 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
               }
             }
           }
+          Variant tmp;
           Variant &value = subLen != 0 ?
             (key.charAt(1) == '*' ?
-             obj->o_lval(key.substr(subLen), clsName) :
-             obj->o_lval(key.substr(subLen),
+             obj->o_lval(key.substr(subLen), tmp, clsName) :
+             obj->o_lval(key.substr(subLen), tmp,
                          String(key.data() + 1, subLen - 2, AttachLiteral)))
-            : obj->o_lval(key);
+            : obj->o_lval(key, tmp);
           value.unserialize(unserializer);
         }
       }
@@ -3331,5 +3343,160 @@ void Variant::dump() const {
   printf("Variant: %s", ret.toString().data());
 }
 
+template<>
+Variant AssignOp<T_CONCAT_EQUAL>::assign(Variant &var, CVarRef val) {
+  return concat_assign(var, val);
+}
+
+template<>
+Variant AssignOp<T_PLUS_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var += val;
+}
+
+template<>
+Variant AssignOp<T_MINUS_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var -= val;
+}
+
+template<>
+Variant AssignOp<T_MUL_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var *= val;
+}
+
+template<>
+Variant AssignOp<T_DIV_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var /= val;
+}
+
+template<>
+Variant AssignOp<T_MOD_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var %= val;
+}
+
+template<>
+Variant AssignOp<T_AND_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var &= val;
+}
+
+template<>
+Variant AssignOp<T_OR_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var |= val;
+}
+
+template<>
+Variant AssignOp<T_XOR_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var ^= val;
+}
+
+template<>
+Variant AssignOp<T_SL_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var <<= val;
+}
+
+template<>
+Variant AssignOp<T_SR_EQUAL>::assign(Variant &var, CVarRef val) {
+  return var >>= val;
+}
+
+template<>
+Variant AssignOp<T_INC>::assign(Variant &var, CVarRef val) {
+  return val.isNull() ? ++var : var++;
+}
+
+template<>
+Variant AssignOp<T_DEC>::assign(Variant &var, CVarRef val) {
+  return val.isNull() ? --var : var--;
+}
+
+template<typename T, int op>
+T Variant::o_assign_op(CStrRef propName, CVarRef val,
+                       CStrRef context /* = null_string */) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+
+  if (m_type == KindOfObject) {
+  } else if (m_type == KindOfVariant) {
+    return (T)m_data.pvar->template o_assign_op<T,op>(propName, val, context);
+  } else if (isObjectConvertable()) {
+    set(Object(NEW(c_stdClass)()));
+  } else {
+    // Raise a warning
+    raise_warning("Attempt to assign property of non-object");
+    Variant tmp;
+    return (T)tmp.template o_assign_op<T,op>(propName, val, context);
+  }
+  return (T)m_data.pobj->template o_assign_op<T,op>(propName, val, context);
+}
+
+template<typename T, int op>
+T Object::o_assign_op(CStrRef propName, CVarRef val,
+                      CStrRef context /* = null_string */) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+  ObjectData *obj = m_px;
+  if (!obj) {
+    obj = NEW(c_stdClass)();
+    SmartPtr<ObjectData>::operator=(obj);
+  }
+
+  return obj->template o_assign_op<T,op>(propName, val, context);
+}
+
+template<typename T, int op>
+T ObjectData::o_assign_op(CStrRef propName, CVarRef val,
+                          CStrRef context /* = null_string */) {
+  bool useGet = getAttribute(ObjectData::UseGet);
+  bool useSet = getAttribute(ObjectData::UseSet);
+  int flags = useSet ? ObjectData::RealPropWrite :
+    ObjectData::RealPropCreate | ObjectData::RealPropWrite;
+
+  if (Variant *t = o_realProp(propName, flags, context)) {
+    if (useGet && !t->isInitialized()) {
+      AttributeClearer a(ObjectData::UseGet, this);
+      *t = t___get(propName);
+    }
+
+    return (T)AssignOp<op>::assign(*t, val);
+  }
+
+  ASSERT(useSet);
+  Variant var;
+  if (useGet) {
+    AttributeClearer a(ObjectData::UseGet, this);
+    var = t___get(propName);
+  }
+
+  Variant ret = AssignOp<op>::assign(var, val);
+  AttributeClearer a(ObjectData::UseSet, this);
+  t___set(propName, var);
+  return (T)ret;
+}
+
+#define DECLARE_O_ASSIGN_OP_ONE(C,T,op)                         \
+  template T                                                  \
+  C::o_assign_op<T,op>(CStrRef propName, CVarRef val,           \
+                       CStrRef context /* = null_string */)
+
+#define DECLARE_O_ASSIGN_OP(op)                 \
+  DECLARE_O_ASSIGN_OP_ONE(Object,void,op);      \
+  DECLARE_O_ASSIGN_OP_ONE(Object,Variant,op);   \
+  DECLARE_O_ASSIGN_OP_ONE(Variant,void,op);     \
+  DECLARE_O_ASSIGN_OP_ONE(Variant,Variant,op)
+
+DECLARE_O_ASSIGN_OP(T_CONCAT_EQUAL);
+DECLARE_O_ASSIGN_OP(T_PLUS_EQUAL);
+DECLARE_O_ASSIGN_OP(T_MINUS_EQUAL);
+DECLARE_O_ASSIGN_OP(T_MUL_EQUAL);
+DECLARE_O_ASSIGN_OP(T_DIV_EQUAL);
+DECLARE_O_ASSIGN_OP(T_MOD_EQUAL);
+DECLARE_O_ASSIGN_OP(T_AND_EQUAL);
+DECLARE_O_ASSIGN_OP(T_OR_EQUAL);
+DECLARE_O_ASSIGN_OP(T_XOR_EQUAL);
+DECLARE_O_ASSIGN_OP(T_SL_EQUAL);
+DECLARE_O_ASSIGN_OP(T_SR_EQUAL);
+DECLARE_O_ASSIGN_OP(T_INC);
+DECLARE_O_ASSIGN_OP(T_DEC);
 ///////////////////////////////////////////////////////////////////////////////
 }

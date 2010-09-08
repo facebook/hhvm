@@ -52,13 +52,10 @@ class c_ReflectionExtension : public ExtObjectData {
   virtual Variant *o_realProp(CStrRef s, int flags,
                               CStrRef context = null_string) const;
   Variant *o_realPropPrivate(CStrRef s, int flags) const;
-  virtual Variant &o_lval(CStrRef s, CStrRef context = null_string);
-  Variant &o_lvalPrivate(CStrRef s);
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_ReflectionExtension 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_ReflectionExtension 1
 
   // DECLARE_COMMON_INVOKE
   static Variant os_invoke(const char *c, MethodIndex methodIndex,

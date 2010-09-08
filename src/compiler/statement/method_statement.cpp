@@ -488,9 +488,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       } else {
         cg_printf("void");
       }
-      if (m_name == "__lval") {
-        cg_printf(" &___lval(");
-      } else if (m_name == "__offsetget_lval") {
+      if (m_name == "__offsetget_lval") {
         cg_printf(" &___offsetget_lval(");
       } else if (m_modifiers->isStatic() && m_stmt) {
         // Static method wrappers get generated as support methods
@@ -532,10 +530,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
                   funcSection.c_str());
       }
 
-      if (m_name == "__lval") {
-        cg_printf(" &%s%s::___lval(",
-                  Option::ClassPrefix, scope->getId(cg).c_str());
-      } else if (m_name == "__offsetget_lval") {
+      if (m_name == "__offsetget_lval") {
         cg_printf(" &%s%s::___offsetget_lval(",
                   Option::ClassPrefix, scope->getId(cg).c_str());
       } else if (m_modifiers->isStatic()) {
@@ -564,7 +559,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
       outputCPPArgInjections(cg, ar, origFuncName.c_str(), ar->getClassScope(),
                              funcScope);
-      if (m_name == "__lval" || m_name == "__offsetget_lval") {
+      if (m_name == "__offsetget_lval") {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);
         cg_printf("Variant &v = %s->__lvalProxy;\n", cg.getGlobals(ar));
@@ -787,7 +782,7 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
     return;
   }
 
-  if (fname == "__lval" || fname == "__offsetget_lval") {
+  if (fname == "__offsetget_lval") {
     return;
   }
 
@@ -1128,7 +1123,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
     return;
   }
 
-  if (fname == "__lval" || fname == "__offsetget_lval") return;
+  if (fname == "__offsetget_lval") return;
 
   const char *clsName;
   if (inClass) {

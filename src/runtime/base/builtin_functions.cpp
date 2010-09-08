@@ -444,17 +444,6 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
   #endif
 }
 
-String concat_assign(ObjectOffset v1, CStrRef s2) {
-  Variant &v = v1.lval();
-  String s1 = v.toString();
-  s1 += s2;
-  #ifdef TAINTED
-  propagate_tainting2(s1, s2, s1);
-  #endif
-  v1 = s1;
-  return s1;
-}
-
 bool empty(CVarRef v, bool    offset) {
   return empty(v, Variant(offset));
 }

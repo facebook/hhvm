@@ -16,6 +16,7 @@
 
 #include <compiler/expression/assignment_expression.h>
 #include <compiler/expression/array_element_expression.h>
+#include <compiler/expression/object_property_expression.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/simple_variable.h>
@@ -296,6 +297,20 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
         }
       }
       cg_printf(")");
+      return;
+    }
+  } else if (m_variable->is(Expression::KindOfObjectPropertyExpression)) {
+    ObjectPropertyExpressionPtr var(
+      dynamic_pointer_cast<ObjectPropertyExpression>(m_variable));
+    if (!var->isValid()) {
+      var->getObject()->outputCPP(cg, ar);
+      cg_printf(".o_set(");
+      var->outputCPPProperty(cg, ar);
+      cg_printf(", %s", ref ? "ref(" : "");
+      m_value->outputCPP(cg, ar);
+      cg_printf("%s, %s)",
+                ref ? ")" : "",
+                ar->getClassScope() ? "s_class_name" : "empty_string");
       return;
     }
   } else if (m_variable->is(Expression::KindOfSimpleVariable) &&

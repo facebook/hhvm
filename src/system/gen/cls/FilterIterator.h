@@ -51,13 +51,10 @@ class c_FilterIterator : public ExtObjectData {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_FilterIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_FilterIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_FilterIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_FilterIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_FilterIterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_FilterIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_FilterIterator 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_FilterIterator 1

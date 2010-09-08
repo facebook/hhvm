@@ -55,13 +55,10 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_RecursiveDirectoryIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_RecursiveDirectoryIterator 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_RecursiveDirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_RecursiveDirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_RecursiveDirectoryIterator 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   #define OMIT_JUMP_TABLE_CLASS_realProp_PUBLIC_RecursiveDirectoryIterator 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_RecursiveDirectoryIterator 1
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_RecursiveDirectoryIterator 1

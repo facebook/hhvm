@@ -70,21 +70,6 @@ Variant * c_SplFileObject::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SplFileObject
-Variant& c_SplFileObject::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileObject
-Variant& c_SplFileObject::o_lvalPublic(CStrRef s) {
-  return c_SplFileInfo::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileObject
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileObject
-Variant& c_SplFileObject::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileObject
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
 Variant c_SplFileObject::os_constant(const char *s) {
   int64 hash = hash_string(s);
@@ -3899,21 +3884,6 @@ Variant * c_SplFileInfo::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_SplFileInfo
-Variant& c_SplFileInfo::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileInfo
-Variant& c_SplFileInfo::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_SplFileInfo
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileInfo
-Variant& c_SplFileInfo::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_SplFileInfo
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
 Variant c_SplFileInfo::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);

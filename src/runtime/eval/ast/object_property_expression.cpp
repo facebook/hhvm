@@ -51,12 +51,12 @@ Variant &ObjectPropertyExpression::lval(VariableEnvironment &env) const {
     Variant &lv = lobj->lval(env);
     String name(m_name->get(env));
     SET_LINE;
-    return HPHP::lval(lv.o_lval(name));
+    return lv.o_lval(name, get_globals()->__lvalProxy);
   } else {
     Variant obj(m_obj->eval(env));
     String name(m_name->get(env));
     SET_LINE;
-    return HPHP::lval(obj.o_lval(name));
+    return obj.o_lval(name, get_globals()->__lvalProxy);
   }
 }
 
@@ -67,10 +67,8 @@ bool ObjectPropertyExpression::weakLval(VariableEnvironment &env,
     Object obj(vobj);
     String name(m_name->get(env));
     if (!SET_LINE_EXPR) return false;
-    if (obj->o_exists(name)) {
-      v = &HPHP::lval(obj.o_lval(name));
-      return true;
-    }
+    v = obj->o_weakLval(name);
+    return v != NULL;
   }
   return false;
 }
@@ -83,12 +81,12 @@ Variant ObjectPropertyExpression::set(VariableEnvironment &env, CVarRef val)
     Variant &lv = lobj->lval(env);
     String name(m_name->get(env));
     SET_LINE;
-    lv.o_lval(name) = val;
+    lv.o_set(name, val);
   } else {
     Variant obj(m_obj->eval(env));
     String name(m_name->get(env));
     SET_LINE;
-    obj.o_lval(name) = val;
+    obj.o_set(name, val);
   }
   return val;
 }
@@ -108,38 +106,31 @@ Variant ObjectPropertyExpression::setOp(VariableEnvironment &env, int op,
   SET_LINE;
   switch (op) {
   case T_PLUS_EQUAL:
-    vobj->o_lval(name) += rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_PLUS_EQUAL>(name, rhs);
   case T_MINUS_EQUAL:
-    vobj->o_lval(name) -= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_MINUS_EQUAL>(name, rhs);
   case T_MUL_EQUAL:
-    vobj->o_lval(name) *= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_MUL_EQUAL>(name, rhs);
   case T_DIV_EQUAL:
-    vobj->o_lval(name) /= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_DIV_EQUAL>(name, rhs);
   case T_CONCAT_EQUAL:
-    concat_assign(vobj->o_lval(name), rhs);
-    break;
+    return vobj->o_assign_op<Variant, T_CONCAT_EQUAL>(name, rhs);
   case T_MOD_EQUAL:
-    vobj->o_lval(name) %= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_MOD_EQUAL>(name, rhs);
   case T_AND_EQUAL:
-    vobj->o_lval(name) &= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_AND_EQUAL>(name, rhs);
   case T_OR_EQUAL:
-    vobj->o_lval(name) |= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_OR_EQUAL>(name, rhs);
   case T_XOR_EQUAL:
-    vobj->o_lval(name) ^= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_XOR_EQUAL>(name, rhs);
   case T_SL_EQUAL:
-    vobj->o_lval(name) <<= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_SL_EQUAL>(name, rhs);
   case T_SR_EQUAL:
-    vobj->o_lval(name) >>= rhs;
-    break;
+    return vobj->o_assign_op<Variant, T_SR_EQUAL>(name, rhs);
+  case T_INC:
+    return vobj->o_assign_op<Variant, T_INC>(name, rhs);
+  case T_DEC:
+    return vobj->o_assign_op<Variant, T_DEC>(name, rhs);
   default:
     ASSERT(false);
   }

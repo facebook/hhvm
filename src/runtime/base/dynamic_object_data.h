@@ -45,7 +45,6 @@ class DynamicObjectData : public ObjectData {
   virtual Variant *o_realProp(CStrRef prop, int flags,
                               CStrRef context = null_string) const;
   virtual Variant *o_realPropPublic(CStrRef prop, int flags) const;
-  virtual Variant &o_lval(CStrRef prop, CStrRef context = null_string);
 //  void o_setDynamicProperties(const Array properties);
   virtual void o_getArray(Array &props) const;
   virtual void o_setArray(CArrRef props);
@@ -89,7 +88,6 @@ class DynamicObjectData : public ObjectData {
   virtual Variant t___set_state(Variant v_properties);
   virtual String t___tostring();
   virtual Variant t___clone();
-  virtual Variant &___lval(Variant v_name);
   virtual Variant &___offsetget_lval(Variant v_name);
 
   void setParent(Object p) { parent = p; }

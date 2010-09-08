@@ -50,13 +50,10 @@ class c_ErrorException : public c_Exception {
   #define OMIT_JUMP_TABLE_CLASS_SETARRAY_ErrorException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_ErrorException 1
   #define OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_ErrorException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_ErrorException 1
-  #define OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_ErrorException 1
 
   // DECLARE_INSTANCE_PUBLIC_PROP_OPS
   public:
   virtual Variant *o_realPropPublic(CStrRef s, int flags) const;
-  virtual Variant &o_lvalPublic(CStrRef s);
 
   // DECLARE_COMMON_INVOKE
   #define OMIT_JUMP_TABLE_CLASS_STATIC_INVOKE_ErrorException 1

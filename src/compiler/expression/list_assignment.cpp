@@ -20,6 +20,7 @@
 #include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/function_scope.h>
 #include <compiler/expression/array_element_expression.h>
+#include <compiler/expression/object_property_expression.h>
 
 using namespace HPHP;
 using namespace std;
@@ -182,6 +183,18 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
               cg_printf(".append(");
             }
             cg_printf("%s[%d]);\n", arrTmp.c_str(), i);
+            done = true;
+          }
+        } else if (exp->is(Expression::KindOfObjectPropertyExpression)) {
+          ObjectPropertyExpressionPtr var(
+            dynamic_pointer_cast<ObjectPropertyExpression>(exp));
+          if (!var->isValid()) {
+            var->getObject()->outputCPP(cg, ar);
+            cg_printf(".o_set(");
+            var->outputCPPProperty(cg, ar);
+            cg_printf(", %s[%d], %s);\n",
+                      arrTmp.c_str(), i,
+                      ar->getClassScope() ? "s_class_name" : "empty_string");
             done = true;
           }
         }

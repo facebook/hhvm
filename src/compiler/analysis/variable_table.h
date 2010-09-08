@@ -95,9 +95,6 @@ public:
     JumpTableClassRealProp,
     JumpTableClassRealPropPublic,
     JumpTableClassRealPropPrivate,
-    JumpTableClassLval,
-    JumpTableClassLvalPublic,
-    JumpTableClassLvalPrivate,
   };
 
 public:

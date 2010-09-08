@@ -65,21 +65,6 @@ Variant * c_stdClass::o_realPropPrivate(CStrRef s, int flags) const {
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_stdClass
-Variant& c_stdClass::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_stdClass
-Variant& c_stdClass::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC_stdClass
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_stdClass
-Variant& c_stdClass::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE_stdClass
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT_stdClass
 Variant c_stdClass::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);
@@ -184,21 +169,6 @@ Variant * c___PHP_Incomplete_Class::o_realPropPrivate(CStrRef s, int flags) cons
   return o_realPropPublic(s, flags);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_realProp_PRIVATE___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_lval___PHP_Incomplete_Class
-Variant& c___PHP_Incomplete_Class::o_lval(CStrRef prop, CStrRef context) {
-  return o_lvalPublic(prop);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___PHP_Incomplete_Class
-Variant& c___PHP_Incomplete_Class::o_lvalPublic(CStrRef s) {
-  return c_ObjectData::o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PUBLIC___PHP_Incomplete_Class
-#ifndef OMIT_JUMP_TABLE_CLASS_lval_PRIVATE___PHP_Incomplete_Class
-Variant& c___PHP_Incomplete_Class::o_lvalPrivate(CStrRef s) {
-  return o_lvalPublic(s);
-}
-#endif // OMIT_JUMP_TABLE_CLASS_lval_PRIVATE___PHP_Incomplete_Class
 #ifndef OMIT_JUMP_TABLE_CLASS_CONSTANT___PHP_Incomplete_Class
 Variant c___PHP_Incomplete_Class::os_constant(const char *s) {
   return c_ObjectData::os_constant(s);

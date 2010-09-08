@@ -1548,9 +1548,6 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
   outputCPPPropertyOp(cg, ar, cls, parent, "realProp", ", int flags", ", flags",
                       "Variant *", true, JumpRealProp, false, dynamicObject,
                       JumpTableClassRealProp);
-  outputCPPPropertyOp(cg, ar, cls, parent, "lval", "", "", "Variant&", false,
-                      JumpReturnString, true, dynamicObject,
-                      JumpTableClassLval);
 }
 
 bool VariableTable::outputCPPPrivateSelector(CodeGenerator &cg,

@@ -60,6 +60,7 @@ protected:
 private:
   bool preCompute(CVarRef value, Variant &result);
   void setExistContext();
+  bool outputCPPImplOpEqual(CodeGenerator &cg, AnalysisResultPtr ar);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

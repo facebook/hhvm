@@ -343,7 +343,11 @@ if ($format == 'profile') {
   if ($mode == 'sep') {
     $inc_file = "\"ext_${name}.h\"";
   } else {
-    $inc_file = "<runtime/ext/ext_${name}.h>";
+    if ($name == "php_mcc") {
+      $inc_file = "<runtime/ext/phpmcc/ext_${name}.h>";
+    } else {
+      $inc_file = "<runtime/ext/ext_${name}.h>";
+    }
   }
 
   fprintf($f,

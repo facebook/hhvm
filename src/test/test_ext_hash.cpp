@@ -177,7 +177,9 @@ bool TestExtHash::test_hash_update() {
 }
 
 bool TestExtHash::test_furchash_hphp_ext() {
-  VS(f_furchash_hphp_ext("15minutesoffame", 15, 86), 25);
+  if (f_furchash_hphp_ext_supported()) {
+    VS(f_furchash_hphp_ext("15minutesoffame", 15, 86), 25);
+  }
   return Count(true);
 }
 

@@ -10989,6 +10989,12 @@ Variant i_pixelsetyellow(CArrRef params) {
     return (f_pixelsetyellow(arg0, arg1), null);
   }
 }
+Variant i_furchash_hphp_ext_supported(CArrRef params) {
+  FUNCTION_INJECTION(furchash_hphp_ext_supported);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("furchash_hphp_ext_supported", 0, 1);
+  return (f_furchash_hphp_ext_supported());
+}
 Variant i_inet_pton(CArrRef params) {
   FUNCTION_INJECTION(inet_pton);
   int count __attribute__((__unused__)) = params.size();
@@ -11459,6 +11465,19 @@ Variant i_hphp_splfileobject_fgetcsv(CArrRef params) {
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
     CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_hphp_splfileobject_fgetcsv(arg0, arg1, arg2, arg3));
+  }
+}
+Variant i_furchash_hphp_ext(CArrRef params) {
+  FUNCTION_INJECTION(furchash_hphp_ext);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("furchash_hphp_ext", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_furchash_hphp_ext(arg0, arg1, arg2));
   }
 }
 Variant i_stream_socket_recvfrom(CArrRef params) {
@@ -18990,17 +19009,17 @@ Variant i_mb_get_info(CArrRef params) {
     return (f_mb_get_info(arg0));
   }
 }
-Variant i_getcwd(CArrRef params) {
-  FUNCTION_INJECTION(getcwd);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  return (f_getcwd());
-}
 Variant i_posix_getrlimit(CArrRef params) {
   FUNCTION_INJECTION(posix_getrlimit);
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
   return (f_posix_getrlimit());
+}
+Variant i_getcwd(CArrRef params) {
+  FUNCTION_INJECTION(getcwd);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  return (f_getcwd());
 }
 Variant i_fputcsv(CArrRef params) {
   FUNCTION_INJECTION(fputcsv);
@@ -25464,6 +25483,9 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 725:
       HASH_INVOKE(0x4D04C580CF9212D5LL, posix_getgroups);
       break;
+    case 726:
+      HASH_INVOKE(0x06E9C984B5F0B2D6LL, furchash_hphp_ext);
+      break;
     case 728:
       HASH_INVOKE(0x56C4896BA2FF52D8LL, drawsetstrokeopacity);
       break;
@@ -26274,6 +26296,7 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x1B9E769FFEC3C54DLL, pcntl_wtermsig);
       break;
     case 1359:
+      HASH_INVOKE(0x30DE78E7131B954FLL, furchash_hphp_ext_supported);
       HASH_INVOKE(0x063200B5AAFEC54FLL, mysql_thread_id);
       break;
     case 1370:
@@ -48177,6 +48200,18 @@ Variant ei_pixelsetyellow(Eval::VariableEnvironment &env, const Eval::FunctionCa
   }
   return (x_pixelsetyellow(a0, a1), null);
 }
+Variant ei_furchash_hphp_ext_supported(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("furchash_hphp_ext_supported", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_furchash_hphp_ext_supported());
+}
 Variant ei_inet_pton(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48967,6 +49002,30 @@ Variant ei_hphp_splfileobject_fgetcsv(Eval::VariableEnvironment &env, const Eval
     (*it)->eval(env);
   }
   return (x_hphp_splfileobject_fgetcsv(a0, a1, a2, a3));
+}
+Variant ei_furchash_hphp_ext(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("furchash_hphp_ext", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_furchash_hphp_ext(a0, a1, a2));
 }
 Variant ei_stream_socket_recvfrom(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61669,18 +61728,6 @@ Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   if (count <= 0) return (x_mb_get_info());
   else return (x_mb_get_info(a0));
 }
-Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_getcwd());
-}
 Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -61692,6 +61739,18 @@ Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionC
     (*it)->eval(env);
   }
   return (x_posix_getrlimit());
+}
+Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_getcwd());
 }
 Variant ei_fputcsv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -72002,6 +72061,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 725:
       HASH_INVOKE_FROM_EVAL(0x4D04C580CF9212D5LL, posix_getgroups);
       break;
+    case 726:
+      HASH_INVOKE_FROM_EVAL(0x06E9C984B5F0B2D6LL, furchash_hphp_ext);
+      break;
     case 728:
       HASH_INVOKE_FROM_EVAL(0x56C4896BA2FF52D8LL, drawsetstrokeopacity);
       break;
@@ -72812,6 +72874,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1B9E769FFEC3C54DLL, pcntl_wtermsig);
       break;
     case 1359:
+      HASH_INVOKE_FROM_EVAL(0x30DE78E7131B954FLL, furchash_hphp_ext_supported);
       HASH_INVOKE_FROM_EVAL(0x063200B5AAFEC54FLL, mysql_thread_id);
       break;
     case 1370:

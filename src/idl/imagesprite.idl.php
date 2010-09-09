@@ -91,7 +91,7 @@ CPP
 BeginClass(
   array(
     'name'   => "ImageSprite",
-    'desc'   => "",
+    'desc'   => "Represents a set of images sprited into a single image.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
 
@@ -113,7 +113,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
-    'desc'   => "TODO",
+    'desc'   => "Creates a new ImageSprite object",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => null,
@@ -124,21 +124,23 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "addFile",
-    'desc'   => "TODO",
+    'desc'   => "Adds the image specified by the file path to the sprite.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "TODO",
+      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
     'args'   => array(
       array(
         'name'   => "file",
         'type'   => String,
+        'desc'   => "The path to the image. Must be a path to the local filesystem or a a stream format php supports.",
       ),
       array(
         'name'   => "options",
         'type'   => StringMap,
         'value'  => "null",
+        'desc'   => "Associative array of options for this image. May include the image's 'width' and 'height' (if previously known to the developer), or spacing requirements via the padding_DIRECTION keys, where DIRECTION may be top, bottom, left, or right.  May also include flush requirements that will force this image to be 'flush_left' or 'flush_right' within the sprite.",
       ),
     ),
   ));
@@ -146,25 +148,28 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "addString",
-    'desc'   => "TODO",
+    'desc'   => "Adds the image defined by the string to the sprite.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "TODO",
+      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
     'args'   => array(
       array(
         'name'   => "id",
         'type'   => String,
+        'desc'   => "An identifier for this image. This will be the key to referencing this image in the mapping.",
       ),
       array(
         'name'   => "data",
         'type'   => String,
+        'desc'   => "The data of this image.",
       ),
       array(
         'name'   => "options",
         'type'   => StringMap,
         'value'  => "null",
+        'desc'   => "Associative array of options for this image. May include the image's 'width' and 'height' (if previously known to the developer), or spacing requirements via the padding_DIRECTION keys, where DIRECTION may be top, bottom, left, or right.  May also include flush requirements that will force this image to be 'flush_left' or 'flush_right' within the sprite.",
       ),
     ),
   ));
@@ -172,26 +177,29 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "addUrl",
-    'desc'   => "TODO",
+    'desc'   => "Adds the image located at the specified URL to the sprite.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "TODO",
+      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
     'args'   => array(
       array(
         'name'   => "url",
         'type'   => String,
+        'desc'   => "The url of the image. The URL must be using the http protocol; secure connections are not supported.",
       ),
       array(
         'name'   => "timeout_ms",
         'type'   => Int32,
         'value'  => "0",
+        'desc'   => "The timeout in milliseconds for this request. A value of 0 or lower will disable the timeout.",
       ),
       array(
         'name'   => "Options",
         'type'   => StringMap,
         'value'  => "null",
+        'desc'   => "Associative array of options for this image. May include the image's 'width' and 'height' (if previously known to the developer), or spacing requirements via the padding_DIRECTION keys, where DIRECTION may be top, bottom, left, or right.  May also include flush requirements that will force this image to be 'flush_left' or 'flush_right' within the sprite.",
       ),
     ),
   ));
@@ -199,17 +207,18 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "clear",
-    'desc'   => "TODO",
+    'desc'   => "Removes images from the sprite and frees the memory associated with that image.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "TODO",
+      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
     'args'   => array(
       array(
         'name'   => "paths",
         'type'   => Variant,
         'value'  => "null",
+        'desc'   => "When passed a string, it will remove the images specified by that path or identifier from the sprite, if they exist. You may also pass an array of strings, and it will remove each.  a null value will remove all images from the sprite.",
       ),
     ),
   ));
@@ -217,17 +226,18 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "loadDims",
-    'desc'   => "TODO",
+    'desc'   => "Loads the dimensions for the images in the sprite, but not necessarily their data.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "TODO",
+      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
     'args'   => array(
       array(
         'name'   => "block",
         'type'   => Boolean,
         'value'  => "false",
+        'desc'   => "Whether this call should block until all the data is loaded or allow them to load in the background.",
       ),
     ),
   ));
@@ -235,17 +245,18 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "loadImages",
-    'desc'   => "TODO",
+    'desc'   => "Loads the images in the sprite and sets the correct dimensions.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Object,
-      'desc'   => "TODO",
+      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
     'args'   => array(
       array(
         'name'   => "block",
         'type'   => Boolean,
         'value'  => "false",
+        'desc'   => "Whether this call should block until all the data is loaded or allow them to load in the background.",
       ),
     ),
   ));
@@ -253,37 +264,41 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "map",
-    'desc'   => "TODO",
+    'desc'   => "Places the images in a tight configuration while respecting padding and flush specifications.",
     'flags'  =>  HasDocComment | NoInjection,
     'return' => array(
       'type'   => Object,
+      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "output",
-    'desc'   => "TODO",
+    'desc'   => "Retrieves the resulting sprite image.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "TODO",
+      'desc'   => "The image data, if the \$output_file is not specified.",
     ),
     'args'   => array(
       array(
         'name'   => "output_file",
         'type'   => String,
         'value'  => "null_string",
+        'desc'   => "Path to where the output image should be saved. If empty or null, the image data is returned as a string.",
       ),
       array(
         'name'   => "format",
         'type'   => String,
         'value'  => "\"png\"",
+        'desc'   => "The format the output image should be returned in. Defaults to png.",
       ),
       array(
         'name'   => "quality",
         'type'   => Int32,
         'value'  => "75",
+        'desc'   => "The output quality of the image. Only applies to jpeg output, and defaults to 75.",
       ),
     ),
   ));
@@ -291,31 +306,35 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "css",
-    'desc'   => "TODO",
+    'desc'   => "Retrieves css for the sprite, mapping ids to images.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => String,
-      'desc'   => "TODO",
+      'desc'   => "The css output, if the \$output_file is not specified.",
     ),
     'args'   => array(
       array(
         'name'   => "css_namespace",
         'type'   => String,
+        'desc'   => "The css class namespace of the sprite. Should be unique within your css.",
       ),
       array(
         'name'   => "sprite_file",
         'type'   => String,
         'value'  => "null_string",
+        'desc'   => "Path to the sprite image relative to wherever this css is being served. The output image may be passed in datauri format to use inlined sprite images. If this is not set, the image location must be specified elsewhere in the css manually.",
       ),
       array(
         'name'   => "output_file",
         'type'   => String,
         'value'  => "null_string",
+        'desc'   => "Path to where the css should be saved. If empty or null, the css is returned as a string.",
       ),
       array(
         'name'   => "verbose",
         'type'   => Boolean,
         'value'  => "false",
+        'desc'   => "Determines whether the css should include comments with information about the sprite.",
       ),
     ),
   ));
@@ -323,32 +342,33 @@ DefineFunction(
 DefineFunction(
   array(
     'name'   => "getErrors",
-    'desc'   => "TODO",
+    'desc'   => "Retrieves an associative array of errors encountered while putting together the sprite.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
-      'desc'   => "TODO",
+      'desc'   => "Associative array of errors",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "mapping",
-    'desc'   => "TODO",
+    'desc'   => "Returns an associative array mapping the images in the sprite to their dimensions, placement, and css id.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => StringVec,
-      'desc'   => "TODO",
+      'desc'   => "Associative array of mapping",
     ),
   ));
 
 DefineFunction(
   array(
     'name'   => "__destruct",
+    'desc'   => "Recovers all memory allocated to the sprite.",
     'flags'  =>  HasDocComment,
     'return' => array(
       'type'   => Variant,
-      'desc'   => "TODO",
+      'desc'   => "null",
     ),
   ));
 

@@ -91,9 +91,13 @@ CPP
 BeginClass(
   array(
     'name'   => "ImageSprite",
+    'bases'  => array('Sweepable'),
     'desc'   => "Represents a set of images sprited into a single image.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT
+
+ private:
+  void map();
 
  public:
   hphp_string_map<ImageSprite::ResourceGroup*> m_rsrc_groups;
@@ -258,17 +262,6 @@ DefineFunction(
         'value'  => "false",
         'desc'   => "Whether this call should block until all the data is loaded or allow them to load in the background.",
       ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "map",
-    'desc'   => "Places the images in a tight configuration while respecting padding and flush specifications.",
-    'flags'  =>  HasDocComment | NoInjection,
-    'return' => array(
-      'type'   => Object,
-      'desc'   => "The ImageSprite object itself (for method chaining).",
     ),
   ));
 

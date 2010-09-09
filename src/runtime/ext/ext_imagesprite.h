@@ -32,7 +32,7 @@ namespace HPHP {
 // class ImageSprite
 
 FORWARD_DECLARE_CLASS(ImageSprite);
-class c_ImageSprite : public ExtObjectData {
+class c_ImageSprite : public ExtObjectData, public Sweepable {
  public:
   BEGIN_CLASS_MAP(ImageSprite)
   END_CLASS_MAP(ImageSprite)
@@ -50,7 +50,6 @@ class c_ImageSprite : public ExtObjectData {
   public: Object t_clear(CVarRef paths = null);
   public: Object t_loaddims(bool block = false);
   public: Object t_loadimages(bool block = false);
-  public: Object t_map();
   public: String t_output(CStrRef output_file = null_string, CStrRef format = "png", int quality = 75);
   public: String t_css(CStrRef css_namespace, CStrRef sprite_file = null_string, CStrRef output_file = null_string, bool verbose = false);
   public: Array t_geterrors();
@@ -63,6 +62,9 @@ class c_ImageSprite : public ExtObjectData {
   public: void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
   public: virtual void destruct();
+
+ private:
+  void map();
 
  public:
   hphp_string_map<ImageSprite::ResourceGroup*> m_rsrc_groups;

@@ -2855,13 +2855,13 @@ Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const ch
         return (t_getrealpath());
       }
       break;
-    case 0x101:
+    case 0x100:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
-    case 0x102:
+    case 0x101:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         return (t_getsubpath());
@@ -2940,7 +2940,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const ch
         return (t_getowner());
       }
       break;
-    case 0x103:
+    case 0x102:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         return (t_haschildren());
@@ -2981,7 +2981,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke(MethodIndex methodIndex, const ch
         }
       }
       break;
-    case 0x104:
+    case 0x103:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         return (t_getchildren());
@@ -3417,13 +3417,13 @@ Variant c_RecursiveDirectoryIterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_getrealpath());
       }
       break;
-    case 0x101:
+    case 0x100:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPathname", 0, 1);
         return (t_getsubpathname());
       }
       break;
-    case 0x102:
+    case 0x101:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getSubPath", 0, 1);
         return (t_getsubpath());
@@ -3491,7 +3491,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_getowner());
       }
       break;
-    case 0x103:
+    case 0x102:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::hasChildren", 0, 1);
         return (t_haschildren());
@@ -3522,7 +3522,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_few_args(MethodIndex methodIndex,
         return (t_getfileinfo(a0));
       }
       break;
-    case 0x104:
+    case 0x103:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count > 0) return throw_toomany_arguments("RecursiveDirectoryIterator::getChildren", 0, 1);
         return (t_getchildren());
@@ -4041,7 +4041,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getrealpath());
       }
       break;
-    case 0x101:
+    case 0x100:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4055,7 +4055,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getsubpathname());
       }
       break;
-    case 0x102:
+    case 0x101:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4223,7 +4223,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
         return (t_getowner());
       }
       break;
-    case 0x103:
+    case 0x102:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
@@ -4302,7 +4302,7 @@ Variant c_RecursiveDirectoryIterator::o_invoke_from_eval(const char *s, Eval::Va
         else return (t_getfileinfo(a0));
       }
       break;
-    case 0x104:
+    case 0x103:
       if (methodIndex.m_overloadIndex == 0x1) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();

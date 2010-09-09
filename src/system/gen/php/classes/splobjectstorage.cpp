@@ -132,7 +132,7 @@ Variant c_SplObjectStorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
         return (t_next(), null);
       }
       break;
-    case 0x18e:
+    case 0x18d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         {
@@ -143,7 +143,7 @@ Variant c_SplObjectStorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
         }
       }
       break;
-    case 0x18d:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         {
@@ -172,7 +172,7 @@ Variant c_SplObjectStorage::o_invoke(MethodIndex methodIndex, const char *s, CAr
         return (t_valid());
       }
       break;
-    case 0x18f:
+    case 0x18e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         {
@@ -285,13 +285,13 @@ Variant c_SplObjectStorage::o_invoke_few_args(MethodIndex methodIndex, const cha
         return (t_next(), null);
       }
       break;
-    case 0x18e:
+    case 0x18d:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::detach", count, 1, 1, 1);
         return (t_detach(a0), null);
       }
       break;
-    case 0x18d:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::attach", count, 1, 1, 1);
         return (t_attach(a0), null);
@@ -315,7 +315,7 @@ Variant c_SplObjectStorage::o_invoke_few_args(MethodIndex methodIndex, const cha
         return (t_valid());
       }
       break;
-    case 0x18f:
+    case 0x18e:
       if (methodIndex.m_overloadIndex == 0x1) {
         if (count != 1) return throw_wrong_arguments("SplObjectStorage::contains", count, 1, 1, 1);
         return (t_contains(a0));
@@ -425,7 +425,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_next(), null);
       }
       break;
-    case 0x18e:
+    case 0x18d:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -443,7 +443,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_detach(a0), null);
       }
       break;
-    case 0x18d:
+    case 0x18c:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -503,7 +503,7 @@ Variant c_SplObjectStorage::o_invoke_from_eval(const char *s, Eval::VariableEnvi
         return (t_valid());
       }
       break;
-    case 0x18f:
+    case 0x18e:
       if (methodIndex.m_overloadIndex == 0x1) {
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();

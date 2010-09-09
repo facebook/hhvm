@@ -585,19 +585,20 @@ Object c_ImageSprite::t_loadimages(bool block /* = false */) {
 }
 
 #define ImageList std::list<ImageSprite::Image*>
+
 #define BlockHeightMinHeap std::priority_queue< \
           ImageSprite::Block*, \
           std::vector<ImageSprite::Block*>, \
           ImageSprite::BlockHeightComparator>
+
 #define BlockAreaMinHeap std::priority_queue< \
           ImageSprite::Block*, \
           std::vector<ImageSprite::Block*>, \
           ImageSprite::BlockAreaComparator>
 
-Object c_ImageSprite::t_map() {
-  INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::map);
+void c_ImageSprite::map() {
   if (same(m_current, true)) {
-    return this;
+    return;
   }
 
   m_mapping.removeAll();
@@ -630,7 +631,7 @@ Object c_ImageSprite::t_map() {
 
   if (images.empty()) {
     // Get out before it's too late
-    return this;
+    return;
   }
 
   // Here be dragons. Thou art forewarned
@@ -675,7 +676,7 @@ Object c_ImageSprite::t_map() {
           m_img_errors.append(
             "Two images specified as flush both left and right, "
             "but have different widths");
-          return this;
+          return;
         } else {
           abs_width = img->m_effwidth;
         }
@@ -692,7 +693,7 @@ Object c_ImageSprite::t_map() {
         m_img_errors.append(
           "Widest image is wider that an image specified "
           "as flush both left and right");
-        return this;
+        return;
       }
     }
   }
@@ -973,8 +974,6 @@ Object c_ImageSprite::t_map() {
   m_mapping.set("height", height);
 
   m_current = true;
-
-  return this;
 }
 
 String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
@@ -982,7 +981,7 @@ String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
                                int32 quality /* = 75 */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::output);
   t_loadimages(true);
-  t_map();
+  map();
 
   if (m_width <= 0 || m_height <= 0) {
     // Danger Will Robinson! Danger!
@@ -1060,7 +1059,7 @@ String c_ImageSprite::t_css(CStrRef css_namespace,
                             bool verbose /* = false */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::css);
   t_loaddims(true);
-  t_map();
+  map();
 
   String output = "";
   if (!sprite_file.empty()) {
@@ -1137,7 +1136,7 @@ Array c_ImageSprite::t_geterrors() {
 Array c_ImageSprite::t_mapping() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ImageSprite, ImageSprite::mapping);
   t_loaddims(true);
-  t_map();
+  map();
 
   return m_mapping;
 }

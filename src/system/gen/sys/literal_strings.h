@@ -437,7 +437,6 @@ extern StaticString s_sys_ss5e2f636f;
 extern StaticString s_sys_ss5ebf091c;
 extern StaticString s_sys_ss5ec24921;
 extern StaticString s_sys_ss5f12d619;
-extern StaticString s_sys_ss5f23052f;
 extern StaticString s_sys_ss5f60f640;
 extern StaticString s_sys_ss5f66ed1d;
 extern StaticString s_sys_ss5f6ade63;

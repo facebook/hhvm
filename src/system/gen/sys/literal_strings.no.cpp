@@ -435,7 +435,6 @@ StaticString s_sys_ss5e2f636f("isPrivate");
 StaticString s_sys_ss5ebf091c("__getlastrequest");
 StaticString s_sys_ss5ec24921("error");
 StaticString s_sys_ss5f12d619("test");
-StaticString s_sys_ss5f23052f("map");
 StaticString s_sys_ss5f60f640("remove_error_listener");
 StaticString s_sys_ss5f66ed1d("isnormalized");
 StaticString s_sys_ss5f6ade63("bindcolumn");

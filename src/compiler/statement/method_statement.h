@@ -67,7 +67,7 @@ public:
   void outputCPPStaticMethodWrapper(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     const char *cls);
-  int checkRefParams();
+  bool hasRefParam();
   void outputParamArrayInit(CodeGenerator &cg);
 
 protected:

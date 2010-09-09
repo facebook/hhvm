@@ -195,6 +195,9 @@ public:
     return ret;
   }
   operator ArrayData *() { return create(); }
+  // this consructor should never be called directly, it is only called from
+  // generated code.
+  ArrayInit (ArrayData *data) {  m_data = data;}
 private:
   ArrayData *m_data;
 };

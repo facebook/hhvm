@@ -593,14 +593,13 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   ar->popScope();
 }
 
-int MethodStatement::checkRefParams() {
-  int refParamCount = 0;
+bool MethodStatement::hasRefParam() {
   for (int i = 0; i < m_params->getCount(); i++) {
     ParameterExpressionPtr param =
       dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
-    if (param->isRef()) refParamCount++;
+    if (param->isRef()) return true;
   }
-  return refParamCount;
+  return false;
 }
 
 void MethodStatement::outputParamArrayInit(CodeGenerator &cg) {
@@ -634,7 +633,7 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
     if (m_params) {
       int n = m_params->getCount();
       cg_printf("INTERCEPT_INJECTION(\"%s\", ", name);
-      if (Option::GenArrayCreate && checkRefParams() <= 1) {
+      if (Option::GenArrayCreate && !hasRefParam()) {
         ar->m_arrayIntegerKeySizes.insert(n);
         outputParamArrayInit(cg);
         cg_printf(", %s);\n", funcScope->isRefReturn() ? "ref(r)" : "r");

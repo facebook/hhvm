@@ -31,7 +31,7 @@ namespace HPHP {
 // constructors/destructors
 
 ArrayData *ArrayData::Create() {
-  return ArrayInit(0).create();
+  return ArrayInit(0, false).create();
 }
 
 ArrayData *ArrayData::Create(CVarRef value) {

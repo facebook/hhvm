@@ -66,7 +66,7 @@ public:
   void setParamDefault(int index, const std::string &value,
                        const std::string &text);
   void setRefParam(int index);
-  int checkRefParams(int max) const;
+  bool hasRefParam(int max) const;
 
   void addModifier(int mod);
 

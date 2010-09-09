@@ -479,13 +479,12 @@ void FunctionScope::setRefParam(int index) {
   m_refs[index] = true;
 }
 
-int FunctionScope::checkRefParams(int max) const {
+bool FunctionScope::hasRefParam(int max) const {
   ASSERT(max >= 0 && max < (int)m_refs.size());
-  int refParamCount = 0;
   for (int i = 0; i < max; i++) {
-    if (m_refs[i]) refParamCount++;
+    if (m_refs[i]) return true;
   }
-  return refParamCount;
+  return false;
 }
 
 const std::string &FunctionScope::getParamName(int index) const {
@@ -702,12 +701,12 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
   if (Option::GenArrayCreate &&
       cg.getOutput() != CodeGenerator::SystemCPP &&
       aggregateParams && m_maxParam > 0) {
-    if (stmt && stmt->checkRefParams() <= 1) {
+    if (stmt && !stmt->hasRefParam()) {
       cg_printf("Array(");
       stmt->outputParamArrayInit(cg);
       cg_printf(")");
       arrayCreated = true;
-    } else if (!userFunc && checkRefParams(m_maxParam) <= 1) {
+    } else if (!userFunc && !hasRefParam(m_maxParam)) {
       cg_printf("Array(");
       for (int i = 0; i < m_maxParam; i++) {
         if (isRefParam(i)) {
@@ -810,7 +809,7 @@ void FunctionScope::outputCPPArguments(ExpressionListPtr params,
       // Parameter arrays are always vectors.
       if (Option::GenArrayCreate &&
           cg.getOutput() != CodeGenerator::SystemCPP) {
-        if (params->checkRefValues(false, i) == 0) {
+        if (!params->hasNonArrayCreateValue(false, i)) {
           ar->m_arrayIntegerKeySizes.insert(paramCount - i);
           cg_printf("Array(");
           params->outputCPPUniqLitKeyArrayInit(cg, ar, paramCount - i,

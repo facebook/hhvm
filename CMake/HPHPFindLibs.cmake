@@ -128,6 +128,7 @@ endif (ICU_FOUND)
 FIND_LIBRARY(UNWIND_LIB unwind)
 
 # Google tmalloc
+add_definitions(-DNO_JEMALLOC=1)
 option(USE_TCMALLOC "Use tcmalloc" ON)
 
 if (USE_TCMALLOC)
@@ -136,6 +137,7 @@ if (USE_TCMALLOC)
 	set(HAVE_TCMALLOC 0)
 	if (NOT GOOGLE_TCMALLOC_LIB)
 		message(STATUS "Skipping TCmalloc")
+		add_definitions(-DNO_TCMALLOC=1)
 	else()
 		message(STATUS "Found tcmalloc: ${GOOGLE_TCMALLOC_LIB}")
 		add_definitions(-DGOOGLE_TCMALLOC=1)

@@ -194,12 +194,14 @@ bool TestExtNetwork::test_socket_get_status() {
 
 bool TestExtNetwork::test_socket_set_blocking() {
   Variant f = f_fsockopen("facebook.com", 80);
+  VERIFY(!same(f, false));
   f_socket_set_blocking(f, 0);
   return Count(true);
 }
 
 bool TestExtNetwork::test_socket_set_timeout() {
   Variant f = f_fsockopen("facebook.com", 80);
+  VERIFY(!same(f, false));
   f_socket_set_timeout(f, 0);
   return Count(true);
 }

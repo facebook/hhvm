@@ -234,6 +234,10 @@ CPPFLAGS += \
   -I $(PROJECT_ROOT)/src \
   -I $(PROJECT_ROOT)/src/system/gen \
 
+ifdef HPHP_DEV
+CPPFLAGS += -isystem $(EXT_DIR)/libpng/include
+endif
+
 ifdef GOOGLE_CPU_PROFILER
 GOOGLE_TOOLS = 1
 endif
@@ -479,7 +483,12 @@ MCC_LIBS = $(EXT_DIR)/libmcc/lib/libmcc.a $(EXT_DIR)/libch/lib/libch.a \
 
 LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
 
+ifdef HPHP_DEV 
+GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
+	-ljpeg -lfreetype -lfontconfig
+else
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a -lpng -ljpeg -lfreetype -lfontconfig
+endif
 
 MOZILLA_LIBS = $(EXT_DIR)/mozilla/libmozutil_s.a \
                $(EXT_DIR)/mozilla/libexpat_s.a \
@@ -561,7 +570,7 @@ ALL_LIBS = $(CURL_LIBS) $(PCRE_LIBS) $(BOOST_LIBS) \
 	$(GD_LIBS) $(LIBXML_LIBS) $(FBML_LIBS) $(MBFL_LIBS) \
 	$(MCRYPT_LIBS) $(JEMALLOC_LIBS) $(GOOGLE_LIBS) $(ICU_LIBS) \
 	$(HTTP_LIBS) $(XHP_LIBS) $(TIME_LIBS) $(TBB_LIBS) $(FBI_LIBS) \
-	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS)
+	$(LDAP_LIBS) $(READLINE_LIBS) $(LIBMEMCACHED_LIBS) $(ORACLE_LIBS) \
 
 LIB_PATHS = $(HPHP_LIB) \
   $(HPHP_TEST_LIB_PATH) \
@@ -592,6 +601,10 @@ LIB_PATHS = $(HPHP_LIB) \
   $(EXT_DIR)/readline/lib \
   $(EXT_DIR)/ldap/lib \
   $(EXT_DIR)/libxml2/lib \
+
+ifdef HPHP_DEV 
+LIB_PATHS += $(EXT_DIR)/libpng/lib
+endif
 
 ###############################################################################
 # Dependencies

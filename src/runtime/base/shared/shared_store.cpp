@@ -215,9 +215,6 @@ bool ProcessSharedStore::s_initialized = false;
 class ThreadSharedVariantFactory {
 public:
   ThreadSharedVariantFactory() : m_locks(NULL) {
-    if (RuntimeOption::ApcUseLockedRefs) {
-      m_locks = new Mutex[SharedStore::s_lockCount];
-    }
   }
   ~ThreadSharedVariantFactory() {
     if (m_locks) {
@@ -232,43 +229,29 @@ public:
    * it may contain a lock associated with a different key.
    */
   inline SharedVariant* create(CStrRef key, CVarRef v) {
-    if (RuntimeOption::ApcUseLockedRefs) {
-      return new ThreadSharedVariantLockedRefs(v, false, *getLock(key));
-    } else {
-      SharedVariant *wrapped = v.getSharedVariant();
-      if (wrapped) {
-        wrapped->incRef();
-        return wrapped;
-      }
-      return new ThreadSharedVariant(v, false);
+    SharedVariant *wrapped = v.getSharedVariant();
+    if (wrapped) {
+      wrapped->incRef();
+      return wrapped;
     }
+    return new ThreadSharedVariant(v, false);
   }
   inline SharedVariant* create(litstr str, int len, CStrRef v,
                            bool serialized) {
-    if (RuntimeOption::ApcUseLockedRefs) {
-      return new ThreadSharedVariantLockedRefs(v, serialized,
-                                               *getLock(str, len));
-    } else {
-      SharedVariant *wrapped = v->getSharedVariant();
-      if (wrapped) {
-        wrapped->incRef();
-        return wrapped;
-      }
-      return new ThreadSharedVariant(v, serialized);
+    SharedVariant *wrapped = v->getSharedVariant();
+    if (wrapped) {
+      wrapped->incRef();
+      return wrapped;
     }
+    return new ThreadSharedVariant(v, serialized);
   }
   inline SharedVariant* create(litstr str, int len, CVarRef v) {
-    if (RuntimeOption::ApcUseLockedRefs) {
-      return new ThreadSharedVariantLockedRefs(v, false,
-                                               *getLock(str, len));
-    } else {
-      SharedVariant *wrapped = v.getSharedVariant();
-      if (wrapped) {
-        wrapped->incRef();
-        return wrapped;
-      }
-      return new ThreadSharedVariant(v, false);
+    SharedVariant *wrapped = v.getSharedVariant();
+    if (wrapped) {
+      wrapped->incRef();
+      return wrapped;
     }
+    return new ThreadSharedVariant(v, false);
   }
 protected:
   Mutex *m_locks;

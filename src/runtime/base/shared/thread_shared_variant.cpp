@@ -310,11 +310,6 @@ ThreadSharedVariant *ThreadSharedVariant::createAnother
   return new ThreadSharedVariant(source, serialized, inner);
 }
 
-ThreadSharedVariant *ThreadSharedVariantLockedRefs::createAnother
-(CVarRef source, bool serialized, bool inner /* = false */) {
-  return new ThreadSharedVariantLockedRefs(source, serialized, m_lock, inner);
-}
-
 void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
   stats->initStats();
   stats->variantCount = 1;

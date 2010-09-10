@@ -101,9 +101,8 @@ bool TestExtApc::RunTests(const std::string &which) {
 
   s_apc_store.clear();
   RuntimeOption::ApcTableType = RuntimeOption::ApcHashTable;
-  RuntimeOption::ApcUseLockedRefs = true;
   s_apc_store.create();
-  printf("\nNon shared-memory version with locked refs:\n");
+  printf("\nNon shared-memory version:\n");
   RUN_TEST(test_apc_add);
   RUN_TEST(test_apc_store);
   RUN_TEST(test_apc_fetch);

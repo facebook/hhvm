@@ -22,6 +22,7 @@
 #include <runtime/eval/ast/static_statement.h>
 #include <runtime/base/runtime_option.h>
 #include <util/process.h>
+#include <util/atomic.h>
 #include <runtime/eval/runtime/eval_state.h>
 
 using namespace std;
@@ -33,8 +34,8 @@ namespace Eval {
 set<string> FileRepository::s_names;
 
 PhpFile::PhpFile(StatementPtr tree, const vector<StaticStatementPtr> &statics,
-                 Mutex &lock, const struct stat &s)
-  : Block(statics), m_lock(lock), m_refCount(1), m_timestamp(s.st_mtime),
+                 const struct stat &s)
+  : Block(statics), m_refCount(1), m_timestamp(s.st_mtime),
     m_ino(s.st_ino), m_devId(s.st_dev), m_tree(tree),
     m_profName(string("run_init::") + string(m_tree->loc()->file)) {
 }
@@ -63,35 +64,26 @@ Variant PhpFile::eval(LVariableTable *vars) {
 }
 
 void PhpFile::decRef() {
-  m_lock.lock();
-  --m_refCount;
-  if (m_refCount == 0) {
-    m_lock.unlock();
+  ASSERT(m_refCount);
+  if (atomic_dec(m_refCount) == 0) {
     delete this;
-    return;
   }
-  m_lock.unlock();
 }
 
 void PhpFile::incRef() {
-  m_lock.lock();
-  ++m_refCount;
-  m_lock.unlock();
+  atomic_inc(m_refCount);
 }
 
 bool PhpFile::isChanged(const struct stat &s) {
   return m_timestamp < s.st_mtime || m_ino != s.st_ino || m_devId != s.st_dev;
 }
 
-Mutex FileRepository::s_lock;
-Mutex FileRepository::s_locks[128];
 hphp_hash_map<std::string, PhpFile*, string_hash>
 FileRepository::m_files;
 
 PhpFile *FileRepository::checkoutFile(const std::string &rname,
                                       const struct stat &s) {
   PhpFile *ret = NULL;
-  Lock lock(s_lock);
   string name;
 
   if (rname[0] == '/') {
@@ -135,8 +127,7 @@ PhpFile *FileRepository::readFile(const std::string &name,
   const char *canoname = canonicalize(name);
   StatementPtr stmt = Parser::parseFile(canoname, sts);
   if (stmt) {
-    uint lock = hash_string(canoname) & 127;
-    PhpFile *p = new PhpFile(stmt, sts, s_locks[lock], s);
+    PhpFile *p = new PhpFile(stmt, sts, s);
     return p;
   }
   return NULL;

@@ -256,7 +256,6 @@ public:
   static time_t ApcKeyMaturityThreshold;
   static size_t ApcMaximumCapacity;
   static int ApcKeyFrequencyUpdatePeriod;
-  static bool ApcUseLockedRefs;
   static bool ApcExpireOnSets;
   static int ApcPurgeFrequency;
 

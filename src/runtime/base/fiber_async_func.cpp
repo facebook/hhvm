@@ -209,15 +209,11 @@ public:
 
   // ref counting
   void incRefCount() {
-    Lock lock(m_mutex);
-    ++m_refCount;
+    atomic_inc(m_refCount);
   }
   void decRefCount() {
-    {
-      Lock lock(m_mutex);
-      --m_refCount;
-    }
-    if (m_refCount == 0) {
+    ASSERT(m_refCount);
+    if (atomic_dec(m_refCount) == 0) {
       delete this;
     }
   }

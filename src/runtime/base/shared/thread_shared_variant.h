@@ -145,34 +145,6 @@ private:
   void clearOwner() { m_flags &= ~Owner;}
 };
 
-class ThreadSharedVariantLockedRefs : public ThreadSharedVariant {
-public:
-  ThreadSharedVariantLockedRefs(CVarRef source, bool serialized, Mutex &lock,
-                                bool inner = false)
-    : ThreadSharedVariant(source, serialized, inner), m_lock(lock) {}
-
-  virtual void incRef() {
-    Lock lock(m_lock);
-    ++m_ref;
-  }
-
-  virtual void decRef() {
-    {
-      Lock lock(m_lock);
-      ASSERT(m_ref);
-      --m_ref;
-    }
-    if (m_ref == 0) {
-      delete this;
-    }
-  }
-
-protected:
-  Mutex &m_lock;
-  virtual ThreadSharedVariant *createAnother(CVarRef source, bool serialized,
-                                             bool inner = false);
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

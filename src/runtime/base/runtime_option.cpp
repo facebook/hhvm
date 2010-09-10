@@ -250,7 +250,6 @@ RuntimeOption::ApcTableLockTypes RuntimeOption::ApcTableLockType =
 time_t RuntimeOption::ApcKeyMaturityThreshold = 20;
 size_t RuntimeOption::ApcMaximumCapacity = 0;
 int RuntimeOption::ApcKeyFrequencyUpdatePeriod = 1000;
-bool RuntimeOption::ApcUseLockedRefs = false;
 bool RuntimeOption::ApcExpireOnSets = false;
 int RuntimeOption::ApcPurgeFrequency = 4096;
 
@@ -622,7 +621,6 @@ void RuntimeOption::Load(Hdf &config) {
                                      "Invalid lock type");
     }
 
-    ApcUseLockedRefs = apc["UseLockedRefs"].getBool();
     ApcExpireOnSets = apc["ExpireOnSets"].getBool();
     ApcPurgeFrequency = apc["PurgeFrequency"].getInt32(4096);
 

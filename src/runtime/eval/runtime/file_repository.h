@@ -33,7 +33,7 @@ DECLARE_AST_PTR(StaticStatement);
 class PhpFile : public Block {
 public:
   PhpFile(StatementPtr tree, const std::vector<StaticStatementPtr> &statics,
-          Mutex &lock, const struct stat &s);
+          const struct stat &s);
   ~PhpFile();
   Variant eval(LVariableTable *env);
   void decRef();
@@ -41,7 +41,6 @@ public:
   time_t readTime() const { return m_timestamp; }
   bool isChanged(const struct stat &s);
 private:
-  Mutex &m_lock;
   int m_refCount;
   time_t m_timestamp;
   ino_t m_ino;
@@ -62,9 +61,7 @@ public:
   static PhpFile *checkoutFile(const std::string &name, const struct stat &s);
   static bool findFile(std::string &path, struct stat &s, const char *currentDir);
 private:
-  static Mutex s_lock;
   static hphp_hash_map<std::string, PhpFile*, string_hash> m_files;
-  static Mutex s_locks[128];
 
   static PhpFile *readFile(const std::string &name, const struct stat &s);
   static bool fileStat(const std::string &name, struct stat &s);

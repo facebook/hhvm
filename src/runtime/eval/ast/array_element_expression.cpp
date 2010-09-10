@@ -87,16 +87,15 @@ bool ArrayElementExpression::weakLval(VariableEnvironment &env,
     throw InvalidOperandException("Cannot unset array append");
   }
   Variant *arr;
-  if (m_arr->weakLval(env, arr)) {
-    Variant idx(m_idx->eval(env));
-    if (!arr->is(KindOfArray)) {
-      return false;
-    }
-    SET_LINE;
-    if (arr->toArray().exists(idx)) {
-      v = &arr->lvalAt(idx);
-      return true;
-    }
+  bool ok = m_arr->weakLval(env, arr);
+  Variant idx(m_idx->eval(env));
+  if (!ok || !arr->is(KindOfArray)) {
+    return false;
+  }
+  SET_LINE;
+  if (arr->toArray().exists(idx)) {
+    v = &arr->lvalAt(idx);
+    return true;
   }
   return false;
 }
@@ -136,6 +135,8 @@ void ArrayElementExpression::unset(VariableEnvironment &env) const {
     Variant idx(m_idx->eval(env));
     SET_LINE_VOID;
     arr->weakRemove(idx);
+  } else {
+    m_idx->eval(env);
   }
 }
 

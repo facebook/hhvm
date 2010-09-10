@@ -405,19 +405,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       break;
     case T_INC:
     case T_DEC:
-      if (m_exp->is(Expression::KindOfSimpleVariable)) {
-        FunctionScopePtr func =
-          dynamic_pointer_cast<FunctionScope>(ar->getScope());
-        if (func) {
-          SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(m_exp);
-          VariableTablePtr variables = ar->getScope()->getVariables();
-          const std::string &name = var->getName();
-          if (variables->isParameter(name)) {
-            variables->addLvalParam(name);
-          }
-        }
-      }
-      // fall through
     case '~':
       if (Type::SameType(expType, Type::Int64) ||
           Type::SameType(expType, Type::Double) ||
@@ -614,8 +601,8 @@ bool UnaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
     ObjectPropertyExpressionPtr var(
       dynamic_pointer_cast<ObjectPropertyExpression>(m_exp));
     if (var->isValid()) return false;
-    var->getObject()->outputCPP(cg, ar);
-    cg_printf(".o_assign_op<%s,%d>(",
+    var->outputCPPObject(cg, ar);
+    cg_printf("o_assign_op<%s,%d>(",
               isUnused() ? "void" : "Variant", m_op);
     var->outputCPPProperty(cg, ar);
     cg_printf(", %s, %s)",

@@ -189,8 +189,8 @@ void ListAssignment::outputCPPAssignment(CodeGenerator &cg,
           ObjectPropertyExpressionPtr var(
             dynamic_pointer_cast<ObjectPropertyExpression>(exp));
           if (!var->isValid()) {
-            var->getObject()->outputCPP(cg, ar);
-            cg_printf(".o_set(");
+            var->outputCPPObject(cg, ar);
+            cg_printf("o_set(");
             var->outputCPPProperty(cg, ar);
             cg_printf(", %s[%d], %s);\n",
                       arrTmp.c_str(), i,

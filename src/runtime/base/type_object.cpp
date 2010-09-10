@@ -83,6 +83,14 @@ Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
   return m_px->o_lval(propName, tmpForGet, context);
 }
 
+Variant &Object::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
+                             CStrRef context /* = null_string */) {
+  if (!m_px) {
+    return const_cast<Variant&>(tmpForGet);
+  }
+  return m_px->o_lval(propName, tmpForGet, context);
+}
+
 bool Object::o_isset(CStrRef propName,
                      CStrRef context /* = null_string */) const {
   if (!m_px) throw NullPointerException();

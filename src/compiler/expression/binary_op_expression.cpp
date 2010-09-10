@@ -1010,8 +1010,8 @@ bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
     ObjectPropertyExpressionPtr var(
       dynamic_pointer_cast<ObjectPropertyExpression>(m_exp1));
     if (var->isValid()) return false;
-    var->getObject()->outputCPP(cg, ar);
-    cg_printf(".o_assign_op<%s,%d>(",
+    var->outputCPPObject(cg, ar);
+    cg_printf("o_assign_op<%s,%d>(",
               isUnused() ? "void" : "Variant", m_op);
     var->outputCPPProperty(cg, ar);
     cg_printf(", ");

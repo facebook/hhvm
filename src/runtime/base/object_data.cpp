@@ -284,9 +284,9 @@ Variant &ObjectData::o_lval(CStrRef propName, CVarRef tmpForGet,
   if (propName.size() == 0) {
     throw EmptyObjectPropertyException();
   }
+
   bool useGet = getAttribute(UseGet);
   int flags = useGet ? RealPropWrite : RealPropCreate | RealPropWrite;
-
   if (Variant *t = o_realProp(propName, flags, context)) {
     if (!useGet || t->isInitialized()) {
       return *t;
@@ -302,7 +302,6 @@ Variant &ObjectData::o_lval(CStrRef propName, CVarRef tmpForGet,
 
   Variant &ret = const_cast<Variant&>(tmpForGet);
   ret = t___get(propName);
-
   return ret;
 }
 

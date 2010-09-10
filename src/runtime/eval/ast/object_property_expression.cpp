@@ -62,17 +62,22 @@ Variant &ObjectPropertyExpression::lval(VariableEnvironment &env) const {
 
 bool ObjectPropertyExpression::weakLval(VariableEnvironment &env,
                                         Variant* &v) const {
-  Variant vobj(m_obj->eval(env));
-  if (vobj.is(KindOfObject)) {
-    Object obj(vobj);
+  Variant *obj;
+
+  const LvalExpression *lobj = m_obj->toLval();
+  if (lobj) {
+    bool ok = lobj->weakLval(env, obj);
     String name(m_name->get(env));
-    if (!SET_LINE_EXPR) return false;
-    v = obj->o_weakLval(name);
-    return v != NULL;
+    if (!ok || !SET_LINE_EXPR) return false;
+    Variant tmp;
+    v = &obj->o_unsetLval(name, tmp);
+    return v != &tmp;
   }
+
+  m_obj->eval(env);
+  m_name->get(env);
   return false;
 }
-
 
 Variant ObjectPropertyExpression::set(VariableEnvironment &env, CVarRef val)
   const {
@@ -147,11 +152,18 @@ bool ObjectPropertyExpression::exist(VariableEnvironment &env, int op) const {
     return obj->o_empty(name);
   }
 }
+
 void ObjectPropertyExpression::unset(VariableEnvironment &env) const {
-  Object obj(m_obj->eval(env));
-  String name(m_name->get(env));
-  SET_LINE_VOID;
-  obj->o_unset(name);
+  const LvalExpression *lobj = m_obj->toLval();
+  Variant *obj;
+  if (lobj && lobj->weakLval(env, obj)) {
+    String name(m_name->get(env));
+    toObject(*obj)->o_unset(name);
+  } else {
+    Object obj(toObject(m_obj->evalExist(env)));
+    String name(m_name->get(env));
+    obj->o_unset(name);
+  }
 }
 
 NamePtr ObjectPropertyExpression::getProperty() const { return m_name; }

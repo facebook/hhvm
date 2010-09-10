@@ -49,6 +49,8 @@ public:
   bool isTemporary() const;
   bool isValid() const { return m_valid; }
   void outputCPPProperty(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputCPPObject(CodeGenerator &cg, AnalysisResultPtr ar,
+                       int directVariant = -1);
 private:
   void setEffect(Effect effect);
   void clearEffect(Effect effect);

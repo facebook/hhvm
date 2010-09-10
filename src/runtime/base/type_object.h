@@ -140,6 +140,8 @@ class Object : public SmartPtr<ObjectData> {
   Variant o_set(CStrRef s, CVarRef v, CStrRef context = null_string);
   Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
                   CStrRef context = null_string);
+  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
+                       CStrRef context = null_string);
   bool o_isset(CStrRef propName, CStrRef context = null_string) const;
   bool o_empty(CStrRef propName, CStrRef context = null_string) const;
   Variant o_unset(CStrRef propName, CStrRef context = null_string) const;

@@ -2536,6 +2536,17 @@ Variant &Variant::o_lval(CStrRef propName, CVarRef tmpForGet,
   }
 }
 
+Variant &Variant::o_unsetLval(CStrRef propName, CVarRef tmpForGet,
+                              CStrRef context /* = null_string */) {
+  if (m_type == KindOfObject) {
+    return m_data.pobj->o_lval(propName, tmpForGet, context);
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_unsetLval(propName, tmpForGet, context);
+  } else {
+    return const_cast<Variant&>(tmpForGet);
+  }
+}
+
 #define IMPLEMENT_SETAT                                                 \
   if (m_type == KindOfArray) {                                          \
     if (v.isContagious()) {                                             \

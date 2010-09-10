@@ -303,8 +303,8 @@ void AssignmentExpression::outputCPPImpl(CodeGenerator &cg,
     ObjectPropertyExpressionPtr var(
       dynamic_pointer_cast<ObjectPropertyExpression>(m_variable));
     if (!var->isValid()) {
-      var->getObject()->outputCPP(cg, ar);
-      cg_printf(".o_set(");
+      var->outputCPPObject(cg, ar);
+      cg_printf("o_set(");
       var->outputCPPProperty(cg, ar);
       cg_printf(", %s", ref ? "ref(" : "");
       m_value->outputCPP(cg, ar);

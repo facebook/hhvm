@@ -627,6 +627,8 @@ class Variant {
   Variant o_getPublic(CStrRef propName, bool error = true) const;
   Variant &o_lval(CStrRef propName, CVarRef tmpForGet,
                   CStrRef context = null_string);
+  Variant &o_unsetLval(CStrRef s, CVarRef tmpForGet,
+                       CStrRef context = null_string);
 
   Variant o_invoke(CStrRef s, CArrRef params, int64 hash = -1);
   Variant o_root_invoke(CStrRef s, CArrRef params, int64 hash = -1);

@@ -699,7 +699,7 @@ Variant i_openlog(CArrRef params) {
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_openlog(arg0, arg1, arg2), null);
+    return (f_openlog(arg0, arg1, arg2));
   }
 }
 Variant i_get_include_path(CArrRef params) {
@@ -997,7 +997,7 @@ Variant i_syslog(CArrRef params) {
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_syslog(arg0, arg1), null);
+    return (f_syslog(arg0, arg1));
   }
 }
 Variant i_array_unique(CArrRef params) {
@@ -6198,7 +6198,7 @@ Variant i_closelog(CArrRef params) {
   FUNCTION_INJECTION(closelog);
   int count __attribute__((__unused__)) = params.size();
   if (count > 0) return throw_toomany_arguments("closelog", 0, 1);
-  return (f_closelog(), null);
+  return (f_closelog());
 }
 Variant i_drawpathlinetoabsolute(CArrRef params) {
   FUNCTION_INJECTION(drawpathlinetoabsolute);
@@ -30884,7 +30884,7 @@ Variant ei_openlog(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_openlog(a0, a1, a2), null);
+  return (x_openlog(a0, a1, a2));
 }
 Variant ei_get_include_path(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -31382,7 +31382,7 @@ Variant ei_syslog(Eval::VariableEnvironment &env, const Eval::FunctionCallExpres
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_syslog(a0, a1), null);
+  return (x_syslog(a0, a1));
 }
 Variant ei_array_unique(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -40083,7 +40083,7 @@ Variant ei_closelog(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_closelog(), null);
+  return (x_closelog());
 }
 Variant ei_drawpathlinetoabsolute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;

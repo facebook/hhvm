@@ -102,16 +102,19 @@ inline void f_define_syslog_variables() {
   // do nothing, since all variables are defined as constants already
 }
 
-inline void f_openlog(CStrRef ident, int option, int facility) {
+inline bool f_openlog(CStrRef ident, int option, int facility) {
   openlog(ident.data(), option, facility);
+  return true;
 }
 
-inline void f_closelog() {
+inline bool f_closelog() {
   closelog();
+  return true;
 }
 
-inline void f_syslog(int priority, CStrRef message) {
+inline bool f_syslog(int priority, CStrRef message) {
   syslog(priority, "%s", message.data());
+  return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

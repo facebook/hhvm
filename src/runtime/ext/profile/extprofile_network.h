@@ -165,19 +165,19 @@ inline void x_define_syslog_variables() {
   f_define_syslog_variables();
 }
 
-inline void x_openlog(CStrRef ident, int option, int facility) {
+inline bool x_openlog(CStrRef ident, int option, int facility) {
   FUNCTION_INJECTION_BUILTIN(openlog);
-  f_openlog(ident, option, facility);
+  return f_openlog(ident, option, facility);
 }
 
-inline void x_closelog() {
+inline bool x_closelog() {
   FUNCTION_INJECTION_BUILTIN(closelog);
-  f_closelog();
+  return f_closelog();
 }
 
-inline void x_syslog(int priority, CStrRef message) {
+inline bool x_syslog(int priority, CStrRef message) {
   FUNCTION_INJECTION_BUILTIN(syslog);
-  f_syslog(priority, message);
+  return f_syslog(priority, message);
 }
 
 

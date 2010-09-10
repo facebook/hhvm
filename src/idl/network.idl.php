@@ -726,7 +726,7 @@ DefineFunction(
     'desc'   => "openlog() opens a connection to the system logger for a program.\n\nThe use of openlog() is optional. It will automatically be called by syslog() if necessary, in which case ident will default to FALSE.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => null,
+      'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(
@@ -754,7 +754,7 @@ DefineFunction(
     'desc'   => "closelog() closes the descriptor being used to write to the system logger. The use of closelog() is optional.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => null,
+      'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
   ));
@@ -765,7 +765,7 @@ DefineFunction(
     'desc'   => "syslog() generates a log message that will be distributed by the system logger.\n\nFor information on setting up a user defined log handler, see the syslog.conf (5) Unix manual page. More information on the syslog facilities and option can be found in the man pages for syslog (3) on Unix machines.",
     'flags'  =>  HasDocComment,
     'return' => array(
-      'type'   => null,
+      'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
     'args'   => array(

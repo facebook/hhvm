@@ -291,6 +291,9 @@ public:
   // implementing IDebuggable
   virtual void debuggerInfo(InfoVec &info);
 
+  void setSSL() {m_isSSL = true;}
+  bool isSSL() const {return m_isSSL;}
+
 protected:
   /**
    * Parameter parsing in this class is done by making just one copy of the
@@ -321,6 +324,8 @@ protected:
   bool m_sendContentType;
   bool m_compression;
   StreamCompressor *m_compressor;
+
+  bool m_isSSL;
 
   enum CompressionDecision {
     NotDecidedYet,

@@ -218,9 +218,11 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
 
   server.set("REQUEST_URI", String(transport->getUrl(), CopyString));
   server.set("SCRIPT_URL", r.originalURL());
-  server.set("SCRIPT_URI", String(string("http://") +
-                                  (hostHeader.empty() ? hostName : hostHeader).
-                                  data() + r.originalURL().data()));
+  String prefix(transport->isSSL() ? "https://" : "http://");
+  server.set("SCRIPT_URI", String(prefix +
+                                  (hostHeader.empty() ? hostName : hostHeader)
+                                  + r.originalURL()));
+
   if (r.rewritten()) {
     // when URL is rewritten, PHP decided to put original URL as SCRIPT_NAME
     String name = r.originalURL();
@@ -278,7 +280,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
     break;
   default:              server.set("REQUEST_METHOD", "");     break;
   }
-  server.set("HTTPS", "");
+  server.set("HTTPS", transport->isSSL() ? "1" : "");
   server.set("REQUEST_TIME", time(NULL));
   server.set("QUERY_STRING", r.queryString());
 

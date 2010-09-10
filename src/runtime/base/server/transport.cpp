@@ -37,7 +37,7 @@ Transport::Transport()
   : m_url(NULL), m_postData(NULL), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
     m_responseCode(-1), m_responseSize(0), m_sendContentType(true),
-    m_compression(true), m_compressor(NULL),
+    m_compression(true), m_compressor(NULL), m_isSSL(false),
     m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
 }
 

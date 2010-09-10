@@ -28,9 +28,7 @@
 #include <runtime/ext/hash/hash_crc32.h>
 #include <runtime/ext/hash/hash_haval.h>
 
-#ifndef HPHP_OSS
-#include <ch/hash.h>
-#endif
+#include <runtime/ext/hash/hash_furc.h>
 
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(hash);
@@ -374,19 +372,11 @@ int f_furchash_hphp_ext(CStrRef key, int len, int npart) {
     len = key.size();
   }
 
-#ifdef _facebook_ch_hash_h_
   return furc_hash(key, len, npart);
-#else
-  throw NotImplementedException(__func__);
-#endif
 }
 
 bool f_furchash_hphp_ext_supported() {
-#ifdef _facebook_ch_hash_h_
   return true;
-#else
-  return false;
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

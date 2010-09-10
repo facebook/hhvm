@@ -213,8 +213,11 @@ public:
     ++m_refCount;
   }
   void decRefCount() {
-    Lock lock(m_mutex);
-    if (--m_refCount == 0) {
+    {
+      Lock lock(m_mutex);
+      --m_refCount;
+    }
+    if (m_refCount == 0) {
       delete this;
     }
   }

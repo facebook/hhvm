@@ -947,6 +947,7 @@ bool TestCppBase::TestMemoryManager() {
 
   }
   DELETE(TestGlobals)(globals);
+  MemoryManager::TheMemoryManager().reset();
   return Count(true);
 }
 

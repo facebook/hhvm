@@ -157,9 +157,12 @@ public:
   }
 
   virtual void decRef() {
-    Lock lock(m_lock);
-    ASSERT(m_ref);
-    if (--m_ref == 0) {
+    {
+      Lock lock(m_lock);
+      ASSERT(m_ref);
+      --m_ref;
+    }
+    if (m_ref == 0) {
       delete this;
     }
   }

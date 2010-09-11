@@ -2618,7 +2618,7 @@ check_array:                                                            \
     case T_SL_EQUAL:    return ((*cv) <<= v);                           \
     case T_SR_EQUAL:    return ((*cv) >>= v);                           \
     default:                                                            \
-      throw FatalErrorException("invalid operator %d", op);             \
+      throw FatalErrorException(0, "invalid operator %d", op);          \
     }                                                                   \
   }                                                                     \
   switch (m_type) {                                                     \
@@ -2654,7 +2654,7 @@ check_array:                                                            \
     case T_SL_EQUAL:     cv <<= v;             break;                   \
     case T_SR_EQUAL:     cv >= v;              break;                   \
     default:                                                            \
-      throw FatalErrorException("invalid operator %d", op);             \
+      throw FatalErrorException(0, "invalid operator %d", op);          \
     }                                                                   \
     aa->o_invoke(s_offsetSet, CREATE_VECTOR2(key, cv), -1);             \
     return cv;                                                          \
@@ -2797,7 +2797,7 @@ check_array:
     case T_SL_EQUAL:    return ((*cv) <<= v);
     case T_SR_EQUAL:    return ((*cv) >>= v);
     default:
-      throw FatalErrorException("invalid operator %d", op);
+      throw FatalErrorException(0, "invalid operator %d", op);
     }
     return v;
   }
@@ -2833,7 +2833,7 @@ check_array:
     case T_SR_EQUAL:     cv >= v;              break;
       break;
     default:
-      throw FatalErrorException("invalid operator %d", op);
+      throw FatalErrorException(0, "invalid operator %d", op);
     }
     aa->o_invoke(s_offsetSet, CREATE_VECTOR2(null_variant, cv));
     return cv;

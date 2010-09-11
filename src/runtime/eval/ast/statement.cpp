@@ -20,7 +20,7 @@ namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
 void Statement::byteCode(ByteCodeProgram &code) const {
-  throw FatalErrorException("Cannot compile %s:%d", m_loc.file, m_loc.line1);
+  throw FatalErrorException(0,"Cannot compile %s:%d", m_loc.file, m_loc.line1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -84,15 +84,15 @@ void ObjectData::bindThis(ThreadInfo *info) {
 // static methods and properties
 
 Variant ObjectData::os_getInit(CStrRef s) {
-  throw FatalErrorException("unknown property %s", s.c_str());
+  throw FatalErrorException(0, "unknown property %s", s.c_str());
 }
 
 Variant ObjectData::os_get(CStrRef s) {
-  throw FatalErrorException("unknown static property %s", s.c_str());
+  throw FatalErrorException(0, "unknown static property %s", s.c_str());
 }
 
 Variant &ObjectData::os_lval(CStrRef s) {
-  throw FatalErrorException("unknown static property %s", s.c_str());
+  throw FatalErrorException(0, "unknown static property %s", s.c_str());
 }
 
 Variant ObjectData::os_invoke(const char *c, MethodIndex methodIndex,

@@ -30,7 +30,8 @@ UnsetStatement::UnsetStatement(STATEMENT_ARGS,
          it != vals.end(); ++it) {
     LvalExpressionPtr lv = (*it)->cast<LvalExpression>();
     if (!lv) {
-      throw FatalErrorException("Cannot unset function return value at %s:%d",
+      throw FatalErrorException(0,
+                                "Cannot unset function return value at %s:%d",
                                 loc()->file, loc()->line1);
     }
     m_vals.push_back(lv);

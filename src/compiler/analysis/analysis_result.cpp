@@ -1811,7 +1811,7 @@ void AnalysisResult::outputConcatImpl(CodeGenerator &cg) {
     }
     cg_printf("char *buf = (char*)malloc(len + 1);\n");
     cg_printf("if (buf == NULL) {\n");
-    cg_printf("  throw FatalErrorException(\"malloc failed: %%d\", len);\n");
+    cg_printf("  throw FatalErrorException(0,\"malloc failed: %%d\", len);\n");
     cg_printf("}\n");
     for (int i = 1; i <= num; i++) {
       cg_printf("memcpy(buf");

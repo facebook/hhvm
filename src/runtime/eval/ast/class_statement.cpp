@@ -132,7 +132,8 @@ loadMethodTable(ClassEvalState &ce) const {
     if (mit != mtable.end()) {
       int mods = mit->second ? mit->second->getModifiers() : Public;
       if (mods & Final) {
-        throw FatalErrorException("Cannot override final method %s::%s() at "
+        throw FatalErrorException(0,
+                                  "Cannot override final method %s::%s() at "
                                   "%s:%d",
                                   mit->second->getClass()->name().c_str(),
                                   (*it)->name().c_str(), (*it)->loc()->file,
@@ -145,7 +146,8 @@ loadMethodTable(ClassEvalState &ce) const {
         } else if (mods & Private) {
           al = "private";
         }
-        throw FatalErrorException("Access level to %s must be %s or weaker "
+        throw FatalErrorException(0,
+                                  "Access level to %s must be %s or weaker "
                                   "(as in class %s) at %s:%d",
                                   (*it)->name().c_str(), al,
                                   mit->second ?
@@ -252,7 +254,7 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
 Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
                               bool init, ObjectData* root /* = NULL*/) const {
   if (getModifiers() & Abstract) {
-    throw FatalErrorException("Cannot instantiate abstract class %s",
+    throw FatalErrorException(0, "Cannot instantiate abstract class %s",
                               name().c_str());
   }
 
@@ -564,7 +566,7 @@ void ClassStatement::failPropertyAccess(CStrRef prop, const char *context,
   if (mods & Private) level = Private;
   else if (mods & Protected) level = Protected;
   if (level == ClassStatement::Private) mod = "private";
-  throw FatalErrorException("Attempt to access %s %s::%s%s%s",
+  throw FatalErrorException(0, "Attempt to access %s %s::%s%s%s",
       mod, m_name.c_str(), prop.data(),
       *context ? " from " : "",
       *context ? context : "");
@@ -670,12 +672,12 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
             }
           }
           if (!found) {
-            throw FatalErrorException("Class %s does not implement abstract "
+            throw FatalErrorException(0,"Class %s does not implement abstract "
                 "method %s::%s", cls->name().c_str(),
                 name().c_str(), (*it)->name().c_str());
           }
           if (incompatible) {
-            throw FatalErrorException("Declaration of %s::%s() must be "
+            throw FatalErrorException(0,"Declaration of %s::%s() must be "
                 "compatible with that of %s::%s()",
                 cls->name().c_str(), m->name().c_str(),
                 name().c_str(), (*it)->name().c_str());
@@ -740,7 +742,7 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     }
     if (parent && parent->getModifiers() & Final) {
       // Extended a final class
-      throw FatalErrorException("Class %s may not inherit from final class "
+      throw FatalErrorException(0,"Class %s may not inherit from final class "
                                 "(%s)",
                                 name().c_str(), parent->name().c_str());
     }

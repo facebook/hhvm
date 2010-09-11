@@ -350,7 +350,7 @@ String concat3(CStrRef s1, CStrRef s2, CStrRef s3) {
   int len = len1 + len2 + len3;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
@@ -373,7 +373,7 @@ String concat4(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4) {
   int len = len1 + len2 + len3 + len4;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
@@ -398,7 +398,7 @@ String concat5(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5) {
   int len = len1 + len2 + len3 + len4 + len5;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);
@@ -426,7 +426,7 @@ String concat6(CStrRef s1, CStrRef s2, CStrRef s3, CStrRef s4, CStrRef s5,
   int len = len1 + len2 + len3 + len4 + len5 + len6;
   char *buf = (char *)malloc(len + 1);
   if (buf == NULL) {
-    throw FatalErrorException("malloc failed: %d", len);
+    throw FatalErrorException(0, "malloc failed: %d", len);
   }
   memcpy(buf, s1.data(), len1);
   memcpy(buf + len1, s2.data(), len2);

@@ -459,9 +459,9 @@ void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
 
   va_list ap;
   va_start(ap, fmt);
-  char buf[20480];
-  vsnprintf(buf, sizeof(buf), fmt, ap);
-  e->m_message = String(buf, CopyString);
+  string msg;
+  Logger::Printf(msg, fmt, ap);
+  e->m_message = String(msg);
   va_end(ap);
 
   if (!info.isNull()) {

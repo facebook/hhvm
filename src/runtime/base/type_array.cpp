@@ -686,7 +686,7 @@ Variant Array::appendOpEqual(int op, CVarRef v) {
   case T_SL_EQUAL:    return ((*cv) <<= v);
   case T_SR_EQUAL:    return ((*cv) >>= v);
   default:
-    throw FatalErrorException("invalid operator %d", op);
+    throw FatalErrorException(0, "invalid operator %d", op);
   }
 }
 

@@ -117,7 +117,8 @@ public:
 
 class FatalErrorException : public ExtendedException {
 public:
-  FatalErrorException(const char *msg, ...) {
+  FatalErrorException(const char *msg) : ExtendedException("%s", msg) {}
+  FatalErrorException(int, const char *msg, ...) {
     va_list ap; va_start(ap, msg); format(msg, ap); va_end(ap);
   }
   virtual ~FatalErrorException() throw() {}
@@ -255,7 +256,7 @@ public:
 class OutOfMemoryException : public FatalErrorException {
 public:
   OutOfMemoryException(const char *msg, int memory)
-    : FatalErrorException(msg, memory) {}
+      : FatalErrorException(0, msg, memory) {}
   virtual ~OutOfMemoryException() throw() {}
 };
 

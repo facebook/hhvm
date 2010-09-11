@@ -152,7 +152,7 @@ public:
       throw ExitException(0);
     }
     if (!m_fatal.isNull()) {
-      throw FatalErrorException("%s", m_fatal.data());
+      throw FatalErrorException(m_fatal.data());
     }
     if (!m_exception.isNull()) {
       throw m_exception;
@@ -191,7 +191,7 @@ public:
         throw ExitException(0);
       }
       if (!m_fatal.isNull()) {
-        throw FatalErrorException("%s", m_fatal.data());
+        throw FatalErrorException(m_fatal.data());
       }
       if (!m_exception.isNull()) {
         throw unmarshaled_exception;

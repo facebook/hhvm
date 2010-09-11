@@ -43,7 +43,7 @@ void FunctionCallExpression::dumpParams() const {
 }
 
 bool FunctionCallExpression::exist(VariableEnvironment &env, int op) const {
-  throw FatalErrorException("Cannot call %s on a function return value",
+  throw FatalErrorException(0, "Cannot call %s on a function return value",
                             op == T_ISSET ? "isset" : "empty");
 }
 

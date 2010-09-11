@@ -18,6 +18,7 @@
 #include "db_conn.h"
 #include "db_dataset.h"
 #include "util.h"
+#include "logger.h"
 
 using namespace std;
 
@@ -27,13 +28,10 @@ namespace HPHP {
 DBQuery::DBQuery(DBConn *conn, const char *sql, ...)
   : m_conn(conn), m_insert(false) {
   ASSERT(sql && *sql);
-
-  char buf[1024];
   va_list ap;
   va_start(ap, sql);
-  vsnprintf(buf, sizeof(buf), sql, ap);
+  Logger::Printf(m_base, sql, ap);
   va_end(ap);
-  m_base = buf;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

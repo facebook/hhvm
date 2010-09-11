@@ -21,6 +21,13 @@ Use "help" to read more about command details.
 
 Use "info" and "list" commands to read more about source code.
 
+(5) readline
+
+Debugger is written with readline library, which has rich feature set,
+including switching between emacs and vi editing mode. Please read its
+[[ http://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC1 |
+documentation]] for more details.
+
 
 2. Debugging local script
 

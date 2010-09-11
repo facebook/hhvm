@@ -148,6 +148,8 @@ function format_document($doc) {
   $doc = preg_replace('/\n\n/', '<p>', $doc);      // paragraphs
   $doc = preg_replace('/<T>/', '&lt;T&gt;', $doc); // C++ templates
   $doc = preg_replace('/<\?/', '&lt;?', $doc);     // PHP start tags
+  $doc = preg_replace('/\[\[[ \n]*(.*?)[ \n]*\|[ \n]*(.*?)[ \n]*\]\]/s',
+                      '<a href="\\1">\\2</a>',$doc); // links
 
   // copyright notice
   $doc .= '<p>&nbsp;<table width="100%"><tr><td class="footer" align=right>'.

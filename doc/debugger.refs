@@ -330,6 +330,12 @@ configuration file for future sessions as well.
     [m]achine [l]ist     list all sandboxes
     [m]achine            attach to a sandbox
       [a]ttach {index}
+    [m]achine            attach to my sandbox by name
+      [a]ttach
+      {sandbox}
+    [m]achine            attach to a sandbox by user and name
+      [a]ttach {user}
+      {sandbox}
 
 
 Use this command to switch between different machines or sandboxes.
@@ -357,10 +363,9 @@ but all functions will be executed on server through RPC. Because states
 are still maintained locally and only functions are executed remotely,
 it may not work with functions or scripts that depend on global
 variables or low-level raw resource pointers. As a simple rule,
-stateless functions will work just fine, even with objects and method
-calls. Currently, all built-in functions are still executed locally. We
-may move some of them to remote server, if they rely on machine specific
-information.
+stateless functions will work just fine. This is true to objects and
+method calls as well, except classes will have to be loaded on client
+side by '=include("file-containing-the-class.php")'.
 
 
     ---------------------------- Next Command ----------------------------

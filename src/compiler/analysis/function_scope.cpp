@@ -1162,6 +1162,28 @@ void FunctionScope::outputCPPEvalInvoke(CodeGenerator &cg,
   cg_printf(";\n");
   cg_indentEnd("}\n");
 
+  if (m_attributeClassInfo & ClassInfo::AllowIntercept) {
+    ClassScopePtr cls = ar->getClassScope();
+    if (cls) {
+      cg_printf("INTERCEPT_INJECTION_ALWAYS(\"%s::%s\", \"%s::%s\", ",
+                cls->getName().c_str(), name, cls->getName().c_str(), name);
+    } else {
+      cg_printf("INTERCEPT_INJECTION_ALWAYS(\"%s\", \"%s\", ", name, name);
+    }
+    if (variable) {
+      cg_printf("vargs");
+    } else if (m_maxParam) {
+      cg_printf("ArrayUtil::Slice(Array(ArrayInit(%d, true)", m_maxParam);
+      for (int i = 0; i < m_maxParam; i++) {
+        cg_printf(".set%s(%d, a%d)", (isRefParam(i) ? "Ref" : ""), i, i);
+      }
+      cg_printf(".create()), 0, count, false)");
+    } else {
+      cg_printf("null_array");
+    }
+    cg_printf(", %s);\n", ret ? (m_refReturn ? "ref(r)" : "r") : "");
+  }
+
   if (variable || getOptionalParamCount()) {
     cg_printf("if (count <= %d) ", m_minParam);
   }

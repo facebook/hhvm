@@ -97,7 +97,14 @@ void CmdHelp::HelpStarted(DebuggerClient *client) {
     "\n"
     "(4) info and list\n"
     "\n"
-    "Use \"info\" and \"list\" commands to read more about source code."
+    "Use \"info\" and \"list\" commands to read more about source code.\n"
+    "\n"
+    "(5) readline\n"
+    "\n"
+    "Debugger is written with readline library, which has rich feature set, "
+    "including switching between emacs and vi editing mode. Please read its "
+    "[[ http://cnswww.cns.cwru.edu/php/chet/readline/readline.html#SEC1 | "
+    "documentation]] for more details."
   );
 
   client->helpBody(

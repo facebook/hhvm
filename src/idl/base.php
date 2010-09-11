@@ -128,6 +128,7 @@ define('FunctionIsFoldable',             1 << 20);
 define('NoEffect',                       1 << 21);
 define('NoInjection',                    1 << 22);
 define('HasOptFunction',                 1 << 23);
+define('AllowIntercept',                 1 << 24);
 
 // Mask for checking the flags related to variable arguments
 define('VarArgsMask', (VariableArguments | RefVariableArguments |
@@ -156,6 +157,7 @@ function get_flag_names($arr, $name) {
   if ($flag & NoEffect              ) $ret .= ' | NoEffect'              ;
   if ($flag & NoInjection           ) $ret .= ' | NoInjection'           ;
   if ($flag & HasOptFunction        ) $ret .= ' | HasOptFunction'        ;
+  if ($flag & AllowIntercept        ) $ret .= ' | AllowIntercept'        ;
 
   if ($ret == '') {
     throw new Exception("invalid flag $flag");

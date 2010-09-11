@@ -89,10 +89,9 @@ bool CmdMachine::help(DebuggerClient *client) {
     "states are still maintained locally and only functions are executed "
     "remotely, it may not work with functions or scripts that depend on "
     "global variables or low-level raw resource pointers. As a simple rule, "
-    "stateless functions will work just fine, even with objects and method "
-    "calls. Currently, all built-in functions are still executed locally. "
-    "We may move some of them to remote server, if they rely on machine "
-    "specific information."
+    "stateless functions will work just fine. This is true to objects and "
+    "method calls as well, except classes will have to be loaded on client "
+    "side by '=include(\"file-containing-the-class.php\")'."
   );
   return true;
 }

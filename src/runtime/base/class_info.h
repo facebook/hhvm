@@ -66,7 +66,8 @@ public:
     FunctionIsFoldable     = (1 << 20), //                  x
     NoEffect               = (1 << 21), //                  x
     NoInjection            = (1 << 22), //                  x      x
-    HasOptFunction         = (1 << 23)  //                  x
+    HasOptFunction         = (1 << 23), //                  x
+    AllowIntercept         = (1 << 24), //                  x      x
   };
 
   class ConstantInfo {

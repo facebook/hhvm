@@ -45821,6 +45821,7 @@ Variant ei_apc_delete(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  INTERCEPT_INJECTION_ALWAYS("apc_delete", "apc_delete", ArrayUtil::Slice(Array(ArrayInit(2, true).set(0, a0).set(1, a1).create()), 0, count, false), r);
   if (count <= 1) return (x_apc_delete(a0));
   else return (x_apc_delete(a0, a1));
 }
@@ -59979,6 +59980,7 @@ Variant ei_apc_fetch(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  INTERCEPT_INJECTION_ALWAYS("apc_fetch", "apc_fetch", ArrayUtil::Slice(Array(ArrayInit(3, true).set(0, a0).setRef(1, a1).set(2, a2).create()), 0, count, false), r);
   if (count <= 1) return (x_apc_fetch(a0));
   else if (count == 2) return (x_apc_fetch(a0, ref(a1)));
   else return (x_apc_fetch(a0, ref(a1), a2));
@@ -65050,6 +65052,7 @@ Variant ei_apc_add(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  INTERCEPT_INJECTION_ALWAYS("apc_add", "apc_add", ArrayUtil::Slice(Array(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).set(3, a3).create()), 0, count, false), r);
   if (count <= 2) return (x_apc_add(a0, a1));
   else if (count == 3) return (x_apc_add(a0, a1, a2));
   else return (x_apc_add(a0, a1, a2, a3));
@@ -65802,6 +65805,7 @@ Variant ei_apc_cas(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  INTERCEPT_INJECTION_ALWAYS("apc_cas", "apc_cas", ArrayUtil::Slice(Array(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).set(3, a3).create()), 0, count, false), r);
   if (count <= 3) return (x_apc_cas(a0, a1, a2));
   else return (x_apc_cas(a0, a1, a2, a3));
 }
@@ -66213,6 +66217,7 @@ Variant ei_apc_dec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  INTERCEPT_INJECTION_ALWAYS("apc_dec", "apc_dec", ArrayUtil::Slice(Array(ArrayInit(4, true).set(0, a0).set(1, a1).setRef(2, a2).set(3, a3).create()), 0, count, false), r);
   if (count <= 1) return (x_apc_dec(a0));
   else if (count == 2) return (x_apc_dec(a0, a1));
   else if (count == 3) return (x_apc_dec(a0, a1, ref(a2)));
@@ -68538,6 +68543,7 @@ Variant ei_apc_inc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  INTERCEPT_INJECTION_ALWAYS("apc_inc", "apc_inc", ArrayUtil::Slice(Array(ArrayInit(4, true).set(0, a0).set(1, a1).setRef(2, a2).set(3, a3).create()), 0, count, false), r);
   if (count <= 1) return (x_apc_inc(a0));
   else if (count == 2) return (x_apc_inc(a0, a1));
   else if (count == 3) return (x_apc_inc(a0, a1, ref(a2)));
@@ -69660,6 +69666,7 @@ Variant ei_apc_store(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
+  INTERCEPT_INJECTION_ALWAYS("apc_store", "apc_store", ArrayUtil::Slice(Array(ArrayInit(4, true).set(0, a0).set(1, a1).set(2, a2).set(3, a3).create()), 0, count, false), r);
   if (count <= 2) return (x_apc_store(a0, a1));
   else if (count == 3) return (x_apc_store(a0, a1, a2));
   else return (x_apc_store(a0, a1, a2, a3));

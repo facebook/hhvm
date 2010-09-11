@@ -53,7 +53,7 @@ DefineFunction(
   array(
     'name'   => "apc_add",
     'desc'   => "Caches a variable in the data store, only if it's not already stored. Unlike many other mechanisms in PHP, variables stored using apc_add() will persist between requests (until the value is removed from the cache).",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -87,7 +87,7 @@ DefineFunction(
   array(
     'name'   => "apc_store",
     'desc'   => "Cache a variable in the data store. Unlike many other mechanisms in PHP, variables stored using apc_store() will persist between requests (until the value is removed from the cache).",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -121,7 +121,7 @@ DefineFunction(
   array(
     'name'   => "apc_fetch",
     'desc'   => "Fetchs a stored variable from the cache.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => Variant,
       'desc'   => "The stored variable or array of variables on success; FALSE on failure",
@@ -150,7 +150,7 @@ DefineFunction(
   array(
     'name'   => "apc_delete",
     'desc'   => "Removes a stored variable from the cache.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns TRUE on success or FALSE on failure.",
@@ -359,7 +359,7 @@ DefineFunction(
   array(
     'name'   => "apc_inc",
     'desc'   => "Increases a stored number.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the current value of key's value on success, or FALSE on failure",
@@ -394,7 +394,7 @@ DefineFunction(
   array(
     'name'   => "apc_dec",
     'desc'   => "Decreases a stored integer value.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => Variant,
       'desc'   => "Returns the current value of key's value on success, or FALSE on failure",
@@ -429,7 +429,7 @@ DefineFunction(
   array(
     'name'   => "apc_cas",
     'desc'   => "apc_cas WarningThis function is currently not documented; only its argument list is available.",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | AllowIntercept,
     'return' => array(
       'type'   => Boolean,
       'desc'   => "Returns TRUE on success or FALSE on failure.",

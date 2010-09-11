@@ -95,9 +95,11 @@ void LibEventWorker::doJob(LibEventJobPtr job) {
   }
 
   LibEventTransport transport(server, request, m_id);
+#ifdef _EVENT_USE_OPENSSL
   if (evhttp_is_connection_ssl(job->request->evcon)) {
     transport.setSSL();
   }
+#endif
   bool error = true;
   std::string errorMsg;
   try {

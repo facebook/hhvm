@@ -167,7 +167,7 @@ inline uint32_t furc_maximum_pool_size(void) {
     return (1 << FURC_SHIFT);
 }
 
-uint32_t furc_hash(const char* const key, const size_t len, const uint32_t m) {
+uint32_t furc_hash_internal(const char* const key, const size_t len, const uint32_t m) {
     uint32_t tries;
     uint32_t d;
     uint32_t num;

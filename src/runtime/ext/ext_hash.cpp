@@ -30,6 +30,12 @@
 
 #include <runtime/ext/hash/hash_furc.h>
 
+#if defined(HPHP_OSS)
+#define furc_hash furc_hash_internal
+#else
+#include <ch/hash.h>
+#endif
+
 namespace HPHP {
 IMPLEMENT_DEFAULT_EXTENSION(hash);
 ///////////////////////////////////////////////////////////////////////////////

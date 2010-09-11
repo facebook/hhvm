@@ -78,12 +78,14 @@ bool PhpFile::isChanged(const struct stat &s) {
   return m_timestamp < s.st_mtime || m_ino != s.st_ino || m_devId != s.st_dev;
 }
 
+Mutex FileRepository::s_lock;
 hphp_hash_map<std::string, PhpFile*, string_hash>
 FileRepository::m_files;
 
 PhpFile *FileRepository::checkoutFile(const std::string &rname,
                                       const struct stat &s) {
   PhpFile *ret = NULL;
+  Lock lock(s_lock);
   string name;
 
   if (rname[0] == '/') {

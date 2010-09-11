@@ -61,6 +61,7 @@ public:
   static PhpFile *checkoutFile(const std::string &name, const struct stat &s);
   static bool findFile(std::string &path, struct stat &s, const char *currentDir);
 private:
+  static Mutex s_lock;
   static hphp_hash_map<std::string, PhpFile*, string_hash> m_files;
 
   static PhpFile *readFile(const std::string &name, const struct stat &s);

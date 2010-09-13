@@ -265,19 +265,28 @@ public:
   /**
    * Sending back a response.
    */
-  void setResponse(int code) { m_responseCode = code;}
+  void setResponse(int code, const char *info) {
+    ASSERT (code != 500 || (info && *info)); // must have a reason for a 500
+    m_responseCode = code;
+    m_responseCodeInfo = info ? info : "";
+  }
+  const std::string &getResponseInfo() const { return m_responseCodeInfo; }
   bool headersSent() { return m_headerSent;}
   virtual void sendRaw(void *data, int size, int code = 200,
-                       bool compressed = false, bool chunked = false);
+                       bool compressed = false, bool chunked = false,
+                       const char *codeInfo = NULL);
   void sendString(const char *data, int code = 200, bool compressed = false,
-                  bool chunked = false) {
-    sendRaw((void*)data, strlen(data), code, compressed, chunked);
+                  bool chunked = false,
+                  const char * codeInfo = NULL) {
+    sendRaw((void*)data, strlen(data), code, compressed, chunked, codeInfo);
   }
   void sendString(const std::string &data, int code = 200,
-                  bool compressed = false, bool chunked = false) {
-    sendRaw((void*)data.c_str(), data.length(), code, compressed, chunked);
+                  bool compressed = false, bool chunked = false,
+                  const char *codeInfo = NULL) {
+    sendRaw((void*)data.c_str(), data.length(), code, compressed, chunked,
+            codeInfo);
   }
-  void redirect(const char *location, int code = 302);
+  void redirect(const char *location, int code, const char *info );
 
   // TODO: support rfc1867
   bool isUploadedFile(CStrRef filename);
@@ -318,6 +327,7 @@ protected:
   bool m_chunkedEncoding;
   bool m_headerSent;
   int m_responseCode;
+  std::string m_responseCodeInfo;
   HeaderMap m_responseHeaders;
   bool m_firstHeaderSet;
   std::string m_firstHeaderFile;

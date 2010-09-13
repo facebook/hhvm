@@ -315,7 +315,7 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
                                             content.size());
       }
       code = 200;
-      transport->sendRaw((void*)content.data(), content.size());
+      transport->sendRaw((void*)content.data(), content.size(), code);
     } else if (error) {
       code = 500;
 
@@ -342,9 +342,10 @@ bool HttpRequestHandler::executePHPRequest(Transport *transport,
       }
       if (errorPage.empty()) {
         if (RuntimeOption::ServerErrorMessage) {
-          transport->sendString(errorMsg, 500);
+          transport->sendString(errorMsg, 500, false, false, "hphp_invoke");
         } else {
-          transport->sendString(RuntimeOption::FatalErrorMessage, 500);
+          transport->sendString(RuntimeOption::FatalErrorMessage,
+                                500, false, false, "hphp_invoke");
         }
       }
     } else {
@@ -374,7 +375,7 @@ bool HttpRequestHandler::handleProxyRequest(Transport *transport, bool force) {
     return false;
   }
   if (code == 0) {
-    transport->sendString(error, 500);
+    transport->sendString(error, 500, false, false, "handleProxyRequest");
     return true;
   }
 

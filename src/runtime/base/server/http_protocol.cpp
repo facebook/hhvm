@@ -551,7 +551,7 @@ bool HttpProtocol::ProxyRequest(Transport *transport, bool force,
     data = (const char *)transport->getPostData(size);
   }
 
-  code = 0;
+  code = 0; // HTTP status of curl or 0 for "no server response code"
   vector<String> responseHeaders;
   HttpClient http;
   if (data && size) {

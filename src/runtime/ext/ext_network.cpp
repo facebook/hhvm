@@ -34,20 +34,20 @@
 #endif
 
 #define MAXPACKET  8192 /* max packet size used internally by BIND */
-#define DNS_T_A		1
-#define DNS_T_NS	2
-#define DNS_T_CNAME	5
-#define DNS_T_SOA	6
-#define DNS_T_PTR	12
-#define DNS_T_HINFO	13
-#define DNS_T_MINFO	14
-#define DNS_T_MX	15
-#define DNS_T_TXT	16
-#define DNS_T_AAAA	28
-#define DNS_T_SRV	33
-#define DNS_T_NAPTR	35
-#define DNS_T_A6	38
-#define DNS_T_ANY	255
+#define DNS_T_A 1
+#define DNS_T_NS 2
+#define DNS_T_CNAME 5
+#define DNS_T_SOA 6
+#define DNS_T_PTR 12
+#define DNS_T_HINFO 13
+#define DNS_T_MINFO 14
+#define DNS_T_MX 15
+#define DNS_T_TXT 16
+#define DNS_T_AAAA 28
+#define DNS_T_SRV 33
+#define DNS_T_NAPTR 35
+#define DNS_T_A6 38
+#define DNS_T_ANY 255
 
 #define PHP_DNS_NUM_TYPES   12  // Number of DNS Types Supported by PHP
 #define PHP_DNS_A      0x00000001
@@ -797,7 +797,7 @@ void f_header(CStrRef str, bool replace /* = true */,
         }
       }
       if (code) {
-        transport->setResponse(code);
+        transport->setResponse(code, "explicit_header");
       }
       return;
     }
@@ -822,7 +822,8 @@ void f_header(CStrRef str, bool replace /* = true */,
       transport->addHeader(newHeader.empty() ? str : newHeader);
     }
     if (http_response_code) {
-      transport->setResponse(http_response_code);
+      transport->setResponse(http_response_code,
+                             "explicit_header_response_code");
     }
   }
 }

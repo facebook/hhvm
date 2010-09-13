@@ -112,7 +112,7 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
           m_rewrittenURL.substr(0, 8) != "https://") {
         PrependSlash(m_rewrittenURL);
       }
-      transport->redirect(m_rewrittenURL, redirect);
+      transport->redirect(m_rewrittenURL, redirect, "rewriteURL");
       return false;
     }
     splitURL(m_rewrittenURL, m_rewrittenURL, m_queryString);
@@ -143,7 +143,7 @@ bool RequestURI::rewriteURL(const VirtualHost *vhost, Transport *transport,
           m_rewrittenURL.substr(0, 8) != "https://") {
         PrependSlash(m_rewrittenURL);
       }
-      transport->redirect(m_rewrittenURL, 301);
+      transport->redirect(m_rewrittenURL, 301, "rewriteURL");
       return false;
     }
   }

@@ -65,7 +65,7 @@ bool f_dangling_server_proxy_old_request() {
     s_detected_dangling_server = false;
     return false;
   }
-  transport->setResponse(code);
+  transport->setResponse(code, "dangling_server_proxy_old_request");
   echo(response.detach());
   return true;
 }
@@ -98,7 +98,7 @@ bool f_dangling_server_proxy_new_request(CStrRef host) {
                                   response, &headers)) {
     return false;
   }
-  transport->setResponse(code);
+  transport->setResponse(code, "dangling_server_proxy_new_request");
   echo(response.detach());
   return true;
 }

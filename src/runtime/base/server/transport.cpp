@@ -307,7 +307,10 @@ bool Transport::splitHeader(CStrRef header, String &name, const char *&value) {
       int pos2 = header.find(' ', pos1 + 1);
       if (pos2 == String::npos) pos2 = header.size();
       if (pos2 - pos1 > 1) {
-        setResponse(atoi(header.data() + pos1));
+        setResponse(atoi(header.data() + pos1),
+                    getResponseInfo().empty() ? "splitHeader"
+                                              : getResponseInfo().c_str()
+                   );
         return false;
       }
     }
@@ -342,7 +345,7 @@ void Transport::addHeader(const char *name, const char *value) {
       setResponse(302);
     }
     */
-    setResponse(302);
+    setResponse(302, "forced.302");
   }
 }
 
@@ -631,7 +634,9 @@ String Transport::prepareResponse(const void *data, int size, bool &compressed,
 
 void Transport::sendRaw(void *data, int size, int code /* = 200 */,
                         bool compressed /* = false */,
-                        bool chunked /* = false */) {
+                        bool chunked /* = false */,
+                        const char *codeInfo /* = "" */
+                        ) {
   ASSERT(data || size == 0);
   ASSERT(size >= 0);
   FiberWriteLock lock(this);
@@ -659,6 +664,7 @@ void Transport::sendRaw(void *data, int size, int code /* = 200 */,
 
   if (m_responseCode < 0) {
     m_responseCode = code;
+    m_responseCodeInfo = codeInfo ? codeInfo: "";
   }
 
   // HTTP header handling
@@ -689,10 +695,11 @@ void Transport::onSendEnd() {
   onSendEndImpl();
 }
 
-void Transport::redirect(const char *location, int code /* = 302 */) {
+void Transport::redirect(const char *location, int code /* = 302 */,
+                         const char *info) {
   FiberWriteLock lock(this);
   addHeaderImpl("Location", location);
-  setResponse(code);
+  setResponse(code, info);
   sendString(location, code);
 }
 

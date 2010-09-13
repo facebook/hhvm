@@ -215,6 +215,14 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
   case 's':
     out << code;
     break;
+  case 'S':
+    // %S is not defined in Apache, we grab it here
+    {
+      const std::string &info (transport->getResponseInfo());
+      if (info.empty()) return false;
+      out << info;
+    }
+    break;
   case 't':
     {
       const char *format;

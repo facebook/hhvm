@@ -684,11 +684,50 @@ void FunctionScope::outputCPPParamsImpl(CodeGenerator &cg,
   }
 }
 
+bool FunctionScope::outputCPPArrayCreate(CodeGenerator &cg,
+                                         AnalysisResultPtr ar,
+                                         int m_maxParam) {
+  ASSERT(m_maxParam >= 0);
+  ASSERT(isVariableArgument());
+  if (!Option::GenArrayCreate ||
+      cg.getOutput() == CodeGenerator::SystemCPP ||
+      m_maxParam == 0) {
+    return false;
+  }
+  if (isUserFunction()) {
+    MethodStatementPtr stmt;
+    stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
+    if (stmt->hasRefParam()) return false;
+    cg_printf("Array(");
+    stmt->outputParamArrayCreate(cg, false);
+  } else if (hasRefParam(m_maxParam)) {
+    ASSERT(false);
+    return false;
+  } else {
+    ASSERT(false);
+    cg_printf("Array(");
+    for (int i = 0; i < m_maxParam; i++) {
+      cg_printf("%d, a%d", i, i);
+      if (i < m_maxParam - 1) {
+        cg_printf(", ");
+      } else {
+        cg_printf(")");
+      }
+    }
+  }
+  cg_printf(")");
+  if (isVariableArgument()) cg_printf(",args");
+  return true;
+}
+
 void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
                                         AnalysisResultPtr ar,
                                         bool aggregateParams) {
   if (isVariableArgument()) {
     cg_printf("num_args, ");
+  }
+  if (aggregateParams && outputCPPArrayCreate(cg, ar, m_maxParam)) {
+    return;
   }
   bool userFunc = isUserFunction();
   MethodStatementPtr stmt;
@@ -696,38 +735,6 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
   if (userFunc) {
     stmt = dynamic_pointer_cast<MethodStatement>(m_stmt);
     params = stmt->getParams();
-  }
-  bool arrayCreated = false;
-  if (Option::GenArrayCreate &&
-      cg.getOutput() != CodeGenerator::SystemCPP &&
-      aggregateParams && m_maxParam > 0) {
-    if (stmt && !stmt->hasRefParam()) {
-      cg_printf("Array(");
-      stmt->outputParamArrayInit(cg);
-      cg_printf(")");
-      arrayCreated = true;
-    } else if (!userFunc && !hasRefParam(m_maxParam)) {
-      cg_printf("Array(");
-      for (int i = 0; i < m_maxParam; i++) {
-        if (isRefParam(i)) {
-          cg_printf("%d, ref(a%d)", i, i);
-        } else {
-          cg_printf("%d, a%d", i, i);
-        }
-        if (i < m_maxParam - 1) {
-          cg_printf(", ");
-        } else {
-          cg_printf(")");
-        }
-      }
-      cg_printf(")");
-      arrayCreated = true;
-    }
-  }
-  if (arrayCreated && isVariableArgument()) {
-    cg_printf(",");
-    cg_printf("args");
-    return;
   }
 
   if (aggregateParams) {
@@ -745,8 +752,7 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
         dynamic_pointer_cast<ParameterExpression>((*params)[i]);
       isRef = param->isRef();
       if (aggregateParams) {
-        cg_printf("set%s(v_%s", isRef ? "Ref" : "",
-                                    param->getName().c_str());
+        cg_printf("set(v_%s", param->getName().c_str());
       } else {
         cg_printf("%sv_%s%s",
                   isRef ? "ref(" : "", param->getName().c_str(),
@@ -755,7 +761,8 @@ void FunctionScope::outputCPPParamsCall(CodeGenerator &cg,
     } else {
       isRef = isRefParam(i);
       if (aggregateParams) {
-        cg_printf("set%s(a%d", isRef ? "Ref" : "", i);
+        ASSERT(false);
+        cg_printf("set(a%d", i);
       } else {
         cg_printf("%sa%d%s",
                   isRef ? "ref(" : "", i, isRef ? ")" : "");

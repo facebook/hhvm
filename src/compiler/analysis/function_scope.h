@@ -388,6 +388,10 @@ public:
   };
 
 private:
+  bool outputCPPArrayCreate(CodeGenerator &cg,
+                            AnalysisResultPtr ar,
+                            int m_maxParam);
+
   static StringToRefParamInfoPtrMap s_refParamInfo;
 
   bool m_method;

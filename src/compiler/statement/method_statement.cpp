@@ -602,7 +602,7 @@ bool MethodStatement::hasRefParam() {
   return false;
 }
 
-void MethodStatement::outputParamArrayInit(CodeGenerator &cg) {
+void MethodStatement::outputParamArrayCreate(CodeGenerator &cg, bool checkRef) {
   int n = m_params->getCount();
   ASSERT(n > 0);
   cg_printf("array_create%d(%d, ", n, n);
@@ -611,7 +611,8 @@ void MethodStatement::outputParamArrayInit(CodeGenerator &cg) {
       dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
     const string &paramName = param->getName();
     cg_printf("%d, ", i);
-    if (param->isRef()) {
+    if (checkRef && param->isRef()) {
+      ASSERT(false);
       cg_printf("ref(%s%s)", Option::VariablePrefix, paramName.c_str());
     } else {
       cg_printf("%s%s", Option::VariablePrefix, paramName.c_str());
@@ -635,7 +636,7 @@ void MethodStatement::outputCPPArgInjections(CodeGenerator &cg,
       cg_printf("INTERCEPT_INJECTION(\"%s\", ", name);
       if (Option::GenArrayCreate && !hasRefParam()) {
         ar->m_arrayIntegerKeySizes.insert(n);
-        outputParamArrayInit(cg);
+        outputParamArrayCreate(cg, true);
         cg_printf(", %s);\n", funcScope->isRefReturn() ? "ref(r)" : "r");
       } else {
         cg_printf("(Array(ArrayInit(%d, true)", n);

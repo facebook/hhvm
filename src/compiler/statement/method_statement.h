@@ -68,7 +68,7 @@ public:
                                     AnalysisResultPtr ar,
                                     const char *cls);
   bool hasRefParam();
-  void outputParamArrayInit(CodeGenerator &cg);
+  void outputParamArrayCreate(CodeGenerator &cg, bool checkRef);
 
 protected:
   bool m_method;

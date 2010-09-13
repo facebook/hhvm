@@ -690,6 +690,7 @@ DefineFunction(
 BeginClass(
   array(
     'name'   => "Memcache",
+    'bases'  => array('Sweepable'),
     'desc'   => "Represents a connection to a set of memcache servers.",
     'flags'  =>  HasDocComment,
     'footer' => <<<EOT

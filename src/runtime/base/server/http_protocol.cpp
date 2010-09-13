@@ -133,11 +133,17 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
         }
       } else {
         needDelete = read_all_post_data(transport, data, size);
-        if (strncasecmp(contentType.c_str(),
-                        DEFAULT_POST_CONTENT_TYPE,
-                        sizeof(DEFAULT_POST_CONTENT_TYPE)-1) == 0) {
+
+        bool decodeData = strncasecmp(contentType.c_str(),
+                                       DEFAULT_POST_CONTENT_TYPE,
+                                       sizeof(DEFAULT_POST_CONTENT_TYPE)-1) == 0;
+        // Always decode data for now. (macvicar)
+        decodeData = true;
+
+        if (decodeData) {
           DecodeParameters(g->gv__POST, (const char*)data, size, true);
         }
+
       }
       CopyParams(request, g->gv__POST);
       if (needDelete) {

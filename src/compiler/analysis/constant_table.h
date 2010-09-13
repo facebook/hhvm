@@ -43,11 +43,11 @@ public:
    * marked up by "Dynamic" note.
    */
   bool isDynamic(const std::string &name) const {
-    return m_dynamic.find(name) != m_dynamic.end();
+    const Symbol *sym = getSymbol(name);
+    return sym && sym->isDynamic();
   }
-  bool hasDynamic() const {
-    return !m_dynamic.empty();
-  }
+
+  bool hasDynamic() const { return m_hasDynamic; }
 
   /**
    * Explicitly setting a constant to be dynamic, mainly for "Dynamic" note.
@@ -109,22 +109,19 @@ public:
                                    const std::string &name,
                                    ClassScopePtr &defClass);
 
-protected:
-  std::set<std::string> m_dynamic; // non-scalar or redeclared or marked up
-
 private:
   bool m_emptyJumpTable;
+  bool m_hasDynamic;
 
   ClassScopePtr findParent(AnalysisResultPtr ar, const std::string &name);
   void outputCPPConstantSymbol(CodeGenerator &cg, AnalysisResultPtr ar,
-                               const std::string &name);
+                               Symbol *sym);
 
   TypePtr checkBases(const std::string &name, TypePtr type,
                      bool coerce, AnalysisResultPtr ar,
                      ConstructPtr construct,
                      const std::vector<std::string> &bases,
                      BlockScope *&defScope);
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -1422,7 +1422,8 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
             m_aliasInfo[sv->getName()].setIsGlobal();
             if (s->is(Statement::KindOfStaticStatement) &&
                 !m_variables->isPseudoMainTable()) {
-              m_variables->addStaticVariable(sv->getName(), m_arp);
+              m_variables->addStaticVariable(
+                m_variables->getSymbol(sv->getName(), true), m_arp);
             }
           }
         }

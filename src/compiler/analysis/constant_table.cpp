@@ -34,7 +34,7 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 
 ConstantTable::ConstantTable(BlockScope &blockScope)
-    : SymbolTable(blockScope), m_emptyJumpTable(false) {
+    : SymbolTable(blockScope), m_emptyJumpTable(false), m_hasDynamic(false) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -47,40 +47,45 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
     return Type::Boolean;
   }
 
-  StringToConstructPtrMap::const_iterator iter = m_values.find(name);
-  if (iter == m_values.end()) {
-    setType(ar, name, type, true);
-    m_declarations[name] = construct;
-    m_values[name] = exp;
+  Symbol *sym = getSymbol(name, true);
+  if (!sym->declarationSet()) {
+    setType(ar, sym, type, true);
+    sym->setDeclaration(construct);
+    sym->setValue(exp);
     return type;
   }
 
   if (ar->isFirstPass()) {
-    if (exp != iter->second) {
+    if (exp != sym->getValue()) {
       ar->getCodeError()->record(CodeError::DeclaredConstantTwice, construct,
-                                 m_declarations[name]);
-      m_dynamic.insert(name);
+                                 sym->getDeclaration());
+      sym->setDynamic();
+      m_hasDynamic = true;
       type = Type::Variant;
     }
-    setType(ar, name, type, true);
+    setType(ar, sym, type, true);
   }
 
   return type;
 }
 
 void ConstantTable::setDynamic(AnalysisResultPtr ar, const std::string &name) {
-  m_dynamic.insert(name);
-  setType(ar, name, Type::Variant, true);
+  Symbol *sym = getSymbol(name, true);
+  sym->setDynamic();
+  m_hasDynamic = true;
+  setType(ar, sym, Type::Variant, true);
 }
 
 void ConstantTable::setValue(AnalysisResultPtr ar, const std::string &name,
                              ExpressionPtr value) {
-  m_values[name] = value;
+  getSymbol(name, true)->setValue(value);
 }
 
 bool ConstantTable::isRecursivelyDeclared(AnalysisResultPtr ar,
-    const std::string &name) {
-  if (isExplicitlyDeclared(name)) return true;
+                                          const std::string &name) {
+  if (Symbol *sym = getSymbol(name)) {
+    if (sym->valueSet()) return true;
+  }
   ClassScopePtr parent = findParent(ar, name);
   if (parent) {
     return parent->getConstants()->isRecursivelyDeclared(ar, name);
@@ -91,7 +96,9 @@ bool ConstantTable::isRecursivelyDeclared(AnalysisResultPtr ar,
 ConstructPtr ConstantTable::getValueRecur(AnalysisResultPtr ar,
                                           const std::string &name,
                                           ClassScopePtr &defClass) {
-  if (ConstructPtr value = getValue(name)) return value;
+  if (Symbol *sym = getSymbol(name)) {
+    if (sym->getValue()) return sym->getValue();
+  }
   ClassScopePtr parent = findParent(ar, name);
   if (parent) {
     defClass = parent;
@@ -103,8 +110,9 @@ ConstructPtr ConstantTable::getValueRecur(AnalysisResultPtr ar,
 ConstructPtr ConstantTable::getDeclarationRecur(AnalysisResultPtr ar,
                                                 const std::string &name,
                                                 ClassScopePtr &defClass) {
-  ConstructPtr decl = getDeclaration(name);
-  if (decl) return decl;
+  if (Symbol *sym = getSymbol(name)) {
+    if (sym->getDeclaration()) return sym->getDeclaration();
+  }
   ClassScopePtr parent = findParent(ar, name);
   if (parent) {
     defClass = parent;
@@ -146,37 +154,39 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
   defScope = NULL;
   if (name == "true" || name == "false") {
     actualType = Type::Boolean;
-  } else if (m_values.find(name) == m_values.end()) {
-    if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
-      actualType = checkBases(name, type, coerce, ar, construct,
-                              bases, defScope);
-      if (defScope) return actualType;
-      ar->getCodeError()->record(CodeError::UseUndeclaredConstant,
-                                 construct);
-      if (m_blockScope.is(BlockScope::ClassScope)) {
-        actualType = Type::Variant;
-      } else {
-        actualType = Type::String;
-      }
-      setType(ar, name, actualType, true);
-    }
   } else {
-    StringToTypePtrMap::const_iterator iter = m_coerced.find(name);
-    if (iter != m_coerced.end()) {
-      defScope = &m_blockScope;
-      actualType = iter->second;
-      if (actualType->is(Type::KindOfSome) ||
-          actualType->is(Type::KindOfAny)) {
-        setType(ar, name, type, true);
-        return type;
+    Symbol *sym = getSymbol(name, true);
+    if (!sym->valueSet()) {
+      if (ar->getPhase() != AnalysisResult::AnalyzeInclude) {
+        actualType = checkBases(name, type, coerce, ar, construct,
+                                bases, defScope);
+        if (defScope) return actualType;
+        ar->getCodeError()->record(CodeError::UseUndeclaredConstant,
+                                   construct);
+        if (m_blockScope.is(BlockScope::ClassScope)) {
+          actualType = Type::Variant;
+        } else {
+          actualType = Type::String;
+        }
+        setType(ar, sym, actualType, true);
       }
     } else {
-      actualType = checkBases(name, type, coerce, ar, construct,
-                              bases, defScope);
-      if (defScope) return actualType;
-      actualType = NEW_TYPE(Some);
-      setType(ar, name, actualType, true);
-      m_declarations[name] = construct;
+      if (sym->getCoerced()) {
+        defScope = &m_blockScope;
+        actualType = sym->getCoerced();
+        if (actualType->is(Type::KindOfSome) ||
+            actualType->is(Type::KindOfAny)) {
+          setType(ar, sym, type, true);
+          return type;
+        }
+      } else {
+        actualType = checkBases(name, type, coerce, ar, construct,
+                                bases, defScope);
+        if (defScope) return actualType;
+        actualType = NEW_TYPE(Some);
+        setType(ar, sym, actualType, true);
+        sym->setDeclaration(construct);
+      }
     }
   }
 
@@ -203,12 +213,13 @@ ClassScopePtr ConstantTable::findParent(AnalysisResultPtr ar,
 
 void ConstantTable::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (Option::GenerateInferredTypes) {
-    for (unsigned int i = 0; i < m_symbols.size(); i++) {
-      const string &name = m_symbols[i];
-      if (isSystem(name)) continue;
+    for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+      Symbol *sym = m_symbolVec[i];
+      if (sym->isSystem()) continue;
 
       cg_printf("// @const  %s\t$%s\n",
-                getFinalType(name)->toString().c_str(), name.c_str());
+                sym->getFinalType()->toString().c_str(),
+                sym->getName().c_str());
     }
   }
 }
@@ -225,25 +236,25 @@ void ConstantTable::outputCPPDynamicDecl(CodeGenerator &cg,
     fmt = "Variant %s%s_%s;\n";
   }
 
-  for (StringToConstructPtrMap::const_iterator iter = m_declarations.begin();
-       iter != m_declarations.end(); ++iter) {
-    const string &name = iter->first;
-    if (isDynamic(name)) {
-      cg_printf(fmt, prefix, classId.c_str(), cg.formatLabel(name).c_str());
+  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
+         end = m_symbolMap.end(); iter != end; ++iter) {
+    Symbol *sym = &iter->second;
+    if (sym->declarationSet() && sym->isDynamic()) {
+      cg_printf(fmt, prefix, classId.c_str(),
+                cg.formatLabel(sym->getName()).c_str());
     }
   }
 }
 
 void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
                                          AnalysisResultPtr ar) {
-  for (StringToConstructPtrMap::const_iterator iter = m_declarations.begin();
-       iter != m_declarations.end(); ++iter) {
-    const string &name = iter->first;
-    if (isDynamic(name)) {
-      const char *nameStr = name.c_str();
+  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
+         end = m_symbolMap.end(); iter != end; ++iter) {
+    Symbol *sym = &iter->second;
+    if (sym->declarationSet() && sym->isDynamic()) {
       cg_printf("%s%s = \"%s\";\n", Option::ConstantPrefix,
-                cg.formatLabel(nameStr).c_str(),
-                cg.escapeLabel(nameStr).c_str());
+                cg.formatLabel(sym->getName()).c_str(),
+                cg.escapeLabel(sym->getName()).c_str());
     }
   }
 }
@@ -251,11 +262,11 @@ void ConstantTable::outputCPPDynamicImpl(CodeGenerator &cg,
 void ConstantTable::collectCPPGlobalSymbols(StringPairVec &symbols,
                                             CodeGenerator &cg,
                                             AnalysisResultPtr ar) {
-  for (StringToConstructPtrMap::const_iterator iter = m_declarations.begin();
-       iter != m_declarations.end(); ++iter) {
-    const string &name = iter->first;
-    if (isDynamic(name)) {
-      string varname = Option::ConstantPrefix + cg.formatLabel(name);
+  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
+         end = m_symbolMap.end(); iter != end; ++iter) {
+    Symbol *sym = &iter->second;
+    if (sym->declarationSet() && sym->isDynamic()) {
+      string varname = Option::ConstantPrefix + cg.formatLabel(sym->getName());
       symbols.push_back(pair<string, string>(varname, varname));
     }
   }
@@ -268,30 +279,29 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
   }
 
   bool printed = false;
-  for (StringToConstructPtrMap::const_iterator iter = m_declarations.begin();
-       iter != m_declarations.end(); ++iter) {
-    const string &name = iter->first;
-    if (isSystem(name) && cg.getOutput() != CodeGenerator::SystemCPP) continue;
-
-    ConstructPtr value = getValue(name);
-    if (isDynamic(name)) continue;
+  for (StringToSymbolMap::iterator iter = m_symbolMap.begin(),
+         end = m_symbolMap.end(); iter != end; ++iter) {
+    Symbol *sym = &iter->second;
+    if (!sym->declarationSet() || sym->isDynamic()) continue;
+    if (sym->isSystem() && cg.getOutput() != CodeGenerator::SystemCPP) continue;
+    const string &name = sym->getName();
+    ConstructPtr value = sym->getValue();
     printed = true;
 
     cg_printf(decl ? "extern const " : "const ");
-    TypePtr type = getFinalType(name);
+    TypePtr type = sym->getFinalType();
     bool isString = type->is(Type::KindOfString);
     if (isString) {
       cg_printf("StaticString");
     } else {
       type->outputCPPDecl(cg, ar);
     }
-    const char *nameStr = name.c_str();
     if (decl) {
       cg_printf(" %s%s", Option::ConstantPrefix,
-                cg.formatLabel(nameStr).c_str());
+                cg.formatLabel(name).c_str());
     } else {
       cg_printf(" %s%s", Option::ConstantPrefix,
-                cg.formatLabel(nameStr).c_str());
+                cg.formatLabel(name).c_str());
       cg_printf(isString ? "(" : " = ");
       if (value) {
         ExpressionPtr exp = dynamic_pointer_cast<Expression>(value);
@@ -305,7 +315,7 @@ void ConstantTable::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
           exp->outputCPP(cg, ar);
         }
       } else {
-        cg_printf("\"%s\"", cg.escapeLabel(nameStr).c_str());
+        cg_printf("\"%s\"", cg.escapeLabel(name).c_str());
       }
       if (isString) {
         cg_printf(")");
@@ -323,20 +333,19 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
                                        bool needsGlobals,
                                        bool ret) {
   bool system = cg.getOutput() == CodeGenerator::SystemCPP;
-  bool hasDynamic = m_dynamic.size() > 0;
   vector<const char *> strings;
-  if (!m_symbols.empty()) {
-    strings.reserve(m_symbols.size());
-    BOOST_FOREACH(string s, m_symbols) {
+  if (!m_symbolVec.empty()) {
+    strings.reserve(m_symbolVec.size());
+    BOOST_FOREACH(Symbol *sym, m_symbolVec) {
       // Extension defined constants have no value but we are sure they exist
-      if (!system && !getValue(s)) continue;
-      strings.push_back(s.c_str());
+      if (!system && !sym->getValue()) continue;
+      strings.push_back(sym->getName().c_str());
     }
   }
 
   m_emptyJumpTable = strings.empty();
   if (!m_emptyJumpTable) {
-    if (hasDynamic) {
+    if (m_hasDynamic) {
       if (needsGlobals) {
         cg.printDeclareGlobals();
       }
@@ -366,22 +375,21 @@ void ConstantTable::outputCPPJumpTable(CodeGenerator &cg,
 
 void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
                                             AnalysisResultPtr ar,
-                                            const std::string &name) {
+                                            Symbol *sym) {
   bool cls = ar->getClassScope();
-  StringToConstructPtrMap::const_iterator iter = m_values.find(name);
-  if (iter != m_values.end() &&
-      (!isDynamic(name) || cls)  &&
-      !ar->isConstantRedeclared(name)) {
-    ExpressionPtr value = dynamic_pointer_cast<Expression>(iter->second);
+  if (sym->valueSet() &&
+      (!sym->isDynamic() || cls)  &&
+      !ar->isConstantRedeclared(sym->getName())) {
+    ExpressionPtr value = dynamic_pointer_cast<Expression>(sym->getValue());
     Variant v;
     if (value && value->getScalarValue(v)) {
       int len;
       string output = getEscapedText(v, len);
       cg_printf("\"%s\", (const char *)%d, \"%s\",\n",
-                cg.escapeLabel(name).c_str(), len, output.c_str());
+                cg.escapeLabel(sym->getName()).c_str(), len, output.c_str());
     } else {
       cg_printf("\"%s\", (const char *)0, NULL,\n",
-                cg.escapeLabel(name).c_str());
+                cg.escapeLabel(sym->getName()).c_str());
     }
   }
 }
@@ -389,8 +397,8 @@ void ConstantTable::outputCPPConstantSymbol(CodeGenerator &cg,
 void ConstantTable::outputCPPClassMap(CodeGenerator &cg,
                                       AnalysisResultPtr ar,
                                       bool last /* = true */) {
-  for (unsigned int i = 0; i < m_symbols.size(); i++) {
-    outputCPPConstantSymbol(cg, ar, m_symbols[i]);
+  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+    outputCPPConstantSymbol(cg, ar, m_symbolVec[i]);
   }
   if (last) cg_printf("NULL,\n");
 }

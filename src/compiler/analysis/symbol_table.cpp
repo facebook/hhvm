@@ -27,6 +27,43 @@ using namespace HPHP;
 using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
+// Symbol
+TypePtr Symbol::getFinalType() const {
+  TypePtr coerced = getType(true);
+  if (coerced &&
+      !coerced->is(Type::KindOfSome) && !coerced->is(Type::KindOfAny)) {
+    return coerced;
+  }
+  return Type::Variant;
+}
+
+TypePtr Symbol::coerceTo(AnalysisResultPtr ar,
+                         TypePtr &curType, TypePtr type) {
+  if (!curType) {
+    curType = type;
+  } else {
+    curType = Type::Coerce(ar, curType, type);
+  }
+
+  return curType;
+}
+
+TypePtr Symbol::setType(AnalysisResultPtr ar, TypePtr type, bool coerced) {
+  TypePtr oldType = getType(true);
+  if (!oldType) oldType = NEW_TYPE(Some);
+  if (type) {
+    TypePtr ret = coerceTo(ar, coerced ? m_coerced : m_rtype, type);
+    TypePtr newType = getType(true);
+    if (!newType) newType = NEW_TYPE(Some);
+    if (!Type::SameType(oldType, newType)) {
+      ar->incNewlyInferred();
+    }
+    return newType;
+  }
+  return TypePtr();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // statics
 
 SymbolTablePtrVec SymbolTable::AllSymbolTables;
@@ -46,122 +83,158 @@ SymbolTable::~SymbolTable() {
 }
 
 void SymbolTable::import(SymbolTablePtr src) {
-  ASSERT(m_symbols.empty());
+  ASSERT(m_symbolMap.empty());
 
-  m_symbols = src->m_symbols;
-  m_declarations = src->m_declarations;
-  m_values = src->m_values;
-  m_coerced = src->m_coerced;
-  m_rtypes = src->m_rtypes;
-  for (unsigned int i = 0; i < m_symbols.size(); i++) {
-    m_system.insert(m_symbols[i]);
+  for (unsigned int i = 0; i < src->m_symbolVec.size(); i++) {
+    Symbol &src_sym = *src->m_symbolVec[i];
+    Symbol &dst_sym = m_symbolMap[src_sym.getName()];
+    m_symbolVec.push_back(&dst_sym);
+    dst_sym.setName(src_sym.getName());
+    dst_sym.setSystem();
+    if (src_sym.declarationSet()) {
+      dst_sym.setDeclaration(src_sym.getDeclaration());
+    }
+    if (src_sym.valueSet()) {
+      dst_sym.setValue(src_sym.getValue());
+    }
+    dst_sym.setCoerced(src_sym.getCoerced());
+    dst_sym.setRType(src_sym.getRType());
   }
 }
 
 bool SymbolTable::isPresent(const std::string &name) const {
-  return m_declarations.find(name) != m_declarations.end();
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->isPresent();
+  }
+  return false;
 }
 
 bool SymbolTable::isSystem(const std::string &name) const {
-  return m_system.find(name) != m_system.end();
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->isSystem();
+  }
+  return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
+Symbol *SymbolTable::getSymbol(const std::string &name) const {
+  std::map<std::string,Symbol>::const_iterator it = m_symbolMap.find(name);
+  if (it != m_symbolMap.end()) {
+    return const_cast<Symbol*>(&it->second);
+  }
+  return NULL;
+}
+
+Symbol *SymbolTable::getSymbol(const std::string &name, bool add) {
+  std::map<std::string,Symbol>::iterator it = m_symbolMap.find(name);
+  if (it != m_symbolMap.end()) {
+    return &it->second;
+  }
+  if (add) {
+    Symbol *sym = &m_symbolMap[name];
+    sym->setName(name);
+    return sym;
+  }
+  return NULL;
+}
+
 TypePtr SymbolTable::getType(const std::string &name, bool coerced) {
-  if (coerced) {
-    StringToTypePtrMap::const_iterator iter = m_coerced.find(name);
-    if (iter != m_coerced.end()) return iter->second;
-  } else {
-    StringToTypePtrMap::const_iterator iter = m_rtypes.find(name);
-    if (iter != m_rtypes.end()) return iter->second;
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->getType(coerced);
   }
   return TypePtr();
 }
 
 TypePtr SymbolTable::getFinalType(const std::string &name) {
-  TypePtr coerced = getType(name, true);
-  if (coerced &&
-      !coerced->is(Type::KindOfSome) && !coerced->is(Type::KindOfAny)) {
-    return coerced;
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->getFinalType();
   }
   return Type::Variant;
 }
 
 bool SymbolTable::isExplicitlyDeclared(const std::string &name) const {
-  return m_values.find(name) != m_values.end();
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->valueSet();
+  }
+  return false;
 }
 
 ConstructPtr SymbolTable::getDeclaration(const std::string &name) {
-  StringToConstructPtrMap::const_iterator iter = m_declarations.find(name);
-  if (iter == m_declarations.end()) {
-    return ConstructPtr();
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->getDeclaration();
   }
-  return iter->second;
+  return ConstructPtr();
 }
 
 ConstructPtr SymbolTable::getValue(const std::string &name) {
-  StringToConstructPtrMap::const_iterator iter = m_values.find(name);
-  if (iter == m_values.end()) {
-    return ConstructPtr();
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->getValue();
   }
-  return iter->second;
+  return ConstructPtr();
 }
 
-TypePtr SymbolTable::coerceTo(AnalysisResultPtr ar,
-                              StringToTypePtrMap &typeMap,
-                              const std::string &name, TypePtr type) {
-  StringToTypePtrMap::iterator iter = typeMap.find(name);
-  if (iter == typeMap.end()) {
-    typeMap[name] = type;
-    return type;
-  }
+void SymbolTable::setSepExtension(const std::string &name) {
+  getSymbol(name, true)->setSep();
+}
 
-  TypePtr newType = Type::Coerce(ar, iter->second, type);
-  if (!Type::SameType(iter->second, newType)) {
-    iter->second = newType;
+bool SymbolTable::isSepExtension(const std::string &name) const {
+  if (Symbol *sym = getSymbol(name)) {
+    return sym->isSep();
   }
-  return newType;
+  return false;
 }
 
 TypePtr SymbolTable::setType(AnalysisResultPtr ar, const std::string &name,
                              TypePtr type, bool coerced) {
-  TypePtr oldType = getType(name, true);
-  if (!oldType) oldType = NEW_TYPE(Some);
-
-  if (m_declarations.find(name) == m_declarations.end()) {
-    m_symbols.push_back(name);
-    m_declarations[name] = ConstructPtr();
-  }
-  if (type) {
-    TypePtr ret = coerceTo(ar, coerced? m_coerced : m_rtypes, name, type);
-    TypePtr newType = getType(name, true);
-    if (!newType) newType = NEW_TYPE(Some);
-    if (!Type::SameType(oldType, newType)) {
-      ar->incNewlyInferred();
-    }
-    return newType;
-  }
-  return type;
+  return setType(ar, getSymbol(name, true), type, coerced);
 }
 
-void SymbolTable::getSymbols(vector<string> &syms) {
-  BOOST_FOREACH(string sym, m_symbols) {
-    syms.push_back(sym);
+TypePtr SymbolTable::setType(AnalysisResultPtr ar, Symbol *sym,
+                             TypePtr type, bool coerced) {
+  if (!sym->declarationSet()) {
+    m_symbolVec.push_back(sym);
+    sym->setDeclaration(ConstructPtr());
+  }
+  return sym->setType(ar, type, coerced);
+}
+
+void SymbolTable::getSymbols(vector<string> &syms) const {
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+    syms.push_back(sym->getName());
+  }
+}
+
+void SymbolTable::getCoerced(StringToTypePtrMap &coerced) const {
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+    coerced[sym->getName()] = sym->getCoerced();
+  }
+}
+
+void SymbolTable::getRTypes(StringToTypePtrMap &rtypes) const {
+  BOOST_FOREACH(Symbol *sym, m_symbolVec) {
+    rtypes[sym->getName()] = sym->getRType();
   }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 void SymbolTable::serialize(JSON::OutputStream &out) const {
-  out << m_symbols << m_coerced << m_rtypes;
+  vector<string> symbols;
+  StringToTypePtrMap coerced;
+  StringToTypePtrMap rtypes;
+  getSymbols(symbols);
+  getCoerced(coerced);
+  getRTypes(rtypes);
+
+  out << symbols << coerced << rtypes;
 }
 
 void SymbolTable::countTypes(std::map<std::string, int> &counts) {
-  for (unsigned int i = 0; i < m_symbols.size(); i++) {
-    const string &name = m_symbols[i];
-    if (!isInherited(name)) {
-      getFinalType(name)->count(counts);
+  for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+    const Symbol *sym = m_symbolVec[i];
+    if (!isInherited(sym->getName())) {
+      sym->getFinalType()->count(counts);
     }
   }
 }
@@ -180,7 +253,6 @@ string SymbolTable::getEscapedText(Variant v, int &len) {
     case '\b': output += "\\b";  break;
     case '\f': output += "\\f";  break;
     case '\v': output += "\\v";  break;
-    case '\0': output += "\\0";  break;
     case '\"': output += "\\\""; break;
     case '\\': output += "\\\\"; break;
     case '?':  output += "\\?";  break;

@@ -515,14 +515,7 @@ Variant ObjectData::o_root_invoke(MethodIndex methodIndex,
 
 Variant ObjectData::o_root_invoke_mil(const char *s, CArrRef params, int64 hash,
                                       bool fatal /* = true */) {
-  MethodIndex methodIndex(MethodIndex::fail());
-  if (RuntimeOption::FastMethodCall) {
-    methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      return doRootCall(s, params, fatal);
-    }
-  }
-  return o_root_invoke(methodIndex, s, params, hash, fatal);
+  return getRoot()->o_invoke_mil(s, params, hash, fatal);
 }
 
 Variant ObjectData::o_invoke_ex(const char *clsname, MethodIndex methodIndex ,
@@ -707,18 +700,8 @@ Variant ObjectData::o_root_invoke_few_args(MethodIndex methodIndex,
 Variant ObjectData::o_root_invoke_few_args_mil(const char *s,
                                                int64 hash, int count,
                                                INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (RuntimeOption::FastMethodCall) {
-    MethodIndex methodIndex = methodIndexExists(s);
-    if (methodIndex.isFail()) {
-      // FMC: broken, don't know what happens here.
-      return doRootCall(s, collectArgs(count, INVOKE_FEW_ARGS_PASS_ARGS),
-                        true);
-    }
-    return o_root_invoke_few_args(methodIndex, s, hash, count,
-                                  INVOKE_FEW_ARGS_PASS_ARGS);
-  }
-  return o_root_invoke_few_args(MethodIndex::fail(), s, hash, count,
-                                INVOKE_FEW_ARGS_PASS_ARGS);
+  return getRoot()->o_invoke_few_args_mil(s, hash, count,
+      INVOKE_FEW_ARGS_PASS_ARGS);
 }
 
 Variant ObjectData::o_invoke_from_eval(const char *s,

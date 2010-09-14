@@ -153,12 +153,8 @@ bool TestExtOutput::test_ob_get_level() {
 }
 
 bool TestExtOutput::test_ob_get_status() {
-  try {
-    f_ob_get_status();
-  } catch (NotSupportedException e) {
-    return Count(true);
-  }
-  return Count(false);
+  f_ob_get_status();
+  return Count(true);
 }
 
 bool TestExtOutput::test_ob_gzhandler() {

@@ -133,6 +133,7 @@ public:
   bool obEnd();
   void obEndAll();
   int obGetLevel();
+  Array obGetStatus(bool full);
   void obSetImplicitFlush(bool on);
   Array obGetHandlers();
   void obProtect(bool on); // making sure obEnd() never passes current level

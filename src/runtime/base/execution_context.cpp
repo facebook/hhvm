@@ -324,6 +324,31 @@ int ExecutionContext::obGetLevel() {
   return m_buffers.size() - m_protectedLevel;
 }
 
+Array ExecutionContext::obGetStatus(bool full) {
+  Array ret = Array::Create();
+  list<OutputBuffer*>::const_iterator iter = m_buffers.begin();
+  ++iter; // skip over the fake outermost buffer
+  int level = 0;
+  for (; iter != m_buffers.end(); ++iter, ++level) {
+    Array status;
+    status.set("level", level);
+    if (level < m_protectedLevel) {
+      status.set("type", 1);
+      status.set("name", "default output handler");
+    } else {
+      status.set("type", 0);
+      status.set("name", (*iter)->handler);
+    }
+
+    if (full) {
+      ret.append(status);
+    } else {
+      ret = status;
+    }
+  }
+  return ret;
+}
+
 void ExecutionContext::obSetImplicitFlush(bool on) {
   m_implicitFlush = on;
 }

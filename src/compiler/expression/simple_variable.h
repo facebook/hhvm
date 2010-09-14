@@ -41,13 +41,18 @@ public:
   void preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                       int state);
   bool checkUnused(AnalysisResultPtr) const;
+  bool getAlwaysStash() const { return m_alwaysStash; }
+  void setAlwaysStash() { m_alwaysStash = true; }
 private:
   std::string m_name;
   std::string m_text;
+
+  TypePtr m_superGlobalType;
+
   bool m_this; // whether this is a legitimate $this
   bool m_globals; // whether is is $GLOBAL
   bool m_superGlobal;
-  TypePtr m_superGlobalType;
+  bool m_alwaysStash;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

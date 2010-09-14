@@ -59,6 +59,9 @@ ExpressionPtr Expression::replaceValue(ExpressionPtr rep) {
     el->addElement(rep);
     rep = el;
   }
+  if (rep->is(KindOfSimpleVariable) && !is(KindOfSimpleVariable)) {
+    static_pointer_cast<SimpleVariable>(rep)->setAlwaysStash();
+  }
   rep->copyContext(m_context & ~DeadStore);
   if (TypePtr t1 = getType()) {
     if (TypePtr t2 = rep->getType()) {

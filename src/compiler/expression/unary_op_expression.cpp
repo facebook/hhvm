@@ -280,7 +280,7 @@ ExpressionPtr UnaryOpExpression::preOptimize(AnalysisResultPtr ar) {
       m_exp->isScalar() &&
       m_exp->getScalarValue(value) &&
       preCompute(value, result)) {
-    return MakeScalarExpression(ar, getLocation(), result);
+    return replaceValue(MakeScalarExpression(ar, getLocation(), result));
   }
   return ExpressionPtr();
 }

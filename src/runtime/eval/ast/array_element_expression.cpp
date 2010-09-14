@@ -29,15 +29,23 @@ using namespace std;
 ArrayElementExpression::ArrayElementExpression(EXPRESSION_ARGS,
                                                LvalExpressionPtr arr,
                                                ExpressionPtr idx)
-  : LvalExpression(EXPRESSION_PASS), m_arr(arr), m_idx(idx) {}
+  : LvalExpression(EXPRESSION_PASS), m_arr(arr), m_idx(idx) {
+  m_reverseOrder = m_idx && m_arr->cast<VariableExpression>();
+}
 
 Variant ArrayElementExpression::eval(VariableEnvironment &env) const {
   if (!m_idx) {
     SET_LINE;
     throw InvalidOperandException("Cannot use [] in read context");
   }
-  Variant arr(m_arr->eval(env));
-  Variant idx(m_idx->eval(env));
+  Variant arr, idx;
+  if (m_reverseOrder) {
+    idx = m_idx->eval(env);
+    arr = m_arr->eval(env);
+  } else {
+    arr = m_arr->eval(env);
+    idx = m_idx->eval(env);
+  }
   SET_LINE;
   return arr.rvalAt(idx, true);
 }
@@ -47,8 +55,14 @@ Variant ArrayElementExpression::evalExist(VariableEnvironment &env) const {
     SET_LINE;
     throw InvalidOperandException("Cannot use [] in isset/empty context");
   }
-  Variant arr(m_arr->evalExist(env));
-  Variant idx(m_idx->eval(env));
+  Variant arr, idx;
+  if (m_reverseOrder) {
+    idx = m_idx->eval(env);
+    arr = m_arr->evalExist(env);
+  } else {
+    arr = m_arr->evalExist(env);
+    idx = m_idx->eval(env);
+  }
   SET_LINE;
   return arr.rvalAt(idx);
 }
@@ -58,8 +72,14 @@ bool ArrayElementExpression::exist(VariableEnvironment &env, int op) const {
     SET_LINE;
     throw InvalidOperandException("Cannot use [] in read context");
   }
-  Variant arr(m_arr->evalExist(env));
-  Variant idx(m_idx->eval(env));
+  Variant arr, idx;
+  if (m_reverseOrder) {
+    idx = m_idx->eval(env);
+    arr = m_arr->evalExist(env);
+  } else {
+    arr = m_arr->evalExist(env);
+    idx = m_idx->eval(env);
+  }
   SET_LINE;
   if (op == T_ISSET) {
     return HPHP::isset(arr, idx);

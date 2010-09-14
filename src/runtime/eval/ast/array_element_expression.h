@@ -46,6 +46,7 @@ public:
 private:
   LvalExpressionPtr m_arr;
   ExpressionPtr m_idx;
+  bool m_reverseOrder;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

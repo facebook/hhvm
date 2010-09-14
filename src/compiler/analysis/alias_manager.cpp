@@ -1111,32 +1111,61 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
     return canonicalizeRecurNonNull(e->replaceValue(rep));
   }
 
-  switch (e->getKindOf()) {
-  case Expression::KindOfQOpExpression:
-    canonicalizeKid(e, e->getNthExpr(0), 0);
-    beginScope();
-    canonicalizeKid(e, e->getNthExpr(1), 1);
-    resetScope();
-    canonicalizeKid(e, e->getNthExpr(2), 2);
-    endScope();
-    return canonicalizeNode(e);
+  bool delayVars = true;
 
-  case Expression::KindOfBinaryOpExpression:
-    if (spc(BinaryOpExpression,e)->isShortCircuitOperator()) {
+  switch (e->getKindOf()) {
+    case Expression::KindOfQOpExpression:
       canonicalizeKid(e, e->getNthExpr(0), 0);
       beginScope();
       canonicalizeKid(e, e->getNthExpr(1), 1);
+      resetScope();
+      canonicalizeKid(e, e->getNthExpr(2), 2);
       endScope();
       return canonicalizeNode(e);
-    }
-    break;
 
-  default:
-    break;
+    case Expression::KindOfBinaryOpExpression:
+      if (spc(BinaryOpExpression,e)->isShortCircuitOperator()) {
+        canonicalizeKid(e, e->getNthExpr(0), 0);
+        beginScope();
+        canonicalizeKid(e, e->getNthExpr(1), 1);
+        endScope();
+        return canonicalizeNode(e);
+      }
+      break;
+
+    case Expression::KindOfExpressionList:
+      delayVars = false;
+      break;
+
+    default:
+      break;
   }
 
-  for (int i = 0, n = e->getKidCount(); i < n; i++) {
-    canonicalizeKid(e, e->getNthExpr(i), i);
+  int n = e->getKidCount();
+  if (n < 2) delayVars = false;
+
+  for (int j = delayVars ? 0 : 1; j < 2; j++) {
+    for (int i = 0; i < n; i++) {
+      if (ExpressionPtr kid = e->getNthExpr(i)) {
+        /*
+          php doesnt evaluate simple variables at the point they are seen
+          except in function calls. So in a case like:
+          $a + ($a = 5)
+          the first $a is evaluated after the assignment. But in:
+          ($a + 1) + ($a = 5)
+          the first $a is evaluated before the assignment.
+          To deal with this, if we're not dealing with an parameter list, and
+          there's more than one child node, we do two passes, and process the
+          simple variables on the second pass.
+        */
+        if (delayVars) {
+          bool stash = !kid->is(Expression::KindOfSimpleVariable) ||
+            spc(SimpleVariable, kid)->getAlwaysStash();
+          if (stash == j) continue;
+        }
+        canonicalizeKid(e, kid, i);
+      }
+    }
   }
 
   return canonicalizeNode(e);

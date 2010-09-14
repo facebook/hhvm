@@ -16,6 +16,7 @@
 
 #include <runtime/eval/ast/object_property_expression.h>
 #include <runtime/eval/ast/name.h>
+#include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
 #include <runtime/eval/parser/hphp.tab.hpp>
 
@@ -27,9 +28,16 @@ ObjectPropertyExpression::ObjectPropertyExpression(EXPRESSION_ARGS,
                                                    ExpressionPtr obj,
                                                    NamePtr name)
   : LvalExpression(EXPRESSION_PASS), m_obj(obj), m_name(name) {
+  m_reverseOrder = m_obj->cast<VariableExpression>();
 }
 
 Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
+  if (m_reverseOrder) {
+    String name(m_name->get(env));
+    Variant obj(m_obj->eval(env));
+    SET_LINE;
+    return obj.o_get(name);
+  }
   Variant obj(m_obj->eval(env));
   String name(m_name->get(env));
   SET_LINE;
@@ -37,6 +45,12 @@ Variant ObjectPropertyExpression::eval(VariableEnvironment &env) const {
 }
 
 Variant ObjectPropertyExpression::evalExist(VariableEnvironment &env) const {
+  if (m_reverseOrder) {
+    String name(m_name->get(env));
+    Variant obj(m_obj->evalExist(env));
+    SET_LINE;
+    return obj.o_get(name, false);
+  }
   Variant obj(m_obj->evalExist(env));
   String name(m_name->get(env));
   SET_LINE;
@@ -110,41 +124,48 @@ Variant ObjectPropertyExpression::setOp(VariableEnvironment &env, int op,
   String name(m_name->get(env));
   SET_LINE;
   switch (op) {
-  case T_PLUS_EQUAL:
-    return vobj->o_assign_op<Variant, T_PLUS_EQUAL>(name, rhs);
-  case T_MINUS_EQUAL:
-    return vobj->o_assign_op<Variant, T_MINUS_EQUAL>(name, rhs);
-  case T_MUL_EQUAL:
-    return vobj->o_assign_op<Variant, T_MUL_EQUAL>(name, rhs);
-  case T_DIV_EQUAL:
-    return vobj->o_assign_op<Variant, T_DIV_EQUAL>(name, rhs);
-  case T_CONCAT_EQUAL:
-    return vobj->o_assign_op<Variant, T_CONCAT_EQUAL>(name, rhs);
-  case T_MOD_EQUAL:
-    return vobj->o_assign_op<Variant, T_MOD_EQUAL>(name, rhs);
-  case T_AND_EQUAL:
-    return vobj->o_assign_op<Variant, T_AND_EQUAL>(name, rhs);
-  case T_OR_EQUAL:
-    return vobj->o_assign_op<Variant, T_OR_EQUAL>(name, rhs);
-  case T_XOR_EQUAL:
-    return vobj->o_assign_op<Variant, T_XOR_EQUAL>(name, rhs);
-  case T_SL_EQUAL:
-    return vobj->o_assign_op<Variant, T_SL_EQUAL>(name, rhs);
-  case T_SR_EQUAL:
-    return vobj->o_assign_op<Variant, T_SR_EQUAL>(name, rhs);
-  case T_INC:
-    return vobj->o_assign_op<Variant, T_INC>(name, rhs);
-  case T_DEC:
-    return vobj->o_assign_op<Variant, T_DEC>(name, rhs);
-  default:
-    ASSERT(false);
+    case T_PLUS_EQUAL:
+      return vobj->o_assign_op<Variant, T_PLUS_EQUAL>(name, rhs);
+    case T_MINUS_EQUAL:
+      return vobj->o_assign_op<Variant, T_MINUS_EQUAL>(name, rhs);
+    case T_MUL_EQUAL:
+      return vobj->o_assign_op<Variant, T_MUL_EQUAL>(name, rhs);
+    case T_DIV_EQUAL:
+      return vobj->o_assign_op<Variant, T_DIV_EQUAL>(name, rhs);
+    case T_CONCAT_EQUAL:
+      return vobj->o_assign_op<Variant, T_CONCAT_EQUAL>(name, rhs);
+    case T_MOD_EQUAL:
+      return vobj->o_assign_op<Variant, T_MOD_EQUAL>(name, rhs);
+    case T_AND_EQUAL:
+      return vobj->o_assign_op<Variant, T_AND_EQUAL>(name, rhs);
+    case T_OR_EQUAL:
+      return vobj->o_assign_op<Variant, T_OR_EQUAL>(name, rhs);
+    case T_XOR_EQUAL:
+      return vobj->o_assign_op<Variant, T_XOR_EQUAL>(name, rhs);
+    case T_SL_EQUAL:
+      return vobj->o_assign_op<Variant, T_SL_EQUAL>(name, rhs);
+    case T_SR_EQUAL:
+      return vobj->o_assign_op<Variant, T_SR_EQUAL>(name, rhs);
+    case T_INC:
+      return vobj->o_assign_op<Variant, T_INC>(name, rhs);
+    case T_DEC:
+      return vobj->o_assign_op<Variant, T_DEC>(name, rhs);
+    default:
+      ASSERT(false);
   }
   return rhs;
 }
 
 bool ObjectPropertyExpression::exist(VariableEnvironment &env, int op) const {
-  Object obj(toObject(m_obj->evalExist(env)));
-  String name(m_name->get(env));
+  Object obj;
+  String name;
+  if (m_reverseOrder) {
+    obj = toObject(m_obj->evalExist(env));
+    name = m_name->get(env);
+  } else {
+    name = m_name->get(env);
+    obj = toObject(m_obj->evalExist(env));
+  }
   SET_LINE;
   if (op == T_ISSET) {
     return obj->o_isset(name);

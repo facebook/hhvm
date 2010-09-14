@@ -15,6 +15,7 @@
 */
 
 #include <runtime/eval/ast/binary_op_expression.h>
+#include <runtime/eval/ast/variable_expression.h>
 #include <runtime/eval/parser/hphp.tab.hpp>
 
 namespace HPHP {
@@ -23,7 +24,9 @@ namespace Eval {
 
 BinaryOpExpression::BinaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp1,
                                        int op, ExpressionPtr exp2)
-  : Expression(EXPRESSION_PASS), m_exp1(exp1), m_exp2(exp2), m_op(op) {}
+  : Expression(EXPRESSION_PASS), m_exp1(exp1), m_exp2(exp2), m_op(op) {
+  m_reverseOrder = m_exp1->cast<VariableExpression>();
+}
 
 Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
   switch (m_op) {
@@ -35,8 +38,14 @@ Variant BinaryOpExpression::eval(VariableEnvironment &env) const {
       m_exp2->eval(env);
   default:
     {
-      Variant v1(m_exp1->eval(env));
-      Variant v2(m_exp2->eval(env));
+      Variant v1, v2;
+      if (m_reverseOrder) {
+        v2 = m_exp2->eval(env);
+        v1 = m_exp1->eval(env);
+      } else {
+        v1 = m_exp1->eval(env);
+        v2 = m_exp2->eval(env);
+      }
       SET_LINE;
       switch (m_op) {
       case T_LOGICAL_XOR:         return logical_xor(v1, v2);

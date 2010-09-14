@@ -33,7 +33,8 @@ using namespace boost;
 SimpleVariable::SimpleVariable
 (EXPRESSION_CONSTRUCTOR_PARAMETERS, const std::string &name)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
-    m_name(name), m_this(false), m_globals(false), m_superGlobal(false) {
+    m_name(name), m_this(false), m_globals(false), m_superGlobal(false),
+    m_alwaysStash(false) {
   setContext(Expression::NoLValueWrapper);
 }
 
@@ -202,7 +203,7 @@ void SimpleVariable::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                     int state)
 {
   if (getContext() & (LValue|RefValue|RefParameter)) return;
-  if (!(state & StashVars)) return;
+  if (!m_alwaysStash && !(state & StashVars)) return;
   Expression::preOutputStash(cg, ar, state);
 }
 

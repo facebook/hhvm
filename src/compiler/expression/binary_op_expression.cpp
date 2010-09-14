@@ -276,9 +276,11 @@ ExpressionPtr BinaryOpExpression::preOptimize(AnalysisResultPtr ar) {
   } catch (Exception &e) {
     // runtime/base threw an exception, perhaps bad operands
   }
-  if (optExp) return optExp;
-  if (isShortCircuitOperator()) return simplifyLogical(ar);
-  return ExpressionPtr();
+  if (!optExp) {
+    if (isShortCircuitOperator()) optExp = simplifyLogical(ar);
+  }
+  if (optExp) optExp = replaceValue(optExp);
+  return optExp;
 }
 
 ExpressionPtr BinaryOpExpression::simplifyArithmetic(AnalysisResultPtr ar) {
@@ -347,9 +349,11 @@ ExpressionPtr BinaryOpExpression::postOptimize(AnalysisResultPtr ar) {
   ar->postOptimize(m_exp1);
   ar->postOptimize(m_exp2);
   ExpressionPtr optExp = simplifyArithmetic(ar);
-  if (optExp) return optExp;
-  if (isShortCircuitOperator()) return simplifyLogical(ar);
-  return ExpressionPtr();
+  if (!optExp) {
+    if (isShortCircuitOperator()) optExp = simplifyLogical(ar);
+  }
+  if (optExp) optExp = replaceValue(optExp);
+  return optExp;
 }
 
 static ExpressionPtr makeIsNull(LocationPtr loc, ExpressionPtr exp,
@@ -742,8 +746,8 @@ void BinaryOpExpression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
                                         int state) {
   if (hasCPPTemp() || isScalar()) return;
   if (m_op == '.' && (state & FixOrder)) {
-    if (m_exp1) m_exp1->preOutputStash(cg, ar, state);
-    if (m_exp2) m_exp2->preOutputStash(cg, ar, state);
+    if (m_exp1) m_exp1->preOutputStash(cg, ar, state|StashVars);
+    if (m_exp2) m_exp2->preOutputStash(cg, ar, state|StashVars);
   } else {
     Expression::preOutputStash(cg, ar, state);
   }

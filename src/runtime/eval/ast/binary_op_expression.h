@@ -35,6 +35,7 @@ private:
   ExpressionPtr m_exp1;
   ExpressionPtr m_exp2;
   int m_op;
+  bool m_reverseOrder;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

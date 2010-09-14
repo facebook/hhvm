@@ -36,7 +36,8 @@ namespace HPHP {
 Transport::Transport()
   : m_url(NULL), m_postData(NULL), m_postDataParsed(false),
     m_chunkedEncoding(false), m_headerSent(false),
-    m_responseCode(-1), m_responseSize(0), m_sendContentType(true),
+    m_responseCode(-1), m_firstHeaderSet(false), m_firstHeaderLine(0),
+    m_responseSize(0), m_sendContentType(true),
     m_compression(true), m_compressor(NULL), m_isSSL(false),
     m_compressionDecision(NotDecidedYet), m_threadType(RequestThread) {
 }
@@ -319,6 +320,12 @@ void Transport::addHeader(const char *name, const char *value) {
   ASSERT(name && *name);
   ASSERT(value);
   FiberWriteLock lock(this);
+
+  if (!m_firstHeaderSet) {
+    m_firstHeaderSet = true;
+    m_firstHeaderFile = FrameInjection::GetContainingFileName(true).data();
+    m_firstHeaderLine = FrameInjection::GetLine(true);
+  }
 
   string svalue = value;
   Util::replaceAll(svalue, "\n", "");

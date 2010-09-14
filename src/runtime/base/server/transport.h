@@ -127,6 +127,8 @@ public:
   void removeHeader(const char *name);
   void removeAllHeaders();
   void getResponseHeaders(HeaderMap &headers);
+  std::string getFirstHeaderFile() const { return m_firstHeaderFile;}
+  int getFirstHeaderLine() const { return m_firstHeaderLine;}
 
   /**
    * Content/MIME type related functions.
@@ -317,6 +319,9 @@ protected:
   bool m_headerSent;
   int m_responseCode;
   HeaderMap m_responseHeaders;
+  bool m_firstHeaderSet;
+  std::string m_firstHeaderFile;
+  int m_firstHeaderLine;
   CookieMap m_responseCookies;
   int m_responseSize;
 

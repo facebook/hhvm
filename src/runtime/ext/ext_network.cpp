@@ -848,6 +848,8 @@ Array f_headers_list() {
 bool f_headers_sent(Variant file /* = null */, Variant line /* = null */) {
   Transport *transport = g_context->getTransport();
   if (transport) {
+    file = String(transport->getFirstHeaderFile());
+    line = transport->getFirstHeaderLine();
     return transport->headersSent();
   }
   return false;

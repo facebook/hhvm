@@ -76,7 +76,7 @@ void StaticContentCache::load() {
   }
 
   Logger::Info("analyzing %d files under source root...", count);
-  for (map<string, string>::const_iterator iter =
+  for (hphp_string_imap<string>::const_iterator iter =
          RuntimeOption::StaticFileExtensions.begin();
        iter != RuntimeOption::StaticFileExtensions.end(); ++iter) {
     if (ext2files.find(iter->first) == ext2files.end()) {

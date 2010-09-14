@@ -55,7 +55,7 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
   size_t pos = cmd.rfind('.');
   ASSERT(pos != string::npos);
   const char *ext = cmd.c_str() + pos + 1;
-  map<string, string>::const_iterator iter =
+  hphp_string_imap<string>::const_iterator iter =
     RuntimeOption::StaticFileExtensions.find(ext);
   if (iter != RuntimeOption::StaticFileExtensions.end()) {
     string val = iter->second;
@@ -65,6 +65,8 @@ void HttpRequestHandler::sendStaticContent(Transport *transport,
       val += RuntimeOption::DefaultCharsetName;
     }
     transport->addHeader("Content-Type", val.c_str());
+  } else {
+    transport->addHeader("Content-Type", "application/octet-stream");
   }
 
   time_t base = time(NULL);
@@ -182,9 +184,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
       }
     }
 
-    if (RuntimeOption::EnableStaticContentFromDisk &&
-        RuntimeOption::StaticFileExtensions.find(ext) !=
-        RuntimeOption::StaticFileExtensions.end()) {
+    if (RuntimeOption::EnableStaticContentFromDisk) {
       String translated = File::TranslatePath(String(absPath));
       if (!translated.empty()) {
         StringBuffer sb(translated.data());

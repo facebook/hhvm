@@ -20,6 +20,7 @@
 #include "base.h"
 #include <string>
 #include "exception.h"
+#include "case_insensitive.h"
 #include "neo/neo_hdf.h"
 
 namespace HPHP {
@@ -131,6 +132,7 @@ public:
   void get(std::vector<std::string> &values) const;
   void get(std::set<std::string> &values) const;
   void get(std::map<std::string, std::string> &values) const;
+  void get(hphp_string_imap<std::string> &values) const;
 
   operator const char *() const { return get();}
   operator std::string() const { return getString();}

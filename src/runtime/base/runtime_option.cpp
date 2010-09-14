@@ -163,7 +163,7 @@ std::vector<std::string> RuntimeOption::ThreadDocuments;
 bool RuntimeOption::SafeFileAccess = false;
 std::vector<std::string> RuntimeOption::AllowedDirectories;
 std::set<std::string> RuntimeOption::AllowedFiles;
-std::map<std::string, std::string> RuntimeOption::StaticFileExtensions;
+hphp_string_imap<std::string> RuntimeOption::StaticFileExtensions;
 std::set<std::string> RuntimeOption::ForbiddenFileExtensions;
 std::set<std::string> RuntimeOption::StaticFileGenerators;
 FilesMatchPtrVec RuntimeOption::FilesMatches;

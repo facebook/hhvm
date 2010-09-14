@@ -341,6 +341,13 @@ void Hdf::get(std::map<std::string, std::string> &values) const {
   }
 }
 
+void Hdf::get(hphp_string_imap<std::string> &values) const {
+  values.clear();
+  for (Hdf hdf = firstChild(); hdf.exists(); hdf = hdf.next()) {
+    values[hdf.getName()] = hdf.getString("");
+  }
+}
+
 int Hdf::compare(const char *v2) const {
   const char *v1 = get();
   if (v1 == NULL && v2 == NULL) return 0;

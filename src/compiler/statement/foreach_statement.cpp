@@ -196,26 +196,22 @@ void ForEachStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       !m_array->is(Expression::KindOfSimpleVariable) ||
       m_array->isThis()) {
     cg_printf("Variant %s%d", Option::MapPrefix, mapId);
+    TypePtr expectedType = m_array->getExpectedType();
+    // Clear m_expectedType to avoid type cast (toArray).
+    m_array->setExpectedType(TypePtr());
     bool wrap = m_array->preOutputCPP(cg, ar, 0);
     if (wrap) {
       cg_printf(";\n");
       m_array->outputCPPBegin(cg, ar);
       cg_printf("%s%d", Option::MapPrefix, mapId);
     }
+    cg_printf(" = ");
+    m_array->outputCPP(cg, ar);
+    cg.printf(";\n");
     if (m_ref) {
-      cg_printf(" = ref(");
-      m_array->outputCPPImpl(cg, ar);
-      cg.printf(");\n");
       cg.printf("%s%d.escalate(true);\n", Option::MapPrefix, mapId);
-    } else {
-      TypePtr expectedType = m_array->getExpectedType();
-      // Clear m_expectedType to avoid type cast (toArray).
-      m_array->setExpectedType(TypePtr());
-      cg_printf(" = ");
-      m_array->outputCPP(cg, ar);
-      cg_printf(";\n");
-      m_array->setExpectedType(expectedType);
     }
+    m_array->setExpectedType(expectedType);
     if (wrap) {
       m_array->outputCPPEnd(cg, ar);
     }

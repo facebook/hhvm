@@ -781,15 +781,37 @@ bool Expression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   return ret;
 }
 
+static bool checkOffsetChain(ExpressionPtr e) {
+  if (e->is(Expression::KindOfObjectPropertyExpression) ||
+      e->is(Expression::KindOfArrayElementExpression)) {
+    if (ExpressionPtr e1 = e->getNthExpr(1)) {
+      if (e1->hasEffect()) return true;
+    }
+    return checkOffsetChain(e->getNthExpr(0));
+  }
+  return e->hasEffect();
+}
+
 bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
                                     AnalysisResultPtr ar,
                                     int state) {
-  if (!(m_context & (OprLValue | DeepOprLValue |
-                     AssignmentLHS | DeepAssignmentLHS |
-                     ExistContext | UnsetContext)) ||
-      !(state & FixOrder)) {
-    return Expression::preOutputCPP(cg, ar, state);
+  bool ret = (state & FixOrder);
+  if (!(m_context & (ObjectContext|ArrayContext))) {
+    if (!ret) {
+      ret = checkOffsetChain(getNthExpr(0));
+      if (!ret &&
+          (m_context & (LValue | OprLValue | RefValue | RefParameter))) {
+        if (ExpressionPtr e1 = getNthExpr(1)) {
+          if (e1->hasEffect()) {
+            ret = true;
+          }
+        }
+      }
+    }
   }
+  if (!ret || !ar->inExpression()) return ret;
+
+  state |= FixOrder;
 
   if (ExpressionPtr e0 = getNthExpr(0)) {
     e0->preOutputCPP(cg, ar, state & ~(StashVars));
@@ -797,6 +819,13 @@ bool Expression::preOutputOffsetLHS(CodeGenerator &cg,
 
   if (ExpressionPtr e1 = getNthExpr(1)) {
     e1->preOutputCPP(cg, ar, state & ~(StashVars));
+  }
+
+  if (!(m_context & (ObjectContext|ArrayContext))) {
+    if (!(m_context & (AssignmentLHS | OprLValue |
+                       ExistContext | UnsetContext))) {
+      Expression::preOutputStash(cg, ar, state);
+    }
   }
 
   return true;

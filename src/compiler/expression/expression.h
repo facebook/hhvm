@@ -98,9 +98,10 @@ public:
     CondExpr = 0x10000,          // Used by alias manager to track expressions
                                  // which are conditionally executed
     AssignmentRHS = 0x20000,     // RHS in assignment
-    DeepReference = 0x40000      // Value is not available for copy propagation
+    DeepReference = 0x40000,     // Value is not available for copy propagation
                                  // because it is referenced in some way
                                  // eg $b in &$b['foo']
+    ArrayContext = 0x80000       // $a in $a[?]
   };
 
   enum Order {

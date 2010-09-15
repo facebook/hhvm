@@ -54,10 +54,12 @@ void DebuggerCommand::sendImpl(DebuggerThriftBuffer &thrift) {
   thrift.write((int32)m_type);
   thrift.write(m_class);
   thrift.write(m_body);
+  thrift.write(m_version);
 }
 
 void DebuggerCommand::recvImpl(DebuggerThriftBuffer &thrift) {
   thrift.read(m_body);
+  thrift.read(m_version);
 }
 
 bool DebuggerCommand::Receive(DebuggerThriftBuffer &thrift,

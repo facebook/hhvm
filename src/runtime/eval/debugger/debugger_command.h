@@ -77,7 +77,8 @@ public:
                       const char *caller);
 
 public:
-  DebuggerCommand(Type type) : m_type(type), m_exitInterrupt(false) {}
+  DebuggerCommand(Type type)
+      : m_type(type), m_version(0), m_exitInterrupt(false) {}
 
   bool is(Type type) const { return m_type == type;}
   Type getType() const { return m_type;}
@@ -102,6 +103,7 @@ protected:
   Type m_type;
   std::string m_class; // for CmdExtended
   std::string m_body;
+  int m_version;
 
   bool m_exitInterrupt; // server side breaking out of message loop
 };

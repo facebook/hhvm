@@ -460,7 +460,7 @@ void throw_pdo_exception(CVarRef code, CVarRef info, const char *fmt, ...) {
   va_list ap;
   va_start(ap, fmt);
   string msg;
-  Logger::Printf(msg, fmt, ap);
+  Logger::VSNPrintf(msg, fmt, ap);
   e->m_message = String(msg);
   va_end(ap);
 

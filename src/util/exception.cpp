@@ -15,6 +15,7 @@
 */
 
 #include "exception.h"
+#include "logger.h"
 #include "base.h"
 
 using namespace std;
@@ -41,9 +42,7 @@ Exception::Exception()
 }
 
 void Exception::format(const char *fmt, va_list ap) {
-  char buf[20480];
-  vsnprintf(buf, sizeof(buf), fmt, ap);
-  m_msg = buf;
+  Logger::VSNPrintf(m_msg, fmt, ap);
 }
 
 Exception::~Exception() throw() {

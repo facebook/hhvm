@@ -30,7 +30,7 @@ DBQuery::DBQuery(DBConn *conn, const char *sql, ...)
   ASSERT(sql && *sql);
   va_list ap;
   va_start(ap, sql);
-  Logger::Printf(m_base, sql, ap);
+  Logger::VSNPrintf(m_base, sql, ap);
   va_end(ap);
 }
 

@@ -1552,14 +1552,14 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
       }
       if (sym->getFinalType()->is(Type::KindOfVariant)) {
         cg_printf("if (isInitialized(%s%s)) props.%s(",
-                  Option::PropertyPrefix, s, priv ? "add" : "set");
+                  Option::PropertyPrefix);
         cg_printString(prop, ar);
         cg_printf(", %s%s.isReferenced() ? ref(%s%s) : %s%s, "
                   "true);\n",
                   Option::PropertyPrefix, s, Option::PropertyPrefix, s,
                   Option::PropertyPrefix, s);
       } else {
-        cg_printf("props.%s(", priv ? "add" : "set");
+        cg_printf("props.set(");
         cg_printString(prop, ar);
         cg_printf(", %s%s, true);\n", Option::PropertyPrefix, s);
       }

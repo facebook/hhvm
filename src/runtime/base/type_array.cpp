@@ -524,48 +524,6 @@ CVarRef Array::set(CVarRef key, CVarRef v) {
   return null_variant;
 }
 
-CVarRef Array::add(litstr  key, CVarRef v, bool isString /* = false */) {
-  if (isString) return addImpl(String(key), v);
-  return addImpl(String(key).toKey(), v);
-}
-
-CVarRef Array::add(CStrRef key, CVarRef v, bool isString /* = false */) {
-  if (isString) return addImpl(key, v);
-  return addImpl(key.toKey(), v);
-}
-
-CVarRef Array::add(CVarRef key, CVarRef v) {
-  if (key.getRawType() == KindOfInt64) {
-    return addImpl(key.getNumData(), v);
-  }
-  Variant k(key.toKey());
-  if (!k.isNull()) {
-    return addImpl(k, v);
-  }
-  return null_variant;
-}
-
-Variant &Array::addLval(litstr  key, bool isString /* = false */) {
-  if (isString) return addLvalImpl(String(key));
-  return addLvalImpl(String(key).toKey());
-}
-
-Variant &Array::addLval(CStrRef key, bool isString /* = false */) {
-  if (isString) return addLvalImpl(key);
-  return addLvalImpl(key.toKey());
-}
-
-Variant &Array::addLval(CVarRef key) {
-  if (key.getRawType() == KindOfInt64) {
-    return addLvalImpl(key.getNumData());
-  }
-  Variant k(key.toKey());
-  if (!k.isNull()) {
-    return addLvalImpl(k);
-  }
-  return Variant::lvalBlackHole();
-}
-
 Variant Array::refvalAt(CStrRef key, bool isString /* = false */) {
   return ref(lvalAt(key, false, isString));
 }
@@ -801,8 +759,8 @@ void Array::unserialize(VariableUnserializer *unserializer) {
     for (int64 i = 0; i < size; i++) {
       Variant key(unserializer->unserializeKey());
       Variant &value =
-        key.isString() ? addLval(key.toString(), true)
-                       : addLval(key);
+        key.isString() ? lvalAt(key.toString(), false, true)
+                       : lvalAt(key);
       value.unserialize(unserializer);
     }
   }

@@ -4259,7 +4259,7 @@ Variant &c_ReflectionClass::os_lval(CStrRef s) {
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
 void c_ReflectionClass::o_getArray(Array &props) const {
   if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss77e35232, "name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss77c51ddf, "\000ReflectionClass\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss77c51ddf, "\000ReflectionClass\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionClass
@@ -7926,8 +7926,8 @@ Variant &c_ReflectionExtension::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ReflectionExtension
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension
 void c_ReflectionExtension::o_getArray(Array &props) const {
-  if (isInitialized(m_name)) props.add(NAMSTR(s_sys_ss7730b079, "\000ReflectionExtension\000name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
-  if (isInitialized(m_info)) props.add(NAMSTR(s_sys_ss446ed36e, "\000ReflectionExtension\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
+  if (isInitialized(m_name)) props.set(NAMSTR(s_sys_ss7730b079, "\000ReflectionExtension\000name"), m_name.isReferenced() ? ref(m_name) : m_name, true);
+  if (isInitialized(m_info)) props.set(NAMSTR(s_sys_ss446ed36e, "\000ReflectionExtension\000info"), m_info.isReferenced() ? ref(m_info) : m_info, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ReflectionExtension

@@ -1121,21 +1121,6 @@ CVarRef Array::setImpl(const T &key, CVarRef v) {
 }
 
 template<typename T>
-CVarRef Array::addImpl(const T &key, CVarRef v) {
-  if (!m_px) {
-    ArrayData *data = ArrayData::Create(key, v);
-    SmartPtr<ArrayData>::operator=(data);
-  } else {
-    if (v.isContagious()) escalate();
-    ArrayData *escalated = m_px->add(key, v, (m_px->getCount() > 1));
-    if (escalated) {
-      SmartPtr<ArrayData>::operator=(escalated);
-    }
-  }
-  return v;
-}
-
-template<typename T>
 Variant Array::refvalAt(const T &key) {
   return ref(lvalAt(key));
 }

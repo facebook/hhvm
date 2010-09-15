@@ -148,36 +148,6 @@ ArrayData *ArrayData::lvalPtr(CStrRef k, Variant *&ret, bool copy,
   throw FatalErrorException("Unimplemented ArrayData::lvalPtr");
 }
 
-ArrayData *ArrayData::add(int64 k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
-  return set(k, v, copy);
-}
-
-ArrayData *ArrayData::add(CStrRef k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
-  return set(k, v, copy);
-}
-
-ArrayData *ArrayData::add(CVarRef k, CVarRef v, bool copy) {
-  ASSERT(!exists(k));
-  return set(k, v, copy);
-}
-
-ArrayData *ArrayData::addLval(int64 k, Variant *&ret, bool copy) {
-  ASSERT(!exists(k));
-  return lval(k, ret, copy);
-}
-
-ArrayData *ArrayData::addLval(CStrRef k, Variant *&ret, bool copy) {
-  ASSERT(!exists(k));
-  return lval(k, ret, copy);
-}
-
-ArrayData *ArrayData::addLval(CVarRef k, Variant *&ret, bool copy) {
-  ASSERT(!exists(k));
-  return lval(k, ret, copy);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // stack and queue operations
 

@@ -501,6 +501,7 @@ void StringData::restore(const char *&data) {
   m_data = data;
   m_len &= LenMask;
   m_len |= IsLinear;
+  m_hash = hash_string(m_data, size());
 }
 
 void StringData::sweep() {

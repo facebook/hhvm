@@ -847,7 +847,8 @@ public:
   Variant m_conn;
   Variant m_curlconn;
   Variant m_curlMultiConn;
-
+  String key;
+  String value;
   DECLARE_SMART_ALLOCATION_NOCALLBACKS(TestGlobals);
   void dump() {}
 };
@@ -861,7 +862,11 @@ bool TestCppBase::TestMemoryManager() {
   TestGlobals *globals = NEW(TestGlobals)();
   f_apc_store("key", CREATE_VECTOR2("value", "s"));
   f_apc_store("key2", "apple");
+  f_apc_store("key3", CREATE_MAP1("foo", "foo"));
   globals->m_array2 = f_apc_fetch("key");
+  String apple = f_apc_fetch("key2"); // a shared string data
+  Array arr = CREATE_MAP1(apple, "jobs");
+  VS(arr[apple], "jobs");
   globals->m_string2 = f_apc_fetch("key2");
   globals->m_conn = f_mysql_connect(TEST_HOSTNAME, TEST_DATABASE,
                                     TEST_PASSWORD, false, 0);
@@ -945,6 +950,7 @@ bool TestCppBase::TestMemoryManager() {
     VS(globals->m_array["a"], "apple");
     VERIFY(!globals->m_array.exists("c"));
 
+    VS(arr[apple], "jobs");
   }
   DELETE(TestGlobals)(globals);
   MemoryManager::TheMemoryManager().reset();

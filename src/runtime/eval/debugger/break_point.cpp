@@ -156,7 +156,6 @@ BreakPointInfo::~BreakPointInfo() {
 }
 
 void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
-  thrift.write(m_index);
   thrift.write(m_state);
   thrift.write(m_interrupt);
   thrift.write(m_file);
@@ -175,7 +174,6 @@ void BreakPointInfo::sendImpl(DebuggerThriftBuffer &thrift) {
 }
 
 void BreakPointInfo::recvImpl(DebuggerThriftBuffer &thrift) {
-  thrift.read(m_index);
   thrift.read(m_state);
   thrift.read(m_interrupt);
   thrift.read(m_file);

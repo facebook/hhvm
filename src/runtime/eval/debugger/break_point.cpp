@@ -589,7 +589,7 @@ bool BreakPointInfo::MatchClass(const char *fcls, const std::string &bcls,
     return true;
   }
 
-  const ClassInfo *clsInfo = ClassInfo::FindClass(fcls);
+  const ClassInfo *clsInfo = ClassInfo::FindClass(bcls.c_str());
   if (clsInfo) {
     ClassInfo *foundClass;
     if (clsInfo->hasMethod(func, foundClass) && foundClass) {

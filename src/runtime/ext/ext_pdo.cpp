@@ -26,6 +26,7 @@
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/util/request_local.h>
 #include <runtime/base/macros.h>
+#include <runtime/eval/eval.h>
 
 #define PDO_HANDLE_DBH_ERR(dbh)                         \
   if (strcmp(dbh->error_code, PDO_ERR_NONE)) {          \
@@ -575,8 +576,7 @@ static void pdo_stmt_construct(sp_PDOStatement stmt, Object object,
     const char *constructor = cls->getConstructor();
     if (constructor) {
       object->set("queryString", stmt->query_string);
-      object->o_invoke_mil( constructor,
-                       ctor_args, -1);
+      object->dynConstructUnchecked(ctor_args);
     }
   }
 }

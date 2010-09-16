@@ -881,7 +881,7 @@ EOT
 DefineFunction(
   array(
     'name'   => "__construct",
-    'flags'  =>  HasDocComment,
+    'flags'  =>  HasDocComment | IsProtected,
     'return' => array(
       'type'   => null,
     ),

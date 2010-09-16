@@ -133,6 +133,7 @@ class ObjectData : public Countable {
   virtual void dynConstruct(CArrRef params) {}
   virtual void dynConstructFromEval(Eval::VariableEnvironment &env,
                                     const Eval::FunctionCallExpression *call);
+  virtual void dynConstructUnchecked(CArrRef params);
   virtual void release() { destruct(); delete this; } // for SmartPtr<T>
   virtual void destruct() {}
 

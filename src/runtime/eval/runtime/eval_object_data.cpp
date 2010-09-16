@@ -44,14 +44,6 @@ EvalObjectData::EvalObjectData(ClassEvalState &cls) :
   DynamicObjectData(NULL, this), m_cls(cls) {
 }
 
-ObjectData *EvalObjectData::dynCreate(CArrRef params, bool ini /* = true */) {
-  init();
-  if (ini) {
-    dynConstruct(params);
-  }
-  return this;
-}
-
 void EvalObjectData::init() {
   m_cls.getClass()->initializeObject(this);
   DynamicObjectData::init();
@@ -73,6 +65,15 @@ void EvalObjectData::dynConstructFromEval(VariableEnvironment &env,
     ms->invokeInstanceDirect(Object(root), env, call);
   } else {
     DynamicObjectData::dynConstructFromEval(env, call);
+  }
+}
+
+void EvalObjectData::dynConstructUnchecked(CArrRef params) {
+  const MethodStatement *ms = m_cls.getConstructor();
+  if (ms) {
+    ms->invokeInstance(Object(root), params, false);
+  } else {
+    DynamicObjectData::dynConstruct(params);
   }
 }
 
@@ -185,14 +186,7 @@ CStrRef EvalObjectData::o_getClassName() const {
 
 const MethodStatement
 *EvalObjectData::getMethodStatement(const char* name) const {
-  const hphp_const_char_imap<const MethodStatement*> &meths =
-    m_cls.getMethodTable();
-  hphp_const_char_imap<const MethodStatement*>::const_iterator it =
-    meths.find(name);
-  if (it != meths.end()) {
-    return it->second;
-  }
-  return NULL;
+  return m_cls.getMethod(name);
 }
 
 bool EvalObjectData::o_instanceof(const char *s) const {
@@ -213,13 +207,11 @@ Variant EvalObjectData::o_invoke(MethodIndex methodIndex,
 Variant EvalObjectData::o_invoke_mil( const char *s,
                                       CArrRef params, int64 hash,
                                       bool fatal /* = true */) {
-  const hphp_const_char_imap<const MethodStatement*> &meths =
-    m_cls.getMethodTable();
-  hphp_const_char_imap<const MethodStatement*>::const_iterator it =
-    meths.find(s);
+  const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
+  ClassEvalState::MethodTable::const_iterator it = meths.find(s);
   if (it != meths.end()) {
-    if (it->second) {
-      return it->second->invokeInstance(Object(root), params);
+    if (it->second.first) {
+      return it->second.first->invokeInstance(Object(root), params);
     } else {
       return DynamicObjectData::o_invoke_mil(s, params, hash, fatal);
     }
@@ -253,8 +245,7 @@ Variant EvalObjectData::o_invoke_ex_mil(const char *clsname,
       return ms->invokeInstance(Object(root), params);
     } else {
       // Possibly builtin class has this method
-      const hphp_const_char_imap<const MethodStatement*> &meths =
-        m_cls.getMethodTable();
+      const ClassEvalState::MethodTable &meths = m_cls.getMethodTable();
       if (meths.find(s) == meths.end()) {
         // Absolutely nothing in the hierarchy has this method
         return doCall(s, params, fatal);

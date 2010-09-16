@@ -41,10 +41,9 @@ void ClassEvalState::init(const ClassStatement *cls) {
 }
 
 const MethodStatement *ClassEvalState::getMethod(const char *m) {
-  hphp_const_char_imap<const MethodStatement*>::const_iterator it =
-    m_methodTable.find(m);
+  MethodTable::const_iterator it = m_methodTable.find(m);
   if (it == m_methodTable.end()) return NULL;
-  return it->second;
+  return it->second.first;
 }
 
 void ClassEvalState::initializeInstance() {

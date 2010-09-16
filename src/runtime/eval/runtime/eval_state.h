@@ -36,6 +36,8 @@ class EvalObjectData;
 
 class ClassEvalState {
 public:
+  typedef hphp_const_char_imap<std::pair<const MethodStatement*, int> >
+    MethodTable;
   ClassEvalState() : m_constructor(NULL),
                      m_initializedInstance(false),
                      m_initializedStatics(false),
@@ -46,7 +48,7 @@ public:
     return m_class;
   }
   const MethodStatement *getMethod(const char *m);
-  hphp_const_char_imap<const MethodStatement*> &getMethodTable() {
+  MethodTable &getMethodTable() {
     return m_methodTable;
   }
   const MethodStatement* &getConstructor() {
@@ -60,7 +62,7 @@ public:
   void semanticCheck();
 private:
   const ClassStatement *m_class;
-  hphp_const_char_imap<const MethodStatement*> m_methodTable;
+  MethodTable m_methodTable;
   const MethodStatement *m_constructor;
   LVariableTable m_statics;
   bool m_initializedInstance;

@@ -33,10 +33,10 @@ public:
   EvalObjectData(ClassEvalState &cls, const char* pname,
                  ObjectData *r = NULL);
   EvalObjectData(ClassEvalState &cls);
-  ObjectData *dynCreate(CArrRef params, bool init /* = true */);
   void dynConstruct(CArrRef params);
   void dynConstructFromEval(VariableEnvironment &env,
                             const FunctionCallExpression *call);
+  virtual void dynConstructUnchecked(CArrRef params);
   virtual void init();
   virtual void destruct();
 

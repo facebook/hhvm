@@ -110,7 +110,7 @@ void ClassStatement::loadInterfaceStatements() const {
 
 void ClassStatement::
 loadMethodTable(ClassEvalState &ce) const {
-  hphp_const_char_imap<const MethodStatement*> &mtable = ce.getMethodTable();
+  ClassEvalState::MethodTable &mtable = ce.getMethodTable();
   if (!m_parent.empty()) {
     const ClassStatement* parent_cls = parentStatement();
     if (parent_cls) {
@@ -121,21 +121,28 @@ loadMethodTable(ClassEvalState &ce) const {
       ClassInfo::GetClassMethods(meths, m_parent.c_str(), 1);
       for (ClassInfo::MethodVec::const_iterator it = meths.begin();
            it != meths.end(); ++it) {
-        mtable[(*it)->name] = NULL;
+        int mods = 0;
+        if ((*it)->attribute & ClassInfo::IsPrivate) mods |= Private;
+        else if ((*it)->attribute & ClassInfo::IsProtected) mods |= Protected;
+        else mods |= Public;
+        pair<const MethodStatement *, int> &p = mtable[(*it)->name];
+        p.first = NULL;
+        p.second = mods;
       }
     }
   }
   for (vector<MethodStatementPtr>::const_iterator it = m_methodsVec.begin();
        it != m_methodsVec.end(); ++it) {
-    hphp_const_char_imap<const MethodStatement*>::iterator mit =
+    ClassEvalState::MethodTable::iterator mit =
       mtable.find((*it)->name().c_str());
     if (mit != mtable.end()) {
-      int mods = mit->second ? mit->second->getModifiers() : Public;
+      int mods = mit->second.second;
+      const MethodStatement *mmit = mit->second.first;
       if (mods & Final) {
         throw FatalErrorException(0,
                                   "Cannot override final method %s::%s() at "
                                   "%s:%d",
-                                  mit->second->getClass()->name().c_str(),
+                                  mmit->getClass()->name().c_str(),
                                   (*it)->name().c_str(), (*it)->loc()->file,
                                   (*it)->loc()->line1);
       } else if ((mods & (Public|Protected|Private)) <
@@ -150,14 +157,17 @@ loadMethodTable(ClassEvalState &ce) const {
                                   "Access level to %s must be %s or weaker "
                                   "(as in class %s) at %s:%d",
                                   (*it)->name().c_str(), al,
-                                  mit->second ?
-                                  mit->second->getClass()->name().c_str() :
+                                  mmit ?
+                                  mmit->getClass()->name().c_str() :
                                   m_parent.c_str(),(*it)->loc()->file,
                                   (*it)->loc()->line1);
       }
-      mit->second = it->get();
+      mit->second.first = it->get();
+      mit->second.second = (*it)->getModifiers();
     } else {
-      mtable[(*it)->name().c_str()] = it->get();
+      pair<const MethodStatement *, int> &p = mtable[(*it)->name().c_str()];
+      p.first = it->get();
+      p.second = (*it)->getModifiers();
     }
   }
 
@@ -252,7 +262,7 @@ void ClassStatement::evalImpl(VariableEnvironment &env) const {
 }
 
 Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
-                              bool init, ObjectData* root /* = NULL*/) const {
+    bool init, ObjectData* root /* = NULL*/) const {
   if (getModifiers() & Abstract) {
     throw FatalErrorException(0, "Cannot instantiate abstract class %s",
                               name().c_str());
@@ -277,10 +287,9 @@ Object ClassStatement::create(ClassEvalState &ce, CArrRef params,
   eo = NEW(EvalObjectData)(ce, builtinParent, root);
 
   Object o(eo);
+  eo->init();
   if (init) {
-    eo->dynCreate(params, init);
-  } else {
-    initializeObject(eo);
+    o->dynConstruct(params);
   }
   return o;
 }

@@ -58,6 +58,10 @@ void ObjectData::
 dynConstructFromEval(Eval::VariableEnvironment &env,
                      const Eval::FunctionCallExpression *call) {}
 
+void ObjectData:: dynConstructUnchecked(CArrRef params) {
+  return dynConstruct(params);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // class info
 

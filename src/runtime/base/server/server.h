@@ -156,6 +156,11 @@ public:
   virtual int getActiveWorker() = 0;
 
   /**
+   * How many jobs are queued waiting to be handled.
+   */
+  virtual int getQueuedJobs() = 0;
+
+  /**
    * This is for TypedServer to specialize a worker class to use.
    */
   virtual RequestHandler *createRequestHandler() = 0;

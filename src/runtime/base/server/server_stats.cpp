@@ -109,6 +109,7 @@ void ServerStats::GetAllKeys(set<string> &allKeys,
   allKeys.insert("hit");
   allKeys.insert("load");
   allKeys.insert("idle");
+  allKeys.insert("queued");
 }
 
 void ServerStats::Filter(list<TimeSlot*> &slots, const std::string &keys,
@@ -241,6 +242,7 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
   // Hack: These two are not really page specific.
   int load = HttpServer::Server->getPageServer()->getActiveWorker();
   int idle = RuntimeOption::ServerThreadCount - load;
+  int queued = HttpServer::Server->getPageServer()->getQueuedJobs();
 
   for (list<TimeSlot*>::const_iterator iter = slots.begin();
        iter != slots.end(); ++iter) {
@@ -261,6 +263,9 @@ void ServerStats::Aggregate(list<TimeSlot*> &slots, const std::string &agg,
       }
       if (wantedKeys.find("idle") != wantedKeys.end()) {
         values["idle"] = idle;
+      }
+      if (wantedKeys.find("queued") != wantedKeys.end()) {
+        values["queued"] = queued;
       }
 
       for (map<string, int>::const_iterator iter = udfKeys.begin();

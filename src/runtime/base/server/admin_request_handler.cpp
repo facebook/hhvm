@@ -80,6 +80,8 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 #endif
 
         "/check-load:      how many threads are actively handling requests\n"
+        "/check-queued:    how many http requests are queued waiting to be\n"
+        "                  handled\n"
         "/check-mem:       report memory quick statistics in log file\n"
         "/check-apc:       report APC quick statistics\n"
         "/check-sql:       report SQL table statistics\n"
@@ -398,6 +400,11 @@ bool AdminRequestHandler::handleCheckRequest(const std::string &cmd,
                                              Transport *transport) {
   if (cmd == "check-load") {
     int count = HttpServer::Server->getPageServer()->getActiveWorker();
+    transport->sendString(lexical_cast<string>(count));
+    return true;
+  }
+  if (cmd == "check-queued") {
+    int count = HttpServer::Server->getPageServer()->getQueuedJobs();
     transport->sendString(lexical_cast<string>(count));
     return true;
   }

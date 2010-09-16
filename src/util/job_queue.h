@@ -129,6 +129,14 @@ public:
     return m_workerCount;
   }
 
+  /**
+   * Keep track of how many jobs are queued, but not yet been serviced.
+   */
+  int getQueuedJobs() {
+    Lock lock(getMutex());
+    return m_jobs.size();
+  }
+
  private:
   std::deque<TJob> m_jobs;
   bool m_stopped;
@@ -240,6 +248,9 @@ public:
   }
   int getActiveWorker() {
     return m_queue.getActiveWorker();
+  }
+  int getQueuedJobs() {
+    return m_queue.getQueuedJobs();
   }
 
   /**

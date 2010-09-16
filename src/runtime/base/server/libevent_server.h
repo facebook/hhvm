@@ -138,6 +138,9 @@ public:
   virtual int getActiveWorker() {
     return m_dispatcher.getActiveWorker();
   }
+  virtual int getQueuedJobs() {
+    return m_dispatcher.getQueuedJobs();
+  }
 
   void onThreadEnter();
 

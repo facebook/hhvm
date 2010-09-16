@@ -1551,8 +1551,8 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
         prop = '\0' + clsScope.getOriginalName() + '\0' + prop;
       }
       if (sym->getFinalType()->is(Type::KindOfVariant)) {
-        cg_printf("if (isInitialized(%s%s)) props.%s(",
-                  Option::PropertyPrefix);
+        cg_printf("if (isInitialized(%s%s)) props.set(",
+                  Option::PropertyPrefix, s);
         cg_printString(prop, ar);
         cg_printf(", %s%s.isReferenced() ? ref(%s%s) : %s%s, "
                   "true);\n",

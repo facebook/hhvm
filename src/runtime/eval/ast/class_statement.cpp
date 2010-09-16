@@ -819,7 +819,7 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
     }
     cls = this;
   }
-  if (getModifiers() & (Interface|Abstract)) return;
+  if (cls->getModifiers() & (Interface|Abstract)) return;
 
   if (parent) {
     parent->semanticCheck(cls);

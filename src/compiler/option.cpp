@@ -158,6 +158,7 @@ bool Option::GenerateCPPMetaInfo = true;
 bool Option::GenerateCPPNameSpace = true;
 bool Option::GenConcat = true;
 bool Option::GenArrayCreate = false;
+bool Option::GenHashTableInvokeFile = true;
 bool Option::KeepStatementsWithNoEffect = false;
 
 int Option::ConditionalIncludeExpandLevel = 1;

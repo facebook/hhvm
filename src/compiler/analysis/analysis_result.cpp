@@ -2011,6 +2011,101 @@ AnalysisResult::getFuncTableBucket(FunctionScopePtr func) {
   return m_funcTable[index];
 }
 
+void AnalysisResult::outputCPPInvokeFileHeader(CodeGenerator &cg) {
+  cg_indentBegin("Variant invoke_file(CStrRef s, "
+                 "bool once /* = false */, "
+                 "LVariableTable* variables /* = NULL */,"
+                 "const char *currentDir /* = NULL */) {\n");
+}
+
+void AnalysisResult::outputCPPEvalHook(CodeGenerator &cg) {
+  cg_indentBegin("{\n");
+  cg_printf("Variant r;\n");
+  cg_printf("if (eval_invoke_file_hook(r, s, once, variables, "
+            "currentDir)) "
+            "return r;\n");
+  cg_indentEnd("}\n");
+}
+
+void AnalysisResult::outputCPPDefaultInvokeFile(CodeGenerator &cg,
+                                                const char *file) {
+  cg_printf("if (s.empty()) return %s%s(once, variables);\n",
+            Option::PseudoMainPrefix,
+            Option::MangleFilename(file, true).c_str());
+}
+
+void AnalysisResult::outputCPPHashTableInvokeFile(
+  CodeGenerator &cg, const vector<const char*> &entries, bool needEvalHook) {
+  const char text1[] =
+    "class hashNode {\n"
+    "public:\n"
+    "  hashNode() {}\n"
+    "  hashNode(int64 h, const char *n, const void *p) :\n"
+    "    hash(h), name(n), ptr(p), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  const void *ptr;\n"
+    "  hashNode *next;\n"
+    "};\n";
+
+  const char text2[] =
+    "static hashNode *fileMapTable[%d];\n"
+    "static hashNode buckets[%d];\n"
+    "\n"
+    "static class FileTableInitializer {\n"
+    "  public: FileTableInitializer() {\n"
+    "    hashNode *b = buckets;\n"
+    "    for (const char **s = fileMapData; *s; s++, b++) {\n"
+    "      const char *name = *s++;\n"
+    "      const void *ptr = *s;\n"
+    "      int64 hash = hash_string(name, strlen(name));\n"
+    "      hashNode *node = new(b) hashNode(hash, name, ptr);\n"
+    "      int h = hash & %d;\n"
+    "      if (fileMapTable[h]) node->next = fileMapTable[h];\n"
+    "      fileMapTable[h] = node;\n"
+    "    }\n"
+    "  }\n"
+    "} file_table_initializer;\n"
+    "\n"
+    "static inline pm_t findFile(const char *name, int64 hash) {\n"
+    "  for (const hashNode *p = fileMapTable[hash & %d ]; p; p = p->next) {\n"
+    "    if (p->hash == hash && !strcmp(p->name, name)) return (pm_t)p->ptr;\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n"
+    "\n";
+
+  const char text3[] =
+    "  pm_t ptr = findFile(s.c_str(), s->hash());\n"
+    "  if (ptr) return ptr(once, variables, get_globals());\n";
+
+  const char text4[] =
+  "  return throw_missing_file(s.c_str());\n"
+  "}\n";
+
+  cg_printf(text1);
+  int tableSize = Util::roundUpToPowerOfTwo(entries.size() * 2);
+  cg_printf("static const char *fileMapData[] = {\n");
+  BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
+    cg_printf("  (const char *)\"%s\", (const char *)&%s%s,\n",
+              f->getName().c_str(),
+              Option::PseudoMainPrefix,
+              Option::MangleFilename(f->getName(), true).c_str());
+  }
+  cg_printf("  NULL, NULL,\n};\n");
+  cg_printf(text2, tableSize, entries.size(), tableSize - 1, tableSize - 1);
+  outputCPPInvokeFileHeader(cg);
+  if (needEvalHook) outputCPPEvalHook(cg);
+  cg_indentEnd("");
+  cg_printf(text3);
+  if (entries.size() == 1) {
+    cg_indentBegin("\n");
+    outputCPPDefaultInvokeFile(cg, entries[0]);
+    cg_indentEnd("");
+  }
+  cg_printf(text4);
+}
+
 void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   AnalysisResultPtr ar = shared_from_this();
   bool system = output == CodeGenerator::SystemCPP;
@@ -2288,62 +2383,58 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
     cg.namespaceEnd();
     fTable.close();
   }
-  {
+  if (output != CodeGenerator::SystemCPP) {
     string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      "dynamic_table_file.no.cpp";
+      (Option::GenHashTableInvokeFile ? "dynamic_table_file.cpp"
+                                      : "dynamic_table_file.no.cpp");
     Util::mkdir(tablePath);
     ofstream fTable(tablePath.c_str());
     CodeGenerator cg(&fTable, output);
 
     outputCPPDynamicTablesHeader(cg, false, false);
-    if (output != CodeGenerator::SystemCPP) {
-      cg.printSection("File Invoke Table");
-      vector<const char*> entries;
-      BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-        entries.push_back(f->getName().c_str());
-        cg_printf("Variant %s%s(bool incOnce = false, "
-                  "LVariableTable* variables = NULL, "
-                  "Globals *globals = get_globals());\n",
-                  Option::PseudoMainPrefix,
-                  Option::MangleFilename(f->getName(), true).c_str());
-      }
-
-      cg_printf("\n");
-      cg_indentBegin("Variant invoke_file(CStrRef s, "
-                     "bool once /* = false */, "
-                     "LVariableTable* variables /* = NULL */,"
-                     "const char *currentDir /* = NULL */) {\n");
-      if (!system && Option::EnableEval == Option::FullEval) {
-        // See if there's an eval'd version
-        cg_indentBegin("{\n");
-        cg_printf("Variant r;\n");
-        cg_printf("if (eval_invoke_file_hook(r, s, once, variables, "
-                  "currentDir)) "
-                  "return r;\n");
-        cg_indentEnd("}\n");
-      }
-
-      string root;
-
-      for (JumpTable jt(cg, entries, false, false, true); jt.ready();
-           jt.next()) {
-        const char *file = jt.key();
-        cg_printf("HASH_INCLUDE(0x%016llXLL, \"%s\", %s);\n",
-                  hash_string(file), file,
-                  Option::MangleFilename(file, true).c_str());
-      }
-
-
-      // when we only have one file, we default to running the file
-      if (entries.size() == 1) {
-        cg_printf("if (s.empty()) return %s%s(once, variables);\n",
-                  Option::PseudoMainPrefix,
-                  Option::MangleFilename(entries[0], true).c_str());
-      }
-
-      cg_printf("return throw_missing_file(s.data());\n");
-      cg_indentEnd("}\n");
+    if (Option::GenHashTableInvokeFile) {
+      cg_printf("typedef Variant (*pm_t)(bool incOnce, "
+                "LVariableTable* variables, Globals *globals);\n");
     }
+    cg.printSection("File Invoke Table");
+    vector<const char*> entries;
+    BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
+      entries.push_back(f->getName().c_str());
+      cg_printf("Variant %s%s(bool incOnce = false, "
+                "LVariableTable* variables = NULL, "
+                "Globals *globals = get_globals());\n",
+                Option::PseudoMainPrefix,
+                Option::MangleFilename(f->getName(), true).c_str());
+    }
+
+    cg_printf("\n");
+    bool needEvalHook = !system && Option::EnableEval == Option::FullEval;
+    if (Option::GenHashTableInvokeFile) {
+      outputCPPHashTableInvokeFile(cg, entries, needEvalHook);
+      cg.namespaceEnd();
+      fTable.close();
+      return;
+    }
+    outputCPPInvokeFileHeader(cg);
+    // See if there's an eval'd version
+    if (needEvalHook) outputCPPEvalHook(cg);
+
+    string root;
+
+    for (JumpTable jt(cg, entries, false, false, true); jt.ready();
+         jt.next()) {
+      const char *file = jt.key();
+      cg_printf("HASH_INCLUDE(0x%016llXLL, \"%s\", %s);\n",
+                hash_string(file), file,
+                Option::MangleFilename(file, true).c_str());
+    }
+
+
+    // when we only have one file, we default to running the file
+    if (entries.size() == 1) outputCPPDefaultInvokeFile(cg, entries[0]);
+
+    cg_printf("return throw_missing_file(s.data());\n");
+    cg_indentEnd("}\n");
 
     cg.namespaceEnd();
     fTable.close();

@@ -144,6 +144,11 @@ public:
   static bool GenArrayCreate;
 
   /**
+   * Generate hash-table lookup based invoke_file
+   */
+  static bool GenHashTableInvokeFile;
+
+  /**
    * Separate compilation
    */
   static bool SeparateCompilation;

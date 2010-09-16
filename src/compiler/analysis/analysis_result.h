@@ -561,6 +561,10 @@ private:
   void outputCPPSepExtensionMake();
   void outputCPPSepExtensionIncludes(CodeGenerator &cg);
 
+  void outputCPPInvokeFileHeader(CodeGenerator &cg);
+  void outputCPPEvalHook(CodeGenerator &cg);
+  void outputCPPDefaultInvokeFile(CodeGenerator &cg, const char *file);
+
   void outputTaintNumDecl(CodeGenerator &cg, int num);
   void outputTaintDecl(CodeGenerator &cg);
   void outputTaintImpl(CodeGenerator &cg);
@@ -570,6 +574,9 @@ private:
   void outputArrayCreateNumDecl(CodeGenerator &cg, int num, const char *type);
   void outputArrayCreateDecl(CodeGenerator &cg);
   void outputArrayCreateImpl(CodeGenerator &cg);
+  void outputCPPHashTableInvokeFile(CodeGenerator &cg,
+                                    const std::vector<const char*> &entries,
+                                    bool needEvalHook);
 
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);

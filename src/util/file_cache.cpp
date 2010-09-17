@@ -54,11 +54,15 @@ FileCache::~FileCache() {
   for (FileMap::iterator iter = m_files.begin(); iter != m_files.end();
        ++iter) {
     Buffer &buffer = iter->second;
-    if (buffer.data) {
-      free(buffer.data);
-    }
-    if (buffer.cdata) {
-      free(buffer.cdata);
+    if (m_fd == -1) {
+      if (buffer.data) {
+        free(buffer.data);
+      }
+      if (buffer.cdata) {
+        free(buffer.cdata);
+      }
+    } else {
+      assert(buffer.data == NULL || buffer.cdata == NULL);
     }
   }
   if (m_fd != -1) {

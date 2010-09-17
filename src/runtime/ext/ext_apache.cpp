@@ -117,8 +117,18 @@ bool f_virtual(CStrRef filename) {
 
 Variant f_apache_get_config() {
   Array ret;
+  int workers, queued;
+
+  workers = queued = 0;
+  if (HttpServer::Server) {
+    workers = HttpServer::Server->getPageServer()->getActiveWorker();
+    queued = HttpServer::Server->getPageServer()->getQueuedJobs();
+  }
+
   ret.set("restart_time", HttpServer::StartTime);
   ret.set("max_clients", RuntimeOption::ServerThreadCount);
+  ret.set("active_clients", workers);
+  ret.set("queued_requests", queued);
   return ret;
 }
 

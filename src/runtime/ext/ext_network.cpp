@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_network.h>
 #include <runtime/ext/ext_apc.h>
+#include <runtime/ext/ext_string.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/server/server_stats.h>
 #include <util/lock.h>
@@ -774,10 +775,12 @@ void f_header(CStrRef str, bool replace /* = true */,
     raise_warning("Cannot modify header information - headers already sent");
   }
 
+  String header = f_rtrim(str);
+
   // new line safety check
   // NOTE: PHP actually allows "\n " and "\n\t" to fall through. Is that bad
   // for security?
-  if (str.find('\n') >= 0) {
+  if (header.find('\n') >= 0) {
     raise_warning("Header may not contain more than a single header, "
                   "new line detected");
     return;
@@ -785,10 +788,10 @@ void f_header(CStrRef str, bool replace /* = true */,
 
   Transport *transport = g_context->getTransport();
   if (transport) {
-    const char *header_line = str->data();
+    const char *header_line = header->data();
 
     // handle single line of status code
-    if (str->size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
+    if (header->size() >= 5 && strncasecmp(header_line, "HTTP/", 5) == 0) {
       int code = 200;
       for (const char *ptr = header_line; *ptr; ptr++) {
         if (*ptr == ' ' && *(ptr + 1) != ' ') {
@@ -812,14 +815,14 @@ void f_header(CStrRef str, bool replace /* = true */,
         mimetype = ptr;
         if (strncmp(mimetype, "text/", 5) == 0 &&
             strstr(mimetype, "charset=") == NULL) {
-          newHeader = str + ";charset=utf-8";
+          newHeader = header + ";charset=utf-8";
         }
       }
     }
     if (replace) {
-      transport->replaceHeader(newHeader.empty() ? str : newHeader);
+      transport->replaceHeader(newHeader.empty() ? header : newHeader);
     } else {
-      transport->addHeader(newHeader.empty() ? str : newHeader);
+      transport->addHeader(newHeader.empty() ? header : newHeader);
     }
     if (http_response_code) {
       transport->setResponse(http_response_code,

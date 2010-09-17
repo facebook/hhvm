@@ -156,6 +156,7 @@ Variant EvalDefine::invokeImpl(VariableEnvironment &env,
       if (!f_defined(n)) {
         return RequestEvalState::declareConstant(n, params.rvalAt(1));
       } else {
+        raise_notice("Constant %s already defined", n.toString().data());
         return false;
       }
     }

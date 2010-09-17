@@ -319,7 +319,7 @@ DefineFunction(
       array(
         'name'   => "length",
         'type'   => Int32,
-        'value'  => "k_PHP_INT_MAX",
+        'value'  => "INT_MAX",
         'desc'   => "If length is given and is positive, the return value will contain at most length characters of the portion that begins at offset (depending on the length of string).\n\nIf negative length is passed, iconv_substr() cuts the portion out of str from the offset'th character up to the character that is length characters away from the end of the string. In case offset is also negative, the start position is calculated beforehand according to the rule explained above.",
       ),
       array(

@@ -404,6 +404,8 @@ bool TestExtDatetime::test_mktime() {
 
   VS(f_mktime(), time(NULL));
 
+  VS(f_date("h", f_mktime(9)), "09");
+
   return Count(true);
 }
 

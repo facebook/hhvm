@@ -397,6 +397,9 @@ function get_serialized_default($s) {
   if ($s == 'RAND_MAX') {
     return serialize(getrandmax());
   }
+  if ($s == 'INT_MAX') {
+    return serialize((1 << 31) - 1);
+  }
   throw new Exception("Unable to serialize default value: [$s]");
 }
 

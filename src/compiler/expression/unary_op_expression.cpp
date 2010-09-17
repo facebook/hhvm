@@ -553,6 +553,7 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (m_op == '@') {
+    if (isUnused()) m_exp->setUnused(true);
     bool inExpression = ar->inExpression();
     bool doit = state & FixOrder;
     if (!doit) {
@@ -747,8 +748,10 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
       }
       break;
     case '@':
-      // Void needs to return something to silenceDec
-      if (!m_exp->hasCPPTemp() && !m_exp->getActualType()) {
+      if (m_silencer < 0 && isUnused()) {
+        m_exp->outputCPPUnneeded(cg, ar);
+      } else if (!m_exp->hasCPPTemp() && !m_exp->getActualType()) {
+        // Void needs to return something to silenceDec
         cg_printf("(");
         m_exp->outputCPP(cg, ar);
         cg_printf(",null)");

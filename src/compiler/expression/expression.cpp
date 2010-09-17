@@ -605,14 +605,16 @@ void Expression::preOutputStash(CodeGenerator &cg, AnalysisResultPtr ar,
   }
 
   if (dstType) {
-    switch (dstType->getKindOf()) {
-    case Type::KindOfAny:
-    case Type::KindOfSome:
-      dstType = Type::Variant;
-      break;
-    default:
-      break;
-    }
+    if (isUnused()) {
+      dstType.reset();
+    } else switch (dstType->getKindOf()) {
+        case Type::KindOfAny:
+        case Type::KindOfSome:
+          dstType = Type::Variant;
+          break;
+        default:
+          break;
+      }
   }
 
   bool constRef = dstType &&

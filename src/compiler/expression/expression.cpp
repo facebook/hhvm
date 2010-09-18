@@ -204,7 +204,7 @@ bool Expression::IsIdentifier(const string &value) {
 TypePtr Expression::getType() {
   if (m_expectedType) return m_expectedType;
   if (m_actualType) return m_actualType;
-  return NEW_TYPE(Any);
+  return Type::Any;
 }
 
 TypePtr Expression::propagateTypes(AnalysisResultPtr ar, TypePtr inType) {
@@ -355,7 +355,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
                                          value /* =ExpressionPtr() */) {
   TypePtr ret = type;
   if (value) {
-    ret = value->inferAndCheck(ar, NEW_TYPE(Some), false);
+    ret = value->inferAndCheck(ar, Type::Some, false);
   }
 
   BlockScopePtr scope = ar->getScope();

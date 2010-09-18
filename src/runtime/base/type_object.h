@@ -70,6 +70,16 @@ class Object : public SmartPtr<ObjectData> {
     return m_px && m_px->o_instanceof(s);
   }
 
+  ArrayIterPtr begin(CStrRef context = null_string) const {
+    if (!m_px) throw NullPointerException();
+    return m_px->begin(context);
+  }
+
+  MutableArrayIterPtr begin(Variant *key, Variant &val) const {
+    if (!m_px) throw NullPointerException();
+    return m_px->begin(key, val);
+  }
+
   /**
    * getTyped() and is() are intended for use with classes only. Using
    * these functions with an interface will cause a compile time error.

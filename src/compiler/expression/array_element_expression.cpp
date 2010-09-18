@@ -280,7 +280,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
         }
       }
       if (m_offset) {
-        m_offset->inferAndCheck(ar, NEW_TYPE(Primitive), false);
+        m_offset->inferAndCheck(ar, Type::Primitive, false);
       }
       return m_implementedType = Type::Variant; // so not to lose values
     }
@@ -292,8 +292,9 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
 
   TypePtr varType;
   if (m_offset) {
-    varType = m_variable->inferAndCheck(ar, NEW_TYPE(Sequence), false);
-    m_offset->inferAndCheck(ar, NEW_TYPE(Some), false);
+    varType = m_variable->inferAndCheck(ar, coerce ? Type::AutoSequence :
+                                        Type::Sequence, coerce);
+    m_offset->inferAndCheck(ar, Type::Some, false);
   } else {
     if (hasContext(ExistContext) || hasContext(UnsetContext)) {
       if (ar->isFirstPass()) {

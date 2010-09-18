@@ -77,7 +77,7 @@ void AssignmentExpression::onParse(AnalysisResultPtr ar) {
   // This is that much we can do during parse phase.
   TypePtr type;
   if (m_value->is(Expression::KindOfScalarExpression)) {
-    type = m_value->inferAndCheck(ar, NEW_TYPE(Some), false);
+    type = m_value->inferAndCheck(ar, Type::Some, false);
   } else if (m_value->is(Expression::KindOfUnaryOpExpression)) {
     UnaryOpExpressionPtr uexp =
       dynamic_pointer_cast<UnaryOpExpression>(m_value);
@@ -85,7 +85,7 @@ void AssignmentExpression::onParse(AnalysisResultPtr ar) {
       type = Type::Array;
     }
   }
-  if (!type) type = NEW_TYPE(Some);
+  if (!type) type = Type::Some;
 
   if (m_variable->is(Expression::KindOfConstantExpression)) {
     // ...as in ClassConstant statement

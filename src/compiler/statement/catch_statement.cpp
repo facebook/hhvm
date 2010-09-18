@@ -110,7 +110,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   // This can never be a specific exception type, because a future exception
   // class may be re-declaring, then generated code like this won't work with
   // DynamicObjectData: p_exception v_e = e;
-  type = NEW_TYPE(Object);
+  type = Type::Object;
 
   BlockScopePtr scope = ar->getScope();
   VariableTablePtr variables = scope->getVariables();

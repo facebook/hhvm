@@ -34,26 +34,41 @@ class Type : public JSON::ISerializable {
 public:
   typedef int KindOf;
 
-  static const KindOf KindOfVoid    = 0x0001;
-  static const KindOf KindOfBoolean = 0x0002;
-  static const KindOf KindOfByte    = 0x0004;
-  static const KindOf KindOfInt16   = 0x0008;
-  static const KindOf KindOfInt32   = 0x0010;
-  static const KindOf KindOfInt64   = 0x0020;
-  static const KindOf KindOfDouble  = 0x0040;
-  static const KindOf KindOfString  = 0x0080;
-  static const KindOf KindOfArray   = 0x0100;
-  static const KindOf KindOfObject  = 0x0200;   // with classname
-  static const KindOf KindOfVariant = 0xFFFF;
+  static const KindOf KindOfVoid       = 0x0001;
+  static const KindOf KindOfBoolean    = 0x0002;
+  static const KindOf KindOfByte       = 0x0004;
+  static const KindOf KindOfInt16      = 0x0008;
+  static const KindOf KindOfInt32      = 0x0010;
+  static const KindOf KindOfInt64      = 0x0020;
+  static const KindOf KindOfDouble     = 0x0040;
+  static const KindOf KindOfString     = 0x0080;
+  static const KindOf KindOfArray      = 0x0100;
+  static const KindOf KindOfObject     = 0x0200;   // with classname
+  static const KindOf KindOfVariant    = 0xFFFF;
 
-  static const KindOf KindOfNumeric = (KindOf)(KindOfDouble | KindOfInt64
-                                    | KindOfInt32 | KindOfInt16 | KindOfByte);
+  /* This bit tells coerce that if the other type
+     is already one of the specified types, it wont
+     be modified.
+     eg $a['foo'] = <whatever>
+     If $a is already known to be string or array, it stays that way.
+     If we coerce to Sequence, however, it would become Sequence, and
+     hence Variant
+  */
+  static const KindOf KindOfAuto       = 0x0400;
+
+  static const KindOf KindOfInteger = (KindOf)(KindOfInt64 | KindOfInt32 |
+                                               KindOfInt16 | KindOfByte);
+  static const KindOf KindOfNumeric = (KindOf)(KindOfDouble | KindOfInteger);
   static const KindOf KindOfPrimitive = (KindOf)(KindOfNumeric | KindOfString);
   static const KindOf KindOfPlusOperand = (KindOf)(KindOfNumeric | KindOfArray);
   static const KindOf KindOfSequence = (KindOf)(KindOfString | KindOfArray);
+
+  static const KindOf KindOfAutoSequence = (KindOf)(KindOfAuto |
+                                                    KindOfSequence);
+  static const KindOf KindOfAutoObject = (KindOf)(KindOfAuto | KindOfObject);
+
   static const KindOf KindOfSome = (KindOf)0x7FFE;
   static const KindOf KindOfAny = (KindOf)0x7FFF;
-
   /**
    * Inferred types: types that a variable or a constant is sure to be.
    */
@@ -65,7 +80,19 @@ public:
   static TypePtr Double;
   static TypePtr String;
   static TypePtr Array;
+  static TypePtr Object;
   static TypePtr Variant;
+
+  static TypePtr Numeric;
+  static TypePtr PlusOperand;
+  static TypePtr Primitive;
+  static TypePtr Sequence;
+
+  static TypePtr AutoSequence;
+  static TypePtr AutoObject;
+
+  static TypePtr Any;
+  static TypePtr Some;
 
   /**
    * Uncertain types: types that are ambiguous yet.

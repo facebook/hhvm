@@ -363,7 +363,7 @@ TypePtr ExpressionList::inferTypes(AnalysisResultPtr ar, TypePtr type,
   size_t size = m_exps.size();
   bool commaList = size && (m_kind != ListKindParam);
   size_t ix = m_kind == ListKindLeft ? 0 : size - 1;
-  TypePtr tmp = commaList ? NEW_TYPE(Some) : type;
+  TypePtr tmp = commaList ? Type::Some : type;
   TypePtr ret = type;
   for (size_t i = 0; i < size; i++) {
     TypePtr t = i != ix ? tmp : type;

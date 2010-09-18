@@ -32,6 +32,8 @@ DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FileScope);
 
+class Symbol;
+
 /**
  * A class scope corresponds to a class declaration. We store all
  * inferred types and analyzed results here, so not to pollute syntax trees.
@@ -217,9 +219,10 @@ public:
   FunctionScopePtr findConstructor(AnalysisResultPtr ar,
                                    bool recursive);
 
-  TypePtr checkProperty(const std::string &name, TypePtr type,
-                        bool coerce, AnalysisResultPtr ar,
-                        ConstructPtr construct, int &properties);
+  Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
+                       AnalysisResultPtr ar, ConstructPtr construct);
+  TypePtr checkProperty(Symbol *sym, TypePtr type,
+                        bool coerce, AnalysisResultPtr ar);
   TypePtr checkStatic(const std::string &name, TypePtr type,
                       bool coerce, AnalysisResultPtr ar,
                       ConstructPtr construct, int &properties);

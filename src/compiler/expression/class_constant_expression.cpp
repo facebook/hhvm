@@ -169,7 +169,7 @@ TypePtr ClassConstantExpression::inferTypes(AnalysisResultPtr ar,
   ConstructPtr self = shared_from_this();
 
   if (m_class) {
-    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
+    m_class->inferAndCheck(ar, Type::Any, false);
     return Type::Variant;
   }
 

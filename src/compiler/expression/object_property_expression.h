@@ -25,6 +25,7 @@ namespace HPHP {
 DECLARE_BOOST_TYPES(ExpressionList);
 DECLARE_BOOST_TYPES(ObjectPropertyExpression);
 DECLARE_BOOST_TYPES(ClassScope);
+class Symbol;
 
 class ObjectPropertyExpression : public Expression {
 public:
@@ -60,9 +61,10 @@ private:
 
   bool m_valid;
   int m_localEffects;
-  ClassScopePtr m_class; // when m_object's type was inferred
   std::string m_lvalTmp;
 
+  Symbol *m_propSym;
+  ClassScopePtr m_propClass;
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   void outputCPPObjProperty(CodeGenerator &cg, AnalysisResultPtr ar,

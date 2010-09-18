@@ -276,7 +276,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           BlockScopePtr block = ar->findConstantDeclarer(varName);
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
-            constants->add(varName, NEW_TYPE(Some), value, ar, self);
+            constants->add(varName, Type::Some, value, ar, self);
             if (name->hasHphpNote("Dynamic")) {
               constants->setDynamic(ar, varName);
             }
@@ -286,7 +286,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     }
 
     if (m_type == UnserializeFunction) {
-      ar->forceClassVariants();
+      ar->forceClassVariants(getOriginalScope(ar));
     }
   }
 
@@ -758,11 +758,11 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
   reset();
 
   if (m_class) {
-    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
+    m_class->inferAndCheck(ar, Type::Any, false);
   }
 
   if (m_safeDef) {
-    m_safeDef->inferAndCheck(ar, NEW_TYPE(Any), false);
+    m_safeDef->inferAndCheck(ar, Type::Any, false);
   }
 
   if (m_safe) {
@@ -782,7 +782,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         varName = name->getIdentifier();
         if (!varName.empty()) {
           ExpressionPtr value = (*m_params)[1];
-          TypePtr varType = value->inferAndCheck(ar, NEW_TYPE(Some), false);
+          TypePtr varType = value->inferAndCheck(ar, Type::Some, false);
           ar->getDependencyGraph()->
             addParent(DependencyGraph::KindOfConstant,
                       ar->getName(), varName, self);
@@ -846,7 +846,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         ar->getCodeError()->record(self, CodeError::UnknownClass, self);
       }
       if (m_params) {
-        m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
+        m_params->inferAndCheck(ar, Type::Some, false);
         m_params->markParams(canInvokeFewArgs());
       }
       return checkTypesImpl(ar, type, Type::Variant, coerce);
@@ -906,7 +906,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
       if (m_arrayParams) {
         (*m_params)[0]->inferAndCheck(ar, Type::Array, false);
       } else {
-        m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
+        m_params->inferAndCheck(ar, Type::Some, false);
       }
     }
     return checkTypesImpl(ar, type, Type::Variant, coerce);

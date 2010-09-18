@@ -166,9 +166,11 @@ TypePtr SimpleVariable::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         ret = Type::Array;
       } else if (scope->is(BlockScope::ClassScope)) {
         // ClassVariable expression will come to this block of code
-        int properties;
-        ret = variables->checkProperty(m_name, type, true, ar, construct,
-                                       properties);
+        ClassScopePtr cls;
+        if (Symbol *sym = variables->findProperty(cls, m_name, ar, construct)) {
+          if (!cls) cls = ar->getClassScope();
+          ret = cls->checkProperty(sym, type, true, ar);
+        }
       } else {
         TypePtr tmpType = type;
         if (m_context & RefValue) {

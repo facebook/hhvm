@@ -18,6 +18,7 @@
 #define __HPHP_OBJECT_DATA_H__
 
 #include <runtime/base/util/countable.h>
+#include <runtime/base/util/smart_ptr.h>
 #include <runtime/base/types.h>
 #include <runtime/base/memory/unsafe_pointer.h>
 #include <runtime/base/macros.h>
@@ -32,6 +33,11 @@ class MethodStatement;
 class FunctionCallExpression;
 class VariableEnvironment;
 }
+
+class IArrayIterator;
+typedef SmartPtr<IArrayIterator> ArrayIterPtr;
+class MutableArrayIter;
+typedef SmartPtr<MutableArrayIter> MutableArrayIterPtr;
 
 /**
  * Base class of all user-defined classes. All data members and methods in
@@ -90,6 +96,9 @@ class ObjectData : public Countable {
     }
     return oldInCtor;
   }
+
+  ArrayIterPtr begin(CStrRef context = null_string);
+  MutableArrayIterPtr begin(Variant *key, Variant &val);
 
   /**
    * o_instanceof() can be used for both classes and interfaces. Note
@@ -304,7 +313,6 @@ class ObjectData : public Countable {
     CT_ASSERT(offsetof(ObjectData, _count) == FAST_REFCOUNT_OFFSET);
   }
 #endif
-
 };
 
 typedef ObjectData c_ObjectData; // purely for easier code generation
@@ -314,7 +322,7 @@ public:
   ExtObjectData() : root(this) {}
   Variant o_root_invoke(const char *s, CArrRef ps, int64 h, bool f = true);
   Variant o_root_invoke_few_args(const char *s, int64 h, int count,
-                          INVOKE_FEW_ARGS_DECL_ARGS);
+                                 INVOKE_FEW_ARGS_DECL_ARGS);
   virtual void setRoot(ObjectData *r) { root = r; }
   virtual ObjectData *getRoot() { return root; }
 protected: ObjectData *root;

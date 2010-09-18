@@ -129,7 +129,7 @@ TypePtr ListAssignment::inferTypes(AnalysisResultPtr ar, TypePtr type,
       ExpressionPtr exp = (*m_variables)[i];
       if (exp) {
         if (exp->is(Expression::KindOfListAssignment)) {
-          exp->inferAndCheck(ar, NEW_TYPE(Any), false);
+          exp->inferAndCheck(ar, Type::Any, false);
         } else {
           inferAssignmentTypes(ar, Type::Variant, true, exp);
         }

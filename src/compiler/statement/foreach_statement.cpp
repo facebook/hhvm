@@ -142,9 +142,9 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
     ar->getCodeError()->record(self, CodeError::ComplexForEach, self);
   }
 
-  m_array->inferAndCheck(ar, Type::Variant, true);
+  m_array->inferAndCheck(ar, m_ref ? Type::Variant : Type::Array, m_ref);
   if (m_name) {
-    m_name->inferAndCheck(ar, NEW_TYPE(Primitive), true);
+    m_name->inferAndCheck(ar, Type::Primitive, true);
   }
   m_value->inferAndCheck(ar, Type::Variant, true);
   if (m_ref) {
@@ -152,7 +152,7 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
     if (!actualType ||
         actualType->is(Type::KindOfVariant) ||
         actualType->is(Type::KindOfObject)) {
-      ar->forceClassVariants();
+      ar->forceClassVariants(ar->getClassScope());
     }
   }
   if (m_stmt) {

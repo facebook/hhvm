@@ -113,12 +113,12 @@ void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
           ret = m_exp->inferAndCheck(ar, funcScope->getReturnType(), false);
         } else {
           ConstructPtr self = shared_from_this();
-          ret = m_exp->inferAndCheck(ar, NEW_TYPE(Some), false);
+          ret = m_exp->inferAndCheck(ar, Type::Some, false);
           ar->getCodeError()->record(self, CodeError::BadReturnStatement,
                                      self);
         }
       } else {
-        TypePtr expected = NEW_TYPE(Some);
+        TypePtr expected = Type::Some;
         if (ar->getPhase() == AnalysisResult::LastInference &&
             funcScope->getReturnType()) {
           expected = funcScope->getReturnType();

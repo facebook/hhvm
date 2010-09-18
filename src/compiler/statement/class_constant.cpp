@@ -96,7 +96,7 @@ StatementPtr ClassConstant::postOptimize(AnalysisResultPtr ar) {
 }
 
 void ClassConstant::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, NEW_TYPE(Some), false);
+  m_exp->inferAndCheck(ar, Type::Some, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

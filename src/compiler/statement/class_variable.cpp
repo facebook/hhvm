@@ -85,7 +85,11 @@ void ClassVariable::onParse(AnalysisResultPtr ar) {
 
 void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
   m_declaration->analyzeProgram(ar);
-  if (ar->getPhase() != AnalysisResult::AnalyzeInclude) return;
+  AnalysisResult::Phase phase = ar->getPhase();
+  if (phase != AnalysisResult::AnalyzeInclude &&
+      phase != AnalysisResult::AnalyzeAll) {
+    return;
+  }
   ClassScopePtr scope = ar->getClassScope();
   for (int i = 0; i < m_declaration->getCount(); i++) {
     ExpressionPtr exp = (*m_declaration)[i];
@@ -94,8 +98,16 @@ void ClassVariable::analyzeProgramImpl(AnalysisResultPtr ar) {
         dynamic_pointer_cast<AssignmentExpression>(exp);
       SimpleVariablePtr var =
         dynamic_pointer_cast<SimpleVariable>(assignment->getVariable());
-      ExpressionPtr value = assignment->getValue();
-      scope->getVariables()->setClassInitVal(var->getName(), value);
+      if (phase == AnalysisResult::AnalyzeInclude) {
+        ExpressionPtr value = assignment->getValue();
+        scope->getVariables()->setClassInitVal(var->getName(), value);
+      } else {
+        scope->getVariables()->markOverride(ar, var->getName());
+      }
+    } else if (phase == AnalysisResult::AnalyzeAll) {
+      SimpleVariablePtr var =
+        dynamic_pointer_cast<SimpleVariable>(exp);
+      scope->getVariables()->markOverride(ar, var->getName());
     }
   }
 }
@@ -144,7 +156,7 @@ StatementPtr ClassVariable::postOptimize(AnalysisResultPtr ar) {
 }
 
 void ClassVariable::inferTypes(AnalysisResultPtr ar) {
-  m_declaration->inferAndCheck(ar, NEW_TYPE(Some), false);
+  m_declaration->inferAndCheck(ar, Type::Some, false);
 
   if (m_modifiers->isStatic()) {
     ClassScopePtr scope = ar->getClassScope();
@@ -163,6 +175,7 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
           TypePtr type = scope->getVariables()->getFinalType(var->getName());
           if (type->is(Type::KindOfObject)) {
             scope->getVariables()->forceVariant(ar, var->getName());
+            scope->getVariables()->forcePrivateVariant(ar, var->getName());
           }
         }
         ExpressionPtr value = assignment->getValue();
@@ -178,6 +191,7 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
         // the class header files in global_variables.h
         if (type->is(Type::KindOfObject)) {
           scope->getVariables()->forceVariant(ar, var->getName());
+          scope->getVariables()->forcePrivateVariant(ar, var->getName());
         }
         const char *initializer = type->getCPPInitializer();
         if (initializer) scope->setNeedStaticInitializer();

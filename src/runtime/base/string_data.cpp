@@ -204,6 +204,18 @@ void StringData::escalate() {
   m_hash = 0;
 }
 
+StringData *StringData::escalate(StringData *in) {
+  if (!in) return NEW(StringData)();
+  if (in->_count != 1 || in->isImmutable()) {
+    StringData *ret = NEW(StringData)(in->data(), in->size(), CopyString);
+    ret->incRefCount();
+    if (!in->decRefCount()) in->release();
+    return ret;
+  }
+  in->m_hash = 0;
+  return in;
+}
+
 void StringData::dump() const {
   const char *p = data();
   int len = size();

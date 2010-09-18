@@ -95,8 +95,8 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       if (!cls && ar->isFirstPass()) {
         ar->getCodeError()->record(self, CodeError::UnknownClass, self);
       }
-      if (m_params) m_params->inferAndCheck(ar, NEW_TYPE(Any), false);
-      return NEW_TYPE(Object);
+      if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
+      return Type::Object;
     }
     if (cls->isVolatile()) {
       ar->getScope()->getVariables()->
@@ -114,7 +114,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           }
           m_params->setOutputCount(0);
         }
-        m_params->inferAndCheck(ar, NEW_TYPE(Some), false);
+        m_params->inferAndCheck(ar, Type::Some, false);
       }
     } else {
       m_extraArg = func->inferParamTypes(ar, self, m_params,
@@ -122,7 +122,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       m_variableArgument = func->isVariableArgument();
     }
     if (!m_validClass || m_dynamic) {
-      m_implementedType = NEW_TYPE(Object);
+      m_implementedType = Type::Object;
     } else {
       m_implementedType.reset();
     }
@@ -140,8 +140,8 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   m_implementedType.reset();
   m_nameExp->inferAndCheck(ar, Type::String, false);
-  if (m_params) m_params->inferAndCheck(ar, NEW_TYPE(Any), false);
-  return NEW_TYPE(Object);
+  if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
+  return Type::Object;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

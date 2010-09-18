@@ -81,7 +81,7 @@ StatementPtr ThrowStatement::postOptimize(AnalysisResultPtr ar) {
 }
 
 void ThrowStatement::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, NEW_TYPE(Object), false);
+  m_exp->inferAndCheck(ar, Type::Object, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

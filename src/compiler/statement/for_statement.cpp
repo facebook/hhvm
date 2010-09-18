@@ -134,15 +134,15 @@ StatementPtr ForStatement::postOptimize(AnalysisResultPtr ar) {
 }
 
 void ForStatement::inferTypes(AnalysisResultPtr ar) {
-  if (m_exp1) m_exp1->inferAndCheck(ar, NEW_TYPE(Any), false);
+  if (m_exp1) m_exp1->inferAndCheck(ar, Type::Any, false);
   if (m_exp2) m_exp2->inferAndCheck(ar, Type::Boolean, false);
   if (m_stmt) {
     ar->getScope()->incLoopNestedLevel();
     m_stmt->inferTypes(ar);
-    if (m_exp3) m_exp3->inferAndCheck(ar, NEW_TYPE(Any), false);
+    if (m_exp3) m_exp3->inferAndCheck(ar, Type::Any, false);
     ar->getScope()->decLoopNestedLevel();
   } else {
-    if (m_exp3) m_exp3->inferAndCheck(ar, NEW_TYPE(Any), false);
+    if (m_exp3) m_exp3->inferAndCheck(ar, Type::Any, false);
   }
 }
 

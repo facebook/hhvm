@@ -198,12 +198,12 @@ public:
    * Force all class variables to be variants, since l-val or reference
    * of dynamic properties are used.
    */
-  void forceClassVariants();
+  void forceClassVariants(ClassScopePtr curScope);
 
   /**
    * Force specified variable of all classes to be variants.
    */
-  void forceClassVariants(const std::string &name);
+  void forceClassVariants(const std::string &name, ClassScopePtr curScope);
 
   /**
    * Code generation functions.

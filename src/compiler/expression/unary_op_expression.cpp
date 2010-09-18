@@ -327,42 +327,42 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   TypePtr rt; // return type
 
   switch (m_op) {
-  case '!':             et = rt = Type::Boolean;                         break;
+  case '!':             et = rt = Type::Boolean;                     break;
   case '+':
-  case '-':             et = NEW_TYPE(Numeric); rt = NEW_TYPE(Numeric);  break;
+  case '-':             et = Type::Numeric; rt = Type::Numeric;      break;
   case T_INC:
   case T_DEC:
-  case '~':             et = rt = NEW_TYPE(Primitive);                   break;
-  case T_CLONE:         et = NEW_TYPE(Some);      rt = NEW_TYPE(Object); break;
-  case '@':             et = type;                rt = Type::Variant;    break;
-  case '(':             et = rt = type;                                  break;
-  case T_INT_CAST:      et = rt = Type::Int64;                           break;
-  case T_DOUBLE_CAST:   et = rt = Type::Double;                          break;
-  case T_STRING_CAST:   et = rt = Type::String;                          break;
-  case T_ARRAY:         et = NEW_TYPE(Some);      rt = Type::Array;      break;
-  case T_ARRAY_CAST:    et = rt = Type::Array;                           break;
-  case T_OBJECT_CAST:   et = rt = NEW_TYPE(Object);                      break;
-  case T_BOOL_CAST:     et = rt = Type::Boolean;                         break;
-  case T_UNSET_CAST:    et = NEW_TYPE(Some);      rt = Type::Variant;    break;
-  case T_UNSET:         et = NEW_TYPE(Some);      rt = Type::Variant;    break;
-  case T_EXIT:          et = NEW_TYPE(Primitive); rt = Type::Variant;    break;
-  case T_PRINT:         et = Type::String;        rt = Type::Boolean;    break;
-  case T_ISSET:         et = Type::Variant;       rt = Type::Boolean;
+  case '~':             et = rt = Type::Primitive;                   break;
+  case T_CLONE:         et = Type::Some;      rt = Type::Object;     break;
+  case '@':             et = type;            rt = Type::Variant;    break;
+  case '(':             et = rt = type;                              break;
+  case T_INT_CAST:      et = rt = Type::Int64;                       break;
+  case T_DOUBLE_CAST:   et = rt = Type::Double;                      break;
+  case T_STRING_CAST:   et = rt = Type::String;                      break;
+  case T_ARRAY:         et = Type::Some;      rt = Type::Array;      break;
+  case T_ARRAY_CAST:    et = rt = Type::Array;                       break;
+  case T_OBJECT_CAST:   et = rt = Type::Object;                      break;
+  case T_BOOL_CAST:     et = rt = Type::Boolean;                     break;
+  case T_UNSET_CAST:    et = Type::Some;      rt = Type::Variant;    break;
+  case T_UNSET:         et = Type::Some;      rt = Type::Variant;    break;
+  case T_EXIT:          et = Type::Primitive; rt = Type::Variant;    break;
+  case T_PRINT:         et = Type::String;    rt = Type::Boolean;    break;
+  case T_ISSET:         et = Type::Variant;   rt = Type::Boolean;
     setExistContext();
     break;
-  case T_EMPTY:         et = NEW_TYPE(Some);      rt = Type::Boolean;
+  case T_EMPTY:         et = Type::Some;      rt = Type::Boolean;
     setExistContext();
     break;
   case T_INCLUDE:
   case T_INCLUDE_ONCE:
   case T_REQUIRE:
-  case T_REQUIRE_ONCE:  et = Type::String;        rt = Type::Variant;    break;
+  case T_REQUIRE_ONCE:  et = Type::String;    rt = Type::Variant;    break;
   case T_EVAL:
     et = Type::String;
-    rt = NEW_TYPE(Any);
+    rt = Type::Any;
     ar->getScope()->getVariables()->forceVariants(ar);
     break;
-  case T_FILE:          et = rt = Type::String;                          break;
+  case T_FILE:          et = rt = Type::String;                      break;
   default:
     ASSERT(false);
   }

@@ -135,12 +135,12 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
     // that didn't implement __toString(), throwing an exception, which isn't
     // consistent with PHP.
     //ret = m_exp->inferAndCheck(ar, Type::String, false);
-    ret = m_exp->inferAndCheck(ar, NEW_TYPE(Some), false);
+    ret = m_exp->inferAndCheck(ar, Type::Some, false);
   } else {
-    ret = m_exp->inferAndCheck(ar, NEW_TYPE(Some), false);
+    ret = m_exp->inferAndCheck(ar, Type::Some, false);
   }
   if (ret->is(Type::KindOfObject) && ret->isSpecificObject()) {
-    m_exp->setExpectedType(NEW_TYPE(Object));
+    m_exp->setExpectedType(Type::Object);
   }
   ConstructPtr self = shared_from_this();
   if (m_cases && m_cases->getCount()) {
@@ -150,7 +150,7 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
     for (int i = 0; i < m_cases->getCount(); i++) {
       CaseStatementPtr stmt =
         dynamic_pointer_cast<CaseStatement>((*m_cases)[i]);
-      stmt->inferAndCheck(ar, NEW_TYPE(Some), false);
+      stmt->inferAndCheck(ar, Type::Some, false);
       ExpressionPtr cond = stmt->getCondition();
       if (!cond) {
         checking = true;

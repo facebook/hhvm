@@ -247,6 +247,9 @@ public:
   StringOffset lvalAt(CObjRef key);
   StringOffset lvalAt(CVarRef key);
 
+  template <class K, class V>
+  inline const V &set(K key, const V &value);
+
   template<class T>
   String refvalAt(T key) {
     return rvalAt(key);
@@ -282,9 +285,7 @@ public:
 
  private:
   StringOffset lvalAtImpl(int key) {
-    SmartPtr<StringData>::operator=
-      (NEW(StringData)(data(), size(), CopyString));
-    return StringOffset(m_px, key);
+    return StringOffset((m_px = StringData::escalate(m_px)), key);
   }
 
   String rvalAtImpl(int key) const {

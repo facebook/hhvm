@@ -144,7 +144,7 @@ StatementPtr ExpStatement::postOptimize(AnalysisResultPtr ar) {
 }
 
 void ExpStatement::inferTypes(AnalysisResultPtr ar) {
-  m_exp->inferAndCheck(ar, NEW_TYPE(Any), false);
+  m_exp->inferAndCheck(ar, Type::Any, false);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

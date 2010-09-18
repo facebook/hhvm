@@ -555,9 +555,9 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       coerce1 = coerce2 = true;
       rt = Type::Array;
     } else {
-      et1 = NEW_TYPE(PlusOperand);
-      et2 = NEW_TYPE(PlusOperand);
-      rt  = NEW_TYPE(PlusOperand);
+      et1 = Type::PlusOperand;
+      et2 = Type::PlusOperand;
+      rt  = Type::PlusOperand;
     }
     break;
   case '-':
@@ -566,9 +566,9 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_MUL_EQUAL:
   case '/':
   case T_DIV_EQUAL:
-    et1 = NEW_TYPE(Numeric);
-    et2 = NEW_TYPE(Numeric);
-    rt  = NEW_TYPE(Numeric);
+    et1 = Type::Numeric;
+    et2 = Type::Numeric;
+    rt  = Type::Numeric;
     break;
   case '.':
     et1 = et2 = rt = Type::String;
@@ -579,12 +579,12 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     break;
   case '%':
     et1 = et2 = Type::Int64;
-    rt  = NEW_TYPE(Numeric);
+    rt  = Type::Numeric;
     break;
   case T_MOD_EQUAL:
-    et1 = NEW_TYPE(Numeric);
+    et1 = Type::Numeric;
     et2 = Type::Int64;
-    rt  = NEW_TYPE(Numeric);
+    rt  = Type::Numeric;
     break;
   case '|':
   case '&':
@@ -592,9 +592,9 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_AND_EQUAL:
   case T_OR_EQUAL:
   case T_XOR_EQUAL:
-    et1 = NEW_TYPE(Primitive);
-    et2 = NEW_TYPE(Primitive);
-    rt  = NEW_TYPE(Primitive);
+    et1 = Type::Primitive;
+    et2 = Type::Primitive;
+    rt  = Type::Primitive;
     break;
   case T_SL:
   case T_SR:
@@ -617,13 +617,13 @@ TypePtr BinaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_IS_NOT_IDENTICAL:
   case T_IS_EQUAL:
   case T_IS_NOT_EQUAL:
-    et1 = NEW_TYPE(Some);
-    et2 = NEW_TYPE(Some);
+    et1 = Type::Some;
+    et2 = Type::Some;
     rt = Type::Boolean;
     break;
 
   case T_INSTANCEOF:
-    et1 = NEW_TYPE(Any);
+    et1 = Type::Any;
     et2 = Type::String;
     rt = Type::Boolean;
     break;
@@ -981,7 +981,13 @@ bool BinaryOpExpression::outputCPPImplOpEqual(CodeGenerator &cg,
     ArrayElementExpressionPtr exp =
       dynamic_pointer_cast<ArrayElementExpression>(m_exp1);
     if (exp->isSuperGlobal() || exp->isDynamicGlobal()) return false;
-
+    if (TypePtr t = exp->getVariable()->getActualType()) {
+      if (t->is(Type::KindOfArray) &&
+          (!exp->getVariable()->getImplementedType() ||
+           exp->getVariable()->getImplementedType()->is(Type::KindOfArray))) {
+        return false;
+      }
+    }
     // turning $a['elem'] Op= $b into $a.setOpEqual('elem', $b);
     exp->getVariable()->outputCPP(cg, ar);
     if (exp->getOffset()) {

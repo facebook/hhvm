@@ -162,19 +162,25 @@ public:
               ModifierExpressionPtr modifiers, bool checkError = true);
 
   /**
+   * Called to note whether a class variable overrides
+   * a definition in a base class.
+   */
+  void markOverride(AnalysisResultPtr ar, const std::string &name);
+
+  /**
    * Called when a variable is used or being evaluated (r-value).
    */
   TypePtr checkVariable(const std::string &name, TypePtr type, bool coerce,
                         AnalysisResultPtr ar, ConstructPtr construct,
                         int &properties);
-
   /**
-   * Called when a property is used or being evaluated (r-value).
+   * Find the class which contains the property, and return
+   * its Symbol
    */
-  TypePtr checkProperty(const std::string &name, TypePtr type, bool coerce,
-                        AnalysisResultPtr ar, ConstructPtr construct,
-                        int &properties);
-
+  Symbol *findProperty(ClassScopePtr &cls, const std::string &name,
+                       AnalysisResultPtr ar, ConstructPtr construct);
+  TypePtr checkProperty(Symbol *sym, TypePtr type,
+                        bool coerce, AnalysisResultPtr ar);
   /**
    * Walk up to find first parent that has the specified symbol.
    */
@@ -212,14 +218,23 @@ public:
 
 
   /**
-   * Set all variables to variants, since l-dynamic value was used.
+   * Set all non-private variables to variants, since l-dynamic value was used.
    */
   void forceVariants(AnalysisResultPtr ar);
+  /**
+   * Set all private variables to variants, since l-dynamic value was used,
+   * in the class scope
+   */
+  void forcePrivateVariants(AnalysisResultPtr ar);
 
   /**
-   * Set one variable to be Type::Variant.
+   * Set one non-private variable to be Type::Variant.
    */
   void forceVariant(AnalysisResultPtr ar, const std::string &name);
+  /**
+   * Set one private variable to be Type::Variant.
+   */
+  void forcePrivateVariant(AnalysisResultPtr ar, const std::string &name);
 
   /**
    * Keep track of $GLOBALS['var'].
@@ -290,10 +305,12 @@ private:
 
   int m_attribute;
   int m_nextParam;
-  bool m_hasGlobal;
-  bool m_hasStatic;
-  bool m_hasPrivate;
-  bool m_hasNonStaticPrivate;
+  unsigned m_hasGlobal : 1;
+  unsigned m_hasStatic : 1;
+  unsigned m_hasPrivate : 1;
+  unsigned m_hasNonStaticPrivate : 1;
+  unsigned m_allVariants : 1;
+  unsigned m_allPrivateVariants : 1;
 
   std::set<JumpTableName> m_emptyJumpTables;
 
@@ -317,8 +334,6 @@ private:
                              FunctionScopePtr func, const std::string &name);
   };
   StringToStaticGlobalInfoPtrMap m_staticGlobals;
-
-  bool m_allVariants;
 
   bool isGlobalTable(AnalysisResultPtr ar) const;
 

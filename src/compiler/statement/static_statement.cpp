@@ -156,7 +156,7 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
         m_exp->removeElement(i--);
       }
     }
-    m_exp->inferTypes(ar, NEW_TYPE(Any), true);
+    m_exp->inferTypes(ar, Type::Any, true);
     return;
   }
   scope->getVariables()->setAttribute(VariableTable::InsideStaticStatement);
@@ -197,7 +197,7 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
       m_exp->removeElement(i--);
       continue;
     }
-    exp->inferAndCheck(ar, NEW_TYPE(Any), false);
+    exp->inferAndCheck(ar, Type::Any, false);
   }
   scope->getVariables()->clearAttribute(VariableTable::InsideStaticStatement);
 }

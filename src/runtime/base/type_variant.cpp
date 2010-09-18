@@ -1469,19 +1469,7 @@ ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
     return new ArrayIter(getArrayData());
   }
   if (is(KindOfObject)) {
-    ObjectData *obj = getObjectData();
-    if (obj->o_instanceof("Iterator")) {
-      return new ObjectArrayIter(obj);
-    }
-    while (obj->o_instanceof("IteratorAggregate")) {
-      Variant iterator = obj->o_invoke("getiterator", Array(), -1);
-      if (!iterator.isObject()) break;
-      if (iterator.instanceof("Iterator")) {
-        return new ObjectArrayIter(iterator.getObjectData(), &iterator);
-      }
-      obj = iterator.getObjectData();
-    }
-    return new ArrayIter(obj->o_toIterArray(context));
+    return getObjectData()->begin(context);
   }
   raise_warning("Invalid argument supplied for foreach()");
   return new ArrayIter(NULL);
@@ -1489,24 +1477,7 @@ ArrayIterPtr Variant::begin(CStrRef context /* = null_string */) const {
 
 MutableArrayIterPtr Variant::begin(Variant *key, Variant &val) {
   if (is(KindOfObject)) {
-    ObjectData *obj = getObjectData();
-    if (obj->o_instanceof("Iterator")) {
-      throw FatalErrorException("An iterator cannot be used with "
-                                "foreach by reference");
-    }
-    while (obj->o_instanceof("IteratorAggregate")) {
-      Variant iterator = obj->o_invoke("getiterator", Array(), -1);
-      if (!iterator.isObject()) break;
-      if (iterator.instanceof("Iterator")) {
-        throw FatalErrorException("An iterator cannot be used with "
-                                  "foreach by reference");
-      }
-      obj = iterator.getObjectData();
-    }
-    Array properties = obj->o_toIterArray(null_string, true);
-    properties.escalate(true);
-    ArrayData *arr = properties.getArrayData();
-    return new MutableArrayIter(arr, key, val);
+    return getObjectData()->begin(key, val);
   }
   // we are about to modify an array that has other weak references, so
   // we have to make a copy to preserve other instances

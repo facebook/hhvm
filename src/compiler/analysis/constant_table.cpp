@@ -183,7 +183,7 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
         actualType = checkBases(name, type, coerce, ar, construct,
                                 bases, defScope);
         if (defScope) return actualType;
-        actualType = NEW_TYPE(Some);
+        actualType = Type::Some;
         setType(ar, sym, actualType, true);
         sym->setDeclaration(construct);
       }

@@ -50,11 +50,11 @@ TypePtr Symbol::coerceTo(AnalysisResultPtr ar,
 
 TypePtr Symbol::setType(AnalysisResultPtr ar, TypePtr type, bool coerced) {
   TypePtr oldType = getType(true);
-  if (!oldType) oldType = NEW_TYPE(Some);
+  if (!oldType) oldType = Type::Some;
   if (type) {
     TypePtr ret = coerceTo(ar, coerced ? m_coerced : m_rtype, type);
     TypePtr newType = getType(true);
-    if (!newType) newType = NEW_TYPE(Some);
+    if (!newType) newType = Type::Some;
     if (!Type::SameType(oldType, newType)) {
       ar->incNewlyInferred();
     }

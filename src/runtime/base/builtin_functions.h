@@ -461,6 +461,13 @@ inline bool instanceOf(ObjectData *v, const char *s) {
   return v && v->o_instanceof(s);
 }
 
+template <class K, class V>
+const V &String::set(K key, const V &value) {
+  (m_px = StringData::escalate(m_px))->
+    setChar(HPHP::toInt32(key), HPHP::toString(value));
+  return value;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // output functions
 

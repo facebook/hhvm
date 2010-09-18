@@ -83,6 +83,8 @@ class StringData {
     return NULL;
   }
 
+  static StringData *escalate(StringData *in);
+
   /**
    * When we have static StringData in SharedStore, we should avoid directly
    * deleting the StringData pointer, but rather call destruct().

@@ -27,15 +27,27 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-TypePtr Type::Boolean(new Type(Type::KindOfBoolean  ));
-TypePtr Type::Byte   (new Type(Type::KindOfByte     ));
-TypePtr Type::Int16  (new Type(Type::KindOfInt16    ));
-TypePtr Type::Int32  (new Type(Type::KindOfInt32    ));
-TypePtr Type::Int64  (new Type(Type::KindOfInt64    ));
-TypePtr Type::Double (new Type(Type::KindOfDouble   ));
-TypePtr Type::String (new Type(Type::KindOfString   ));
-TypePtr Type::Array  (new Type(Type::KindOfArray    ));
-TypePtr Type::Variant(new Type(Type::KindOfVariant  ));
+TypePtr Type::Boolean     (new Type(Type::KindOfBoolean     ));
+TypePtr Type::Byte        (new Type(Type::KindOfByte        ));
+TypePtr Type::Int16       (new Type(Type::KindOfInt16       ));
+TypePtr Type::Int32       (new Type(Type::KindOfInt32       ));
+TypePtr Type::Int64       (new Type(Type::KindOfInt64       ));
+TypePtr Type::Double      (new Type(Type::KindOfDouble      ));
+TypePtr Type::String      (new Type(Type::KindOfString      ));
+TypePtr Type::Array       (new Type(Type::KindOfArray       ));
+TypePtr Type::Object      (new Type(Type::KindOfObject      ));
+TypePtr Type::Variant     (new Type(Type::KindOfVariant     ));
+
+TypePtr Type::Numeric     (new Type(Type::KindOfNumeric     ));
+TypePtr Type::PlusOperand (new Type(Type::KindOfPlusOperand ));
+TypePtr Type::Primitive   (new Type(Type::KindOfPrimitive   ));
+TypePtr Type::Sequence    (new Type(Type::KindOfSequence    ));
+
+TypePtr Type::AutoSequence(new Type(Type::KindOfAutoSequence));
+TypePtr Type::AutoObject  (new Type(Type::KindOfAutoObject  ));
+
+TypePtr Type::Any         (new Type(Type::KindOfAny         ));
+TypePtr Type::Some        (new Type(Type::KindOfSome        ));
 
 TypePtr Type::CreateObjectType(const std::string &classname) {
   return TypePtr(new Type(KindOfObject, classname));
@@ -185,21 +197,41 @@ TypePtr Type::Coerce(AnalysisResultPtr ar, TypePtr type1, TypePtr type2) {
   if (SameType(type1, type2)) return type1;
   if (type1->m_kindOf == KindOfVariant ||
       type2->m_kindOf == KindOfVariant) return Type::Variant;
-  if (type1->m_kindOf > type2->m_kindOf) return Coerce(ar, type2, type1);
+  if (type1->m_kindOf > type2->m_kindOf) {
+    TypePtr tmp = type1;
+    type1 = type2;
+    type2 = tmp;
+  }
   if (type2->m_kindOf == KindOfSome ||
       type2->m_kindOf == KindOfAny) return type1;
 
-  if (type1->mustBe(KindOfNumeric) && type2->mustBe(Type::KindOfDouble)) {
-    return TypePtr(new Type(KindOfNumeric));
-  } else if (type1->mustBe(KindOfNumeric) &&
-             type2->mustBe(Type::KindOfNumeric)) {
-    return type2;
-  } else if (type1->mustBe(Type::KindOfObject) &&
-             type2->mustBe(Type::KindOfObject)) {
+  if (type2->m_kindOf & KindOfAuto) {
+    if (type1->mustBe(type2->m_kindOf & ~KindOfAuto)) {
+      if (!(type1->m_kindOf & Type::KindOfString)) {
+        return type1;
+      }
+      if (type2->m_kindOf == KindOfAutoSequence) {
+        return Type::Sequence;
+      }
+      return TypePtr(new Type((KindOf)(type2->m_kindOf & ~KindOfAuto)));
+    }
+    return Type::Variant;
+  }
+
+  if (type1->mustBe(KindOfInteger)) {
+    if (type2->mustBe(KindOfInteger)) {
+      return type2;
+    } else if (type2->mustBe(KindOfDouble)) {
+      return Type::Numeric;
+    }
+  }
+
+  if (type1->mustBe(Type::KindOfObject) &&
+      type2->mustBe(Type::KindOfObject)) {
     if (type1->m_name.empty()) return type1;
     if (type2->m_name.empty()) return type2;
     ClassScopePtr cls1 = ar->findClass(type1->m_name);
-     if (cls1 && !cls1->isRedeclaring() &&
+    if (cls1 && !cls1->isRedeclaring() &&
         cls1->derivesFrom(ar, type2->m_name, true, false)) {
       return type2;
     }

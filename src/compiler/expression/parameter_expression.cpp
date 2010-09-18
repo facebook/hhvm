@@ -113,7 +113,7 @@ ExpressionPtr ParameterExpression::postOptimize(AnalysisResultPtr ar) {
 TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar) {
   TypePtr ret;
   if (m_type.empty() || m_defaultValue) {
-    ret = NEW_TYPE(Some);
+    ret = Type::Some;
   } else if (m_type == "array") {
     ret = Type::Array;
   } else {
@@ -123,7 +123,7 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar) {
         ConstructPtr self = shared_from_this();
         ar->getCodeError()->record(self, CodeError::UnknownClass, self);
       }
-      ret = NEW_TYPE(Some);
+      ret = Type::Some;
     } else {
       ret = Type::CreateObjectType(m_type);
     }

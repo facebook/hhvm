@@ -97,7 +97,7 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
     ar->getCodeError()->record(self, CodeError::UseDynamicFunction, self);
   }
   if (m_class) {
-    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
+    m_class->inferAndCheck(ar, Type::Any, false);
   }
   m_nameExp->inferAndCheck(ar, Type::String, false);
   if (m_params) {

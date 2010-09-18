@@ -112,7 +112,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       variables->checkRedeclared(name, KindOfGlobalStatement);
       variables->addLocalGlobal(name);
       var->setContext(Expression::Declaration);
-      var->inferAndCheck(ar, NEW_TYPE(Any), true);
+      var->inferAndCheck(ar, Type::Any, true);
       variables->forceVariant(ar, name);
 
       ConstructPtr decl =
@@ -132,7 +132,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       variables->forceVariants(ar);
       variables->setAttribute(VariableTable::ContainsLDynamicVariable);
       if (exp->is(Expression::KindOfDynamicVariable)) {
-        exp->inferAndCheck(ar, NEW_TYPE(Any), true);
+        exp->inferAndCheck(ar, Type::Any, true);
       } else {
         assert(false);
       }

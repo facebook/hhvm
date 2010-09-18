@@ -1035,7 +1035,11 @@ string AnalysisResult::prepareFile(const char *root, const string &fileName,
   return fullPath;
 }
 
-void AnalysisResult::forceClassVariants() {
+void AnalysisResult::forceClassVariants(ClassScopePtr curScope) {
+  if (curScope) {
+    curScope->getVariables()->forcePrivateVariants(shared_from_this());
+  }
+
   if (m_classForcedVariants) {
     return;
   }
@@ -1050,7 +1054,11 @@ void AnalysisResult::forceClassVariants() {
   }
 }
 
-void AnalysisResult::forceClassVariants(const std::string &name) {
+void AnalysisResult::forceClassVariants(const std::string &name,
+                                        ClassScopePtr curScope) {
+  if (curScope) {
+    curScope->getVariables()->forcePrivateVariant(shared_from_this(), name);
+  }
   if (m_classForcedVariants) {
     return;
   }

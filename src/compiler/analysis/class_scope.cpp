@@ -567,11 +567,15 @@ bool ClassScope::hasConst(const string &name) {
   return m_constants->isPresent(name);
 }
 
-TypePtr ClassScope::checkProperty(const std::string &name, TypePtr type,
-                                  bool coerce, AnalysisResultPtr ar,
-                                  ConstructPtr construct, int &properties) {
-  return getVariables()->checkProperty(name, type, coerce,
-                                       ar, construct, properties);
+Symbol *ClassScope::findProperty(ClassScopePtr &cls,
+                                 const string &name,
+                                 AnalysisResultPtr ar, ConstructPtr construct) {
+  return getVariables()->findProperty(cls, name, ar, construct);
+}
+
+TypePtr ClassScope::checkProperty(Symbol *sym, TypePtr type,
+                                  bool coerce, AnalysisResultPtr ar) {
+  return getVariables()->checkProperty(sym, type, coerce, ar);
 }
 
 TypePtr ClassScope::checkStatic(const std::string &name, TypePtr type,

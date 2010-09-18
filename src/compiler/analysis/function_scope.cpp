@@ -401,7 +401,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
     if (valid && !canSetParamType && i < m_maxParam) {
       expType = param->inferAndCheck(ar, getParamType(i), false);
     } else {
-      expType = param->inferAndCheck(ar, NEW_TYPE(Some), false);
+      expType = param->inferAndCheck(ar, Type::Some, false);
     }
     bool isRefVararg = (i >= m_maxParam && isReferenceVariableArgument());
     if ((i < m_maxParam && isRefParam(i)) || isRefVararg) {
@@ -453,7 +453,7 @@ TypePtr FunctionScope::setParamType(AnalysisResultPtr ar, int index,
   ASSERT(index >= 0 && index < (int)m_paramTypes.size());
   TypePtr paramType = m_paramTypes[index];
 
-  if (!paramType) paramType = NEW_TYPE(Some);
+  if (!paramType) paramType = Type::Some;
   type = Type::Coerce(ar, paramType, type);
   if (type && !Type::SameType(paramType, type)) {
     ar->incNewlyInferred();
@@ -471,7 +471,7 @@ TypePtr FunctionScope::getParamType(int index) {
   ASSERT(index >= 0 && index < (int)m_paramTypes.size());
   TypePtr paramType = m_paramTypes[index];
   if (!paramType) {
-    paramType = NEW_TYPE(Some);
+    paramType = Type::Some;
     m_paramTypes[index] = paramType;
   }
   return paramType;

@@ -86,6 +86,7 @@ public:
   bool isUsed() const { return m_flags.m_used; }
   bool isNeeded() const { return m_flags.m_needed; }
   bool isSuperGlobal() const { return m_flags.m_superGlobal; }
+  bool isOverride() const { return m_flags.m_override; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
   void setProtected() { m_flags.m_protected = true; }
@@ -99,6 +100,7 @@ public:
   void setUsed() { m_flags.m_used = true; }
   void setNeeded() { m_flags.m_needed = true; }
   void setSuperGlobal() { m_flags.m_superGlobal = true; }
+  void setOverride() { m_flags.m_override = true; }
 
   void clearUsed() { m_flags.m_used = false; }
   void clearNeeded() { m_flags.m_needed = false; }
@@ -133,6 +135,7 @@ private:
       unsigned m_used : 1;
       unsigned m_needed : 1;
       unsigned m_superGlobal : 1;
+      unsigned m_override : 1;
     } m_flags;
   };
   ConstructPtr        m_declaration;

@@ -89,7 +89,7 @@ VariableTable::VariableTable(BlockScope &blockScope)
     : SymbolTable(blockScope), m_attribute(0), m_nextParam(0),
       m_hasGlobal(false), m_hasStatic(false),
       m_hasPrivate(false), m_hasNonStaticPrivate(false),
-      m_allVariants(false), m_hookData(NULL) {
+      m_allVariants(false), m_allPrivateVariants(false), m_hookData(NULL) {
 }
 
 VariableTable::~VariableTable() {
@@ -354,6 +354,19 @@ void VariableTable::addStaticVariable(Symbol *sym,
   globalVariables->m_staticGlobals[id] = sgi;
 }
 
+void VariableTable::markOverride(AnalysisResultPtr ar, const string &name) {
+  Symbol *sym = getSymbol(name);
+  assert(sym && sym->isPresent());
+  ClassScopePtr parent = findParent(ar, name);
+  if (parent) {
+    Symbol *s2 = parent->getVariables()->getSymbol(name);
+    assert(s2);
+    if (!s2->isPrivate()) {
+      sym->setOverride();
+    }
+  }
+}
+
 TypePtr VariableTable::add(const string &name, TypePtr type,
                            bool implicit, AnalysisResultPtr ar,
                            ConstructPtr construct,
@@ -401,6 +414,7 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
       addStaticVariable(sym, ar);
     }
   }
+
   type = setType(ar, sym, type, true);
   sym->setDeclaration(construct);
 
@@ -459,42 +473,43 @@ TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
   return setType(ar, sym, type, coerce);
 }
 
-TypePtr VariableTable::checkProperty(const string &name, TypePtr type,
-                                     bool coerce, AnalysisResultPtr ar,
-                                     ConstructPtr construct, int &properties) {
-  properties = VariablePresent;
-  Symbol *sym = getSymbol(name, true);
-  if (!sym->declarationSet()) {
-    ClassScopePtr parent = findParent(ar, name);
-    if (parent) {
-      TypePtr ret = parent->checkProperty(name, type, coerce, ar, construct,
-                                          properties);
-      if (!(properties & VariablePrivate)) {
-        return ret;
+Symbol *VariableTable::findProperty(ClassScopePtr &cls,
+                                    const string &name, AnalysisResultPtr ar,
+                                    ConstructPtr construct) {
+  Symbol *sym = getSymbol(name);
+  if (sym && sym->declarationSet()) {
+    return sym;
+  }
+
+  if (!sym) {
+    if (ClassScopePtr parent = findParent(ar, name)) {
+      sym = parent->findProperty(parent, name, ar, construct);
+      if (sym) {
+        cls = parent;
+        return sym;
       }
     }
-    if (ar->isFirstPass()) {
+
+    if (!cls) {
+      sym = getSymbol(name, true);
       ar->getCodeError()->record(CodeError::UseUndeclaredVariable, construct);
     }
-    properties = 0;
-    return type;
   }
 
-  TypePtr ret = setType(ar, sym, type, coerce);
+  return sym;
+}
 
-  // walk up to make sure all parents are happy with this type
-  ClassScopePtr parent = findParent(ar, name);
-  if (parent) {
-    return parent->checkProperty(name, type, coerce, ar, construct,
-                                 properties);
+TypePtr VariableTable::checkProperty(Symbol *sym, TypePtr type,
+                                     bool coerce, AnalysisResultPtr ar) {
+  if (sym->isOverride()) {
+    ClassScopePtr parent = findParent(ar, sym->getName());
+    assert(parent);
+    sym = parent->getVariables()->getSymbol(sym->getName());
+    assert(sym && !sym->isPrivate());
+    type = parent->getVariables()->setType(ar, sym, type, coerce);
   }
-  if (sym->isStatic()) {
-    properties |= VariableStatic;
-  }
-  if (sym->isPrivate()) {
-    properties |= VariablePrivate;
-  }
-  return ret;
+
+  return setType(ar, sym, type, coerce);
 }
 
 bool VariableTable::checkRedeclared(const string &name,
@@ -565,7 +580,10 @@ void VariableTable::clearUsed()
 void VariableTable::forceVariants(AnalysisResultPtr ar) {
   if (!m_allVariants) {
     for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-      setType(ar, m_symbolVec[i], Type::Variant, true);
+      Symbol *sym = m_symbolVec[i];
+      if (!sym->isPrivate()) {
+        setType(ar, sym, Type::Variant, true);
+      }
     }
     m_allVariants = true;
 
@@ -576,10 +594,35 @@ void VariableTable::forceVariants(AnalysisResultPtr ar) {
   }
 }
 
+void VariableTable::forcePrivateVariants(AnalysisResultPtr ar) {
+  if (!m_allPrivateVariants) {
+    if (m_hasPrivate) {
+      for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
+        Symbol *sym = m_symbolVec[i];
+        if (sym->isPrivate()) {
+          setType(ar, sym, Type::Variant, true);
+        }
+      }
+    }
+    m_allPrivateVariants = true;
+  }
+}
+
 void VariableTable::forceVariant(AnalysisResultPtr ar,
                                  const string &name) {
+  if (m_allVariants) return;
   if (Symbol *sym = getSymbol(name)) {
-    if (sym->declarationSet()) {
+    if (sym->declarationSet() && !sym->isPrivate()) {
+      setType(ar, sym, Type::Variant, true);
+    }
+  }
+}
+
+void VariableTable::forcePrivateVariant(AnalysisResultPtr ar,
+                                        const string &name) {
+  if (m_allPrivateVariants || !m_hasPrivate) return;
+  if (Symbol *sym = getSymbol(name)) {
+    if (sym->declarationSet() && sym->isPrivate()) {
       setType(ar, sym, Type::Variant, true);
     }
   }
@@ -592,8 +635,12 @@ TypePtr VariableTable::setType(AnalysisResultPtr ar, const std::string &name,
 
 TypePtr VariableTable::setType(AnalysisResultPtr ar, Symbol *sym,
                                TypePtr type, bool coerce) {
-  if (m_allVariants) type = Type::Variant;
-  TypePtr ret = SymbolTable::setType(ar, sym, type, coerce || m_allVariants);
+  bool force_coerce = coerce;
+  if (sym->isPrivate() ? m_allPrivateVariants : m_allVariants) {
+    type = Type::Variant;
+    force_coerce = true;
+  }
+  TypePtr ret = SymbolTable::setType(ar, sym, type, force_coerce);
   if (!ret) return ret;
 
   if (sym->isGlobal() && !isGlobalTable(ar)) {
@@ -1447,7 +1494,7 @@ void VariableTable::outputCPPPropertyClone(CodeGenerator &cg,
     const Symbol *sym = m_symbolVec[i];
     const string &name = sym->getName();
     string formatted = cg.formatLabel(name);
-    if (sym->isStatic()) continue;
+    if (sym->isStatic() || sym->isOverride()) continue;
     if (sym->getFinalType()->is(Type::KindOfVariant)) {
       if (!dynamicObject || isPrivate(name)) {
         cg_printf("clone->%s%s = %s%s.isReferenced() ? ref(%s%s) : %s%s;\n",
@@ -1550,7 +1597,14 @@ void VariableTable::outputCPPPropertyTable(CodeGenerator &cg,
         ClassScope clsScope = dynamic_cast<ClassScope &>(m_blockScope);
         prop = '\0' + clsScope.getOriginalName() + '\0' + prop;
       }
-      if (sym->getFinalType()->is(Type::KindOfVariant)) {
+      if (sym->isOverride()) {
+        /* The actual property is stored in a base class,
+           but we need to set the entry here, to get the
+           iteration order right */
+        cg_printf("props.set(");
+        cg_printString(prop, ar);
+        cg_printf(", null_variant, true);\n");
+      } else if (sym->getFinalType()->is(Type::KindOfVariant)) {
         cg_printf("if (isInitialized(%s%s)) props.%s(",
                   Option::PropertyPrefix, s, priv ? "add" : "set");
         cg_printString(prop, ar);

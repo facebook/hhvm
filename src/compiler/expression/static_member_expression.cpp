@@ -134,10 +134,10 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
   ConstructPtr self = shared_from_this();
 
   if (m_class) {
-    if (m_context & (LValue | RefValue)) {
-      ar->forceClassVariants();
+    if (m_context & (LValue | RefValue | UnsetContext)) {
+      ar->forceClassVariants(getOriginalScope(ar));
     }
-    m_class->inferAndCheck(ar, NEW_TYPE(Any), false);
+    m_class->inferAndCheck(ar, Type::Any, false);
     m_exp->inferAndCheck(ar, Type::String, false);
     return Type::Variant;
   }
@@ -202,6 +202,9 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     return m_implementedType = tp;
   } else if (cls) {
     cls->getVariables()->forceVariants(ar);
+    if (cls == getOriginalScope(ar)) {
+      cls->getVariables()->forcePrivateVariants(ar);
+    }
   }
 
   // we have to use a variant to hold dynamic value

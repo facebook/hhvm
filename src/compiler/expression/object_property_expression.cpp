@@ -39,7 +39,8 @@ ObjectPropertyExpression::ObjectPropertyExpression
  ExpressionPtr object, ExpressionPtr property)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_object(object), m_property(property),
-    m_valid(false), m_localEffects(AccessorEffect) {
+    m_valid(false), m_localEffects(AccessorEffect),
+    m_propSym(NULL) {
   m_object->setContext(Expression::ObjectContext);
 }
 
@@ -48,6 +49,8 @@ ExpressionPtr ObjectPropertyExpression::clone() {
   Expression::deepCopy(exp);
   exp->m_object = Clone(m_object);
   exp->m_property = Clone(m_property);
+  exp->m_propSym = NULL;
+  exp->m_propClass.reset();
   return exp;
 }
 
@@ -187,7 +190,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   m_valid = false;
 
   ConstructPtr self = shared_from_this();
-  TypePtr objectType = m_object->inferAndCheck(ar, NEW_TYPE(Object), false);
+  TypePtr objectType = m_object->inferAndCheck(ar, Type::Object, false);
 
   if (!m_property->is(Expression::KindOfScalarExpression)) {
     // if dynamic property or method, we have nothing to find out
@@ -200,10 +203,20 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // any type inference could be wrong. Instead, we just force variants on
     // all class variables.
     if (m_context & (LValue | RefValue)) {
-      ar->forceClassVariants();
+      ar->forceClassVariants(getOriginalScope(ar));
     }
 
     return Type::Variant; // we have to use a variant to hold dynamic value
+  }
+
+  bool debug = false;
+  if (ClassScopePtr cur = ar->getClassScope()) {
+    if (!strcasecmp(cur->getName().c_str(), "FBTExternalObjectPreparable")) {
+      FunctionScopePtr func = ar->getFunctionScope();
+      if (!strcasecmp(func->getName().c_str(), "prepare")) {
+        debug = true;
+      }
+    }
   }
 
   ScalarExpressionPtr exp = dynamic_pointer_cast<ScalarExpression>(m_property);
@@ -229,13 +242,13 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
                       !objectType->is(Type::KindOfVariant) &&
                       !objectType->is(Type::KindOfSome) &&
                       !objectType->is(Type::KindOfAny)) {
-      m_object->inferAndCheck(ar, NEW_TYPE(Object), true);
+      m_object->inferAndCheck(ar, Type::Object, true);
     }
   }
 
   if (!cls) {
-    if (m_context & (LValue | RefValue)) {
-      ar->forceClassVariants(name);
+    if (m_context & (LValue | RefValue | UnsetContext)) {
+      ar->forceClassVariants(name, getOriginalScope(ar));
     }
     return Type::Variant;
   }
@@ -246,7 +259,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   if (!cls->implementsAccessor(ar, accessorName)) clearEffect(AccessorEffect);
 
   // resolved to this class
-  int present = 0;
   if (m_context & RefValue) {
     type = Type::Variant;
     coerce = true;
@@ -265,17 +277,26 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     }
   }
 
-  TypePtr ret;
-  if (!cls->derivesFromRedeclaring()) { // Have to use dynamic.
-    ret = cls->checkProperty(name, type, coerce, ar, self, present);
-    // Private only valid if in the defining class
-    if (present &&
-        !(present & VariableTable::VariableStatic) &&
-        (getOriginalScope(ar) == cls ||
-         !(present & VariableTable::VariablePrivate))) {
-      m_valid = m_object->getType()->isSpecificObject();
-      m_class = cls;
+  if (!m_propSym) {
+    m_propClass.reset();
+    m_propSym = cls->findProperty(m_propClass, name, ar, self);
+    assert(m_propSym);
+    if (!m_propClass) {
+      m_propClass = cls;
     }
+    if (!m_propSym->isPresent() ||
+        (m_propSym->isPrivate() && getOriginalScope(ar) != m_propClass) ||
+        m_propSym->isStatic()) {
+      m_propClass.reset();
+    }
+  }
+
+  TypePtr ret;
+  if (m_propClass && (!cls->derivesFromRedeclaring() ||
+                      m_propSym->isPrivate())) {
+    ret = cls->checkProperty(m_propSym, type, coerce, ar);
+    assert(m_object->getType()->isSpecificObject());
+    m_valid = true;
   }
 
   // get() will return Variant

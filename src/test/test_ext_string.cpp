@@ -218,6 +218,18 @@ bool TestExtString::test_chop() {
 
 bool TestExtString::test_explode() {
   {
+    String metric = "create stuff";
+    Array pieces = f_explode(" ", metric, 1);
+    VS(pieces.size(), 1);
+    VS(pieces[0], "create stuff");
+  }
+  {
+    String metric = "create stuff";
+    Array pieces = f_explode(" ", metric, 0);
+    VS(pieces.size(), 1);
+    VS(pieces[0], "create stuff");
+  }
+  {
     String pizza = "piece1 piece2 piece3 piece4 piece5 piece6";
     Array pieces = f_explode(" ", pizza);
     VS(pieces[0], "piece1");
@@ -226,6 +238,7 @@ bool TestExtString::test_explode() {
   {
     String str = "one|two|three|four";
     Array ret = f_explode("|", str, 2);
+    VERIFY(ret.size() == 2);
     VS(ret[0], "one");
     VS(ret[1], "two|three|four");
   }

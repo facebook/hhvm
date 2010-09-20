@@ -26,26 +26,6 @@ using namespace std;
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_apache_child_terminate() {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
-Array f_apache_get_modules() {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
-String f_apache_get_version() {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
-String f_apache_getenv(CStrRef variable, bool walk_to_top /* = false */) {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
-Object f_apache_lookup_uri(CStrRef filename) {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
 Variant f_apache_note(CStrRef note_name,
                       CStrRef note_value /* = null_string */) {
   String prev = ServerNote::Get(note_name);
@@ -74,10 +54,6 @@ Array f_apache_request_headers() {
   return Array();
 }
 
-bool f_apache_reset_timeout() {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
 Array f_apache_response_headers() {
   Transport *transport = g_context->getTransport();
   if (transport) {
@@ -97,14 +73,6 @@ Array f_apache_response_headers() {
 bool f_apache_setenv(CStrRef variable, CStrRef value,
                      bool walk_to_top /* = false */) {
   return false;
-}
-
-int f_ascii2ebcdic(CStrRef ascii_str) {
-  throw NotSupportedException(__func__, "apache is not in use");
-}
-
-int f_ebcdic2ascii(CStrRef ebcdic_str) {
-  throw NotSupportedException(__func__, "apache is not in use");
 }
 
 Array f_getallheaders() {

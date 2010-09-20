@@ -51,81 +51,6 @@ CPP
 
 DefineFunction(
   array(
-    'name'   => "apache_child_terminate",
-    'desc'   => "apache_child_terminate() will register the Apache process executing the current PHP request for termination once execution of PHP code is completed. It may be used to terminate a process after a script with high memory consumption has been run as memory will usually only be freed internally but not given back to the operating system.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Boolean,
-      'desc'   => "Returns TRUE if PHP is running as an Apache 1 module, the Apache version is non-multithreaded, and the child_terminate PHP directive is enabled (disabled by default). If these conditions are not met, FALSE is returned and an error of level E_WARNING is generated.",
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "apache_get_modules",
-    'desc'   => "Get a list of loaded Apache modules.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => StringVec,
-      'desc'   => "An array of loaded Apache modules.",
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "apache_get_version",
-    'desc'   => "Fetch the Apache version.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => String,
-      'desc'   => "Returns the Apache version on success or FALSE on failure.",
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "apache_getenv",
-    'desc'   => "Get an Apache environment variable as specified by variable.\n\nThis function requires Apache 2 otherwise it's undefined.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => String,
-      'desc'   => "The value of the Apache environment variable on success, or FALSE on failure",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "variable",
-        'type'   => String,
-        'desc'   => "The Apache environment variable",
-      ),
-      array(
-        'name'   => "walk_to_top",
-        'type'   => Boolean,
-        'value'  => "false",
-        'desc'   => "Whether to get the top-level variable available to all Apache layers.",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "apache_lookup_uri",
-    'desc'   => "This performs a partial request for a URI. It goes just far enough to obtain all the important information about the given resource. This function is only supported when PHP is installed as an Apache module.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Object,
-      'desc'   => "An object of related URI information. The properties of this object are:\n\nstatus the_request status_line method content_type handler uri filename path_info args boundary no_cache no_local_copy allowed send_bodyct bytes_sent byterange clength unparsed_uri mtime request_time",
-    ),
-    'args'   => array(
-      array(
-        'name'   => "filename",
-        'type'   => String,
-        'desc'   => "The filename (URI) that's being requested.",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
     'name'   => "apache_note",
     'desc'   => "This function is a wrapper for Apache's table_get and table_set. It edits the table of notes that exists during a request. The table's purpose is to allow Apache modules to communicate.\n\nThe main use for apache_note() is to pass information from one module to another within the same request.",
     'flags'  =>  HasDocComment,
@@ -156,17 +81,6 @@ DefineFunction(
     'return' => array(
       'type'   => StringVec,
       'desc'   => "An associative array of all the HTTP headers in the current request, or FALSE on failure.",
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "apache_reset_timeout",
-    'desc'   => "apache_reset_timeout() resets the Apache write timer, which defaults to 300 seconds. With set_time_limit(0); ignore_user_abort(true) and periodic apache_reset_timeout() calls, Apache can theoretically run forever.\n\nThis function requires Apache 1.",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Boolean,
-      'desc'   => "Returns TRUE on success or FALSE on failure.",
     ),
   ));
 
@@ -206,36 +120,6 @@ DefineFunction(
         'type'   => Boolean,
         'value'  => "false",
         'desc'   => "Whether to set the top-level variable available to all Apache layers.",
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "ascii2ebcdic",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Int32,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "ascii_str",
-        'type'   => String,
-      ),
-    ),
-  ));
-
-DefineFunction(
-  array(
-    'name'   => "ebcdic2ascii",
-    'flags'  =>  HasDocComment,
-    'return' => array(
-      'type'   => Int32,
-    ),
-    'args'   => array(
-      array(
-        'name'   => "ebcdic_str",
-        'type'   => String,
       ),
     ),
   ));

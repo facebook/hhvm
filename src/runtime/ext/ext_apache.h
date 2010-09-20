@@ -25,18 +25,10 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-bool f_apache_child_terminate();
-Array f_apache_get_modules();
-String f_apache_get_version();
-String f_apache_getenv(CStrRef variable, bool walk_to_top = false);
-Object f_apache_lookup_uri(CStrRef filename);
 Variant f_apache_note(CStrRef note_name, CStrRef note_value = null_string);
 Array f_apache_request_headers();
-bool f_apache_reset_timeout();
 Array f_apache_response_headers();
 bool f_apache_setenv(CStrRef variable, CStrRef value, bool walk_to_top = false);
-int f_ascii2ebcdic(CStrRef ascii_str);
-int f_ebcdic2ascii(CStrRef ebcdic_str);
 Array f_getallheaders();
 bool f_virtual(CStrRef filename);
 Variant f_apache_get_config();

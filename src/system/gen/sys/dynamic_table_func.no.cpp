@@ -5844,17 +5844,6 @@ Variant i_dom_document_schema_validate_xml(CArrRef params) {
     return (f_dom_document_schema_validate_xml(arg0, arg1));
   }
 }
-Variant i_ascii2ebcdic(CArrRef params) {
-  FUNCTION_INJECTION(ascii2ebcdic);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("ascii2ebcdic", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_ascii2ebcdic(arg0));
-  }
-}
 Variant i_ereg(CArrRef params) {
   FUNCTION_INJECTION(ereg);
   int count __attribute__((__unused__)) = params.size();
@@ -6609,12 +6598,6 @@ Variant i_session_set_cookie_params(CArrRef params) {
     return (f_session_set_cookie_params(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
-Variant i_apache_get_modules(CArrRef params) {
-  FUNCTION_INJECTION(apache_get_modules);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_get_modules", 0, 1);
-  return (f_apache_get_modules());
-}
 Variant i_drawellipse(CArrRef params) {
   FUNCTION_INJECTION(drawellipse);
   int count __attribute__((__unused__)) = params.size();
@@ -6937,12 +6920,6 @@ Variant i_imagelayereffect(CArrRef params) {
     return (f_imagelayereffect(arg0, arg1));
   }
 }
-Variant i_apache_reset_timeout(CArrRef params) {
-  FUNCTION_INJECTION(apache_reset_timeout);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_reset_timeout", 0, 1);
-  return (f_apache_reset_timeout());
-}
 Variant i_glob(CArrRef params) {
   FUNCTION_INJECTION(glob);
   int count __attribute__((__unused__)) = params.size();
@@ -7251,17 +7228,6 @@ Variant i_session_is_registered(CArrRef params) {
     return (f_session_is_registered(arg0));
   }
 }
-Variant i_ebcdic2ascii(CArrRef params) {
-  FUNCTION_INJECTION(ebcdic2ascii);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("ebcdic2ascii", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_ebcdic2ascii(arg0));
-  }
-}
 Variant i_mysql_real_escape_string(CArrRef params) {
   FUNCTION_INJECTION(mysql_real_escape_string);
   int count __attribute__((__unused__)) = params.size();
@@ -7436,19 +7402,6 @@ Variant i_drawpathcurvetoquadraticbezierabsolute(CArrRef params) {
     CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
     CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_drawpathcurvetoquadraticbezierabsolute(arg0, arg1, arg2, arg3, arg4), null);
-  }
-}
-Variant i_apache_getenv(CArrRef params) {
-  FUNCTION_INJECTION(apache_getenv);
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) return throw_wrong_arguments("apache_getenv", count, 1, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (f_apache_getenv(arg0));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_apache_getenv(arg0, arg1));
   }
 }
 Variant i_socket_set_timeout(CArrRef params) {
@@ -10081,12 +10034,6 @@ Variant i_magickgetimageinterlacescheme(CArrRef params) {
     CVarRef arg0((ad->getValue(pos)));
     return (f_magickgetimageinterlacescheme(arg0));
   }
-}
-Variant i_apache_child_terminate(CArrRef params) {
-  FUNCTION_INJECTION(apache_child_terminate);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_child_terminate", 0, 1);
-  return (f_apache_child_terminate());
 }
 Variant i_array_merge_recursive(CArrRef params) {
   FUNCTION_INJECTION(array_merge_recursive);
@@ -13506,12 +13453,6 @@ Variant i_gzgets(CArrRef params) {
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
     return (f_gzgets(arg0, arg1));
   }
-}
-Variant i_apache_get_version(CArrRef params) {
-  FUNCTION_INJECTION(apache_get_version);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_get_version", 0, 1);
-  return (f_apache_get_version());
 }
 Variant i_array_intersect_uassoc(CArrRef params) {
   FUNCTION_INJECTION(array_intersect_uassoc);
@@ -18986,16 +18927,17 @@ Variant i_xbox_task_start(CArrRef params) {
     return (f_xbox_task_start(arg0));
   }
 }
-Variant i_newpixelwands(CArrRef params) {
-  FUNCTION_INJECTION(newpixelwands);
+Variant i_getcwd(CArrRef params) {
+  FUNCTION_INJECTION(getcwd);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_newpixelwands(arg0));
-  }
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  return (f_getcwd());
+}
+Variant i_posix_getrlimit(CArrRef params) {
+  FUNCTION_INJECTION(posix_getrlimit);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
+  return (f_posix_getrlimit());
 }
 Variant i_mb_get_info(CArrRef params) {
   FUNCTION_INJECTION(mb_get_info);
@@ -19009,17 +18951,16 @@ Variant i_mb_get_info(CArrRef params) {
     return (f_mb_get_info(arg0));
   }
 }
-Variant i_posix_getrlimit(CArrRef params) {
-  FUNCTION_INJECTION(posix_getrlimit);
+Variant i_newpixelwands(CArrRef params) {
+  FUNCTION_INJECTION(newpixelwands);
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
-  return (f_posix_getrlimit());
-}
-Variant i_getcwd(CArrRef params) {
-  FUNCTION_INJECTION(getcwd);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  return (f_getcwd());
+  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_newpixelwands(arg0));
+  }
 }
 Variant i_fputcsv(CArrRef params) {
   FUNCTION_INJECTION(fputcsv);
@@ -23718,17 +23659,6 @@ Variant i_libxml_disable_entity_loader(CArrRef params) {
     return (f_libxml_disable_entity_loader(arg0));
   }
 }
-Variant i_apache_lookup_uri(CArrRef params) {
-  FUNCTION_INJECTION(apache_lookup_uri);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("apache_lookup_uri", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_apache_lookup_uri(arg0));
-  }
-}
 Variant i_magickmotionblurimage(CArrRef params) {
   FUNCTION_INJECTION(magickmotionblurimage);
   int count __attribute__((__unused__)) = params.size();
@@ -25324,7 +25254,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x71D2D4757B7E4260LL, apache_request_headers);
       break;
     case 609:
-      HASH_INVOKE(0x383800902035F261LL, apache_child_terminate);
       HASH_INVOKE(0x48305E8ABB8BC261LL, hphp_instanceof);
       break;
     case 610:
@@ -26395,9 +26324,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 1448:
       HASH_INVOKE(0x4FBB1F662399A5A8LL, is_soap_fault);
       break;
-    case 1451:
-      HASH_INVOKE(0x79E0380A18A345ABLL, apache_get_modules);
-      break;
     case 1452:
       HASH_INVOKE(0x763BA2B1C60A55ACLL, pixelgetalphaquantum);
       break;
@@ -27028,7 +26954,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 1965:
       HASH_INVOKE(0x7DA08D9D148837ADLL, posix_mkfifo);
-      HASH_INVOKE(0x217C52A1EBDF87ADLL, apache_get_version);
       break;
     case 1966:
       HASH_INVOKE(0x00141B0E3E6F77AELL, xml_set_unparsed_entity_decl_handler);
@@ -27462,9 +27387,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       break;
     case 2324:
       HASH_INVOKE(0x6E22C6D840B44914LL, mcrypt_generic_init);
-      break;
-    case 2326:
-      HASH_INVOKE(0x245A2DC3B6B62916LL, apache_lookup_uri);
       break;
     case 2329:
       HASH_INVOKE(0x022B16C0D64D7919LL, file_put_contents);
@@ -28133,9 +28055,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 2844:
       HASH_INVOKE(0x249399CEC35B7B1CLL, png2wbmp);
       break;
-    case 2845:
-      HASH_INVOKE(0x6791459B883F0B1DLL, apache_reset_timeout);
-      break;
     case 2846:
       HASH_INVOKE(0x7160AA24D4251B1ELL, mb_strripos);
       break;
@@ -28759,9 +28678,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x018F22AEA371ED02LL, filemtime);
       HASH_INVOKE(0x7EB48D1BB5B7AD02LL, dom_element_set_attribute);
       break;
-    case 3331:
-      HASH_INVOKE(0x48EE7157C4392D03LL, apache_getenv);
-      break;
     case 3332:
       HASH_INVOKE(0x1248250E701DAD04LL, magickgaussianblurimage);
       break;
@@ -29319,9 +29235,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
     case 3750:
       HASH_INVOKE(0x1D7B8E395613AEA6LL, dom_element_remove_attribute_ns);
       break;
-    case 3752:
-      HASH_INVOKE(0x3C6190E9534F3EA8LL, ebcdic2ascii);
-      break;
     case 3753:
       HASH_INVOKE(0x308D76DB12424EA9LL, magicksetimageindex);
       break;
@@ -29775,7 +29688,6 @@ Variant invoke_builtin(const char *s, CArrRef params, int64 hash, bool fatal) {
       HASH_INVOKE(0x13EE24AF67113FFALL, ob_end_flush);
       break;
     case 4091:
-      HASH_INVOKE(0x68E499A4D75BDFFBLL, ascii2ebcdic);
       HASH_INVOKE(0x63BE4CEF1FC47FFBLL, imagefill);
       break;
     case 4094:
@@ -39492,22 +39404,6 @@ Variant ei_dom_document_schema_validate_xml(Eval::VariableEnvironment &env, cons
   }
   return (x_dom_document_schema_validate_xml(a0, a1));
 }
-Variant ei_ascii2ebcdic(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("ascii2ebcdic", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_ascii2ebcdic(a0));
-}
 Variant ei_ereg(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -40767,18 +40663,6 @@ Variant ei_session_set_cookie_params(Eval::VariableEnvironment &env, const Eval:
   else if (count == 4) return (x_session_set_cookie_params(a0, a1, a2, a3), null);
   else return (x_session_set_cookie_params(a0, a1, a2, a3, a4), null);
 }
-Variant ei_apache_get_modules(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_get_modules", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_apache_get_modules());
-}
 Variant ei_drawellipse(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -41316,18 +41200,6 @@ Variant ei_imagelayereffect(Eval::VariableEnvironment &env, const Eval::Function
   }
   return (x_imagelayereffect(a0, a1));
 }
-Variant ei_apache_reset_timeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_reset_timeout", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_apache_reset_timeout());
-}
 Variant ei_glob(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -41829,22 +41701,6 @@ Variant ei_session_is_registered(Eval::VariableEnvironment &env, const Eval::Fun
   }
   return (x_session_is_registered(a0));
 }
-Variant ei_ebcdic2ascii(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("ebcdic2ascii", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_ebcdic2ascii(a0));
-}
 Variant ei_mysql_real_escape_string(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -42162,27 +42018,6 @@ Variant ei_drawpathcurvetoquadraticbezierabsolute(Eval::VariableEnvironment &env
     (*it)->eval(env);
   }
   return (x_drawpathcurvetoquadraticbezierabsolute(a0, a1, a2, a3, a4), null);
-}
-Variant ei_apache_getenv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) return throw_wrong_arguments("apache_getenv", count, 1, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  if (count <= 1) return (x_apache_getenv(a0));
-  else return (x_apache_getenv(a0, a1));
 }
 Variant ei_socket_set_timeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -46643,18 +46478,6 @@ Variant ei_magickgetimageinterlacescheme(Eval::VariableEnvironment &env, const E
     (*it)->eval(env);
   }
   return (x_magickgetimageinterlacescheme(a0));
-}
-Variant ei_apache_child_terminate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_child_terminate", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_apache_child_terminate());
 }
 Variant ei_array_merge_recursive(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -52405,18 +52228,6 @@ Variant ei_gzgets(Eval::VariableEnvironment &env, const Eval::FunctionCallExpres
   }
   if (count <= 1) return (x_gzgets(a0));
   else return (x_gzgets(a0, a1));
-}
-Variant ei_apache_get_version(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("apache_get_version", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_apache_get_version());
 }
 Variant ei_array_intersect_uassoc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61697,21 +61508,29 @@ Variant ei_xbox_task_start(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   return (x_xbox_task_start(a0));
 }
-Variant ei_newpixelwands(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
+Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_newpixelwands(a0));
+  return (x_getcwd());
+}
+Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_getrlimit());
 }
 Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61730,29 +61549,21 @@ Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   if (count <= 0) return (x_mb_get_info());
   else return (x_mb_get_info(a0));
 }
-Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_newpixelwands(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
+  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_posix_getrlimit());
-}
-Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_getcwd());
+  return (x_newpixelwands(a0));
 }
 Variant ei_fputcsv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -69704,22 +69515,6 @@ Variant ei_libxml_disable_entity_loader(Eval::VariableEnvironment &env, const Ev
   if (count <= 0) return (x_libxml_disable_entity_loader());
   else return (x_libxml_disable_entity_loader(a0));
 }
-Variant ei_apache_lookup_uri(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("apache_lookup_uri", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_apache_lookup_uri(a0));
-}
 Variant ei_magickmotionblurimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -71909,7 +71704,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x71D2D4757B7E4260LL, apache_request_headers);
       break;
     case 609:
-      HASH_INVOKE_FROM_EVAL(0x383800902035F261LL, apache_child_terminate);
       HASH_INVOKE_FROM_EVAL(0x48305E8ABB8BC261LL, hphp_instanceof);
       break;
     case 610:
@@ -72980,9 +72774,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1448:
       HASH_INVOKE_FROM_EVAL(0x4FBB1F662399A5A8LL, is_soap_fault);
       break;
-    case 1451:
-      HASH_INVOKE_FROM_EVAL(0x79E0380A18A345ABLL, apache_get_modules);
-      break;
     case 1452:
       HASH_INVOKE_FROM_EVAL(0x763BA2B1C60A55ACLL, pixelgetalphaquantum);
       break;
@@ -73613,7 +73404,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1965:
       HASH_INVOKE_FROM_EVAL(0x7DA08D9D148837ADLL, posix_mkfifo);
-      HASH_INVOKE_FROM_EVAL(0x217C52A1EBDF87ADLL, apache_get_version);
       break;
     case 1966:
       HASH_INVOKE_FROM_EVAL(0x00141B0E3E6F77AELL, xml_set_unparsed_entity_decl_handler);
@@ -74047,9 +73837,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2324:
       HASH_INVOKE_FROM_EVAL(0x6E22C6D840B44914LL, mcrypt_generic_init);
-      break;
-    case 2326:
-      HASH_INVOKE_FROM_EVAL(0x245A2DC3B6B62916LL, apache_lookup_uri);
       break;
     case 2329:
       HASH_INVOKE_FROM_EVAL(0x022B16C0D64D7919LL, file_put_contents);
@@ -74718,9 +74505,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2844:
       HASH_INVOKE_FROM_EVAL(0x249399CEC35B7B1CLL, png2wbmp);
       break;
-    case 2845:
-      HASH_INVOKE_FROM_EVAL(0x6791459B883F0B1DLL, apache_reset_timeout);
-      break;
     case 2846:
       HASH_INVOKE_FROM_EVAL(0x7160AA24D4251B1ELL, mb_strripos);
       break;
@@ -75344,9 +75128,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x018F22AEA371ED02LL, filemtime);
       HASH_INVOKE_FROM_EVAL(0x7EB48D1BB5B7AD02LL, dom_element_set_attribute);
       break;
-    case 3331:
-      HASH_INVOKE_FROM_EVAL(0x48EE7157C4392D03LL, apache_getenv);
-      break;
     case 3332:
       HASH_INVOKE_FROM_EVAL(0x1248250E701DAD04LL, magickgaussianblurimage);
       break;
@@ -75904,9 +75685,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3750:
       HASH_INVOKE_FROM_EVAL(0x1D7B8E395613AEA6LL, dom_element_remove_attribute_ns);
       break;
-    case 3752:
-      HASH_INVOKE_FROM_EVAL(0x3C6190E9534F3EA8LL, ebcdic2ascii);
-      break;
     case 3753:
       HASH_INVOKE_FROM_EVAL(0x308D76DB12424EA9LL, magicksetimageindex);
       break;
@@ -76360,7 +76138,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x13EE24AF67113FFALL, ob_end_flush);
       break;
     case 4091:
-      HASH_INVOKE_FROM_EVAL(0x68E499A4D75BDFFBLL, ascii2ebcdic);
       HASH_INVOKE_FROM_EVAL(0x63BE4CEF1FC47FFBLL, imagefill);
       break;
     case 4094:

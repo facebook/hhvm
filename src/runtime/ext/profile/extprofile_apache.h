@@ -25,31 +25,6 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool x_apache_child_terminate() {
-  FUNCTION_INJECTION_BUILTIN(apache_child_terminate);
-  return f_apache_child_terminate();
-}
-
-inline Array x_apache_get_modules() {
-  FUNCTION_INJECTION_BUILTIN(apache_get_modules);
-  return f_apache_get_modules();
-}
-
-inline String x_apache_get_version() {
-  FUNCTION_INJECTION_BUILTIN(apache_get_version);
-  return f_apache_get_version();
-}
-
-inline String x_apache_getenv(CStrRef variable, bool walk_to_top = false) {
-  FUNCTION_INJECTION_BUILTIN(apache_getenv);
-  return f_apache_getenv(variable, walk_to_top);
-}
-
-inline Object x_apache_lookup_uri(CStrRef filename) {
-  FUNCTION_INJECTION_BUILTIN(apache_lookup_uri);
-  return f_apache_lookup_uri(filename);
-}
-
 inline Variant x_apache_note(CStrRef note_name, CStrRef note_value = null_string) {
   FUNCTION_INJECTION_BUILTIN(apache_note);
   return f_apache_note(note_name, note_value);
@@ -60,11 +35,6 @@ inline Array x_apache_request_headers() {
   return f_apache_request_headers();
 }
 
-inline bool x_apache_reset_timeout() {
-  FUNCTION_INJECTION_BUILTIN(apache_reset_timeout);
-  return f_apache_reset_timeout();
-}
-
 inline Array x_apache_response_headers() {
   FUNCTION_INJECTION_BUILTIN(apache_response_headers);
   return f_apache_response_headers();
@@ -73,16 +43,6 @@ inline Array x_apache_response_headers() {
 inline bool x_apache_setenv(CStrRef variable, CStrRef value, bool walk_to_top = false) {
   FUNCTION_INJECTION_BUILTIN(apache_setenv);
   return f_apache_setenv(variable, value, walk_to_top);
-}
-
-inline int x_ascii2ebcdic(CStrRef ascii_str) {
-  FUNCTION_INJECTION_BUILTIN(ascii2ebcdic);
-  return f_ascii2ebcdic(ascii_str);
-}
-
-inline int x_ebcdic2ascii(CStrRef ebcdic_str) {
-  FUNCTION_INJECTION_BUILTIN(ebcdic2ascii);
-  return f_ebcdic2ascii(ebcdic_str);
 }
 
 inline Array x_getallheaders() {

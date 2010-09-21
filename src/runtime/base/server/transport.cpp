@@ -293,9 +293,15 @@ void Transport::getSplitParam(const char *name,
 
 bool Transport::splitHeader(CStrRef header, String &name, const char *&value) {
   int pos = header.find(':');
-  if (pos != String::npos && header.charAt(pos + 1) == ' ') {
+
+  if (pos != String::npos) {
     name = header.substr(0, pos);
-    value = header.data() + pos + 2;
+    value = header.data() + pos;
+
+    do {
+      value++;
+    } while (*value == ' ');
+
     return true;
   }
 

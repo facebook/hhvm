@@ -657,7 +657,7 @@ void throw_memory_exceeded_exception() ATTRIBUTE_COLD __attribute__((noreturn));
 /**
  * Cloning an object.
  */
-Object f_clone(Object obj);
+Object f_clone(CVarRef v);
 
 /**
  * Serialize/unserialize a variant into/from a string. We need these two

@@ -332,8 +332,6 @@ bool TestCodeError::TestTooManyArgument() {
 }
 
 bool TestCodeError::TestBadTypeConversion() {
-  VE(BadTypeConversion, "<?php clone(1);");
-
   // negative cases
   VEN(BadTypeConversion,
       "<?php function t() { return array(0);} while($a = t()) {print $a[1];}");

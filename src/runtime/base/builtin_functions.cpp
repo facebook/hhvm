@@ -313,10 +313,14 @@ void throw_unexpected_argument_type(int argNum, const char *fnName,
      argNum, fnName, expected, otype);
 }
 
-Object f_clone(Object obj) {
-  Object clone = Object(obj->clone());
-  clone->t___clone();
-  return clone;
+Object f_clone(CVarRef v) {
+  if (v.isObject()) {
+    Object clone = Object(v.toObject()->clone());
+    clone->t___clone();
+    return clone;
+  }
+  raise_error("Cannot clone non-object");
+  return Object();
 }
 
 String f_serialize(CVarRef value) {

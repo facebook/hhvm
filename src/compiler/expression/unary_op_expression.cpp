@@ -66,6 +66,7 @@ UnaryOpExpression::UnaryOpExpression
   case T_REQUIRE:
   case T_REQUIRE_ONCE:
   case T_EVAL:
+  case T_CLONE:
     m_localEffects = UnknownEffect;
     break;
   case T_UNSET:
@@ -332,7 +333,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_INC:
   case T_DEC:
   case '~':             et = rt = NEW_TYPE(Primitive);                   break;
-  case T_CLONE:         et = rt = NEW_TYPE(Object);                      break;
+  case T_CLONE:         et = NEW_TYPE(Some);      rt = NEW_TYPE(Object); break;
   case '@':             et = type;                rt = Type::Variant;    break;
   case '(':             et = rt = type;                                  break;
   case T_INT_CAST:      et = rt = Type::Int64;                           break;
@@ -369,7 +370,6 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   if (m_exp) {
     bool ecoerce = false; // expected type needs m_exp to coerce to
     switch (m_op) {
-    case T_CLONE:
     case T_ISSET:
       ecoerce = true;
     default:

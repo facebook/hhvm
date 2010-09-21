@@ -742,11 +742,20 @@ Variant &Variant::operator+=(CVarRef var) {
     return *this;
   }
   if (is(KindOfArray) && var.is(KindOfArray)) {
-    set(toArray() + var.toArray());
+    ArrayData *arr1 = getArrayData();
+    ArrayData *arr2 = var.getArrayData();
+    if (arr1 == NULL || arr2 == NULL) {
+      throw BadArrayMergeException();
+    }
+    if (arr2->empty() || arr1 == arr2) return *this;
+    if (arr1->empty()) {
+      set(arr2);
+      return *this;
+    }
+    ArrayData *escalated = arr1->append(arr2, ArrayData::Plus,
+                                        arr1->getCount() > 1);
+    if (escalated) set(escalated);
     return *this;
-  }
-  if (is(KindOfArray) || var.is(KindOfArray)) {
-    throw BadArrayMergeException();
   }
   if (isDouble() || var.isDouble()) {
     set(toDouble() + var.toDouble());

@@ -96,8 +96,10 @@ class Array : public SmartPtr<ArrayData> {
   Array &operator =  (ArrayData *data);
   Array &operator =  (CArrRef v);
   Array &operator =  (CVarRef v);
+  Array  operator +  (ArrayData *data) const;
   Array  operator +  (CArrRef v) const;
   Array  operator +  (CVarRef v) const;
+  Array &operator += (ArrayData *data);
   Array &operator += (CArrRef v);
   Array &operator += (CVarRef v);
 
@@ -443,7 +445,7 @@ class Array : public SmartPtr<ArrayData> {
  private:
   // helpers
   bool compare(CArrRef v2) const;
-  Array &mergeImpl(CArrRef arr, ArrayData::ArrayOp op);
+  Array &mergeImpl(ArrayData *data, ArrayData::ArrayOp op);
   Array diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
                  PFUNC_CMP key_cmp_function, const void *key_data,
                  PFUNC_CMP value_cmp_function, const void *value_data) const;

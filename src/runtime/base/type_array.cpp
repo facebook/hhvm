@@ -67,26 +67,33 @@ Array &Array::operator=(CVarRef var) {
   return operator=(var.toArray());
 }
 
+Array Array::operator+(ArrayData *data) const {
+  return Array(m_px).operator+=(data);
+}
+
 Array Array::operator+(CVarRef var) const {
   if (var.getType() != KindOfArray) {
     throw BadArrayMergeException();
   }
-  return operator+(var.toArray());
+  return operator+(var.getArrayData());
 }
 
 Array Array::operator+(CArrRef arr) const {
-  return Array(m_px).operator+=(arr);
+  return operator+(arr.m_px);
 }
 
+Array &Array::operator+=(ArrayData *data) {
+  return mergeImpl(data, ArrayData::Plus);
+}
 Array &Array::operator+=(CVarRef var) {
   if (var.getType() != KindOfArray) {
     throw BadArrayMergeException();
   }
-  return operator+=(var.toArray());
+  return operator+=(var.getArrayData());
 }
 
 Array &Array::operator+=(CArrRef arr) {
-  return mergeImpl(arr, ArrayData::Plus);
+  return mergeImpl(arr.m_px, ArrayData::Plus);
 }
 
 Array Array::diff(CArrRef array, bool by_key, bool by_value,
@@ -236,18 +243,18 @@ Array Array::diffImpl(CArrRef array, bool by_key, bool by_value, bool match,
 // manipulations
 
 Array &Array::merge(CArrRef arr) {
-  return mergeImpl(arr, ArrayData::Merge);
+  return mergeImpl(arr.m_px, ArrayData::Merge);
 }
 
-Array &Array::mergeImpl(CArrRef arr, ArrayData::ArrayOp op) {
-  if (m_px == NULL || arr.m_px == NULL) {
+Array &Array::mergeImpl(ArrayData *data, ArrayData::ArrayOp op) {
+  if (m_px == NULL || data == NULL) {
     throw BadArrayMergeException();
   }
-  if (!arr.m_px->empty()) {
+  if (!data->empty()) {
     if (op != ArrayData::Merge && m_px->empty()) {
-      SmartPtr<ArrayData>::operator=(arr.m_px);
-    } else {
-      ArrayData *escalated = m_px->append(arr.m_px, op, m_px->getCount() > 1);
+      SmartPtr<ArrayData>::operator=(data);
+    } else if (m_px != data || op == ArrayData::Merge) {
+      ArrayData *escalated = m_px->append(data, op, m_px->getCount() > 1);
       if (escalated) {
         SmartPtr<ArrayData>::operator=(escalated);
       }

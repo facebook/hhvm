@@ -181,6 +181,7 @@ bool RuntimeOption::UseProxyURLs;
 int RuntimeOption::ProxyPercentage = 0;
 std::set<std::string> RuntimeOption::ProxyURLs;
 std::vector<std::string> RuntimeOption::ProxyPatterns;
+bool RuntimeOption::AlwaysUseRelativePath = false;
 
 bool RuntimeOption::MySQLReadOnly = false;
 bool RuntimeOption::MySQLLocalize = false;
@@ -594,6 +595,7 @@ void RuntimeOption::Load(Hdf &config) {
     UseHphpArray = server["UseHphpArray"].getBool(false);
     UseSmallArray = server["UseSmallArray"].getBool(false);
     UseDirectCopy = server["UseDirectCopy"].getBool(false);
+    AlwaysUseRelativePath = server["AlwaysUseRelativePath"].getBool(false);
 
     Hdf apc = server["APC"];
     EnableApc = apc["EnableApc"].getBool(true);

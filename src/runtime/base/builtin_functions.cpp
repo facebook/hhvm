@@ -561,10 +561,11 @@ Variant include_impl_invoke(CStrRef file, bool once,
                                    LVariableTable* variables,
                                    const char *currentDir) {
   if (file[0] == '/') {
-    try {
-      return invoke_file(file, once, variables, currentDir);
-    } catch(PhpFileDoesNotExistException &e) {}
-
+    if (RuntimeOption::SandboxMode || !RuntimeOption::AlwaysUseRelativePath) {
+      try {
+        return invoke_file(file, once, variables, currentDir);
+      } catch(PhpFileDoesNotExistException &e) {}
+    }
     string server_root = RuntimeOption::SourceRoot;
     if (server_root.empty()) {
       server_root = string(g_context->getCwd()->data()) + "/";

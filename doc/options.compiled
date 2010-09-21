@@ -138,6 +138,9 @@ flood error logs.
       * = some path
       * = another path
     }
+    # Recommend to turn this on when all the file paths in the file invoke
+    # table are relative for faster dynamic file inclusion.
+    AlwaysUseRelativePath = false
 
     RequestTimeoutSeconds = -1
     RequestMemoryMaxBytes = 0

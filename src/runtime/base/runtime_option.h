@@ -179,6 +179,7 @@ public:
   static int ProxyPercentage;
   static std::set<std::string> ProxyURLs;
   static std::vector<std::string> ProxyPatterns;
+  static bool AlwaysUseRelativePath;
 
   static bool MySQLReadOnly;
   static bool MySQLLocalize;  // whether to localize MySQL query results

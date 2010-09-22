@@ -454,9 +454,8 @@ bool String::less(litstr v2) const {
 }
 
 bool String::less(CStrRef v2) const {
-  if (m_px == NULL && v2.get() == NULL) return false;
+  if (v2.get() == NULL) return false;
   if (m_px == NULL) return !v2.empty();
-  if (v2.get() == NULL) return empty();
   return m_px->compare(v2.get()) < 0;
 }
 
@@ -484,8 +483,7 @@ bool String::more(litstr v2) const {
 }
 
 bool String::more(CStrRef v2) const {
-  if (m_px == NULL && v2.get() == NULL) return false;
-  if (m_px == NULL) return v2.empty();
+  if (m_px == NULL) return false;
   if (v2.get() == NULL) return !empty();
   return m_px->compare(v2.get()) > 0;
 }

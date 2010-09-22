@@ -5260,6 +5260,23 @@ bool TestCodeRun::TestComparisons() {
       "$y = new c;"
       "var_dump($x > $y);"
       "var_dump(array($x) == array($y));");
+  MVCR("<?php "
+       "function foo($p) {"
+       "  if ($p) {"
+       "    $a = 'foo';"
+       "  }"
+       "  if ('' < $a) {"
+       "    echo 'yes';"
+       "  } else {"
+       "    echo 'no';"
+       "  }"
+       "  if ($a > '') {"
+       "    echo 'yes';"
+       "  } else {"
+       "    echo 'no';"
+       "  }"
+       "}"
+       "foo(false);");
 
   return true;
 }

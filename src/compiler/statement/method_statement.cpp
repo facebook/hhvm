@@ -774,6 +774,7 @@ bool MethodStatement::outputFFI(CodeGenerator &cg, AnalysisResultPtr ar) {
 void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
                                        AnalysisResultPtr ar) {
   FunctionScopePtr funcScope = m_funcScope.lock();
+  ClassScopePtr clsScope = ar->getClassScope();
   bool varArgs = funcScope->isVariableArgument();
   bool ret = funcScope->getReturnType();
   string fname = funcScope->getId(cg);
@@ -784,7 +785,7 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
     return;
   }
 
-  if (fname == "__offsetget_lval") {
+  if (funcScope->getName() == "__offsetget_lval") {
     return;
   }
 
@@ -839,17 +840,16 @@ void MethodStatement::outputCPPFFIStub(CodeGenerator &cg,
     if (!inClass) {
       // simple function call
       cg_printf("%s%s(", Option::FunctionPrefix, fname.c_str());
-    }
-    else if (isStatic) {
+    } else if (isStatic) {
       // static method call
-      cg_printf("%s%s::%s%s(", Option::ClassPrefix, m_className.c_str(),
-                Option::MethodPrefix, fname.c_str());
-    }
-    else {
+      cg_printf("%s%s::%s%s(", Option::ClassPrefix,
+                clsScope->getId(cg).c_str(),
+                Option::MethodPrefix, funcScope->getName().c_str());
+    } else {
       // instance method call
       cg_printf("dynamic_cast<%s%s *>(target->getObjectData())->",
-                Option::ClassPrefix, m_className.c_str());
-      cg_printf("%s%s(", Option::MethodPrefix, fname.c_str());
+                Option::ClassPrefix, clsScope->getId(cg).c_str());
+      cg_printf("%s%s(", Option::MethodPrefix, funcScope->getName().c_str());
     }
 
     first = true;
@@ -1125,15 +1125,14 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
     return;
   }
 
-  if (fname == "__offsetget_lval") return;
+  if (funcScope->getName() == "__offsetget_lval") return;
 
   const char *clsName;
   if (inClass) {
     // uses capitalized original class name
     ClassScopePtr cls = ar->findClass(m_className);
     clsName = cls->getOriginalName().c_str();
-  }
-  else {
+  } else {
     clsName = "HphpMain";
   }
   string mangledName = "Java." + packageName + "." + clsName + "." + fname
@@ -1183,8 +1182,7 @@ void MethodStatement::outputJavaFFICPPStub(CodeGenerator &cg,
               Option::FFIFnPrefix,
               (inClass ? (m_className + "_cls_").c_str() : ""), fname.c_str());
     if (!isStatic || ac > 0 || varArgs) cg_printf(", ");
-  }
-  else {
+  } else {
     cg_printf("%s%s%s(", Option::FFIFnPrefix,
                          (inClass ? (m_className + "_cls_").c_str() : ""),
                          fname.c_str());

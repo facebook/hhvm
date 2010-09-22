@@ -1582,10 +1582,10 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
 
       if (type) cg_printf("return ");
       if (isStatic()) {
-        cg_printf("%sinvoke_mil(NULL, \"%s\", params, -1);\n",
+        cg_printf("%sinvoke(NULL, \"%s\", params, -1);\n",
                   Option::ObjectStaticPrefix, m_name.c_str());
       } else {
-        cg_printf("%sinvoke_mil(\"%s\", params, -1);\n",
+        cg_printf("%sinvoke(\"%s\", params, -1);\n",
                   Option::ObjectPrefix, m_name.c_str());
       }
     }

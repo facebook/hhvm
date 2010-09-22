@@ -61,8 +61,8 @@ Variant &c_ArrayIterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_ArrayIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
 void c_ArrayIterator::o_getArray(Array &props) const {
-  if (isInitialized(m_arr)) props.set(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
-  if (isInitialized(m_flags)) props.set(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
+  if (isInitialized(m_arr)) props.add(NAMSTR(s_sys_ss00ce7919, "\000ArrayIterator\000arr"), m_arr.isReferenced() ? ref(m_arr) : m_arr, true);
+  if (isInitialized(m_flags)) props.add(NAMSTR(s_sys_ss4f67744c, "\000ArrayIterator\000flags"), m_flags.isReferenced() ? ref(m_flags) : m_flags, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_ArrayIterator
@@ -1765,7 +1765,7 @@ Variant &c_AppendIterator::os_lval(CStrRef s) {
 #endif // OMIT_JUMP_TABLE_CLASS_STATIC_LVAL_AppendIterator
 #ifndef OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator
 void c_AppendIterator::o_getArray(Array &props) const {
-  if (isInitialized(m_iterators)) props.set(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
+  if (isInitialized(m_iterators)) props.add(NAMSTR(s_sys_ss5b908ab0, "\000AppendIterator\000iterators"), m_iterators.isReferenced() ? ref(m_iterators) : m_iterators, true);
   c_ObjectData::o_getArray(props);
 }
 #endif // OMIT_JUMP_TABLE_CLASS_GETARRAY_AppendIterator

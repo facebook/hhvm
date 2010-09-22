@@ -551,7 +551,8 @@ bool ZendArray::nextInsert(CVarRef data) {
   return true;
 }
 
-bool ZendArray::addLval(int64 h, Variant **pDest, bool doFind /* = true */) {
+bool ZendArray::addLvalImpl(int64 h, Variant **pDest,
+                            bool doFind /* = true */) {
   ASSERT(pDest != NULL);
   Bucket *p;
   if (doFind) {
@@ -579,8 +580,8 @@ bool ZendArray::addLval(int64 h, Variant **pDest, bool doFind /* = true */) {
   return true;
 }
 
-bool ZendArray::addLval(StringData *key, int64 h, Variant **pDest,
-                        bool doFind /* = true */) {
+bool ZendArray::addLvalImpl(StringData *key, int64 h, Variant **pDest,
+                            bool doFind /* = true */) {
   ASSERT(key != NULL && pDest != NULL);
   Bucket *p;
   if (doFind) {
@@ -605,7 +606,7 @@ bool ZendArray::addLval(StringData *key, int64 h, Variant **pDest,
   return true;
 }
 
-bool ZendArray::add(int64 h, CVarRef data) {
+bool ZendArray::addVal(int64 h, CVarRef data) {
   Bucket *p = find(h);
   if (p) {
     return false;
@@ -625,7 +626,7 @@ bool ZendArray::add(int64 h, CVarRef data) {
   return true;
 }
 
-bool ZendArray::add(StringData *key, CVarRef data) {
+bool ZendArray::addVal(StringData *key, CVarRef data) {
   int64 h = key->hash();
   Bucket *p = find(key->data(), key->size(), h);
   if (p) {
@@ -733,12 +734,12 @@ ArrayData *ZendArray::lval(Variant *&ret, bool copy) {
 ArrayData *ZendArray::lval(int64 k, Variant *&ret, bool copy,
                            bool checkExist /* = false */) {
   if (!copy) {
-    addLval(k, &ret);
+    addLvalImpl(k, &ret);
     return NULL;
   }
   if (!checkExist) {
     ZendArray *a = copyImpl();
-    a->addLval(k, &ret);
+    a->addLvalImpl(k, &ret);
     return a;
   }
   Bucket *p = find(k);
@@ -747,7 +748,7 @@ ArrayData *ZendArray::lval(int64 k, Variant *&ret, bool copy,
     return NULL;
   }
   ZendArray *a = copyImpl();
-  a->addLval(k, &ret, false);
+  a->addLvalImpl(k, &ret, false);
   return a;
 }
 
@@ -756,12 +757,12 @@ ArrayData *ZendArray::lval(CStrRef k, Variant *&ret, bool copy,
   StringData *key = k.get();
   int64 prehash = key->hash();
   if (!copy) {
-    addLval(key, prehash, &ret);
+    addLvalImpl(key, prehash, &ret);
     return NULL;
   }
   if (!checkExist) {
     ZendArray *a = copyImpl();
-    a->addLval(key, prehash, &ret);
+    a->addLvalImpl(key, prehash, &ret);
     return a;
   }
   Bucket *p = find(key->data(), key->size(), prehash);
@@ -770,7 +771,7 @@ ArrayData *ZendArray::lval(CStrRef k, Variant *&ret, bool copy,
     return NULL;
   }
   ZendArray *a = copyImpl();
-  a->addLval(key, prehash, &ret, false);
+  a->addLvalImpl(key, prehash, &ret, false);
   return a;
 }
 
@@ -784,7 +785,7 @@ ArrayData *ZendArray::lvalPtr(CStrRef k, Variant *&ret, bool copy,
   }
 
   if (create) {
-    t->addLval(key, prehash, &ret);
+    t->addLvalImpl(key, prehash, &ret);
   } else {
     Bucket *p = t->find(key->data(), key->size(), prehash);
     if (p) {
@@ -861,6 +862,84 @@ ArrayData *ZendArray::set(CVarRef k, CVarRef v, bool copy) {
     update(sd, v);
     return NULL;
   }
+}
+
+ArrayData *ZendArray::add(int64 k, CVarRef v, bool copy) {
+  ASSERT(!exists(k));
+  if (copy) {
+    ZendArray *result = copyImpl();
+    result->add(k, v, false);
+    return result;
+  }
+  Bucket *p = NEW(Bucket)(v);
+  p->h = k;
+  uint nIndex = (k & m_nTableMask);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
+  SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
+  CONNECT_TO_GLOBAL_DLLIST(p);
+  if ((long)k >= (long)m_nNextFreeElement) {
+    m_nNextFreeElement = k + 1;
+  }
+  if (++m_nNumOfElements > m_nTableSize) {
+    resize();
+  }
+  return NULL;
+}
+
+ArrayData *ZendArray::add(CStrRef k, CVarRef v, bool copy) {
+  ASSERT(!exists(k));
+  if (copy) {
+    ZendArray *result = copyImpl();
+    result->add(k, v, false);
+    return result;
+  }
+  int64 h = k->hash();
+  Bucket *p = NEW(Bucket)(v);
+  p->key = k.get();
+  p->key->incRefCount();
+  p->h = h;
+  uint nIndex = (h & m_nTableMask);
+  CONNECT_TO_BUCKET_LIST(p, m_arBuckets[nIndex]);
+  SET_ARRAY_BUCKET_HEAD(m_arBuckets, nIndex, p);
+  CONNECT_TO_GLOBAL_DLLIST(p);
+  if (++m_nNumOfElements > m_nTableSize) {
+    resize();
+  }
+  return NULL;
+}
+
+ArrayData *ZendArray::add(CVarRef k, CVarRef v, bool copy) {
+  ASSERT(!exists(k));
+  if (k.isNumeric()) return add(k.toInt64(), v, copy);
+  return add(k.toString(), v, copy);
+}
+
+ArrayData *ZendArray::addLval(int64 k, Variant *&ret, bool copy) {
+  ASSERT(!exists(k));
+  if (copy) {
+    ZendArray *result = copyImpl();
+    result->addLvalImpl(k, &ret, false);
+    return result;
+  }
+  addLvalImpl(k, &ret, false);
+  return NULL;
+}
+
+ArrayData *ZendArray::addLval(CStrRef k, Variant *&ret, bool copy) {
+  ASSERT(!exists(k));
+  if (copy) {
+    ZendArray *result = copyImpl();
+    result->addLvalImpl(k.get(), k->hash(), &ret, false);
+    return result;
+  }
+  addLvalImpl(k.get(), k->hash(), &ret, false);
+  return NULL;
+}
+
+ArrayData *ZendArray::addLval(CVarRef k, Variant *&ret, bool copy) {
+  ASSERT(!exists(k));
+  if (k.isNumeric()) return addLval(k.toInt64(), ret, copy);
+  return addLval(k.toString(), ret, copy);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -1065,10 +1144,10 @@ ArrayData *ZendArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
         CVarRef value = it.secondRef();
         if (value.isReferenced()) value.setContagious();
         if (key.isNumeric()) {
-          add(key.toInt64(), value);
+          addVal(key.toInt64(), value);
         } else {
           String skey = key.toString();
-          add(skey.get(), value);
+          addVal(skey.get(), value);
         }
       }
     } else {
@@ -1090,10 +1169,10 @@ ArrayData *ZendArray::append(const ArrayData *elems, ArrayOp op, bool copy) {
       for (ArrayIter it(elems); !it.end(); it.next()) {
         Variant key = it.first();
         if (key.isNumeric()) {
-          add(key.toInt64(), it.second());
+          addVal(key.toInt64(), it.second());
         } else {
           String skey = key.toString();
-          add(skey.get(), it.second());
+          addVal(skey.get(), it.second());
         }
       }
     } else {

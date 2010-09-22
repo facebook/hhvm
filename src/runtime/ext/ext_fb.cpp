@@ -381,9 +381,9 @@ int fb_unserialize_from_buffer(Variant &res, const char *buff,
           return retval;
         }
         if (!key.isNull()) {
-          ret.set(key, value);
+          ret.add(key, value);
         } else {
-          ret.set(index, value);
+          ret.add(index, value);
         }
         /* Need at least 1 byte for type/stop (see start of loop) */
         CHECK_ENOUGH(1, *pos, buff_len);

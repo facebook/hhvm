@@ -177,7 +177,11 @@ void f_srand(CVarRef seed /* = null_variant */) {
   if (seed.isNull()) {
     return srand(GENERATE_SEED());
   }
-  return srand(seed.toInt32());
+  if (seed.isNumeric(true)) {
+    srand(seed.toInt32());
+  } else {
+    raise_warning("srand() expects parameter 1 to be long");
+  }
 }
 
 int64 f_rand(int64 min /* = 0 */, int64 max /* = RAND_MAX */) {
@@ -197,7 +201,11 @@ void f_mt_srand(CVarRef seed /* = null_variant */) {
   if (seed.isNull()) {
     return math_mt_srand(GENERATE_SEED());
   }
-  return math_mt_srand(seed.toInt32());
+  if (seed.isNumeric(true)) {
+    math_mt_srand(seed.toInt32());
+  } else {
+    raise_warning("mt_srand() expects parameter 1 to be long");
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

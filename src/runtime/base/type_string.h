@@ -193,7 +193,7 @@ public:
    * Type conversions
    */
   bool   toBoolean() const { return m_px ? m_px->toBoolean() : false;}
-  char   toByte   () const { return m_px ? m_px->toByte   () : false;}
+  char   toByte   () const { return m_px ? m_px->toByte   () : 0;}
   short  toInt16  () const { return m_px ? m_px->toInt16  () : 0;}
   int    toInt32  () const { return m_px ? m_px->toInt32  () : 0;}
   int64  toInt64  () const { return m_px ? m_px->toInt64  () : 0;}

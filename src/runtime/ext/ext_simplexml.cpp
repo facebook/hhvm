@@ -296,7 +296,8 @@ void c_SimpleXMLElement::t___construct(CStrRef data, int64 options /* = 0 */,
       m_attributes = collect_attributes(m_node, ns, is_prefix);
     }
   } else {
-    raise_error("String could not be parsed as XML");
+    throw (Object)p_Exception(NEW(c_Exception)())->create(
+        "String could not be parsed as XML");
   }
 }
 

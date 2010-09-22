@@ -85,6 +85,11 @@ inline void x_hphp_clear_unflushed() {
   f_hphp_clear_unflushed();
 }
 
+inline Array x_hphp_debug_caller_info() {
+  FUNCTION_INJECTION_BUILTIN(hphp_debug_caller_info);
+  return f_hphp_debug_caller_info();
+}
+
 inline bool x_trigger_error(CStrRef error_msg, int error_type = k_E_USER_NOTICE) {
   FUNCTION_INJECTION_BUILTIN(trigger_error);
   return f_trigger_error(error_msg, error_type);

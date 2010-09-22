@@ -155,6 +155,39 @@ Array FrameInjection::GetBacktrace(bool skip /* = false */,
   return bt;
 }
 
+Array FrameInjection::GetCallerInfo(bool skip /* = false */) {
+  FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
+  if (skip && t) {
+    t = t->m_prev;
+  }
+  while (t) {
+    if (strcasecmp(t->m_name, "call_user_func") == 0 ||
+        strcasecmp(t->m_name, "call_user_func_array") == 0) {
+      t = t->m_prev;
+    } else {
+      break;
+    }
+  }
+  while (t && t->m_prev) {
+    String file = t->m_prev->getFileName();
+    if (!file.empty() && t->m_prev->m_line) {
+      Array result = Array::Create();
+      result.set(s_file, file, true);
+      result.set(s_line, t->m_prev->m_line, true);
+      return result;
+    }
+    t = t->m_prev;
+    if (t) {
+      if (strcasecmp(t->m_name, "call_user_func") == 0 ||
+          strcasecmp(t->m_name, "call_user_func_array") == 0) {
+        continue;
+      }
+    }
+    break;
+  }
+  return Array::Create();
+}
+
 int FrameInjection::GetLine(bool skip /* = false */) {
   FrameInjection *t = ThreadInfo::s_threadInfo->m_top;
   if (t && skip) {

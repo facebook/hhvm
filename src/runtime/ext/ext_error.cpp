@@ -35,6 +35,24 @@ Array f_debug_backtrace(bool provide_object /* = true */) {
   return stackTraceToBackTrace(st);
 }
 
+/**
+ * hphp_debug_caller_info - returns an array of info about the "caller"
+ *
+ * For clarity, we refer to the function that called debug_get_caller_info()
+ * as the "callee", and we refer to the function that called the callee as
+ * the "caller".
+ *
+ * This function returns an array containing two keys "file" and "line" which
+ * indicate the the filename and line number where the "caller" called the
+ * "callee".
+ */
+Array f_hphp_debug_caller_info() {
+  if (RuntimeOption::InjectedStackTrace) {
+    return FrameInjection::GetCallerInfo(true);
+  }
+  return Array::Create();
+}
+
 void f_debug_print_backtrace() {
   if (RuntimeOption::InjectedStackTrace) {
     Array bt = FrameInjection::GetBacktrace(true);

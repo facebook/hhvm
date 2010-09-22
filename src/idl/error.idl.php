@@ -255,6 +255,17 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "hphp_debug_caller_info",
+    'desc'   => "Retrieves information about the caller that invoked the current function or method",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => StringVec,
+      'desc'   => "Returns an associative array. On success, the array will contain two keys 'file' and 'line' which indicate the filename and line number of the callsite that invoked the current function or method.",
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "trigger_error",
     'desc'   => "Used to trigger a user error condition, it can be used by in conjunction with the built-in error handler, or with a user defined function that has been set as the new error handler (set_error_handler()).\n\nThis function is useful when you need to generate a particular response to an exception at runtime.",
     'flags'  =>  HasDocComment,

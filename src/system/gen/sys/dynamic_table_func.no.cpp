@@ -27490,6 +27490,16 @@ Variant ifa_getdate(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 0) return (f_getdate());
   return (f_getdate(a0));
 }
+Variant i_hphp_debug_caller_info(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(hphp_debug_caller_info);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_debug_caller_info", 0, 1);
+  return (f_hphp_debug_caller_info());
+}
+Variant ifa_hphp_debug_caller_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("hphp_debug_caller_info", 0, 1);
+  return (f_hphp_debug_caller_info());
+}
 Variant i_xmlwriter_write_attribute(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_write_attribute);
   int count __attribute__((__unused__)) = params.size();
@@ -67301,6 +67311,18 @@ Variant ei_getdate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   if (count <= 0) return (x_getdate());
   else return (x_getdate(a0));
 }
+Variant ei_hphp_debug_caller_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("hphp_debug_caller_info", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_hphp_debug_caller_info());
+}
 Variant ei_xmlwriter_write_attribute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -75741,6 +75763,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 666:
       HASH_INVOKE_FROM_EVAL(0x68272A37CC9E729ALL, mb_strtolower);
+      HASH_INVOKE_FROM_EVAL(0x24BD9EBDC721E29ALL, hphp_debug_caller_info);
       break;
     case 667:
       HASH_INVOKE_FROM_EVAL(0x4A09634AE6DFF29BLL, fileperms);
@@ -81731,6 +81754,7 @@ CallInfo ci_magickqueryfontmetrics((void*)&i_magickqueryfontmetrics, (void*)&ifa
 CallInfo ci_ispixeliterator((void*)&i_ispixeliterator, (void*)&ifa_ispixeliterator, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagefilledarc((void*)&i_imagefilledarc, (void*)&ifa_imagefilledarc, 9, 0, 0x0000000000000000LL);
 CallInfo ci_getdate((void*)&i_getdate, (void*)&ifa_getdate, 1, 0, 0x0000000000000000LL);
+CallInfo ci_hphp_debug_caller_info((void*)&i_hphp_debug_caller_info, (void*)&ifa_hphp_debug_caller_info, 0, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_attribute((void*)&i_xmlwriter_write_attribute, (void*)&ifa_xmlwriter_write_attribute, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imagearc((void*)&i_imagearc, (void*)&ifa_imagearc, 8, 0, 0x0000000000000000LL);
 CallInfo ci_magickreadimages((void*)&i_magickreadimages, (void*)&ifa_magickreadimages, 2, 0, 0x0000000000000000LL);
@@ -83863,6 +83887,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 666:
       HASH_GUARD(0x68272A37CC9E729ALL, mb_strtolower) {
         ci = &ci_mb_strtolower;
+        return true;
+      }
+      HASH_GUARD(0x24BD9EBDC721E29ALL, hphp_debug_caller_info) {
+        ci = &ci_hphp_debug_caller_info;
         return true;
       }
       break;

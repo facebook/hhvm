@@ -38,7 +38,7 @@ public:
   bool init(const std::string &defaultFormat,
             std::vector<std::pair<std::string, std::string> > &files);
   bool init(const std::string &format, const std::string &file);
-  void log(Transport *transport);
+  void log(Transport *transport, const VirtualHost *vhost);
   bool setThreadLog(const char *file);
   void clearThreadLog();
   void onNewRequest();
@@ -50,10 +50,11 @@ private:
   bool parseConditions(const char* &format, int code);
   std::string parseArgument(const char* &format);
   bool genField(std::ostringstream &out, const char* &format,
-                       Transport *transport, const std::string &arg);
+                Transport *transport, const VirtualHost *vhost,
+                const std::string &arg);
   void skipField(const char* &format);
-  void writeLog(Transport *transport, FILE *outFile,
-                       const char *format);
+  void writeLog(Transport *transport, const VirtualHost *vhost,
+                FILE *outFile, const char *format);
 
   std::vector<FILE*> m_output;
   bool m_initialized;

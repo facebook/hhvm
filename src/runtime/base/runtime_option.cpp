@@ -858,7 +858,7 @@ void RuntimeOption::Load(Hdf &config) {
   {
     Hdf sandbox = config["Sandbox"];
     SandboxMode = sandbox["SandboxMode"].getBool();
-    SandboxPattern = format_pattern(sandbox["Pattern"].getString());
+    SandboxPattern = format_pattern(sandbox["Pattern"].getString(), true);
     SandboxHome = sandbox["Home"].getString();
     SandboxFallback = sandbox["Fallback"].getString();
     SandboxConfFile = sandbox["ConfFile"].getString();

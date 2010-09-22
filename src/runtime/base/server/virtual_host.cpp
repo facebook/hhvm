@@ -44,7 +44,7 @@ const VirtualHost *VirtualHost::GetCurrent() {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-std::string format_pattern(const std::string &pattern) {
+std::string format_pattern(const std::string &pattern, bool prefixSlash) {
   if (pattern.empty()) return pattern;
 
   std::string ret = "#";
@@ -52,7 +52,7 @@ std::string format_pattern(const std::string &pattern) {
     char ch = pattern[i];
 
     // apache rewrite rules don't require initial slash
-    if (i == 0 && ch == '^') {
+    if (prefixSlash && i == 0 && ch == '^') {
       char ch1 = pattern[1];
       if (ch1 != '/' && ch1 != '(') {
         ret += "^/";
@@ -73,7 +73,6 @@ std::string format_pattern(const std::string &pattern) {
 VirtualHost::VirtualHost() : m_disabled(false) {
 }
 
-
 VirtualHost::VirtualHost(Hdf vh) : m_disabled(false) {
   init(vh);
 }
@@ -87,7 +86,7 @@ void VirtualHost::init(Hdf vh) {
 
   if (prefix) m_prefix = prefix;
   if (pattern) {
-    m_pattern = format_pattern(pattern);
+    m_pattern = format_pattern(pattern, true);
     if (!m_pattern.empty()) {
       m_pattern += "i"; // case-insensitive
     }
@@ -112,7 +111,7 @@ void VirtualHost::init(Hdf vh) {
     RewriteRule dummy;
     m_rewriteRules.push_back(dummy);
     RewriteRule &rule = m_rewriteRules.back();
-    rule.pattern = format_pattern(hdf["pattern"].getString(""));
+    rule.pattern = format_pattern(hdf["pattern"].getString(""), true);
     rule.to = hdf["to"].getString("");
     rule.qsa = hdf["qsa"].getBool(false);
     rule.redirect = hdf["redirect"].getInt16(0);
@@ -126,7 +125,7 @@ void VirtualHost::init(Hdf vh) {
       RewriteCond dummy;
       rule.rewriteConds.push_back(dummy);
       RewriteCond &cond = rule.rewriteConds.back();
-      cond.pattern = format_pattern(chdf["pattern"].getString(""));
+      cond.pattern = format_pattern(chdf["pattern"].getString(""), true);
       if (cond.pattern.empty()) {
         throw InvalidArgumentException("rewrite rule", "(empty cond pattern)");
       }
@@ -151,6 +150,38 @@ void VirtualHost::init(Hdf vh) {
   if (vh["IpBlockMap"].firstChild().exists()) {
     Hdf ipblocks = vh["IpBlockMap"];
     m_ipBlocks = IpBlockMapPtr(new IpBlockMap(ipblocks));
+  }
+
+  Hdf logFilters = vh["LogFilters"];
+  for (Hdf hdf = logFilters.firstChild(); hdf.exists(); hdf = hdf.next()) {
+    QueryStringFilter filter;
+    filter.urlPattern = format_pattern(hdf["url"].getString(""), true);
+    filter.replaceWith = hdf["value"].getString("");
+
+    string pattern = hdf["pattern"].getString("");
+    vector<string> names;
+    hdf["params"].get(names);
+
+    if (pattern.empty()) {
+      for (unsigned int i = 0; i < names.size(); i++) {
+        if (pattern.empty()) {
+          pattern = "(?<=[&\?](";
+        } else {
+          pattern += "|";
+        }
+        pattern += names[i];
+      }
+      if (!pattern.empty()) {
+        pattern += ")=).*?(?=(&|$))";
+        pattern = format_pattern(pattern, false);
+      }
+    } else if (!names.empty()) {
+      throw InvalidArgumentException
+        ("log filter", "(cannot specify both params and pattern)");
+    }
+
+    filter.namePattern = pattern;
+    m_queryStringFilters.push_back(filter);
   }
 
   vh["ServerVariables"].get(m_serverVars);
@@ -247,6 +278,48 @@ std::string VirtualHost::serverName(const std::string &host) const {
   }
 
   return RuntimeOption::Host;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// query string filter
+
+std::string VirtualHost::filterUrl(const std::string &url) const {
+  ASSERT(!m_queryStringFilters.empty());
+
+  for (unsigned int i = 0; i < m_queryStringFilters.size(); i++) {
+    const QueryStringFilter &filter = m_queryStringFilters[i];
+
+    bool match = true;
+    if (!filter.urlPattern.empty()) {
+      Variant ret = preg_match(String(filter.urlPattern.c_str(),
+                                      filter.urlPattern.size(),
+                                      AttachLiteral),
+                               String(url.c_str(), url.size(),
+                                      AttachLiteral));
+      match = (ret.toInt64() > 0);
+    }
+
+    if (match) {
+      if (filter.namePattern.empty()) {
+        return "";
+      }
+
+      Variant ret;
+      int count = preg_replace(ret, filter.namePattern.c_str(),
+                               String(filter.replaceWith.c_str(),
+                                      filter.replaceWith.size(),
+                                      AttachLiteral),
+                               String(url.c_str(), url.size(),
+                                      AttachLiteral));
+      if (!same(ret, false) && count > 0) {
+        return ret.toString().data();
+      }
+
+      return url;
+    }
+  }
+
+  return url;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

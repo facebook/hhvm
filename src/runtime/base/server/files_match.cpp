@@ -25,7 +25,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 FilesMatch::FilesMatch(Hdf vh) {
-  m_pattern = format_pattern(vh["pattern"].get(""));
+  m_pattern = format_pattern(vh["pattern"].get(""), true);
   vh["headers"].get(m_headers);
 }
 

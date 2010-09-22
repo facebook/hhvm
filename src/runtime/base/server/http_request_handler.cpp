@@ -247,7 +247,7 @@ void HttpRequestHandler::handleRequest(Transport *transport) {
   } catch (...) {
     Logger::Error("Unhandled exception in HPHP server engine.");
   }
-  GetAccessLog().log(transport);
+  GetAccessLog().log(transport, vhost);
   hphp_session_exit();
 
   HttpProtocol::ClearRecord(ret, tmpfile);

@@ -50,7 +50,7 @@ SatelliteServerInfo::SatelliteServerInfo(Hdf hdf) {
     vector<string> urls;
     hdf["URLs"].get(urls);
     for (unsigned int i = 0; i < urls.size(); i++) {
-      m_urls.insert(format_pattern(urls[i]));
+      m_urls.insert(format_pattern(urls[i], true));
     }
     if (hdf["BlockMainServer"].getBool(true)) {
       InternalURLs.insert(m_urls.begin(), m_urls.end());

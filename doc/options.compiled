@@ -414,6 +414,25 @@ These are experimental LFU settings.
       IpBlockMap {
         # in same format as the IpBlockMap example above
       }
+
+      # Remove certain query string parameters from access log.
+      LogFilters {
+        * {
+          # regex pattern to match a URL
+          url = (empty means matching all URLs)
+
+          # names of parameters to remove from query string
+          params = {
+            * = parameter name
+          }
+
+          # alternatively, use regex pattern to replace with empty string.
+          pattern = (empty means hiding entire query string)
+
+          # optionally, specify what values to replace with
+          value = (by default it's empty, removing the query parameter)
+        }
+      }
     }
   }
 

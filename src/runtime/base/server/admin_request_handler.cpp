@@ -356,7 +356,7 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
 
     transport->sendString("Unknown command: " + cmd + "\n", 404);
   } while (0);
-  GetAccessLog().log(transport);
+  GetAccessLog().log(transport, NULL);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

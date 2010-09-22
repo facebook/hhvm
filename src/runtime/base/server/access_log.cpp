@@ -82,25 +82,24 @@ bool AccessLog::openFiles() {
   return !m_output.empty();
 }
 
-void AccessLog::log(Transport *transport) {
+void AccessLog::log(Transport *transport, const VirtualHost *vhost) {
   ASSERT(transport);
   if (!m_initialized) return;
 
   FILE *threadLog = m_fGetThreadData()->log;
   if (threadLog) {
-    writeLog(transport, threadLog,
-             m_defaultFormat.c_str());
+    writeLog(transport, vhost, threadLog, m_defaultFormat.c_str());
   }
   for (uint i = 0; i < m_output.size(); ++i) {
     FILE *outFile = m_output[i];
     if (!outFile) continue;
     const char *format = m_files[i].second.c_str();
-    writeLog(transport, outFile, format);
+    writeLog(transport, vhost, outFile, format);
   }
 }
 
-void AccessLog::writeLog(Transport *transport, FILE *outFile,
-                         const char *format) {
+void AccessLog::writeLog(Transport *transport, const VirtualHost *vhost,
+                         FILE *outFile, const char *format) {
    char c;
    ostringstream out;
    while (c = *format++) {
@@ -111,7 +110,7 @@ void AccessLog::writeLog(Transport *transport, FILE *outFile,
 
      if (parseConditions(format, transport->getResponseCode())) {
        string arg = parseArgument(format);
-       if (!genField(out, format, transport, arg)) {
+       if (!genField(out, format, transport, vhost, arg)) {
          out << "-";
        }
      } else {
@@ -178,7 +177,8 @@ void AccessLog::skipField(const char* &format) {
 }
 
 bool AccessLog::genField(ostringstream &out, const char* &format,
-                         Transport *transport, const string &arg) {
+                         Transport *transport, const VirtualHost *vhost,
+                         const string &arg) {
   int responseSize = transport->getResponseSize();
   int code = transport->getResponseCode();
 
@@ -201,7 +201,13 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
     {
       string header = transport->getHeader(arg.c_str());
       if (header.empty()) return false;
-      out << header;
+
+      if (vhost && vhost->hasLogFilter() &&
+          strcasecmp(arg.c_str(), "Referer") == 0) {
+        out << vhost->filterUrl(header);
+      } else {
+        out << header;
+      }
     }
     break;
   case 'n':
@@ -253,9 +259,17 @@ bool AccessLog::genField(ostringstream &out, const char* &format,
       default: break;
       }
       if (!method) return false;
+      out << method << " ";
+
       const char *url = transport->getUrl();
+      if (vhost && vhost->hasLogFilter()) {
+        out << vhost->filterUrl(url);
+      } else {
+        out << url;
+      }
+
       string httpVersion = transport->getHTTPVersion();
-      out << method << " " << url << " HTTP/" << httpVersion;
+      out << " HTTP/" << httpVersion;
     }
     break;
   case 'U':

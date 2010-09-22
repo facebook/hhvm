@@ -25,6 +25,9 @@ StringOffset::operator String() const {
 }
 
 StringOffset &StringOffset::operator=(CVarRef v) {
+  if (v.isArray()) {
+    raise_notice("Array to string conversion");
+  }
   m_data->setChar(m_offset, v.toString());
   return *this;
 }

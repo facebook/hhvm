@@ -1098,7 +1098,7 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     bool parentCall = m_parentClass && inObj;
     string className;
     if (m_classScope) {
-      if (m_classScope->isRedeclaring()) {
+      if (m_redeclaredClass) {
         className = cg.formatLabel(m_classScope->getName());
       } else {
         className = m_classScope->getId(cg);

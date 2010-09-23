@@ -910,8 +910,8 @@ void createOutputDirectory(ProgramOptions &po) {
     }
     temp += "/hphp_XXXXXX";
     char path[PATH_MAX + 1];
-    strncpy(path, temp.c_str(), sizeof(path));
-    path[temp.size()] = '\0';
+    strncpy(path, temp.c_str(), PATH_MAX);
+    path[PATH_MAX] = '\0';
     po.outputDir = mkdtemp(path);
     Logger::Info("creating temporary directory %s ...", po.outputDir.c_str());
   }

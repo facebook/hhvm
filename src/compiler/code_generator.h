@@ -228,6 +228,7 @@ private:
 
   void print(const char *fmt, va_list ap);
   void print(const std::string &msg, bool indent = true);
+  std::string getFormattedName(const std::string &file);
 };
 
 #define STR(x) #x

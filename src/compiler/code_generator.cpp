@@ -25,6 +25,7 @@
 #include <compiler/analysis/variable_table.h>
 #include <util/util.h>
 #include <util/hash.h>
+#include <boost/format.hpp>
 
 using namespace HPHP;
 using namespace std;
@@ -153,13 +154,21 @@ void CodeGenerator::namespaceEnd() {
   printf("}\n");
 }
 
-void CodeGenerator::headerBegin(const std::string &file) {
+std::string CodeGenerator::getFormattedName(const std::string &file) {
   string formatted = file;
   Util::replaceAll(formatted, ".", "_");
   Util::replaceAll(formatted, "/", "_");
   Util::replaceAll(formatted, "-", "_");
   Util::replaceAll(formatted, "$", "_");
 
+  int hash = hash_string(file.data(), file.size());
+  if (hash < 0) hash = -hash;
+  formatted += boost::str(boost::format("%08x") % hash);
+  return formatted;
+}
+
+void CodeGenerator::headerBegin(const std::string &file) {
+  string formatted = getFormattedName(file);
   printf("\n");
   printf("#ifndef __GENERATED_%s__\n", formatted.c_str());
   printf("#define __GENERATED_%s__\n", formatted.c_str());
@@ -167,12 +176,7 @@ void CodeGenerator::headerBegin(const std::string &file) {
 }
 
 void CodeGenerator::headerEnd(const std::string &file) {
-  string formatted = file;
-  Util::replaceAll(formatted, ".", "_");
-  Util::replaceAll(formatted, "/", "_");
-  Util::replaceAll(formatted, "-", "_");
-  Util::replaceAll(formatted, "$", "_");
-
+  string formatted = getFormattedName(file);
   printf("\n");
   printf("#endif // __GENERATED_%s__\n", formatted.c_str());
 }

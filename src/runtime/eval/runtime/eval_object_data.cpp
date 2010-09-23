@@ -175,6 +175,7 @@ void EvalObjectData::o_setArray(CArrRef props) {
       int subLen = k.find('\0', 1) + 1;
       String cls = k.substr(1, subLen - 2);
       String key = k.substr(subLen);
+      if (cls == "*") cls = o_getClassName();
       props->load(k, o_lval(key, Variant(), cls));
     }
   }

@@ -14163,6 +14163,19 @@ bool TestCodeRun::TestAPC() {
         "  &int(5)\n"
         "}\n"
       );
+  MVCRO("<?php\n"
+      "class a {"
+      "  protected $foo = 10;"
+      "}"
+      "$x = new a;"
+      "apc_store('x', array($x));"
+      "$x = apc_fetch('x');"
+      "var_dump($x[0]);",
+      "object(a)#1 (1) {\n"
+      "  [\"foo:protected\"]=>\n"
+      "  int(10)\n"
+      "}\n"
+      );
   return true;
 }
 

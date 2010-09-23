@@ -18,6 +18,7 @@
 #define __HPHP_AST_PTR_H__
 
 #include <runtime/base/util/smart_ptr.h>
+#include <util/atomic.h>
 
 namespace HPHP {
 namespace Eval {
@@ -41,6 +42,18 @@ public:
     SmartPtr<T>::operator=(px);
     return *this;
   }
+};
+
+class AtomicCountable {
+public:
+  void incRefCount() {
+    atomic_inc(m_count);
+  }
+  int decRefCount() {
+    return atomic_dec(m_count);
+  }
+private:
+  int m_count;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

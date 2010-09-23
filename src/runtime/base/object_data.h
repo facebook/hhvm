@@ -186,7 +186,7 @@ class ObjectData : public Countable {
   Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
 
   virtual void o_setArray(CArrRef properties);
-  virtual void o_getArray(Array &props) const {}
+  virtual void o_getArray(Array &props) const;
   void o_set(const Array properties);
   Variant o_argval(bool byRef, CStrRef s, int64 hash, bool error = true,
       const char *context = NULL);

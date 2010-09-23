@@ -29,213 +29,73 @@ public:
     m_globals = (Globals*)get_global_variables();
   }
 
-  virtual void release() {
-  }
+  virtual void release();
+  virtual ssize_t size() const;
+  virtual Variant getKey(ssize_t pos) const;
+  virtual Variant getValue(ssize_t pos) const;
+  virtual CVarRef getValueRef(ssize_t pos) const;
+  virtual bool supportValueRef() const;
+  virtual bool isGlobalArrayWrapper() const;
 
-  virtual ssize_t size() const {
-    return m_globals->size();
-  }
+  virtual bool exists(int64   k) const;
+  virtual bool exists(litstr  k) const;
+  virtual bool exists(CStrRef k) const;
+  virtual bool exists(CVarRef k) const;
+  virtual bool idxExists(ssize_t idx) const;
 
-  virtual Variant getKey(ssize_t pos) const {
-    Variant k;
-    m_globals->getByIdx(pos, k);
-    return k;
-  }
-  virtual Variant getValue(ssize_t pos) const {
-    Variant k;
-    return m_globals->getByIdx(pos, k);
-  }
-  virtual CVarRef getValueRef(ssize_t pos) const {
-    Variant k;
-    return m_globals->getRefByIdx(pos, k);
-  }
-  virtual bool supportValueRef() const { return true; }
+  virtual Variant get(int64   k, bool error = false) const;
+  virtual Variant get(litstr  k, bool error = false) const;
+  virtual Variant get(CStrRef k, bool error = false) const;
+  virtual Variant get(CVarRef k, bool error = false) const;
 
-  virtual bool exists(int64   k) const {
-    return exists(Variant(k));
-  }
-  virtual bool exists(litstr  k) const {
-    return exists(Variant(k));
-  }
-  virtual bool exists(CStrRef k) const {
-    return exists(Variant(k));
-  }
-  virtual bool exists(CVarRef k) const {
-    return m_globals->exists(k.toString().data());
-  }
-  virtual bool idxExists(ssize_t idx) const {
-    return idx < size();
-  }
+  virtual void load(CVarRef k, Variant &v) const;
 
-  virtual Variant get(int64   k, bool error = false) const {
-    return get(Variant(k));
-  }
-  virtual Variant get(litstr  k, bool error = false) const {
-    if (exists(k)) {
-      return m_globals->get(k);
-    }
-    return Variant();
-  }
-  virtual Variant get(CStrRef k, bool error = false) const {
-    if (exists(k)) {
-      return m_globals->get(k);
-    }
-    return Variant();
-  }
-  virtual Variant get(CVarRef k, bool error = false) const {
-    if (exists(k)) {
-      return m_globals->get(k);
-    }
-    return Variant();
-  }
-
-  virtual void load(CVarRef k, Variant &v) const {
-    ssize_t idx = getIndex(k);
-    if (idx >= 0) {
-      CVarRef r = getValueRef(idx);
-      if (r.isReferenced()) v = ref(r); else v = r;
-    }
-  }
-
-  virtual ssize_t getIndex(int64 k) const {
-    String s = toString(k);
-    return m_globals->getIndex(s.data(), s->hash());
-  }
-  virtual ssize_t getIndex(litstr k) const {
-    String s(k, AttachLiteral);
-    return m_globals->getIndex(k, s->hash());
-  }
-  virtual ssize_t getIndex(CStrRef k) const {
-    return m_globals->getIndex(k.data(), k->hash());
-  }
+  virtual ssize_t getIndex(int64 k) const;
+  virtual ssize_t getIndex(litstr k) const;
+  virtual ssize_t getIndex(CStrRef k) const;
   virtual ssize_t getIndex(CVarRef k) const;
 
-  virtual ArrayData *lval(Variant *&ret, bool copy) {
-    ret = &m_globals->lval();
-    return NULL;
-  }
+  virtual ArrayData *lval(Variant *&ret, bool copy);
   virtual ArrayData *lval(int64   k, Variant *&ret, bool copy,
-                          bool checkExist = false) {
-    return lval(Variant(k), ret, copy);
-  }
+                          bool checkExist = false);
   virtual ArrayData *lval(litstr  k, Variant *&ret, bool copy,
-                          bool checkExist = false) {
-    ret = &m_globals->get(k);
-    return NULL;
-  }
+                          bool checkExist = false);
   virtual ArrayData *lval(CVarRef k, Variant *&ret, bool copy,
-                          bool checkExist = false) {
-    ret = &m_globals->get(k);
-    return NULL;
-  }
+                          bool checkExist = false);
   virtual ArrayData *lval(CStrRef k, Variant *&ret, bool copy,
-                          bool checkExist = false) {
-    ret = &m_globals->get(k);
-    return NULL;
-  }
+                          bool checkExist = false);
 
-  virtual ArrayData *set(int64   k, CVarRef v, bool copy) {
-    set(Variant(k), v, copy);
-    return NULL;
-  }
-  virtual ArrayData *set(litstr  k, CVarRef v, bool copy) {
-    m_globals->get(k) = v;
-    return NULL;
-  }
-  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy) {
-    m_globals->get(k) = v;
-    return NULL;
-  }
-  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy) {
-    m_globals->get(k) = v;
-    return NULL;
-  }
+  virtual ArrayData *set(int64   k, CVarRef v, bool copy);
+  virtual ArrayData *set(litstr  k, CVarRef v, bool copy);
+  virtual ArrayData *set(CStrRef k, CVarRef v, bool copy);
+  virtual ArrayData *set(CVarRef k, CVarRef v, bool copy);
+  virtual ArrayData *remove(int64   k, bool copy);
+  virtual ArrayData *remove(litstr  k, bool copy);
+  virtual ArrayData *remove(CStrRef k, bool copy);
+  virtual ArrayData *remove(CVarRef k, bool copy);
 
-  virtual ArrayData *remove(int64   k, bool copy) {
-    return remove(Variant(k), copy);
-  }
-  virtual ArrayData *remove(litstr  k, bool copy) {
-    unset(m_globals->get(k));
-    return NULL;
-  }
-  virtual ArrayData *remove(CStrRef k, bool copy) {
-    unset(m_globals->get(k));
-    return NULL;
-  }
-  virtual ArrayData *remove(CVarRef k, bool copy) {
-    unset(m_globals->get(k));
-    return NULL;
-  }
+  virtual ArrayData *copy() const;
 
-  virtual ArrayData *copy() const {
-    return NULL;
-  }
+  virtual ArrayData *append(CVarRef v, bool copy);
 
-  virtual ArrayData *append(CVarRef v, bool copy) {
-    m_globals->append(v);
-    return NULL;
-  }
+  virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy);
 
-  virtual ArrayData *append(const ArrayData *elems, ArrayOp op, bool copy) {
-    ((Array*)m_globals)->get()->append(elems, op, false);
-    return NULL;
-  }
+  virtual ArrayData *pop(Variant &value);
 
-  virtual ArrayData *pop(Variant &value) {
-    throw NotSupportedException(__func__, "manipulating globals array");
-  }
+  virtual ArrayData *dequeue(Variant &value);
 
-  virtual ArrayData *dequeue(Variant &value) {
-    throw NotSupportedException(__func__, "manipulating globals array");
-  }
+  virtual ArrayData *prepend(CVarRef v, bool copy);
 
-  virtual ArrayData *prepend(CVarRef v, bool copy) {
-    throw NotSupportedException(__func__, "manipulating globals array");
-  }
+  ssize_t iter_begin() const;
+  ssize_t iter_end() const;
+  ssize_t iter_advance(ssize_t prev) const;
+  ssize_t iter_rewind(ssize_t prev) const;
 
-  ssize_t iter_begin() const {
-    return m_globals->iter_begin();
-  }
-  ssize_t iter_end() const {
-    return m_globals->iter_end();
-  }
-  ssize_t iter_advance(ssize_t prev) const {
-    return m_globals->iter_advance(prev);
-  }
-  ssize_t iter_rewind(ssize_t prev) const {
-    return m_globals->iter_rewind(prev);
-  }
+  virtual Variant next();
 
-  virtual Variant next() {
-    m_pos = m_globals->iter_advance(m_pos);
-    return value(m_pos);
-  }
+  virtual void getFullPos(FullPos &pos);
 
-  virtual void getFullPos(FullPos &pos) {
-    if (m_pos == ArrayData::invalid_index) {
-      pos.primary = ArrayData::invalid_index;
-    } else if (m_pos < m_globals->staticSize()) {
-      pos.primary = m_pos;
-      pos.secondary = ArrayData::invalid_index;
-    } else {
-      m_globals->getFullPos(pos);
-    }
-  }
-
-  virtual bool setFullPos(const FullPos &pos) {
-    if (pos.primary != ArrayData::invalid_index) {
-      if (m_pos < m_globals->staticSize()) return true;
-      ArrayData *data = m_globals->getArrayData();
-      if (data) {
-        data->reset();
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
-  }
+  virtual bool setFullPos(const FullPos &pos);
 
 private:
   Globals* m_globals;

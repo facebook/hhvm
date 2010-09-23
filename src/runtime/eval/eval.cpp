@@ -39,7 +39,7 @@ Variant eval(LVariableTable *vars, CObjRef self, CStrRef code_str,
   Eval::StatementPtr s = Eval::Parser::ParseString(code_str2.data(), statics);
   Block blk(statics);
   // install string code container to globals
-  StringCodeContainer *scc = new StringCodeContainer(s);
+  SmartPtr<CodeContainer> scc = new StringCodeContainer(s);
   RequestEvalState::addCodeContainer(scc);
   // todo: pass in params
   NestedVariableEnvironment env(vars, blk, Array(), self);

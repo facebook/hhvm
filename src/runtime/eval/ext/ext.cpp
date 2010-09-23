@@ -246,7 +246,7 @@ Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
 
   vector<StaticStatementPtr> statics;
   ostringstream fnStream;
-  int64 id = RequestEvalState::unique();
+  string id(RequestEvalState::unique());
   fnStream << "<?php function lambda_" << id << "(" << var.toString().data() <<
     ") {" << body.toString().data() << "}\n";
   StatementPtr bodyAst = Parser::ParseString(fnStream.str().c_str(), statics);
@@ -256,7 +256,7 @@ Variant EvalCreateFunction::InvokeImpl(VariableEnvironment &env,
   FunctionStatementPtr f = bodyAst->cast<StatementListStatement>()->stmts()[0];
   ASSERT(f);
   f->changeName(nameStream.str());
-  StringCodeContainer *cc = new StringCodeContainer(bodyAst);
+  SmartPtr<CodeContainer> cc(new StringCodeContainer(bodyAst));
   RequestEvalState::addCodeContainer(cc);
   f->eval(env);
   return String(f->name().c_str(), f->name().size(), AttachLiteral);

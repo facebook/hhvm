@@ -21,6 +21,7 @@
 #include <runtime/base/class_info.h>
 #include <runtime/eval/runtime/variant_stack.h>
 #include <util/case_insensitive.h>
+#include <util/atomic.h>
 
 namespace HPHP {
 namespace Eval {
@@ -38,7 +39,7 @@ class ClassEvalState {
 public:
   typedef hphp_const_char_imap<std::pair<const MethodStatement*, int> >
     MethodTable;
-  ClassEvalState() : m_constructor(NULL),
+  ClassEvalState() : m_class(NULL), m_constructor(NULL),
                      m_initializedInstance(false),
                      m_initializedStatics(false),
                      m_doneSemanticCheck(false)
@@ -60,6 +61,9 @@ public:
   void initializeInstance();
   void initializeStatics();
   void semanticCheck();
+  void fiberInit(ClassEvalState &oces, FiberReferenceMap &refMap);
+  void fiberExit(ClassEvalState &oces, FiberReferenceMap &refMap,
+                 FiberAsyncFunc::Strategy default_strategy);
 private:
   const ClassStatement *m_class;
   MethodTable m_methodTable;
@@ -70,24 +74,39 @@ private:
   bool m_doneSemanticCheck;
 };
 
+
 /**
  * Containers to live in Globals and do the garbage collection.
  */
-class CodeContainer {
+class CodeContainer : public AtomicCountable {
 public:
   virtual ~CodeContainer() {}
+  void release();
 };
 
 class StringCodeContainer : public CodeContainer {
 public:
   StringCodeContainer(StatementPtr s);
+  ~StringCodeContainer();
 private:
   StatementPtr m_s;
 };
 
- class ClassInfoEvaled : public ClassInfo {
+class EvalConstantInfo : public ClassInfo::ConstantInfo,
+  public AtomicCountable {
+public:
+  void release() { delete this; }
+};
+
+class EvalMethodInfo :  public ClassInfo::MethodInfo, public AtomicCountable {
+public:
+  void release() { delete this; }
+};
+
+class ClassInfoEvaled : public ClassInfo, public AtomicCountable {
  public:
   ~ClassInfoEvaled();
+  void release() { delete this; }
   virtual const char *getParentClass() const { return m_parentClass; }
 
   // implementing ClassInfo
@@ -117,7 +136,7 @@ class RequestEvalState {
 public:
   static void Reset();
   static void DestructObjects();
-  static void addCodeContainer(CodeContainer *cc);
+  static void addCodeContainer(SmartPtr<CodeContainer> &cc);
   static ClassEvalState &declareClass(const ClassStatement *cls);
   static void declareFunction(const FunctionStatement *cls);
   static bool declareConstant(CStrRef name, CVarRef value);
@@ -155,7 +174,7 @@ public:
   static void GetDynamicConstants(Array &arr);
 
   // Misc
-  static int64 unique();
+  static std::string unique();
   static void info();
 
   static VariantStack &argStack();
@@ -163,9 +182,14 @@ public:
 
   static void registerObject(EvalObjectData *obj);
   static void deregisterObject(EvalObjectData *obj);
+
+  static RequestEvalState *Get();
+  void fiberInit(RequestEvalState *res, FiberReferenceMap &refMap);
+  void fiberExit(RequestEvalState *res, FiberReferenceMap &refMap,
+                 FiberAsyncFunc::Strategy default_strategy);
 private:
   std::map<std::string, PhpFile*> m_evaledFiles;
-  std::vector<Eval::CodeContainer*> m_codeContainers;
+  std::list<SmartPtr<CodeContainer> > m_codeContainers;
 
   hphp_const_char_imap<ClassEvalState> m_classes;
   hphp_const_char_imap<const FunctionStatement*> m_functions;
@@ -173,10 +197,10 @@ private:
   std::map<const MethodStatement*, std::map<std::string, LVariableTable> >
     m_methodStatics;
   Array m_constants;
-  std::map<std::string, ClassInfo::ConstantInfo> m_constantInfos;
-  std::map<std::string, ClassInfo::MethodInfo> m_methodInfos;
-  std::map<std::string, ClassInfoEvaled> m_classInfos;
-  std::map<std::string, ClassInfoEvaled> m_interfaceInfos;
+  std::map<std::string, SmartPtr<EvalConstantInfo> > m_constantInfos;
+  std::map<std::string, SmartPtr<EvalMethodInfo> > m_methodInfos;
+  std::map<std::string, SmartPtr<ClassInfoEvaled> > m_classInfos;
+  std::map<std::string, SmartPtr<ClassInfoEvaled> > m_interfaceInfos;
   std::set<EvalObjectData*> m_livingObjects;
   int64 m_ids;
   VariantStack m_argStack;

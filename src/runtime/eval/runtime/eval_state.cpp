@@ -34,7 +34,12 @@ namespace Eval {
 using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
+void CodeContainer::release() {
+  delete this;
+}
+
 StringCodeContainer::StringCodeContainer(StatementPtr s) : m_s(s) {}
+StringCodeContainer::~StringCodeContainer() {}
 
 void ClassEvalState::init(const ClassStatement *cls) {
   m_class = cls;
@@ -68,6 +73,35 @@ void ClassEvalState::semanticCheck() {
     m_doneSemanticCheck = true;
   }
 }
+void ClassEvalState::fiberInit(ClassEvalState &oces,
+                               FiberReferenceMap &refMap) {
+  m_class = oces.m_class;
+  m_methodTable = oces.m_methodTable;
+  m_constructor = oces.m_constructor;
+
+  Array sv(oces.m_statics.fiberMarshal(refMap));
+  m_statics.Array::operator=(sv);
+
+  m_initializedInstance = oces.m_initializedInstance;
+  m_initializedStatics = oces.m_initializedStatics;
+  m_doneSemanticCheck = oces.m_doneSemanticCheck;
+}
+void ClassEvalState::fiberExit(ClassEvalState &oces,
+                               FiberReferenceMap &refMap,
+                               FiberAsyncFunc::Strategy default_strategy) {
+  if (!m_class) {
+    init(oces.m_class);
+  } else if (m_class != oces.m_class) {
+    // Class definition diverged
+    raise_error("Different class of the same name (%s) defined in fiber",
+                m_class->name().c_str());
+  }
+  refMap.unmarshal(m_statics, oces.m_statics, default_strategy);
+  if (default_strategy != FiberAsyncFunc::GlobalStateIgnore) {
+    m_initializedStatics |= oces.m_initializedStatics;
+  }
+}
+
 
 IMPLEMENT_THREAD_LOCAL(RequestEvalState, s_res);
 void RequestEvalState::Reset() {
@@ -88,11 +122,6 @@ void RequestEvalState::reset() {
   m_ids = 0;
   m_argStack.clear();
 
-  for (vector<CodeContainer*>::const_iterator it =
-         m_codeContainers.begin(); it != m_codeContainers.end();
-       ++it) {
-    delete *it;
-  }
   for (map<string, PhpFile*>::const_iterator it =
          m_evaledFiles.begin(); it != m_evaledFiles.end(); ++it) {
     it->second->decRef();
@@ -121,7 +150,7 @@ void RequestEvalState::destructObjects() {
   }
 }
 
-void RequestEvalState::addCodeContainer(CodeContainer *cc) {
+void RequestEvalState::addCodeContainer(SmartPtr<CodeContainer> &cc) {
   RequestEvalState *self = s_res.get();
   self->m_codeContainers.push_back(cc);
 }
@@ -151,12 +180,13 @@ bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {
   RequestEvalState *self = s_res.get();
   if (self->m_constants.exists(name)) return false;
   self->m_constants.set(name, val);
-  ClassInfo::ConstantInfo &ci = self->m_constantInfos[name.c_str()];
+  SmartPtr<EvalConstantInfo> &ci = self->m_constantInfos[name.c_str()];
+  ci = new EvalConstantInfo();
   // Only need to set value really.
-  ci.name = NULL;
-  ci.valueLen = 0;
-  ci.valueText = NULL;
-  ci.setValue(val);
+  ci->name = NULL;
+  ci->valueLen = 0;
+  ci->valueText = NULL;
+  ci->setValue(val);
   return true;
 }
 
@@ -332,9 +362,13 @@ LVariableTable *RequestEvalState::getClassStatics(const ClassStatement* cls) {
   return &it->second.getStatics();
 }
 
-int64 RequestEvalState::unique() {
+string RequestEvalState::unique() {
   RequestEvalState *self = s_res.get();
-  return self->m_ids++;
+  int64 id = self->m_ids++;
+  stringstream ss;
+  // Unique id contains self so that it will be unique even among fibers
+  ss << (uint64)self << "_" << id;
+  return ss.str();
 }
 
 Array RequestEvalState::getUserFunctionsInfo() {
@@ -377,62 +411,65 @@ Array RequestEvalState::getConstants() {
 const ClassInfo::MethodInfo *RequestEvalState::
 findFunctionInfo(const char *name) {
   RequestEvalState *self = s_res.get();
-  map<string, ClassInfo::MethodInfo>::iterator it =
+  map<string, SmartPtr<EvalMethodInfo> >::iterator it =
     self->m_methodInfos.find(name);
   if (it == self->m_methodInfos.end()) {
     const FunctionStatement *fs = findUserFunction(name);
     if (fs) {
-      ClassInfo::MethodInfo &m = self->m_methodInfos[name];
-      fs->getInfo(m);
-      return &m;
+      SmartPtr<EvalMethodInfo> &m = self->m_methodInfos[name];
+      m = new EvalMethodInfo();
+      fs->getInfo(*m.get());
+      return m.get();
     }
     return NULL;
   } else {
-    return &it->second;
+    return it->second.get();
   }
 }
 
 const ClassInfo *RequestEvalState::findClassInfo(const char *name) {
   RequestEvalState *self = s_res.get();
-  map<string, ClassInfoEvaled>::const_iterator it =
+  map<string, SmartPtr<ClassInfoEvaled> >::const_iterator it =
     self->m_classInfos.find(name);
   if (it == self->m_classInfos.end()) {
     const ClassStatement *cls = findClass(name);
     if (cls && !(cls->getModifiers() & ClassStatement::Interface)) {
-      ClassInfoEvaled &cl = self->m_classInfos[name];
-      cls->getInfo(cl);
-      return &cl;
+      SmartPtr<ClassInfoEvaled> &cl = self->m_classInfos[name];
+      cl = new ClassInfoEvaled();
+      cls->getInfo(*cl.get());
+      return cl.get();
     }
     return NULL;
   } else {
-    return &it->second;
+    return it->second.get();
   }
 }
 
 const ClassInfo *RequestEvalState::findInterfaceInfo(const char *name) {
   RequestEvalState *self = s_res.get();
-  map<string, ClassInfoEvaled>::const_iterator it =
+  map<string, SmartPtr<ClassInfoEvaled> >::const_iterator it =
     self->m_interfaceInfos.find(name);
   if (it == self->m_interfaceInfos.end()) {
     const ClassStatement *cls = findClass(name);
     if (cls && (cls->getModifiers() & ClassStatement::Interface)) {
-      ClassInfoEvaled &cl = self->m_interfaceInfos[name];
-      cls->getInfo(cl);
-      return &cl;
+      SmartPtr<ClassInfoEvaled> &cl = self->m_interfaceInfos[name];
+      cl = new ClassInfoEvaled();
+      cls->getInfo(*cl.get());
+      return cl.get();
     }
     return NULL;
   } else {
-    return &it->second;
+    return it->second.get();
   }
 }
 
 const ClassInfo::ConstantInfo *RequestEvalState::
 findConstantInfo(const char *name) {
   RequestEvalState *self = s_res.get();
-  map<string, ClassInfo::ConstantInfo>::const_iterator it =
+  map<string, SmartPtr<EvalConstantInfo> >::const_iterator it =
     self->m_constantInfos.find(name);
   if (it != self->m_constantInfos.end()) {
-    return &it->second;
+    return it->second.get();
   }
   return NULL;
 }
@@ -510,6 +547,151 @@ void RequestEvalState::GetDynamicConstants(Array &arr) {
   String prefix("k_");
   for (ArrayIter vit(self->m_constants); !vit.end(); vit.next()) {
     arr.set(prefix + vit.first(), vit.second());
+  }
+}
+
+RequestEvalState *RequestEvalState::Get() {
+  return s_res.get();
+}
+
+void RequestEvalState::fiberInit(RequestEvalState *res,
+                                 FiberReferenceMap &refMap) {
+  // Files
+  for (map<std::string, PhpFile*>::iterator it = res->m_evaledFiles.begin();
+      it != res->m_evaledFiles.end(); ++it) {
+    m_evaledFiles[it->first] = it->second;
+    it->second->incRef();
+  }
+  // Code containers
+  for (list<SmartPtr<CodeContainer> >::iterator it =
+      res->m_codeContainers.begin(); it != res->m_codeContainers.end();
+      ++it) {
+    addCodeContainer(*it);
+  }
+  // Classes
+  for (hphp_const_char_imap<ClassEvalState>::iterator it =
+      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+    ClassEvalState &ces = m_classes[it->first];
+    ClassEvalState &oces = it->second;
+    ces.fiberInit(oces, refMap);
+  }
+  // Functions
+  m_functions = res->m_functions;
+  // Function Statics
+  for (map<const FunctionStatement*, LVariableTable>::const_iterator it =
+      res->m_functionStatics.begin(); it != res->m_functionStatics.end();
+      ++it) {
+    m_functionStatics[it->first].
+      Array::operator=(it->second.fiberMarshal(refMap));
+  }
+  // Method statics
+  for (map<const MethodStatement*, map<string, LVariableTable> >::
+        const_iterator it = res->m_methodStatics.begin();
+      it != res->m_methodStatics.end(); ++it) {
+    for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
+        it2 != it->second.end(); ++it) {
+      m_methodStatics[it->first][it2->first].
+        Array::operator=(it2->second.fiberMarshal(refMap));
+    }
+  }
+  // Constants
+  m_constants = res->m_constants.fiberMarshal(refMap);
+  // Constant Info
+  for (map<string, SmartPtr<EvalConstantInfo> >::iterator it =
+      res->m_constantInfos.begin(); it != res->m_constantInfos.end(); ++it) {
+    m_constantInfos[it->first] = it->second;
+  }
+  // Method Info
+  for (map<string, SmartPtr<EvalMethodInfo> >::iterator it =
+      res->m_methodInfos.begin(); it != res->m_methodInfos.end(); ++it) {
+    m_methodInfos[it->first] = it->second;
+  }
+  // Class Infos
+  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
+      res->m_classInfos.begin(); it != res->m_classInfos.end(); ++it) {
+    m_classInfos[it->first] = it->second;
+  }
+  // Interface infos
+  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
+      res->m_interfaceInfos.begin(); it != res->m_interfaceInfos.end(); ++it) {
+    m_interfaceInfos[it->first] = it->second;
+  }
+}
+void RequestEvalState::fiberExit(RequestEvalState *res,
+                                 FiberReferenceMap &refMap,
+                                 FiberAsyncFunc::Strategy default_strategy) {
+  // Files
+  for (map<std::string, PhpFile*>::iterator it = res->m_evaledFiles.begin();
+      it != res->m_evaledFiles.end(); ++it) {
+    if (m_evaledFiles.find(it->first) == m_evaledFiles.end()) {
+      m_evaledFiles[it->first] = it->second;
+      it->second->incRef();
+    }
+  }
+  // Code containers
+  for (list<SmartPtr<CodeContainer> >::iterator it =
+      res->m_codeContainers.begin(); it != res->m_codeContainers.end();
+      ++it) {
+    // Could be re-adding it but that's ok
+    addCodeContainer(*it);
+  }
+  // Classes
+  for (hphp_const_char_imap<ClassEvalState>::iterator it =
+      res->m_classes.begin(); it != res->m_classes.end(); ++it) {
+    ClassEvalState &ces = m_classes[it->first];
+    ClassEvalState &oces = it->second;
+    ces.fiberExit(oces, refMap, default_strategy);
+  }
+  // Functions
+  for (hphp_const_char_imap<const FunctionStatement*>::iterator it =
+      res->m_functions.begin(); it != res->m_functions.end(); ++it) {
+    hphp_const_char_imap<const FunctionStatement*>::iterator fit =
+      m_functions.find(it->first);
+    if (fit == m_functions.end()) {
+      m_functions[it->first] = it->second;
+    } else if (fit->second != it->second) {
+      raise_error("Different function of the same name (%s) defined in fiber",
+                  fit->first);
+    }
+  }
+  // Function Statics
+  for (map<const FunctionStatement*, LVariableTable>::const_iterator it =
+      res->m_functionStatics.begin(); it != res->m_functionStatics.end();
+      ++it) {
+    refMap.unmarshal((Array&)m_functionStatics[it->first], (Array&)it->second,
+                     default_strategy);
+  }
+  // Method statics
+  for (map<const MethodStatement*, map<string, LVariableTable> >::
+        const_iterator it = res->m_methodStatics.begin();
+      it != res->m_methodStatics.end(); ++it) {
+    for (map<string, LVariableTable>::const_iterator it2 = it->second.begin();
+        it2 != it->second.end(); ++it) {
+      refMap.unmarshal((Array&)m_methodStatics[it->first][it2->first],
+                       (Array&)it2->second, default_strategy);
+    }
+  }
+  // Constants
+  refMap.unmarshal(m_constants, res->m_constants, default_strategy);
+  // Constant Info
+  for (map<string, SmartPtr<EvalConstantInfo> >::iterator it =
+      res->m_constantInfos.begin(); it != res->m_constantInfos.end(); ++it) {
+    m_constantInfos[it->first] = it->second;
+  }
+  // Method Info
+  for (map<string, SmartPtr<EvalMethodInfo> >::iterator it =
+      res->m_methodInfos.begin(); it != res->m_methodInfos.end(); ++it) {
+    m_methodInfos[it->first] = it->second;
+  }
+  // Class Infos
+  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
+      res->m_classInfos.begin(); it != res->m_classInfos.end(); ++it) {
+    m_classInfos[it->first] = it->second;
+  }
+  // Interface infos
+  for (map<string, SmartPtr<ClassInfoEvaled> >::iterator it =
+      res->m_interfaceInfos.begin(); it != res->m_interfaceInfos.end(); ++it) {
+    m_interfaceInfos[it->first] = it->second;
   }
 }
 

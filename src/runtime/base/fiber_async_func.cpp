@@ -24,6 +24,7 @@
 #include <util/job_queue.h>
 #include <util/lock.h>
 #include <util/logger.h>
+#include <runtime/eval/runtime/eval_state.h>
 
 using namespace std;
 
@@ -60,7 +61,7 @@ public:
         m_function(function), m_params(params),
         m_global_variables(NULL), m_refCount(0),
         m_async(async), m_ready(false), m_done(false), m_delete(false),
-        m_exit(false) {
+        m_exit(false), m_unmarshaled_evalState(NULL), m_evalState(NULL) {
     m_reqId = m_thread->m_reqId;
 
     // Profoundly needed: (1) to make sure references and objects are held
@@ -77,6 +78,7 @@ public:
       m_unmarshaled_params = NEW(Variant)();
       *m_unmarshaled_params = m_params;
       m_unmarshaled_global_variables = get_global_variables();
+      m_unmarshaled_evalState = Eval::RequestEvalState::Get();
     }
   }
 
@@ -118,6 +120,8 @@ public:
         context->fiberInit(m_context, m_refMap);
         m_context = context; // switching role
       }
+      (m_evalState = Eval::RequestEvalState::Get())->
+        fiberInit(m_unmarshaled_evalState, m_refMap);
       m_function = m_function.fiberMarshal(m_refMap);
       m_params = m_params.fiberMarshal(m_refMap);
       ThreadInfo::s_threadInfo->m_globals =
@@ -175,6 +179,8 @@ public:
       m_context = NULL;
     }
 
+    Eval::RequestEvalState::Get()->fiberExit(m_evalState, m_refMap,
+                                             default_strategy);
     fiber_unmarshal_global_state(get_global_variables(), m_global_variables,
                                  m_refMap, default_strategy, resolver);
 
@@ -245,6 +251,8 @@ private:
   String m_fatal;
   Object m_exception;
   Variant m_return;
+  Eval::RequestEvalState *m_unmarshaled_evalState;
+  Eval::RequestEvalState *m_evalState;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

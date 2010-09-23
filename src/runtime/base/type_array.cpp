@@ -831,7 +831,9 @@ void Array::unserialize(VariableUnserializer *unserializer) {
 Array Array::fiberMarshal(FiberReferenceMap &refMap) const {
   if (m_px) {
     Array ret = Array::Create();
-    if (m_px->supportValueRef()) {
+    if (m_px->isGlobalArrayWrapper()) {
+      ret = get_global_array_wrapper();
+    } else if (m_px->supportValueRef()) {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberMarshal(refMap),
                 ref(iter.secondRef().fiberMarshal(refMap)));
@@ -850,7 +852,9 @@ Array Array::fiberMarshal(FiberReferenceMap &refMap) const {
 Array Array::fiberUnmarshal(FiberReferenceMap &refMap) const {
   if (m_px) {
     Array ret = Array::Create();
-    if (m_px->supportValueRef()) {
+    if (m_px->isGlobalArrayWrapper()) {
+      ret = get_global_array_wrapper();
+    } else if (m_px->supportValueRef()) {
       for (ArrayIter iter(*this); iter; ++iter) {
         ret.set(iter.first().fiberUnmarshal(refMap),
                 ref(iter.secondRef().fiberUnmarshal(refMap)));

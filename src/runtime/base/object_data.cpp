@@ -313,6 +313,20 @@ void ObjectData::o_setArray(CArrRef properties) {
     }
   }
 }
+
+void ObjectData::o_getArray(Array &props) const {
+  if (o_properties && !o_properties->empty()) {
+    ASSERT((*o_properties)->supportValueRef());
+    for (ArrayIter it(*o_properties); !it.end(); it.next()) {
+      Variant key = it.first();
+      CVarRef value = it.secondRef();
+      if (value.isReferenced()) value.setContagious();
+      if (key.isNumeric()) props.add(key.toInt64(), value);
+      else props.add(key.toString(), value, true);
+    }
+  }
+}
+
 Variant ObjectData::o_argval(bool byRef, CStrRef s, int64 hash,
     bool error /* = true */, const char *context /* = NULL */) {
   if (byRef) {
@@ -375,16 +389,6 @@ Variant *ObjectData::o_weakLval(CStrRef propName,
 Array ObjectData::o_toArray() const {
   Array ret(ArrayData::Create());
   const_cast<ObjectData*>(this)->getRoot()->o_getArray(ret);
-  if (o_properties && !o_properties->empty()) {
-    ASSERT((*o_properties)->supportValueRef());
-    for (ArrayIter it(*o_properties); !it.end(); it.next()) {
-      Variant key = it.first();
-      CVarRef value = it.secondRef();
-      if (value.isReferenced()) value.setContagious();
-      if (key.isNumeric()) ret.add(key.toInt64(), value);
-      else ret.add(key.toString(), value, true);
-    }
-  }
   return ret;
 }
 
@@ -979,7 +983,9 @@ Object ObjectData::fiberMarshal(FiberReferenceMap &refMap) const {
     refMap.insert(const_cast<ObjectData*>(this), copy.get());
     Array props;
     o_getArray(props);
-    copy->o_setArray(props.fiberMarshal(refMap));
+    if (!props.empty()) {
+      copy->o_setArray(props.fiberMarshal(refMap));
+    }
     return copy;
   }
   return px;
@@ -1000,7 +1006,9 @@ Object ObjectData::fiberUnmarshal(FiberReferenceMap &refMap) const {
     refMap.insert(const_cast<ObjectData*>(this), px);
     Array props;
     o_getArray(props);
-    px->o_setArray(props.fiberUnmarshal(refMap));
+    if (!props.empty()) {
+      px->o_setArray(props.fiberUnmarshal(refMap));
+    }
   }
   return Object(px);
 }

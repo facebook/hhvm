@@ -245,7 +245,7 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       filearg += "main.php";
       const char *argv[] = {"", filearg.c_str(),
                             "--config=test/config.hdf",
-                            "-v Fiber.ThreadCount = 0",
+                            "-v Fiber.ThreadCount=5",
                             NULL};
       Process::Exec("hphpi/hphpi", argv, NULL, actual, &err);
     }
@@ -14031,7 +14031,6 @@ bool TestCodeRun::TestFiber() {
 
         "int(456)\n"
        );
-#if 0
   MVCRO("<?php "
         "function fiber() { global $foo; $foo = 456;}"
         "$foo = 123;"
@@ -14052,7 +14051,6 @@ bool TestCodeRun::TestFiber() {
 
         "int(123)\n"
        );
-#endif
 
   // test dynamic globals
   MVCRO("<?php "
@@ -14075,6 +14073,17 @@ bool TestCodeRun::TestFiber() {
         "int(124)\n"
         "int(125)\n"
        );
+  MVCRO("<?php "
+    "class CS {"
+    "  public static $x = 10;"
+    "}"
+    "function f() {"
+    "  CS::$x = 20;"
+    "}"
+    "end_user_func_async(call_user_func_async('f'), GLOBAL_STATE_OVERWRITE);"
+    "var_dump(CS::$x);",
+
+    "int(20)\n");
 
   // test execution context
   MVCRO("<?php "
@@ -14085,6 +14094,24 @@ bool TestCodeRun::TestFiber() {
 
         "string(16) \"America/New_York\"\n"
        );
+  // test definitions
+  MVCRO("<?php "
+        "function f() {"
+        "  class zz {}"
+        "  function gg() { return 1; }"
+        "  define('con', 123);"
+        "}"
+        "end_user_func_async(call_user_func_async('f'), "
+        "                    GLOBAL_STATE_OVERWRITE);"
+        "var_dump(new zz);"
+        "var_dump(gg());"
+        "var_dump(con);",
+
+        "object(zz)#1 (0) {\n"
+        "}\n"
+        "int(1)\n"
+        "int(123)\n"
+        );
 
   return true;
 }

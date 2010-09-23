@@ -79,6 +79,10 @@ bool ArrayData::isVectorData() const {
   return true;
 }
 
+bool ArrayData::isGlobalArrayWrapper() const {
+  return false;
+}
+
 int ArrayData::compare(const ArrayData *v2) const {
   ASSERT(v2);
 

@@ -95,6 +95,7 @@ class ArrayData : public Countable {
   virtual CVarRef getValueRef(ssize_t pos) const;
   virtual bool isVectorData() const;
   virtual bool supportValueRef() const { return false;}
+  virtual bool isGlobalArrayWrapper() const;
 
   virtual SharedVariant *getSharedVariant() const { return NULL; }
 

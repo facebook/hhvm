@@ -147,11 +147,12 @@ void FiberReferenceMap::unmarshalDynamicGlobals
   for (ArrayIter iter(src); iter; ++iter) {
     String key = iter.first().toString();
     CVarRef val = iter.secondRef();
+    String fullKey = String("gv_") + key;
 
     FiberAsyncFunc::Strategy strategy =
       (FiberAsyncFunc::Strategy)default_strategy;
     hphp_string_map<char>::const_iterator iter =
-      additional_strategies.find(key.data());
+      additional_strategies.find(fullKey.data());
     if (iter != additional_strategies.end()) {
       strategy = (FiberAsyncFunc::Strategy)iter->second;
     }

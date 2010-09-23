@@ -44,11 +44,23 @@ if ("${PROGRAM_NAME}" STREQUAL "")
 	set(PROGRAM_NAME program)
 endif()
 
-auto_sources(SOURCES "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/php")
+auto_sources(SOURCES1 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/php")
 auto_sources(SOURCES2 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/sys")
 auto_sources(SOURCES3 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cls")
 auto_sources(SOURCES4 "*.cpp" "RECURSE" "${CMAKE_CURRENT_SOURCE_DIR}/cpp")
-add_executable(${PROGRAM_NAME} ${SOURCES} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+set(SOURCES ${SOURCES1} ${SOURCES2} ${SOURCES3} ${SOURCES4})
+
+add_executable(${PROGRAM_NAME} ${SOURCES})
+
+foreach (SOURCE_FILE ${SOURCES})
+	if(${SOURCE_FILE} MATCHES ".no.cpp$")
+		SET_SOURCE_FILES_PROPERTIES(
+			${CXX_FILE}
+			PROPERTIES
+			COMPILE_FLAGS -O0
+		)
+	endif()
+endforeach()
 
 add_library(libhphp_runtime STATIC IMPORTED)
 SET_PROPERTY(TARGET libhphp_runtime PROPERTY IMPORTED_LOCATION "${HPHP_HOME}/bin/libhphp_runtime.a")

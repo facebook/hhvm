@@ -7240,12 +7240,14 @@ bool TestCodeRun::TestReflectionClasses() {
       "$obj = new B();"
       "$obj->foo();");
 
-MVCR("<?php "
-    "interface A {}"
-    "interface B extends A {}"
-    "class C implements B {};"
-    "$klass = new ReflectionClass('C');"
-    "var_dump($klass->implementsInterface('A'));");
+  MVCR("<?php "
+       "interface A {function foo();}"
+       "interface B extends A {}"
+       "class C implements B {function foo() {}};"
+       "$klass = new ReflectionClass('C');"
+       "var_dump($klass->implementsInterface('A'));"
+       "$inter = new ReflectionClass('B');"
+       "var_dump($inter->hasMethod('foo'));");
 
   return true;
 }

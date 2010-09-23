@@ -47,7 +47,7 @@
 
 #define CHECK_HANDLE(handle, f)                         \
   File *f = handle.getTyped<File>(true, true);          \
-  if (f == NULL) {                                      \
+  if (f == NULL || f->isClosed()) {                     \
     raise_warning("Not a valid stream resource");       \
     return false;                                       \
   }                                                     \

@@ -52,6 +52,7 @@ public:
     // This is different from Zend where each resource is assigned a unique id.
     return o_id;
   }
+  virtual bool isResource() const { return !m_closed;}
 
   int fd() const { return m_fd;}
   bool valid() const { return m_fd >= 0;}
@@ -65,6 +66,7 @@ public:
    * How to close this type of file.
    */
   virtual bool close() = 0;
+  virtual bool isClosed() const { return m_closed;}
 
   /**
    * Read one chunk of input. Returns a null string on failure or eof.

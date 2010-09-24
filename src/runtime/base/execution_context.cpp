@@ -664,7 +664,7 @@ bool ExecutionContext::onFatalError(const Exception &e) {
   return handled;
 }
 
-void ExecutionContext::onUnhandledException(Object e) {
+bool ExecutionContext::onUnhandledException(Object e) {
   String err = e.toString();
   if (RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Error("HipHop Fatal error: Uncaught exception %s", err.data());
@@ -674,7 +674,7 @@ void ExecutionContext::onUnhandledException(Object e) {
     // user thrown exception
     if (!m_userExceptionHandlers.empty()) {
       f_call_user_func_array(m_userExceptionHandlers.back(),CREATE_VECTOR1(e));
-      return;
+      return true;// no matter what handler returns!
     }
   } else {
     ASSERT(false);
@@ -684,6 +684,7 @@ void ExecutionContext::onUnhandledException(Object e) {
   if (!RuntimeOption::AlwaysLogUnhandledExceptions) {
     Logger::Error("HipHop Fatal error: Uncaught exception: %s", err.data());
   }
+  return false;
 }
 
 void ExecutionContext::setLogErrors(bool on) {

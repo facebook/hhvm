@@ -173,7 +173,7 @@ public:
                             bool swallowExceptions);
   void recordLastError(const Exception &e, int errnum = 0);
   bool onFatalError(const Exception &e); // returns handled
-  void onUnhandledException(Object e);
+  bool onUnhandledException(Object e);
   int getErrorState() const { return m_errorState;}
   void setErrorState(int state) { m_errorState = state;}
   String getLastError() const { return m_lastError;}

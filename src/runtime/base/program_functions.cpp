@@ -287,7 +287,7 @@ static bool handle_exception(ExecutionContext *context, std::string &errorMsg,
       errorMsg += "(unable to call toString())";
     }
     if (where == InvokeException) {
-      context->onUnhandledException(e);
+      ret = context->onUnhandledException(e);
     } else {
       Logger::Error("%s", errorMsg.c_str());
     }
@@ -892,8 +892,8 @@ static void handle_invoke_exception(bool &ret, ExecutionContext *context,
   } catch (...) {
     if (!handle_exception(context, errorMsg, HandlerException, error)) {
       ret = false;
+      context->obEndAll();
     }
-    context->obEndAll();
   }
 }
 

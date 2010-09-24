@@ -30,9 +30,7 @@ class c_LogicException : public c_Exception {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(LogicException)
-    PARENT_CLASS(Exception)
-  END_CLASS_MAP(LogicException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(LogicException, LogicException)
   DECLARE_INVOKE_EX(LogicException, LogicException, Exception)
 

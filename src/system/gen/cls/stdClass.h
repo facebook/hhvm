@@ -29,8 +29,7 @@ class c_stdClass : public ExtObjectData {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(stdClass)
-  END_CLASS_MAP(stdClass)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(stdClass, stdClass)
   DECLARE_INVOKE_EX(stdClass, stdClass, ObjectData)
 

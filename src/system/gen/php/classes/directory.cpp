@@ -99,6 +99,17 @@ Variant c_Directory::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Directory
 IMPLEMENT_CLASS(Directory)
+bool c_Directory::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 1:
+      HASH_INSTANCEOF(0x34C95AF311506C8FLL, NAMSTR(s_sys_ss11506c8f, "directory"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_Directory::cloneImpl() {
   c_Directory *obj = NEW(c_Directory)();
   cloneSet(obj);

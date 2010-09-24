@@ -31,14 +31,7 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(RecursiveDirectoryIterator)
-    PARENT_CLASS(DirectoryIterator)
-    PARENT_CLASS(Iterator)
-    PARENT_CLASS(RecursiveIterator)
-    PARENT_CLASS(SeekableIterator)
-    PARENT_CLASS(SplFileInfo)
-    PARENT_CLASS(Traversable)
-  END_CLASS_MAP(RecursiveDirectoryIterator)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(RecursiveDirectoryIterator, RecursiveDirectoryIterator)
   DECLARE_INVOKE_EX(RecursiveDirectoryIterator, RecursiveDirectoryIterator, DirectoryIterator)
 

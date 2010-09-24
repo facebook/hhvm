@@ -30,10 +30,7 @@ class c_ReflectionObject : public c_ReflectionClass {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(ReflectionObject)
-    PARENT_CLASS(ReflectionClass)
-    PARENT_CLASS(Reflector)
-  END_CLASS_MAP(ReflectionObject)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ReflectionObject, ReflectionObject)
   DECLARE_INVOKE_EX(ReflectionObject, ReflectionObject, ReflectionClass)
 

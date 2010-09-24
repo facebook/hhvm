@@ -439,25 +439,21 @@ inline String &concat_assign_rev(CStrRef s2, const StringOffset &s) {
   return concat_assign(s, s2);
 }
 
-inline bool instanceOf(bool    v, const char *s) { return false;}
-inline bool instanceOf(char    v, const char *s) { return false;}
-inline bool instanceOf(short   v, const char *s) { return false;}
-inline bool instanceOf(int     v, const char *s) { return false;}
-inline bool instanceOf(int64   v, const char *s) { return false;}
-inline bool instanceOf(double  v, const char *s) { return false;}
-inline bool instanceOf(litstr  v, const char *s) { return false;}
-inline bool instanceOf(CStrRef v, const char *s) { return false;}
-inline bool instanceOf(CArrRef v, const char *s) { return false;}
-inline bool instanceOf(CObjRef v, const char *s) { return v.instanceof(s);}
-inline bool instanceOf(CVarRef v, const char *s) {
+inline bool instanceOf(bool    v, CStrRef s) { return false;}
+inline bool instanceOf(char    v, CStrRef s) { return false;}
+inline bool instanceOf(short   v, CStrRef s) { return false;}
+inline bool instanceOf(int     v, CStrRef s) { return false;}
+inline bool instanceOf(int64   v, CStrRef s) { return false;}
+inline bool instanceOf(double  v, CStrRef s) { return false;}
+inline bool instanceOf(litstr  v, CStrRef s) { return false;}
+inline bool instanceOf(CStrRef v, CStrRef s) { return false;}
+inline bool instanceOf(CArrRef v, CStrRef s) { return false;}
+inline bool instanceOf(CObjRef v, CStrRef s) { return v.instanceof(s);}
+inline bool instanceOf(CVarRef v, CStrRef s) {
   return v.is(KindOfObject) &&
     toObject(v).instanceof(s);
 }
-template <typename T>
-bool instanceOf(const SmartObject<T> &v, const char *s) {
-  return v.instanceof(s);
-}
-inline bool instanceOf(ObjectData *v, const char *s) {
+inline bool instanceOf(ObjectData *v, CStrRef s) {
   return v && v->o_instanceof(s);
 }
 

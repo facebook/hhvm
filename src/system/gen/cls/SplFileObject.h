@@ -33,13 +33,7 @@ class c_SplFileObject : public c_SplFileInfo {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(SplFileObject)
-    PARENT_CLASS(Iterator)
-    PARENT_CLASS(RecursiveIterator)
-    PARENT_CLASS(SeekableIterator)
-    PARENT_CLASS(SplFileInfo)
-    PARENT_CLASS(Traversable)
-  END_CLASS_MAP(SplFileObject)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(SplFileObject, SplFileObject)
   DECLARE_INVOKE_EX(SplFileObject, SplFileObject, SplFileInfo)
 

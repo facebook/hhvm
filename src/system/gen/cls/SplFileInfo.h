@@ -29,8 +29,7 @@ class c_SplFileInfo : public ExtObjectData {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(SplFileInfo)
-  END_CLASS_MAP(SplFileInfo)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(SplFileInfo, SplFileInfo)
   DECLARE_INVOKE_EX(SplFileInfo, SplFileInfo, ObjectData)
 
@@ -91,8 +90,8 @@ class c_SplFileInfo : public ExtObjectData {
   public: Variant t_getrealpath();
   public: String t___tostring();
   public: Object t_openfile(CVarRef v_mode = NAMSTR(s_sys_ss122506fb, "r"), CVarRef v_use_include_path = false, CVarRef v_context = null_variant);
-  public: Variant t_setfileclass(CVarRef v_class_name = NAMSTR(s_sys_ss5da6122e, "SplFileObject"));
-  public: Variant t_setinfoclass(CVarRef v_class_name = NAMSTR(s_sys_ss016dc059, "SplFileInfo"));
+  public: Variant t_setfileclass(CVarRef v_class_name = NAMSTR(s_sys_ss5da6122e_1, "SplFileObject"));
+  public: Variant t_setinfoclass(CVarRef v_class_name = NAMSTR(s_sys_ss016dc059_1, "SplFileInfo"));
   public: Variant m_rsrc;
   DECLARE_METHOD_INVOKE_HELPERS(getperms);
   DECLARE_METHOD_INVOKE_HELPERS(iswritable);

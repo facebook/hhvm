@@ -107,7 +107,7 @@ class ObjectData : public Countable {
    * hierarchy. It is also worth noting that o_instanceof will always return
    * false for classes that are descendents of ResourceData.
    */
-  virtual bool o_instanceof(const char *s) const = 0;
+  virtual bool o_instanceof(CStrRef s) const = 0;
   virtual ObjectData *getRedeclaredParent() const { return 0; }
 
   // class info

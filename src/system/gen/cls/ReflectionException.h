@@ -30,9 +30,7 @@ class c_ReflectionException : public c_Exception {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(ReflectionException)
-    PARENT_CLASS(Exception)
-  END_CLASS_MAP(ReflectionException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ReflectionException, ReflectionException)
   DECLARE_INVOKE_EX(ReflectionException, ReflectionException, Exception)
 

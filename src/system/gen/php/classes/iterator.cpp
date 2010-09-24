@@ -114,6 +114,28 @@ Variant c_ArrayIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ArrayIterator
 IMPLEMENT_CLASS(ArrayIterator)
+bool c_ArrayIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 15) {
+    case 1:
+      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5ee263d1, "countable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x3D5870E53BF89873LL, NAMSTR(s_sys_ss3bf89873, "arrayiterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss1eba23bd, "seekableiterator"));
+      break;
+    case 11:
+      HASH_INSTANCEOF(0x3BDD11EABFCD6F0BLL, NAMSTR(s_sys_ss403290f5, "arrayaccess"));
+      break;
+    case 14:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ArrayIterator::cloneImpl() {
   c_ArrayIterator *obj = NEW(c_ArrayIterator)();
   cloneSet(obj);
@@ -1813,6 +1835,26 @@ Variant c_AppendIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_AppendIterator
 IMPLEMENT_CLASS(AppendIterator)
+bool c_AppendIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 0:
+      HASH_INSTANCEOF(0x2E363D51549781C8LL, NAMSTR(s_sys_ss549781c8, "appenditerator"));
+      break;
+    case 1:
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss5371ad73, "outeriterator"));
+      break;
+    case 6:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_AppendIterator::cloneImpl() {
   c_AppendIterator *obj = NEW(c_AppendIterator)();
   cloneSet(obj);
@@ -2445,7 +2487,7 @@ void c_AppendIterator::t___construct() {
 /* SRC: classes/iterator.php line 941 */
 void c_AppendIterator::t_append(CVarRef v_it) {
   INSTANCE_METHOD_INJECTION_BUILTIN(AppendIterator, AppendIterator::append);
-  if(!v_it.instanceof("iterator"))
+  if(!v_it.instanceof(NAMSTR(s_sys_ss4af9d29e, "iterator")))
     throw_unexpected_argument_type(0,"append","iterator",v_it);
   {
     MethodCallPackage mcp2;
@@ -2747,6 +2789,31 @@ Variant c_RecursiveDirectoryIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveDirectoryIterator
 IMPLEMENT_CLASS(RecursiveDirectoryIterator)
+bool c_RecursiveDirectoryIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 15) {
+    case 1:
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ss0af036d3, "recursiveiterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss1eba23bd, "seekableiterator"));
+      break;
+    case 7:
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss016dc059, "splfileinfo"));
+      break;
+    case 8:
+      HASH_INSTANCEOF(0x464D3427431A6ED8LL, NAMSTR(s_sys_ss431a6ed8, "recursivedirectoryiterator"));
+      break;
+    case 14:
+      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ss68175ea2, "directoryiterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_RecursiveDirectoryIterator::cloneImpl() {
   c_RecursiveDirectoryIterator *obj = NEW(c_RecursiveDirectoryIterator)();
   cloneSet(obj);
@@ -3701,6 +3768,27 @@ Variant c_DirectoryIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DirectoryIterator
 IMPLEMENT_CLASS(DirectoryIterator)
+bool c_DirectoryIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 15) {
+    case 1:
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss1eba23bd, "seekableiterator"));
+      break;
+    case 7:
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss016dc059, "splfileinfo"));
+      break;
+    case 14:
+      HASH_INSTANCEOF(0x7754323897E8A15ELL, NAMSTR(s_sys_ss68175ea2, "directoryiterator"));
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_DirectoryIterator::cloneImpl() {
   c_DirectoryIterator *obj = NEW(c_DirectoryIterator)();
   cloneSet(obj);
@@ -4458,6 +4546,26 @@ Variant c_RecursiveIteratorIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RecursiveIteratorIterator
 IMPLEMENT_CLASS(RecursiveIteratorIterator)
+bool c_RecursiveIteratorIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 2:
+      HASH_INSTANCEOF(0x365899865E2EAA32LL, NAMSTR(s_sys_ss5e2eaa32, "recursiveiteratoriterator"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss5371ad73, "outeriterator"));
+      break;
+    case 6:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_RecursiveIteratorIterator::cloneImpl() {
   c_RecursiveIteratorIterator *obj = NEW(c_RecursiveIteratorIterator)();
   cloneSet(obj);
@@ -5092,6 +5200,24 @@ Variant c_FilterIterator::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_FilterIterator
 IMPLEMENT_CLASS(FilterIterator)
+bool c_FilterIterator::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x7A394042E7488231LL, NAMSTR(s_sys_ss18b77dcf, "filteriterator"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x39CA0210AC8E528DLL, NAMSTR(s_sys_ss5371ad73, "outeriterator"));
+      break;
+    case 6:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_FilterIterator::cloneImpl() {
   c_FilterIterator *obj = NEW(c_FilterIterator)();
   cloneSet(obj);

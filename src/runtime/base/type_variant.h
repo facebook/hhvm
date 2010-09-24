@@ -236,7 +236,7 @@ class Variant {
     return getType() == KindOfArray;
   }
   bool isResource() const;
-  bool instanceof(const char *s) const;
+  bool instanceof(CStrRef s) const;
 
   /**
    * Borrowing Countable::_count for contagious bit, and this is okay, since

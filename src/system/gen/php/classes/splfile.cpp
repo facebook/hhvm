@@ -94,6 +94,30 @@ Variant c_SplFileObject::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileObject
 IMPLEMENT_CLASS(SplFileObject)
+bool c_SplFileObject::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 15) {
+    case 1:
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 2:
+      HASH_INSTANCEOF(0x297ECCC7A259EDD2LL, NAMSTR(s_sys_ss5da6122e, "splfileobject"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x191964700AF036D3LL, NAMSTR(s_sys_ss0af036d3, "recursiveiterator"));
+      HASH_INSTANCEOF(0x60C47E7FE145DC43LL, NAMSTR(s_sys_ss1eba23bd, "seekableiterator"));
+      break;
+    case 7:
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss016dc059, "splfileinfo"));
+      break;
+    case 14:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_SplFileObject::cloneImpl() {
   c_SplFileObject *obj = NEW(c_SplFileObject)();
   cloneSet(obj);
@@ -2272,6 +2296,17 @@ Variant c_SplFileInfo::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplFileInfo
 IMPLEMENT_CLASS(SplFileInfo)
+bool c_SplFileInfo::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 1:
+      HASH_INSTANCEOF(0x71089C29FE923FA7LL, NAMSTR(s_sys_ss016dc059, "splfileinfo"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_SplFileInfo::cloneImpl() {
   c_SplFileInfo *obj = NEW(c_SplFileInfo)();
   cloneSet(obj);
@@ -4178,13 +4213,13 @@ Object c_SplFileInfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss122506fb, "
   return x_hphp_splfileinfo_openfile(GET_THIS(), toString(v_mode), toBoolean(v_use_include_path), v_context);
 } /* function */
 /* SRC: classes/splfile.php line 355 */
-Variant c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5da6122e, "SplFileObject")
+Variant c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5da6122e_1, "SplFileObject")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setFileClass);
   return (x_hphp_splfileinfo_setfileclass(GET_THIS(), toString(v_class_name)), null);
 } /* function */
 /* SRC: classes/splfile.php line 371 */
-Variant c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss016dc059, "SplFileInfo")
+Variant c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss016dc059_1, "SplFileInfo")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setInfoClass);
   return (x_hphp_splfileinfo_setinfoclass(GET_THIS(), toString(v_class_name)), null);

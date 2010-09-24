@@ -30,10 +30,7 @@ class c_UnderflowException : public c_RuntimeException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(UnderflowException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(RuntimeException)
-  END_CLASS_MAP(UnderflowException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(UnderflowException, UnderflowException)
   DECLARE_INVOKE_EX(UnderflowException, UnderflowException, RuntimeException)
 

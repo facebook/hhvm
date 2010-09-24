@@ -33,10 +33,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   Variant m_class;
 
   // Class Map
-  BEGIN_CLASS_MAP(ReflectionMethod)
-    PARENT_CLASS(ReflectionFunctionAbstract)
-    PARENT_CLASS(Reflector)
-  END_CLASS_MAP(ReflectionMethod)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ReflectionMethod, ReflectionMethod)
   DECLARE_INVOKE_EX(ReflectionMethod, ReflectionMethod, ReflectionFunctionAbstract)
 

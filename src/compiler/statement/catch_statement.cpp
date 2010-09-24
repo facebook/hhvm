@@ -137,7 +137,9 @@ void CatchStatement::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 
 void CatchStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   if (m_valid) {
-    cg_indentBegin("if (e.instanceof(\"%s\")) {\n", m_className.c_str());
+    cg_printf("if (e.instanceof(");
+    cg_printString(m_className, ar);
+    cg_indentBegin(")) {\n");
     VariableTablePtr variables = ar->getScope()->getVariables();
     string name = variables->getVariableName(cg, ar, m_variable);
     cg_printf("%s = e;\n", name.c_str());

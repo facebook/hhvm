@@ -31,8 +31,7 @@ class c_Directory : public ExtObjectData {
   Variant m_handle;
 
   // Class Map
-  BEGIN_CLASS_MAP(Directory)
-  END_CLASS_MAP(Directory)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(Directory, Directory)
   DECLARE_INVOKE_EX(Directory, Directory, ObjectData)
 

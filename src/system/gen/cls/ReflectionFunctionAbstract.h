@@ -30,8 +30,7 @@ class c_ReflectionFunctionAbstract : public ExtObjectData {
   Variant m_info;
 
   // Class Map
-  BEGIN_CLASS_MAP(ReflectionFunctionAbstract)
-  END_CLASS_MAP(ReflectionFunctionAbstract)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ReflectionFunctionAbstract, ReflectionFunctionAbstract)
   DECLARE_INVOKE_EX(ReflectionFunctionAbstract, ReflectionFunctionAbstract, ObjectData)
 

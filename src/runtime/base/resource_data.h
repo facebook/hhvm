@@ -33,7 +33,7 @@ public:
   virtual ~ResourceData();
 
   // implementing ObjectData
-  virtual bool o_instanceof(const char *s) const { return false;}
+  virtual bool o_instanceof(CStrRef s) const { return false;}
   virtual bool isResource() const { return true;}
   virtual String t___tostring();
   virtual int64 o_toInt64() const { return o_getId();}

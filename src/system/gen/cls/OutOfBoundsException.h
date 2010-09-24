@@ -30,10 +30,7 @@ class c_OutOfBoundsException : public c_RuntimeException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(OutOfBoundsException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(RuntimeException)
-  END_CLASS_MAP(OutOfBoundsException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(OutOfBoundsException, OutOfBoundsException)
   DECLARE_INVOKE_EX(OutOfBoundsException, OutOfBoundsException, RuntimeException)
 

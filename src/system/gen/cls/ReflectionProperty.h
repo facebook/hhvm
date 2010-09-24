@@ -33,9 +33,7 @@ class c_ReflectionProperty : public ExtObjectData {
   Variant m_class;
 
   // Class Map
-  BEGIN_CLASS_MAP(ReflectionProperty)
-    PARENT_CLASS(Reflector)
-  END_CLASS_MAP(ReflectionProperty)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ReflectionProperty, ReflectionProperty)
   DECLARE_INVOKE_EX(ReflectionProperty, ReflectionProperty, ObjectData)
 

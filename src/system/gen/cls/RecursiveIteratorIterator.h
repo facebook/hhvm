@@ -31,11 +31,7 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(RecursiveIteratorIterator)
-    PARENT_CLASS(Iterator)
-    PARENT_CLASS(OuterIterator)
-    PARENT_CLASS(Traversable)
-  END_CLASS_MAP(RecursiveIteratorIterator)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(RecursiveIteratorIterator, RecursiveIteratorIterator)
   DECLARE_INVOKE_EX(RecursiveIteratorIterator, RecursiveIteratorIterator, ObjectData)
 

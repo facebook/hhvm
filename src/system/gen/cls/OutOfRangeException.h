@@ -30,10 +30,7 @@ class c_OutOfRangeException : public c_LogicException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(OutOfRangeException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(LogicException)
-  END_CLASS_MAP(OutOfRangeException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(OutOfRangeException, OutOfRangeException)
   DECLARE_INVOKE_EX(OutOfRangeException, OutOfRangeException, LogicException)
 

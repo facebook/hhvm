@@ -29,8 +29,8 @@ namespace HPHP {
 extern StaticString s_sys_ss00000000;
 extern StaticString s_sys_ss228ee909;
 extern StaticString s_sys_ss2d8b6f3b;
-extern StaticString s_sys_ss016dc059;
-extern StaticString s_sys_ss5da6122e;
+extern StaticString s_sys_ss016dc059_1;
+extern StaticString s_sys_ss5da6122e_1;
 extern StaticString s_sys_ss2a618761;
 extern StaticString s_sys_ss229c615f;
 extern StaticString s_sys_ss6b4cb5ed;
@@ -77,17 +77,23 @@ extern StaticString s_sys_ss60465f1d;
 extern StaticString s_sys_ss72c51c58;
 extern StaticString s_sys_ss16bfe3b1;
 extern StaticString s_sys_ss47b9c59d;
+extern StaticString s_sys_ss4af9d29e;
 extern StaticString s_sys_ss7db173af;
 extern StaticString s_sys_ss447efd48;
 extern StaticString s_sys_ss48bdfe35;
 extern StaticString s_sys_ss122506fb;
+extern StaticString s_sys_ss0af036d3;
 extern StaticString s_sys_ss21d85096;
 extern StaticString s_sys_ss77054c67;
+extern StaticString s_sys_ss1eba23bd;
 extern StaticString s_sys_ss06fa5330;
 extern StaticString s_sys_ss5633b25b;
 extern StaticString s_sys_ss1d522e0a;
 extern StaticString s_sys_ss25d241c5;
 extern StaticString s_sys_ss0e43d437;
+extern StaticString s_sys_ss016dc059;
+extern StaticString s_sys_ss5da6122e;
+extern StaticString s_sys_ss3a190f5f;
 extern StaticString s_sys_ss54808c44;
 
 // 2. Static Arrays

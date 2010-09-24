@@ -47,18 +47,17 @@ namespace HPHP {
 
 #define BEGIN_CLASS_MAP(cls)                            \
   public:                                               \
-  virtual bool o_instanceof(const char *s) const {      \
-    if (!s || !*s) return false;                        \
-    if (strcasecmp(s, #cls) == 0) return true;          \
+  virtual bool o_instanceof(CStrRef s) const {          \
+    if (strcasecmp(s.data(), #cls) == 0) return true;   \
 
 #define PARENT_CLASS(parent)                            \
-    if (strcasecmp(s, #parent) == 0) return true;       \
+    if (strcasecmp(s.data(), #parent) == 0) return true;\
 
 #define CLASS_MAP_REDECLARED()                          \
     if (parent->o_instanceof(s)) return true;           \
 
 #define RECURSIVE_PARENT_CLASS(parent)                  \
-    if (strcasecmp(s, #parent) == 0) return true;       \
+    if (strcasecmp(s.data(), #parent) == 0) return true;\
     if (c_##parent::o_instanceof(s)) return true;       \
 
 #define END_CLASS_MAP(cls)                              \
@@ -348,6 +347,10 @@ do { \
   if (hash == code && !strcasecmp(s, #f)) return ei_ ## f(env, caller)
 #define HASH_INVOKE_REDECLARED_FROM_EVAL(code, f)                       \
   if (hash == code && !strcasecmp(s, #f)) return g->ei_ ## f(env_caller)
+#define HASH_INSTANCEOF(code, str)                                      \
+  if ((s.data() == str.data()) ||                                       \
+      (hash == code &&                                                  \
+       strcasecmp(s.data(), str.data()) == 0)) return true;             \
 
 ///////////////////////////////////////////////////////////////////////////////
 // global variable macros

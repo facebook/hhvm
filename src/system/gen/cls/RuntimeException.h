@@ -30,9 +30,7 @@ class c_RuntimeException : public c_Exception {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(RuntimeException)
-    PARENT_CLASS(Exception)
-  END_CLASS_MAP(RuntimeException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(RuntimeException, RuntimeException)
   DECLARE_INVOKE_EX(RuntimeException, RuntimeException, Exception)
 

@@ -31,11 +31,7 @@ class c_AppendIterator : public ExtObjectData {
   Variant m_iterators;
 
   // Class Map
-  BEGIN_CLASS_MAP(AppendIterator)
-    PARENT_CLASS(Iterator)
-    PARENT_CLASS(OuterIterator)
-    PARENT_CLASS(Traversable)
-  END_CLASS_MAP(AppendIterator)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(AppendIterator, AppendIterator)
   DECLARE_INVOKE_EX(AppendIterator, AppendIterator, ObjectData)
 

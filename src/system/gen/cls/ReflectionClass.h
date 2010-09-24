@@ -32,9 +32,7 @@ class c_ReflectionClass : public ExtObjectData {
   Variant m_info;
 
   // Class Map
-  BEGIN_CLASS_MAP(ReflectionClass)
-    PARENT_CLASS(Reflector)
-  END_CLASS_MAP(ReflectionClass)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ReflectionClass, ReflectionClass)
   DECLARE_INVOKE_EX(ReflectionClass, ReflectionClass, ObjectData)
 

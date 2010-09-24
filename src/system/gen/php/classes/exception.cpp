@@ -72,6 +72,21 @@ Variant c_UnexpectedValueException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnexpectedValueException
 IMPLEMENT_CLASS(UnexpectedValueException)
+bool c_UnexpectedValueException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x5AA2EE582E0D3849LL, NAMSTR(s_sys_ss2e0d3849, "unexpectedvalueexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss18a8b3dc, "runtimeexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_UnexpectedValueException::cloneImpl() {
   c_UnexpectedValueException *obj = NEW(c_UnexpectedValueException)();
   cloneSet(obj);
@@ -152,6 +167,21 @@ Variant c_OverflowException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OverflowException
 IMPLEMENT_CLASS(OverflowException)
+bool c_OverflowException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x0E4CCE95F6A727D9LL, NAMSTR(s_sys_ss0958d827, "overflowexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss18a8b3dc, "runtimeexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_OverflowException::cloneImpl() {
   c_OverflowException *obj = NEW(c_OverflowException)();
   cloneSet(obj);
@@ -232,6 +262,21 @@ Variant c_OutOfBoundsException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfBoundsException
 IMPLEMENT_CLASS(OutOfBoundsException)
+bool c_OutOfBoundsException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x227C70ED5B143841LL, NAMSTR(s_sys_ss5b143841, "outofboundsexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss18a8b3dc, "runtimeexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_OutOfBoundsException::cloneImpl() {
   c_OutOfBoundsException *obj = NEW(c_OutOfBoundsException)();
   cloneSet(obj);
@@ -312,6 +357,20 @@ Variant c_LogicException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LogicException
 IMPLEMENT_CLASS(LogicException)
+bool c_LogicException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss64f192b5, "logicexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_LogicException::cloneImpl() {
   c_LogicException *obj = NEW(c_LogicException)();
   cloneSet(obj);
@@ -392,6 +451,21 @@ Variant c_RangeException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RangeException
 IMPLEMENT_CLASS(RangeException)
+bool c_RangeException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 3:
+      HASH_INSTANCEOF(0x6AF83706F76A9D53LL, NAMSTR(s_sys_ss089562ad, "rangeexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss18a8b3dc, "runtimeexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_RangeException::cloneImpl() {
   c_RangeException *obj = NEW(c_RangeException)();
   cloneSet(obj);
@@ -472,6 +546,23 @@ Variant c_InvalidArgumentException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_InvalidArgumentException
 IMPLEMENT_CLASS(InvalidArgumentException)
+bool c_InvalidArgumentException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 3:
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss64f192b5, "logicexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x085A4F6FD393D475LL, NAMSTR(s_sys_ss2c6c2b8b, "invalidargumentexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_InvalidArgumentException::cloneImpl() {
   c_InvalidArgumentException *obj = NEW(c_InvalidArgumentException)();
   cloneSet(obj);
@@ -552,6 +643,19 @@ Variant c_UnderflowException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_UnderflowException
 IMPLEMENT_CLASS(UnderflowException)
+bool c_UnderflowException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 4:
+      HASH_INSTANCEOF(0x5E623FEAF7B068D4LL, NAMSTR(s_sys_ss084f972c, "underflowexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss18a8b3dc, "runtimeexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_UnderflowException::cloneImpl() {
   c_UnderflowException *obj = NEW(c_UnderflowException)();
   cloneSet(obj);
@@ -632,6 +736,21 @@ Variant c_OutOfRangeException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_OutOfRangeException
 IMPLEMENT_CLASS(OutOfRangeException)
+bool c_OutOfRangeException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 3:
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss64f192b5, "logicexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x622D4DF07E2A01FCLL, NAMSTR(s_sys_ss7e2a01fc, "outofrangeexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_OutOfRangeException::cloneImpl() {
   c_OutOfRangeException *obj = NEW(c_OutOfRangeException)();
   cloneSet(obj);
@@ -712,6 +831,26 @@ Variant c_BadMethodCallException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadMethodCallException
 IMPLEMENT_CLASS(BadMethodCallException)
+bool c_BadMethodCallException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 0:
+      HASH_INSTANCEOF(0x06335FF83CDEA590LL, NAMSTR(s_sys_ss3cdea590, "badmethodcallexception"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss64f192b5, "logicexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    case 6:
+      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss1b10b1ba, "badfunctioncallexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_BadMethodCallException::cloneImpl() {
   c_BadMethodCallException *obj = NEW(c_BadMethodCallException)();
   cloneSet(obj);
@@ -792,6 +931,18 @@ Variant c_RuntimeException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_RuntimeException
 IMPLEMENT_CLASS(RuntimeException)
+bool c_RuntimeException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_INSTANCEOF(0x1078CB3118A8B3DCLL, NAMSTR(s_sys_ss18a8b3dc, "runtimeexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_RuntimeException::cloneImpl() {
   c_RuntimeException *obj = NEW(c_RuntimeException)();
   cloneSet(obj);
@@ -923,6 +1074,17 @@ Variant c_Exception::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_Exception
 IMPLEMENT_CLASS(Exception)
+bool c_Exception::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_Exception::cloneImpl() {
   c_Exception *obj = NEW(c_Exception)();
   cloneSet(obj);
@@ -1819,6 +1981,20 @@ Variant c_ErrorException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ErrorException
 IMPLEMENT_CLASS(ErrorException)
+bool c_ErrorException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x69EDCA1CC29CFE0BLL, NAMSTR(s_sys_ss3d6301f5, "errorexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ErrorException::cloneImpl() {
   c_ErrorException *obj = NEW(c_ErrorException)();
   cloneSet(obj);
@@ -2221,6 +2397,23 @@ Variant c_BadFunctionCallException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_BadFunctionCallException
 IMPLEMENT_CLASS(BadFunctionCallException)
+bool c_BadFunctionCallException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 3:
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss64f192b5, "logicexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    case 6:
+      HASH_INSTANCEOF(0x66282FC8E4EF4E46LL, NAMSTR(s_sys_ss1b10b1ba, "badfunctioncallexception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_BadFunctionCallException::cloneImpl() {
   c_BadFunctionCallException *obj = NEW(c_BadFunctionCallException)();
   cloneSet(obj);
@@ -2301,6 +2494,21 @@ Variant c_LengthException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_LengthException
 IMPLEMENT_CLASS(LengthException)
+bool c_LengthException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 3:
+      HASH_INSTANCEOF(0x3CAE91CFA2AAD16BLL, NAMSTR(s_sys_ss5d552e95, "lengthexception"));
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss64f192b5, "logicexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_LengthException::cloneImpl() {
   c_LengthException *obj = NEW(c_LengthException)();
   cloneSet(obj);
@@ -2381,6 +2589,21 @@ Variant c_DomainException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_DomainException
 IMPLEMENT_CLASS(DomainException)
+bool c_DomainException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 3:
+      HASH_INSTANCEOF(0x4860DC2F9B0E6D4BLL, NAMSTR(s_sys_ss64f192b5, "logicexception"));
+      break;
+    case 4:
+      HASH_INSTANCEOF(0x70D4A29DE6A7BA84LL, NAMSTR(s_sys_ss1958457c, "domainexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_DomainException::cloneImpl() {
   c_DomainException *obj = NEW(c_DomainException)();
   cloneSet(obj);

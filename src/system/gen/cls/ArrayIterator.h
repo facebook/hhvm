@@ -34,13 +34,7 @@ class c_ArrayIterator : public ExtObjectData {
   Variant m_flags;
 
   // Class Map
-  BEGIN_CLASS_MAP(ArrayIterator)
-    PARENT_CLASS(ArrayAccess)
-    PARENT_CLASS(Countable)
-    PARENT_CLASS(Iterator)
-    PARENT_CLASS(SeekableIterator)
-    PARENT_CLASS(Traversable)
-  END_CLASS_MAP(ArrayIterator)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ArrayIterator, ArrayIterator)
   DECLARE_INVOKE_EX(ArrayIterator, ArrayIterator, ObjectData)
 

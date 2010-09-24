@@ -30,10 +30,7 @@ class c_InvalidArgumentException : public c_LogicException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(InvalidArgumentException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(LogicException)
-  END_CLASS_MAP(InvalidArgumentException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(InvalidArgumentException, InvalidArgumentException)
   DECLARE_INVOKE_EX(InvalidArgumentException, InvalidArgumentException, LogicException)
 

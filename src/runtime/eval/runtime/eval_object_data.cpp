@@ -201,8 +201,8 @@ const MethodStatement
   return m_cls.getMethod(name);
 }
 
-bool EvalObjectData::o_instanceof(const char *s) const {
-  return m_cls.getClass()->subclassOf(s) ||
+bool EvalObjectData::o_instanceof(CStrRef s) const {
+  return m_cls.getClass()->subclassOf(s.data()) ||
     (!parent.isNull() && parent->o_instanceof(s));
 }
 

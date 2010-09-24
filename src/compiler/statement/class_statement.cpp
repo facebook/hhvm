@@ -477,25 +477,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
 
       cg.printSection("Class Map");
       if (Option::GenerateCPPMacros) {
-        // Get all of this class's ancestors
-        vector<string> bases;
-        getAllParents(ar, bases);
-        // Eliminate duplicates
-        sort(bases.begin(), bases.end());
-        bases.erase(unique(bases.begin(), bases.end()), bases.end());
-
-        cg_indentBegin("BEGIN_CLASS_MAP(%s)\n",
-                       classScope->getOriginalName().c_str());
-        for (unsigned int i = 0; i < bases.size(); i++) {
-          ClassScopePtr baseCls = ar->findClass(bases[i]);
-          cg_printf("PARENT_CLASS(%s)\n",
-                    (baseCls ? baseCls->getOriginalName() : bases[i]).c_str());
-        }
-        if (classScope->derivesFromRedeclaring()) {
-          cg_printf("CLASS_MAP_REDECLARED()\n");
-        }
-        cg_indentEnd("END_CLASS_MAP(%s)\n",
-                     classScope->getOriginalName().c_str());
+        cg_printf("virtual bool o_instanceof(CStrRef s) const;\n");
       }
 
       if (Option::GenerateCPPMacros) {

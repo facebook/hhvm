@@ -34,8 +34,7 @@ class c_Exception : public ExtObjectData {
   Variant m_trace;
 
   // Class Map
-  BEGIN_CLASS_MAP(Exception)
-  END_CLASS_MAP(Exception)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(Exception, Exception)
   DECLARE_INVOKE_EX(Exception, Exception, ObjectData)
 

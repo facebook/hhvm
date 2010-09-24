@@ -30,10 +30,7 @@ class c_DomainException : public c_LogicException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(DomainException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(LogicException)
-  END_CLASS_MAP(DomainException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(DomainException, DomainException)
   DECLARE_INVOKE_EX(DomainException, DomainException, LogicException)
 

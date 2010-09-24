@@ -66,7 +66,7 @@ class Object : public SmartPtr<ObjectData> {
   bool isResource() const {
     return m_px && m_px->isResource();
   }
-  bool instanceof(const char *s) const {
+  bool instanceof(CStrRef s) const {
     return m_px && m_px->o_instanceof(s);
   }
 

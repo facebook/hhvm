@@ -31,9 +31,7 @@ class c_ErrorException : public c_Exception {
   Variant m_severity;
 
   // Class Map
-  BEGIN_CLASS_MAP(ErrorException)
-    PARENT_CLASS(Exception)
-  END_CLASS_MAP(ErrorException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ErrorException, ErrorException)
   DECLARE_INVOKE_EX(ErrorException, ErrorException, Exception)
 

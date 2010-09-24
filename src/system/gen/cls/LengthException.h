@@ -30,10 +30,7 @@ class c_LengthException : public c_LogicException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(LengthException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(LogicException)
-  END_CLASS_MAP(LengthException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(LengthException, LengthException)
   DECLARE_INVOKE_EX(LengthException, LengthException, LogicException)
 

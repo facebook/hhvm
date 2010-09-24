@@ -613,8 +613,10 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
                 i, m_name.c_str(),
                 Option::VariablePrefix, param->getName().c_str());
     } else if (specType->is(Type::KindOfObject)) {
-      cg_printf("if(!%s%s.instanceof(\"%s\"))\n", Option::VariablePrefix,
-                param->getName().c_str(), specType->getName().c_str());
+      cg_printf("if(!%s%s.instanceof(", Option::VariablePrefix,
+                param->getName().c_str());
+      cg_printString(specType->getName(), ar);
+      cg_printf("))\n");
       cg_printf("  throw_unexpected_argument_type(%d,\"%s\",\"%s\",%s%s);\n",
                 i, m_name.c_str(), specType->getName().c_str(),
                 Option::VariablePrefix, param->getName().c_str());

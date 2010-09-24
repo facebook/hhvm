@@ -60,7 +60,7 @@ public:
   virtual bool o_get_call_info_ex(const char *clsname,
       MethodCallPackage &mcp, int64 hash);
 
-  virtual bool o_instanceof(const char *s) const;
+  virtual bool o_instanceof(CStrRef s) const;
 
   virtual Variant doCall(Variant v_name, Variant v_arguments, bool fatal);
 

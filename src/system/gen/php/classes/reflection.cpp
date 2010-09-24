@@ -93,6 +93,17 @@ Variant c_ReflectionFunctionAbstract::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunctionAbstract
 IMPLEMENT_CLASS(ReflectionFunctionAbstract)
+bool c_ReflectionFunctionAbstract::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss35281082, "reflectionfunctionabstract"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionFunctionAbstract::cloneImpl() {
   c_ReflectionFunctionAbstract *obj = NEW(c_ReflectionFunctionAbstract)();
   cloneSet(obj);
@@ -1047,6 +1058,21 @@ Variant c_ReflectionObject::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionObject
 IMPLEMENT_CLASS(ReflectionObject)
+bool c_ReflectionObject::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 2:
+      HASH_INSTANCEOF(0x41A9F7D81254DD7ALL, NAMSTR(s_sys_ss1254dd7a, "reflectionobject"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionObject::cloneImpl() {
   c_ReflectionObject *obj = NEW(c_ReflectionObject)();
   cloneSet(obj);
@@ -1251,6 +1277,18 @@ Variant c_ReflectionException::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionException
 IMPLEMENT_CLASS(ReflectionException)
+bool c_ReflectionException::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_INSTANCEOF(0x672AD818DDE95538LL, NAMSTR(s_sys_ss2216aac8, "reflectionexception"));
+      HASH_INSTANCEOF(0x47D93E6F80B66A94LL, NAMSTR(s_sys_ss7f49956c, "exception"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionException::cloneImpl() {
   c_ReflectionException *obj = NEW(c_ReflectionException)();
   cloneSet(obj);
@@ -1388,6 +1426,18 @@ Variant c_ReflectionClass::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionClass
 IMPLEMENT_CLASS(ReflectionClass)
+bool c_ReflectionClass::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 1:
+      HASH_INSTANCEOF(0x35A44A5E6AE2E71DLL, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"));
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionClass::cloneImpl() {
   c_ReflectionClass *obj = NEW(c_ReflectionClass)();
   cloneSet(obj);
@@ -4651,7 +4701,7 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   Primitive v_name = 0;
   Variant v__;
 
-  if (instanceOf(v_cls, "ReflectionClass")) {
+  if (instanceOf(v_cls, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"))) {
     {
       {
         MethodCallPackage mcp2;
@@ -4822,7 +4872,7 @@ Array c_ReflectionClass::t_getdefaultproperties() {
 /* SRC: classes/reflection.php line 1204 */
 Variant c_ReflectionClass::t_isiterateable() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::isIterateable);
-  return t_issubclassof(NAMSTR(s_sys_ss403290f5, "ArrayAccess"));
+  return t_issubclassof(NAMSTR(s_sys_ss403290f5_1, "ArrayAccess"));
 } /* function */
 /* SRC: classes/reflection.php line 1219 */
 bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
@@ -4830,7 +4880,7 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   Primitive v_name = 0;
   Variant v__;
 
-  if (instanceOf(v_cls, "ReflectionClass")) {
+  if (instanceOf(v_cls, NAMSTR(s_sys_ss6ae2e71d, "reflectionclass"))) {
     {
       {
         MethodCallPackage mcp6;
@@ -4966,6 +5016,20 @@ Variant c_ReflectionExtension::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionExtension
 IMPLEMENT_CLASS(ReflectionExtension)
+bool c_ReflectionExtension::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 1:
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x0B61E0BFCFA06573LL, NAMSTR(s_sys_ss305f9a8d, "reflectionextension"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionExtension::cloneImpl() {
   c_ReflectionExtension *obj = NEW(c_ReflectionExtension)();
   cloneSet(obj);
@@ -5923,6 +5987,23 @@ Variant c_ReflectionMethod::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionMethod
 IMPLEMENT_CLASS(ReflectionMethod)
+bool c_ReflectionMethod::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 0:
+      HASH_INSTANCEOF(0x43BBC8F6F28E44B0LL, NAMSTR(s_sys_ss0d71bb50, "reflectionmethod"));
+      break;
+    case 2:
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss35281082, "reflectionfunctionabstract"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionMethod::cloneImpl() {
   c_ReflectionMethod *obj = NEW(c_ReflectionMethod)();
   cloneSet(obj);
@@ -7300,6 +7381,20 @@ Variant c_ReflectionProperty::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionProperty
 IMPLEMENT_CLASS(ReflectionProperty)
+bool c_ReflectionProperty::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 0:
+      HASH_INSTANCEOF(0x75AA2571BDB659E4LL, NAMSTR(s_sys_ss4249a61c, "reflectionproperty"));
+      break;
+    case 1:
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionProperty::cloneImpl() {
   c_ReflectionProperty *obj = NEW(c_ReflectionProperty)();
   cloneSet(obj);
@@ -8568,6 +8663,23 @@ Variant c_ReflectionFunction::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionFunction
 IMPLEMENT_CLASS(ReflectionFunction)
+bool c_ReflectionFunction::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x21EF70351574EC09LL, NAMSTR(s_sys_ss1574ec09, "reflectionfunction"));
+      break;
+    case 2:
+      HASH_INSTANCEOF(0x33BD46E935281082LL, NAMSTR(s_sys_ss35281082, "reflectionfunctionabstract"));
+      break;
+    case 5:
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionFunction::cloneImpl() {
   c_ReflectionFunction *obj = NEW(c_ReflectionFunction)();
   cloneSet(obj);
@@ -9143,6 +9255,20 @@ Variant c_ReflectionParameter::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_ReflectionParameter
 IMPLEMENT_CLASS(ReflectionParameter)
+bool c_ReflectionParameter::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 3) {
+    case 1:
+      HASH_INSTANCEOF(0x62F7F85447C0A605LL, NAMSTR(s_sys_ss47c0a605, "reflector"));
+      break;
+    case 3:
+      HASH_INSTANCEOF(0x2E7081C468A05993LL, NAMSTR(s_sys_ss68a05993, "reflectionparameter"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_ReflectionParameter::cloneImpl() {
   c_ReflectionParameter *obj = NEW(c_ReflectionParameter)();
   cloneSet(obj);
@@ -10159,7 +10285,7 @@ Variant c_ReflectionParameter::t_getdefaultvalue() {
     Variant tmp3((m_info.rvalAt(NAMSTR(s_sys_ss6463ffdf, "default"), true, true)));
     v_defaultValue = tmp3;
   }
-  if (instanceOf(v_defaultValue, "stdclass")) {
+  if (instanceOf(v_defaultValue, NAMSTR(s_sys_ss78ba13f7, "stdclass"))) {
     {
       {
         const String &tmp4((toString(v_defaultValue.o_getPublic(NAMSTR(s_sys_ss10d8f28e, "msg"), true))));

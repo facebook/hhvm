@@ -1195,10 +1195,14 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
   }
   case T_INSTANCEOF:
     {
-      if (second->isUnquotedScalar()) {
-        cg_printf("\"");
-        second->outputCPP(cg, ar);
-        cg_printf("\"");
+      if (second->isScalar()) {
+        std::string s = second->getLiteralString();
+        std::string sLower = Util::toLower(s);
+        if (sLower != "") {
+          cg_printString(sLower, ar);
+        } else {
+          second->outputCPP(cg, ar);
+        }
       } else {
         second->outputCPP(cg, ar);
       }

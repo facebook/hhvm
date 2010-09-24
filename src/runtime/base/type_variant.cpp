@@ -509,7 +509,7 @@ bool Variant::isResource() const {
   return false;
 }
 
-bool Variant::instanceof(const char *s) const {
+bool Variant::instanceof(CStrRef s) const {
   if (m_type == KindOfObject) {
     return toObject().instanceof(s);
   }

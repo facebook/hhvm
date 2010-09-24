@@ -30,10 +30,7 @@ class c_RangeException : public c_RuntimeException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(RangeException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(RuntimeException)
-  END_CLASS_MAP(RangeException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(RangeException, RangeException)
   DECLARE_INVOKE_EX(RangeException, RangeException, RuntimeException)
 

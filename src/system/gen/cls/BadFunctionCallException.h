@@ -30,10 +30,7 @@ class c_BadFunctionCallException : public c_LogicException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(BadFunctionCallException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(LogicException)
-  END_CLASS_MAP(BadFunctionCallException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(BadFunctionCallException, BadFunctionCallException)
   DECLARE_INVOKE_EX(BadFunctionCallException, BadFunctionCallException, LogicException)
 

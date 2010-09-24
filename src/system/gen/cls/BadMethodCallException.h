@@ -30,11 +30,7 @@ class c_BadMethodCallException : public c_BadFunctionCallException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(BadMethodCallException)
-    PARENT_CLASS(BadFunctionCallException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(LogicException)
-  END_CLASS_MAP(BadMethodCallException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(BadMethodCallException, BadMethodCallException)
   DECLARE_INVOKE_EX(BadMethodCallException, BadMethodCallException, BadFunctionCallException)
 

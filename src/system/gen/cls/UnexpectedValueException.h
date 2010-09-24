@@ -30,10 +30,7 @@ class c_UnexpectedValueException : public c_RuntimeException {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(UnexpectedValueException)
-    PARENT_CLASS(Exception)
-    PARENT_CLASS(RuntimeException)
-  END_CLASS_MAP(UnexpectedValueException)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(UnexpectedValueException, UnexpectedValueException)
   DECLARE_INVOKE_EX(UnexpectedValueException, UnexpectedValueException, RuntimeException)
 

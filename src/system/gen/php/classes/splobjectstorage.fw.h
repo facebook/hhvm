@@ -31,13 +31,17 @@ extern StaticString s_sys_ss3d348351;
 extern StaticString s_sys_ss14775b54;
 extern StaticString s_sys_ss05dd2d70;
 extern StaticString s_sys_ss65104d10;
+extern StaticString s_sys_ss5ee263d1;
 extern StaticString s_sys_ss7b94de24;
 extern StaticString s_sys_ss1456596b;
 extern StaticString s_sys_ss43880cae;
+extern StaticString s_sys_ss4af9d29e;
 extern StaticString s_sys_ss7db173af;
 extern StaticString s_sys_ss447efd48;
 extern StaticString s_sys_ss21d85096;
+extern StaticString s_sys_ss045859b1;
 extern StaticString s_sys_ss7e2b6dc3;
+extern StaticString s_sys_ss3a190f5f;
 extern StaticString s_sys_ss54808c44;
 
 // 2. Static Arrays

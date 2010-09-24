@@ -112,6 +112,24 @@ Variant c_SplObjectStorage::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_SplObjectStorage
 IMPLEMENT_CLASS(SplObjectStorage)
+bool c_SplObjectStorage::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 7) {
+    case 1:
+      HASH_INSTANCEOF(0x795F86375EE263D1LL, NAMSTR(s_sys_ss5ee263d1, "countable"));
+      HASH_INSTANCEOF(0x66679538C5E6F0A1LL, NAMSTR(s_sys_ss3a190f5f, "traversable"));
+      break;
+    case 6:
+      HASH_INSTANCEOF(0x0636A5F84AF9D29ELL, NAMSTR(s_sys_ss4af9d29e, "iterator"));
+      break;
+    case 7:
+      HASH_INSTANCEOF(0x5BA243B9FBA7A64FLL, NAMSTR(s_sys_ss045859b1, "splobjectstorage"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_SplObjectStorage::cloneImpl() {
   c_SplObjectStorage *obj = NEW(c_SplObjectStorage)();
   cloneSet(obj);

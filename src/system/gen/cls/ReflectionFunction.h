@@ -31,10 +31,7 @@ class c_ReflectionFunction : public c_ReflectionFunctionAbstract {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(ReflectionFunction)
-    PARENT_CLASS(ReflectionFunctionAbstract)
-    PARENT_CLASS(Reflector)
-  END_CLASS_MAP(ReflectionFunction)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(ReflectionFunction, ReflectionFunction)
   DECLARE_INVOKE_EX(ReflectionFunction, ReflectionFunction, ReflectionFunctionAbstract)
 

@@ -29,8 +29,7 @@ class c___PHP_Incomplete_Class : public ExtObjectData {
   // Properties
 
   // Class Map
-  BEGIN_CLASS_MAP(__PHP_Incomplete_Class)
-  END_CLASS_MAP(__PHP_Incomplete_Class)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(__PHP_Incomplete_Class, __PHP_Incomplete_Class)
   DECLARE_INVOKE_EX(__PHP_Incomplete_Class, __PHP_Incomplete_Class, ObjectData)
 

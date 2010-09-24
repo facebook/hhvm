@@ -33,11 +33,7 @@ class c_SplObjectStorage : public ExtObjectData {
   int64 m_index;
 
   // Class Map
-  BEGIN_CLASS_MAP(SplObjectStorage)
-    PARENT_CLASS(Countable)
-    PARENT_CLASS(Iterator)
-    PARENT_CLASS(Traversable)
-  END_CLASS_MAP(SplObjectStorage)
+  virtual bool o_instanceof(CStrRef s) const;
   DECLARE_CLASS_COMMON(SplObjectStorage, SplObjectStorage)
   DECLARE_INVOKE_EX(SplObjectStorage, SplObjectStorage, ObjectData)
 

@@ -72,6 +72,17 @@ Variant c_stdClass::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT_stdClass
 IMPLEMENT_CLASS(stdClass)
+bool c_stdClass::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 1:
+      HASH_INSTANCEOF(0x3D69936178BA13F7LL, NAMSTR(s_sys_ss78ba13f7, "stdclass"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c_stdClass::cloneImpl() {
   c_stdClass *obj = NEW(c_stdClass)();
   cloneSet(obj);
@@ -151,6 +162,17 @@ Variant c___PHP_Incomplete_Class::os_constant(const char *s) {
 }
 #endif // OMIT_JUMP_TABLE_CLASS_CONSTANT___PHP_Incomplete_Class
 IMPLEMENT_CLASS(__PHP_Incomplete_Class)
+bool c___PHP_Incomplete_Class::o_instanceof(CStrRef s) const {
+  int64 hash = s->hash();
+  switch (hash & 1) {
+    case 0:
+      HASH_INSTANCEOF(0x6576EACCCE24D694LL, NAMSTR(s_sys_ss31db296c, "__php_incomplete_class"));
+      break;
+    default:
+      break;
+  }
+  return false;
+}
 ObjectData *c___PHP_Incomplete_Class::cloneImpl() {
   c___PHP_Incomplete_Class *obj = NEW(c___PHP_Incomplete_Class)();
   cloneSet(obj);

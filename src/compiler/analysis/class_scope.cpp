@@ -1114,6 +1114,36 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg_indentEnd("}\n");
   }
 
+  // instanceof
+  if (!isExtensionClass()) { // Extension class uses macros
+    cg_indentBegin("bool %s%s::o_instanceof(CStrRef s) const {\n",
+                   Option::ClassPrefix, clsName);
+    vector<string> bases;
+    getAllParents(ar, bases);
+    // Eliminate duplicates
+    sort(bases.begin(), bases.end());
+    bases.erase(unique(bases.begin(), bases.end()), bases.end());
+    vector<const char *> ancestors;
+    // Convert to char * and add self
+    ancestors.push_back(m_name.c_str());
+    for (unsigned int i = 0; i < bases.size(); i++) {
+      ancestors.push_back(bases[i].c_str());
+    }
+    for (JumpTable jt(cg, ancestors, true, false, true);
+         jt.ready(); jt.next()) {
+      const char *name = jt.key();
+      string nameStr(name);
+      cg_printf("HASH_INSTANCEOF(0x%016llXLL, ", hash_string_i(name));
+      cg_printString(nameStr, ar);
+      cg_printf(");\n");
+    }
+    if (derivesFromRedeclaring()) {
+      cg_printf("if (parent->o_instanceof(s)) return true;\n");
+    }
+    cg_printf("return false;\n");
+    cg_indentEnd("}\n");
+  }
+
   // Cloning
   cg_indentBegin("ObjectData *%s%s::cloneImpl() {\n",
                  Option::ClassPrefix, clsName);

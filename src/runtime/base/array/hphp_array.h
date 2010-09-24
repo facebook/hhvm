@@ -22,6 +22,10 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/complex_types.h>
 
+#ifndef __BIGGEST_ALIGNMENT__
+#define __BIGGEST_ALIGNMENT__ 16
+#endif
+
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 

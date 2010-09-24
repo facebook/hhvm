@@ -298,18 +298,18 @@ Variant ObjectData::o_set(CStrRef propName, CVarRef v,
 
 void ObjectData::o_setArray(CArrRef properties) {
   bool valueRef = properties->supportValueRef();
+  CStrRef context = o_getClassName();
   for (ArrayIter iter(properties); iter; ++iter) {
     String key = iter.first().toString();
     if (key.empty() || key.charAt(0) != '\0') {
-      // public property
+      // non-private property
       if (valueRef) {
         CVarRef secondRef = iter.secondRef();
-        if (secondRef.isReferenced()) {
-          o_set(key, ref(secondRef), false);
-          continue;
-        }
+        o_set(key, secondRef.isReferenced() ? ref(secondRef) : secondRef,
+              false, context);
+        continue;
       }
-      o_set(key, iter.second(), false);
+      o_set(key, iter.second(), false, context);
     }
   }
 }

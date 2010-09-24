@@ -562,7 +562,7 @@ void VariableSerializer::writePropertyPrivacy(const char *prop,
 
 void VariableSerializer::writeSerializedProperty(CStrRef prop,
                                                  const ClassInfo *cls) {
-  ASSERT(m_type == Serialize || m_type == APCSerialize);
+  ASSERT(m_type == Serialize);
   const ClassInfo *origCls = cls;
   if (cls) {
     ClassInfo::PropertyInfo *p = cls->getPropertyInfo(prop.c_str());
@@ -601,6 +601,10 @@ void VariableSerializer::writeSerializedProperty(CStrRef prop,
 }
 
 void VariableSerializer::writeArrayKey(const ArrayData *arr, Variant key) {
+  if (m_type == APCSerialize && key.isString()) {
+    write(key.toString());
+    return;
+  }
   ArrayInfo &info = m_arrayInfos.back();
   const ClassInfo *cls = info.class_info;
   if (info.is_object) {

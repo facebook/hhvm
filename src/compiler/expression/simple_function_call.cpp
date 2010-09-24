@@ -83,6 +83,7 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
     FunctionTypeMap["constant"]             = ConstantFunction;
 
     FunctionTypeMap["unserialize"]          = UnserializeFunction;
+    FunctionTypeMap["apc_fetch"]            = UnserializeFunction;
 
     FunctionTypeMap["get_defined_vars"]     = GetDefinedVarsFunction;
   }

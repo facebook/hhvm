@@ -1073,7 +1073,7 @@ public:
     Trace::iterator it = trace.begin();
 
     // map null strings to -1
-    fmap[NULL] = (fm::mapped_type)-1;
+    fmap[NULL] = (typename fm::mapped_type)-1;
 
     while (it != trace.end()) {
       TraceEntry *te = te_buff;

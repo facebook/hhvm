@@ -149,6 +149,11 @@ public:
   static bool GenHashTableInvokeFile;
 
   /**
+   * Generate hash-table lookup based function invoke
+   */
+  static bool GenHashTableInvokeFunc;
+
+  /**
    * Separate compilation
    */
   static bool SeparateCompilation;

@@ -242,6 +242,163 @@ void FunctionContainer::outputCPPJumpTable(CodeGenerator &cg,
   cg_indentEnd("}\n");
 }
 
+void FunctionContainer::outputGetCallInfoHeader(CodeGenerator &cg,
+                                                bool system,
+                                                bool needGlobals) {
+  cg_indentBegin("bool get_call_info%s(const CallInfo *&ci, void *&extra, "
+      "const char *s, int64 hash) {\n", system ? "_builtin" : "");
+  if (needGlobals) cg.printDeclareGlobals();
+  cg_printf("extra = NULL;\n");
+
+  if (!system && (!Option::DynamicInvokeFunctions.empty() ||
+        Option::EnableEval == Option::FullEval)) {
+    cg_printf("const char *ss = get_renamed_function(s);\n");
+    cg_printf("if (ss != s) { s = ss; hash = -1;};\n");
+  }
+  if (!system && Option::EnableEval == Option::FullEval) {
+    cg_printf("if (eval_get_call_info_hook(ci, extra, s, hash)) "
+        "return true;\n");
+  }
+}
+
+void FunctionContainer::outputGetCallInfoTail(CodeGenerator &cg,
+                                              bool system) {
+  if (system) {
+    cg_printf("return false;\n");
+  } else {
+    cg_printf("return get_call_info_builtin(ci, extra, s, hash);\n");
+  }
+  cg_indentEnd("}\n");
+}
+
+void FunctionContainer::outputCPPHashTableGetCallInfo(
+  CodeGenerator &cg, bool system,
+  const StringToFunctionScopePtrVecMap *functions,
+  const vector<const char *> &funcs) {
+  ASSERT(cg.getCurrentIndentation() == 0);
+  const char text1[] =
+    "\n"
+    "class hashNodeFunc {\n"
+    "public:\n"
+    "  hashNodeFunc() {}\n"
+    "  hashNodeFunc(int64 h, const char *n, bool off, const void *d) :\n"
+    "    hash(h), name(n), offset(off), data(d), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  bool offset;\n"
+    "  const void *data;\n"
+    "  hashNodeFunc *next;\n"
+    "};\n";
+  const char text1s[] =
+    "\n"
+    "class hashNodeFunc {\n"
+    "public:\n"
+    "  hashNodeFunc() {}\n"
+    "  hashNodeFunc(int64 h, const char *n, const void *d) :\n"
+    "    hash(h), name(n), data(d), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  const void *data;\n"
+    "  hashNodeFunc *next;\n"
+    "};\n";
+  const char text2[] =
+    "static hashNodeFunc *funcMapTable[%d];\n"
+    "static hashNodeFunc funcBuckets[%d];\n"
+    "\n"
+    "static class %sFuncTableInitializer {\n"
+    "  public: %sFuncTableInitializer() {\n%s"
+    "    const char *funcMapData[] = {\n";
+
+  const char text3[] =
+    "    hashNodeFunc *b = funcBuckets;\n"
+    "    for (const char **s = funcMapData; *s; s++, b++) {\n"
+    "      const char *name = *s++;\n"
+    "%s"
+    "      const void *data = *s;\n"
+    "      int64 hash = hash_string(name, strlen(name));\n"
+    "      hashNodeFunc *node = new(b) hashNodeFunc(hash, name%s, data);\n"
+    "      int h = hash & %d;\n"
+    "      if (funcMapTable[h]) node->next = funcMapTable[h];\n"
+    "      funcMapTable[h] = node;\n"
+    "    }\n"
+    "  }\n"
+    "} func_table_initializer;\n"
+    "\n"
+    "static inline const hashNodeFunc *"
+    "findFunc(const char *name, int64 hash) {\n"
+    "  for (const hashNodeFunc *p = funcMapTable[hash & %d]; p; "
+    "p = p->next) {\n"
+    "    if (p->hash == hash && !strcasecmp(p->name, name)) return p;\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n"
+    "\n";
+
+  const char text4[] =
+    "  if (hash < 0) hash = hash_string(s);\n"
+    "  const hashNodeFunc *p = findFunc(s, hash);\n"
+    "  if (p) {\n"
+    "    if (p->offset) {\n"
+    "      const char *addr = (const char *)g + (int64)p->data;\n"
+    "      ci = *(const CallInfo **)addr;\n"
+    "    } else {\n"
+    "      ci = (const CallInfo *)p->data;\n"
+    "    }\n"
+    "    return true;\n"
+    "  }\n";
+
+  const char text4s[] =
+    "  if (hash < 0) hash = hash_string(s);\n"
+    "  const hashNodeFunc *p = findFunc(s, hash);\n"
+    "  if (p) {\n"
+    "    ci = (const CallInfo *)p->data;\n"
+    "    return true;\n"
+    "  }\n";
+
+  int numEntries = funcs.size();
+  if (numEntries > 0) {
+    int tableSize = Util::roundUpToPowerOfTwo(numEntries * 2);
+    cg_printf(system ? text1s : text1);
+    cg_printf(text2, tableSize, numEntries,
+              (system ? "Sys" : ""),
+              (system ? "Sys" : ""),
+              (system ? "" : "    GlobalVariables gv;\n"));
+    for (int i = 0; i < numEntries; i++) {
+      const char *name = funcs[i];
+      StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
+        functions->find(name);iterFuncs =
+      functions->find(name);
+      ASSERT(iterFuncs != functions->end());
+      cg_printf("      (const char *)\"%s\", ", name);
+      if (!system) {
+        cg_printf("(const char *)%d, ",
+                  iterFuncs->second[0]->isRedeclaring() ? 1 : 0);
+      }
+      FunctionScopePtr func = iterFuncs->second[0];
+      if (func->isRedeclaring()) {
+        assert(!system);
+        string lname(cg.formatLabel(name));
+        cg_printf("(const char *)((char *)&gv.%s%s - (char *)&gv),\n",
+                  Option::CallInfoPrefix, lname.c_str());
+      } else {
+        cg_printf("(const char *)&%s%s,\n",
+                  Option::CallInfoPrefix, func->getId(cg).c_str());
+      }
+    }
+    cg_printf("      NULL, NULL, %s\n    };\n", system ? "" : "NULL, ");
+    cg_printf(text3, (system ? "" : "      bool offset = *s++;\n"),
+              (system ? "" : ", offset"),
+              tableSize - 1, tableSize - 1);
+  }
+  outputGetCallInfoHeader(cg, system, !system);
+  cg_indentEnd("");
+  if (numEntries > 0) {
+    cg_printf(system ? text4s : text4);
+  }
+  cg_indentBegin("  ");
+  outputGetCallInfoTail(cg, system);
+}
+
 void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
     AnalysisResultPtr ar, bool support,
     const StringToFunctionScopePtrVecMap *functions /* = NULL */) {
@@ -258,35 +415,24 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
     if (!func->inPseudoMain() && (system || func->isDynamic()) &&
         fit.firstInner()) {
       funcs.push_back(fit.name().c_str());
-      if (!support) {
+      if (!support && !func->isRedeclaring()) {
         cg_printf("extern CallInfo %s%s;\n", Option::CallInfoPrefix,
         func->getId(cg).c_str());
       }
     }
   }
-  cg.indentBegin("bool get_call_info%s(const CallInfo *&ci, void *&extra, "
-      "const char *s, int64 hash)"
-      " {\n",
-      system ? "_builtin" : "");
-  if (needGlobals) cg.printDeclareGlobals();
-  cg_printf("extra = NULL;\n");
-
-  if (!system && (!Option::DynamicInvokeFunctions.empty() ||
-        Option::EnableEval == Option::FullEval)) {
-    cg_printf("const char *ss = get_renamed_function(s);\n");
-    cg_printf("if (ss != s) { s = ss; hash = -1;};\n");
+  if (Option::GenHashTableInvokeFunc) {
+    outputCPPHashTableGetCallInfo(cg, system, functions, funcs);
+    return;
   }
-  if (!system && Option::EnableEval == Option::FullEval) {
-    cg_printf("if (eval_get_call_info_hook(ci, extra, s, hash)) "
-        "return true;\n");
-  }
+  outputGetCallInfoHeader(cg, system, needGlobals);
 
   for (JumpTable fit(cg, funcs, true, true, false); fit.ready(); fit.next()) {
     const char *name = fit.key();
     StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
       functions->find(name);
     ASSERT(iterFuncs != functions->end());
-    cg.indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
+    cg_indentBegin("HASH_GUARD(0x%016llXLL, %s) {\n",
                 hash_string_i(name), name);
     if (iterFuncs->second[0]->isRedeclaring()) {
       string lname(cg.formatLabel(name));
@@ -296,14 +442,109 @@ void FunctionContainer::outputCPPCodeInfoTable(CodeGenerator &cg,
           iterFuncs->second[0]->getId(cg).c_str());
     }
     cg_printf("return true;\n");
-    cg.indentEnd("}\n");
+    cg_indentEnd("}\n");
   }
+  outputGetCallInfoTail(cg, system);
+}
+
+void FunctionContainer::outputCPPEvalInvokeHeader(CodeGenerator &cg,
+                                                  bool system) {
+  cg_indentBegin("Variant Eval::invoke_from_eval%s"
+                 "(const char *s, Eval::VariableEnvironment &env, "
+                 "const Eval::FunctionCallExpression *caller, int64 hash, "
+                 "bool fatal) {\n",
+                 system ? "_builtin" : "");
+}
+
+void FunctionContainer::outputCPPEvalInvokeTail(CodeGenerator &cg,
+                                                bool system) {
   if (system) {
-    cg_printf("return false;\n");
+    cg_printf("return invoke_failed(s, eval_get_params(env, caller),"
+              " -1, fatal);\n");
   } else {
-    cg_printf("return get_call_info_builtin(ci, extra, s, hash);\n");
+    cg_printf("return invoke_from_eval_builtin(s, env, caller, hash, "
+              "fatal);\n");
   }
-  cg.indentEnd("}\n");
+  cg_indentEnd("}\n");
+}
+
+void FunctionContainer::outputCPPHashTableEvalInvoke(
+  CodeGenerator &cg, const vector<const char *> &funcs) {
+  ASSERT(cg.getCurrentIndentation() == 0);
+  const char text1[] =
+    "typedef Variant (*ef_t)(Eval::VariableEnvironment &env, "
+    "const Eval::FunctionCallExpression *caller);\n"
+    "\n"
+    "class hashNodeFuncEval {\n"
+    "public:\n"
+    "  hashNodeFuncEval() {}\n"
+    "  hashNodeFuncEval(int64 h, const char *n, const void *p) :\n"
+    "    hash(h), name(n), ptr(p), next(NULL) {}\n"
+    "  int64 hash;\n"
+    "  const char *name;\n"
+    "  const void *ptr;\n"
+    "  hashNodeFuncEval *next;\n"
+    "};\n"
+    "static hashNodeFuncEval *funcMapTableEval[%d];\n"
+    "static hashNodeFuncEval funcEvalBuckets[%d];\n"
+    "\n"
+    "static class EvalFuncTableInitializer {\n"
+    "  public: EvalFuncTableInitializer() {\n"
+    "    const char *funcEvalMapData[] = {\n";
+
+  const char text2[] =
+    "    hashNodeFuncEval *b = funcEvalBuckets;\n"
+    "    for (const char **s = funcEvalMapData; *s; s++, b++) {\n"
+    "      const char *name = *s++;\n"
+    "      const void *ptr = *s;\n"
+    "      int64 hash = hash_string(name, strlen(name));\n"
+    "      hashNodeFuncEval *node = new(b) "
+    "hashNodeFuncEval(hash, name, ptr);\n"
+    "      int h = hash & %d;\n"
+    "      if (funcMapTableEval[h]) node->next = funcMapTableEval[h];\n"
+    "      funcMapTableEval[h] = node;\n"
+    "    }\n"
+    "  }\n"
+    "} eval_func_table_initializer;\n"
+    "\n"
+    "static inline ef_t findFuncEval(const char *name, int64 hash) {\n"
+    "  for (const hashNodeFuncEval *p = funcMapTableEval[hash & %d]; "
+    "p; p = p->next) {\n"
+    "    if (p->hash == hash && !strcasecmp(p->name, name)) "
+    "return (ef_t)p->ptr;\n"
+    "  }\n"
+    "  return NULL;\n"
+    "}\n"
+    "\n";
+
+  const char text3[] =
+    "  if (hash < 0) hash = hash_string(s);\n"
+    "  ef_t ptr = findFuncEval(s, hash);\n"
+    "  if (ptr) return ptr(env, caller);\n";
+
+  cg_printf("typedef Variant (*ef_t)(Eval::VariableEnvironment &env, "
+            "const Eval::FunctionCallExpression *caller);\n");
+  int numEntries = funcs.size();
+  assert(numEntries > 0);
+  int tableSize = Util::roundUpToPowerOfTwo(numEntries * 2);
+  cg_printf(text1, tableSize, numEntries);
+  for (int i = 0; i < numEntries; i++) {
+    const char *name = funcs[i];
+    StringToFunctionScopePtrVecMap::const_iterator iterFuncs =
+      m_functions.find(name);
+    ASSERT(iterFuncs != m_functions.end());
+    assert(!iterFuncs->second[0]->isRedeclaring());
+    string lname(cg.formatLabel(name));
+    cg_printf("      (const char *)\"%s\", (const char *)&%s%s,\n", name,
+              Option::EvalInvokePrefix, lname.c_str());
+  }
+  cg_printf("      NULL, NULL,\n    };\n");
+  cg_printf(text2, tableSize - 1, tableSize - 1);
+  outputCPPEvalInvokeHeader(cg, true);
+  cg_indentEnd("");
+  cg_printf(text3);
+  cg_indentBegin("  ");
+  outputCPPEvalInvokeTail(cg, true);
 }
 
 void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
@@ -313,12 +554,12 @@ void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
   vector<const char *> funcs;
   bool needGlobals = false;
   if (generate) outputCPPJumpTableEvalSupport(cg, ar, needGlobals, &funcs);
+  if (generate && Option::GenHashTableInvokeFunc && system) {
+    outputCPPHashTableEvalInvoke(cg, funcs);
+    return;
+  }
   // output invoke()
-  cg_indentBegin("Variant Eval::invoke_from_eval%s"
-                 "(const char *s, Eval::VariableEnvironment &env, "
-                 "const Eval::FunctionCallExpression *caller, int64 hash, "
-                 "bool fatal) {\n",
-                 system ? "_builtin" : "");
+  outputCPPEvalInvokeHeader(cg, system);
   if (generate) {
     if (needGlobals) cg.printDeclareGlobals();
 
@@ -338,12 +579,5 @@ void FunctionContainer::outputCPPEvalInvokeTable(CodeGenerator &cg,
       }
     }
   }
-  if (system) {
-    cg_printf("return invoke_failed(s, eval_get_params(env, caller),"
-              " -1, fatal);\n");
-  } else {
-    cg_printf("return invoke_from_eval_builtin(s, env, caller, hash, "
-              "fatal);\n");
-  }
-  cg_indentEnd("}\n");
+  outputCPPEvalInvokeTail(cg, system);
 }

@@ -201,6 +201,7 @@ public:
                          AnalysisResultPtr ar);
   void printString(const std::string &str, AnalysisResultPtr ar,
                    bool stringWrapper = true, bool check = true);
+  int getCurrentIndentation() const { return m_indentation[m_curStream];}
 private:
   std::string m_filename;
   Stream m_curStream;

@@ -2043,30 +2043,34 @@ void AnalysisResult::outputCPPDefaultInvokeFile(CodeGenerator &cg,
 
 void AnalysisResult::outputCPPHashTableInvokeFile(
   CodeGenerator &cg, const vector<const char*> &entries, bool needEvalHook) {
+  ASSERT(cg.getCurrentIndentation() == 0);
   const char text1[] =
-    "class hashNode {\n"
+    "class hashNodeFile {\n"
     "public:\n"
-    "  hashNode() {}\n"
-    "  hashNode(int64 h, const char *n, const void *p) :\n"
+    "  hashNodeFile() {}\n"
+    "  hashNodeFile(int64 h, const char *n, const void *p) :\n"
     "    hash(h), name(n), ptr(p), next(NULL) {}\n"
     "  int64 hash;\n"
     "  const char *name;\n"
     "  const void *ptr;\n"
-    "  hashNode *next;\n"
-    "};\n";
-
-  const char text2[] =
-    "static hashNode *fileMapTable[%d];\n"
-    "static hashNode buckets[%d];\n"
+    "  hashNodeFile *next;\n"
+    "};\n"
+    "static hashNodeFile *fileMapTable[%d];\n"
+    "static hashNodeFile fileBuckets[%d];\n"
     "\n"
     "static class FileTableInitializer {\n"
     "  public: FileTableInitializer() {\n"
-    "    hashNode *b = buckets;\n"
+    "    const char *fileMapData[] = {\n";
+
+  const char text2[] =
+    "      NULL, NULL,\n"
+    "    };\n"
+    "    hashNodeFile *b = fileBuckets;\n"
     "    for (const char **s = fileMapData; *s; s++, b++) {\n"
     "      const char *name = *s++;\n"
     "      const void *ptr = *s;\n"
     "      int64 hash = hash_string(name, strlen(name));\n"
-    "      hashNode *node = new(b) hashNode(hash, name, ptr);\n"
+    "      hashNodeFile *node = new(b) hashNodeFile(hash, name, ptr);\n"
     "      int h = hash & %d;\n"
     "      if (fileMapTable[h]) node->next = fileMapTable[h];\n"
     "      fileMapTable[h] = node;\n"
@@ -2075,7 +2079,8 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
     "} file_table_initializer;\n"
     "\n"
     "static inline pm_t findFile(const char *name, int64 hash) {\n"
-    "  for (const hashNode *p = fileMapTable[hash & %d ]; p; p = p->next) {\n"
+    "  for (const hashNodeFile *p = fileMapTable[hash & %d ]; "
+    "p; p = p->next) {\n"
     "    if (p->hash == hash && !strcmp(p->name, name)) return (pm_t)p->ptr;\n"
     "  }\n"
     "  return NULL;\n"
@@ -2090,17 +2095,15 @@ void AnalysisResult::outputCPPHashTableInvokeFile(
   "  return throw_missing_file(s.c_str());\n"
   "}\n";
 
-  cg_printf(text1);
   int tableSize = Util::roundUpToPowerOfTwo(entries.size() * 2);
-  cg_printf("static const char *fileMapData[] = {\n");
+  cg_printf(text1, tableSize, entries.size());
   BOOST_FOREACH(FileScopePtr f, m_fileScopes) {
-    cg_printf("  (const char *)\"%s\", (const char *)&%s%s,\n",
+    cg_printf("      (const char *)\"%s\", (const char *)&%s%s,\n",
               f->getName().c_str(),
               Option::PseudoMainPrefix,
               Option::MangleFilename(f->getName(), true).c_str());
   }
-  cg_printf("  NULL, NULL,\n};\n");
-  cg_printf(text2, tableSize, entries.size(), tableSize - 1, tableSize - 1);
+  cg_printf(text2, tableSize - 1, tableSize - 1);
   outputCPPInvokeFileHeader(cg);
   if (needEvalHook) outputCPPEvalHook(cg);
   cg_indentEnd("");
@@ -2118,7 +2121,8 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
   bool system = output == CodeGenerator::SystemCPP;
   {
     string tablePath = m_outputPath + "/" + Option::SystemFilePrefix +
-      "dynamic_table_func.no.cpp";
+      (Option::GenHashTableInvokeFunc ? "dynamic_table_func.cpp"
+                                        : "dynamic_table_func.no.cpp");
     Util::mkdir(tablePath);
     ofstream fTable(tablePath.c_str());
     CodeGenerator cg(&fTable, output);

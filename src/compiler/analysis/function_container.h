@@ -73,6 +73,17 @@ protected:
                                      std::vector<const char *> *funcs = NULL);
   void outputCPPCallInfoTableSupport(CodeGenerator &cg, AnalysisResultPtr ar,
       bool &hasRedeclared, std::vector<const char *> *funcs = NULL);
+private:
+  void outputGetCallInfoHeader(CodeGenerator &cg, bool system,
+                               bool needGlobals);
+  void outputGetCallInfoTail(CodeGenerator &cg, bool system);
+  void outputCPPEvalInvokeHeader(CodeGenerator &cg, bool system);
+  void outputCPPEvalInvokeTail(CodeGenerator &cg, bool system);
+  void outputCPPHashTableGetCallInfo(CodeGenerator &cg, bool system,
+       const StringToFunctionScopePtrVecMap *functions,
+       const std::vector<const char *> &funcs);
+  void outputCPPHashTableEvalInvoke(CodeGenerator &cg,
+       const std::vector<const char *> &funcs);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

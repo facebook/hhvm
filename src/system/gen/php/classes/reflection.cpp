@@ -955,7 +955,7 @@ int c_ReflectionFunctionAbstract::t_getnumberofparameters() {
 int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionFunctionAbstract, ReflectionFunctionAbstract::getNumberOfRequiredParameters);
   int64 v_count = 0;
-  Variant v_params;
+  Array v_params;
   Primitive v_name = 0;
   Variant v_param;
 
@@ -966,10 +966,10 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   }
   {
     LOOP_COUNTER(2);
-    for (ArrayIterPtr iter4 = v_params.begin(s_class_name); !iter4->end(); iter4->next()) {
+    for (ArrayIter iter4 = v_params.begin(s_class_name); !iter4.end(); ++iter4) {
       LOOP_COUNTER_CHECK(2);
-      iter4->second(v_param);
-      v_name = iter4->first();
+      iter4.second(v_param);
+      v_name = iter4.first();
       {
         {
           bool tmp5;
@@ -4509,9 +4509,9 @@ Variant c_ReflectionClass::t_getconstant(CVarRef v_name) {
   return v_constants.rvalAt(v_name, true);
 } /* function */
 /* SRC: classes/reflection.php line 944 */
-Variant c_ReflectionClass::t_getinterfaces() {
+Array c_ReflectionClass::t_getinterfaces() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getInterfaces);
-  Variant v_ret;
+  Array v_ret;
   Primitive v_name = 0;
   Variant v__;
   p_ReflectionClass v_cls;
@@ -4719,9 +4719,9 @@ Variant c_ReflectionClass::t_issubclassof(Variant v_cls) {
   }
 } /* function */
 /* SRC: classes/reflection.php line 1129 */
-Variant c_ReflectionClass::t_getstaticproperties() {
+Array c_ReflectionClass::t_getstaticproperties() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getStaticProperties);
-  Variant v_ret;
+  Array v_ret;
   Variant v_prop;
 
   v_ret = s_sys_sa00000000;
@@ -4783,9 +4783,9 @@ void c_ReflectionClass::t_setstaticpropertyvalue(CVarRef v_name, CVarRef v_value
   x_hphp_set_static_property(toString(m_name), toString(v_name), v_value);
 } /* function */
 /* SRC: classes/reflection.php line 1185 */
-Variant c_ReflectionClass::t_getdefaultproperties() {
+Array c_ReflectionClass::t_getdefaultproperties() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getDefaultProperties);
-  Variant v_ret;
+  Array v_ret;
   Variant v_prop;
 
   v_ret = s_sys_sa00000000;

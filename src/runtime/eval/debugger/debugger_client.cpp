@@ -1271,6 +1271,7 @@ void DebuggerClient::parseCommand(const char *line) {
 }
 
 bool DebuggerClient::parse(const char *line) {
+  while (isspace(*line)) line++;
   m_line = line;
 
   if (m_inputState == TakingCommand) {

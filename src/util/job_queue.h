@@ -77,7 +77,7 @@ public:
   /**
    * Constructor.
    */
-  JobQueue() : m_stopped(false), m_workerCount(0) {
+  JobQueue() : m_jobCount(0), m_stopped(false), m_workerCount(0) {
   }
 
   /**
@@ -86,6 +86,7 @@ public:
   void enqueue(TJob job) {
     Lock lock(getMutex());
     m_jobs.push_back(job);
+    m_jobCount = m_jobs.size();
     notify();
   }
 
@@ -104,6 +105,7 @@ public:
     }
     TJob job = m_jobs.front();
     m_jobs.pop_front();
+    m_jobCount = m_jobs.size();
     return job;
   }
 
@@ -133,11 +135,11 @@ public:
    * Keep track of how many jobs are queued, but not yet been serviced.
    */
   int getQueuedJobs() {
-    Lock lock(getMutex());
-    return m_jobs.size();
+    return m_jobCount;
   }
 
  private:
+  int m_jobCount;
   std::deque<TJob> m_jobs;
   bool m_stopped;
   int m_workerCount;

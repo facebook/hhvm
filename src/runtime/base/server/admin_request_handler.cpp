@@ -30,7 +30,7 @@
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/ext/mysql_stats.h>
 #include <runtime/base/shared/shared_store_stats.h>
-#include <runtime/base/util/alloc.h>
+#include <util/alloc.h>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>

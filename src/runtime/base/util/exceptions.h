@@ -253,13 +253,6 @@ public:
   virtual ~PhpFileDoesNotExistException() throw() {}
 };
 
-class OutOfMemoryException : public FatalErrorException {
-public:
-  OutOfMemoryException(const char *msg, int memory)
-      : FatalErrorException(0, msg, memory) {}
-  virtual ~OutOfMemoryException() throw() {}
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -19,7 +19,7 @@
 #include <fcntl.h>
 
 #include <runtime/base/util/string_buffer.h>
-#include <runtime/base/util/alloc.h>
+#include <util/alloc.h>
 #include <runtime/base/file/file.h>
 #include <runtime/base/zend/zend_functions.h>
 #ifdef TAINTED

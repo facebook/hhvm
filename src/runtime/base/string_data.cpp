@@ -18,7 +18,7 @@
 #include <runtime/base/shared/shared_variant.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/util/exceptions.h>
-#include <runtime/base/util/alloc.h>
+#include <util/alloc.h>
 #include <math.h>
 #include <runtime/base/zend/zend_string.h>
 #include <runtime/base/zend/zend_strtod.h>

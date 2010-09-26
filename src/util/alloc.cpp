@@ -14,8 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
-#include <runtime/base/util/alloc.h>
-#include <runtime/base/util/exceptions.h>
+#include "alloc.h"
 
 namespace HPHP { namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,7 +23,7 @@ void* safe_malloc(size_t size) {
   void *ptr = std::malloc(size);
 
   if (ptr == NULL) {
-    throw OutOfMemoryException("Unable to allocate %d bytes of memory", size);
+    throw OutOfMemoryException(size);
   }
   return ptr;
 }
@@ -34,7 +33,7 @@ void* safe_realloc(void *var, size_t size) {
 
   ptr = std::realloc(var, size);
   if (ptr == NULL && size != 0) {
-    throw OutOfMemoryException("Unable to allocate %d bytes of memory", size);
+    throw OutOfMemoryException(size);
   }
 
   return ptr;
@@ -43,6 +42,14 @@ void* safe_realloc(void *var, size_t size) {
 void safe_free(void *ptr) {
   if (!ptr) {
     free(ptr);
+  }
+}
+
+void flush_thread_caches() {
+  if (mallctl) {
+    mallctl("tcache.flush", NULL, NULL, NULL, 0);
+  } else if (MallocExtensionInstance) {
+    MallocExtensionInstance()->MarkThreadIdle();
   }
 }
 

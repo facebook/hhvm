@@ -14,10 +14,10 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __HPHP_ALLOC_H__
-#define __HPHP_ALLOC_H__
+#ifndef __HPHP_UTIL_ALLOC_H__
+#define __HPHP_UTIL_ALLOC_H__
 
-#include <stdlib.h>
+#include "exception.h"
 
 #ifndef NO_TCMALLOC
 #include <google/malloc_extension.h>
@@ -35,23 +35,40 @@ extern "C" {
 
 #ifndef NO_JEMALLOC
   int mallctl(const char *name, void *oldp, size_t *oldlenp, void *newp,
-          size_t newlen) __attribute__((weak));
+              size_t newlen) __attribute__((weak));
   void malloc_stats_print(void (*write_cb)(void *, const char *),
-          void *cbopaque, const char *opts) __attribute__((weak));
+                          void *cbopaque, const char *opts)
+    __attribute__((weak));
 #endif
 }
 
-namespace HPHP { namespace Util {
+namespace HPHP {
+///////////////////////////////////////////////////////////////////////////////
+
+class OutOfMemoryException : public Exception {
+public:
+  OutOfMemoryException(int size)
+      : Exception("Unable to allocate %d bytes of memory", size) {}
+  virtual ~OutOfMemoryException() throw() {}
+};
+
+namespace Util {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
  * Safe memory allocation.
  */
-  void* safe_malloc(size_t size);
-  void* safe_realloc(void* ptr, size_t size);
-  void  safe_free(void* ptr);
+void* safe_malloc(size_t size);
+void* safe_realloc(void* ptr, size_t size);
+void  safe_free(void* ptr);
+
+/**
+ * Instruct low level memory allocator to free memory back to system. Called
+ * when thread's been idle and predicted to continue to be idle for a while.
+ */
+void flush_thread_caches();
 
 ///////////////////////////////////////////////////////////////////////////////
 }}
 
-#endif // __HPHP_ALLOC_H__
+#endif // __HPHP_UTIL_ALLOC_H__

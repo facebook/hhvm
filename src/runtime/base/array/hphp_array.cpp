@@ -22,6 +22,7 @@
 #include <runtime/base/variable_serializer.h>
 #include <util/hash.h>
 #include <util/lock.h>
+#include <util/alloc.h>
 
 // If PEDANTIC is defined, extra checks are performed to ensure correct
 // function even as an array approaches 2^31 elements.  In practice this is
@@ -755,8 +756,7 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize) {
                        + (tableSize * sizeof(ElmInd))
                        + ElmAlignment); // <-- pad
   if (data == NULL) {
-    throw OutOfMemoryException("HphpArray allocation failure (size %u)",
-                               tableSize);
+    throw OutOfMemoryException(tableSize);
   }
   if (!m_linear) {
     size_t oldPad = uintptr_t(data2Elms(m_data)) - uintptr_t(m_data);

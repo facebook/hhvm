@@ -14,27 +14,37 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __SYNCHRONIZABLE_H__
-#define __SYNCHRONIZABLE_H__
+#ifndef __SYNCHRONIZABLE_MULTI_H__
+#define __SYNCHRONIZABLE_MULTI_H__
 
+#include "base.h"
 #include "mutex.h"
-#include <pthread.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
- * Java-like base class for synchronization between object methods within the
- * same class. Check pool.h for a typical example.
+ * A Synchronizable object that has multiple conditional variables. The benefit
+ * is, notify() can choose to notify the most recently waited conditional
+ * variable for an altered scheduling that potentially wakes up a thread with
+ * better thread caching.
  */
-class Synchronizable {
- public:
-  Synchronizable();
-  virtual ~Synchronizable();
+class SynchronizableMulti {
+public:
+  SynchronizableMulti(int size);
+  virtual ~SynchronizableMulti();
 
-  void wait();
-  bool wait(long seconds); // false if timed out
-  bool wait(long seconds, long long nanosecs); // false if timed out
+  /**
+   * "id" is an arbitrary number that locates the conditional variable to wait
+   * on.
+   *
+   * "front" means adding this thread to front of the queue while waiting.
+   * Otherwise, the thread is pushed to the back of the queue, being the last
+   * to wake up, when notify() is called.
+   */
+  void wait(int id, bool front);
+  bool wait(int id, bool front, long seconds); // false if timed out
+  bool wait(int id, bool front, long seconds, long long nanosecs);
   void notify();
   void notifyAll();
 
@@ -42,10 +52,13 @@ class Synchronizable {
 
  private:
   Mutex m_mutex;
-  pthread_cond_t m_cond;
+  std::vector<pthread_cond_t> m_conds;
+  std::list<pthread_cond_t*> m_cond_list;
+
+  bool waitImpl(int id, bool front, timespec *ts);
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 
-#endif // __SYNCHRONIZABLE_H__
+#endif // __SYNCHRONIZABLE_MULTI_H__

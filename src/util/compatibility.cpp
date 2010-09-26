@@ -52,5 +52,16 @@ int dprintf(int fd, const char *format, ...) {
 }
 #endif
 
+void gettime(struct timespec &ts) {
+#if defined(__APPLE__)
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  ts.tv_sec = tv.tv_sec;
+  ts.tv_nsec = tv.tv_usec * 1000;
+#else
+  clock_gettime(CLOCK_REALTIME, &ts);
+#endif
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

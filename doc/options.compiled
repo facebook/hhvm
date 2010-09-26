@@ -132,6 +132,9 @@ flood error logs.
     IP = 0.0.0.0
     Port = 80
     ThreadCount = 50
+    ThreadRoundRobin = false   # last thread serves next
+    ThreadDropCacheTimeoutSeconds = 0
+    ThreadJobLIFO = false
 
     SourceRoot = path to source files and static contents
     IncludeSearchPaths {

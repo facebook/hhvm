@@ -75,6 +75,9 @@ public:
   static std::string ServerPrimaryIP;
   static int ServerPort;
   static int ServerThreadCount;
+  static bool ServerThreadRoundRobin;
+  static int ServerThreadDropCacheTimeoutSeconds;
+  static bool ServerThreadJobLIFO;
   static int PageletServerThreadCount;
   static int FiberCount;
   static int RequestTimeoutSeconds;

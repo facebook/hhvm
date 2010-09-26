@@ -29,6 +29,8 @@ char *strndup(const char* str, size_t len);
 int dprintf(int fd, const char *format, ...);
 #endif
 
+void gettime(struct timespec &ts);
+
 ///////////////////////////////////////////////////////////////////////////////
 }
 

@@ -174,7 +174,10 @@ void XboxServer::Restart() {
 
   if (RuntimeOption::XboxServerThreadCount > 0) {
     s_dispatcher = new JobQueueDispatcher<XboxTransport*, XboxWorker>
-      (RuntimeOption::XboxServerThreadCount, NULL);
+      (RuntimeOption::XboxServerThreadCount,
+       RuntimeOption::ServerThreadRoundRobin,
+       RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+       NULL);
     Logger::Info("xbox server started");
     s_dispatcher->start();
   }

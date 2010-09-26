@@ -19,9 +19,10 @@
 
 #include "async_func.h"
 #include <vector>
-#include "synchronizable.h"
+#include "synchronizable_multi.h"
 #include "lock.h"
 #include "atomic.h"
+#include "alloc.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -68,7 +69,7 @@ namespace HPHP {
  * A job queue that's suitable for multiple threads to work on.
  */
 template<typename TJob>
-class JobQueue : public Synchronizable {
+class JobQueue : public SynchronizableMulti {
 public:
   // trial class for signaling queue stop
   class StopSignal {};
@@ -77,14 +78,18 @@ public:
   /**
    * Constructor.
    */
-  JobQueue() : m_jobCount(0), m_stopped(false), m_workerCount(0) {
+  JobQueue(int threadCount, bool threadRoundRobin, int dropCacheTimeout,
+           bool lifo)
+      : SynchronizableMulti(threadRoundRobin ? 1 : threadCount),
+        m_jobCount(0), m_stopped(false), m_workerCount(0),
+        m_dropCacheTimeout(dropCacheTimeout), m_lifo(lifo) {
   }
 
   /**
    * Put a job into the queue and notify a worker to pick it up.
    */
   void enqueue(TJob job) {
-    Lock lock(getMutex());
+    Lock lock(this);
     m_jobs.push_back(job);
     m_jobCount = m_jobs.size();
     notify();
@@ -95,17 +100,31 @@ public:
    * by this queue class, it's up to a worker class on whether to deallocate
    * the job object correctly.
    */
-  TJob dequeue() {
-    Lock lock(getMutex());
+  TJob dequeue(int id) {
+    Lock lock(this);
+    bool flushed = false;
     while (m_jobs.empty()) {
       if (m_stopped) {
         throw StopSignal();
       }
-      wait();
+      if (m_dropCacheTimeout <= 0 || flushed) {
+        wait(id, false);
+      } else if (!wait(id, true, m_dropCacheTimeout)) {
+        // since we timed out, maybe we can turn idle without holding memory
+        if (m_jobs.empty()) {
+          Util::flush_thread_caches();
+          flushed = true;
+        }
+      }
+    }
+    m_jobCount = m_jobs.size() - 1;
+    if (m_lifo) {
+      TJob job = m_jobs.back();
+      m_jobs.pop_back();
+      return job;
     }
     TJob job = m_jobs.front();
     m_jobs.pop_front();
-    m_jobCount = m_jobs.size();
     return job;
   }
 
@@ -113,7 +132,7 @@ public:
    * Purely for making sure no new jobs are queued when we are stopping.
    */
   void stop() {
-    Lock lock(getMutex());
+    Lock lock(this);
     m_stopped = true;
     notifyAll(); // so all waiting threads can find out queue is stopped
   }
@@ -143,6 +162,8 @@ public:
   std::deque<TJob> m_jobs;
   bool m_stopped;
   int m_workerCount;
+  int m_dropCacheTimeout;
+  bool m_lifo;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -188,7 +209,7 @@ public:
     onThreadEnter();
     while (!m_stopped) {
       try {
-        TJob job = m_queue->dequeue();
+        TJob job = m_queue->dequeue(m_id);
         if (countActive) m_queue->incActiveWorker();
         doJob(job);
         if (countActive) m_queue->decActiveWorker();
@@ -227,7 +248,10 @@ public:
   /**
    * Constructor.
    */
-  JobQueueDispatcher(int threadCount, void *opaque) : m_stopped(true) {
+  JobQueueDispatcher(int threadCount, bool threadRoundRobin,
+                     int dropCacheTimeout, void *opaque, bool lifo = false)
+      : m_stopped(true),
+        m_queue(threadCount, threadRoundRobin, dropCacheTimeout, lifo) {
     ASSERT(threadCount >= 1);
     m_workers.resize(threadCount);
     m_funcs.resize(threadCount);

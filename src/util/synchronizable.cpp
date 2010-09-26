@@ -15,7 +15,7 @@
 */
 
 #include "synchronizable.h"
-#include "base.h"
+#include "compatibility.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,22 +37,15 @@ void Synchronizable::wait() {
 #endif
 }
 
-bool Synchronizable::wait(long long seconds) {
+bool Synchronizable::wait(long seconds) {
   return wait(seconds, 0);
 }
 
-bool Synchronizable::wait(long long seconds, long long nanosecs) {
+bool Synchronizable::wait(long seconds, long long nanosecs) {
   struct timespec ts;
-#if defined(__APPLE__)
-  struct timeval tv;
-  gettimeofday(&tv, NULL);
-  ts.tv_sec = tv.tv_sec + seconds;
-  ts.tv_nsec = tv.tv_usec * 1000 + nanosecs;
-#else
-  clock_gettime(CLOCK_REALTIME, &ts);
+  gettime(ts);
   ts.tv_sec += seconds;
   ts.tv_nsec += nanosecs;
-#endif
 
   int ret = pthread_cond_timedwait(&m_cond, &m_mutex.getRaw(), &ts);
   ASSERT(ret != EPERM); // did you lock the mutex?

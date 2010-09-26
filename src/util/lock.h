@@ -19,6 +19,7 @@
 
 #include "mutex.h"
 #include "synchronizable.h"
+#include "synchronizable_multi.h"
 #include "logger.h"
 
 namespace HPHP {
@@ -64,6 +65,10 @@ public:
     m_mutex.lock();
   }
   Lock(Synchronizable *obj, bool profile = true)
+    : m_profiler(profile), m_mutex(obj->getMutex()) {
+    m_mutex.lock();
+  }
+  Lock(SynchronizableMulti *obj, bool profile = true)
     : m_profiler(profile), m_mutex(obj->getMutex()) {
     m_mutex.lock();
   }

@@ -79,6 +79,9 @@ std::string RuntimeOption::ServerIP;
 std::string RuntimeOption::ServerPrimaryIP;
 int RuntimeOption::ServerPort;
 int RuntimeOption::ServerThreadCount = 50;
+bool RuntimeOption::ServerThreadRoundRobin = false;
+int RuntimeOption::ServerThreadDropCacheTimeoutSeconds = 0;
+bool RuntimeOption::ServerThreadJobLIFO = false;
 int RuntimeOption::PageletServerThreadCount = 0;
 int RuntimeOption::FiberCount = 0;
 int RuntimeOption::RequestTimeoutSeconds = 0;
@@ -480,6 +483,10 @@ void RuntimeOption::Load(Hdf &config) {
     ServerPrimaryIP = Util::GetPrimaryIP();
     ServerPort = server["Port"].getInt16(80);
     ServerThreadCount = server["ThreadCount"].getInt32(50);
+    ServerThreadRoundRobin = server["ThreadRoundRobin"].getBool();
+    ServerThreadDropCacheTimeoutSeconds =
+      server["ThreadDropCacheTimeoutSeconds"].getInt32(0);
+    ServerThreadJobLIFO = server["ThreadJobLIFO"].getBool();
     RequestTimeoutSeconds = server["RequestTimeoutSeconds"].getInt32(0);
     RequestMemoryMaxBytes = server["RequestMemoryMaxBytes"].getInt32(-1);
     ResponseQueueCount = server["ResponseQueueCount"].getInt32(0);

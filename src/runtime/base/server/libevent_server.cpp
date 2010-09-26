@@ -156,7 +156,9 @@ LibEventServer::LibEventServer(const std::string &address, int port,
     m_accept_sock_ssl(-1),
     m_timeoutThreadData(thread, timeoutSeconds),
     m_timeoutThread(&m_timeoutThreadData, &TimeoutThread::run),
-    m_dispatcher(thread, this),
+    m_dispatcher(thread, RuntimeOption::ServerThreadRoundRobin,
+                 RuntimeOption::ServerThreadDropCacheTimeoutSeconds,
+                 this, RuntimeOption::ServerThreadJobLIFO),
     m_dispatcherThread(this, &LibEventServer::dispatch) {
   m_eventBase = event_base_new();
   m_server = evhttp_new(m_eventBase);

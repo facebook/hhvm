@@ -795,7 +795,7 @@ void f_header(CStrRef str, bool replace /* = true */,
   }
 
   Transport *transport = g_context->getTransport();
-  if (transport) {
+  if (transport && header->size()) {
     const char *header_line = header->data();
 
     // handle single line of status code

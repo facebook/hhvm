@@ -834,8 +834,12 @@ Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
     }
 
     /* 3. Now pass our field back to php */
-    *comp_end = '\0';
-    ret.append(String(temp, comp_end - temp, CopyString));
+    if (comp_end - temp) {
+      *comp_end = '\0';
+      ret.append(String(temp, comp_end - temp, CopyString));
+    } else {
+      ret.append(null_variant);
+    }
   } while (bptr < limit);
 
   free(temp);

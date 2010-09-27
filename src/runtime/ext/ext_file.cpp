@@ -1050,6 +1050,17 @@ String f_basename(CStrRef path, CStrRef suffix /* = null_string */) {
 }
 
 bool f_fnmatch(CStrRef pattern, CStrRef filename, int flags /* = 0 */) {
+  if (filename.size() >= PATH_MAX) {
+    raise_warning("Filename exceeds the maximum allowed length of %d characters",
+                  PATH_MAX);
+    return false;
+  }
+  if (pattern.size() >= PATH_MAX) {
+    raise_warning("Path exceeds the maximum allowed length of %d characters",
+                  PATH_MAX);
+    return false;
+  }
+
   return fnmatch(pattern.data(), filename.data(), flags) == 0;
 }
 

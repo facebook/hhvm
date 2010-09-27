@@ -205,6 +205,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     if (cls == getOriginalScope(ar)) {
       cls->getVariables()->forcePrivateVariants(ar);
     }
+    m_resolvedClassName = cls->getName();
   }
 
   // we have to use a variant to hold dynamic value

@@ -2045,7 +2045,13 @@ static unsigned char *php_base64_decode(const unsigned char *str,
 
   /* run through the whole string, converting as we go */
   while ((ch = *current++) != '\0' && length-- > 0) {
-    if (ch == base64_pad) break;
+    if (ch == base64_pad) {
+      if (*current != '=' && (i % 4) == 1) {
+        free(result);
+        return NULL;
+      }
+      continue;
+    }
 
     ch = base64_reverse_table[ch];
     if ((!strict && ch < 0) || ch == -1) {
@@ -2085,7 +2091,7 @@ static unsigned char *php_base64_decode(const unsigned char *str,
     case 2:
       k++;
     case 3:
-      result[k++] = 0;
+      result[k] = 0;
     }
   }
   if(ret_length) {

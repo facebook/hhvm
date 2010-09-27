@@ -43,6 +43,8 @@ bool TestExtUrl::test_base64_decode() {
      "This is an encoded string");
   VERIFY(same(f_base64_decode("BgAYdjk="),
               String("\006\0\030v9", 5, AttachLiteral)));
+  VERIFY(!same(f_base64_decode("dGVzdA=="),
+               f_base64_decode("dGVzdA==CORRUPT")));
   return Count(true);
 }
 

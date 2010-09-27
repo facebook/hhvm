@@ -383,15 +383,23 @@ static unsigned char *php_parserr(unsigned char *cp, querybuf *answer,
     subarray.set("os", String((const char *)cp, n, CopyString));
     cp += n;
     break;
-  case DNS_T_TXT:
+  case DNS_T_TXT: {
+    int ll = 0;
+
     subarray.set("type", "TXT");
-    n = cp[0];
-    tp = (unsigned char *)malloc(n + 1);
-    memcpy(tp, cp + 1, n);
-    tp[n] = '\0';
+    tp = (unsigned char *)malloc(dlen + 1);
+
+    while (ll < dlen) {
+      n = cp[ll];
+      memcpy(tp + ll , cp + ll + 1, n);
+      ll = ll + n + 1;
+    }
+    tp[dlen] = '\0';
     cp += dlen;
-    subarray.set("txt", String((const char *)tp, n, AttachString));
+
+    subarray.set("txt", String((const char *)tp, dlen - 1, AttachString));
     break;
+  }
   case DNS_T_SOA:
     subarray.set("type", "SOA");
     n = dn_expand(answer->qb2, answer->qb2+65536, cp, name, (sizeof name) -2);

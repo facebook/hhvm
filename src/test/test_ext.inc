@@ -6,6 +6,7 @@ RUN_TESTSUITE(TestExtApc);
 RUN_TESTSUITE(TestExtApd);
 RUN_TESTSUITE(TestExtArray);
 RUN_TESTSUITE(TestExtBcmath);
+RUN_TESTSUITE(TestExtBzip2);
 RUN_TESTSUITE(TestExtClass);
 RUN_TESTSUITE(TestExtCtype);
 RUN_TESTSUITE(TestExtCurl);

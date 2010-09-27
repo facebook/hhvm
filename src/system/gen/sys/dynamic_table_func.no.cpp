@@ -88,6 +88,25 @@ Variant ifa_func_get_args(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("func_get_args", 0, 1);
   return (f_func_get_args());
 }
+Variant i_bzwrite(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzwrite);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("bzwrite", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_bzwrite(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_bzwrite(arg0, arg1, arg2));
+  }
+}
+Variant ifa_bzwrite(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("bzwrite", count, 2, 3, 1);
+  if (count <= 2) return (f_bzwrite(a0, a1));
+  return (f_bzwrite(a0, a1, a2));
+}
 Variant i_php_uname(void *extra, CArrRef params) {
   FUNCTION_INJECTION(php_uname);
   int count __attribute__((__unused__)) = params.size();
@@ -5604,6 +5623,21 @@ Variant ifa_posix_getgroups(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("posix_getgroups", 0, 1);
   return (f_posix_getgroups());
 }
+Variant i_bzerrstr(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzerrstr);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzerrstr", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_bzerrstr(arg0));
+  }
+}
+Variant ifa_bzerrstr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("bzerrstr", count, 1, 1, 1);
+  return (f_bzerrstr(a0));
+}
 Variant i_fileinode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fileinode);
   int count __attribute__((__unused__)) = params.size();
@@ -7465,6 +7499,27 @@ Variant ifa_end_user_func_async(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count == 2) return (f_end_user_func_async(a0, a1));
   return (f_end_user_func_async(a0, a1, a2));
 }
+Variant i_bzcompress(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzcompress);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 3) return throw_wrong_arguments("bzcompress", count, 1, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_bzcompress(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_bzcompress(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_bzcompress(arg0, arg1, arg2));
+  }
+}
+Variant ifa_bzcompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 3) return throw_wrong_arguments("bzcompress", count, 1, 3, 1);
+  if (count <= 1) return (f_bzcompress(a0));
+  if (count == 2) return (f_bzcompress(a0, a1));
+  return (f_bzcompress(a0, a1, a2));
+}
 Variant i_openssl_get_publickey(void *extra, CArrRef params) {
   FUNCTION_INJECTION(openssl_get_publickey);
   int count __attribute__((__unused__)) = params.size();
@@ -9018,6 +9073,24 @@ Variant i_unserialize(void *extra, CArrRef params) {
 Variant ifa_unserialize(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("unserialize", count, 1, 1, 1);
   return (f_unserialize(a0));
+}
+Variant i_bzdecompress(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzdecompress);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("bzdecompress", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_bzdecompress(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_bzdecompress(arg0, arg1));
+  }
+}
+Variant ifa_bzdecompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("bzdecompress", count, 1, 2, 1);
+  if (count <= 1) return (f_bzdecompress(a0));
+  return (f_bzdecompress(a0, a1));
 }
 Variant i_urldecode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(urldecode);
@@ -13828,6 +13901,21 @@ Variant ifa_array_uintersect(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count >= 6) params.append(a5);
   return (f_array_uintersect(count,a0, a1, a2, params));
 }
+Variant i_bzflush(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzflush);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzflush", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_bzflush(arg0));
+  }
+}
+Variant ifa_bzflush(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("bzflush", count, 1, 1, 1);
+  return (f_bzflush(a0));
+}
 Variant i_xml_set_unparsed_entity_decl_handler(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xml_set_unparsed_entity_decl_handler);
   int count __attribute__((__unused__)) = params.size();
@@ -14248,6 +14336,21 @@ Variant ifa_is_float(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("is_float", count, 1, 1, 1);
   return (f_is_float(a0));
 }
+Variant i_bzerrno(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzerrno);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzerrno", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_bzerrno(arg0));
+  }
+}
+Variant ifa_bzerrno(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("bzerrno", count, 1, 1, 1);
+  return (f_bzerrno(a0));
+}
 Variant i_stream_socket_pair(void *extra, CArrRef params) {
   FUNCTION_INJECTION(stream_socket_pair);
   int count __attribute__((__unused__)) = params.size();
@@ -14308,6 +14411,21 @@ Variant i_chmod(void *extra, CArrRef params) {
 Variant ifa_chmod(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("chmod", count, 2, 2, 1);
   return (f_chmod(a0, a1));
+}
+Variant i_bzerror(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzerror);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzerror", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_bzerror(arg0));
+  }
+}
+Variant ifa_bzerror(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("bzerror", count, 1, 1, 1);
+  return (f_bzerror(a0));
 }
 Variant i_magickgettextascent(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickgettextascent);
@@ -24972,6 +25090,21 @@ Variant ifa_dom_xpath_evaluate(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   if (count <= 2) return (f_dom_xpath_evaluate(a0, a1));
   return (f_dom_xpath_evaluate(a0, a1, a2));
 }
+Variant i_bzclose(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzclose);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzclose", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_bzclose(arg0));
+  }
+}
+Variant ifa_bzclose(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("bzclose", count, 1, 1, 1);
+  return (f_bzclose(a0));
+}
 Variant i_strtoupper(void *extra, CArrRef params) {
   FUNCTION_INJECTION(strtoupper);
   int count __attribute__((__unused__)) = params.size();
@@ -25933,6 +26066,21 @@ Variant ifa_hphp_get_class_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count != 1) return throw_wrong_arguments("hphp_get_class_info", count, 1, 1, 1);
   return (f_hphp_get_class_info(a0));
 }
+Variant i_mailparse_msg_get_part_data(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(mailparse_msg_get_part_data);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("mailparse_msg_get_part_data", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_mailparse_msg_get_part_data(arg0));
+  }
+}
+Variant ifa_mailparse_msg_get_part_data(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("mailparse_msg_get_part_data", count, 1, 1, 1);
+  return (f_mailparse_msg_get_part_data(a0));
+}
 Variant i_dom_element_remove_attribute_ns(void *extra, CArrRef params) {
   FUNCTION_INJECTION(dom_element_remove_attribute_ns);
   int count __attribute__((__unused__)) = params.size();
@@ -25949,21 +26097,6 @@ Variant i_dom_element_remove_attribute_ns(void *extra, CArrRef params) {
 Variant ifa_dom_element_remove_attribute_ns(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 3) return throw_wrong_arguments("dom_element_remove_attribute_ns", count, 3, 3, 1);
   return (f_dom_element_remove_attribute_ns(a0, a1, a2));
-}
-Variant i_mailparse_msg_get_part_data(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(mailparse_msg_get_part_data);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("mailparse_msg_get_part_data", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_mailparse_msg_get_part_data(arg0));
-  }
-}
-Variant ifa_mailparse_msg_get_part_data(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("mailparse_msg_get_part_data", count, 1, 1, 1);
-  return (f_mailparse_msg_get_part_data(a0));
 }
 Variant i_openssl_csr_new(void *extra, CArrRef params) {
   FUNCTION_INJECTION(openssl_csr_new);
@@ -26003,25 +26136,20 @@ Variant ifa_xbox_task_start(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("xbox_task_start", count, 1, 1, 1);
   return (f_xbox_task_start(a0));
 }
-Variant i_getcwd(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(getcwd);
+Variant i_newpixelwands(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(newpixelwands);
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  return (f_getcwd());
+  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_newpixelwands(arg0));
+  }
 }
-Variant ifa_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  return (f_getcwd());
-}
-Variant i_posix_getrlimit(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(posix_getrlimit);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
-  return (f_posix_getrlimit());
-}
-Variant ifa_posix_getrlimit(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
-  return (f_posix_getrlimit());
+Variant ifa_newpixelwands(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
+  return (f_newpixelwands(a0));
 }
 Variant i_mb_get_info(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mb_get_info);
@@ -26040,20 +26168,25 @@ Variant ifa_mb_get_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 0) return (f_mb_get_info());
   return (f_mb_get_info(a0));
 }
-Variant i_newpixelwands(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(newpixelwands);
+Variant i_posix_getrlimit(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(posix_getrlimit);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_newpixelwands(arg0));
-  }
+  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
+  return (f_posix_getrlimit());
 }
-Variant ifa_newpixelwands(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
-  return (f_newpixelwands(a0));
+Variant ifa_posix_getrlimit(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
+  return (f_posix_getrlimit());
+}
+Variant i_getcwd(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(getcwd);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  return (f_getcwd());
+}
+Variant ifa_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  return (f_getcwd());
 }
 Variant i_fputcsv(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fputcsv);
@@ -28331,6 +28464,22 @@ Variant ifa_get_meta_tags(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 1) return (f_get_meta_tags(a0));
   return (f_get_meta_tags(a0, a1));
 }
+Variant i_bzopen(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzopen);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("bzopen", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_bzopen(arg0, arg1));
+  }
+}
+Variant ifa_bzopen(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("bzopen", count, 2, 2, 1);
+  return (f_bzopen(a0, a1));
+}
 Variant i_magicknextimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magicknextimage);
   int count __attribute__((__unused__)) = params.size();
@@ -29188,6 +29337,24 @@ Variant i_pixelsetyellowquantum(void *extra, CArrRef params) {
 Variant ifa_pixelsetyellowquantum(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("pixelsetyellowquantum", count, 2, 2, 1);
   return (f_pixelsetyellowquantum(a0, a1), null);
+}
+Variant i_bzread(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(bzread);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("bzread", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_bzread(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_bzread(arg0, arg1));
+  }
+}
+Variant ifa_bzread(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("bzread", count, 1, 2, 1);
+  if (count <= 1) return (f_bzread(a0));
+  return (f_bzread(a0, a1));
 }
 Variant i_dom_document_create_element_ns(void *extra, CArrRef params) {
   FUNCTION_INJECTION(dom_document_create_element_ns);
@@ -32311,22 +32478,6 @@ Variant ifa_mcrypt_module_is_block_algorithm_mode(void *extra, int count, INVOKE
   if (count <= 1) return (f_mcrypt_module_is_block_algorithm_mode(a0));
   return (f_mcrypt_module_is_block_algorithm_mode(a0, a1));
 }
-Variant i_posix_setpgid(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(posix_setpgid);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("posix_setpgid", count, 2, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_posix_setpgid(arg0, arg1));
-  }
-}
-Variant ifa_posix_setpgid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("posix_setpgid", count, 2, 2, 1);
-  return (f_posix_setpgid(a0, a1));
-}
 Variant i_dns_get_mx(void *extra, CArrRef params) {
   FUNCTION_INJECTION(dns_get_mx);
   int count __attribute__((__unused__)) = params.size();
@@ -32346,6 +32497,22 @@ Variant ifa_dns_get_mx(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 2 || count > 3) return throw_wrong_arguments("dns_get_mx", count, 2, 3, 1);
   if (count <= 2) return (f_dns_get_mx(a0, ref(a1)));
   return (f_dns_get_mx(a0, ref(a1), ref(a2)));
+}
+Variant i_posix_setpgid(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(posix_setpgid);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("posix_setpgid", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_posix_setpgid(arg0, arg1));
+  }
+}
+Variant ifa_posix_setpgid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("posix_setpgid", count, 2, 2, 1);
+  return (f_posix_setpgid(a0, a1));
 }
 Variant i_headers_list(void *extra, CArrRef params) {
   FUNCTION_INJECTION(headers_list);
@@ -33792,6 +33959,31 @@ Variant ei_func_get_args(Eval::VariableEnvironment &env, const Eval::FunctionCal
     (*it)->eval(env);
   }
   return (x_func_get_args());
+}
+Variant ei_bzwrite(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("bzwrite", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_bzwrite(a0, a1));
+  else return (x_bzwrite(a0, a1, a2));
 }
 Variant ei_php_uname(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -40509,6 +40701,22 @@ Variant ei_posix_getgroups(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   return (x_posix_getgroups());
 }
+Variant ei_bzerrstr(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzerrstr", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_bzerrstr(a0));
+}
 Variant ei_fileinode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -42726,6 +42934,32 @@ Variant ei_end_user_func_async(Eval::VariableEnvironment &env, const Eval::Funct
   else if (count == 2) return (x_end_user_func_async(a0, a1));
   else return (x_end_user_func_async(a0, a1, a2));
 }
+Variant ei_bzcompress(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 3) return throw_wrong_arguments("bzcompress", count, 1, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_bzcompress(a0));
+  else if (count == 2) return (x_bzcompress(a0, a1));
+  else return (x_bzcompress(a0, a1, a2));
+}
 Variant ei_openssl_get_publickey(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -44609,6 +44843,27 @@ Variant ei_unserialize(Eval::VariableEnvironment &env, const Eval::FunctionCallE
     (*it)->eval(env);
   }
   return (x_unserialize(a0));
+}
+Variant ei_bzdecompress(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("bzdecompress", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_bzdecompress(a0));
+  else return (x_bzdecompress(a0, a1));
 }
 Variant ei_urldecode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -50570,6 +50825,22 @@ Variant ei_array_uintersect(Eval::VariableEnvironment &env, const Eval::Function
   if (count <= 3) return (x_array_uintersect(count, a0, a1, a2));
   return (x_array_uintersect(count, a0, a1, a2,vargs));
 }
+Variant ei_bzflush(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzflush", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_bzflush(a0));
+}
 Variant ei_xml_set_unparsed_entity_decl_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -51086,6 +51357,22 @@ Variant ei_is_float(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   }
   return (x_is_float(a0));
 }
+Variant ei_bzerrno(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzerrno", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_bzerrno(a0));
+}
 Variant ei_stream_socket_pair(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -51162,6 +51449,22 @@ Variant ei_chmod(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
     (*it)->eval(env);
   }
   return (x_chmod(a0, a1));
+}
+Variant ei_bzerror(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzerror", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_bzerror(a0));
 }
 Variant ei_magickgettextascent(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -64287,6 +64590,22 @@ Variant ei_dom_xpath_evaluate(Eval::VariableEnvironment &env, const Eval::Functi
   if (count <= 2) return (x_dom_xpath_evaluate(a0, a1));
   else return (x_dom_xpath_evaluate(a0, a1, a2));
 }
+Variant ei_bzclose(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("bzclose", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_bzclose(a0));
+}
 Variant ei_strtoupper(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -65469,6 +65788,22 @@ Variant ei_hphp_get_class_info(Eval::VariableEnvironment &env, const Eval::Funct
   }
   return (x_hphp_get_class_info(a0));
 }
+Variant ei_mailparse_msg_get_part_data(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("mailparse_msg_get_part_data", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_mailparse_msg_get_part_data(a0));
+}
 Variant ei_dom_element_remove_attribute_ns(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -65492,22 +65827,6 @@ Variant ei_dom_element_remove_attribute_ns(Eval::VariableEnvironment &env, const
     (*it)->eval(env);
   }
   return (x_dom_element_remove_attribute_ns(a0, a1, a2));
-}
-Variant ei_mailparse_msg_get_part_data(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("mailparse_msg_get_part_data", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_mailparse_msg_get_part_data(a0));
 }
 Variant ei_openssl_csr_new(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65555,29 +65874,21 @@ Variant ei_xbox_task_start(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   return (x_xbox_task_start(a0));
 }
-Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_newpixelwands(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_getcwd());
-}
-Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_getrlimit());
+  return (x_newpixelwands(a0));
 }
 Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65596,21 +65907,29 @@ Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   if (count <= 0) return (x_mb_get_info());
   else return (x_mb_get_info(a0));
 }
-Variant ei_newpixelwands(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
+Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixelwands", count, 1, 1, 1);
+  if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_newpixelwands(a0));
+  return (x_posix_getrlimit());
+}
+Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_getcwd());
 }
 Variant ei_fputcsv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -68391,6 +68710,26 @@ Variant ei_get_meta_tags(Eval::VariableEnvironment &env, const Eval::FunctionCal
   if (count <= 1) return (x_get_meta_tags(a0));
   else return (x_get_meta_tags(a0, a1));
 }
+Variant ei_bzopen(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("bzopen", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_bzopen(a0, a1));
+}
 Variant ei_magicknextimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -69440,6 +69779,27 @@ Variant ei_pixelsetyellowquantum(Eval::VariableEnvironment &env, const Eval::Fun
     (*it)->eval(env);
   }
   return (x_pixelsetyellowquantum(a0, a1), null);
+}
+Variant ei_bzread(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("bzread", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_bzread(a0));
+  else return (x_bzread(a0, a1));
 }
 Variant ei_dom_document_create_element_ns(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -73318,26 +73678,6 @@ Variant ei_mcrypt_module_is_block_algorithm_mode(Eval::VariableEnvironment &env,
   if (count <= 1) return (x_mcrypt_module_is_block_algorithm_mode(a0));
   else return (x_mcrypt_module_is_block_algorithm_mode(a0, a1));
 }
-Variant ei_posix_setpgid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("posix_setpgid", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_setpgid(a0, a1));
-}
 Variant ei_dns_get_mx(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -73362,6 +73702,26 @@ Variant ei_dns_get_mx(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   }
   if (count <= 2) return (x_dns_get_mx(a0, ref(a1)));
   else return (x_dns_get_mx(a0, ref(a1), ref(a2)));
+}
+Variant ei_posix_setpgid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("posix_setpgid", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_setpgid(a0, a1));
 }
 Variant ei_headers_list(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -75168,6 +75528,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 112:
       HASH_INVOKE_FROM_EVAL(0x3C466098FF7B5070LL, mb_check_encoding);
       break;
+    case 118:
+      HASH_INVOKE_FROM_EVAL(0x0CFFD02753B98076LL, bzread);
+      break;
     case 120:
       HASH_INVOKE_FROM_EVAL(0x6B268C26E21C1078LL, arsort);
       HASH_INVOKE_FROM_EVAL(0x01AE1DE8FA116078LL, call_user_func_array_async);
@@ -75724,6 +76087,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 556:
       HASH_INVOKE_FROM_EVAL(0x4129FFBF3548E22CLL, mb_strpos);
       break;
+    case 557:
+      HASH_INVOKE_FROM_EVAL(0x3B0FE36F9A7AE22DLL, bzflush);
+      break;
     case 558:
       HASH_INVOKE_FROM_EVAL(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler);
       break;
@@ -75742,6 +76108,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5542AABF33A2F236LL, stream_filter_remove);
       break;
     case 568:
+      HASH_INVOKE_FROM_EVAL(0x0B7BB85A435F8238LL, bzdecompress);
       HASH_INVOKE_FROM_EVAL(0x695AC59F79E2A238LL, mb_encode_mimeheader);
       break;
     case 570:
@@ -75807,6 +76174,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 622:
       HASH_INVOKE_FROM_EVAL(0x5672949384A4F26ELL, stream_filter_register);
+      break;
+    case 625:
+      HASH_INVOKE_FROM_EVAL(0x135CE067FA0A6271LL, bzerrno);
       break;
     case 626:
       HASH_INVOKE_FROM_EVAL(0x1C65F32FF28BC272LL, pathinfo);
@@ -76450,6 +76820,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x738D381800CE946DLL, ldap_parse_result);
       HASH_INVOKE_FROM_EVAL(0x5229C0069FD7D46DLL, vfprintf);
       break;
+    case 1135:
+      HASH_INVOKE_FROM_EVAL(0x5B8F2ABBB480346FLL, bzwrite);
+      break;
     case 1136:
       HASH_INVOKE_FROM_EVAL(0x0C626F268F120470LL, __halt_compiler);
       break;
@@ -76479,6 +76852,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1151:
       HASH_INVOKE_FROM_EVAL(0x68AE04B02253B47FLL, mb_parse_str);
+      break;
+    case 1153:
+      HASH_INVOKE_FROM_EVAL(0x1876287F59CEB481LL, bzerror);
       break;
     case 1154:
       HASH_INVOKE_FROM_EVAL(0x4590C853C2027482LL, magickembossimage);
@@ -76799,6 +77175,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1399:
       HASH_INVOKE_FROM_EVAL(0x412521E7ADB21577LL, iconv_mime_decode_headers);
+      HASH_INVOKE_FROM_EVAL(0x72E1FD3DCD45C577LL, bzopen);
       HASH_INVOKE_FROM_EVAL(0x1E154D823451B577LL, magicksetresolution);
       break;
     case 1401:
@@ -78053,6 +78430,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x489355BDBE396988LL, drawsettextencoding);
       HASH_INVOKE_FROM_EVAL(0x55BE7AE8DEF3F988LL, magickgetstringheight);
       break;
+    case 2441:
+      HASH_INVOKE_FROM_EVAL(0x60BF7CDD733A2989LL, bzerrstr);
+      break;
     case 2443:
       HASH_INVOKE_FROM_EVAL(0x0E863EF8C11A598BLL, is_writable);
       break;
@@ -79114,6 +79494,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x39E03AAC188D3CB7LL, magickgetimagecompressionquality);
       break;
     case 3259:
+      HASH_INVOKE_FROM_EVAL(0x031F9B7B9A08ECBBLL, bzcompress);
       HASH_INVOKE_FROM_EVAL(0x41D3B07854936CBBLL, token_get_all);
       HASH_INVOKE_FROM_EVAL(0x15ACD9F32D214CBBLL, mysql_fetch_lengths);
       break;
@@ -80149,6 +80530,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4026:
       HASH_INVOKE_FROM_EVAL(0x0664323CB1CC2FBALL, imagecolorset);
       break;
+    case 4028:
+      HASH_INVOKE_FROM_EVAL(0x0A8ED0466E41AFBCLL, bzclose);
+      break;
     case 4031:
       HASH_INVOKE_FROM_EVAL(0x70B38AB9EAE16FBFLL, ini_set);
       break;
@@ -80240,6 +80624,7 @@ CallInfo ci_utf8_encode((void*)&i_utf8_encode, (void*)&ifa_utf8_encode, 1, 0, 0x
 CallInfo ci_hphp_splfileobject___construct((void*)&i_hphp_splfileobject___construct, (void*)&ifa_hphp_splfileobject___construct, 5, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_create_comment((void*)&i_dom_document_create_comment, (void*)&ifa_dom_document_create_comment, 2, 0, 0x0000000000000000LL);
 CallInfo ci_func_get_args((void*)&i_func_get_args, (void*)&ifa_func_get_args, 0, 0, 0x0000000000000000LL);
+CallInfo ci_bzwrite((void*)&i_bzwrite, (void*)&ifa_bzwrite, 3, 0, 0x0000000000000000LL);
 CallInfo ci_php_uname((void*)&i_php_uname, (void*)&ifa_php_uname, 1, 0, 0x0000000000000000LL);
 CallInfo ci_posix_uname((void*)&i_posix_uname, (void*)&ifa_posix_uname, 0, 0, 0x0000000000000000LL);
 CallInfo ci_curl_multi_remove_handle((void*)&i_curl_multi_remove_handle, (void*)&ifa_curl_multi_remove_handle, 2, 0, 0x0000000000000000LL);
@@ -80568,6 +80953,7 @@ CallInfo ci_eregi((void*)&i_eregi, (void*)&ifa_eregi, 3, 0, 0x0000000000000004LL
 CallInfo ci_pixelsetcolorcount((void*)&i_pixelsetcolorcount, (void*)&ifa_pixelsetcolorcount, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawpathcurvetoquadraticbezierrelative((void*)&i_drawpathcurvetoquadraticbezierrelative, (void*)&ifa_drawpathcurvetoquadraticbezierrelative, 5, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getgroups((void*)&i_posix_getgroups, (void*)&ifa_posix_getgroups, 0, 0, 0x0000000000000000LL);
+CallInfo ci_bzerrstr((void*)&i_bzerrstr, (void*)&ifa_bzerrstr, 1, 0, 0x0000000000000000LL);
 CallInfo ci_fileinode((void*)&i_fileinode, (void*)&ifa_fileinode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetnumberimages((void*)&i_magickgetnumberimages, (void*)&ifa_magickgetnumberimages, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagesblob((void*)&i_magickgetimagesblob, (void*)&ifa_magickgetimagesblob, 1, 0, 0x0000000000000000LL);
@@ -80676,6 +81062,7 @@ CallInfo ci_strtr((void*)&i_strtr, (void*)&ifa_strtr, 3, 0, 0x0000000000000000LL
 CallInfo ci_posix_strerror((void*)&i_posix_strerror, (void*)&ifa_posix_strerror, 1, 0, 0x0000000000000000LL);
 CallInfo ci_libxml_use_internal_errors((void*)&i_libxml_use_internal_errors, (void*)&ifa_libxml_use_internal_errors, 1, 0, 0x0000000000000000LL);
 CallInfo ci_end_user_func_async((void*)&i_end_user_func_async, (void*)&ifa_end_user_func_async, 3, 0, 0x0000000000000000LL);
+CallInfo ci_bzcompress((void*)&i_bzcompress, (void*)&ifa_bzcompress, 3, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_get_publickey((void*)&i_openssl_get_publickey, (void*)&ifa_openssl_get_publickey, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_node_lookup_prefix((void*)&i_dom_node_lookup_prefix, (void*)&ifa_dom_node_lookup_prefix, 2, 0, 0x0000000000000000LL);
 CallInfo ci_time_nanosleep((void*)&i_time_nanosleep, (void*)&ifa_time_nanosleep, 2, 0, 0x0000000000000000LL);
@@ -80770,6 +81157,7 @@ CallInfo ci_bindec((void*)&i_bindec, (void*)&ifa_bindec, 1, 0, 0x000000000000000
 CallInfo ci_fileperms((void*)&i_fileperms, (void*)&ifa_fileperms, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fstat((void*)&i_hphp_splfileobject_fstat, (void*)&ifa_hphp_splfileobject_fstat, 1, 0, 0x0000000000000000LL);
 CallInfo ci_unserialize((void*)&i_unserialize, (void*)&ifa_unserialize, 1, 0, 0x0000000000000000LL);
+CallInfo ci_bzdecompress((void*)&i_bzdecompress, (void*)&ifa_bzdecompress, 2, 0, 0x0000000000000000LL);
 CallInfo ci_urldecode((void*)&i_urldecode, (void*)&ifa_urldecode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickannotateimage((void*)&i_magickannotateimage, (void*)&ifa_magickannotateimage, 6, 0, 0x0000000000000000LL);
 CallInfo ci_mailparse_msg_create((void*)&i_mailparse_msg_create, (void*)&ifa_mailparse_msg_create, 0, 0, 0x0000000000000000LL);
@@ -81054,6 +81442,7 @@ CallInfo ci_xmlwriter_start_attribute_ns((void*)&i_xmlwriter_start_attribute_ns,
 CallInfo ci_magickgetimageinterlacescheme((void*)&i_magickgetimageinterlacescheme, (void*)&ifa_magickgetimageinterlacescheme, 1, 0, 0x0000000000000000LL);
 CallInfo ci_array_merge_recursive((void*)&i_array_merge_recursive, (void*)&ifa_array_merge_recursive, 1, 1, 0x0000000000000000LL);
 CallInfo ci_array_uintersect((void*)&i_array_uintersect, (void*)&ifa_array_uintersect, 3, 1, 0x0000000000000000LL);
+CallInfo ci_bzflush((void*)&i_bzflush, (void*)&ifa_bzflush, 1, 0, 0x0000000000000000LL);
 CallInfo ci_xml_set_unparsed_entity_decl_handler((void*)&i_xml_set_unparsed_entity_decl_handler, (void*)&ifa_xml_set_unparsed_entity_decl_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_ob_get_contents((void*)&i_ob_get_contents, (void*)&ifa_ob_get_contents, 0, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetcyan((void*)&i_pixelgetcyan, (void*)&ifa_pixelgetcyan, 1, 0, 0x0000000000000000LL);
@@ -81079,10 +81468,12 @@ CallInfo ci_magicksetimage((void*)&i_magicksetimage, (void*)&ifa_magicksetimage,
 CallInfo ci_openssl_free_key((void*)&i_openssl_free_key, (void*)&ifa_openssl_free_key, 1, 0, 0x0000000000000000LL);
 CallInfo ci_preg_grep((void*)&i_preg_grep, (void*)&ifa_preg_grep, 3, 0, 0x0000000000000000LL);
 CallInfo ci_is_float((void*)&i_is_float, (void*)&ifa_is_float, 1, 0, 0x0000000000000000LL);
+CallInfo ci_bzerrno((void*)&i_bzerrno, (void*)&ifa_bzerrno, 1, 0, 0x0000000000000000LL);
 CallInfo ci_stream_socket_pair((void*)&i_stream_socket_pair, (void*)&ifa_stream_socket_pair, 3, 0, 0x0000000000000000LL);
 CallInfo ci_get_required_files((void*)&i_get_required_files, (void*)&ifa_get_required_files, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_fetch_field((void*)&i_mysql_fetch_field, (void*)&ifa_mysql_fetch_field, 2, 0, 0x0000000000000000LL);
 CallInfo ci_chmod((void*)&i_chmod, (void*)&ifa_chmod, 2, 0, 0x0000000000000000LL);
+CallInfo ci_bzerror((void*)&i_bzerror, (void*)&ifa_bzerror, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgettextascent((void*)&i_magickgettextascent, (void*)&ifa_magickgettextascent, 4, 0, 0x0000000000000000LL);
 CallInfo ci_mb_regex_encoding((void*)&i_mb_regex_encoding, (void*)&ifa_mb_regex_encoding, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mail((void*)&i_mail, (void*)&ifa_mail, 5, 0, 0x0000000000000000LL);
@@ -81711,6 +82102,7 @@ CallInfo ci_xmlwriter_write_comment((void*)&i_xmlwriter_write_comment, (void*)&i
 CallInfo ci_drawgetfontstyle((void*)&i_drawgetfontstyle, (void*)&ifa_drawgetfontstyle, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_set_attribute_ns((void*)&i_dom_element_set_attribute_ns, (void*)&ifa_dom_element_set_attribute_ns, 4, 0, 0x0000000000000000LL);
 CallInfo ci_dom_xpath_evaluate((void*)&i_dom_xpath_evaluate, (void*)&ifa_dom_xpath_evaluate, 3, 0, 0x0000000000000000LL);
+CallInfo ci_bzclose((void*)&i_bzclose, (void*)&ifa_bzclose, 1, 0, 0x0000000000000000LL);
 CallInfo ci_strtoupper((void*)&i_strtoupper, (void*)&ifa_strtoupper, 1, 0, 0x0000000000000000LL);
 CallInfo ci_xml_set_processing_instruction_handler((void*)&i_xml_set_processing_instruction_handler, (void*)&ifa_xml_set_processing_instruction_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apd_breakpoint((void*)&i_apd_breakpoint, (void*)&ifa_apd_breakpoint, 0, 0, 0x0000000000000000LL);
@@ -81770,14 +82162,14 @@ CallInfo ci_libxml_clear_errors((void*)&i_libxml_clear_errors, (void*)&ifa_libxm
 CallInfo ci_magicknormalizeimage((void*)&i_magicknormalizeimage, (void*)&ifa_magicknormalizeimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetformat((void*)&i_magickgetformat, (void*)&ifa_magickgetformat, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_get_class_info((void*)&i_hphp_get_class_info, (void*)&ifa_hphp_get_class_info, 1, 0, 0x0000000000000000LL);
-CallInfo ci_dom_element_remove_attribute_ns((void*)&i_dom_element_remove_attribute_ns, (void*)&ifa_dom_element_remove_attribute_ns, 3, 0, 0x0000000000000000LL);
 CallInfo ci_mailparse_msg_get_part_data((void*)&i_mailparse_msg_get_part_data, (void*)&ifa_mailparse_msg_get_part_data, 1, 0, 0x0000000000000000LL);
+CallInfo ci_dom_element_remove_attribute_ns((void*)&i_dom_element_remove_attribute_ns, (void*)&ifa_dom_element_remove_attribute_ns, 3, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_csr_new((void*)&i_openssl_csr_new, (void*)&ifa_openssl_csr_new, 4, 0, 0x0000000000000002LL);
 CallInfo ci_xbox_task_start((void*)&i_xbox_task_start, (void*)&ifa_xbox_task_start, 1, 0, 0x0000000000000000LL);
-CallInfo ci_getcwd((void*)&i_getcwd, (void*)&ifa_getcwd, 0, 0, 0x0000000000000000LL);
-CallInfo ci_posix_getrlimit((void*)&i_posix_getrlimit, (void*)&ifa_posix_getrlimit, 0, 0, 0x0000000000000000LL);
-CallInfo ci_mb_get_info((void*)&i_mb_get_info, (void*)&ifa_mb_get_info, 1, 0, 0x0000000000000000LL);
 CallInfo ci_newpixelwands((void*)&i_newpixelwands, (void*)&ifa_newpixelwands, 1, 0, 0x0000000000000000LL);
+CallInfo ci_mb_get_info((void*)&i_mb_get_info, (void*)&ifa_mb_get_info, 1, 0, 0x0000000000000000LL);
+CallInfo ci_posix_getrlimit((void*)&i_posix_getrlimit, (void*)&ifa_posix_getrlimit, 0, 0, 0x0000000000000000LL);
+CallInfo ci_getcwd((void*)&i_getcwd, (void*)&ifa_getcwd, 0, 0, 0x0000000000000000LL);
 CallInfo ci_fputcsv((void*)&i_fputcsv, (void*)&ifa_fputcsv, 4, 0, 0x0000000000000000LL);
 CallInfo ci_stream_bucket_prepend((void*)&i_stream_bucket_prepend, (void*)&ifa_stream_bucket_prepend, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apache_get_scoreboard((void*)&i_apache_get_scoreboard, (void*)&ifa_apache_get_scoreboard, 0, 0, 0x0000000000000000LL);
@@ -81915,6 +82307,7 @@ CallInfo ci_pixelgetindex((void*)&i_pixelgetindex, (void*)&ifa_pixelgetindex, 1,
 CallInfo ci_class_implements((void*)&i_class_implements, (void*)&ifa_class_implements, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hebrevc((void*)&i_hebrevc, (void*)&ifa_hebrevc, 2, 0, 0x0000000000000000LL);
 CallInfo ci_get_meta_tags((void*)&i_get_meta_tags, (void*)&ifa_get_meta_tags, 2, 0, 0x0000000000000000LL);
+CallInfo ci_bzopen((void*)&i_bzopen, (void*)&ifa_bzopen, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicknextimage((void*)&i_magicknextimage, (void*)&ifa_magicknextimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursivedirectoryiterator_key((void*)&i_hphp_recursivedirectoryiterator_key, (void*)&ifa_hphp_recursivedirectoryiterator_key, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_create_db((void*)&i_mysql_create_db, (void*)&ifa_mysql_create_db, 2, 0, 0x0000000000000000LL);
@@ -81964,6 +82357,7 @@ CallInfo ci_drawsetstrokedashoffset((void*)&i_drawsetstrokedashoffset, (void*)&i
 CallInfo ci_php_ini_scanned_files((void*)&i_php_ini_scanned_files, (void*)&ifa_php_ini_scanned_files, 0, 0, 0x0000000000000000LL);
 CallInfo ci_disk_free_space((void*)&i_disk_free_space, (void*)&ifa_disk_free_space, 1, 0, 0x0000000000000000LL);
 CallInfo ci_pixelsetyellowquantum((void*)&i_pixelsetyellowquantum, (void*)&ifa_pixelsetyellowquantum, 2, 0, 0x0000000000000000LL);
+CallInfo ci_bzread((void*)&i_bzread, (void*)&ifa_bzread, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_create_element_ns((void*)&i_dom_document_create_element_ns, (void*)&ifa_dom_document_create_element_ns, 4, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_public_decrypt((void*)&i_openssl_public_decrypt, (void*)&ifa_openssl_public_decrypt, 4, 0, 0x0000000000000002LL);
 CallInfo ci_convert_uuencode((void*)&i_convert_uuencode, (void*)&ifa_convert_uuencode, 1, 0, 0x0000000000000000LL);
@@ -82150,8 +82544,8 @@ CallInfo ci_hphp_stats((void*)&i_hphp_stats, (void*)&ifa_hphp_stats, 2, 0, 0x000
 CallInfo ci_opendir((void*)&i_opendir, (void*)&ifa_opendir, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetexceptionstring((void*)&i_magickgetexceptionstring, (void*)&ifa_magickgetexceptionstring, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_module_is_block_algorithm_mode((void*)&i_mcrypt_module_is_block_algorithm_mode, (void*)&ifa_mcrypt_module_is_block_algorithm_mode, 2, 0, 0x0000000000000000LL);
-CallInfo ci_posix_setpgid((void*)&i_posix_setpgid, (void*)&ifa_posix_setpgid, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dns_get_mx((void*)&i_dns_get_mx, (void*)&ifa_dns_get_mx, 3, 0, 0x0000000000000006LL);
+CallInfo ci_posix_setpgid((void*)&i_posix_setpgid, (void*)&ifa_posix_setpgid, 2, 0, 0x0000000000000000LL);
 CallInfo ci_headers_list((void*)&i_headers_list, (void*)&ifa_headers_list, 0, 0, 0x0000000000000000LL);
 CallInfo ci_escapeshellarg((void*)&i_escapeshellarg, (void*)&ifa_escapeshellarg, 1, 0, 0x0000000000000000LL);
 CallInfo ci_is_scalar((void*)&i_is_scalar, (void*)&ifa_is_scalar, 1, 0, 0x0000000000000000LL);
@@ -82497,6 +82891,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 112:
       HASH_GUARD(0x3C466098FF7B5070LL, mb_check_encoding) {
         ci = &ci_mb_check_encoding;
+        return true;
+      }
+      break;
+    case 118:
+      HASH_GUARD(0x0CFFD02753B98076LL, bzread) {
+        ci = &ci_bzread;
         return true;
       }
       break;
@@ -83698,6 +84098,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 557:
+      HASH_GUARD(0x3B0FE36F9A7AE22DLL, bzflush) {
+        ci = &ci_bzflush;
+        return true;
+      }
+      break;
     case 558:
       HASH_GUARD(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler) {
         ci = &ci_fb_stubout_intercept_handler;
@@ -83737,6 +84143,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 568:
+      HASH_GUARD(0x0B7BB85A435F8238LL, bzdecompress) {
+        ci = &ci_bzdecompress;
+        return true;
+      }
       HASH_GUARD(0x695AC59F79E2A238LL, mb_encode_mimeheader) {
         ci = &ci_mb_encode_mimeheader;
         return true;
@@ -83869,6 +84279,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 622:
       HASH_GUARD(0x5672949384A4F26ELL, stream_filter_register) {
         ci = &ci_stream_filter_register;
+        return true;
+      }
+      break;
+    case 625:
+      HASH_GUARD(0x135CE067FA0A6271LL, bzerrno) {
+        ci = &ci_bzerrno;
         return true;
       }
       break;
@@ -85282,6 +85698,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 1135:
+      HASH_GUARD(0x5B8F2ABBB480346FLL, bzwrite) {
+        ci = &ci_bzwrite;
+        return true;
+      }
+      break;
     case 1136:
       HASH_GUARD(0x0C626F268F120470LL, __halt_compiler) {
         ci = &ci___halt_compiler;
@@ -85345,6 +85767,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1151:
       HASH_GUARD(0x68AE04B02253B47FLL, mb_parse_str) {
         ci = &ci_mb_parse_str;
+        return true;
+      }
+      break;
+    case 1153:
+      HASH_GUARD(0x1876287F59CEB481LL, bzerror) {
+        ci = &ci_bzerror;
         return true;
       }
       break;
@@ -86043,6 +86471,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1399:
       HASH_GUARD(0x412521E7ADB21577LL, iconv_mime_decode_headers) {
         ci = &ci_iconv_mime_decode_headers;
+        return true;
+      }
+      HASH_GUARD(0x72E1FD3DCD45C577LL, bzopen) {
+        ci = &ci_bzopen;
         return true;
       }
       HASH_GUARD(0x1E154D823451B577LL, magicksetresolution) {
@@ -88730,6 +89162,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 2441:
+      HASH_GUARD(0x60BF7CDD733A2989LL, bzerrstr) {
+        ci = &ci_bzerrstr;
+        return true;
+      }
+      break;
     case 2443:
       HASH_GUARD(0x0E863EF8C11A598BLL, is_writable) {
         ci = &ci_is_writable;
@@ -90997,6 +91435,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3259:
+      HASH_GUARD(0x031F9B7B9A08ECBBLL, bzcompress) {
+        ci = &ci_bzcompress;
+        return true;
+      }
       HASH_GUARD(0x41D3B07854936CBBLL, token_get_all) {
         ci = &ci_token_get_all;
         return true;
@@ -93235,6 +93677,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 4026:
       HASH_GUARD(0x0664323CB1CC2FBALL, imagecolorset) {
         ci = &ci_imagecolorset;
+        return true;
+      }
+      break;
+    case 4028:
+      HASH_GUARD(0x0A8ED0466E41AFBCLL, bzclose) {
+        ci = &ci_bzclose;
         return true;
       }
       break;

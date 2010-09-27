@@ -6,6 +6,7 @@
 #include "apd.inc"
 #include "array.inc"
 #include "bcmath.inc"
+#include "bzip2.inc"
 #include "class.inc"
 #include "ctype.inc"
 #include "curl.inc"

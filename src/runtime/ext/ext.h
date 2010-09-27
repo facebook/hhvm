@@ -23,6 +23,7 @@
 #include <runtime/ext/profile/extprofile_apd.h>
 #include <runtime/ext/profile/extprofile_array.h>
 #include <runtime/ext/profile/extprofile_bcmath.h>
+#include <runtime/ext/profile/extprofile_bzip2.h>
 #include <runtime/ext/profile/extprofile_class.h>
 #include <runtime/ext/profile/extprofile_ctype.h>
 #include <runtime/ext/profile/extprofile_curl.h>

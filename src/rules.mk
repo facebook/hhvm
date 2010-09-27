@@ -431,7 +431,7 @@ ifdef MAC_OS_X
 LINK_LIBS = -lpthread -lstdc++ -lz -ldl
 else
 BFD_LIBS = -L$(EXT_DIR)/binutils/ -lbfd -liberty -ldl -lz
-LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv -lcap
+LINK_LIBS = -lpthread $(BFD_LIBS) -lrt -lstdc++ -lresolv -lcap -lbz2
 endif
 
 # 2. Common Libraries

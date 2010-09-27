@@ -43,6 +43,7 @@ public:
     m_user.reset();
     m_sandbox.reset();
     m_path.reset();
+    m_serverVars.reset();
   }
 
   bool error() const {

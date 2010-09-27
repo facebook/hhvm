@@ -204,18 +204,22 @@ public:
    * Comparisons
    */
   bool same (litstr  v2) const;
+  bool same (const StringData *v2) const;
   bool same (CStrRef v2) const;
   bool same (CArrRef v2) const;
   bool same (CObjRef v2) const;
   bool equal(litstr  v2) const;
+  bool equal(const StringData *v2) const;
   bool equal(CStrRef v2) const;
   bool equal(CArrRef v2) const;
   bool equal(CObjRef v2) const;
   bool less (litstr  v2) const;
+  bool less (const StringData *v2) const;
   bool less (CStrRef v2) const;
   bool less (CArrRef v2) const;
   bool less (CObjRef v2) const;
   bool more (litstr  v2) const;
+  bool more (const StringData *v2) const;
   bool more (CStrRef v2) const;
   bool more (CArrRef v2) const;
   bool more (CObjRef v2) const;
@@ -230,6 +234,7 @@ public:
   String rvalAt(int64   key) const { return rvalAtImpl(key);}
   String rvalAt(double  key) const { return rvalAtImpl((int64)key);}
   String rvalAt(litstr  key) const { return rvalAtImpl(String(key).toInt32());}
+  String rvalAt(const StringData *key) const { assert(false);}
   String rvalAt(CStrRef key) const { return rvalAtImpl(key.toInt32());}
   String rvalAt(CArrRef key) const;
   String rvalAt(CObjRef key) const;
@@ -242,6 +247,7 @@ public:
   StringOffset lvalAt(int64   key) { return lvalAtImpl(key);}
   StringOffset lvalAt(double  key) { return lvalAtImpl((int64)key);}
   StringOffset lvalAt(litstr  key) { return lvalAtImpl(String(key).toInt32());}
+  StringOffset lvalAt(const StringData *key) { assert(false);}
   StringOffset lvalAt(CStrRef key) { return lvalAtImpl(key.toInt32());}
   StringOffset lvalAt(CArrRef key);
   StringOffset lvalAt(CObjRef key);

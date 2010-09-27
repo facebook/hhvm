@@ -662,6 +662,12 @@ Variant Variant::array_iter_each() {
   return null_variant;
 }
 
+inline DataType Variant::convertToNumeric(int64 *lval, double *dval) const {
+  StringData *s = getStringData();
+  ASSERT(s);
+  return is_numeric_string(s->data(), s->size(), lval, dval, 1);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // unary plus
 Variant Variant::operator+() const {
@@ -675,10 +681,8 @@ Variant Variant::operator+() const {
     return toInt64();
   }
   if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return dval;
     }
@@ -712,19 +716,15 @@ Variant Variant::operator+(CVarRef var) const {
     return toDouble() + var.toDouble();
   }
   if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return dval + var.toDouble();
     }
   }
   if (var.isString()) {
-    String s = var.toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = var.convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return toDouble() + dval;
     }
@@ -762,20 +762,16 @@ Variant &Variant::operator+=(CVarRef var) {
     return *this;
   }
   if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       set(dval + var.toDouble());
       return *this;
     }
   }
   if (var.isString()) {
-    String s = var.toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = var.convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       set(toDouble() + dval);
       return *this;
@@ -802,10 +798,8 @@ Variant &Variant::operator+=(int64 n) {
     throw BadArrayMergeException();
   }
   if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       set(dval + n);
       return *this;
@@ -838,10 +832,8 @@ Variant Variant::operator-() const {
     return -toInt64();
   } else {
     if (isString()) {
-      String s = toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         return -dval;
       } else if (ret == KindOfInt64) {
@@ -867,19 +859,15 @@ Variant Variant::operator-(CVarRef var) const {
     return toInt64() - var.toInt64();
   }
   if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return dval - var.toDouble();
     }
   }
   if (var.isString()) {
-    String s = var.toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = var.convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return toDouble() - dval;
     }
@@ -897,20 +885,16 @@ Variant &Variant::operator-=(CVarRef var) {
     set(toInt64() - var.toInt64());
   } else {
     if (isString()) {
-      String s = toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval - var.toDouble());
         return *this;
       }
     }
     if (var.isString()) {
-      String s = var.toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = var.convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(toDouble() - dval);
         return *this;
@@ -931,10 +915,8 @@ Variant &Variant::operator-=(int64 n) {
     set(toInt64() - n);
   } else {
     if (isString()) {
-      String s = toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval - n);
         return *this;
@@ -969,19 +951,15 @@ Variant Variant::operator*(CVarRef var) const {
     return toInt64() * var.toInt64();
   }
   if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return dval * var.toDouble();
     }
   }
   if (var.isString()) {
-    String s = var.toString();
-    DataType ret = KindOfNull;
     int64 lval; double dval;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = var.convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       return toDouble() * dval;
     }
@@ -999,20 +977,16 @@ Variant &Variant::operator*=(CVarRef var) {
     set(toInt64() * var.toInt64());
   } else {
     if (isString()) {
-      String s = toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval * var.toDouble());
         return *this;
       }
     }
     if (var.isString()) {
-      String s = var.toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = var.convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(toDouble() * dval);
         return *this;
@@ -1033,10 +1007,8 @@ Variant &Variant::operator*=(int64 n) {
     set(toInt64() * n);
   } else {
     if (isString()) {
-      String s = toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfDouble) {
         set(dval * n);
         return *this;
@@ -1073,9 +1045,7 @@ Variant Variant::operator/(CVarRef var) const {
   } else if (isIntVal()) {
     lval = toInt64();
   } else if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       int1 = false;
     } else if (ret != KindOfInt64) {
@@ -1090,9 +1060,7 @@ Variant Variant::operator/(CVarRef var) const {
   } else if (var.isIntVal()) {
     lval2 = var.toInt64();
   } else if (var.isString()) {
-    String s = var.toString();
-    DataType ret = KindOfNull;
-    ret = is_numeric_string(s.data(), s.size(), &lval2, &dval2, 1);
+    DataType ret = var.convertToNumeric(&lval2, &dval2);
     if (ret == KindOfDouble) {
       int2 = false;
     } else if (ret != KindOfInt64) {
@@ -1135,9 +1103,7 @@ Variant &Variant::operator/=(CVarRef var) {
   } else if (isIntVal()) {
     lval = toInt64();
   } else if (isString()) {
-    String s = toString();
-    DataType ret = KindOfNull;
-    ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+    DataType ret = convertToNumeric(&lval, &dval);
     if (ret == KindOfDouble) {
       int1 = false;
     } else if (ret != KindOfInt64) {
@@ -1152,9 +1118,7 @@ Variant &Variant::operator/=(CVarRef var) {
   } else if (var.isIntVal()) {
     lval2 = var.toInt64();
   } else if (var.isString()) {
-    String s = var.toString();
-    DataType ret = KindOfNull;
-    ret = is_numeric_string(s.data(), s.size(), &lval2, &dval2, 1);
+    DataType ret = var.convertToNumeric(&lval2, &dval2);
     if (ret == KindOfDouble) {
       int2 = false;
     } else if (ret != KindOfInt64) {
@@ -1202,10 +1166,8 @@ Variant &Variant::operator/=(int64 n) {
     set(toDouble() / n);
   } else {
     if (isString()) {
-      String s = toString();
-      DataType ret = KindOfNull;
       int64 lval; double dval;
-      ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+      DataType ret = convertToNumeric(&lval, &dval);
       if (ret == KindOfInt64 && lval % n == 0) {
         set(lval / n);
         return *this;
@@ -1367,12 +1329,11 @@ Variant &Variant::operator++() {
   case KindOfStaticString:
   case KindOfString:
     {
-      String s = toString();
-      if (s.empty()) {
+      if (getStringData()->empty()) {
         set(1LL);
       } else {
         int64 lval; double dval;
-        DataType ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+        DataType ret = convertToNumeric(&lval, &dval);
         switch (ret) {
         case KindOfInt64:  set(lval + 1); break;
         case KindOfDouble: set(dval + 1); break;
@@ -1408,12 +1369,11 @@ Variant &Variant::operator--() {
   case KindOfStaticString:
   case KindOfString:
     {
-      String s = toString();
-      if (s.empty()) {
+      if (getStringData()->empty()) {
         set(-1LL);
       } else {
         int64 lval; double dval;
-        DataType ret = is_numeric_string(s.data(), s.size(), &lval, &dval, 1);
+        DataType ret = convertToNumeric(&lval, &dval);
         switch (ret) {
         case KindOfInt64:  set(lval - 1);   break;
         case KindOfDouble: set(dval - 1);   break;
@@ -1546,7 +1506,7 @@ Array Variant::toArray() const {
   case KindOfNull:    return Array::Create();
   case KindOfInt64:   return Array::Create(m_data.num);
   case KindOfStaticString:
-  case KindOfString:  return Array::Create(String(m_data.pstr));
+  case KindOfString:  return Array::Create(m_data.pstr);
   case KindOfArray:   return m_data.parr;
   case KindOfObject:  return m_data.pobj->o_toArray();
   case KindOfVariant: return m_data.pvar->toArray();
@@ -1667,15 +1627,20 @@ bool Variant::same(double v2) const {
 }
 
 bool Variant::same(litstr v2) const {
-  return same(String(v2));
+  StringData sd2(v2);
+  return same(&sd2);
+}
+
+bool Variant::same(const StringData *v2) const {
+  bool null1 = isNull();
+  bool null2 = (v2 == NULL);
+  if (null1 && null2) return true;
+  if (null1 || null2) return false;
+  return isString() && HPHP::same(getStringData(), v2);
 }
 
 bool Variant::same(CStrRef v2) const {
-  bool null1 = isNull();
-  bool null2 = v2.isNull();
-  if (null1 && null2) return true;
-  if (null1 || null2) return false;
-  return isString() && equal(v2);
+  return same(v2.get());
 }
 
 bool Variant::same(CArrRef v2) const {
@@ -1750,7 +1715,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, toString());     \
+  case KindOfString:  return HPHP::reverse(v2, getStringData());\
   case KindOfArray:   return HPHP::reverse(v2, toArray());      \
   case KindOfObject:  return HPHP::reverse(v2, toObject());     \
   default:                                                      \
@@ -1770,7 +1735,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, toString());     \
+  case KindOfString:  return HPHP::reverse(v2, getStringData());\
   case KindOfArray:   return HPHP::reverse(v2, toArray());      \
   case KindOfObject:  return HPHP::reverse(v2, toObject());     \
   default:                                                      \
@@ -1793,7 +1758,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, toString());     \
+  case KindOfString:  return HPHP::reverse(v2, getStringData());\
   case KindOfArray:                                             \
     if (v2.is(KindOfArray)) {                                   \
       return toArray().forward(v2.toArray());                   \
@@ -1818,7 +1783,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, toString());     \
+  case KindOfString:  return HPHP::reverse(v2, getStringData());\
   case KindOfArray:   return toArray().forward(v2);             \
   case KindOfObject:  return HPHP::reverse(v2, toObject());     \
   default:                                                      \
@@ -1834,6 +1799,7 @@ bool Variant::equal(int     v2) const { UNWRAP(equal);}
 bool Variant::equal(int64   v2) const { UNWRAP(equal);}
 bool Variant::equal(double  v2) const { UNWRAP(equal);}
 bool Variant::equal(litstr  v2) const { UNWRAP_STR(equal);}
+bool Variant::equal(const StringData *v2) const { UNWRAP_STR(equal);}
 bool Variant::equal(CStrRef v2) const { UNWRAP_STR(equal);}
 bool Variant::equal(CArrRef v2) const { UNWRAP(equal);}
 bool Variant::equal(CObjRef v2) const { UNWRAP(equal);}
@@ -1846,6 +1812,7 @@ bool Variant::less(int     v2) const { UNWRAP(more);}
 bool Variant::less(int64   v2) const { UNWRAP(more);}
 bool Variant::less(double  v2) const { UNWRAP(more);}
 bool Variant::less(litstr  v2) const { UNWRAP_STR(more);}
+bool Variant::less(const StringData *v2) const { UNWRAP_STR(more);}
 bool Variant::less(CStrRef v2) const { UNWRAP_STR(more);}
 bool Variant::less(CArrRef v2) const { UNWRAP_ARR(less,more);}
 bool Variant::less(CObjRef v2) const { UNWRAP(more);}
@@ -1858,6 +1825,7 @@ bool Variant::more(int     v2) const { UNWRAP(less);}
 bool Variant::more(int64   v2) const { UNWRAP(less);}
 bool Variant::more(double  v2) const { UNWRAP(less);}
 bool Variant::more(litstr  v2) const { UNWRAP_STR(less);}
+bool Variant::more(const StringData *v2) const { UNWRAP_STR(less);}
 bool Variant::more(CStrRef v2) const { UNWRAP_STR(less);}
 bool Variant::more(CArrRef v2) const { UNWRAP_ARR(more,less);}
 bool Variant::more(CObjRef v2) const { UNWRAP(less);}
@@ -1972,7 +1940,7 @@ Variant Variant::rvalAt(litstr offset, bool error /* = false */,
   switch (m_type) {
   case KindOfStaticString:
   case KindOfString:
-    return m_data.pstr->getChar(String(offset).toInt32());
+    return m_data.pstr->getChar(StringData(offset).toInt32());
   case KindOfObject:
     return getArrayAccess()->o_invoke(s_offsetGet, Array::Create(offset));
   case KindOfVariant:
@@ -2689,7 +2657,7 @@ CVarRef Variant::append(CVarRef v) {
     }
   case KindOfStaticString:
   case KindOfString:
-    if (toString().empty()) {
+    if (getStringData()->empty()) {
       set(ArrayData::Create(v));
       return v;
     }
@@ -2772,7 +2740,7 @@ check_array:
   }
   case KindOfStaticString:
   case KindOfString:
-    if (toString().empty()) {
+    if (getStringData()->empty()) {
       set(ArrayData::Create());
       goto check_array;
     }

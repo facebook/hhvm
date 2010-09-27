@@ -183,7 +183,7 @@ class Variant {
    * Type testing functions
    */
   DataType getType() const {
-    return m_type == KindOfVariant ? m_data.pvar->getType() : m_type;
+    return m_type == KindOfVariant ? m_data.pvar->m_type : m_type;
   }
   DataType getRawType() const {
     return m_type;
@@ -436,6 +436,7 @@ class Variant {
   bool same(int64   v2) const;
   bool same(double  v2) const;
   bool same(litstr  v2) const;
+  bool same(const StringData *v2) const;
   bool same(CStrRef v2) const;
   bool same(CArrRef v2) const;
   bool same(CObjRef v2) const;
@@ -448,6 +449,7 @@ class Variant {
   bool equal(int64   v2) const;
   bool equal(double  v2) const;
   bool equal(litstr  v2) const;
+  bool equal(const StringData *v2) const;
   bool equal(CStrRef v2) const;
   bool equal(CArrRef v2) const;
   bool equal(CObjRef v2) const;
@@ -460,6 +462,7 @@ class Variant {
   bool less(int64   v2) const;
   bool less(double  v2) const;
   bool less(litstr  v2) const;
+  bool less(const StringData *v2) const;
   bool less(CStrRef v2) const;
   bool less(CArrRef v2) const;
   bool less(CObjRef v2) const;
@@ -472,6 +475,7 @@ class Variant {
   bool more(int64   v2) const;
   bool more(double  v2) const;
   bool more(litstr  v2) const;
+  bool more(const StringData *v2) const;
   bool more(CStrRef v2) const;
   bool more(CArrRef v2) const;
   bool more(CObjRef v2) const;
@@ -547,6 +551,7 @@ class Variant {
   const Variant operator[](int64   key) const { return rvalAt(key);}
   const Variant operator[](double  key) const { return rvalAt(key);}
   const Variant operator[](litstr  key) const { return rvalAt(key);}
+  const Variant operator[](const StringData *key) const { assert(false);}
   const Variant operator[](CStrRef key) const { return rvalAt(key);}
   const Variant operator[](CArrRef key) const { return rvalAt(key);}
   const Variant operator[](CObjRef key) const { return rvalAt(key);}
@@ -1075,6 +1080,7 @@ class Variant {
     CT_ASSERT(offsetof(Variant,_count) == FAST_REFCOUNT_OFFSET);
 #endif
   }
+  DataType convertToNumeric(int64 *lval, double *dval) const;
 };
 
 template<int op> class AssignOp {
@@ -1157,6 +1163,11 @@ inline const Variant Array::operator[](double  key) const {
 }
 
 inline const Variant Array::operator[](litstr  key) const {
+  return rvalAt(key);
+}
+
+inline const Variant Array::operator[](const StringData *key) const {
+  assert(false);
   return rvalAt(key);
 }
 

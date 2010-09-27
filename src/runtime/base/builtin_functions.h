@@ -63,6 +63,7 @@ inline bool empty(int     v) { return !v;}
 inline bool empty(int64   v) { return !v;}
 inline bool empty(double  v) { return !v;}
 inline bool empty(litstr  v) { return !v || !*v;}
+inline bool empty(const StringData *v) { return v ? v->toBoolean() : false;}
 inline bool empty(CStrRef v) { return !v.toBoolean();}
 inline bool empty(CArrRef v) { return !v.toBoolean();}
 inline bool empty(CObjRef v) { return !v.toBoolean();}

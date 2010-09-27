@@ -31,7 +31,10 @@ inline bool toBoolean(int     v) { return v;}
 inline bool toBoolean(int64   v) { return v;}
 inline bool toBoolean(double  v) { return v;}
 inline bool toBoolean(litstr  v) { return v && *v;}
-inline bool toBoolean(CStrRef v) { return v.toBoolean();}
+inline bool toBoolean(const StringData *v) {
+  return v ? v->toBoolean() : false;
+}
+inline bool toBoolean(CStrRef v) { return toBoolean(v.get());}
 inline bool toBoolean(CArrRef v) { return v.toBoolean();}
 inline bool toBoolean(CObjRef v) { return v.toBoolean();}
 inline bool toBoolean(CVarRef v) { return v.toBoolean();}
@@ -43,7 +46,8 @@ inline char toByte(int     v) { return v;}
 inline char toByte(int64   v) { return v;}
 inline char toByte(double  v) { return (char)v;}
 inline char toByte(litstr  v) { return StringData(v).toByte();}
-inline char toByte(CStrRef v) { return v.toByte();}
+inline char toByte(const StringData *v) { return v ? v->toByte() : 0;}
+inline char toByte(CStrRef v) { return toByte(v.get());}
 inline char toByte(CArrRef v) { return v.toByte();}
 inline char toByte(CObjRef v) { return v.toByte();}
 inline char toByte(CVarRef v) { return v.toByte();}
@@ -55,7 +59,8 @@ inline short toInt16(int     v) { return v;}
 inline short toInt16(int64   v) { return v;}
 inline short toInt16(double  v) { return (short)v;}
 inline short toInt16(litstr  v) { return StringData(v).toInt16();}
-inline short toInt16(CStrRef v) { return v.toInt16();}
+inline short toInt16(const StringData *v) { return v ? v->toInt16() : 0;}
+inline short toInt16(CStrRef v) { return toInt16(v.get());}
 inline short toInt16(CArrRef v) { return v.toInt16();}
 inline short toInt16(CObjRef v) { return v.toInt16();}
 inline short toInt16(CVarRef v) { return v.toInt16();}
@@ -67,7 +72,8 @@ inline int toInt32(int     v) { return v;}
 inline int toInt32(int64   v) { return v;}
 inline int toInt32(double  v) { return (int)v;}
 inline int toInt32(litstr  v) { return StringData(v).toInt32();}
-inline int toInt32(CStrRef v) { return v.toInt32();}
+inline int toInt32(const StringData *v) { return v ? v->toInt32() : 0;}
+inline int toInt32(CStrRef v) { return toInt32(v.get());}
 inline int toInt32(CArrRef v) { return v.toInt32();}
 inline int toInt32(CObjRef v) { return v.toInt32();}
 inline int toInt32(CVarRef v) { return v.toInt32();}
@@ -81,7 +87,8 @@ inline int64 toInt64(double  v) {
   return ((v > LONG_MAX) ? (uint64)v : (int64)v);
 }
 inline int64 toInt64(litstr  v) { return StringData(v).toInt64();}
-inline int64 toInt64(CStrRef v) { return v.toInt64();}
+inline int64 toInt64(const StringData *v) { return v ? v->toInt64() : 0;}
+inline int64 toInt64(CStrRef v) { return toInt64(v.get());}
 inline int64 toInt64(CArrRef v) { return v.toInt64();}
 inline int64 toInt64(CObjRef v) { return v.toInt64();}
 inline int64 toInt64(CVarRef v) { return v.toInt64();}
@@ -93,7 +100,8 @@ inline double toDouble(int     v) { return v;}
 inline double toDouble(int64   v) { return v;}
 inline double toDouble(double  v) { return v;}
 inline double toDouble(litstr  v) { return StringData(v).toDouble();}
-inline double toDouble(CStrRef v) { return v.toDouble();}
+inline double toDouble(const StringData *v) { return v? v->toDouble() : 0;}
+inline double toDouble(CStrRef v) { return toDouble(v.get());}
 inline double toDouble(CArrRef v) { return v.toDouble();}
 inline double toDouble(CObjRef v) { return v.toDouble();}
 inline double toDouble(CVarRef v) { return v.toDouble();}
@@ -105,6 +113,7 @@ inline String toString(int     v) { return (int64)v;}
 inline String toString(int64   v) { return v;}
 inline String toString(double  v) { return v;}
 inline String toString(litstr  v) { return v;}
+inline String toString(StringData *v) { return v;}
 inline String toString(CStrRef v) { return v;}
 inline String toString(CArrRef v) { return "Array";}
 inline String toString(CObjRef v) { return v.toString();}
@@ -117,6 +126,7 @@ inline Array toArray(int     v) { return Array::Create(v);}
 inline Array toArray(int64   v) { return Array::Create(v);}
 inline Array toArray(double  v) { return Array::Create(v);}
 inline Array toArray(litstr  v) { return Array::Create(v);}
+inline Array toArray(StringData *v) { return Array::Create(String(v));}
 inline Array toArray(CStrRef v) { return Array::Create(v);}
 inline Array toArray(CArrRef v) { return v;}
 inline Array toArray(CObjRef v) { return v.toArray();}
@@ -129,6 +139,7 @@ inline Object toObject(int     v) { return Variant(v).toObject();}
 inline Object toObject(int64   v) { return Variant(v).toObject();}
 inline Object toObject(double  v) { return Variant(v).toObject();}
 inline Object toObject(litstr  v) { return Variant(v).toObject();}
+inline Object toObject(const StringData *v) { return Variant(v).toObject();}
 inline Object toObject(CStrRef v) { return Variant(v).toObject();}
 inline Object toObject(CArrRef v) { return v.toObject();}
 inline Object toObject(CObjRef v) { return v;}

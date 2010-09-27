@@ -5289,6 +5289,9 @@ bool TestCodeRun::TestComparisons() {
        "  }"
        "}"
        "foo(false);");
+  MVCR("<?php "
+       "$part = ' 1';"
+       "var_dump(trim($part) !== $part);");
 
   return true;
 }

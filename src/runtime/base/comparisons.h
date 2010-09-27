@@ -31,6 +31,7 @@ inline bool same(CVarRef v1, short   v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, int     v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, int64   v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, double  v2)  { return v1.same(v2);}
+inline bool same(CVarRef v1, const StringData *v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, CStrRef v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, litstr  v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, CArrRef v2)  { return v1.same(v2);}
@@ -43,6 +44,7 @@ inline bool equal(CVarRef v1, short   v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, int     v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, int64   v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, double  v2) { return v1.equal(v2);}
+inline bool equal(CVarRef v1, const StringData *v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, CStrRef v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, litstr  v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, CArrRef v2) { return v1.equal(v2);}
@@ -55,6 +57,7 @@ inline bool less(CVarRef v1, short   v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, int     v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, int64   v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, double  v2)  { return v1.less(v2);}
+inline bool less(CVarRef v1, const StringData *v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, CStrRef v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, litstr  v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, CArrRef v2)  { return v1.less(v2);}
@@ -67,6 +70,7 @@ inline bool more(CVarRef v1, short   v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, int     v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, int64   v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, double  v2)  { return v1.more(v2);}
+inline bool more(CVarRef v1, const StringData *v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, CStrRef v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, litstr  v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, CArrRef v2)  { return v1.more(v2);}
@@ -82,6 +86,7 @@ inline bool same(bool v1, short   v2)  { return false;}
 inline bool same(bool v1, int     v2)  { return false;}
 inline bool same(bool v1, int64   v2)  { return false;}
 inline bool same(bool v1, double  v2)  { return false;}
+inline bool same(bool v1, const StringData *v2)  { return false;}
 inline bool same(bool v1, CStrRef v2)  { return false;}
 inline bool same(bool v1, litstr  v2)  { return false;}
 inline bool same(bool v1, CArrRef v2)  { return false;}
@@ -94,6 +99,7 @@ inline bool equal(bool v1, short   v2) { return v1 == (v2 != 0);}
 inline bool equal(bool v1, int     v2) { return v1 == (v2 != 0);}
 inline bool equal(bool v1, int64   v2) { return v1 == (v2 != 0);}
 inline bool equal(bool v1, double  v2) { return v1 == (v2 != 0.0);}
+inline bool equal(bool v1, const StringData *v2) { return v1 == toBoolean(v2);}
 inline bool equal(bool v1, CStrRef v2) { return v1 == v2.toBoolean();}
 inline bool equal(bool v1, litstr  v2) { return equal(v1, String(v2));}
 inline bool equal(bool v1, CArrRef v2) { return v1 == v2.toBoolean();}
@@ -106,6 +112,9 @@ inline bool less(bool v1, short   v2)  { return less(v1,(v2 != 0));}
 inline bool less(bool v1, int     v2)  { return less(v1,(v2 != 0));}
 inline bool less(bool v1, int64   v2)  { return less(v1,(v2 != 0));}
 inline bool less(bool v1, double  v2)  { return less(v1,(v2 != 0.0));}
+inline bool less(bool v1, const StringData *v2)  {
+  return less(v1,toBoolean(v2));
+}
 inline bool less(bool v1, CStrRef v2)  { return less(v1,v2.toBoolean());}
 inline bool less(bool v1, litstr  v2)  { return less(v1,String(v2));}
 inline bool less(bool v1, CArrRef v2)  { return less(v1,v2.toBoolean());}
@@ -118,6 +127,9 @@ inline bool more(bool v1, short   v2)  { return more(v1,(v2 != 0));}
 inline bool more(bool v1, int     v2)  { return more(v1,(v2 != 0));}
 inline bool more(bool v1, int64   v2)  { return more(v1,(v2 != 0));}
 inline bool more(bool v1, double  v2)  { return more(v1,(v2 != 0.0));}
+inline bool more(bool v1, const StringData *v2)  {
+  return more(v1,toBoolean(v2));
+}
 inline bool more(bool v1, CStrRef v2)  { return more(v1,v2.toBoolean());}
 inline bool more(bool v1, litstr  v2)  { return more(v1,String(v2));}
 inline bool more(bool v1, CArrRef v2)  { return more(v1,v2.toBoolean());}
@@ -133,6 +145,7 @@ inline bool same(char v1, short   v2)  { return v1 == v2;}
 inline bool same(char v1, int     v2)  { return v1 == v2;}
 inline bool same(char v1, int64   v2)  { return v1 == v2;}
 inline bool same(char v1, double  v2)  { return (double)v1 == v2;}
+inline bool same(char v1, const StringData *v2)  { return false;}
 inline bool same(char v1, CStrRef v2)  { return false;}
 inline bool same(char v1, litstr  v2)  { return false;}
 inline bool same(char v1, CArrRef v2)  { return false;}
@@ -145,7 +158,8 @@ inline bool equal(char v1, short   v2) { return v1 == v2;}
 inline bool equal(char v1, int     v2) { return v1 == v2;}
 inline bool equal(char v1, int64   v2) { return v1 == v2;}
 inline bool equal(char v1, double  v2) { return (double)v1 == v2;}
-bool equal(char v1, CStrRef v2);
+bool equal(char v1, const StringData *v2);
+inline bool equal(char v1, CStrRef v2) { return equal(v1, v2.get());}
 inline bool equal(char v1, litstr  v2) { return equal(v1, String(v2));}
 inline bool equal(char v1, CArrRef v2) { return false;}
 inline bool equal(char v1, CObjRef v2) { return false;}
@@ -157,7 +171,8 @@ inline bool less(char v1, short   v2)  { return v1 < v2;}
 inline bool less(char v1, int     v2)  { return v1 < v2;}
 inline bool less(char v1, int64   v2)  { return v1 < v2;}
 inline bool less(char v1, double  v2)  { return v1 < v2;}
-bool less(char v1, CStrRef v2);
+bool less(char v1, const StringData *v2);
+inline bool less(char v1, CStrRef v2) { return less(v1, v2.get());}
 inline bool less(char v1, litstr  v2)  { return less(v1, String(v2));}
 inline bool less(char v1, CArrRef v2)  { return true;}
 inline bool less(char v1, CObjRef v2)  { return true;}
@@ -169,7 +184,8 @@ inline bool more(char v1, short   v2)  { return v1 > v2;}
 inline bool more(char v1, int     v2)  { return v1 > v2;}
 inline bool more(char v1, int64   v2)  { return v1 > v2;}
 inline bool more(char v1, double  v2)  { return v1 > v2;}
-bool more(char v1, CStrRef v2);
+bool more(char v1, const StringData *v2);
+inline bool more(char v1, CStrRef v2) { return more(v1, v2.get());}
 inline bool more(char v1, litstr  v2)  { return more(v1, String(v2));}
 inline bool more(char v1, CArrRef v2)  { return false;}
 inline bool more(char v1, CObjRef v2)  { return false;}
@@ -184,6 +200,7 @@ inline bool same(short v1, short   v2)  { return v1 == v2;}
 inline bool same(short v1, int     v2)  { return v1 == v2;}
 inline bool same(short v1, int64   v2)  { return v1 == v2;}
 inline bool same(short v1, double  v2)  { return (double)v1 == v2;}
+inline bool same(short v1, const StringData *v2)  { return false;}
 inline bool same(short v1, CStrRef v2)  { return false;}
 inline bool same(short v1, litstr  v2)  { return false;}
 inline bool same(short v1, CArrRef v2)  { return false;}
@@ -196,7 +213,8 @@ inline bool equal(short v1, short   v2) { return v1 == v2;}
 inline bool equal(short v1, int     v2) { return v1 == v2;}
 inline bool equal(short v1, int64   v2) { return v1 == v2;}
 inline bool equal(short v1, double  v2) { return (double)v1 == v2;}
-bool equal(short v1, CStrRef v2);
+bool equal(short v1, const StringData *v2);
+inline bool equal(short v1, CStrRef v2) { return equal(v1, v2.get());}
 inline bool equal(short v1, litstr  v2) { return equal(v1, String(v2));}
 inline bool equal(short v1, CArrRef v2) { return false;}
 inline bool equal(short v1, CObjRef v2) { return false;}
@@ -208,7 +226,8 @@ inline bool less(short v1, short   v2)  { return v1 < v2;}
 inline bool less(short v1, int     v2)  { return v1 < v2;}
 inline bool less(short v1, int64   v2)  { return v1 < v2;}
 inline bool less(short v1, double  v2)  { return v1 < v2;}
-bool less(short v1, CStrRef v2);
+bool less(short v1, const StringData *v2);
+inline bool less(short v1, CStrRef v2) { return less(v1, v2.get());}
 inline bool less(short v1, litstr  v2)  { return less(v1, String(v2));}
 inline bool less(short v1, CArrRef v2)  { return true;}
 inline bool less(short v1, CObjRef v2)  { return true;}
@@ -220,7 +239,8 @@ inline bool more(short v1, short   v2)  { return v1 > v2;}
 inline bool more(short v1, int     v2)  { return v1 > v2;}
 inline bool more(short v1, int64   v2)  { return v1 > v2;}
 inline bool more(short v1, double  v2)  { return v1 > v2;}
-bool more(short v1, CStrRef v2);
+bool more(short v1, const StringData *v2);
+inline bool more(short v1, CStrRef v2) { return more(v1, v2.get());}
 inline bool more(short v1, litstr  v2)  { return more(v1, String(v2));}
 inline bool more(short v1, CArrRef v2)  { return false;}
 inline bool more(short v1, CObjRef v2)  { return false;}
@@ -235,6 +255,7 @@ inline bool same(int v1, short   v2)  { return same(v2, v1);}
 inline bool same(int v1, int     v2)  { return v1 == v2;}
 inline bool same(int v1, int64   v2)  { return v1 == v2;}
 inline bool same(int v1, double  v2)  { return (double)v1 == v2;}
+inline bool same(int v1, const StringData *v2)  { return false;}
 inline bool same(int v1, CStrRef v2)  { return false;}
 inline bool same(int v1, litstr  v2)  { return false;}
 inline bool same(int v1, CArrRef v2)  { return false;}
@@ -247,7 +268,8 @@ inline bool equal(int v1, short   v2) { return equal(v2, v1);}
 inline bool equal(int v1, int     v2) { return v1 == v2;}
 inline bool equal(int v1, int64   v2) { return v1 == v2;}
 inline bool equal(int v1, double  v2) { return (double)v1 == v2;}
-bool equal(int v1, CStrRef v2);
+bool equal(int v1, const StringData *v2);
+inline bool equal(int v1, CStrRef v2) { return equal(v1, v2.get());}
 inline bool equal(int v1, litstr  v2) { return equal(v1, String(v2));}
 inline bool equal(int v1, CArrRef v2) { return false;}
 inline bool equal(int v1, CObjRef v2) { return false;}
@@ -259,7 +281,8 @@ inline bool less(int v1, short   v2)  { return more(v2, v1);}
 inline bool less(int v1, int     v2)  { return v1 < v2;}
 inline bool less(int v1, int64   v2)  { return v1 < v2;}
 inline bool less(int v1, double  v2)  { return v1 < v2;}
-bool less(int v1, CStrRef v2);
+bool less(int v1, const StringData *v2);
+inline bool less(int v1, CStrRef v2) { return less(v1, v2.get());}
 inline bool less(int v1, litstr  v2)  { return less(v1, String(v2));}
 inline bool less(int v1, CArrRef v2)  { return true;}
 inline bool less(int v1, CObjRef v2)  { return true;}
@@ -271,7 +294,8 @@ inline bool more(int v1, short   v2)  { return less(v2, v1);}
 inline bool more(int v1, int     v2)  { return v1 > v2;}
 inline bool more(int v1, int64   v2)  { return v1 > v2;}
 inline bool more(int v1, double  v2)  { return v1 > v2;}
-bool more(int v1, CStrRef v2);
+bool more(int v1, const StringData *v2);
+inline bool more(int v1, CStrRef v2) { return more(v1, v2.get());}
 inline bool more(int v1, litstr  v2)  { return more(v1, String(v2));}
 inline bool more(int v1, CArrRef v2)  { return false;}
 inline bool more(int v1, CObjRef v2)  { return false;}
@@ -286,6 +310,7 @@ inline bool same(int64 v1, short   v2)  { return same(v2, v1);}
 inline bool same(int64 v1, int     v2)  { return same(v2, v1);}
 inline bool same(int64 v1, int64   v2)  { return v1 == v2;}
 inline bool same(int64 v1, double  v2)  { return (double)v1 == v2;}
+inline bool same(int64 v1, const StringData *v2)  { return false;}
 inline bool same(int64 v1, CStrRef v2)  { return false;}
 inline bool same(int64 v1, litstr  v2)  { return false;}
 inline bool same(int64 v1, CArrRef v2)  { return false;}
@@ -298,7 +323,8 @@ inline bool equal(int64 v1, short   v2) { return equal(v2, v1);}
 inline bool equal(int64 v1, int     v2) { return equal(v2, v1);}
 inline bool equal(int64 v1, int64   v2) { return v1 == v2;}
 inline bool equal(int64 v1, double  v2) { return (double)v1 == v2;}
-bool equal(int64 v1, CStrRef v2);
+bool equal(int64 v1, const StringData *v2);
+inline bool equal(int64 v1, CStrRef v2) { return equal(v1, v2.get());}
 inline bool equal(int64 v1, litstr  v2) { return equal(v1, String(v2));}
 inline bool equal(int64 v1, CArrRef v2) { return false;}
 inline bool equal(int64 v1, CObjRef v2) { return false;}
@@ -310,7 +336,8 @@ inline bool less(int64 v1, short   v2)  { return more(v2, v1);}
 inline bool less(int64 v1, int     v2)  { return more(v2, v1);}
 inline bool less(int64 v1, int64   v2)  { return v1 < v2;}
 inline bool less(int64 v1, double  v2)  { return v1 < v2;}
-bool less(int64 v1, CStrRef v2);
+bool less(int64 v1, const StringData *v2);
+inline bool less(int64 v1, CStrRef v2) { return less(v1, v2.get());}
 inline bool less(int64 v1, litstr  v2)  { return less(v1, String(v2));}
 inline bool less(int64 v1, CArrRef v2)  { return true;}
 inline bool less(int64 v1, CObjRef v2)  { return true;}
@@ -322,7 +349,8 @@ inline bool more(int64 v1, short   v2)  { return less(v2, v1);}
 inline bool more(int64 v1, int     v2)  { return less(v2, v1);}
 inline bool more(int64 v1, int64   v2)  { return v1 > v2;}
 inline bool more(int64 v1, double  v2)  { return v1 > v2;}
-bool more(int64 v1, CStrRef v2);
+bool more(int64 v1, const StringData *v2);
+inline bool more(int64 v1, CStrRef v2) { return more(v1, v2.get());}
 inline bool more(int64 v1, litstr  v2)  { return more(v1, String(v2));}
 inline bool more(int64 v1, CArrRef v2)  { return false;}
 inline bool more(int64 v1, CObjRef v2)  { return false;}
@@ -337,6 +365,7 @@ inline bool same(double v1, short   v2)  { return same(v2, v1);}
 inline bool same(double v1, int     v2)  { return same(v2, v1);}
 inline bool same(double v1, int64   v2)  { return same(v2, v1);}
 inline bool same(double v1, double  v2)  { return v1 == v2;}
+inline bool same(double v1, const StringData *v2)  { return false;}
 inline bool same(double v1, CStrRef v2)  { return false;}
 inline bool same(double v1, litstr  v2)  { return false;}
 inline bool same(double v1, CArrRef v2)  { return false;}
@@ -349,6 +378,9 @@ inline bool equal(double v1, short   v2) { return equal(v2, v1);}
 inline bool equal(double v1, int     v2) { return equal(v2, v1);}
 inline bool equal(double v1, int64   v2) { return equal(v2, v1);}
 inline bool equal(double v1, double  v2) { return v1 == v2;}
+inline bool equal(double v1, const StringData *v2) {
+  return v1 == toDouble(v2);
+}
 inline bool equal(double v1, CStrRef v2) { return v1 == v2.toDouble();}
 inline bool equal(double v1, litstr  v2) { return equal(v1,String(v2));}
 inline bool equal(double v1, CArrRef v2) { return false;}
@@ -361,6 +393,9 @@ inline bool less(double v1, short   v2)  { return more(v2, v1);}
 inline bool less(double v1, int     v2)  { return more(v2, v1);}
 inline bool less(double v1, int64   v2)  { return more(v2, v1);}
 inline bool less(double v1, double  v2)  { return v1 < v2;}
+inline bool less(double v1, const StringData *v2)  {
+  return less(v1,toDouble(v2));
+}
 inline bool less(double v1, CStrRef v2)  { return less(v1,v2.toDouble());}
 inline bool less(double v1, litstr  v2)  { return less(v1,String(v2));}
 inline bool less(double v1, CArrRef v2)  { return true;}
@@ -373,11 +408,154 @@ inline bool more(double v1, short   v2)  { return less(v2, v1);}
 inline bool more(double v1, int     v2)  { return less(v2, v1);}
 inline bool more(double v1, int64   v2)  { return less(v2, v1);}
 inline bool more(double v1, double  v2)  { return v1 > v2;}
+inline bool more(double v1, const StringData *v2)  {
+  return more(v1,toDouble(v2));
+}
 inline bool more(double v1, CStrRef v2)  { return more(v1,v2.toDouble());}
 inline bool more(double v1, litstr  v2)  { return more(v1,String(v2));}
 inline bool more(double v1, CArrRef v2)  { return false;}
 inline bool more(double v1, CObjRef v2)  { return false;}
 inline bool more(double v1, CVarRef v2)  { return less(v2, v1);}
+
+///////////////////////////////////////////////////////////////////////////////
+// StringData *
+
+inline bool same(const StringData *v1, bool    v2)  { return same(v2, v1);}
+inline bool same(const StringData *v1, char    v2)  { return same(v2, v1);}
+inline bool same(const StringData *v1, short   v2)  { return same(v2, v1);}
+inline bool same(const StringData *v1, int     v2)  { return same(v2, v1);}
+inline bool same(const StringData *v1, int64   v2)  { return same(v2, v1);}
+inline bool same(const StringData *v1, double  v2)  { return same(v2, v1);}
+inline bool same(const StringData *v1, const StringData *v2) {
+  if (v1 == v2) return true;
+  if (v1 && v2) return v1->same(v2);
+  return false;
+}
+inline bool same(const StringData *v1, CStrRef v2)  {
+  return same(v1, v2.get());
+}
+inline bool same(const StringData *v1, litstr  v2)  {
+  StringData sd2(v2);
+  return same(v1, &sd2);
+}
+inline bool same(const StringData *v1, CArrRef v2)  { return false; }
+inline bool same(const StringData *v1, CObjRef v2)  { return false; }
+inline bool same(const StringData *v1, CVarRef v2)  { return same(v2, v1);}
+
+inline bool equal(const StringData *v1, bool    v2) { return equal(v2, v1);}
+inline bool equal(const StringData *v1, char    v2) { return equal(v2, v1);}
+inline bool equal(const StringData *v1, short   v2) { return equal(v2, v1);}
+inline bool equal(const StringData *v1, int     v2) { return equal(v2, v1);}
+inline bool equal(const StringData *v1, int64   v2) { return equal(v2, v1);}
+inline bool equal(const StringData *v1, double  v2) { return equal(v2, v1);}
+inline bool equal(const StringData *v1, const StringData *v2) {
+  if (v1 == v2) return true;
+  if (v1 == NULL) return v2->empty();
+  if (v2 == NULL) return v1->empty();
+  return v1->compare(v2) == 0;
+}
+inline bool equal(const StringData *v1, CStrRef v2) {
+  return equal(v1, v2.get());
+}
+inline bool equal(const StringData *v1, litstr  v2) {
+  StringData sd2(v2);
+  return equal(v1, &sd2);
+}
+inline bool equal(const StringData *v1, CArrRef v2) {
+  if (v1 == NULL || v2.get() == NULL) {
+    return equal(toBoolean(v1), v2.toBoolean());
+  }
+  return false;
+}
+inline bool equal(const StringData *v1, CObjRef v2) {
+  if (v1 == NULL || v2.get() == NULL) {
+    return equal(toBoolean(v1), v2.toBoolean());
+  }
+  if (v2.isResource()) return false;
+  try {
+    return equal(v1, v2.toString());
+  } catch (BadTypeConversionException &e) {
+    return false;
+  }
+  return false;
+}
+inline bool equal(const StringData *v1, CVarRef v2) { return equal(v2, v1);}
+
+inline bool less(const StringData *v1, bool    v2)  { return more(v2, v1);}
+inline bool less(const StringData *v1, char    v2)  { return more(v2, v1);}
+inline bool less(const StringData *v1, short   v2)  { return more(v2, v1);}
+inline bool less(const StringData *v1, int     v2)  { return more(v2, v1);}
+inline bool less(const StringData *v1, int64   v2)  { return more(v2, v1);}
+inline bool less(const StringData *v1, double  v2)  { return more(v2, v1);}
+inline bool less(const StringData *v1, const StringData *v2) {
+  if (v1 == v2 || v2 == NULL) return false;
+  if (v1 == NULL) return !v2->empty();
+  return v1->compare(v2) < 0;
+}
+inline bool less(const StringData *v1, CStrRef v2)  {
+  return less(v1, v2.get());
+}
+inline bool less(const StringData *v1, litstr  v2)  {
+  StringData sd2(v2);
+  return less(v1, &sd2);
+}
+inline bool less(const StringData *v1, CArrRef v2)  {
+  if (v1 == NULL || v2.get() == NULL) {
+    return less(toBoolean(v1), v2.toBoolean());
+  }
+  return true;
+}
+inline bool less(const StringData *v1, CObjRef v2)  {
+  if (v1 == NULL || v2.get() == NULL) {
+    return less(toBoolean(v1), v2.toBoolean());
+  }
+  if (v2.isResource()) return true;
+  try {
+    return less(v1, v2.toString());
+  } catch (BadTypeConversionException &e) {
+    return true;
+  }
+
+}
+inline bool less(const StringData *v1, CVarRef v2)  { return more(v2, v1);}
+
+inline bool more(const StringData *v1, bool    v2)  { return less(v2, v1);}
+inline bool more(const StringData *v1, char    v2)  { return less(v2, v1);}
+inline bool more(const StringData *v1, short   v2)  { return less(v2, v1);}
+inline bool more(const StringData *v1, int     v2)  { return less(v2, v1);}
+inline bool more(const StringData *v1, int64   v2)  { return less(v2, v1);}
+inline bool more(const StringData *v1, double  v2)  { return less(v2, v1);}
+inline bool more(const StringData *v1, const StringData *v2)  {
+  if (v1 == NULL) return false;
+  if (v2 == NULL) return !v1->empty();
+  return v1->compare(v2) > 0;
+}
+inline bool more(const StringData *v1, CStrRef v2)  {
+  return more(v1, v2.get());
+}
+inline bool more(const StringData *v1, litstr  v2)  {
+  StringData sd2(v2);
+  return more(v1, &sd2);
+}
+inline bool more(const StringData *v1, CArrRef v2)  {
+  if (v1 == NULL || v2.get() == NULL) {
+    return more(toBoolean(v1), v2.toBoolean());
+  }
+  return false;
+}
+inline bool more(const StringData *v1, CObjRef v2)  {
+  if (v1 == NULL || v2.get() == NULL) {
+    return more(toBoolean(v1), v2.toBoolean());
+  }
+  if (v2.isResource()) return false;
+  try {
+    return more(v1, v2.toString());
+  } catch (BadTypeConversionException &e) {
+    return false;
+  }
+}
+inline bool more(const StringData *v1, CVarRef v2)  { return less(v2, v1);}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // String
@@ -388,6 +566,9 @@ inline bool same(CStrRef v1, short   v2)  { return same(v2, v1);}
 inline bool same(CStrRef v1, int     v2)  { return same(v2, v1);}
 inline bool same(CStrRef v1, int64   v2)  { return same(v2, v1);}
 inline bool same(CStrRef v1, double  v2)  { return same(v2, v1);}
+inline bool same(CStrRef v1, const StringData *v2)  {
+  return same(v2, v1.get());
+}
 inline bool same(CStrRef v1, CStrRef v2)  { return v1.same(v2);}
 inline bool same(CStrRef v1, litstr  v2)  { return v1.same(v2);}
 inline bool same(CStrRef v1, CArrRef v2)  { return v1.same(v2);}
@@ -400,6 +581,9 @@ inline bool equal(CStrRef v1, short   v2) { return equal(v2, v1);}
 inline bool equal(CStrRef v1, int     v2) { return equal(v2, v1);}
 inline bool equal(CStrRef v1, int64   v2) { return equal(v2, v1);}
 inline bool equal(CStrRef v1, double  v2) { return equal(v2, v1);}
+inline bool equal(CStrRef v1, const StringData *v2) {
+  return equal(v2, v1.get());
+}
 inline bool equal(CStrRef v1, CStrRef v2) { return v1.equal(v2);}
 inline bool equal(CStrRef v1, litstr  v2) { return v1.equal(v2);}
 inline bool equal(CStrRef v1, CArrRef v2) { return v1.equal(v2);}
@@ -412,6 +596,9 @@ inline bool less(CStrRef v1, short   v2)  { return more(v2, v1);}
 inline bool less(CStrRef v1, int     v2)  { return more(v2, v1);}
 inline bool less(CStrRef v1, int64   v2)  { return more(v2, v1);}
 inline bool less(CStrRef v1, double  v2)  { return more(v2, v1);}
+inline bool less(CStrRef v1, const StringData *v2)  {
+  return more(v2, v1.get());
+}
 inline bool less(CStrRef v1, CStrRef v2)  { return v1.less(v2);}
 inline bool less(CStrRef v1, litstr  v2)  { return v1.less(v2);}
 inline bool less(CStrRef v1, CArrRef v2)  { return v1.less(v2);}
@@ -424,6 +611,9 @@ inline bool more(CStrRef v1, short   v2)  { return less(v2, v1);}
 inline bool more(CStrRef v1, int     v2)  { return less(v2, v1);}
 inline bool more(CStrRef v1, int64   v2)  { return less(v2, v1);}
 inline bool more(CStrRef v1, double  v2)  { return less(v2, v1);}
+inline bool more(CStrRef v1, const StringData *v2)  {
+  return less(v2, v1.get());
+}
 inline bool more(CStrRef v1, CStrRef v2)  { return v1.more(v2);}
 inline bool more(CStrRef v1, litstr  v2)  { return v1.more(v2);}
 inline bool more(CStrRef v1, CArrRef v2)  { return v1.more(v2);}
@@ -439,6 +629,10 @@ inline bool same(litstr v1, short   v2)  { return same(String(v1), v2);}
 inline bool same(litstr v1, int     v2)  { return same(String(v1), v2);}
 inline bool same(litstr v1, int64   v2)  { return same(String(v1), v2);}
 inline bool same(litstr v1, double  v2)  { return same(String(v1), v2);}
+inline bool same(litstr v1, const StringData *v2)  {
+  StringData sd1(v1);
+  return same(&sd1, v2);
+}
 inline bool same(litstr v1, CStrRef v2)  { return same(String(v1), v2);}
 inline bool same(litstr v1, litstr  v2)  { return same(String(v1), v2);}
 inline bool same(litstr v1, CArrRef v2)  { return same(String(v1), v2);}
@@ -451,6 +645,10 @@ inline bool equal(litstr v1, short   v2) { return equal(String(v1),v2);}
 inline bool equal(litstr v1, int     v2) { return equal(String(v1),v2);}
 inline bool equal(litstr v1, int64   v2) { return equal(String(v1),v2);}
 inline bool equal(litstr v1, double  v2) { return equal(String(v1),v2);}
+inline bool equal(litstr v1, const StringData *v2) {
+  StringData sd1(v1);
+  return equal(&sd1, v2);
+}
 inline bool equal(litstr v1, CStrRef v2) { return equal(String(v1),v2);}
 inline bool equal(litstr v1, litstr  v2) { return equal(String(v1),v2);}
 inline bool equal(litstr v1, CArrRef v2) { return equal(String(v1),v2);}
@@ -463,6 +661,10 @@ inline bool less(litstr v1, short   v2)  { return less(String(v1), v2);}
 inline bool less(litstr v1, int     v2)  { return less(String(v1), v2);}
 inline bool less(litstr v1, int64   v2)  { return less(String(v1), v2);}
 inline bool less(litstr v1, double  v2)  { return less(String(v1), v2);}
+inline bool less(litstr v1, const StringData *v2)  {
+  StringData sd1(v1);
+  return less(&sd1, v2);
+}
 inline bool less(litstr v1, CStrRef v2)  { return less(String(v1), v2);}
 inline bool less(litstr v1, litstr  v2)  { return less(String(v1), v2);}
 inline bool less(litstr v1, CArrRef v2)  { return less(String(v1), v2);}
@@ -475,6 +677,10 @@ inline bool more(litstr v1, short   v2)  { return more(String(v1), v2);}
 inline bool more(litstr v1, int     v2)  { return more(String(v1), v2);}
 inline bool more(litstr v1, int64   v2)  { return more(String(v1), v2);}
 inline bool more(litstr v1, double  v2)  { return more(String(v1), v2);}
+inline bool more(litstr v1, const StringData *v2)  {
+  StringData sd1(v1);
+  return more(&sd1, v2);
+}
 inline bool more(litstr v1, CStrRef v2)  { return more(String(v1), v2);}
 inline bool more(litstr v1, litstr  v2)  { return more(String(v1), v2);}
 inline bool more(litstr v1, CArrRef v2)  { return more(String(v1), v2);}
@@ -490,6 +696,7 @@ inline bool same(CArrRef v1, short   v2)  { return same(v2, v1);}
 inline bool same(CArrRef v1, int     v2)  { return same(v2, v1);}
 inline bool same(CArrRef v1, int64   v2)  { return same(v2, v1);}
 inline bool same(CArrRef v1, double  v2)  { return same(v2, v1);}
+inline bool same(CArrRef v1, const StringData *v2)  { return same(v2, v1);}
 inline bool same(CArrRef v1, CStrRef v2)  { return same(v2, v1);}
 inline bool same(CArrRef v1, litstr  v2)  { return same(v2, v1);}
 inline bool same(CArrRef v1, CArrRef v2)  { return v1.same(v2);}
@@ -502,6 +709,7 @@ inline bool equal(CArrRef v1, short   v2) { return equal(v2, v1);}
 inline bool equal(CArrRef v1, int     v2) { return equal(v2, v1);}
 inline bool equal(CArrRef v1, int64   v2) { return equal(v2, v1);}
 inline bool equal(CArrRef v1, double  v2) { return equal(v2, v1);}
+inline bool equal(CArrRef v1, const StringData *v2) { return equal(v2, v1);}
 inline bool equal(CArrRef v1, CStrRef v2) { return equal(v2, v1);}
 inline bool equal(CArrRef v1, litstr  v2) { return equal(v2, v1);}
 inline bool equal(CArrRef v1, CArrRef v2) { return v1.equal(v2);}
@@ -514,6 +722,7 @@ inline bool less(CArrRef v1, short   v2)  { return more(v2, v1);}
 inline bool less(CArrRef v1, int     v2)  { return more(v2, v1);}
 inline bool less(CArrRef v1, int64   v2)  { return more(v2, v1);}
 inline bool less(CArrRef v1, double  v2)  { return more(v2, v1);}
+inline bool less(CArrRef v1, const StringData *v2)  { return more(v2, v1);}
 inline bool less(CArrRef v1, CStrRef v2)  { return more(v2, v1);}
 inline bool less(CArrRef v1, litstr  v2)  { return more(v2, v1);}
 inline bool less(CArrRef v1, CArrRef v2)  { return v1.less(v2);}
@@ -526,6 +735,7 @@ inline bool more(CArrRef v1, short   v2)  { return less(v2, v1);}
 inline bool more(CArrRef v1, int     v2)  { return less(v2, v1);}
 inline bool more(CArrRef v1, int64   v2)  { return less(v2, v1);}
 inline bool more(CArrRef v1, double  v2)  { return less(v2, v1);}
+inline bool more(CArrRef v1, const StringData *v2)  { return less(v2, v1);}
 inline bool more(CArrRef v1, CStrRef v2)  { return less(v2, v1);}
 inline bool more(CArrRef v1, litstr  v2)  { return less(v2, v1);}
 inline bool more(CArrRef v1, CArrRef v2)  { return v1.more(v2);}
@@ -541,6 +751,7 @@ inline bool same(CObjRef v1, short   v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, int     v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, int64   v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, double  v2)  { return same(v2, v1);}
+inline bool same(CObjRef v1, const StringData *v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, CStrRef v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, litstr  v2)  { return same(v2, v1);}
 inline bool same(CObjRef v1, CArrRef v2)  { return same(v2, v1);}
@@ -553,6 +764,7 @@ inline bool equal(CObjRef v1, short   v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, int     v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, int64   v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, double  v2) { return equal(v2, v1);}
+inline bool equal(CObjRef v1, const StringData *v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, CStrRef v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, litstr  v2) { return equal(v2, v1);}
 inline bool equal(CObjRef v1, CArrRef v2) { return equal(v2, v1);}
@@ -565,6 +777,7 @@ inline bool less(CObjRef v1, short   v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, int     v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, int64   v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, double  v2)  { return more(v2, v1);}
+inline bool less(CObjRef v1, const StringData *v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, CStrRef v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, litstr  v2)  { return more(v2, v1);}
 inline bool less(CObjRef v1, CArrRef v2)  { return more(v2, v1);}
@@ -577,6 +790,7 @@ inline bool more(CObjRef v1, short   v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, int     v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, int64   v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, double  v2)  { return less(v2, v1);}
+inline bool more(CObjRef v1, const StringData *v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, CStrRef v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, litstr  v2)  { return less(v2, v1);}
 inline bool more(CObjRef v1, CArrRef v2)  { return less(v2, v1);}

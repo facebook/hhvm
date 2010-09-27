@@ -402,185 +402,158 @@ Variant String::toKey() const {
 // comparisons
 
 bool String::same(litstr v2) const {
-  return same(String(v2));
+  return HPHP::same(m_px, v2);
+}
+
+bool String::same(const StringData *v2) const {
+  return HPHP::same(m_px, v2);
 }
 
 bool String::same(CStrRef v2) const {
-  if (m_px == NULL && v2.get() == NULL) return true;
-  if (m_px && v2.get()) return m_px->same(v2.get());
-  return false;
+  return HPHP::same(m_px, v2);
 }
 
 bool String::same(CArrRef v2) const {
-  return false;
+  return HPHP::same(m_px, v2);
 }
 
 bool String::same(CObjRef v2) const {
-  return false;
+  return HPHP::same(m_px, v2);
 }
 
 bool String::equal(litstr v2) const {
-  return equal(String(v2));
+  return HPHP::equal(m_px, v2);
+}
+
+bool String::equal(const StringData *v2) const {
+  return HPHP::equal(m_px, v2);
 }
 
 bool String::equal(CStrRef v2) const {
-  if (m_px == NULL && v2.get() == NULL) return true;
-  if (m_px == NULL) return v2.empty();
-  if (v2.get() == NULL) return empty();
-  return m_px->compare(v2.get()) == 0;
+  return HPHP::equal(m_px, v2);
 }
 
 bool String::equal(CArrRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
-    return HPHP::equal(toBoolean(), v2.toBoolean());
-  }
-  return false;
+  return HPHP::equal(m_px, v2);
 }
 
 bool String::equal(CObjRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
-    return HPHP::equal(toBoolean(), v2.toBoolean());
-  }
-  if (v2.isResource())
-    return false;
-  try {
-    return equal(v2.toString());
-  } catch (BadTypeConversionException &e) {
-    return false;
-  }
+  return HPHP::equal(m_px, v2);
 }
 
 bool String::less(litstr v2) const {
-  return less(String(v2));
+  return HPHP::less(m_px, v2);
+}
+
+bool String::less(const StringData *v2) const {
+  return HPHP::less(m_px, v2);
 }
 
 bool String::less(CStrRef v2) const {
-  if (v2.get() == NULL) return false;
-  if (m_px == NULL) return !v2.empty();
-  return m_px->compare(v2.get()) < 0;
+  return HPHP::less(m_px, v2);
 }
 
 bool String::less(CArrRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
-    return HPHP::less(toBoolean(), v2.toBoolean());
-  }
-  return true;
+  return HPHP::less(m_px, v2);
 }
 
 bool String::less(CObjRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
-    return HPHP::less(toBoolean(), v2.toBoolean());
-  }
-  if (v2.isResource()) return true;
-  try {
-    return less(v2.toString());
-  } catch (BadTypeConversionException &e) {
-    return true;
-  }
+  return HPHP::less(m_px, v2);
 }
 
 bool String::more(litstr v2) const {
-  return more(String(v2));
+  return HPHP::more(m_px, v2);
+}
+
+bool String::more(const StringData *v2) const {
+  return HPHP::more(m_px, v2);
 }
 
 bool String::more(CStrRef v2) const {
-  if (m_px == NULL) return false;
-  if (v2.get() == NULL) return !empty();
-  return m_px->compare(v2.get()) > 0;
+  return HPHP::more(m_px, v2);
 }
 
 bool String::more(CArrRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
-    return HPHP::more(toBoolean(), v2.toBoolean());
-  }
-  return false;
+  return HPHP::more(m_px, v2);
 }
 
 bool String::more(CObjRef v2) const {
-  if (m_px == NULL || v2.get() == NULL) {
-    return HPHP::more(toBoolean(), v2.toBoolean());
-  }
-  if (v2.isResource()) return false;
-  try {
-    return more(v2.toString());
-  } catch (BadTypeConversionException &e) {
-    return false;
-  }
+  return HPHP::more(m_px, v2);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 // comparison operators
 
 bool String::operator==(litstr v) const {
-  return HPHP::equal(*this, v);
+  return HPHP::equal(m_px, v);
 }
 
 bool String::operator!=(litstr v) const {
-  return !HPHP::equal(*this, v);
+  return !HPHP::equal(m_px, v);
 }
 
 bool String::operator>=(litstr v) const {
-  return not_less(*this, v);
+  return not_less(m_px, v);
 }
 
 bool String::operator<=(litstr v) const {
-  return not_more(*this, v);
+  return not_more(m_px, v);
 }
 
 bool String::operator>(litstr v) const {
-  return HPHP::more(*this, v);
+  return HPHP::more(m_px, v);
 }
 
 bool String::operator<(litstr v) const {
-  return HPHP::less(*this, v);
+  return HPHP::less(m_px, v);
 }
 
 bool String::operator==(CStrRef v) const {
-  return HPHP::equal(*this, v);
+  return HPHP::equal(m_px, v);
 }
 
 bool String::operator!=(CStrRef v) const {
-  return !HPHP::equal(*this, v);
+  return !HPHP::equal(m_px, v);
 }
 
 bool String::operator>=(CStrRef v) const {
-  return not_less(*this, v);
+  return not_less(m_px, v);
 }
 
 bool String::operator<=(CStrRef v) const {
-  return not_more(*this, v);
+  return not_more(m_px, v);
 }
 
 bool String::operator>(CStrRef v) const {
-  return HPHP::more(*this, v);
+  return HPHP::more(m_px, v);
 }
 
 bool String::operator<(CStrRef v) const {
-  return HPHP::less(*this, v);
+  return HPHP::less(m_px, v);
 }
 
 bool String::operator==(CVarRef v) const {
-  return HPHP::equal(*this, v);
+  return HPHP::equal(m_px, v);
 }
 
 bool String::operator!=(CVarRef v) const {
-  return !HPHP::equal(*this, v);
+  return !HPHP::equal(m_px, v);
 }
 
 bool String::operator>=(CVarRef v) const {
-  return not_less(*this, v);
+  return not_less(m_px, v);
 }
 
 bool String::operator<=(CVarRef v) const {
-  return not_more(*this, v);
+  return not_more(m_px, v);
 }
 
 bool String::operator>(CVarRef v) const {
-  return HPHP::more(*this, v);
+  return HPHP::more(m_px, v);
 }
 
 bool String::operator<(CVarRef v) const {
-  return HPHP::less(*this, v);
+  return HPHP::less(m_px, v);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

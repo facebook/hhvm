@@ -234,6 +234,7 @@ class Array : public SmartPtr<ArrayData> {
   const Variant operator[](int64   key) const;
   const Variant operator[](double  key) const;
   const Variant operator[](litstr  key) const;
+  const Variant operator[](const StringData *key) const;
   const Variant operator[](CStrRef key) const;
   const Variant operator[](CVarRef key) const;
 

@@ -39,22 +39,23 @@ bool not_less(CVarRef v1, CVarRef v2) {
   return !less(v1, v2);
 }
 
-bool equal(char v1, CStrRef v2) {
+bool equal(char v1, const StringData *v2) {
   return equal((int64)v1, v2);
 }
 
-bool equal(short v1, CStrRef v2) {
+bool equal(short v1, const StringData *v2) {
   return equal((int64)v1, v2);
 }
 
-bool equal(int v1, CStrRef v2) {
+bool equal(int v1, const StringData *v2) {
   return equal((int64)v1, v2);
 }
 
-bool equal(int64 v1, CStrRef v2) {
+bool equal(int64 v1, const StringData *v2) {
   DataType ret = KindOfNull;
   int64 lval; double dval;
-  ret = is_numeric_string(v2.data(), v2.size(), &lval, &dval, 1);
+  ret = is_numeric_string((v2 ? v2->data() : NULL),
+                          (v2 ? v2->size() : 0), &lval, &dval, 1);
   if (ret == KindOfInt64) {
     return v1 == lval;
   } else if (ret == KindOfDouble) {
@@ -64,22 +65,23 @@ bool equal(int64 v1, CStrRef v2) {
   }
 }
 
-bool less(char v1, CStrRef v2) {
+bool less(char v1, const StringData *v2) {
   return less((int64)v1, v2);
 }
 
-bool less(short v1, CStrRef v2) {
+bool less(short v1, const StringData *v2) {
   return less((int64)v1, v2);
 }
 
-bool less(int v1, CStrRef v2) {
+bool less(int v1, const StringData *v2) {
   return less((int64)v1, v2);
 }
 
-bool less(int64 v1, CStrRef v2) {
+bool less(int64 v1, const StringData *v2) {
   DataType ret = KindOfNull;
   int64 lval; double dval;
-  ret = is_numeric_string(v2.data(), v2.size(), &lval, &dval, 1);
+  ret = is_numeric_string((v2 ? v2->data() : NULL),
+                          (v2 ? v2->size() : 0), &lval, &dval, 1);
   if (ret == KindOfInt64) {
     return v1 < lval;
   } else if (ret == KindOfDouble) {
@@ -89,22 +91,23 @@ bool less(int64 v1, CStrRef v2) {
   }
 }
 
-bool more(char v1, CStrRef v2) {
+bool more(char v1, const StringData *v2) {
   return more((int64)v1, v2);
 }
 
-bool more(short v1, CStrRef v2) {
+bool more(short v1, const StringData *v2) {
   return more((int64)v1, v2);
 }
 
-bool more(int v1, CStrRef v2) {
+bool more(int v1, const StringData *v2) {
   return more((int64)v1, v2);
 }
 
-bool more(int64 v1, CStrRef v2) {
+bool more(int64 v1, const StringData *v2) {
   DataType ret = KindOfNull;
   int64 lval; double dval;
-  ret = is_numeric_string(v2.data(), v2.size(), &lval, &dval, 1);
+  ret = is_numeric_string((v2 ? v2->data() : NULL),
+                          (v2 ? v2->size() : 0), &lval, &dval, 1);
   if (ret == KindOfInt64) {
     return v1 > lval;
   } else if (ret == KindOfDouble) {

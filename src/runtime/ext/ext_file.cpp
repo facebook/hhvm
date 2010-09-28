@@ -1100,6 +1100,12 @@ Variant f_glob(CStrRef pattern, int flags /* = 0 */) {
   globbuf.gl_offs = 0;
   String work_pattern;
 
+  if (pattern.size() >= PATH_MAX) {
+    raise_warning("Pattern exceeds the maximum allowed length of %d characters",
+                  PATH_MAX);
+    return false;
+  }
+
   if (pattern.charAt(0) == '/') {
     work_pattern = pattern;
   } else {

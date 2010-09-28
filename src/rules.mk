@@ -58,13 +58,7 @@
 OS := $(shell head -1 /etc/issue | cut -d' ' -f1)
 
 ifeq ($(OS), CentOS)
-
-ifndef HPHP_DEV
-OS = centos
-else
-OS = centos-dev
-endif
-
+OS = centos$(if $(HPHP_DEV),-dev)
 else
 OS = fedora
 endif
@@ -479,7 +473,7 @@ MCC_LIBS = $(EXT_DIR)/libmcc/lib/libmcc.a $(EXT_DIR)/libch/lib/libch.a \
 
 LIBMEMCACHED_LIBS = $(EXT_DIR)/libmemcached/lib/libmemcached.a
 
-ifdef HPHP_DEV 
+ifdef HPHP_DEV
 GD_LIBS = $(EXT_DIR)/gd/lib/libgd.a $(EXT_DIR)/libpng/lib/libpng.a \
 	-ljpeg -lfreetype -lfontconfig
 else
@@ -598,7 +592,7 @@ LIB_PATHS = $(HPHP_LIB) \
   $(EXT_DIR)/ldap/lib \
   $(EXT_DIR)/libxml2/lib \
 
-ifdef HPHP_DEV 
+ifdef HPHP_DEV
 LIB_PATHS += $(EXT_DIR)/libpng/lib
 endif
 
@@ -614,11 +608,7 @@ quiet:
 	@true
 
 # Suppressing no rule errors
-%.d:
-	@
-
-# Suppressing errors for missing headers caused by old deps in .d files
-%.h:
+%.d %.h %.hpp %.hh:
 	@
 
 DEPEND_FILES := $(OBJECTS:.o=.d)

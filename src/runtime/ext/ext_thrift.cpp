@@ -349,17 +349,17 @@ Variant binary_deserialize(int8_t thrift_typeID, PHPInputTransport& transport,
     case T_BYTE: {
       uint8_t c;
       transport.readBytes(&c, 1);
-      return c;
+      return Variant((int8)c);
     }
     case T_I16: {
       uint16_t c;
       transport.readBytes(&c, 2);
-      return ntohs(c);
+      return Variant((int16)ntohs(c));
     }
     case T_I32: {
       uint32_t c;
       transport.readBytes(&c, 4);
-      return Variant((int)ntohl(c));
+      return Variant((int32)ntohl(c));
     }
     case T_U64:
     case T_I64: {

@@ -150,12 +150,18 @@ inline void x_header_remove(CStrRef name = null_string) {
   f_header_remove(name);
 }
 
-inline bool x_setcookie(CStrRef name, CStrRef value = null_string, int expire = 0, CStrRef path = null_string, CStrRef domain = null_string, bool secure = false, bool httponly = false) {
+inline bool x_setcookie(CStrRef name, CStrRef value = null_string,
+                        int64 expire = 0, CStrRef path = null_string,
+                        CStrRef domain = null_string, bool secure = false,
+                        bool httponly = false) {
   FUNCTION_INJECTION_BUILTIN(setcookie);
   return f_setcookie(name, value, expire, path, domain, secure, httponly);
 }
 
-inline bool x_setrawcookie(CStrRef name, CStrRef value = null_string, int expire = 0, CStrRef path = null_string, CStrRef domain = null_string, bool secure = false, bool httponly = false) {
+inline bool x_setrawcookie(CStrRef name, CStrRef value = null_string,
+                           int64 expire = 0, CStrRef path = null_string,
+                           CStrRef domain = null_string, bool secure = false,
+                           bool httponly = false) {
   FUNCTION_INJECTION_BUILTIN(setrawcookie);
   return f_setrawcookie(name, value, expire, path, domain, secure, httponly);
 }

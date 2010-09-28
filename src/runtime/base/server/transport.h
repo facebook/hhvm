@@ -149,7 +149,7 @@ public:
   /**
    * Set cookie response header.
    */
-  bool setCookie(CStrRef name, CStrRef value, int expire = 0,
+  bool setCookie(CStrRef name, CStrRef value, int64 expire = 0,
                  CStrRef path = "", CStrRef domain = "", bool secure = false,
                  bool httponly = false, bool encode_url = true);
 

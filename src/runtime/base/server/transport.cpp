@@ -473,21 +473,21 @@ String Transport::getMimeType() {
 ///////////////////////////////////////////////////////////////////////////////
 // cookies
 
-bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
+bool Transport::setCookie(CStrRef name, CStrRef value, int64 expire /* = 0 */,
                           CStrRef path /* = "" */, CStrRef domain /* = "" */,
                           bool secure /* = false */,
                           bool httponly /* = false */,
                           bool encode_url /* = true */) {
   if (!name.empty() && strpbrk(name.data(), "=,; \t\r\n\013\014")) {
-    Logger::Warning("Cookie names can not contain any of the folllowing "
-                    "'=,; \\t\\r\\n\\013\\014' (%s)", name.data());
+    Logger::Warning("Cookie names can not contain any of the following "
+                    "'=,; \\t\\r\\n\\013\\014'");
     return false;
   }
 
   if (!encode_url &&
       !value.empty() && strpbrk(value.data(), ",; \t\r\n\013\014")) {
-    Logger::Warning("Cookie values can not contain any of the folllowing "
-                    "',; \\t\\r\\n\\013\\014' (%s)", value.data());
+    Logger::Warning("Cookie values can not contain any of the following "
+                    "',; \\t\\r\\n\\013\\014'");
     return false;
   }
 
@@ -522,6 +522,10 @@ bool Transport::setCookie(CStrRef name, CStrRef value, int expire /* = 0 */,
     cookie += "=";
     cookie += encoded_value ? encoded_value : "";
     if (expire > 0) {
+      if (expire > 253402300799LL) {
+        raise_warning("Expiry date cannot have a year greater then 9999");
+        return false;
+      }
       cookie += "; expires=";
       String sdt = DateTime(expire, true).toString(DateTime::Cookie);
       cookie += sdt.data();

@@ -882,7 +882,7 @@ void f_header_remove(CStrRef name /* = null_string */) {
 }
 
 bool f_setcookie(CStrRef name, CStrRef value /* = null_string */,
-                 int expire /* = 0 */, CStrRef path /* = null_string */,
+                 int64 expire /* = 0 */, CStrRef path /* = null_string */,
                  CStrRef domain /* = null_string */, bool secure /* = false */,
                  bool httponly /* = false */) {
   Transport *transport = g_context->getTransport();
@@ -894,7 +894,7 @@ bool f_setcookie(CStrRef name, CStrRef value /* = null_string */,
 }
 
 bool f_setrawcookie(CStrRef name, CStrRef value /* = null_string */,
-                    int expire /* = 0 */, CStrRef path /* = null_string */,
+                    int64 expire /* = 0 */, CStrRef path /* = null_string */,
                     CStrRef domain /* = null_string */,
                     bool secure /* = false */,
                     bool httponly /* = false */) {

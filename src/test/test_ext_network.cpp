@@ -231,6 +231,7 @@ bool TestExtNetwork::test_header_remove() {
 
 bool TestExtNetwork::test_setcookie() {
   VERIFY(!f_setcookie("name", "value"));
+  VERIFY(!f_setcookie("name", "value", 253402300800LL));
   return Count(true);
 }
 

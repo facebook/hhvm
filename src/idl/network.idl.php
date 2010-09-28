@@ -632,7 +632,7 @@ DefineFunction(
       ),
       array(
         'name'   => "expire",
-        'type'   => Int32,
+        'type'   => Int64,
         'value'  => "0",
         'desc'   => "The time the cookie expires. This is a Unix timestamp so is in number of seconds since the epoch. In other words, you'll most likely set this with the time() function plus the number of seconds before you want it to expire. Or you might use mktime(). time()+60*60*24*30 will set the cookie to expire in 30 days. If set to 0, or omitted, the cookie will expire at the end of the session (when the browser closes).\n\n\n\nYou may notice the expire parameter takes on a Unix timestamp, as opposed to the date format Wdy, DD-Mon-YYYY HH:MM:SS GMT, this is because PHP does this conversion internally.\n\nexpire is compared to the client's time which can differ from server's time.",
       ),
@@ -684,7 +684,7 @@ DefineFunction(
       ),
       array(
         'name'   => "expire",
-        'type'   => Int32,
+        'type'   => Int64,
         'value'  => "0",
       ),
       array(

@@ -1180,6 +1180,10 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     cg_indentEnd("}\n");
 
   }
+
+  if (m_class) m_class->preOutputCPP(cg, ar, state);
+  if (m_safeDef) m_safeDef->preOutputCPP(cg, ar, state);
+
   if (m_params && m_params->getCount() > 0) {
     ar->pushCallInfo(m_ciTemp);
     m_params->preOutputCPP(cg, ar, state);

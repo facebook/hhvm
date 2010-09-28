@@ -289,20 +289,11 @@ void LibEventServer::stop() {
 ///////////////////////////////////////////////////////////////////////////////
 // SSL handling
 
-bool LibEventServer::enableSSL(const std::string &certFile,
-    const std::string &keyFile,
-    int port) {
+bool LibEventServer::enableSSL(void *sslCTX, int port) {
 #ifdef _EVENT_USE_OPENSSL
-  struct ssl_config config;
-  if (certFile == "" || keyFile == "") {
-    Logger::Error("Invalid certificate file or key file");
-    return false;
-  }
-  config.cert_file = (char*)certFile.c_str();
-  config.pk_file = (char*)keyFile.c_str();
-  m_server_ssl = evhttp_new_openssl(m_eventBase, &config);
+  m_server_ssl = evhttp_new_openssl_ctx(m_eventBase, sslCTX);
   if (m_server_ssl == NULL) {
-    Logger::Error("evhttp_new_openssl failed");
+    Logger::Error("evhttp_new_openssl_ctx failed");
     return false;
   }
   m_port_ssl = port;

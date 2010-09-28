@@ -52,8 +52,8 @@ time_t HttpServer::StartTime;
 
 ///////////////////////////////////////////////////////////////////////////////
 
-HttpServer::HttpServer()
-  : m_stopped(false),
+HttpServer::HttpServer(void *sslCTX /* = NULL */)
+  : m_stopped(false), m_sslCTX(sslCTX),
     m_loggerThread(this, &HttpServer::flushLog),
     m_watchDog(this, &HttpServer::watchDog) {
 
@@ -77,11 +77,9 @@ HttpServer::HttpServer()
     m_pageServer = ServerPtr(server);
   }
 
-  if (RuntimeOption::EnableSSL) {
+  if (RuntimeOption::EnableSSL && m_sslCTX) {
     SSLInit::Init();
-    m_pageServer->enableSSL(RuntimeOption::SSLCertificateFile,
-                            RuntimeOption::SSLCertificateKeyFile,
-                            RuntimeOption::SSLPort);
+    m_pageServer->enableSSL(m_sslCTX, RuntimeOption::SSLPort);
   }
 
   m_adminServer = ServerPtr

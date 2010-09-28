@@ -34,7 +34,7 @@ public:
   static time_t StartTime;
 
 public:
-  HttpServer();
+  HttpServer(void *sslCTX = NULL);
   ~HttpServer();
 
   void run();
@@ -49,6 +49,7 @@ public:
 
 private:
   bool m_stopped;
+  void *m_sslCTX;
 
   ServerPtr m_pageServer;
   ServerPtr m_adminServer;

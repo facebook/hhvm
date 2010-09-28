@@ -463,6 +463,23 @@ static int start_server(const std::string &username) {
   AdminRequestHandler::GetAccessLog().init
     (RuntimeOption::AdminLogFormat, RuntimeOption::AdminLogFile);
 
+  void *sslCTX = NULL;
+  if (RuntimeOption::EnableSSL) {
+#ifdef _EVENT_USE_OPENSSL
+    struct ssl_config config;
+    if (RuntimeOption::SSLCertificateFile != "" &&
+        RuntimeOption::SSLCertificateKeyFile != "") {
+      config.cert_file = (char*)RuntimeOption::SSLCertificateFile.c_str();
+      config.pk_file = (char*)RuntimeOption::SSLCertificateKeyFile.c_str();
+      sslCTX = evhttp_init_openssl(&config);
+    } else {
+      Logger::Error("Invalid certificate file or key file");
+    }
+#else
+    Logger::Error("A SSL enabled libevent is required");
+#endif
+  }
+
 #if !defined(SKIP_USER_CHANGE)
   if (!username.empty()) {
     Capability::ChangeUnixUser(username);
@@ -470,7 +487,7 @@ static int start_server(const std::string &username) {
   }
 #endif
 
-  HttpServer::Server = HttpServerPtr(new HttpServer());
+  HttpServer::Server = HttpServerPtr(new HttpServer(sslCTX));
   HttpServer::Server->run();
   return 0;
 }

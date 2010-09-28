@@ -163,8 +163,7 @@ public:
    * To enable SSL of the current server, it will listen to an additional
    * port as specified in parameter.
    */
-  virtual bool enableSSL(const std::string &certFile,
-                         const std::string &keyFile, int port);
+  virtual bool enableSSL(void *sslCTX, int port);
 
   // Whether the server may reset the request handler, e.g., the RPC server.
   virtual bool supportReset() { return false; }

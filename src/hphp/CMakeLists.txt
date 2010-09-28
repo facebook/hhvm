@@ -12,7 +12,7 @@ ENDIF()
 target_link_libraries(hphp hphp_analysis hphp_runtime_static)
 
 IF(EXISTS "${HPHP_HOME}/src/hphpi/gen/CMakeCache.txt")
-  file(REMOVE "${HPHP_HOME}/src/hphpi/gen/CMakeCache.txt")
+  file(REMOVE_RECURSE "${HPHP_HOME}/src/hphpi/gen/")
 ENDIF()
 
 add_custom_command(TARGET hphp

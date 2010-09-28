@@ -625,16 +625,21 @@ void UnaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     int id = -1;
     int hash = -1;
     int index = -1;
+    string text;
     if (m_exp) {
       ExpressionListPtr pairs = dynamic_pointer_cast<ExpressionList>(m_exp);
       Variant v;
       if (pairs && pairs->isScalarArrayPairs() && pairs->getScalarValue(v)) {
-        id = ar->registerScalarArray(m_exp, hash, index);
+        id = ar->registerScalarArray(m_exp, hash, index, text);
       }
     } else {
-      id = ar->registerScalarArray(m_exp, hash, index); // empty array
+      id = ar->registerScalarArray(m_exp, hash, index, text); // empty array
     }
     if (id != -1) {
+      if (Option::UseNamedScalarArray &&
+          cg.getContext() == CodeGenerator::CppParameterDefaultValueDecl) {
+        ar->getFileScope()->addUsedDefaultValueScalarArray(text);
+      }
       ar->outputCPPScalarArrayId(cg, id, hash, index);
       return;
     }

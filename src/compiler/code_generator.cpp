@@ -406,6 +406,12 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
       getContext() != CodeGenerator::CppConstantsDecl &&
       getContext() != CodeGenerator::CppClassConstantsImpl) {
     int stringId = ar->getLiteralStringId(str, index);
+    if (Option::UseNamedLiteralString) {
+      ar->getFileScope()->addUsedLiteralString(str);
+      if (m_context == CppParameterDefaultValueDecl) {
+        ar->getFileScope()->addUsedDefaultValueLiteralString(str);
+      }
+    }
     if (stringId >= 0) return stringId;
   }
   index = -1;

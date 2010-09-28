@@ -184,7 +184,8 @@ public:
   /**
    * Scalar array handling.
    */
-  int registerScalarArray(ExpressionPtr pairs, int &hash, int &index);
+  int registerScalarArray(ExpressionPtr pairs, int &hash, int &index,
+                          std::string &text);
   int checkScalarArray(const std::string &text, int &index);
   int getScalarArrayId(const std::string &text);
   void outputCPPNamedScalarArrays(const std::string &file);

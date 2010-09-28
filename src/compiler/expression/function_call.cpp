@@ -296,7 +296,9 @@ void FunctionCall::optimizeArgArray(AnalysisResultPtr ar) {
                                 Expression::KindOfArrayPairExpression,
                                 ExpressionPtr(), param, false)));
     }
+    string text;
     m_argArrayId =
-      ar->registerScalarArray(argArrayPairs, m_argArrayHash, m_argArrayIndex);
+      ar->registerScalarArray(argArrayPairs, m_argArrayHash, m_argArrayIndex,
+                              text);
   }
 }

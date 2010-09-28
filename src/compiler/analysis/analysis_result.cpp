@@ -864,7 +864,7 @@ void AnalysisResult::postOptimize(int maxPass /* = 100 */) {
 // code generation functions
 
 int AnalysisResult::registerScalarArray(ExpressionPtr pairs, int &hash,
-                                        int &index) {
+                                        int &index, string &text) {
   int id = -1;
   hash = -1;
   index = -1;
@@ -873,7 +873,6 @@ int AnalysisResult::registerScalarArray(ExpressionPtr pairs, int &hash,
     return -1;
   }
 
-  string text;
   if (pairs) {
     // Normal picked PHP wouldn't work here, because predefined constants,
     // e.g., __CLASS__, need to be translated.
@@ -1320,12 +1319,15 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
 
     // for each file, generate one header and a list of class headers
     BOOST_FOREACH(FileScopePtr fs, iter->second) {
+      pushScope(fs);
       string fileBase = fs->outputFilebase();
       Util::mkdir(root + fileBase);
       string header = fileBase + ".h";
       string fwheader = fileBase + ".fw.h";
+      string fwsheader = fileBase + ".fws.h";
       string fileHeader = root + header;
       string fwFileHeader = root + fwheader;
+      string fwsFileHeader = root + fwsheader;
       {
         ofstream f(fileHeader.c_str());
         CodeGenerator cg(&f, output);
@@ -1339,6 +1341,13 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
         fs->outputCPPForwardDeclHeader(cg, ar);
         f.close();
       }
+      {
+        ofstream f(fwsFileHeader.c_str());
+        CodeGenerator cg(&f, output);
+        fs->outputCPPForwardStaticDecl(cg, ar);
+        f.close();
+      }
+      popScope();
     }
   }
 
@@ -2221,6 +2230,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
       }
     }
     BOOST_FOREACH(FileScopePtr fs, m_fileScopes) {
+      pushScope(fs);
       ConstantTablePtr ct = fs->getConstants();
       vector<string> syms;
       ct->getSymbols(syms);
@@ -2230,6 +2240,7 @@ void AnalysisResult::outputCPPDynamicTables(CodeGenerator::Output output) {
         dyns[sym.c_str()] = ct->isDynamic(sym);
       }
       ct->outputCPP(cg, ar);
+      popScope();
     }
 
     cg.printSection("Get Constant Table");
@@ -3426,6 +3437,11 @@ void AnalysisResult::outputCPPClusterImpl(CodeGenerator &cg,
     FileScopePtr fs = iter->second;
     cg_printInclude(fs->outputFilebase());
   }
+  for (map<string, FileScopePtr>::const_iterator iter = toInclude.begin();
+       iter != toInclude.end(); ++iter) {
+    FileScopePtr fs = iter->second;
+    cg_printInclude(fs->outputFilebase() + ".fws");
+  }
   cg_printInclude("<runtime/ext/ext.h>");
   outputCPPSepExtensionIncludes(cg);
   if (Option::EnableEval >= Option::LimitedEval ||
@@ -3720,7 +3736,6 @@ int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
     strings.push_back(s);
   }
   index = i;
-  getFileScope()->addUsedLiteralString(s);
   return hash;
 }
 

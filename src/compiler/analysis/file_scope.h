@@ -109,11 +109,14 @@ public:
   std::set<std::string> &getUsedLiteralStrings() {
     return m_usedLiteralStrings;
   }
+  void addUsedDefaultValueLiteralString(std::string s) {
+    m_usedDefaultValueLiteralStrings.insert(s);
+  }
   void addUsedScalarArray(std::string s) {
     m_usedScalarArrays.insert(s);
   }
-  std::set<std::string> &getUsedScalarArrays() {
-    return m_usedScalarArrays;
+  void addUsedDefaultValueScalarArray(std::string s) {
+    m_usedDefaultValueScalarArrays.insert(s);
   }
 
   /**
@@ -165,6 +168,7 @@ public:
     return m_pseudoMainVariables;
   }
 
+  void outputCPPForwardStaticDecl(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPForwardDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPDeclHeader(CodeGenerator &cg, AnalysisResultPtr ar);
   void outputCPPForwardDeclarations(CodeGenerator &cg, AnalysisResultPtr ar);
@@ -211,7 +215,9 @@ private:
   std::set<std::string> m_usedConsts;
   std::set<std::string> m_usedIncludesInline;
   std::set<std::string> m_usedLiteralStrings;
+  std::set<std::string> m_usedDefaultValueLiteralStrings;
   std::set<std::string> m_usedScalarArrays;
+  std::set<std::string> m_usedDefaultValueScalarArrays;
   std::string m_pseudoMainName;
   std::set<std::string> m_pseudoMainVariables;
 

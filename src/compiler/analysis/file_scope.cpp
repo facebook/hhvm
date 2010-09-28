@@ -375,7 +375,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   cg.namespaceBegin();
   cg.printSection("1. Static Strings", false);
   string str;
-  BOOST_FOREACH(str, m_usedLiteralStrings) {
+  BOOST_FOREACH(str, m_usedDefaultValueLiteralStrings) {
     int index = -1;
     int stringId = cg.checkLiteralString(str, index, ar);
     assert(index != -1);
@@ -384,7 +384,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   }
   cg_printf("\n");
   cg.printSection("2. Static Arrays", false);
-  BOOST_FOREACH(str, m_usedScalarArrays) {
+  BOOST_FOREACH(str, m_usedDefaultValueScalarArrays) {
     int index = -1;
     int hash = ar->checkScalarArray(str, index);
     assert(hash != -1 && index != -1);
@@ -509,6 +509,42 @@ void FileScope::outputCPPForwardDeclHeader(CodeGenerator &cg,
     cg_printInclude("<runtime/base/hphp_system.h>");
   }
   outputCPPForwardDeclarations(cg, ar);
+  cg.headerEnd(header);
+}
+
+void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
+                                           AnalysisResultPtr ar) {
+  string header = outputFilebase() + ".fws.h";
+  cg.headerBegin(header);
+  cg.namespaceBegin();
+  cg.printSection("1. Static Strings", false);
+  string str;
+  BOOST_FOREACH(str, m_usedLiteralStrings) {
+    if (m_usedDefaultValueLiteralStrings.find(str) !=
+        m_usedDefaultValueLiteralStrings.end()) {
+      continue;
+    }
+    int index = -1;
+    int stringId = cg.checkLiteralString(str, index, ar);
+    assert(index != -1);
+    string lisnam = ar->getLiteralStringName(stringId, index);
+    cg_printf("extern StaticString %s;\n", lisnam.c_str());
+  }
+  cg_printf("\n");
+  cg.printSection("2. Static Arrays", false);
+  BOOST_FOREACH(str, m_usedScalarArrays) {
+    if (m_usedDefaultValueScalarArrays.find(str) !=
+        m_usedDefaultValueScalarArrays.end()) {
+      continue;
+    }
+    int index = -1;
+    int hash = ar->checkScalarArray(str, index);
+    assert(hash != -1 && index != -1);
+    string name = ar->getScalarArrayName(hash, index);
+    cg_printf("extern StaticArray %s;\n", name.c_str());
+  }
+  cg.namespaceEnd();
+  cg_printf("\n");
   cg.headerEnd(header);
 }
 

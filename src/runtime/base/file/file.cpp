@@ -669,6 +669,7 @@ Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
   const char escape_char = '\\';
 
   int64 temp_len, line_end_len;
+  bool first_field = true;
 
   /* Now into new section that parses buf for delimiter/enclosure fields */
 
@@ -700,6 +701,12 @@ Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
         break;
       }
     }
+
+    if (first_field && bptr == line_end) {
+      ret.append(null_variant);
+      break;
+    }
+    first_field = false;
 
     /* 2. Read field, leaving bptr pointing at start of next field */
     if (bptr < limit && *bptr == enclosure_char) {
@@ -834,12 +841,8 @@ Array File::readCSV(int64 length /* = 0 */, char delimiter_char /* = ',' */,
     }
 
     /* 3. Now pass our field back to php */
-    if (comp_end - temp) {
-      *comp_end = '\0';
-      ret.append(String(temp, comp_end - temp, CopyString));
-    } else {
-      ret.append(null_variant);
-    }
+    *comp_end = '\0';
+    ret.append(String(temp, comp_end - temp, CopyString));
   } while (bptr < limit);
 
   free(temp);

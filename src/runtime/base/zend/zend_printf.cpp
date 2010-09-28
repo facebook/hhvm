@@ -684,14 +684,14 @@ inline static void appenddouble(char **buffer, int *pos,
   if (isnan(number)) {
     is_negative = (number<0);
     appendstring(buffer, pos, size, "NaN", 3, 0, padding,
-                 alignment, precision, is_negative, 0, always_sign);
+                 alignment, 3, is_negative, 0, always_sign);
     return;
   }
 
   if (isinf(number)) {
     is_negative = (number<0);
     appendstring(buffer, pos, size, "INF", 3, 0, padding,
-                 alignment, precision, is_negative, 0, always_sign);
+                 alignment, 3, is_negative, 0, always_sign);
     return;
   }
 

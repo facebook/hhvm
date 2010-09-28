@@ -431,11 +431,16 @@ Variant f_file(CStrRef filename, int flags /* = 0 */,
     } while ((p = (const char *)memchr(p, eol_marker, (e-p))));
   } else {
     do {
-      if (skip_blank_lines && !(p-s)) {
+      int windows_eol = 0;
+      if (p != content.data() && eol_marker == '\n' && *(p - 1) == '\r') {
+        windows_eol++;
+      }
+
+      if (skip_blank_lines && !(p-s-windows_eol)) {
         s = ++p;
         continue;
       }
-      ret.set(i++, String(s, p-s, CopyString));
+      ret.set(i++, String(s, p-s-windows_eol, CopyString));
       s = ++p;
     } while ((p = (const char *)memchr(p, eol_marker, (e-p))));
   }

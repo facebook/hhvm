@@ -19,6 +19,7 @@ $topics =
       ),
       'HTTP Server' => array(
         'Rewrite Rules' => 'server.rewrite_rules',
+        'SSL Setup' => 'server.ssl',
       ),
       'Inconsistencies' => array(
         'PHP vs. HipHop' => 'inconsistencies',

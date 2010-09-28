@@ -2,14 +2,22 @@
 
 Here's how server processes a URL.
 
-1. Determine which virtual host the URL is on. This is done by matching virtual
+1. Virtual Host
+
+Determine which virtual host the URL is on. This is done by matching virtual
 host's "Prefix" or "Pattern" with this URL's domain name.
 
-2. Prepend with virtual host's PathTranslation.
+2. Path Translation
 
-3. If the URL/file exists physically, that will be the final resolution. No
+Prepend with virtual host's PathTranslation.
+
+3. Physical Location
+
+If the URL/file exists physically, that will be the final resolution. No
 more processing will happen.
 
-4. Otherwise, each rewrite rule will be checked sequentially in the order of
+4. Rewrite Rules
+
+Otherwise, each rewrite rule will be checked sequentially in the order of
 how they appear in configuration file. Once matched, the URL will be re-written
 according to the rule.

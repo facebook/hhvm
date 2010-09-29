@@ -64,6 +64,7 @@ bool f_openssl_x509_export(CVarRef x509, Variant output, bool notext = true);
 void f_openssl_x509_free(CObjRef x509cert);
 Variant f_openssl_x509_parse(CVarRef x509cert, bool shortnames = true);
 Variant f_openssl_x509_read(CVarRef x509certdata);
+Variant f_openssl_random_pseudo_bytes(int length, Variant crypto_strong = false);
 
 ///////////////////////////////////////////////////////////////////////////////
 }

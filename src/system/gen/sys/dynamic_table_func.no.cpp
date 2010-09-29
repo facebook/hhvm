@@ -30795,6 +30795,25 @@ Variant ifa_magickgetpackagename(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
   if (count > 0) return throw_toomany_arguments("magickgetpackagename", 0, 1);
   return (f_magickgetpackagename());
 }
+Variant i_openssl_random_pseudo_bytes(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(openssl_random_pseudo_bytes);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_random_pseudo_bytes", count, 1, 2, 1);
+  const_cast<Array&>(params).escalate(true);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_openssl_random_pseudo_bytes(arg0));
+    CVarRef arg1(ref(ad->getValueRef(pos = ad->iter_advance(pos))));
+    return (f_openssl_random_pseudo_bytes(arg0, arg1));
+  }
+}
+Variant ifa_openssl_random_pseudo_bytes(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_random_pseudo_bytes", count, 1, 2, 1);
+  if (count <= 1) return (f_openssl_random_pseudo_bytes(a0));
+  return (f_openssl_random_pseudo_bytes(a0, ref(a1)));
+}
 Variant i_destroypixelwandarray(void *extra, CArrRef params) {
   FUNCTION_INJECTION(destroypixelwandarray);
   int count __attribute__((__unused__)) = params.size();
@@ -71424,6 +71443,27 @@ Variant ei_magickgetpackagename(Eval::VariableEnvironment &env, const Eval::Func
   }
   return (x_magickgetpackagename());
 }
+Variant ei_openssl_random_pseudo_bytes(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("openssl_random_pseudo_bytes", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = ref((*it)->refval(env));
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_openssl_random_pseudo_bytes(a0));
+  else return (x_openssl_random_pseudo_bytes(a0, ref(a1)));
+}
 Variant ei_destroypixelwandarray(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -77334,6 +77374,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1883:
       HASH_INVOKE_FROM_EVAL(0x05D293F45C15F75BLL, ldap_mod_del);
+      HASH_INVOKE_FROM_EVAL(0x0ED4D905630EB75BLL, openssl_random_pseudo_bytes);
       break;
     case 1884:
       HASH_INVOKE_FROM_EVAL(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename);
@@ -82018,6 +82059,7 @@ CallInfo ci_hphp_recursivedirectoryiterator_haschildren((void*)&i_hphp_recursive
 CallInfo ci_hphp_instanceof((void*)&i_hphp_instanceof, (void*)&ifa_hphp_instanceof, 2, 0, 0x0000000000000000LL);
 CallInfo ci_import_request_variables((void*)&i_import_request_variables, (void*)&ifa_import_request_variables, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetpackagename((void*)&i_magickgetpackagename, (void*)&ifa_magickgetpackagename, 0, 0, 0x0000000000000000LL);
+CallInfo ci_openssl_random_pseudo_bytes((void*)&i_openssl_random_pseudo_bytes, (void*)&ifa_openssl_random_pseudo_bytes, 2, 0, 0x0000000000000002LL);
 CallInfo ci_destroypixelwandarray((void*)&i_destroypixelwandarray, (void*)&ifa_destroypixelwandarray, 1, 0, 0x0000000000000000LL);
 CallInfo ci_spliti((void*)&i_spliti, (void*)&ifa_spliti, 3, 0, 0x0000000000000000LL);
 CallInfo ci_posix_setgid((void*)&i_posix_setgid, (void*)&ifa_posix_setgid, 1, 0, 0x0000000000000000LL);
@@ -87233,6 +87275,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1883:
       HASH_GUARD(0x05D293F45C15F75BLL, ldap_mod_del) {
         ci = &ci_ldap_mod_del;
+        return true;
+      }
+      HASH_GUARD(0x0ED4D905630EB75BLL, openssl_random_pseudo_bytes) {
+        ci = &ci_openssl_random_pseudo_bytes;
         return true;
       }
       break;

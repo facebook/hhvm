@@ -220,6 +220,12 @@ inline Variant x_openssl_x509_read(CVarRef x509certdata) {
   return f_openssl_x509_read(x509certdata);
 }
 
+inline Variant x_openssl_random_pseudo_bytes(int length,
+                                             CVarRef crypto_strong = false) {
+  FUNCTION_INJECTION_BUILTIN(openssl_random_pseudo_bytes);
+  return f_openssl_random_pseudo_bytes(length, crypto_strong);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

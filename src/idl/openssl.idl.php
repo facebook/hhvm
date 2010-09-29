@@ -1139,6 +1139,29 @@ DefineFunction(
     ),
   ));
 
+DefineFunction(
+  array(
+    'name'   => "openssl_random_pseudo_bytes",
+    'desc'   => "Generates a string of pseudo-random bytes, with the number of bytes determined by the length parameter.\n\nIt also indicates if a cryptographically strong algorithm was used to produce the pseudo-random bytes, and does this via the optional crypto_strong parameter. It's rare for this to be FALSE, but some systems may be broken or old.",
+    'flags'  =>  HasDocComment,
+    'return' => array(
+      'type'   => Variant,
+      'desc'   => "Returns the generated string of bytes on success, or FALSE on failure.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "length",
+        'type'   => Int32,
+        'desc'   => "The length of the desired string of bytes. Must be a positive integer. PHP will try to cast this parameter to a non-null integer to use it.",
+      ),
+      array(
+        'name'   => "crypto_strong",
+        'type'   => Variant | Reference,
+        'value'  => "false",
+        'desc'   => "If passed into the function, this will hold a boolean value that determines if the algorithm used was \"cryptographically strong\", e.g., safe for usage with GPG, passwords, etc. TRUE if it did, otherwise FALSE",
+      ),
+    ),
+  ));
 
 ///////////////////////////////////////////////////////////////////////////////
 // Classes

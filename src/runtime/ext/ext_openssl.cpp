@@ -2255,5 +2255,32 @@ Variant f_openssl_x509_read(CVarRef x509certdata) {
   return ocert;
 }
 
+Variant f_openssl_random_pseudo_bytes(int length,
+                                      Variant crypto_strong /* = false */) {
+  if (length <= 0) {
+    return false;
+  }
+
+  unsigned char *buffer = NULL;
+
+  if ((buffer = (unsigned char *)malloc(length + 1)) == NULL) {
+    return false;
+  }
+
+  crypto_strong = false;
+
+  int crypto_strength = 0;
+
+  if ((crypto_strength = RAND_pseudo_bytes(buffer, length)) < 0) {
+    crypto_strong = false;
+    free(buffer);
+    return false;
+  } else {
+    crypto_strong = crypto_strength;
+    buffer[length] = '\0';
+    return String((char *)buffer, length, AttachString);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

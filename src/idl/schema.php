@@ -24,6 +24,8 @@ $output = <<<CODE
  * any changes that are not part of schema. Use "note" field to comment on
  * schema itself, and "note" fields are not used in any code generation but
  * only staying within this file.
+ *
+ * @nolint
  */
 ///////////////////////////////////////////////////////////////////////////////
 // Preamble: C++ code inserted at beginning of ext_{name}.h

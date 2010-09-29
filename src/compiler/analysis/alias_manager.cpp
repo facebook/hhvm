@@ -1134,6 +1134,9 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
       break;
 
     case Expression::KindOfExpressionList:
+    case Expression::KindOfObjectMethodExpression:
+    case Expression::KindOfDynamicFunctionCall:
+    case Expression::KindOfSimpleFunctionCall:
       delayVars = false;
       break;
 
@@ -1149,7 +1152,8 @@ ExpressionPtr AliasManager::canonicalizeRecur(ExpressionPtr e) {
       if (ExpressionPtr kid = e->getNthExpr(i)) {
         /*
           php doesnt evaluate simple variables at the point they are seen
-          except in function calls. So in a case like:
+          except in function parameters and function "addresses".
+          So in a case like:
           $a + ($a = 5)
           the first $a is evaluated after the assignment. But in:
           ($a + 1) + ($a = 5)

@@ -195,6 +195,24 @@ DefineFunction(
 
 DefineFunction(
   array(
+    'name'   => "check_user_func_async",
+    'desc'   => "Check to see if an async call is done or not.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "TRUE if done; FALSE otherwise.",
+    ),
+    'args'   => array(
+      array(
+        'name'   => "handle",
+        'type'   => Object,
+        'desc'   => "The object returned from call_user_func_async() or call_user_func_array_async().",
+      ),
+    ),
+  ));
+
+DefineFunction(
+  array(
     'name'   => "end_user_func_async",
     'desc'   => "Block until function returns. Used with call_user_func_async() or call_user_func_array_async().",
     'flags'  =>  HasDocComment | HipHopSpecific,

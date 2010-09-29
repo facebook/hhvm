@@ -17,6 +17,7 @@
 
 #include <runtime/ext/ext_misc.h>
 #include <runtime/ext/ext_class.h>
+#include <runtime/ext/ext_math.h>
 #include <runtime/base/util/exceptions.h>
 #include <runtime/base/zend/zend_pack.h>
 #include <runtime/base/hphp_system.h>
@@ -265,8 +266,8 @@ String f_uniqid(CStrRef prefix /* = null_string */,
 
   char uniqid[256];
   if (more_entropy) {
-    snprintf(uniqid, sizeof(uniqid), "%s%08x%05x%08x",
-             (const char *)prefix, sec, usec, rand());
+    snprintf(uniqid, sizeof(uniqid), "%s%08x%05x%.8F",
+             (const char *)prefix, sec, usec, math_combined_lcg() * 10);
   } else {
     snprintf(uniqid, sizeof(uniqid), "%s%08x%05x",
              (const char *)prefix, sec, usec);

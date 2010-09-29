@@ -353,6 +353,8 @@ public:
   static bool GenerateDocComments;
   static bool FlAnnotate; // annotate emitted code with compiler file-line info
   static bool SystemGen; // -t cpp -f sys
+  static bool ControlFlow;
+  static bool DumpAst;
 
   static void setHookHandler(void (*hookHandler)(Hdf &config)) {
     m_hookHandler = hookHandler;

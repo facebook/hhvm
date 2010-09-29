@@ -370,6 +370,8 @@ int prepareOptions(ProgramOptions &po, int argc, char **argv) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
 
+  if (po.dump) Option::DumpAst = true;
+
   if (po.inputDir.empty()) {
     po.inputDir = '.';
   }
@@ -561,7 +563,7 @@ int process(const ProgramOptions &po) {
     fileCacheThread.start();
   }
 
-  if (po.dump) {
+  if (Option::DumpAst) {
     ar->dump();
   }
 
@@ -586,7 +588,7 @@ int process(const ProgramOptions &po) {
     return 1;
   }
 
-  if (po.dump) {
+  if (Option::DumpAst) {
     ar->dump();
   }
 

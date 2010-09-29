@@ -52,9 +52,9 @@ void WhileStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 
 ConstructPtr WhileStatement::getNthKid(int n) const {
   switch (n) {
-    case 0:
+    case CondExpr:
       return m_condition;
-    case 1:
+    case BodyStmt:
       return m_stmt;
     default:
       ASSERT(false);
@@ -69,10 +69,10 @@ int WhileStatement::getKidCount() const {
 
 void WhileStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
-    case 0:
+    case CondExpr:
       m_condition = boost::dynamic_pointer_cast<Expression>(cp);
       break;
-    case 1:
+    case BodyStmt:
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
     default:

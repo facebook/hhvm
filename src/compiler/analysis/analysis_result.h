@@ -396,6 +396,11 @@ public:
   void outputCPPGlobalState();
   void outputCPPFiberGlobalState();
 
+  AnalysisResultPtr shared_from_this() {
+    return boost::static_pointer_cast<AnalysisResult>
+      (BlockScope::shared_from_this());
+  }
+
 private:
   int m_scalarArraySortedAvgLen;
   int m_scalarArraySortedIndex;
@@ -527,11 +532,6 @@ private:
 
   void cloneRTTIFuncs(ClassScopePtr cls,
                       const StringToFunctionScopePtrVecMap &functions);
-
-  AnalysisResultPtr shared_from_this() {
-    return boost::static_pointer_cast<AnalysisResult>
-      (BlockScope::shared_from_this());
-  }
 
   StringToMethodSlotMap stringToMethodSlotMap;
   CallIndexVectSet callIndexVectSet; // set of methods at this callIndex

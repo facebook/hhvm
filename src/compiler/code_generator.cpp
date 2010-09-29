@@ -473,7 +473,7 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
 }
 
 void CodeGenerator::printString(const std::string &str, AnalysisResultPtr ar,
-                                BlockScopePtr bs,
+                                BlockScopeRawPtr bs,
                                 bool stringWrapper /* = true */) {
   int index = -1;
   int stringId = bs ? checkLiteralString(str, index, ar, bs) : -1;

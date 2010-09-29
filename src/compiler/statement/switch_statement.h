@@ -34,6 +34,9 @@ public:
   virtual bool hasDecl() const;
   virtual bool hasRetExp() const;
   virtual int getRecursiveCount() const;
+
+  ExpressionPtr getExp() const { return m_exp; }
+  StatementListPtr getCases() const { return m_cases; }
 private:
   ExpressionPtr m_exp;
   StatementListPtr m_cases;

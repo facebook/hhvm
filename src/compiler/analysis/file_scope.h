@@ -196,6 +196,10 @@ public:
     return l.name;
   }
 
+  FileScopePtr shared_from_this() {
+    return boost::static_pointer_cast<FileScope>
+      (BlockScope::shared_from_this());
+  }
 private:
   int m_size;
   std::vector<int> m_attributes;
@@ -232,12 +236,6 @@ private:
   FunctionScopePtr createPseudoMain(AnalysisResultPtr ar);
   void outputCPPHelper(CodeGenerator &cg, AnalysisResultPtr ar,
                        bool classes = true);
-
-  FileScopePtr shared_from_this() {
-    return boost::static_pointer_cast<FileScope>
-      (BlockScope::shared_from_this());
-  }
-
 };
 
 ///////////////////////////////////////////////////////////////////////////////

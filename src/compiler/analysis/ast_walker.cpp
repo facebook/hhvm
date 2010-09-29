@@ -14,33 +14,26 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __WHILE_STATEMENT_H__
-#define __WHILE_STATEMENT_H__
+#include <compiler/analysis/ast_walker.h>
+#include <compiler/statement/statement.h>
 
-#include <compiler/statement/loop_statement.h>
+using namespace HPHP;
+using namespace boost;
 
-namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(WhileStatement);
-
-class WhileStatement : public LoopStatement {
-public:
-  enum { CondExpr, BodyStmt };
-  WhileStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
-                 ExpressionPtr condition, StatementPtr stmt);
-
-  DECLARE_STATEMENT_VIRTUAL_FUNCTIONS;
-  virtual bool hasDecl() const { return m_stmt && m_stmt->hasDecl(); }
-  virtual bool hasRetExp() const { return m_stmt && m_stmt->hasRetExp(); }
-  virtual int getRecursiveCount() const {
-    return 1 + (m_stmt ? m_stmt->getRecursiveCount() : 0);
+int FunctionWalker::before(ConstructRawPtr cp) {
+  if (StatementRawPtr s = dynamic_pointer_cast<Statement>(cp)) {
+    Statement::KindOf stype = s->getKindOf();
+    switch (stype) {
+      case Statement::KindOfFunctionStatement:
+      case Statement::KindOfMethodStatement:
+      case Statement::KindOfClassStatement:
+      case Statement::KindOfInterfaceStatement:
+        return WalkSkip;
+      default:
+        break;
+    }
   }
-private:
-  ExpressionPtr m_condition;
-  StatementPtr m_stmt;
-};
-
-///////////////////////////////////////////////////////////////////////////////
+  return WalkContinue;
 }
-#endif // __WHILE_STATEMENT_H__

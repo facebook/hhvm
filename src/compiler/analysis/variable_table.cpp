@@ -312,7 +312,7 @@ void VariableTable::addStaticVariable(Symbol *sym,
   sgi->sym = sym;
   sgi->variables = this;
   sgi->cls = getClassScope();
-  sgi->func = member ? FunctionScopePtr() : getFunctionScope();
+  sgi->func = member ? FunctionScopeRawPtr() : getFunctionScope();
 
   globalVariables->m_staticGlobalsVec.push_back(sgi);
 }

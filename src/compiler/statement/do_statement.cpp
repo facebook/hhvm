@@ -52,9 +52,9 @@ void DoStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
 
 ConstructPtr DoStatement::getNthKid(int n) const {
   switch (n) {
-    case 0:
+    case BodyStmt:
       return m_stmt;
-    case 1:
+    case CondExpr:
       return m_condition;
     default:
       ASSERT(false);
@@ -69,10 +69,10 @@ int DoStatement::getKidCount() const {
 
 void DoStatement::setNthKid(int n, ConstructPtr cp) {
   switch (n) {
-    case 0:
+    case BodyStmt:
       m_stmt = boost::dynamic_pointer_cast<Statement>(cp);
       break;
-    case 1:
+    case CondExpr:
       m_condition = boost::dynamic_pointer_cast<Expression>(cp);
       break;
     default:

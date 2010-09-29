@@ -199,7 +199,7 @@ public:
   static SymbolTablePtrVec AllSymbolTables; // for stats purpose
   static void CountTypes(std::map<std::string, int> &counts);
   BlockScope *getScopePtr() const { return &m_blockScope; }
-  BlockScopePtr getBlockScope();
+  BlockScopeRawPtr getBlockScope() { return BlockScopeRawPtr(&m_blockScope); }
 public:
   SymbolTable(BlockScope &blockScope);
   SymbolTable();
@@ -271,12 +271,12 @@ public:
   Symbol *getSymbol(const std::string &name) const;
   Symbol *getSymbol(const std::string &name, bool add);
 
-  FunctionScopePtr getFunctionScope();
-  ClassScopePtr getClassScope();
-  FileScopePtr getFileScope();
+  FunctionScopeRawPtr getFunctionScope();
+  ClassScopeRawPtr getClassScope();
+  FileScopeRawPtr getFileScope();
 protected:
   typedef std::map<std::string,Symbol> StringToSymbolMap;
-  BlockScope &m_blockScope;     // parent
+  BlockScope &m_blockScope;     // owner
 
   std::vector<Symbol*>  m_symbolVec; // in declaration order
   StringToSymbolMap     m_symbolMap;

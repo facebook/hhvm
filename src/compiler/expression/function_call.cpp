@@ -19,6 +19,7 @@
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/analysis/code_error.h>
 #include <compiler/analysis/function_scope.h>
+#include <compiler/analysis/file_scope.h>
 #include <compiler/analysis/variable_table.h>
 #include <compiler/statement/statement.h>
 #include <compiler/analysis/class_scope.h>

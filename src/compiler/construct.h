@@ -35,6 +35,8 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(FileScope);
 
+class AstWalkerStateVec;
+
 class IParseHandler {
 public:
   virtual ~IParseHandler() {}
@@ -89,16 +91,16 @@ public:
   bool isVisited() const { return m_flags.visited; }
   BlockScopeRawPtr getScope() const { return m_blockScope; }
   void setBlockScope(BlockScopeRawPtr scope) { m_blockScope = scope; }
-  FileScopePtr getFileScope() const {
+  FileScopeRawPtr getFileScope() const {
     return m_blockScope->getContainingFile();
   }
-  FunctionScopePtr getFunctionScope() const {
+  FunctionScopeRawPtr getFunctionScope() const {
     return m_blockScope->getContainingFunction();
   }
-  ClassScopePtr getClassScope() const {
+  ClassScopeRawPtr getClassScope() const {
     return m_blockScope->getContainingClass();
   }
-  void resetScope(BlockScopePtr scope);
+  void resetScope(BlockScopeRawPtr scope);
 
   virtual int getLocalEffects() const { return UnknownEffect;}
   int getChildrenEffects() const;
@@ -144,7 +146,11 @@ public:
    */
   virtual int getKidCount() const = 0;
 
-  virtual void dump(int spc, AnalysisResultPtr ar);
+  void dump(int spc, AnalysisResultPtr ar);
+  void dumpNode(int spc, AnalysisResultPtr ar);
+  static void dump(int spc, AnalysisResultPtr ar, bool functionOnly,
+                   const AstWalkerStateVec &start,
+                   ConstructPtr endBefore, ConstructPtr endAfter);
 
   /**
    * Called when generating code.

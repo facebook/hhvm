@@ -87,11 +87,13 @@ public:
   StatementPtr getStmt() const { return m_stmt;}
   VariableTablePtr getVariables() { return m_variables;}
   ConstantTablePtr getConstants() { return m_constants;}
-  ClassScopePtr getContainingClass();
-  FunctionScopePtr getContainingFunction();
-  FileScopePtr getContainingFile();
-  AnalysisResultPtr getContainingProgram();
-
+  ClassScopeRawPtr getContainingClass();
+  FunctionScopeRawPtr getContainingFunction() const {
+    return FunctionScopeRawPtr(is(FunctionScope) ?
+                               (HPHP::FunctionScope*)this : 0);
+  }
+  FileScopeRawPtr getContainingFile();
+  AnalysisResultRawPtr getContainingProgram();
   ClassScopePtr findExactClass(const std::string &className);
 
   void addUse(BlockScopeRawPtr user, int useFlags);

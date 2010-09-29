@@ -34,6 +34,8 @@ public:
   virtual bool hasDecl() const;
   virtual bool hasRetExp() const;
   virtual int getRecursiveCount() const;
+
+  StatementListPtr getCatches() const { return m_catches; }
 private:
   StatementPtr m_tryStmt;
   StatementListPtr m_catches;

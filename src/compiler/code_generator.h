@@ -206,7 +206,7 @@ public:
   int checkLiteralString(const std::string &str, int &index,
                          AnalysisResultPtr ar, BlockScopePtr bs);
   void printString(const std::string &str, AnalysisResultPtr ar,
-                   BlockScopePtr check, bool stringWrapper = true);
+                   BlockScopeRawPtr check, bool stringWrapper = true);
   void printString(const std::string &str, AnalysisResultPtr ar,
                    ConstructPtr check, bool stringWrapper = true);
   int getCurrentIndentation() const { return m_indentation[m_curStream];}

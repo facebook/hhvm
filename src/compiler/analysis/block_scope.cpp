@@ -58,48 +58,39 @@ void BlockScope::decLoopNestedLevel() {
   m_loopNestedLevel--;
 }
 
-FileScopePtr BlockScope::getContainingFile() {
-  BlockScopePtr bs(shared_from_this());
+FileScopeRawPtr BlockScope::getContainingFile() {
+  BlockScope *bs = this;
   while (bs) {
     if (bs->is(BlockScope::FileScope)) {
-      return dynamic_pointer_cast<HPHP::FileScope>(bs);
-    }
-    bs = bs->getOuterScope();
-  }
-
-  return FileScopePtr();
-}
-
-AnalysisResultPtr BlockScope::getContainingProgram() {
-  BlockScopePtr bs(shared_from_this());
-  while (bs) {
-    if (bs->is(BlockScope::ProgramScope)) {
-      return dynamic_pointer_cast<AnalysisResult>(bs);
-    }
-    bs = bs->getOuterScope();
-  }
-
-  return AnalysisResultPtr();
-}
-
-ClassScopePtr BlockScope::getContainingClass() {
-  int nfunc = 0;
-  BlockScopePtr bs = shared_from_this();
-  while (bs) {
-    if (bs->is(BlockScope::ClassScope)) {
-      return dynamic_pointer_cast<HPHP::ClassScope>(bs);
-    } else if (bs->is(BlockScope::FunctionScope) &&
-               nfunc++) {
       break;
     }
-    bs = bs->getOuterScope();
+    bs = bs->getOuterScope().get();
   }
 
-  return ClassScopePtr();
+  return FileScopeRawPtr((HPHP::FileScope*)bs);
 }
 
-FunctionScopePtr BlockScope::getContainingFunction() {
-  return dynamic_pointer_cast<HPHP::FunctionScope>(shared_from_this());
+AnalysisResultRawPtr BlockScope::getContainingProgram() {
+  BlockScope *bs = this;
+  while (bs) {
+    if (bs->is(BlockScope::ProgramScope)) {
+      break;
+    }
+    bs = bs->getOuterScope().get();
+  }
+
+  return AnalysisResultRawPtr((AnalysisResult*)bs);
+}
+
+ClassScopeRawPtr BlockScope::getContainingClass() {
+  BlockScope *bs = this;
+  if (bs->is(BlockScope::FunctionScope)) {
+    bs = bs->m_outerScope.get();
+  }
+  if (!bs->is(BlockScope::ClassScope)) {
+    bs = 0;
+  }
+  return ClassScopeRawPtr((HPHP::ClassScope*)bs);
 }
 
 ClassScopePtr BlockScope::findExactClass(const std::string &className) {

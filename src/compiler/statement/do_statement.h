@@ -26,6 +26,7 @@ DECLARE_BOOST_TYPES(DoStatement);
 
 class DoStatement : public LoopStatement {
 public:
+  enum { BodyStmt, CondExpr };
   DoStatement(STATEMENT_CONSTRUCTOR_PARAMETERS,
               StatementPtr stmt, ExpressionPtr condition);
 

@@ -21,6 +21,7 @@
 #include <compiler/analysis/function_scope.h>
 #include <compiler/analysis/class_scope.h>
 #include <compiler/analysis/analysis_result.h>
+#include <compiler/analysis/ast_walker.h>
 
 #include <compiler/expression/simple_function_call.h>
 #include <compiler/expression/simple_variable.h>
@@ -38,7 +39,7 @@ Construct::Construct(BlockScopePtr scope, LocationPtr loc)
       m_containedEffects(0), m_effectsTag(0) {
 }
 
-void Construct::resetScope(BlockScopePtr scope) {
+void Construct::resetScope(BlockScopeRawPtr scope) {
   setBlockScope(scope);
   for (int i = 0, n = getKidCount(); i < n; i++) {
     if (ConstructPtr kid = getNthKid(i)) {
@@ -139,7 +140,7 @@ void Construct::printSource(CodeGenerator &cg) {
   }
 }
 
-void Construct::dump(int spc, AnalysisResultPtr ar) {
+void Construct::dumpNode(int spc, AnalysisResultPtr ar) {
   int nkid = getKidCount();
   std::string name;
   int type = 0;
@@ -412,19 +413,41 @@ void Construct::dump(int spc, AnalysisResultPtr ar) {
       m_loc->line1 << "@" << m_loc->char1;
   }
   std::cout << "\n";
+}
 
-  for (int i = 0; i < nkid; i++) {
-    ConstructPtr kid = getNthKid(i);
-    if (kid) {
-      kid->dump(spc+2, ar);
-    } else {
-      int s = spc+2;
-      while (s > 0) {
-        int n = s > 10 ? 10 : s;
-        std::cout << ("          "+10-n);
-        s -= n;
-      }
-      std::cout << "-> (nokid)\n";
-    }
+class ConstructDumper : public FunctionWalker {
+public:
+  ConstructDumper(int spc, AnalysisResultPtr ar, bool functionOnly = false) :
+      m_spc(spc), m_ar(ar), m_functionOnly(functionOnly) {}
+
+  void walk(AstWalkerStateVec state,
+            ConstructRawPtr endBefore, ConstructRawPtr endAfter) {
+    AstWalker::walk(*this, state, endBefore, endAfter);
   }
+  int before(ConstructRawPtr cp) {
+    int ret = m_functionOnly ? FunctionWalker::before(cp) : WalkContinue;
+    cp->dumpNode(m_spc, m_ar);
+    m_spc += 2;
+    return ret;
+  }
+  int after(ConstructRawPtr cp) {
+    m_spc -= 2;
+    return WalkContinue;
+  }
+private:
+  int m_spc;
+  AnalysisResultPtr m_ar;
+  bool m_functionOnly;
+};
+
+void Construct::dump(int spc, AnalysisResultPtr ar) {
+  ConstructDumper cd(spc, ar);
+  cd.walk(ConstructRawPtr(this), ConstructRawPtr(), ConstructRawPtr());
+}
+
+void Construct::dump(int spc, AnalysisResultPtr ar, bool functionOnly,
+                     const AstWalkerStateVec &state,
+                     ConstructPtr endBefore, ConstructPtr endAfter) {
+  ConstructDumper cd(spc, ar, functionOnly);
+  cd.walk(state, endBefore, endAfter);
 }

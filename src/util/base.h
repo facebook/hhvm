@@ -178,8 +178,8 @@ public:
 
   template <class S>
   operator boost::shared_ptr<S>() const {
-    S *s = ptr;
-    return s ? boost::static_pointer_cast<S>(s->shared_from_this()) :
+    S *s = ptr; // just to verify the implicit conversion T->S
+    return s ? boost::static_pointer_cast<S>(ptr->shared_from_this()) :
       boost::shared_ptr<S>();
   }
 
@@ -190,6 +190,11 @@ public:
 private:
   T     *ptr;
 };
+
+template <typename T, typename U>
+hphp_raw_ptr<T> dynamic_pointer_cast(hphp_raw_ptr<U> p) {
+  return hphp_raw_ptr<T>(dynamic_cast<T*>(p.get()));
+}
 
 template<typename T>
 class hphp_const_char_map :

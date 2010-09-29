@@ -38,6 +38,7 @@
 #include <compiler/statement/exp_statement.h>
 #include <compiler/statement/echo_statement.h>
 #include <compiler/analysis/alias_manager.h>
+#include <compiler/analysis/control_flow.h>
 #include <compiler/analysis/variable_table.h>
 #include <util/parser/hphp.tab.hpp>
 #include <util/util.h>
@@ -78,11 +79,14 @@ bool AliasManager::parseOptimizations(const std::string &optimizations,
       Option::StringLoopOpts = val;
     } else if (opt == "inline") {
       Option::AutoInline = val;
+    } else if (opt == "cflow") {
+      Option::ControlFlow = val;
     } else if (val && (opt == "all" || opt == "none")) {
       val = opt == "all";
       Option::EliminateDeadCode = val;
       Option::LocalCopyProp = val;
       Option::AutoInline = val;
+//      Option::ControlFlow = val;
     } else {
       errs = "Unknown optimization: " + opt;
       return false;
@@ -1528,6 +1532,12 @@ void AliasManager::collectAliasInfoRecur(ConstructPtr cs, bool unused) {
 int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
   m_arp = ar;
 
+  ControlFlowGraph *g = 0;
+  if (Option::ControlFlow) {
+    g = ControlFlowGraph::buildControlFlow(m);
+    if (Option::DumpAst) g->dump(ar);
+  }
+
   FunctionScopePtr func = m->getFunctionScope();
   m_variables = func->getVariables();
   m_variables->clearUsed();
@@ -1570,34 +1580,36 @@ int AliasManager::optimize(AnalysisResultPtr ar, MethodStatementPtr m) {
     }
 
     killLocals();
-    if (m_replaced) return -1;
   }
 
-  if (ar->getPhase() == AnalysisResult::PostOptimize) {
-    if (func) {
-      if (func->isRefReturn()) {
-        m_nrvoFix = -1;
-      } else if (m_nrvoFix > 0) {
-        Symbol *sym = m_variables->getSymbol(m_returnVar);
-        if (sym && !sym->isParameter() &&
-            (m_wildRefs || sym->isReferenced() ||
-             ((sym->isGlobal() || sym->isStatic()) &&
-              m_variables->needLocalCopy(sym)))) {
-          // do nothing
-        } else {
+  if (!m_replaced) {
+    if (ar->getPhase() == AnalysisResult::PostOptimize) {
+      if (func) {
+        if (func->isRefReturn()) {
           m_nrvoFix = -1;
+        } else if (m_nrvoFix > 0) {
+          Symbol *sym = m_variables->getSymbol(m_returnVar);
+          if (sym && !sym->isParameter() &&
+              (m_wildRefs || sym->isReferenced() ||
+               ((sym->isGlobal() || sym->isStatic()) &&
+                m_variables->needLocalCopy(sym)))) {
+            // do nothing
+          } else {
+            m_nrvoFix = -1;
+          }
         }
+
+        func->setNRVOFix(m_nrvoFix > 0);
       }
 
-      func->setNRVOFix(m_nrvoFix > 0);
-    }
-
-    if (!m_changes && Option::StringLoopOpts && !m_wildRefs) {
-      stringOptsRecur(m->getStmts());
+      if (!m_changes && Option::StringLoopOpts && !m_wildRefs) {
+        stringOptsRecur(m->getStmts());
+      }
     }
   }
 
-  return m_changes ? 1 : 0;
+  delete g;
+  return m_replaced ? -1 : m_changes ? 1 : 0;
 }
 
 AliasManager::LoopInfo::LoopInfo(StatementPtr s) :

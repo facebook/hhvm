@@ -147,19 +147,15 @@ void SymbolTable::endLocal() {
   }
 }
 
-BlockScopePtr SymbolTable::getBlockScope() {
-  return m_blockScope.shared_from_this();
-}
-
-FileScopePtr SymbolTable::getFileScope() {
+FileScopeRawPtr SymbolTable::getFileScope() {
   return m_blockScope.getContainingFile();
 }
 
-FunctionScopePtr SymbolTable::getFunctionScope() {
+FunctionScopeRawPtr SymbolTable::getFunctionScope() {
   return m_blockScope.getContainingFunction();
 }
 
-ClassScopePtr SymbolTable::getClassScope() {
+ClassScopeRawPtr SymbolTable::getClassScope() {
   return m_blockScope.getContainingClass();
 }
 

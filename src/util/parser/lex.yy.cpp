@@ -75317,12 +75317,13 @@ YY_RULE_SETUP
            line number */
         yyless(0);
         yy_pop_state(yyscanner);
+        STEPPOS;
         return T_ENCAPSED_AND_WHITESPACE;
 }
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 426 "hphp.x"
+#line 427 "hphp.x"
 {
         SETTOKEN;
         return T_STRING;
@@ -75331,7 +75332,7 @@ YY_RULE_SETUP
 case 129:
 /* rule 129 can match eol */
 YY_RULE_SETUP
-#line 431 "hphp.x"
+#line 432 "hphp.x"
 {
         STEPPOS;
         return T_WHITESPACE;
@@ -75339,7 +75340,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 436 "hphp.x"
+#line 437 "hphp.x"
 {
         BEGIN(ST_ONE_LINE_COMMENT);
         yymore();
@@ -75347,7 +75348,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 441 "hphp.x"
+#line 442 "hphp.x"
 {
         yymore();
 }
@@ -75355,7 +75356,7 @@ YY_RULE_SETUP
 case 132:
 /* rule 132 can match eol */
 YY_RULE_SETUP
-#line 445 "hphp.x"
+#line 446 "hphp.x"
 {
         switch (yytext[yyleng-1]) {
         case '?':
@@ -75374,7 +75375,7 @@ YY_RULE_SETUP
 case 133:
 /* rule 133 can match eol */
 YY_RULE_SETUP
-#line 460 "hphp.x"
+#line 461 "hphp.x"
 {
         STEPPOS;
         BEGIN(ST_IN_SCRIPTING);
@@ -75383,7 +75384,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 466 "hphp.x"
+#line 467 "hphp.x"
 {
         if (_scanner->aspTags() || yytext[yyleng-2] != '%') {
                 _scanner->setToken(yytext, yyleng-2, yytext, yyleng-2);
@@ -75398,7 +75399,7 @@ YY_RULE_SETUP
 case 135:
 /* rule 135 can match eol */
 YY_RULE_SETUP
-#line 477 "hphp.x"
+#line 478 "hphp.x"
 {
         BEGIN(ST_DOC_COMMENT);
         yymore();
@@ -75406,7 +75407,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 482 "hphp.x"
+#line 483 "hphp.x"
 {
         BEGIN(ST_COMMENT);
         yymore();
@@ -75415,14 +75416,14 @@ YY_RULE_SETUP
 case 137:
 /* rule 137 can match eol */
 YY_RULE_SETUP
-#line 487 "hphp.x"
+#line 488 "hphp.x"
 {
         yymore();
 }
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 491 "hphp.x"
+#line 492 "hphp.x"
 {
         STEPPOS;
         _scanner->setDocComment(yytext, yyleng);
@@ -75432,7 +75433,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 498 "hphp.x"
+#line 499 "hphp.x"
 {
         STEPPOS;
         BEGIN(ST_IN_SCRIPTING);
@@ -75447,7 +75448,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 510 "hphp.x"
+#line 511 "hphp.x"
 {
         yymore();
 }
@@ -75455,7 +75456,7 @@ YY_RULE_SETUP
 case 141:
 /* rule 141 can match eol */
 YY_RULE_SETUP
-#line 514 "hphp.x"
+#line 515 "hphp.x"
 {
         STEPPOS;
         BEGIN(ST_IN_HTML);
@@ -75469,7 +75470,7 @@ YY_RULE_SETUP
 case 142:
 /* rule 142 can match eol */
 YY_RULE_SETUP
-#line 524 "hphp.x"
+#line 525 "hphp.x"
 {
         if (_scanner->aspTags()) {
                 STEPPOS;
@@ -75489,7 +75490,7 @@ YY_RULE_SETUP
 case 143:
 /* rule 143 can match eol */
 YY_RULE_SETUP
-#line 540 "hphp.x"
+#line 541 "hphp.x"
 {
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         std::string strval =
@@ -75502,7 +75503,7 @@ YY_RULE_SETUP
 case 144:
 /* rule 144 can match eol */
 YY_RULE_SETUP
-#line 549 "hphp.x"
+#line 550 "hphp.x"
 {
         int bprefix = (yytext[0] != '\'') ? 1 : 0;
         std::string strval =
@@ -75514,7 +75515,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 558 "hphp.x"
+#line 559 "hphp.x"
 {
         int bprefix = (yytext[0] != '"') ? 1 : 0;
         _scanner->setToken(yytext, yyleng, yytext + bprefix, yyleng - bprefix);
@@ -75525,7 +75526,7 @@ YY_RULE_SETUP
 case 146:
 /* rule 146 can match eol */
 YY_RULE_SETUP
-#line 565 "hphp.x"
+#line 566 "hphp.x"
 {
         int bprefix = (yytext[0] != '<') ? 1 : 0;
         int label_len = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -75542,7 +75543,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 579 "hphp.x"
+#line 580 "hphp.x"
 {
         STEPPOS;
         BEGIN(ST_BACKQUOTE);
@@ -75552,7 +75553,7 @@ YY_RULE_SETUP
 case 148:
 /* rule 148 can match eol */
 YY_RULE_SETUP
-#line 585 "hphp.x"
+#line 586 "hphp.x"
 {
         yyless(0);
         BEGIN(ST_HEREDOC);
@@ -75561,7 +75562,7 @@ YY_RULE_SETUP
 case 149:
 /* rule 149 can match eol */
 YY_RULE_SETUP
-#line 590 "hphp.x"
+#line 591 "hphp.x"
 {
         int label_len = yyleng-1;
         if (yytext[label_len-1]==';') {
@@ -75583,7 +75584,7 @@ YY_RULE_SETUP
 case 150:
 /* rule 150 can match eol */
 YY_RULE_SETUP
-#line 608 "hphp.x"
+#line 609 "hphp.x"
 {
         char *end = yytext + yyleng - 1;
 
@@ -75620,7 +75621,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 151:
 YY_RULE_SETUP
-#line 642 "hphp.x"
+#line 643 "hphp.x"
 {
         BEGIN(ST_IN_SCRIPTING);
         STEPPOS;
@@ -75629,7 +75630,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-#line 648 "hphp.x"
+#line 649 "hphp.x"
 {
         _scanner->setToken(yytext, 1, yytext, 1);
         yy_push_state(ST_IN_SCRIPTING, yyscanner);
@@ -75640,7 +75641,7 @@ YY_RULE_SETUP
 case 153:
 /* rule 153 can match eol */
 YY_RULE_SETUP
-#line 655 "hphp.x"
+#line 656 "hphp.x"
 {
         std::string strval = _scanner->escape(yytext, yyleng, '"');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -75650,7 +75651,7 @@ YY_RULE_SETUP
 case 154:
 /* rule 154 can match eol */
 YY_RULE_SETUP
-#line 661 "hphp.x"
+#line 662 "hphp.x"
 {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, '"');
@@ -75661,7 +75662,7 @@ YY_RULE_SETUP
 case 155:
 /* rule 155 can match eol */
 YY_RULE_SETUP
-#line 668 "hphp.x"
+#line 669 "hphp.x"
 {
         std::string strval = _scanner->escape(yytext, yyleng, '`');
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -75671,7 +75672,7 @@ YY_RULE_SETUP
 case 156:
 /* rule 156 can match eol */
 YY_RULE_SETUP
-#line 674 "hphp.x"
+#line 675 "hphp.x"
 {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, '`');
@@ -75682,7 +75683,7 @@ YY_RULE_SETUP
 case 157:
 /* rule 157 can match eol */
 YY_RULE_SETUP
-#line 681 "hphp.x"
+#line 682 "hphp.x"
 {
         std::string strval = _scanner->escape(yytext, yyleng, 0);
         _scanner->setToken(yytext, yyleng, strval.c_str(), strval.length());
@@ -75692,7 +75693,7 @@ YY_RULE_SETUP
 case 158:
 /* rule 158 can match eol */
 YY_RULE_SETUP
-#line 687 "hphp.x"
+#line 688 "hphp.x"
 {
         yyless(yyleng - 1);
         std::string strval = _scanner->escape(yytext, yyleng, 0);
@@ -75702,7 +75703,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 159:
 YY_RULE_SETUP
-#line 694 "hphp.x"
+#line 695 "hphp.x"
 {
         BEGIN(ST_IN_SCRIPTING);
         return '"';
@@ -75710,7 +75711,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
-#line 699 "hphp.x"
+#line 700 "hphp.x"
 {
         BEGIN(ST_IN_SCRIPTING);
         return '`';
@@ -75718,7 +75719,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case YY_STATE_EOF(ST_COMMENT):
 case YY_STATE_EOF(ST_DOC_COMMENT):
-#line 704 "hphp.x"
+#line 705 "hphp.x"
 {
         _scanner->error("Unterminated comment at end of file");
         return 0;
@@ -75727,7 +75728,7 @@ case YY_STATE_EOF(ST_DOC_COMMENT):
 case 161:
 /* rule 161 can match eol */
 YY_RULE_SETUP
-#line 709 "hphp.x"
+#line 710 "hphp.x"
 {
         _scanner->error("Unexpected character in input: '%c' (ASCII=%d)",
                         yytext[0], yytext[0]);
@@ -75735,10 +75736,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
-#line 714 "hphp.x"
+#line 715 "hphp.x"
 ECHO;
 	YY_BREAK
-#line 75726 "lex.yy.cpp"
+#line 75727 "lex.yy.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ST_IN_HTML):
 case YY_STATE_EOF(ST_IN_SCRIPTING):
@@ -76966,7 +76967,7 @@ void hphpfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 714 "hphp.x"
+#line 715 "hphp.x"
 
 
 

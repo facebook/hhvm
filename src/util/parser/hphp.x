@@ -420,6 +420,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
            line number */
         yyless(0);
         yy_pop_state(yyscanner);
+        STEPPOS;
         return T_ENCAPSED_AND_WHITESPACE;
 }
 

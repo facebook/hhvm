@@ -3821,6 +3821,21 @@ Variant ifa_mb_list_encodings_alias_names(void *extra, int count, INVOKE_FEW_ARG
   if (count <= 0) return (f_mb_list_encodings_alias_names());
   return (f_mb_list_encodings_alias_names(a0));
 }
+Variant i_fb_output_compression(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(fb_output_compression);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_output_compression", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_fb_output_compression(arg0));
+  }
+}
+Variant ifa_fb_output_compression(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("fb_output_compression", count, 1, 1, 1);
+  return (f_fb_output_compression(a0));
+}
 Variant i_i18n_loc_set_attribute(void *extra, CArrRef params) {
   FUNCTION_INJECTION(i18n_loc_set_attribute);
   int count __attribute__((__unused__)) = params.size();
@@ -38242,6 +38257,22 @@ Variant ei_mb_list_encodings_alias_names(Eval::VariableEnvironment &env, const E
   }
   if (count <= 0) return (x_mb_list_encodings_alias_names());
   else return (x_mb_list_encodings_alias_names(a0));
+}
+Variant ei_fb_output_compression(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("fb_output_compression", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_output_compression(a0));
 }
 Variant ei_i18n_loc_set_attribute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -79764,6 +79795,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3819:
       HASH_INVOKE_FROM_EVAL(0x72882DBF2D49CEEBLL, set_magic_quotes_runtime);
       break;
+    case 3820:
+      HASH_INVOKE_FROM_EVAL(0x115CC08BC872FEECLL, fb_output_compression);
+      break;
     case 3824:
       HASH_INVOKE_FROM_EVAL(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request);
       break;
@@ -80354,6 +80388,7 @@ CallInfo ci_mb_ereg_search((void*)&i_mb_ereg_search, (void*)&ifa_mb_ereg_search,
 CallInfo ci_rewind((void*)&i_rewind, (void*)&ifa_rewind, 1, 0, 0x0000000000000000LL);
 CallInfo ci_chunk_split((void*)&i_chunk_split, (void*)&ifa_chunk_split, 3, 0, 0x0000000000000000LL);
 CallInfo ci_mb_list_encodings_alias_names((void*)&i_mb_list_encodings_alias_names, (void*)&ifa_mb_list_encodings_alias_names, 1, 0, 0x0000000000000000LL);
+CallInfo ci_fb_output_compression((void*)&i_fb_output_compression, (void*)&ifa_fb_output_compression, 1, 0, 0x0000000000000000LL);
 CallInfo ci_i18n_loc_set_attribute((void*)&i_i18n_loc_set_attribute, (void*)&ifa_i18n_loc_set_attribute, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pixelsynciterator((void*)&i_pixelsynciterator, (void*)&ifa_pixelsynciterator, 1, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_error_string((void*)&i_openssl_error_string, (void*)&ifa_openssl_error_string, 0, 0, 0x0000000000000000LL);
@@ -92513,6 +92548,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3819:
       HASH_GUARD(0x72882DBF2D49CEEBLL, set_magic_quotes_runtime) {
         ci = &ci_set_magic_quotes_runtime;
+        return true;
+      }
+      break;
+    case 3820:
+      HASH_GUARD(0x115CC08BC872FEECLL, fb_output_compression) {
+        ci = &ci_fb_output_compression;
         return true;
       }
       break;

@@ -870,6 +870,20 @@ int f_fb_get_taint(CStrRef str){
   #endif
 }
 
+bool f_fb_output_compression(bool new_value) {
+  Transport *transport = g_context->getTransport();
+  if (transport) {
+    bool rv = transport->isCompressionEnabled();
+    if (new_value) {
+      transport->enableCompression();
+    } else {
+      transport->disableCompression();
+    }
+    return rv;
+  }
+  return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // const index functions
 

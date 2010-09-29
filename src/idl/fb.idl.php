@@ -719,6 +719,25 @@ DefineFunction(
   ));
 
 
+DefineFunction(
+  array(
+    'name'   => "fb_output_compression",
+    'desc'   => "Toggles the compression status of HipHop output, if headers have already been sent this may be ignored.",
+    'flags'  =>  HasDocComment | HipHopSpecific,
+    'return' => array(
+      'type'   => Boolean,
+      'desc'   => "The old value.",
+    ),
+    'args'   => array(
+      array(
+	'name'   => "new_value",
+        'type'   => Boolean,
+        'desc'   => "The new value for the compression state.",
+      ),
+    ),
+  ));
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Classes
 //

@@ -155,6 +155,11 @@ inline Variant x_fb_const_fetch(CVarRef key) {
   return f_fb_const_fetch(key);
 }
 
+inline bool x_fb_output_compression(bool new_value) {
+  FUNCTION_INJECTION_BUILTIN(fb_output_compression);
+  return f_fb_output_compression(new_value);
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 }

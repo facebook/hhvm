@@ -51,6 +51,7 @@ void f_fb_set_taint(Variant str, int taint);
 void f_fb_unset_taint(Variant str, int taint);
 int f_fb_get_taint(CStrRef str);
 Variant f_fb_const_fetch(CVarRef key);
+bool f_fb_output_compression(bool new_value);
 extern const int64 k_FB_UNSERIALIZE_NONSTRING_VALUE;
 extern const int64 k_FB_UNSERIALIZE_UNEXPECTED_END;
 extern const int64 k_FB_UNSERIALIZE_UNRECOGNIZED_OBJECT_TYPE;

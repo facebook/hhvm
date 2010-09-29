@@ -57,8 +57,6 @@ static const char *prefix[] = {
   "smc:3:t:",
   "smc:3:pv:",
   "smc:3:v:",
-  "XBOXC_",
-  "XBOX_CACHE_",
 };
 
 static const char *prefix_replace[] = {
@@ -75,10 +73,8 @@ static const char *prefix_replace[] = {
   "smc:3:t:{A}",
   "smc:3:pv:{A}",
   "smc:3:v:{A}",
-  "XBOXC_{A}",
-  "XBOX_CACHE_{A}",
 };
-static const int prefix_count = 15;
+static const int prefix_count = 13;
 
 static const char *mid[] = {
   ":haste:",
@@ -397,13 +393,11 @@ void SharedStoreStats::onClear() {
   lock();
   StatsMap::iterator iter;
   for (iter = s_statsMap.begin(); iter != s_statsMap.end(); ++iter) {
-    free(iter->first);
     delete iter->second;
   }
   s_statsMap.clear();
   if (RuntimeOption::EnableAPCSizeDetail) {
     for (iter = s_detailMap.begin(); iter != s_detailMap.end(); ++iter) {
-      free(iter->first);
       delete iter->second;
     }
   }

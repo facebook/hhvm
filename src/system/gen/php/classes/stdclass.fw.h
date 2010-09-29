@@ -26,8 +26,6 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // 1. Static Strings
-extern StaticString s_sys_ss31db296c;
-extern StaticString s_sys_ss78ba13f7;
 
 // 2. Static Arrays
 

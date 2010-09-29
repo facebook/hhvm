@@ -17,6 +17,8 @@
 
 #include <php/classes/iterator.h>
 #include <php/classes/splobjectstorage.h>
+#include <php/classes/iterator.fws.h>
+#include <php/classes/splobjectstorage.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
 

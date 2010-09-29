@@ -26,62 +26,8 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 // 1. Static Strings
-extern StaticString s_sys_ss5b908ab0;
-extern StaticString s_sys_ss00ce7919;
-extern StaticString s_sys_ss4f67744c;
-extern StaticString s_sys_ss0c10eb92;
-extern StaticString s_sys_ss3c6754b7;
-extern StaticString s_sys_ss35f9d4be;
-extern StaticString s_sys_ss53ceeb6c;
-extern StaticString s_sys_ss229c615f;
-extern StaticString s_sys_ss6b4cb5ed;
-extern StaticString s_sys_ss2dc69ec2;
-extern StaticString s_sys_ss549781c8;
-extern StaticString s_sys_ss7646d15b;
-extern StaticString s_sys_ss403290f5;
-extern StaticString s_sys_ss3bf89873;
-extern StaticString s_sys_ss5cbbd412;
-extern StaticString s_sys_ss65104d10;
-extern StaticString s_sys_ss5ee263d1;
-extern StaticString s_sys_ss7b94de24;
-extern StaticString s_sys_ss68175ea2;
-extern StaticString s_sys_ss18b77dcf;
-extern StaticString s_sys_ss79503405;
-extern StaticString s_sys_ss4d202b9f;
-extern StaticString s_sys_ss5713adf1;
-extern StaticString s_sys_ss75ad17e1;
-extern StaticString s_sys_ss4f638bdc;
-extern StaticString s_sys_ss76b5e27b;
-extern StaticString s_sys_ss712c57f7;
-extern StaticString s_sys_ss25c683eb;
-extern StaticString s_sys_ss48725a0c;
-extern StaticString s_sys_ss4af9d29e;
-extern StaticString s_sys_ss1f14ff71;
-extern StaticString s_sys_ss7db173af;
-extern StaticString s_sys_ss658b04e8;
-extern StaticString s_sys_ss486e8646;
-extern StaticString s_sys_ss531f214d;
-extern StaticString s_sys_ss447efd48;
-extern StaticString s_sys_ss742fc700;
-extern StaticString s_sys_ss0bbfbb68;
-extern StaticString s_sys_ss5b7508c8;
-extern StaticString s_sys_ss19c96546;
-extern StaticString s_sys_ss5371ad73;
-extern StaticString s_sys_ss431a6ed8;
-extern StaticString s_sys_ss0af036d3;
-extern StaticString s_sys_ss5e2eaa32;
-extern StaticString s_sys_ss21d85096;
-extern StaticString s_sys_ss77054c67;
-extern StaticString s_sys_ss1eba23bd;
-extern StaticString s_sys_ss1d522e0a;
-extern StaticString s_sys_ss016dc059;
-extern StaticString s_sys_ss3a190f5f;
-extern StaticString s_sys_ss02b6fd60;
-extern StaticString s_sys_ss58e4193c;
-extern StaticString s_sys_ss54808c44;
 
 // 2. Static Arrays
-extern StaticArray s_sys_sa00000000;
 
 // 3. Constants
 

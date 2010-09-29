@@ -18,6 +18,9 @@
 #include <php/classes/exception.h>
 #include <php/classes/reflection.h>
 #include <php/classes/stdclass.h>
+#include <php/classes/exception.fws.h>
+#include <php/classes/reflection.fws.h>
+#include <php/classes/stdclass.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
 

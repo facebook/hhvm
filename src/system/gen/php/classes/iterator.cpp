@@ -20,6 +20,11 @@
 #include <php/classes/iterator.h>
 #include <php/classes/splfile.h>
 #include <php/globals/constants.h>
+#include <php/classes/arrayaccess.fws.h>
+#include <php/classes/exception.fws.h>
+#include <php/classes/iterator.fws.h>
+#include <php/classes/splfile.fws.h>
+#include <php/globals/constants.fws.h>
 #include <runtime/ext/ext.h>
 #include <runtime/eval/eval.h>
 

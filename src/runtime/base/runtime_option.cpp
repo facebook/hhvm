@@ -359,27 +359,53 @@ static void normalizePath(std::string &path) {
   }
 }
 
+static bool matchHdfPattern(const std::string &value, Hdf hdfPattern) {
+  string pattern = hdfPattern.getString();
+  if (!pattern.empty()) {
+    Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
+                                    AttachLiteral),
+                             String(value.c_str(), value.size(),
+                                    AttachLiteral));
+    if (ret.toInt64() <= 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 void RuntimeOption::Load(Hdf &config) {
   PidFile = config["PidFile"].getString("www.pid");
+
+  // Machine metrics
+  string hostname, tier, cpu;
+  {
+    Hdf machine = config["Machine"];
+
+    hostname = machine["name"].getString();
+    if (hostname.empty()) {
+      hostname = Process::GetHostName();
+    }
+
+    tier = machine["tier"].getString();
+
+    cpu = machine["cpu"].getString();
+    if (cpu.empty()) {
+      cpu = Process::GetCPUModel();
+    }
+  }
 
   // Tier overwrites
   {
     Hdf tiers = config["Tiers"];
-    string hostname = Process::GetHostName();
     for (Hdf hdf = tiers.firstChild(); hdf.exists(); hdf = hdf.next()) {
-      string pattern = hdf["machine"].getString();
-      if (!pattern.empty()) {
-        Variant ret = preg_match(String(pattern.c_str(), pattern.size(),
-                                        AttachLiteral),
-                                 String(hostname.c_str(), hostname.size(),
-                                        AttachLiteral));
-        if (ret.toInt64() > 0) {
-          Tier = hdf.getName();
-          config.copy(hdf["overwrite"]);
-          // no break here, so we can continue to match more overwrites
-        } else {
-          hdf["overwrite"].setVisited(); // avoid lint complaining
-        }
+      if (matchHdfPattern(hostname, hdf["machine"]) &&
+          matchHdfPattern(tier, hdf["tier"]) &&
+          matchHdfPattern(cpu, hdf["cpu"])) {
+        Tier = hdf.getName();
+        config.copy(hdf["overwrite"]);
+        // no break here, so we can continue to match more overwrites
+      } else {
+        hdf["overwrite"].setVisited(); // avoid lint complaining
       }
     }
   }

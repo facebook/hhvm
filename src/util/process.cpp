@@ -431,6 +431,53 @@ int Process::GetProcessRSS(pid_t pid) {
   return 0;
 }
 
+int Process::GetCPUCount() {
+  return sysconf(_SC_NPROCESSORS_ONLN);
+}
+
+static __inline void do_cpuid(u_int ax, u_int *p) {
+  __asm __volatile("cpuid"
+                   : "=a" (p[0]), "=b" (p[1]), "=c" (p[2]), "=d" (p[3])
+                   : "0" (ax));
+}
+
+std::string Process::GetCPUModel() {
+  uint32_t regs[4];
+  do_cpuid(0, regs);
+
+  char cpu_vendor[13];
+  //uint32_t cpu_high = regs[0];
+  ((uint32_t *)&cpu_vendor)[0] = regs[1];
+  ((uint32_t *)&cpu_vendor)[1] = regs[3];
+  ((uint32_t *)&cpu_vendor)[2] = regs[2];
+  cpu_vendor[12] = '\0';
+
+  //do_cpuid(1, regs);
+  //uint32_t cpu_id       = regs[0];
+  //uint32_t cpu_procinfo = regs[1];
+  //uint32_t cpu_feature  = regs[3];
+  //uint32_t cpu_feature2 = regs[2];
+
+  uint32_t cpu_exthigh = 0;
+  if (strcmp(cpu_vendor, "GenuineIntel") == 0 ||
+      strcmp(cpu_vendor, "AuthenticAMD") == 0) {
+    do_cpuid(0x80000000, regs);
+    cpu_exthigh = regs[0];
+  }
+
+  char cpu_brand[48];
+  char *brand = cpu_brand;
+  if (cpu_exthigh >= 0x80000004) {
+    for (u_int i = 0x80000002; i < 0x80000005; i++) {
+      do_cpuid(i, regs);
+      memcpy(brand, regs, sizeof(regs));
+      brand += sizeof(regs);
+    }
+  }
+  *brand = '\0';
+  return cpu_brand;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 std::string Process::GetAppName() {

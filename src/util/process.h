@@ -116,6 +116,12 @@ public:
   }
 
   /**
+   * Get CPU information.
+   */
+  static int GetCPUCount();
+  static std::string GetCPUModel();
+
+  /**
    * Get current working directory.
    */
   static std::string GetCurrentDirectory();

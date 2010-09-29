@@ -23,6 +23,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/fiber_safe.h>
 #include <runtime/base/debuggable.h>
+#include <runtime/base/runtime_option.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -144,7 +145,9 @@ public:
    */
   void enableCompression() { m_compression = true;}
   void disableCompression() { m_compression = false;}
-  bool isCompressionEnabled() const { return m_compression;}
+  bool isCompressionEnabled() const {
+    return m_compression && RuntimeOption::GzipCompressionLevel;
+  }
 
   /**
    * Set cookie response header.

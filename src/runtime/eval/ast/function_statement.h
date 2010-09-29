@@ -49,6 +49,7 @@ public:
   bool isOptional() const;
   void addNullDefault(void *parser);
   int argNum() const { return m_argNum; }
+  const std::string &type() const { return m_type; }
 private:
   std::string m_type;
   NamePtr m_name;

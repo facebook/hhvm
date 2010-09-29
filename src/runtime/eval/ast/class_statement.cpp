@@ -687,17 +687,17 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
                   const vector<ParameterPtr> &p1 = (*it)->getParams();
                   const vector<const ClassInfo::ParameterInfo *> &p2 =
                     meth->parameters;
-                  for (uint i = 0; i < p2.size(); ++i) {
+                  for (uint i = 0; !incompatible && i < p2.size(); ++i) {
                     if (i >= p1.size()) {
                       if (!p2[i]->value) {
                         incompatible = true;
-                        break;
                       }
                     } else if ((!p1[i]->isRef() !=
                           !p2[i]->attribute & ClassInfo::IsReference) ||
                         !p1[i]->isOptional() != !p2[i]->value) {
                       incompatible = true;
-                      break;
+                    }  else if (p1[i]->type() != p2[i]->type) {
+                      incompatible = true;
                     }
                   }
                 }
@@ -714,16 +714,16 @@ void ClassStatement::semanticCheck(const ClassStatement *cls)
             } else {
               const vector<ParameterPtr> &p1 = (*it)->getParams();
               const vector<ParameterPtr> &p2 = m->getParams();
-              for (uint i = 0; i < p2.size(); ++i) {
+              for (uint i = 0; !incompatible && i < p2.size(); ++i) {
                 if (i >= p1.size()) {
                   if (!p2[i]->isOptional()) {
                     incompatible = true;
-                    break;
                   }
                 } else if (p1[i]->isRef() != p2[i]->isRef() ||
                     p1[i]->isOptional() != p2[i]->isOptional()) {
                   incompatible = true;
-                  break;
+                } else if (p1[i]->type() != p2[i]->type()) {
+                  incompatible = true;
                 }
               }
             }

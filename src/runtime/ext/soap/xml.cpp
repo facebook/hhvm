@@ -88,7 +88,9 @@ xmlDocPtr soap_xmlParseFile(const char *filename) {
   if (!same(content, false)) {
     String scontent = content.toString();
     xmlDocPtr ret = soap_xmlParseMemory(scontent.data(), scontent.size());
-    ret->URL = xmlCharStrdup(filename);
+    if (ret) {
+      ret->URL = xmlCharStrdup(filename);
+    }
     return ret;
   }
   return NULL;

@@ -75,7 +75,6 @@ void EchoStatement::setNthKid(int n, ConstructPtr cp) {
 
 StatementPtr EchoStatement::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_exp);
-  if (!m_exp->hasEffect()) m_exp->stripConcat();
   return StatementPtr();
 }
 

@@ -62,6 +62,7 @@ extern StaticString s_sys_ss44934786;
 extern StaticString s_sys_ss6d03a6ea;
 extern StaticString s_sys_ss0af50f06;
 extern StaticString s_sys_ss25c683eb;
+extern StaticString s_sys_ss0799d76e;
 extern StaticString s_sys_ss371013f8;
 extern StaticString s_sys_ss2a0ccb7a;
 extern StaticString s_sys_ss60465f1d;

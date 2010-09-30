@@ -244,10 +244,9 @@ void RequestInjection::checkSurprise(ThreadInfo *info) {
   if (do_signaled) f_pcntl_signal_dispatch();
 }
 
-void get_call_info_or_fail(const CallInfo *&ci, void *&extra,
-    const char *s, int64 hash /* = -1 */) {
-  if (!get_call_info(ci, extra, s, hash)) {
-    throw InvalidFunctionCallException(s);
+void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name) {
+  if (!get_call_info(ci, extra, name->data(), name->hash())) {
+    throw InvalidFunctionCallException(name->data());
   }
 }
 

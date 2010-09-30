@@ -593,8 +593,7 @@ Variant o_invoke_failed(const char *cls, const char *meth,
                         bool fatal = true);
 
 
-void get_call_info_or_fail(const CallInfo *&ci, void *&extra,
-                           const char *s, int64 hash = -1);
+void get_call_info_or_fail(const CallInfo *&ci, void *&extra, CStrRef name);
 
 /**
  * When fatal coding errors are transformed to this function call.

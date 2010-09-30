@@ -2154,7 +2154,7 @@ Variant c_SplFileObject::t_fscanf(CVarRef v_format) {
   {
     const CallInfo *cit1 = NULL;
     void *vt1 = NULL;
-    get_call_info_or_fail(cit1, vt1, "hphp_splfileobject_fscanf", 0x6DB71D850799D76ELL);
+    get_call_info_or_fail(cit1, vt1, NAMSTR(s_sys_ss0799d76e, "hphp_splfileobject_fscanf"));
     return (cit1->getFuncFewArgs())(vt1, 1, GET_THIS(), null, null, null, null, null);
   }
 } /* function */

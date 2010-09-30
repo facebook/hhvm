@@ -1751,7 +1751,7 @@ bool c_ArrayIterator::t_uksort(Variant v_cmp_function) {
   {
     const CallInfo *cit1 = NULL;
     void *vt1 = NULL;
-    get_call_info_or_fail(cit1, vt1, "uksort", 0x4842AF70A71BE6C4LL);
+    get_call_info_or_fail(cit1, vt1, NAMSTR(s_sys_ss58e4193c, "uksort"));
     return toBoolean((cit1->getFuncFewArgs())(vt1, 1, ref(v_cmp_function), null, null, null, null, null));
   }
 } /* function */
@@ -3692,7 +3692,7 @@ Variant c_RecursiveDirectoryIterator::t_seek(CVarRef v_position) {
   {
     const CallInfo *cit30 = NULL;
     void *vt30 = NULL;
-    get_call_info_or_fail(cit30, vt30, "hphp_recursivedirectoryiterator_seek", 0x09A98E99D51E8C2BLL);
+    get_call_info_or_fail(cit30, vt30, NAMSTR(s_sys_ss2ae173d5, "hphp_recursivedirectoryiterator_seek"));
     return ((cit30->getFuncFewArgs())(vt30, 1, GET_THIS(), null, null, null, null, null), null);
   }
 } /* function */

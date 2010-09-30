@@ -1081,8 +1081,10 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
             m_ciTemp, escapedName.c_str());
       }
     } else {
-      cg_printf("get_call_info_or_fail(cit%d, vt%d, \"%s\"",
-          m_ciTemp, m_ciTemp, escapedName.c_str());
+      cg_printf("get_call_info_or_fail(cit%d, vt%d, ", m_ciTemp, m_ciTemp);
+      cg_printString(m_name, ar);
+      cg_printf(");\n");
+      needHash = false;
     }
   } else {
     const MethodSlot *ms = NULL;

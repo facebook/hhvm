@@ -1229,7 +1229,7 @@ Variant &Variant::operator/=(double n) {
   return *this;
 }
 
-double operator/(double n, CVarRef v) {
+Variant operator/(double n, CVarRef v) {
   if (v.is(KindOfArray)) {
     throw BadArrayOperandException();
   }
@@ -1241,7 +1241,23 @@ double operator/(double n, CVarRef v) {
   return n / dval;
 }
 
-double operator/(int n, CVarRef v) {
+Variant operator/(bool n, CVarRef v) {
+  return toInt64(n) / v;
+}
+
+Variant operator/(char n, CVarRef v) {
+  return toInt64(n) / v;
+}
+
+Variant operator/(short n, CVarRef v) {
+  return toInt64(n) / v;
+}
+
+Variant operator/(int n, CVarRef v) {
+  return toInt64(n) / v;
+}
+
+Variant operator/(int64 n, CVarRef v) {
   if (v.is(KindOfArray)) {
     throw BadArrayOperandException();
   }

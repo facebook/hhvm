@@ -1792,7 +1792,7 @@ bool TestCodeRun::TestScalarArray() {
       "function test2() { $a = array(__FUNCTION__, __LINE__); return $a; }\n"
       "var_dump(test1()); var_dump(test2());");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "define('VALUE', 1);"
        "function func($params) {"
        " var_dump($params);"
@@ -4609,7 +4609,7 @@ bool TestCodeRun::TestObjectMagicMethod() {
        "}\n"
        "test();\n");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X {"
        "  public $real = 1;"
        "  function __get($name) { echo 'get:'; var_dump($name); return 'abc'; }"
@@ -6827,7 +6827,7 @@ bool TestCodeRun::TestCompilation() {
        "  }"
        "}");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X {"
        "  static function g() {}"
        "};"
@@ -6882,7 +6882,7 @@ bool TestCodeRun::TestCompilation() {
        "  foo()->bar();"
        "}");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function checker($x) {"
        "  $msg = foo();"
        "  $notice = $msg['title'].'. '.$msg['body'];"
@@ -6892,7 +6892,21 @@ bool TestCodeRun::TestCompilation() {
        "  $x = @$x['b'];"
        "  return $a - $b + $x;"
        "}");
-
+  MVCR("<?php "
+       "class C {"
+       "  function foo($a) {"
+       "    var_dump($this + $a);"
+       "    var_dump($this - $a);"
+       "    var_dump($this * $a);"
+       "    var_dump($this / $a);"
+       "    var_dump($a + $this);"
+       "    var_dump($a - $this);"
+       "    var_dump($a * $this);"
+       "    var_dump($a / $this);"
+       "  }"
+       "}"
+       "$obj = new C;"
+       "$obj->foo(1);");
   return true;
 }
 
@@ -6941,7 +6955,7 @@ bool TestCodeRun::TestReflection() {
       "class B extends A { function bar() {}}"
       "var_dump(get_class_methods(new B()));");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X {"
        "  public function a() { var_dump(get_class_methods($this)); }"
        "  protected function b() {}"
@@ -7487,14 +7501,14 @@ bool TestCodeRun::TestSuperGlobals() {
        "  var_dump($_SERVER['foo']);"
        "  }"
        "test();");
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function test() {"
        "  $_POST = array('HELLO' => 1);"
        "}"
        "test();"
        "var_dump($_POST);");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X {"
        "  static function test() {"
        "    var_dump(__FUNCTION__);"
@@ -8038,7 +8052,7 @@ bool TestCodeRun::TestIfStatement() {
       "  function bar() { echo \"bar\\n\"; }"
       "}");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function test($a,$b = 0) {"
        "  if ($a == 2) {"
        "    if ($b == 1) {"
@@ -10089,7 +10103,7 @@ bool TestCodeRun::TestEvalOrder() {
        "}"
        "foo(new C);");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X {"
        "  function __destruct() { var_dump('done'); }"
        "}"
@@ -10102,7 +10116,7 @@ bool TestCodeRun::TestEvalOrder() {
        "  var_dump('end');"
        "}"
        "g();");
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function foo($v) {"
        "  $a = array('key' => &$v);"
        "  return $a;"
@@ -10194,7 +10208,7 @@ bool TestCodeRun::TestEvalOrder() {
        "dump($a.$a, $a = 'bar');");
 
   if (Option::EnableEval < Option::FullEval) {
-    MVCR("<?php ;"
+    MVCR("<?php "
          "function f($x) {"
          "  global $a;"
          "  var_dump($x, $a);"
@@ -11909,7 +11923,7 @@ bool TestCodeRun::TestAssignment() {
       "var_dump($obj);"
       "$obj->bar();");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "class X"
        "{"
        "  function __destruct() { var_dump('destruct'); }"
@@ -11922,7 +11936,7 @@ bool TestCodeRun::TestAssignment() {
        "}"
        "foo();");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function e() { return 'hello'; }"
        "function foo() {"
        "  $expected = e();"
@@ -12982,7 +12996,7 @@ bool TestCodeRun::TestUselessAssignment() {
       "}"
       "foo();");
 
-  MVCR("<?php ;"
+  MVCR("<?php "
        "function bug( $flag ) {"
        "  $tag = '';"
        "  if ($flag) {"

@@ -392,14 +392,15 @@ void SharedStoreStats::add(SharedValueProfile *svp) {
 void SharedStoreStats::onClear() {
   lock();
   StatsMap::iterator iter;
-  for (iter = s_statsMap.begin(); iter != s_statsMap.end(); ++iter) {
-    delete iter->second;
+  for (iter = s_statsMap.begin(); iter != s_statsMap.end();) {
+    delete (iter++)->second;
   }
   s_statsMap.clear();
   if (RuntimeOption::EnableAPCSizeDetail) {
-    for (iter = s_detailMap.begin(); iter != s_detailMap.end(); ++iter) {
-      delete iter->second;
+    for (iter = s_detailMap.begin(); iter != s_detailMap.end();) {
+      delete (iter++)->second;
     }
+    s_detailMap.clear();
   }
   resetStats();
   unlock();

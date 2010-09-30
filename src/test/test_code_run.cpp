@@ -398,8 +398,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestArrayIterator);
   RUN_TEST(TestArrayForEach);
   RUN_TEST(TestArrayAssignment);
-  RUN_TEST(TestArrayMerge);
-  RUN_TEST(TestArrayUnique);
+  RUN_TEST(TestArrayFunctions);
   RUN_TEST(TestScalarArray);
   RUN_TEST(TestRange);
   RUN_TEST(TestVariant);
@@ -2907,7 +2906,22 @@ bool TestCodeRun::TestArrayAssignment() {
   return true;
 }
 
-bool TestCodeRun::TestArrayMerge() {
+bool TestCodeRun::TestArrayFunctions() {
+  MVCR("<?php\n"
+       "$a = array(\n"
+       "  array('a' => 'a'),\n"
+       "  array('b' => 'bb'),\n"
+       "  array('c' => 'cc'),\n"
+       ");\n"
+       "\n"
+       "$refs = array();\n"
+       "foreach ($a as &$arr) {\n"
+       "  $refs[] = &$arr;\n"
+       "}\n"
+       "array_splice($a, 1, 1);\n"
+       "var_dump($a);\n"
+      );
+
   MVCR("<?php\n"
        "$x = array('x' => 'y');\n"
        "$a = array('a1' => $x, 'a2' => $x);\n"
@@ -2937,10 +2951,7 @@ bool TestCodeRun::TestArrayMerge() {
       "var_dump(array_merge($a, array('b' => 2)));");
   MVCR("<?php $a = array('a' => 1, 'b' => 3); "
       "var_dump(array_merge($a, array('c' => 2)));");
-  return true;
-}
 
-bool TestCodeRun::TestArrayUnique() {
   MVCR("<?php "
       "var_dump(array_unique(array(array(1,2), array(1,2), array(3,4),)));");
   MVCR("<?php "

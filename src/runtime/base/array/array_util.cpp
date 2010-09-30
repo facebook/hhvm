@@ -163,20 +163,41 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int length /* = 0 */,
   Array out_hash = Array::Create();
   int pos = 0;
   ArrayIter iter(input);
+  bool supportRef = input->supportValueRef();
   for (; pos < offset && iter; ++pos, ++iter) {
-    if (iter.first().isNumeric()) {
-      out_hash.append(iter.second());
+    if (supportRef) {
+      CVarRef v = iter.secondRef();
+      if (v.isReferenced()) v.setContagious();
+      if (iter.first().isNumeric()) {
+        out_hash.append(v);
+      } else {
+        out_hash.set(iter.first(), v);
+      }
     } else {
-      out_hash.set(iter.first(), iter.second());
+      if (iter.first().isNumeric()) {
+        out_hash.append(iter.second());
+      } else {
+        out_hash.set(iter.first(), iter.second());
+      }
     }
   }
 
   for (; pos < offset + length && iter; ++pos, ++iter) {
     if (removed) {
-      if (iter.first().isNumeric()) {
-        removed->append(iter.second());
+      if (supportRef) {
+        CVarRef v = iter.secondRef();
+        if (v.isReferenced()) v.setContagious();
+        if (iter.first().isNumeric()) {
+          removed->append(v);
+        } else {
+          removed->set(iter.first(), v);
+        }
       } else {
-        removed->set(iter.first(), iter.second());
+        if (iter.first().isNumeric()) {
+          removed->append(iter.second());
+        } else {
+          removed->set(iter.first(), iter.second());
+        }
       }
     }
   }
@@ -184,15 +205,31 @@ Variant ArrayUtil::Splice(CArrRef input, int offset, int length /* = 0 */,
   Array arr = replacement.toArray();
   if (!arr.empty()) {
     for (ArrayIter iter(arr); iter; ++iter) {
-      out_hash.append(iter.second());
+      if (supportRef) {
+        CVarRef v = iter.secondRef();
+        if (v.isReferenced()) v.setContagious();
+        out_hash.append(v);
+      } else {
+        out_hash.append(iter.second());
+      }
     }
   }
 
   for (; iter; ++iter) {
-    if (iter.first().isNumeric()) {
-      out_hash.append(iter.second());
+    if (supportRef) {
+      CVarRef v = iter.secondRef();
+      if (v.isReferenced()) v.setContagious();
+      if (iter.first().isNumeric()) {
+        out_hash.append(v);
+      } else {
+        out_hash.set(iter.first(), v);
+      }
     } else {
-      out_hash.set(iter.first(), iter.second());
+      if (iter.first().isNumeric()) {
+        out_hash.append(iter.second());
+      } else {
+        out_hash.set(iter.first(), iter.second());
+      }
     }
   }
 

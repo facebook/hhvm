@@ -214,11 +214,17 @@ static void lcg_seed() {
   RandData *data = s_rand_data.get();
   struct timeval tv;
   if (gettimeofday(&tv, NULL) == 0) {
-    data->lcg_s1 = tv.tv_sec ^ (~tv.tv_usec);
+    data->lcg_s1 = tv.tv_sec ^ (tv.tv_usec<<11);
   } else {
     data->lcg_s1 = 1;
   }
   data->lcg_s2 = (long)getpid();
+
+  /* Add entropy to s2 by calling gettimeofday() again */
+  if (gettimeofday(&tv, NULL) == 0) {
+    data->lcg_s2 ^= (tv.tv_usec<<11);
+  }
+
   data->lcg_seeded = true;
 }
 

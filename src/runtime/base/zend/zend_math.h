@@ -80,7 +80,8 @@ namespace HPHP {
                             ((__n) / ((__tmax) + 1.0)))
 
 #define GENERATE_SEED() \
-  (long) (time(0) * getpid() * 1000000 * math_combined_lcg())
+  (((long) (time(0) * getpid())) ^ ((long) (1000000.0 * math_combined_lcg())))
+
 
 ///////////////////////////////////////////////////////////////////////////////
 

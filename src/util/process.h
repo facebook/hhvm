@@ -17,13 +17,7 @@
 #ifndef __PROCESS_H__
 #define __PROCESS_H__
 
-#include <string>
-#include <vector>
-#include <pthread.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <limits.h>
-#include <string.h>
+#include "base.h"
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,7 +76,7 @@ public:
   }
 
   /**
-   * Process identifier.
+   * Parent's process identifier.
    */
   static pid_t GetParentProcessId() {
     return getppid();
@@ -113,6 +107,13 @@ public:
    */
   static pthread_t GetThreadId() {
     return pthread_self();
+  }
+
+  /*
+   * Thread's process identifier.
+   */
+  static pid_t GetThreadPid() {
+    return syscall(2);
   }
 
   /**

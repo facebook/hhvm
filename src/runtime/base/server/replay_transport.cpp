@@ -18,6 +18,7 @@
 #include <runtime/base/string_util.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <runtime/base/zend/zend_string.h>
+#include <util/process.h>
 
 using namespace std;
 
@@ -28,7 +29,15 @@ void ReplayTransport::recordInput(Transport* transport, const char *filename) {
   ASSERT(transport);
 
   Hdf hdf;
-  hdf["thread"] = (int64)pthread_self();
+
+  char buf[32];
+  snprintf(buf, sizeof(buf), "%u", Process::GetProcessId());
+  hdf["pid"] = string(buf);
+  snprintf(buf, sizeof(buf), "%llx", (int64)Process::GetThreadId());
+  hdf["tid"] = string(buf);
+  snprintf(buf, sizeof(buf), "%u", Process::GetThreadPid());
+  hdf["tpid"] = string(buf);
+
   hdf["get"] = (transport->getMethod() == GET);
   hdf["url"] = transport->getUrl();
   hdf["remote_host"] = transport->getRemoteHost();

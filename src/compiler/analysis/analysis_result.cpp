@@ -1435,9 +1435,6 @@ void AnalysisResult::outputAllCPP(CodeGenerator &cg) {
     cg_printInclude("<runtime/base/hphp.h>");
     cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
     cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-    if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
-      cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
-    }
     cg_printf("\n");
   }
 
@@ -1537,9 +1534,6 @@ void AnalysisResult::outputCPPClassMapFile() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
-    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
-  }
   cg_printf("\n");
   cg_printf("using namespace std;\n");
 
@@ -2962,7 +2956,8 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if (Option::PrecomputeLiteralStrings || Option::UseNamedLiteralString) {
+  if ((Option::PrecomputeLiteralStrings || Option::UseNamedLiteralString) &&
+      (part == 1 || part == 2)) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }
   if (part == 1) {
@@ -3321,9 +3316,6 @@ void AnalysisResult::outputCPPMain() {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
-    cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
-  }
 
   cg_printf("\n");
   cg_printf("using namespace std;\n");

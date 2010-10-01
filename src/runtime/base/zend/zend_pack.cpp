@@ -17,6 +17,7 @@
 
 #include <runtime/base/zend/zend_pack.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 
 using namespace std;

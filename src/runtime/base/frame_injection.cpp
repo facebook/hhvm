@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 #include <runtime/base/types.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/source_info.h>
 #include <runtime/base/class_info.h>

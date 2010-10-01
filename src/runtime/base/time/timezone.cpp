@@ -18,6 +18,7 @@
 #include <runtime/base/complex_types.h>
 #include <runtime/base/time/datetime.h>
 #include <runtime/base/execution_context.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_error.h>
 #include <util/logger.h>

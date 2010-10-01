@@ -30,6 +30,7 @@
 #include <compiler/parser/parser.h>
 #include <util/hash.h>
 #include <runtime/base/string_data.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_printf.h>

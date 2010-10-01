@@ -17,6 +17,7 @@
 #include <runtime/base/util/php_thrift_buffer.h>
 #include <runtime/base/array/array_init.h>
 #include <runtime/base/externals.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 
 namespace HPHP {

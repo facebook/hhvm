@@ -18,6 +18,7 @@
 #include <runtime/base/zend/zend_scanf.h>
 
 #include <runtime/base/complex_types.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 
 namespace HPHP {

@@ -22,6 +22,7 @@
 #include <compiler/expression/scalar_expression.h>
 #include <compiler/expression/constant_expression.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/zend/zend_string.h>

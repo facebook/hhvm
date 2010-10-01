@@ -17,6 +17,7 @@
 #ifndef __HPHP_COMPARISONS_H__
 #define __HPHP_COMPARISONS_H__
 
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/complex_types.h>
 
@@ -36,8 +37,6 @@ inline bool same(CVarRef v1, CArrRef v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, CObjRef v2)  { return v1.same(v2);}
 inline bool same(CVarRef v1, CVarRef v2)  { return v1.same(v2);}
 
-inline bool same_rev(CVarRef v2, CVarRef v1)  { return v1.same(v2);}
-
 inline bool equal(CVarRef v1, bool    v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, char    v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, short   v2) { return v1.equal(v2);}
@@ -49,8 +48,6 @@ inline bool equal(CVarRef v1, litstr  v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, CArrRef v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, CObjRef v2) { return v1.equal(v2);}
 inline bool equal(CVarRef v1, CVarRef v2) { return v1.equal(v2);}
-
-inline bool equal_rev(CVarRef v2, CVarRef v1) { return v1.equal(v2);}
 
 inline bool less(CVarRef v1, bool    v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, char    v2)  { return v1.less(v2);}
@@ -64,8 +61,6 @@ inline bool less(CVarRef v1, CArrRef v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, CObjRef v2)  { return v1.less(v2);}
 inline bool less(CVarRef v1, CVarRef v2)  { return v1.less(v2);}
 
-inline bool less_rev(CVarRef v2, CVarRef v1)  { return v1.less(v2);}
-
 inline bool more(CVarRef v1, bool    v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, char    v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, short   v2)  { return v1.more(v2);}
@@ -77,8 +72,6 @@ inline bool more(CVarRef v1, litstr  v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, CArrRef v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, CObjRef v2)  { return v1.more(v2);}
 inline bool more(CVarRef v1, CVarRef v2)  { return v1.more(v2);}
-
-inline bool more_rev(CVarRef v2, CVarRef v1)  { return v1.more(v2);}
 
 ///////////////////////////////////////////////////////////////////////////////
 // bool
@@ -597,15 +590,7 @@ inline bool more(CObjRef v1, CVarRef v2)  { return less(v2, v1);}
  */
 bool not_more(CVarRef v1, CVarRef v2);
 
-inline bool not_more_rev(CVarRef v2, CVarRef v1) {
-  return not_more(v1, v2);
-}
-
 bool not_less(CVarRef v1, CVarRef v2);
-
-inline bool not_less_rev(CVarRef v2, CVarRef v1) {
-  return not_less(v1, v2);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

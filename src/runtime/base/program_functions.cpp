@@ -16,6 +16,7 @@
 
 #include <runtime/base/types.h>
 #include <runtime/base/program_functions.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/execution_context.h>
 #include <runtime/base/runtime_option.h>

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/shared/shared_map.h>
 #include <runtime/base/array/zend_array.h>
 #include <runtime/base/runtime_option.h>

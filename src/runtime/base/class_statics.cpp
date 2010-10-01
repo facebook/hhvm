@@ -16,6 +16,7 @@
 #include <runtime/base/class_statics.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/runtime_error.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 
 namespace HPHP {

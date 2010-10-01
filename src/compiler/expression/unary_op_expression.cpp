@@ -30,6 +30,7 @@
 #include <compiler/expression/constant_expression.h>
 #include <compiler/expression/binary_op_expression.h>
 #include <compiler/expression/encaps_list_expression.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <compiler/parser/parser.h>
 

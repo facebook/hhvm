@@ -26,6 +26,7 @@
 #include <runtime/base/macros.h>
 #include <runtime/base/zend/zend_functions.h>
 #include <util/exception.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/string_offset.h>

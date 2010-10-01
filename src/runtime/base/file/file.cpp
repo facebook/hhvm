@@ -23,6 +23,7 @@
 #include <runtime/base/file/url_file.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/util/string_buffer.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/server/static_content_cache.h>
 #include <runtime/base/server/virtual_host.h>

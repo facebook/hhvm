@@ -16,6 +16,7 @@
 
 #include <runtime/base/fiber_async_func.h>
 #include <runtime/base/program_functions.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/resource_data.h>
 #include <runtime/base/fiber_reference_map.h>

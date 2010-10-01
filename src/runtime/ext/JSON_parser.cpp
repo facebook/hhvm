@@ -31,6 +31,7 @@ SOFTWARE.
 #include <stdio.h>
 #include <runtime/base/util/string_buffer.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <system/gen/php/classes/stdclass.h>
 

@@ -14,6 +14,7 @@
    +----------------------------------------------------------------------+
 */
 
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/hphp_ffi.h>
 #include <runtime/base/complex_types.h>
 #include <runtime/base/array/array_data.h>

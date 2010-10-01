@@ -1229,46 +1229,6 @@ Variant &Variant::operator/=(double n) {
   return *this;
 }
 
-Variant operator/(double n, CVarRef v) {
-  if (v.is(KindOfArray)) {
-    throw BadArrayOperandException();
-  }
-  double dval = v.toDouble();
-  if (dval == 0.0) {
-    raise_warning("Division by zero");
-    return false;
-  }
-  return n / dval;
-}
-
-Variant operator/(bool n, CVarRef v) {
-  return toInt64(n) / v;
-}
-
-Variant operator/(char n, CVarRef v) {
-  return toInt64(n) / v;
-}
-
-Variant operator/(short n, CVarRef v) {
-  return toInt64(n) / v;
-}
-
-Variant operator/(int n, CVarRef v) {
-  return toInt64(n) / v;
-}
-
-Variant operator/(int64 n, CVarRef v) {
-  if (v.is(KindOfArray)) {
-    throw BadArrayOperandException();
-  }
-  double dval = v.toDouble();
-  if (dval == 0.0) {
-    raise_warning("Division by zero");
-    return false;
-  }
-  return n / dval;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // modulus
 

@@ -16,6 +16,7 @@
 
 #include <runtime/base/ini_setting.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/runtime_option.h>
 #include <runtime/base/timeout_thread.h>

@@ -16,6 +16,7 @@
 
 #include <runtime/base/complex_types.h>
 #include <runtime/base/string_offset.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/comparisons.h>
 #include <runtime/base/variable_serializer.h>

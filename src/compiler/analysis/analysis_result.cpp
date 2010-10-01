@@ -3611,6 +3611,7 @@ void AnalysisResult::outputJavaFFICppImpl() {
   cg_printInclude("<jni.h>");
   cg_printInclude("<runtime/base/hphp_ffi.h>");
   cg_printInclude("<runtime/base/object_data.h>");
+  cg_printInclude("<runtime/base/type_conversions.h>");
   cg_printInclude("<runtime/base/builtin_functions.h>");
   cg_printInclude("<runtime/ext/ext.h>");
   cg_printInclude("\"stubs.h\"");

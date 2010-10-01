@@ -17,6 +17,7 @@
 #include <runtime/base/zend/zend_collator.h>
 #include <runtime/base/zend/zend_strtod.h>
 #include <runtime/base/zend/intl_convert.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>

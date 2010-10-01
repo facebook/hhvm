@@ -19,6 +19,7 @@
 #include <runtime/base/shared/process_shared_variant.h>
 #include <runtime/base/shared/thread_shared_variant.h>
 #include <runtime/base/runtime_option.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/memory/leak_detectable.h>
 #include <runtime/base/server/server_stats.h>

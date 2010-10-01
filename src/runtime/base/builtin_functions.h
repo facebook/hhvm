@@ -20,6 +20,7 @@
 #include <runtime/base/execution_context.h>
 #include <runtime/base/types.h>
 #include <runtime/base/complex_types.h>
+#include <runtime/base/binary_operations.h>
 #include <runtime/base/string_offset.h>
 #include <runtime/base/frame_injection.h>
 #include <runtime/base/intercept.h>
@@ -53,31 +54,19 @@
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
-// type conversion functions
+// empty
 
-inline bool toBoolean(bool    v) { return v;}
-inline bool toBoolean(char    v) { return v;}
-inline bool toBoolean(short   v) { return v;}
-inline bool toBoolean(int     v) { return v;}
-inline bool toBoolean(int64   v) { return v;}
-inline bool toBoolean(double  v) { return v;}
-inline bool toBoolean(litstr  v) { return v && *v;}
-inline bool toBoolean(CStrRef v) { return v.toBoolean();}
-inline bool toBoolean(CArrRef v) { return v.toBoolean();}
-inline bool toBoolean(CObjRef v) { return v.toBoolean();}
-inline bool toBoolean(CVarRef v) { return v.toBoolean();}
-
-inline bool empty(bool    v) { return !toBoolean(v);}
-inline bool empty(char    v) { return !toBoolean(v);}
-inline bool empty(short   v) { return !toBoolean(v);}
-inline bool empty(int     v) { return !toBoolean(v);}
-inline bool empty(int64   v) { return !toBoolean(v);}
-inline bool empty(double  v) { return !toBoolean(v);}
-inline bool empty(litstr  v) { return !toBoolean(v);}
-inline bool empty(CStrRef v) { return !toBoolean(v);}
-inline bool empty(CArrRef v) { return !toBoolean(v);}
-inline bool empty(CObjRef v) { return !toBoolean(v);}
-inline bool empty(CVarRef v) { return !toBoolean(v);}
+inline bool empty(bool    v) { return !v;}
+inline bool empty(char    v) { return !v;}
+inline bool empty(short   v) { return !v;}
+inline bool empty(int     v) { return !v;}
+inline bool empty(int64   v) { return !v;}
+inline bool empty(double  v) { return !v;}
+inline bool empty(litstr  v) { return !v || !*v;}
+inline bool empty(CStrRef v) { return !v.toBoolean();}
+inline bool empty(CArrRef v) { return !v.toBoolean();}
+inline bool empty(CObjRef v) { return !v.toBoolean();}
+inline bool empty(CVarRef v) { return !v.toBoolean();}
 
 bool empty(CVarRef v, bool    offset);
 bool empty(CVarRef v, char    offset);
@@ -90,104 +79,6 @@ bool empty(CVarRef v, CObjRef offset);
 bool empty(CVarRef v, CVarRef offset);
 bool empty(CVarRef v, litstr  offset, bool isString = false);
 bool empty(CVarRef v, CStrRef offset, bool isString = false);
-
-inline char toByte(bool    v) { return v ? 1 : 0;}
-inline char toByte(char    v) { return v;}
-inline char toByte(short   v) { return v;}
-inline char toByte(int     v) { return v;}
-inline char toByte(int64   v) { return v;}
-inline char toByte(double  v) { return (char)v;}
-inline char toByte(litstr  v) { return StringData(v).toByte();}
-inline char toByte(CStrRef v) { return v.toByte();}
-inline char toByte(CArrRef v) { return v.toByte();}
-inline char toByte(CObjRef v) { return v.toByte();}
-inline char toByte(CVarRef v) { return v.toByte();}
-
-inline short toInt16(bool    v) { return v ? 1 : 0;}
-inline short toInt16(char    v) { return v;}
-inline short toInt16(short   v) { return v;}
-inline short toInt16(int     v) { return v;}
-inline short toInt16(int64   v) { return v;}
-inline short toInt16(double  v) { return (short)v;}
-inline short toInt16(litstr  v) { return StringData(v).toInt16();}
-inline short toInt16(CStrRef v) { return v.toInt16();}
-inline short toInt16(CArrRef v) { return v.toInt16();}
-inline short toInt16(CObjRef v) { return v.toInt16();}
-inline short toInt16(CVarRef v) { return v.toInt16();}
-
-inline int toInt32(bool    v) { return v ? 1 : 0;}
-inline int toInt32(char    v) { return v;}
-inline int toInt32(short   v) { return v;}
-inline int toInt32(int     v) { return v;}
-inline int toInt32(int64   v) { return v;}
-inline int toInt32(double  v) { return (int)v;}
-inline int toInt32(litstr  v) { return StringData(v).toInt32();}
-inline int toInt32(CStrRef v) { return v.toInt32();}
-inline int toInt32(CArrRef v) { return v.toInt32();}
-inline int toInt32(CObjRef v) { return v.toInt32();}
-inline int toInt32(CVarRef v) { return v.toInt32();}
-
-inline int64 toInt64(bool    v) { return v ? 1 : 0;}
-inline int64 toInt64(char    v) { return v;}
-inline int64 toInt64(short   v) { return v;}
-inline int64 toInt64(int     v) { return v;}
-inline int64 toInt64(int64   v) { return v;}
-inline int64 toInt64(double  v) {
-  return ((v > LONG_MAX) ? (uint64)v : (int64)v);
-}
-inline int64 toInt64(litstr  v) { return StringData(v).toInt64();}
-inline int64 toInt64(CStrRef v) { return v.toInt64();}
-inline int64 toInt64(CArrRef v) { return v.toInt64();}
-inline int64 toInt64(CObjRef v) { return v.toInt64();}
-inline int64 toInt64(CVarRef v) { return v.toInt64();}
-
-inline double toDouble(bool    v) { return v ? 1 : 0;}
-inline double toDouble(char    v) { return v;}
-inline double toDouble(short   v) { return v;}
-inline double toDouble(int     v) { return v;}
-inline double toDouble(int64   v) { return v;}
-inline double toDouble(double  v) { return v;}
-inline double toDouble(litstr  v) { return StringData(v).toDouble();}
-inline double toDouble(CStrRef v) { return v.toDouble();}
-inline double toDouble(CArrRef v) { return v.toDouble();}
-inline double toDouble(CObjRef v) { return v.toDouble();}
-inline double toDouble(CVarRef v) { return v.toDouble();}
-
-inline String toString(bool    v) { return v ? "1" : "";}
-inline String toString(char    v) { return (int64)v;}
-inline String toString(short   v) { return (int64)v;}
-inline String toString(int     v) { return (int64)v;}
-inline String toString(int64   v) { return v;}
-inline String toString(double  v) { return v;}
-inline String toString(litstr  v) { return v;}
-inline String toString(CStrRef v) { return v;}
-inline String toString(CArrRef v) { return "Array";}
-inline String toString(CObjRef v) { return v.toString();}
-inline String toString(CVarRef v) { return v.toString();}
-
-inline Array toArray(bool    v) { return Array::Create(v);}
-inline Array toArray(char    v) { return Array::Create(v);}
-inline Array toArray(short   v) { return Array::Create(v);}
-inline Array toArray(int     v) { return Array::Create(v);}
-inline Array toArray(int64   v) { return Array::Create(v);}
-inline Array toArray(double  v) { return Array::Create(v);}
-inline Array toArray(litstr  v) { return Array::Create(v);}
-inline Array toArray(CStrRef v) { return Array::Create(v);}
-inline Array toArray(CArrRef v) { return v;}
-inline Array toArray(CObjRef v) { return v.toArray();}
-inline Array toArray(CVarRef v) { return v.toArray();}
-
-inline Object toObject(bool    v) { return Variant(v).toObject();}
-inline Object toObject(char    v) { return Variant(v).toObject();}
-inline Object toObject(short   v) { return Variant(v).toObject();}
-inline Object toObject(int     v) { return Variant(v).toObject();}
-inline Object toObject(int64   v) { return Variant(v).toObject();}
-inline Object toObject(double  v) { return Variant(v).toObject();}
-inline Object toObject(litstr  v) { return Variant(v).toObject();}
-inline Object toObject(CStrRef v) { return Variant(v).toObject();}
-inline Object toObject(CArrRef v) { return v.toObject();}
-inline Object toObject(CObjRef v) { return v;}
-inline Object toObject(CVarRef v) { return v.toObject();}
 
 ///////////////////////////////////////////////////////////////////////////////
 // operators
@@ -218,116 +109,6 @@ inline Numeric modulo(int64 v1, int64 v2) {
 inline int64 shift_left(int64 v1, int64 v2)        { return v1 << v2; }
 inline int64 shift_right(int64 v1, int64 v2)       { return v1 >> v2; }
 
-inline bool logical_xor_rev(bool v2, bool v1)
-{ return (v1 ? 1:0) ^ (v2 ? 1:0);}
-inline Variant bitwise_or_rev(CVarRef v2, CVarRef v1)  { return v1 | v2;}
-inline Variant bitwise_and_rev(CVarRef v2, CVarRef v1) { return v1 & v2;}
-inline Variant bitwise_xor_rev(CVarRef v2, CVarRef v1) { return v1 ^ v2;}
-
-inline int64 multiply_rev(bool v2, bool v1)            { return v1 * v2;}
-inline int64 multiply_rev(bool v2, int v1)             { return v1 * v2;}
-inline int64 multiply_rev(bool v2, int64 v1)           { return v1 * v2;}
-inline double multiply_rev(bool v2, double v1)         { return v1 * v2;}
-inline Numeric multiply_rev(bool v2, CVarRef v1)       { return v1 * v2;}
-inline int64 multiply_rev(int v2, bool v1)             { return v1 * v2;}
-inline int64 multiply_rev(int v2, int v1)              { return v1 * v2;}
-inline int64 multiply_rev(int v2, int64 v1)            { return v1 * v2;}
-inline double multiply_rev(int v2, double v1)          { return v1 * v2;}
-inline Numeric multiply_rev(int v2, CVarRef v1)        { return v1 * v2;}
-inline int64 multiply_rev(int64 v2, bool v1)           { return v1 * v2;}
-inline int64 multiply_rev(int64 v2, int v1)            { return v1 * v2;}
-inline int64 multiply_rev(int64 v2, int64 v1)          { return v1 * v2;}
-inline double multiply_rev(int64 v2, double v1)        { return v1 * v2;}
-inline Numeric multiply_rev(int64 v2, CVarRef v1)      { return v1 * v2;}
-inline double multiply_rev(double v2, bool v1)         { return v1 * v2;}
-inline double multiply_rev(double v2, int v1)          { return v1 * v2;}
-inline double multiply_rev(double v2, int64 v1)        { return v1 * v2;}
-inline double multiply_rev(double v2, double v1)       { return v1 * v2;}
-inline Numeric multiply_rev(double v2, CVarRef v1)     { return v1 * v2;}
-inline Numeric multiply_rev(CVarRef v2, bool v1)       { return v1 * v2;}
-inline Numeric multiply_rev(CVarRef v2, int v1)        { return v1 * v2;}
-inline Numeric multiply_rev(CVarRef v2, int64 v1)      { return v1 * v2;}
-inline Numeric multiply_rev(CVarRef v2, double v1)     { return v1 * v2;}
-inline Numeric multiply_rev(CVarRef v2, CVarRef v1)    { return v1 * v2;}
-
-inline int64 plus_rev(bool v2, bool v1)                { return v1 + v2;}
-inline int64 plus_rev(bool v2, int v1)                 { return v1 + v2;}
-inline int64 plus_rev(bool v2, int64 v1)               { return v1 + v2;}
-inline double plus_rev(bool v2, double v1)             { return v1 + v2;}
-inline Numeric plus_rev(bool v2, CVarRef v1)           { return v1 + v2;}
-inline int64 plus_rev(int v2, bool v1)                 { return v1 + v2;}
-inline int64 plus_rev(int v2, int v1)                  { return v1 + v2;}
-inline int64 plus_rev(int v2, int64 v1)                { return v1 + v2;}
-inline double plus_rev(int v2, double v1)              { return v1 + v2;}
-inline Numeric plus_rev(int v2, CVarRef v1)            { return v1 + v2;}
-inline int64 plus_rev(int64 v2, bool v1)               { return v1 + v2;}
-inline int64 plus_rev(int64 v2, int v1)                { return v1 + v2;}
-inline int64 plus_rev(int64 v2, int64 v1)              { return v1 + v2;}
-inline double plus_rev(int64 v2, double v1)            { return v1 + v2;}
-inline Numeric plus_rev(int64 v2, CVarRef v1)          { return v1 + v2;}
-inline double plus_rev(double v2, bool v1)             { return v1 + v2;}
-inline double plus_rev(double v2, int v1)              { return v1 + v2;}
-inline double plus_rev(double v2, int64 v1)            { return v1 + v2;}
-inline double plus_rev(double v2, double v1)           { return v1 + v2;}
-inline Numeric plus_rev(double v2, CVarRef v1)         { return v1 + v2;}
-inline Numeric plus_rev(CVarRef v2, bool v1)           { return v1 + v2;}
-inline Numeric plus_rev(CVarRef v2, int v1)            { return v1 + v2;}
-inline Numeric plus_rev(CVarRef v2, int64 v1)          { return v1 + v2;}
-inline Numeric plus_rev(CVarRef v2, double v1)         { return v1 + v2;}
-inline Numeric plus_rev(CVarRef v2, CVarRef v1)        { return v1 + v2;}
-
-inline int64 minus_rev(bool v2, bool v1)               { return v1 - v2;}
-inline int64 minus_rev(bool v2, int v1)                { return v1 - v2;}
-inline int64 minus_rev(bool v2, int64 v1)              { return v1 - v2;}
-inline double minus_rev(bool v2, double v1)            { return v1 - v2;}
-inline Numeric minus_rev(bool v2, CVarRef v1)          { return v1 - v2;}
-inline int64 minus_rev(int v2, bool v1)                { return v1 - v2;}
-inline int64 minus_rev(int v2, int v1)                 { return v1 - v2;}
-inline int64 minus_rev(int v2, int64 v1)               { return v1 - v2;}
-inline double minus_rev(int v2, double v1)             { return v1 - v2;}
-inline Numeric minus_rev(int v2, CVarRef v1)           { return v1 - v2;}
-inline int64 minus_rev(int64 v2, bool v1)              { return v1 - v2;}
-inline int64 minus_rev(int64 v2, int v1)               { return v1 - v2;}
-inline int64 minus_rev(int64 v2, int64 v1)             { return v1 - v2;}
-inline double minus_rev(int64 v2, double v1)           { return v1 - v2;}
-inline Numeric minus_rev(int64 v2, CVarRef v1)         { return v1 - v2;}
-inline double minus_rev(double v2, bool v1)            { return v1 - v2;}
-inline double minus_rev(double v2, int v1)             { return v1 - v2;}
-inline double minus_rev(double v2, int64 v1)           { return v1 - v2;}
-inline double minus_rev(double v2, double v1)          { return v1 - v2;}
-inline Numeric minus_rev(double v2, CVarRef v1)        { return v1 - v2;}
-inline Numeric minus_rev(CVarRef v2, bool v1)          { return v1 - v2;}
-inline Numeric minus_rev(CVarRef v2, int v1)           { return v1 - v2;}
-inline Numeric minus_rev(CVarRef v2, int64 v1)         { return v1 - v2;}
-inline Numeric minus_rev(CVarRef v2, double v1)        { return v1 - v2;}
-inline Numeric minus_rev(CVarRef v2, CVarRef v1)       { return v1 - v2;}
-
-inline Numeric divide_rev(CVarRef v2, CVarRef v1)      { return v1 / v2; }
-inline int64 modulo_rev(int64 v2, int64 v1)            { return v1 % v2; }
-inline int64 shift_left_rev(int64 v2, int64 v1)        { return v1 << v2; }
-inline int64 shift_right_rev(int64 v2, int64 v1)       { return v1 >> v2; }
-
-inline Variant bitwise_or_assign_rev(CVarRef v2, Variant& v1)
-{ return v1 |= v2;}
-inline Variant bitwise_and_assign_rev(CVarRef v2, Variant& v1)
-{ return v1 &= v2;}
-inline Variant bitwise_xor_assign_rev(CVarRef v2, Variant& v1)
-{ return v1 ^= v2;}
-inline Variant multiply_assign_rev(CVarRef v2, Variant& v1)
-{ return v1 *= v2;}
-inline Variant plus_assign_rev(CVarRef v2, Variant& v1)
-{ return v1 += v2;}
-inline Numeric minus_assign_rev(CVarRef v2, Variant& v1)
-{ return v1 -= v2;}
-inline Numeric divide_assign_rev(CVarRef v2, Variant& v1)
-{ return v1 /= v2; }
-inline int64 modulo_assign_rev(int64 v2, Variant& v1)
-{ return v1 %= v2; }
-inline int64 shift_left_assign_rev(int64 v2, Variant& v1)
-{ return v1 <<= v2; }
-inline int64 shift_right_assign_rev(int64 v2, Variant& v1)
-{ return v1 >>= v2; }
-
 inline char    negate(char v)    { return -v; }
 inline short   negate(short v)   { return -v; }
 inline int     negate(int v)     { return -v; }
@@ -336,15 +117,6 @@ inline double  negate(double v)  { return -v; }
 inline Variant negate(CVarRef v) { return -(Variant)v; }
 
 inline String concat(CStrRef s1, CStrRef s2)         {
-  #ifndef TAINTED
-  return s1 + s2;
-  #else
-  String res = s1 + s2;
-  propagate_tainting2(s1, s2, res);
-  return res;
-  #endif
-}
-inline String concat_rev(CStrRef s2, CStrRef s1)     {
   #ifndef TAINTED
   return s1 + s2;
   #else
@@ -420,25 +192,6 @@ inline String &concat_assign(const StringOffset &s1, CStrRef s2) {
   return concat_assign(s1.lval(), s2);
 }
 
-inline String &concat_assign_rev(litstr s2, String &s1)  {
-  return concat_assign(s1, s2);
-}
-inline String &concat_assign_rev(CStrRef s2, String &s1) {
-  return concat_assign(s1, s2);
-}
-inline Variant &concat_assign_rev(litstr s2, Variant &v1) {
-  return concat_assign(v1, s2);
-}
-inline Variant &concat_assign_rev(CStrRef s2, Variant &v1) {
-  return concat_assign(v1, s2);
-}
-inline String &concat_assign_rev(litstr s2, const StringOffset &s1) {
-  return concat_assign(s1, s2);
-}
-inline String &concat_assign_rev(CStrRef s2, const StringOffset &s) {
-  return concat_assign(s, s2);
-}
-
 inline bool instanceOf(bool    v, CStrRef s) { return false;}
 inline bool instanceOf(char    v, CStrRef s) { return false;}
 inline bool instanceOf(short   v, CStrRef s) { return false;}
@@ -451,7 +204,7 @@ inline bool instanceOf(CArrRef v, CStrRef s) { return false;}
 inline bool instanceOf(CObjRef v, CStrRef s) { return v.instanceof(s);}
 inline bool instanceOf(CVarRef v, CStrRef s) {
   return v.is(KindOfObject) &&
-    toObject(v).instanceof(s);
+    v.toObject().instanceof(s);
 }
 inline bool instanceOf(ObjectData *v, CStrRef s) {
   return v && v->o_instanceof(s);

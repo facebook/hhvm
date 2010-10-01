@@ -15,6 +15,7 @@
 */
 
 #include <runtime/base/util/thrift_buffer.h>
+#include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_unserializer.h>
 

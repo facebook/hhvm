@@ -494,7 +494,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf(" &___offsetget_lval(");
       } else if (m_modifiers->isStatic() && m_stmt) {
         // Static method wrappers get generated as support methods
-        cg_printf(" %s%s(const char* cls%s", Option::MethodImplPrefix,
+        cg_printf(" %s%s(CStrRef cls%s", Option::MethodImplPrefix,
                   cg.formatLabel(m_name).c_str(),
                   funcScope->isVariableArgument() ||
                   (m_params && m_params->getCount()) ? ", " : "");
@@ -536,7 +536,7 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         cg_printf(" &%s%s::___offsetget_lval(",
                   Option::ClassPrefix, scope->getId(cg).c_str());
       } else if (m_modifiers->isStatic()) {
-        cg_printf(" %s%s::%s%s(const char* cls%s", Option::ClassPrefix,
+        cg_printf(" %s%s::%s%s(CStrRef cls%s", Option::ClassPrefix,
                   scope->getId(cg).c_str(),
                   Option::MethodImplPrefix, cg.formatLabel(m_name).c_str(),
                   funcScope->isVariableArgument() ||
@@ -704,10 +704,10 @@ void MethodStatement::outputCPPStaticMethodWrapper(CodeGenerator &cg,
   CodeGenerator::Context old = cg.getContext();
   cg.setContext(CodeGenerator::CppStaticMethodWrapper);
   funcScope->outputCPPParamsDecl(cg, ar, m_params, true);
+  cg_printf(") { %s%s%s(", type ? "return " : "", Option::MethodImplPrefix,
+            cg.formatLabel(m_name).c_str());
+  cg_printString(string(cls), ar);
   cg.setContext(old);
-  cg_printf(") { %s%s%s(\"%s\"", type ? "return " : "",
-            Option::MethodImplPrefix, cg.formatLabel(m_name).c_str(),
-            cls);
   if (funcScope->isVariableArgument()) {
     cg_printf(", num_args");
   }

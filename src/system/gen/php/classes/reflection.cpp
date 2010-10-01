@@ -1215,7 +1215,7 @@ void c_ReflectionObject::init() {
   c_ReflectionClass::init();
 }
 /* SRC: classes/reflection.php line 1287 */
-Variant c_ReflectionObject::ti_export(const char* cls, Variant v_obj, CVarRef v_ret) {
+Variant c_ReflectionObject::ti_export(CStrRef cls, Variant v_obj, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionObject, ReflectionObject::export);
   String v_str;
 
@@ -4259,7 +4259,7 @@ String c_ReflectionClass::t___tostring() {
   return toString(null);
 } /* function */
 /* SRC: classes/reflection.php line 610 */
-Variant c_ReflectionClass::ti_export(const char* cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionClass::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::export);
   p_ReflectionClass v_obj;
   String v_str;
@@ -5808,7 +5808,7 @@ String c_ReflectionExtension::t___tostring() {
   return toString(null);
 } /* function */
 /* SRC: classes/reflection.php line 1823 */
-Variant c_ReflectionExtension::ti_export(const char* cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionExtension::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::export);
   p_ReflectionExtension v_obj;
   String v_str;
@@ -7159,7 +7159,7 @@ String c_ReflectionMethod::t___tostring() {
   return toString(null);
 } /* function */
 /* SRC: classes/reflection.php line 1594 */
-Variant c_ReflectionMethod::ti_export(const char* cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::export);
   Variant v_obj;
   String v_str;
@@ -8481,7 +8481,7 @@ String c_ReflectionProperty::t___tostring() {
   return toString(null);
 } /* function */
 /* SRC: classes/reflection.php line 1346 */
-Variant c_ReflectionProperty::ti_export(const char* cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::export);
   Variant v_obj;
   String v_str;
@@ -9150,7 +9150,7 @@ String c_ReflectionFunction::t___tostring() {
   return toString(null);
 } /* function */
 /* SRC: classes/reflection.php line 492 */
-Variant c_ReflectionFunction::ti_export(const char* cls, CVarRef v_name, CVarRef v_ret) {
+Variant c_ReflectionFunction::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionFunction, ReflectionFunction::export);
   p_ReflectionFunction v_obj;
   String v_str;
@@ -10192,7 +10192,7 @@ String c_ReflectionParameter::t___tostring() {
   return toString(null);
 } /* function */
 /* SRC: classes/reflection.php line 75 */
-Variant c_ReflectionParameter::ti_export(const char* cls, CVarRef v_func, CVarRef v_param, CVarRef v_ret) {
+Variant c_ReflectionParameter::ti_export(CStrRef cls, CVarRef v_func, CVarRef v_param, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionParameter, ReflectionParameter::export);
   p_ReflectionParameter v_obj;
   String v_str;

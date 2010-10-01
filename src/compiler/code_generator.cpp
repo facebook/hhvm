@@ -408,8 +408,9 @@ int CodeGenerator::checkLiteralString(const std::string &str, int &index,
     int stringId = ar->getLiteralStringId(str, index);
     if (Option::UseNamedLiteralString) {
       ar->getFileScope()->addUsedLiteralString(str);
-      if (m_context == CppParameterDefaultValueDecl) {
-        ar->getFileScope()->addUsedDefaultValueLiteralString(str);
+      if (m_context == CppParameterDefaultValueDecl ||
+          m_context == CppStaticMethodWrapper) {
+        ar->getFileScope()->addUsedLiteralStringHeader(str);
       }
     }
     if (stringId >= 0) return stringId;

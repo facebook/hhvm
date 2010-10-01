@@ -70,7 +70,7 @@ class c_ReflectionProperty : public ExtObjectData {
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
-  public: static Variant ti_export(const char* cls, Variant v_cls, CVarRef v_name, CVarRef v_ret);
+  public: static Variant ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_getname();
   public: bool t_ispublic();
   public: bool t_isprivate();
@@ -83,7 +83,7 @@ class c_ReflectionProperty : public ExtObjectData {
   public: Variant t_setvalue(CVarRef v_obj, CVarRef v_value);
   public: Variant t_getdeclaringclass();
   public: Variant t_getdoccomment();
-  public: static Variant t_export(CVarRef v_cls, CVarRef v_name, CVarRef v_ret) { return ti_export("ReflectionProperty", v_cls, v_name, v_ret); }
+  public: static Variant t_export(CVarRef v_cls, CVarRef v_name, CVarRef v_ret) { return ti_export(NAMSTR(s_sys_ss4249a61c_1, "ReflectionProperty"), v_cls, v_name, v_ret); }
   DECLARE_METHOD_INVOKE_HELPERS(isprivate);
   DECLARE_METHOD_INVOKE_HELPERS(getvalue);
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);

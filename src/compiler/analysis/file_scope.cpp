@@ -375,7 +375,7 @@ void FileScope::outputCPPForwardDeclarations(CodeGenerator &cg,
   cg.namespaceBegin();
   cg.printSection("1. Static Strings", false);
   string str;
-  BOOST_FOREACH(str, m_usedDefaultValueLiteralStrings) {
+  BOOST_FOREACH(str, m_usedLiteralStringsHeader) {
     int index = -1;
     int stringId = cg.checkLiteralString(str, index, ar);
     assert(index != -1);
@@ -517,8 +517,8 @@ void FileScope::outputCPPForwardStaticDecl(CodeGenerator &cg,
   cg.printSection("1. Static Strings", false);
   string str;
   BOOST_FOREACH(str, m_usedLiteralStrings) {
-    if (m_usedDefaultValueLiteralStrings.find(str) !=
-        m_usedDefaultValueLiteralStrings.end()) {
+    if (m_usedLiteralStringsHeader.find(str) !=
+        m_usedLiteralStringsHeader.end()) {
       continue;
     }
     int index = -1;

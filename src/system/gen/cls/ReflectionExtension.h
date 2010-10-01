@@ -70,7 +70,7 @@ class c_ReflectionExtension : public ExtObjectData {
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
-  public: static Variant ti_export(const char* cls, CVarRef v_name, CVarRef v_ret);
+  public: static Variant ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_getname();
   public: Variant t_getversion();
   public: Variant t_getfunctions();
@@ -79,7 +79,7 @@ class c_ReflectionExtension : public ExtObjectData {
   public: Variant t_getclasses();
   public: Array t_getclassnames();
   public: Variant t_info();
-  public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export("ReflectionExtension", v_name, v_ret); }
+  public: static Variant t_export(CVarRef v_name, CVarRef v_ret) { return ti_export(NAMSTR(s_sys_ss305f9a8d_1, "ReflectionExtension"), v_name, v_ret); }
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(getfunctions);

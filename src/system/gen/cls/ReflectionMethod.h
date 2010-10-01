@@ -70,7 +70,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: String t___tostring();
-  public: static Variant ti_export(const char* cls, Variant v_cls, CVarRef v_name, CVarRef v_ret);
+  public: static Variant ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret);
   public: Variant t_invoke(int num_args, CVarRef v_obj, Array args = Array());
   public: Variant t_invokeargs(CVarRef v_obj, CVarRef v_args);
   public: Variant t_isfinal();
@@ -84,7 +84,7 @@ class c_ReflectionMethod : public c_ReflectionFunctionAbstract {
   public: Variant t_getmodifiers();
   public: Variant t_getclosure();
   public: Variant t_getdeclaringclass();
-  public: static Variant t_export(CVarRef v_cls, CVarRef v_name, CVarRef v_ret) { return ti_export("ReflectionMethod", v_cls, v_name, v_ret); }
+  public: static Variant t_export(CVarRef v_cls, CVarRef v_name, CVarRef v_ret) { return ti_export(NAMSTR(s_sys_ss0d71bb50_1, "ReflectionMethod"), v_cls, v_name, v_ret); }
   DECLARE_METHOD_INVOKE_HELPERS(isprivate);
   DECLARE_METHOD_INVOKE_HELPERS(__tostring);
   DECLARE_METHOD_INVOKE_HELPERS(isprotected);

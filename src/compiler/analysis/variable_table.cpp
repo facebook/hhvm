@@ -89,7 +89,7 @@ VariableTable::VariableTable(BlockScope &blockScope)
     : SymbolTable(blockScope), m_attribute(0), m_nextParam(0),
       m_hasGlobal(false), m_hasStatic(false),
       m_hasPrivate(false), m_hasNonStaticPrivate(false),
-      m_allVariants(false), m_allPrivateVariants(false), m_hookData(NULL) {
+      m_forcedVariants(0), m_hookData(NULL) {
 }
 
 VariableTable::~VariableTable() {
@@ -376,7 +376,7 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
   if (getAttribute(InsideStaticStatement)) {
     addStaticVariable(sym, ar);
     if (ar->needStaticArray(ar->getClassScope(), ar->getFunctionScope())) {
-      forceVariant(ar, name);
+      forceVariant(ar, name, AnyVars);
     }
   } else if (getAttribute(InsideGlobalStatement)) {
     sym->setGlobal();
@@ -577,52 +577,40 @@ void VariableTable::clearUsed()
   }
 }
 
-void VariableTable::forceVariants(AnalysisResultPtr ar) {
-  if (!m_allVariants) {
-    for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
-      Symbol *sym = m_symbolVec[i];
-      if (!sym->isPrivate()) {
-        setType(ar, sym, Type::Variant, true);
-      }
-    }
-    m_allVariants = true;
+void VariableTable::forceVariants(AnalysisResultPtr ar, int varClass) {
+  int mask = varClass & ~m_forcedVariants;
+  if (mask) {
+    if (!m_hasPrivate) mask &= ~AnyPrivateVars;
+    if (!m_hasStatic) mask &= ~AnyStaticVars;
 
-    ClassScopePtr parent = m_blockScope.getParentScope(ar);
-    if (parent) {
-      parent->getVariables()->forceVariants(ar);
-    }
-  }
-}
-
-void VariableTable::forcePrivateVariants(AnalysisResultPtr ar) {
-  if (!m_allPrivateVariants) {
-    if (m_hasPrivate) {
+    if (mask) {
       for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
         Symbol *sym = m_symbolVec[i];
-        if (sym->isPrivate()) {
+        if (sym->declarationSet() &&
+            mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
           setType(ar, sym, Type::Variant, true);
         }
       }
     }
-    m_allPrivateVariants = true;
-  }
-}
+    m_forcedVariants |= varClass;
 
-void VariableTable::forceVariant(AnalysisResultPtr ar,
-                                 const string &name) {
-  if (m_allVariants) return;
-  if (Symbol *sym = getSymbol(name)) {
-    if (sym->declarationSet() && !sym->isPrivate()) {
-      setType(ar, sym, Type::Variant, true);
+    ClassScopePtr parent = m_blockScope.getParentScope(ar);
+    if (parent) {
+      parent->getVariables()->forceVariants(ar, varClass);
     }
   }
 }
 
-void VariableTable::forcePrivateVariant(AnalysisResultPtr ar,
-                                        const string &name) {
-  if (m_allPrivateVariants || !m_hasPrivate) return;
+void VariableTable::forceVariant(AnalysisResultPtr ar,
+                                 const string &name, int varClass) {
+  int mask = varClass & ~m_forcedVariants;
+  if (!mask) return;
+  if (!m_hasPrivate) mask &= ~AnyPrivateVars;
+  if (!m_hasStatic) mask &= ~AnyStaticVars;
+  if (!mask) return;
   if (Symbol *sym = getSymbol(name)) {
-    if (sym->declarationSet() && sym->isPrivate()) {
+    if (sym->declarationSet() &&
+        mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
       setType(ar, sym, Type::Variant, true);
     }
   }
@@ -636,7 +624,8 @@ TypePtr VariableTable::setType(AnalysisResultPtr ar, const std::string &name,
 TypePtr VariableTable::setType(AnalysisResultPtr ar, Symbol *sym,
                                TypePtr type, bool coerce) {
   bool force_coerce = coerce;
-  if (sym->isPrivate() ? m_allPrivateVariants : m_allVariants) {
+  int mask = GetVarClassMask(sym->isPrivate(), sym->isStatic());
+  if (m_forcedVariants & mask) {
     type = Type::Variant;
     force_coerce = true;
   }
@@ -1213,7 +1202,7 @@ void VariableTable::outputCPPVariableInit(CodeGenerator &cg,
 void VariableTable::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
   bool inPseudoMain = isPseudoMainTable();
   if (inPseudoMain) {
-    if (m_allVariants) {
+    if (m_forcedVariants) {
       cg_printf("LVariableTable *gVariables __attribute__((__unused__)) = "
                 "(LVariableTable *)g;\n");
     } else {
@@ -1354,7 +1343,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
   }
 
   cg_printf("\n");
-  if (m_allVariants) {
+  if (m_forcedVariants) {
     cg_printf("class VariableTable : public LVariableTable {\n");
   } else {
     cg_printf("class VariableTable : public RVariableTable {\n");
@@ -1370,7 +1359,7 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     }
   }
 
-  if (m_allVariants) {
+  if (m_forcedVariants) {
     cg_indentBegin("virtual Variant &getImpl(CStrRef s) {\n");
     if (!outputCPPJumpTable(cg, ar, NULL, true, true, EitherStatic,
                             JumpReturnString)) {
@@ -1410,13 +1399,13 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
   }
 
   if (getAttribute(ContainsGetDefinedVars)) {
-    if (m_allVariants) {
+    if (m_forcedVariants) {
       cg_indentBegin("virtual Array getDefinedVars() {\n");
     } else {
       cg_indentBegin("virtual Array getDefinedVars() const {\n");
     }
     cg_printf("Array ret = %sVariableTable::getDefinedVars();\n",
-              m_allVariants ? "L" : "R");
+              m_forcedVariants ? "L" : "R");
     for (unsigned int i = 0; i < m_symbolVec.size(); i++) {
       const string &name = m_symbolVec[i]->getName();
       const char *prefix = getVariablePrefix(ar, name);
@@ -1441,12 +1430,12 @@ void VariableTable::outputCPPVariableTable(CodeGenerator &cg,
     }
     cg_printf("%sVariableTable* __attribute__((__unused__)) "
               "variables = &variableTable;\n",
-              m_allVariants ? "L" : "R");
+              m_forcedVariants ? "L" : "R");
   } else {
     cg_indentEnd("};\n");
     cg_printf("static IMPLEMENT_THREAD_LOCAL(VariableTable, "
               "g_variable_tables);\n");
-    if (m_allVariants) {
+    if (m_forcedVariants) {
       cg_printf("LVariableTable *get_variable_table() "
                 "{ return g_variable_tables.get();}\n");
     } else {

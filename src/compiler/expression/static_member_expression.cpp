@@ -135,7 +135,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
 
   if (m_class) {
     if (m_context & (LValue | RefValue | UnsetContext)) {
-      ar->forceClassVariants(getOriginalScope(ar));
+      ar->forceClassVariants(getOriginalScope(ar), true);
     }
     m_class->inferAndCheck(ar, Type::Any, false);
     m_exp->inferAndCheck(ar, Type::String, false);
@@ -201,9 +201,10 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
     }
     return m_implementedType = tp;
   } else if (cls) {
-    cls->getVariables()->forceVariants(ar);
-    if (cls == getOriginalScope(ar)) {
-      cls->getVariables()->forcePrivateVariants(ar);
+    if (m_context & (LValue | RefValue | UnsetContext)) {
+      int mask = cls == getOriginalScope(ar) ?
+        VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
+      cls->getVariables()->forceVariants(ar, mask);
     }
     m_resolvedClassName = cls->getName();
   }

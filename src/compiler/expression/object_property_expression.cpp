@@ -203,7 +203,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     // any type inference could be wrong. Instead, we just force variants on
     // all class variables.
     if (m_context & (LValue | RefValue)) {
-      ar->forceClassVariants(getOriginalScope(ar));
+      ar->forceClassVariants(getOriginalScope(ar), false);
     }
 
     return Type::Variant; // we have to use a variant to hold dynamic value
@@ -248,7 +248,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
 
   if (!cls) {
     if (m_context & (LValue | RefValue | UnsetContext)) {
-      ar->forceClassVariants(name, getOriginalScope(ar));
+      ar->forceClassVariants(name, getOriginalScope(ar), false);
     }
     return Type::Variant;
   }

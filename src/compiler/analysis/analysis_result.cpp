@@ -56,7 +56,7 @@ AnalysisResult::AnalysisResult()
   : BlockScope("Root", "", StatementPtr(), BlockScope::ProgramScope),
     m_package(NULL), m_parseOnDemand(false), m_phase(AnalyzeInclude),
     m_newlyInferred(0), m_dynamicClass(false), m_dynamicFunction(false),
-    m_classForcedVariants(false), m_optCounter(0),
+    m_optCounter(0),
     m_scalarArraysCounter(0), m_paramRTTICounter(0),
     m_insideScalarArray(false), m_inExpression(false),
     m_wrappedExpression(false),
@@ -64,6 +64,7 @@ AnalysisResult::AnalysisResult()
     m_scalarArraySortedSumLen(0), m_scalarArrayCompressedTextSize(0),
     m_system(false) {
   m_dependencyGraph = DependencyGraphPtr(new DependencyGraph());
+  m_classForcedVariants[0] = m_classForcedVariants[1] = false;
 }
 
 void AnalysisResult::appendExtraCode(const std::string &code) {
@@ -444,8 +445,13 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) {
   if (classes.size() > 0) {
     classScope->setRedeclaring(ar, classes.size());
   }
-  if (m_classForcedVariants) {
-    classScope->getVariables()->forceVariants(ar);
+
+  int mask =
+    (m_classForcedVariants[0] ? VariableTable::NonPrivateNonStaticVars : 0) |
+    (m_classForcedVariants[1] ? VariableTable::NonPrivateStaticVars : 0);
+
+  if (mask) {
+    classScope->getVariables()->forceVariants(ar, mask);
   }
   classes.push_back(classScope);
   return true;
@@ -592,7 +598,7 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
   AnalysisResultPtr ar = shared_from_this();
 
   if (system) m_system = true;
-  getVariables()->forceVariants(ar);
+  getVariables()->forceVariants(ar, VariableTable::AnyVars);
   getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   getVariables()->setAttribute(VariableTable::ContainsExtract);
   pushScope(ar);
@@ -1034,31 +1040,34 @@ string AnalysisResult::prepareFile(const char *root, const string &fileName,
   return fullPath;
 }
 
-void AnalysisResult::forceClassVariants(ClassScopePtr curScope) {
+void AnalysisResult::forceClassVariants(ClassScopePtr curScope, bool doStatic) {
   if (curScope) {
-    curScope->getVariables()->forcePrivateVariants(shared_from_this());
+    curScope->getVariables()->forceVariants(
+      shared_from_this(), VariableTable::GetVarClassMask(true, doStatic));
   }
 
-  if (m_classForcedVariants) {
+  if (m_classForcedVariants[doStatic]) {
     return;
   }
-  m_classForcedVariants = true;
+  m_classForcedVariants[doStatic] = true;
 
   AnalysisResultPtr ar = shared_from_this();
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
-      cls->getVariables()->forceVariants(ar);
+      cls->getVariables()->forceVariants(
+        ar, VariableTable::GetVarClassMask(false, doStatic));
     }
   }
 }
 
 void AnalysisResult::forceClassVariants(const std::string &name,
-                                        ClassScopePtr curScope) {
+                                        ClassScopePtr curScope, bool doStatic) {
   if (curScope) {
-    curScope->getVariables()->forcePrivateVariant(shared_from_this(), name);
+    curScope->getVariables()->forceVariant(
+      shared_from_this(), name, VariableTable::GetVarClassMask(true, doStatic));
   }
-  if (m_classForcedVariants) {
+  if (m_classForcedVariants[doStatic]) {
     return;
   }
 
@@ -1066,7 +1075,8 @@ void AnalysisResult::forceClassVariants(const std::string &name,
   for (StringToClassScopePtrVecMap::const_iterator iter = m_classDecs.begin();
        iter != m_classDecs.end(); ++iter) {
     BOOST_FOREACH(ClassScopePtr cls, iter->second) {
-      cls->getVariables()->forceVariant(ar, name);
+      cls->getVariables()->forceVariant(
+        ar, name, VariableTable::GetVarClassMask(false, doStatic));
     }
   }
 }

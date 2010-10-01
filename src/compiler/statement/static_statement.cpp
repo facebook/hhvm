@@ -147,7 +147,8 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
           SimpleVariablePtr var =
             dynamic_pointer_cast<SimpleVariable>(variable);
           var->setContext(Expression::Declaration);
-          scope->getVariables()->forceVariant(ar, var->getName());
+          scope->getVariables()->forceVariant(ar, var->getName(),
+                                              VariableTable::AnyStaticVars);
         } else {
           ASSERT(false);
         }
@@ -187,7 +188,7 @@ void StaticStatement::inferTypes(AnalysisResultPtr ar) {
         }
 
         if (variables->needLocalCopy(name)) {
-          variables->forceVariant(ar, name);
+          variables->forceVariant(ar, name, VariableTable::AnyStaticVars);
         }
       } else {
         ASSERT(false);

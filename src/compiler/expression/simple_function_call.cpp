@@ -287,7 +287,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
     }
 
     if (m_type == UnserializeFunction) {
-      ar->forceClassVariants(getOriginalScope(ar));
+      ar->forceClassVariants(getOriginalScope(ar), false);
     }
   }
 
@@ -816,7 +816,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         ar->getCodeError()->record(self, CodeError::BadDefine, self);
       }
     } else if (m_type == ExtractFunction) {
-      ar->getScope()->getVariables()->forceVariants(ar);
+      ar->getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     }
   }
 

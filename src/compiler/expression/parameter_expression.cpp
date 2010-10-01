@@ -158,7 +158,7 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     if (ar->getFunctionScope()->isDynamic() ||
         ar->getFunctionScope()->isRedeclaring() ||
         ar->getFunctionScope()->isVirtual()) {
-      variables->forceVariant(ar, m_name);
+      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
     }
     int p;
     ret = variables->checkVariable(m_name, ret, true, ar, shared_from_this(),
@@ -168,7 +168,7 @@ TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       // a function never called will have parameter types of Any.
       // Functions that it calls won't be able to accept variant unless
       // it is forced here.
-      variables->forceVariant(ar, m_name);
+      variables->forceVariant(ar, m_name, VariableTable::AnyVars);
       ret = Type::Variant;
     } else if (ar->getPhase() == AnalysisResult::LastInference &&
                !ret->getName().empty()) {

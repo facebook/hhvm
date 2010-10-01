@@ -253,7 +253,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
             funcs.insert(cur.begin(), cur.end());
           }
           m_derivesFromRedeclaring = DirectFromRedeclared;
-          getVariables()->forceVariants(ar);
+          getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
           getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
           setVolatile();
         } else if (isInterface()) {
@@ -264,7 +264,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         if (super->derivesFromRedeclaring()) {
           if (base == m_parent) {
             m_derivesFromRedeclaring = IndirectFromRedeclared;
-            getVariables()->forceVariants(ar);
+            getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
             setVolatile();
           } else if (isInterface()) {
             m_derivesFromRedeclaring = IndirectFromRedeclared;
@@ -278,7 +278,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         ar->declareUnknownClass(m_parent);
         m_derivesFromRedeclaring = DirectFromRedeclared;
         getVariables()->setAttribute(VariableTable::NeedGlobalPointer);
-        getVariables()->forceVariants(ar);
+        getVariables()->forceVariants(ar, VariableTable::AnyNonPrivateVars);
         setVolatile();
       } else {
         if (isInterface()) {
@@ -978,7 +978,7 @@ void ClassScope::setRedeclaring(AnalysisResultPtr ar, int redecId) {
       fs->setDynamic();
     }
   }
-  m_variables->forceVariants(ar);
+  m_variables->forceVariants(ar, VariableTable::AnyNonPrivateVars);
 }
 
 ClassScopePtr ClassScope::getRootParent(AnalysisResultPtr ar,

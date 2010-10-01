@@ -199,12 +199,13 @@ public:
    * Force all class variables to be variants, since l-val or reference
    * of dynamic properties are used.
    */
-  void forceClassVariants(ClassScopePtr curScope);
+  void forceClassVariants(ClassScopePtr curScope, bool doStatic);
 
   /**
    * Force specified variable of all classes to be variants.
    */
-  void forceClassVariants(const std::string &name, ClassScopePtr curScope);
+  void forceClassVariants(const std::string &name, ClassScopePtr curScope,
+                          bool doStatic);
 
   /**
    * Code generation functions.
@@ -408,7 +409,7 @@ private:
 
   bool m_dynamicClass;
   bool m_dynamicFunction;
-  bool m_classForcedVariants;
+  bool m_classForcedVariants[2];
 
   BlockScopePtrVec m_scopes;
   BlockScopePtr m_scope;

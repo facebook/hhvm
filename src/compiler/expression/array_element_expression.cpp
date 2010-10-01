@@ -270,7 +270,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
           ar->getCodeError()->record(self, CodeError::UseLDynamicVariable,
                                      self);
         }
-        ar->getVariables()->forceVariants(ar);
+        ar->getVariables()->forceVariants(ar, VariableTable::AnyVars);
         ar->getVariables()->
           setAttribute(VariableTable::ContainsLDynamicVariable);
       } else {

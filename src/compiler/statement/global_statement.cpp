@@ -113,7 +113,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       variables->addLocalGlobal(name);
       var->setContext(Expression::Declaration);
       var->inferAndCheck(ar, Type::Any, true);
-      variables->forceVariant(ar, name);
+      variables->forceVariant(ar, name, VariableTable::AnyVars);
 
       ConstructPtr decl =
         ar->getVariables()->getDeclaration(var->getName());
@@ -129,7 +129,7 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
         ar->getCodeError()->record(shared_from_this(),
                                    CodeError::UseDynamicGlobal, exp);
       }
-      variables->forceVariants(ar);
+      variables->forceVariants(ar, VariableTable::AnyVars);
       variables->setAttribute(VariableTable::ContainsLDynamicVariable);
       if (exp->is(Expression::KindOfDynamicVariable)) {
         exp->inferAndCheck(ar, Type::Any, true);

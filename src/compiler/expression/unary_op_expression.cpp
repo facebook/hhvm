@@ -361,7 +361,7 @@ TypePtr UnaryOpExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
   case T_EVAL:
     et = Type::String;
     rt = Type::Any;
-    ar->getScope()->getVariables()->forceVariants(ar);
+    ar->getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     break;
   case T_FILE:          et = rt = Type::String;                      break;
   default:

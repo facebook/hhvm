@@ -92,7 +92,7 @@ TypePtr DynamicVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
     if (ar->isFirstPass()) {
       ar->getCodeError()->record(self, CodeError::UseLDynamicVariable, self);
     }
-    ar->getScope()->getVariables()->forceVariants(ar);
+    ar->getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     ar->getScope()->
       getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
   } else {

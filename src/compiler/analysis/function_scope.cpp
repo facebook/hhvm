@@ -61,7 +61,7 @@ FunctionScope::FunctionScope(AnalysisResultPtr ar, bool method,
   bool canInline = true;
   if (inPseudoMain) {
     canInline = false;
-    m_variables->forceVariants(ar);
+    m_variables->forceVariants(ar, VariableTable::AnyVars);
     setReturnType(ar, Type::Variant);
   }
   setParamCounts(ar, minParam, maxParam);

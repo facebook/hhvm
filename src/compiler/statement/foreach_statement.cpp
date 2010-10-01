@@ -152,7 +152,7 @@ void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
     if (!actualType ||
         actualType->is(Type::KindOfVariant) ||
         actualType->is(Type::KindOfObject)) {
-      ar->forceClassVariants(ar->getClassScope());
+      ar->forceClassVariants(ar->getClassScope(), false);
     }
   }
   if (m_stmt) {

@@ -174,8 +174,8 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
         if (var) {
           TypePtr type = scope->getVariables()->getFinalType(var->getName());
           if (type->is(Type::KindOfObject)) {
-            scope->getVariables()->forceVariant(ar, var->getName());
-            scope->getVariables()->forcePrivateVariant(ar, var->getName());
+            scope->getVariables()->forceVariant(ar, var->getName(),
+                                                VariableTable::AnyVars);
           }
         }
         ExpressionPtr value = assignment->getValue();
@@ -190,8 +190,8 @@ void ClassVariable::inferTypes(AnalysisResultPtr ar) {
         // force it to be a Variant, because we don't include
         // the class header files in global_variables.h
         if (type->is(Type::KindOfObject)) {
-          scope->getVariables()->forceVariant(ar, var->getName());
-          scope->getVariables()->forcePrivateVariant(ar, var->getName());
+          scope->getVariables()->forceVariant(ar, var->getName(),
+                                              VariableTable::AnyVars);
         }
         const char *initializer = type->getCPPInitializer();
         if (initializer) scope->setNeedStaticInitializer();

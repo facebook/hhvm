@@ -97,6 +97,24 @@ public:
     JumpTableClassRealPropPrivate,
   };
 
+  enum AlteredVarClass {
+    NonPrivateNonStaticVars = 1,
+    NonPrivateStaticVars = 2,
+    PrivateNonStaticVars = 4,
+    PrivateStaticVars = 8,
+
+    AnyNonStaticVars = NonPrivateNonStaticVars | PrivateNonStaticVars,
+    AnyStaticVars = NonPrivateStaticVars | PrivateStaticVars,
+    AnyNonPrivateVars = NonPrivateNonStaticVars | NonPrivateStaticVars,
+    AnyPrivateVars = PrivateNonStaticVars | PrivateStaticVars,
+
+    AnyVars = AnyStaticVars | AnyNonStaticVars
+  };
+
+  static int GetVarClassMask(bool privates, bool statics) {
+    return (statics ? 2 : 1) << (privates ? 2 : 0);
+  }
+
 public:
   VariableTable(BlockScope &blockScope);
   ~VariableTable();
@@ -218,23 +236,15 @@ public:
 
 
   /**
-   * Set all non-private variables to variants, since l-dynamic value was used.
+   * Set all matching variables to variants, since l-dynamic value was used.
    */
-  void forceVariants(AnalysisResultPtr ar);
-  /**
-   * Set all private variables to variants, since l-dynamic value was used,
-   * in the class scope
-   */
-  void forcePrivateVariants(AnalysisResultPtr ar);
+  void forceVariants(AnalysisResultPtr ar, int varClass);
 
   /**
-   * Set one non-private variable to be Type::Variant.
+   * Set one matching variable to be Type::Variant.
    */
-  void forceVariant(AnalysisResultPtr ar, const std::string &name);
-  /**
-   * Set one private variable to be Type::Variant.
-   */
-  void forcePrivateVariant(AnalysisResultPtr ar, const std::string &name);
+  void forceVariant(AnalysisResultPtr ar, const std::string &name,
+                    int varClass);
 
   /**
    * Keep track of $GLOBALS['var'].
@@ -309,8 +319,7 @@ private:
   unsigned m_hasStatic : 1;
   unsigned m_hasPrivate : 1;
   unsigned m_hasNonStaticPrivate : 1;
-  unsigned m_allVariants : 1;
-  unsigned m_allPrivateVariants : 1;
+  unsigned m_forcedVariants : 4;
 
   std::set<JumpTableName> m_emptyJumpTables;
 

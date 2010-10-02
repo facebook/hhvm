@@ -109,18 +109,19 @@ void IpBlockMap::LoadIpList(AclPtr acl, Hdf hdf, bool allow) {
     string ip = child.getString();
 
     unsigned int start, end;
-    ReadIPv4Address(ip.c_str(), start, end);
-    ASSERT(end >= start);
-    if (end - start < 1024) {
-      for (unsigned int i = start; i <= end; i++) {
-        acl->ips[i] = allow;
+    if (ReadIPv4Address(ip.c_str(), start, end)) {
+      ASSERT(end >= start);
+      if (end - start < 1024) {
+        for (unsigned int i = start; i <= end; i++) {
+          acl->ips[i] = allow;
+        }
+      } else {
+        acl->ranges.resize(acl->ranges.size() + 1);
+        IpRange &range = acl->ranges.back();
+        range.start = start;
+        range.end = end;
+        range.allow = allow;
       }
-    } else {
-      acl->ranges.resize(acl->ranges.size() + 1);
-      IpRange &range = acl->ranges.back();
-      range.start = start;
-      range.end = end;
-      range.allow = allow;
     }
   }
 }

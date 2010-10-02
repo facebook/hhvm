@@ -33,10 +33,13 @@ public:
   };
 
 public:
-  VariableUnserializer(std::istream &in, Type type)
-      : m_type(type), m_in(in), m_key(false) {}
+  VariableUnserializer(std::istream &in, Type type,
+                       bool allowUnknownSerializableClass = false)
+      : m_type(type), m_in(in), m_key(false),
+        m_unknownSerializable(allowUnknownSerializableClass) {}
 
   Type getType() const { return m_type;}
+  bool allowUnknownSerializableClass() const { return m_unknownSerializable;}
 
   Variant unserialize() {
     Variant v;
@@ -70,6 +73,7 @@ public:
   std::istream &m_in;
   std::vector<Variant*> m_refs;
   bool m_key;
+  bool m_unknownSerializable;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

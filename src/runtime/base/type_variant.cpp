@@ -3056,17 +3056,25 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
       if (sep != ':') {
         throw Exception("Expected ':' but got '%c'", sep);
       }
-
-      Object obj = create_object(clsName.data(), Array::Create(), false);
-      if (!obj->o_instanceof("Serializable")) {
-        raise_error("%s didn't implement Serializable", clsName.data());
-      }
-      operator=(obj);
-
       String serialized;
       serialized.unserialize(in, '{', '}');
-      obj->o_invoke("unserialize", CREATE_VECTOR1(serialized), -1);
 
+      Object obj;
+      try {
+        obj = create_object(clsName.data(), Array::Create(), false);
+        if (!obj->o_instanceof("Serializable")) {
+          raise_error("%s didn't implement Serializable", clsName.data());
+        }
+        obj->o_invoke("unserialize", CREATE_VECTOR1(serialized), -1);
+      } catch (ClassNotFoundException &e) {
+        if (!unserializer->allowUnknownSerializableClass()) {
+          throw;
+        }
+        obj = create_object("__PHP_Incomplete_Class", Array::Create(), false);
+        obj->o_set("__PHP_Incomplete_Class_Name", clsName);
+        obj->o_set("serialized", serialized);
+      }
+      operator=(obj);
       return; // object has '}' terminating
     }
     break;

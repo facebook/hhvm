@@ -18,6 +18,7 @@
 #include <runtime/base/type_conversions.h>
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/variable_unserializer.h>
+#include <util/logger.h>
 
 #define INVALID_DATA 1
 
@@ -192,11 +193,13 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
 
 static Variant unserialize_with_no_notice(CStrRef str) {
   istringstream in(std::string(str.data(), str.size()));
-  VariableUnserializer vu(in, VariableUnserializer::Serialize);
+  VariableUnserializer vu(in, VariableUnserializer::Serialize, true);
   Variant v;
   try {
     v = vu.unserialize();
-  } catch (Exception &e) {}
+  } catch (Exception &e) {
+    Logger::Error("unserialize(): %s", e.getMessage().c_str());
+  }
   return v;
 }
 

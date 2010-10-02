@@ -74,6 +74,7 @@ void StaticMemberExpression::analyzeProgram(AnalysisResultPtr ar) {
     addUserClass(ar, m_className);
   }
   m_exp->analyzeProgram(ar);
+
 }
 
 ConstructPtr StaticMemberExpression::getNthKid(int n) const {
@@ -116,7 +117,29 @@ ExpressionPtr StaticMemberExpression::preOptimize(AnalysisResultPtr ar) {
 }
 
 ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
-  if (m_class) ar->postOptimize(m_class);
+  Symbol *sym = NULL;
+  if (m_class) {
+    ar->postOptimize(m_class);
+  } else if (!m_redeclared && m_valid &&
+             m_exp->is(Expression::KindOfScalarExpression)) {
+    ClassScopePtr cls = ar->findExactClass(m_className);
+    if (cls) {
+      ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+      const std::string &name = var->getString();
+
+      ClassScopePtr parent;
+      sym = cls->findProperty(parent, name, ar, shared_from_this());
+      if (sym && !sym->isIndirectAltered() && sym->isStatic()) {
+        ConstructPtr init = sym->getClsInitVal();
+        if (init) {
+          ExpressionPtr rep = dynamic_pointer_cast<Expression>(init);
+          if (rep->isScalar()) {
+            return replaceValue(rep->clone());
+          }
+        }
+      }
+    }
+  }
   ar->postOptimize(m_exp);
   return ExpressionPtr();
 }
@@ -133,9 +156,17 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
                                            TypePtr type, bool coerce) {
   ConstructPtr self = shared_from_this();
 
+  bool modified = m_context & (LValue | RefValue | UnsetContext);
+
   if (m_class) {
-    if (m_context & (LValue | RefValue | UnsetContext)) {
-      ar->forceClassVariants(getOriginalScope(ar), true);
+    if (modified) {
+      if (m_exp->is(Expression::KindOfScalarExpression)) {
+        ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
+        const std::string &name = var->getString();
+        ar->forceClassVariants(name, getOriginalScope(ar), true);
+      } else {
+        ar->forceClassVariants(getOriginalScope(ar), true);
+      }
     }
     m_class->inferAndCheck(ar, Type::Any, false);
     m_exp->inferAndCheck(ar, Type::String, false);
@@ -192,16 +223,20 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
 
     m_valid = !p || (p & VariableTable::VariableStatic) ||
       m_redeclared || m_dynamicClass;
-    if (cls->hasProperty(name) || m_redeclared) {
-      m_resolvedClassName = m_className;
-    } else {
-      ClassScopePtr parent = cls->getVariables()->findParent(ar, name);
-      ASSERT(parent);
+    ClassScopePtr parent;
+    Symbol *sym = m_redeclared ? NULL :
+      cls->findProperty(parent, name, ar, self);
+    if (sym && parent) {
       m_resolvedClassName = parent->getName();
+    } else {
+      m_resolvedClassName = m_className;
+    }
+    if (sym && modified && ar->getPhase() == AnalysisResult::LastInference) {
+      sym->setIndirectAltered();
     }
     return m_implementedType = tp;
   } else if (cls) {
-    if (m_context & (LValue | RefValue | UnsetContext)) {
+    if (modified) {
       int mask = cls == getOriginalScope(ar) ?
         VariableTable::AnyStaticVars : VariableTable::NonPrivateStaticVars;
       cls->getVariables()->forceVariants(ar, mask);

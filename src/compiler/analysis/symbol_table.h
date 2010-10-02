@@ -87,6 +87,7 @@ public:
   bool isNeeded() const { return m_flags.m_needed; }
   bool isSuperGlobal() const { return m_flags.m_superGlobal; }
   bool isOverride() const { return m_flags.m_override; }
+  bool isIndirectAltered() const { return m_flags.m_indirectAltered; }
 
   void setParameterIndex(int ix) { m_parameter = ix; }
   void setProtected() { m_flags.m_protected = true; }
@@ -101,21 +102,39 @@ public:
   void setNeeded() { m_flags.m_needed = true; }
   void setSuperGlobal() { m_flags.m_superGlobal = true; }
   void setOverride() { m_flags.m_override = true; }
+  void setIndirectAltered() { m_flags.m_indirectAltered = true; }
 
   void clearUsed() { m_flags.m_used = false; }
   void clearNeeded() { m_flags.m_needed = false; }
 
-  ConstructPtr getStaticInitVal() const { return m_staticInitVal; }
-  ConstructPtr getClsInitVal() const { return m_clsInitVal; }
-  void setStaticInitVal(ConstructPtr initVal) { m_staticInitVal = initVal; }
-  void setClsInitVal(ConstructPtr initVal) { m_clsInitVal = initVal; }
+  ConstructPtr getStaticInitVal() const {
+    return m_flags.m_hasStaticInit ? m_initVal : ConstructPtr();
+  }
+  ConstructPtr getClsInitVal() const {
+    return m_flags.m_hasClassInit ? m_initVal : ConstructPtr();
+  }
+  void setStaticInitVal(ConstructPtr initVal) {
+    if (m_flags.m_hasClassInit) initVal.reset();
+    m_flags.m_hasStaticInit = true;
+    m_initVal = initVal;
+  }
+  void setClsInitVal(ConstructPtr initVal) {
+    if (m_flags.m_hasStaticInit) initVal.reset();
+    m_flags.m_hasClassInit = true;
+    m_initVal = initVal;
+  }
 private:
   std::string m_name;
   union {
     unsigned m_flags_val;
     struct {
+      /* internal */
       unsigned m_declaration_set : 1;
       unsigned m_value_set : 1;
+      unsigned m_hasStaticInit : 1;
+      unsigned m_hasClassInit : 1;
+
+      /* common */
       unsigned m_system : 1;
       unsigned m_sep : 1;
 
@@ -136,6 +155,7 @@ private:
       unsigned m_needed : 1;
       unsigned m_superGlobal : 1;
       unsigned m_override : 1;
+      unsigned m_indirectAltered : 1;
     } m_flags;
   };
   ConstructPtr        m_declaration;
@@ -144,8 +164,7 @@ private:
   TypePtr             m_rtype;
 
   int                 m_parameter;
-  ConstructPtr        m_staticInitVal;
-  ConstructPtr        m_clsInitVal;
+  ConstructPtr        m_initVal;
 
   static TypePtr coerceTo(AnalysisResultPtr ar,
                           TypePtr &curType, TypePtr type);

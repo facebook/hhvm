@@ -442,14 +442,14 @@ TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
                                       coerce, ar, construct, properties);
   }
 
-  Symbol *sym = getSymbol(name, true);
-  if (!sym->declarationSet()) {
-    ClassScopePtr parent = findParent(ar, name);
-    if (parent) {
-      return parent->checkStatic(name, type, coerce, ar,
-                                 construct, properties);
-    }
+  ClassScopePtr parent;
+  Symbol *sym = findProperty(parent, name, ar, construct);
+  if (parent) {
+    return parent->checkStatic(name, type, coerce, ar,
+                               construct, properties);
+  }
 
+  if (!sym->declarationSet()) {
     bool isLocal = !sym->isGlobal() && !sym->isSystem();
     if (isLocal && !getAttribute(ContainsLDynamicVariable) &&
         ar->isFirstPass()) {
@@ -589,6 +589,7 @@ void VariableTable::forceVariants(AnalysisResultPtr ar, int varClass) {
         if (sym->declarationSet() &&
             mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
           setType(ar, sym, Type::Variant, true);
+          sym->setIndirectAltered();
         }
       }
     }
@@ -596,7 +597,7 @@ void VariableTable::forceVariants(AnalysisResultPtr ar, int varClass) {
 
     ClassScopePtr parent = m_blockScope.getParentScope(ar);
     if (parent) {
-      parent->getVariables()->forceVariants(ar, varClass);
+      parent->getVariables()->forceVariants(ar, varClass & ~AnyPrivateVars);
     }
   }
 }
@@ -612,6 +613,7 @@ void VariableTable::forceVariant(AnalysisResultPtr ar,
     if (sym->declarationSet() &&
         mask & GetVarClassMask(sym->isPrivate(), sym->isStatic())) {
       setType(ar, sym, Type::Variant, true);
+      sym->setIndirectAltered();
     }
   }
 }

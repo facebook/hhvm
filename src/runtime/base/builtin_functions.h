@@ -213,8 +213,7 @@ inline bool instanceOf(ObjectData *v, CStrRef s) {
 
 template <class K, class V>
 const V &String::set(K key, const V &value) {
-  (m_px = StringData::escalate(m_px))->
-    setChar(HPHP::toInt32(key), HPHP::toString(value));
+  (m_px = StringData::escalate(m_px))->setChar(toInt32(key), toString(value));
   return value;
 }
 

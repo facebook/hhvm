@@ -805,6 +805,14 @@ class Variant {
   Variant array_iter_each();
 
   /**
+   * For C++ library users to write "var.cast<c_MyClass>()->mf_func()".
+   */
+  template<typename T>
+  T *cast() const {
+    return toObject().getTyped<T>();
+  }
+
+  /**
    * Low level access that should be restricted to internal use.
    */
   int64 *getInt64Data() const {

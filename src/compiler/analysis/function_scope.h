@@ -328,7 +328,8 @@ public:
    * output functions
    */
   void outputCPPClassMap(CodeGenerator &cg, AnalysisResultPtr ar);
-  void outputMethodWrapper(CodeGenerator &cg, AnalysisResultPtr ar);
+  void outputMethodWrapper(CodeGenerator &cg, AnalysisResultPtr ar,
+                           const char *clsToConstruct);
 
   /**
    * Output CallInfo instance for this function.

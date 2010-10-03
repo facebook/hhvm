@@ -118,6 +118,10 @@ class Object : public SmartPtr<ObjectData> {
   bool is() const {
     return getTyped<T>(true, true) != NULL;
   }
+  template<typename T>
+  T *cast() const {
+    return getTyped<T>();
+  }
 
   /**
    * Type conversions

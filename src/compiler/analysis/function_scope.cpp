@@ -1524,7 +1524,8 @@ void FunctionScope::RecordRefParamInfo(string fname, FunctionScopePtr func) {
 }
 
 void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
-                                        AnalysisResultPtr ar) {
+                                        AnalysisResultPtr ar,
+                                        const char *clsToConstruct) {
   cg_printf("\n");
   if (m_stmt) {
     m_stmt->printSource(cg);
@@ -1535,15 +1536,20 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
   int maxCount = getMaxParamCount();
 
   for (int count = minCount; count <= maxCount; count++) {
-    if (isStatic()) cg_printf("static ");
     TypePtr type = getReturnType();
-    if (type) {
-      type->outputCPPDecl(cg, ar);
+
+    if (clsToConstruct) {
+      cg_printf("static %s%s Create(", Option::SmartPtrPrefix, clsToConstruct);
     } else {
-      cg_printf("void");
+      if (isStatic()) cg_printf("static ");
+      if (type) {
+        type->outputCPPDecl(cg, ar);
+      } else {
+        cg_printf("void");
+      }
+      cg_printf(" %s%s(", Option::MethodWrapperPrefix, getId(cg).c_str());
     }
 
-    cg_printf(" %s%s(", Option::MethodWrapperPrefix, getId(cg).c_str());
     for (int i = 0; i < count; i++) {
       if (i > 0) cg_printf(", ");
       getParamType(i)->outputCPPDecl(cg, ar);
@@ -1555,17 +1561,31 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
     }
     cg_indentBegin(") {\n");
 
-    if ((isStatic() || isPerfectVirtual() || !isVirtual()) &&
+    if (clsToConstruct) {
+      cg_printf("%s%s ret(NEW(%s%s)());\n",
+                Option::SmartPtrPrefix, clsToConstruct,
+                Option::ClassPrefix, clsToConstruct);
+    }
+
+    if ((isStatic() || isPerfectVirtual() || !isVirtual() || clsToConstruct) &&
         !isRedeclaring()) {
 
-      if (type) cg_printf("return ");
+      if (clsToConstruct) {
+        cg_printf("ret->");
+      } else if (type) {
+        cg_printf("return ");
+      }
+
       cg_printf("%s%s(", Option::MethodPrefix, cg.formatLabel(m_name).c_str());
       if (isVariableArgument()) {
         cg_printf("args.size() + %d, ", count);
       }
       for (int i = 0; i < count; i++) {
         if (i > 0) cg_printf(", ");
+        bool isRef = isRefParam(i);
+        if (isRef) cg_printf("ref(");
         cg_printf("%s%s", Option::VariablePrefix, getParamName(i).c_str());
+        if (isRef) cg_printf(")");
       }
       if (isVariableArgument()) {
         if (count) cg_printf(", ");
@@ -1576,14 +1596,25 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
     } else {
       cg_printf("Array params;\n");
       for (int i = 0; i < count; i++) {
-        cg_printf("params.append(%s%s);\n",
-                  Option::VariablePrefix, getParamName(i).c_str());
+        cg_printf("params.append(");
+
+        bool isRef = isRefParam(i);
+        if (isRef) cg_printf("ref(");
+        cg_printf("%s%s", Option::VariablePrefix, getParamName(i).c_str());
+        if (isRef) cg_printf(")");
+
+        cg_printf(");\n");
       }
       if (isVariableArgument()) {
         cg_printf("params.merge(args);\n");
       }
 
-      if (type) cg_printf("return ");
+      if (clsToConstruct) {
+        cg_printf("ret->");
+      } else if (type) {
+        cg_printf("return ");
+      }
+
       if (isStatic()) {
         cg_printf("%sinvoke(NULL, \"%s\", params, -1);\n",
                   Option::ObjectStaticPrefix, m_name.c_str());
@@ -1593,6 +1624,9 @@ void FunctionScope::outputMethodWrapper(CodeGenerator &cg,
       }
     }
 
+    if (clsToConstruct) {
+      cg_printf("return ret;\n");
+    }
     cg_indentEnd("}\n");
   }
 }

@@ -1706,12 +1706,28 @@ void ClassScope::OutputVolatileCheck(CodeGenerator &cg, AnalysisResultPtr ar,
 void ClassScope::outputMethodWrappers(CodeGenerator &cg,
                                       AnalysisResultPtr ar) {
   if (!isInterface()) {
+    string name = getId(cg);
+
+    FunctionScopePtr constructor = findConstructor(ar, true);
+    if (constructor) {
+      if (!constructor->isAbstract()) {
+        constructor->outputMethodWrapper(cg, ar, name.c_str());
+        cg_printf("\n");
+      }
+    } else {
+      cg_indentBegin("static %s%s Create() {\n", Option::SmartPtrPrefix,
+                     name.c_str());
+      cg_printf("return NEW(%s%s)();\n", Option::ClassPrefix, name.c_str());
+      cg_indentEnd("}\n");
+      cg_printf("\n");
+    }
+
     ClassScopePtr self = static_pointer_cast<ClassScope>(shared_from_this());
     for (unsigned int i = 0; i < m_functionsVec.size(); i++) {
       FunctionScopePtr func = m_functionsVec[i];
       if (func->isPublic() && !func->isConstructor(self) &&
           !func->isMagic() && !func->isAbstract()) {
-        func->outputMethodWrapper(cg, ar);
+        func->outputMethodWrapper(cg, ar, NULL);
       }
     }
   }

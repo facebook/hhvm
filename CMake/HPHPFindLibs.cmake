@@ -168,6 +168,10 @@ include_directories(${OPENSSL_INCLUDE_DIR})
 find_package(ZLIB REQUIRED)
 include_directories(${ZLIB_INCLUDE_DIR})
 
+find_package(BZip2 REQUIRED)
+include_directories(${BZIP2_INCLUDE_DIR})
+add_definitions(${BZIP2_DEFINITIONS})
+
 # oniguruma
 find_package(ONIGURUMA REQUIRED)
 include_directories(${ONIGURUMA_INCLUDE_DIRS})
@@ -258,6 +262,7 @@ endif()
 	target_link_libraries(${target} ${TBB_LIBRARIES})
 	target_link_libraries(${target} ${OPENSSL_LIBRARIES})
 	target_link_libraries(${target} ${ZLIB_LIBRARIES})
+	target_link_libraries(${target} ${BZIP2_LIBRARIES})
 
 	target_link_libraries(${target} ${LIBXML2_LIBRARIES})
 	target_link_libraries(${target} ${EXPAT_LIBRARY})

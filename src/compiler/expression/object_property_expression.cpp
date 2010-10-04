@@ -39,8 +39,9 @@ ObjectPropertyExpression::ObjectPropertyExpression
  ExpressionPtr object, ExpressionPtr property)
   : Expression(EXPRESSION_CONSTRUCTOR_PARAMETER_VALUES),
     m_object(object), m_property(property),
-    m_valid(false), m_localEffects(AccessorEffect),
-    m_propSym(NULL) {
+    m_localEffects(AccessorEffect), m_propSym(NULL) {
+  m_valid = false;
+  m_propSymValid = false;
   m_object->setContext(Expression::ObjectContext);
 }
 
@@ -50,7 +51,8 @@ ExpressionPtr ObjectPropertyExpression::clone() {
   exp->m_object = Clone(m_object);
   exp->m_property = Clone(m_property);
   exp->m_propSym = NULL;
-  exp->m_propClass.reset();
+  exp->m_propSymValid = false;
+  exp->m_objectClass.reset();
   return exp;
 }
 
@@ -267,43 +269,42 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     }
   }
 
-  if (!m_propSym) {
-    m_propClass.reset();
-    m_propSym = cls->findProperty(m_propClass, name, ar, self);
+  if (!m_propSym || cls != m_objectClass.lock()) {
+    m_objectClass = cls;
+    ClassScopePtr parent;
+    m_propSym = cls->findProperty(parent, name, ar, self);
     assert(m_propSym);
-    if (!m_propClass) {
-      m_propClass = cls;
+    if (!parent) {
+      parent = cls;
     }
-    if (!m_propSym->isPresent() ||
-        (m_propSym->isPrivate() && getOriginalScope(ar) != m_propClass) ||
-        m_propSym->isStatic()) {
-      m_propClass.reset();
-    }
+    m_propSymValid = m_propSym->isPresent() &&
+      (!m_propSym->isPrivate() ||
+       getOriginalScope(ar) == parent) &&
+      !m_propSym->isStatic();
+
+    m_objectClass = cls;
   }
 
   TypePtr ret;
-  if (m_propClass && (!cls->derivesFromRedeclaring() ||
-                      m_propSym->isPrivate())) {
+  if (m_propSymValid && (!cls->derivesFromRedeclaring() ||
+                         m_propSym->isPrivate())) {
     ret = cls->checkProperty(m_propSym, type, coerce, ar);
     assert(m_object->getType()->isSpecificObject());
     m_valid = true;
-  }
 
-  // get() will return Variant
-  if (!m_valid) {
+    clearEffect(AccessorEffect);
+
+    if (ar->getPhase() == AnalysisResult::LastInference) {
+      if (!(m_context & ObjectContext)) {
+        m_object->clearContext(Expression::LValue);
+      }
+      setContext(Expression::NoLValueWrapper);
+    }
+    return ret;
+  } else {
     m_actualType = Type::Variant;
     return m_actualType;
   }
-
-  clearEffect(AccessorEffect);
-
-  if (ar->getPhase() == AnalysisResult::LastInference) {
-    if (!(m_context & ObjectContext)) {
-      m_object->clearContext(Expression::LValue);
-    }
-    setContext(Expression::NoLValueWrapper);
-  }
-  return ret;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

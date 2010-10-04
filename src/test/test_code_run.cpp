@@ -6942,6 +6942,17 @@ bool TestCodeRun::TestCompilation() {
        "}"
        "$obj = new C;"
        "$obj->foo(1);");
+  MVCR("<?php "
+       "class X {}"
+       "class Y extends X { public $foo; }"
+       "function foo() {"
+       "  $x = new Y;"
+       "  $x && var_dump($x->foo);"
+       "  $x = new X;"
+       "  var_dump($x);"
+       "}"
+       "foo();");
+
   return true;
 }
 

@@ -59,12 +59,15 @@ private:
   ExpressionPtr m_object;
   ExpressionPtr m_property;
 
-  bool m_valid;
+  unsigned m_valid : 1;
+  unsigned m_propSymValid : 1;
+
   int m_localEffects;
   std::string m_lvalTmp;
 
   Symbol *m_propSym;
-  ClassScopePtr m_propClass;
+  boost::weak_ptr<HPHP::ClassScope> m_objectClass;
+
   // for avoiding code generate toObject(Variant)
   bool directVariantProxy(AnalysisResultPtr ar);
   void outputCPPObjProperty(CodeGenerator &cg, AnalysisResultPtr ar,

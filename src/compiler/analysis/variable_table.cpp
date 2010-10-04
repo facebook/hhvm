@@ -442,14 +442,13 @@ TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
                                       coerce, ar, construct, properties);
   }
 
-  ClassScopePtr parent;
-  Symbol *sym = findProperty(parent, name, ar, construct);
-  if (parent) {
-    return parent->checkStatic(name, type, coerce, ar,
-                               construct, properties);
-  }
+  ClassScopePtr cur(dynamic_pointer_cast<ClassScope>(
+                      m_blockScope.shared_from_this()));
+  Symbol *sym = findProperty(cur, name, ar, construct);
 
-  if (!sym->declarationSet()) {
+  if (!sym) return Type::Variant;
+
+  if (!cur && !sym->declarationSet()) {
     bool isLocal = !sym->isGlobal() && !sym->isSystem();
     if (isLocal && !getAttribute(ContainsLDynamicVariable) &&
         ar->isFirstPass()) {

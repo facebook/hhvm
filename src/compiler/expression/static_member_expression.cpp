@@ -127,8 +127,7 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
       ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
       const std::string &name = var->getString();
 
-      ClassScopePtr parent;
-      sym = cls->findProperty(parent, name, ar, shared_from_this());
+      sym = cls->findProperty(cls, name, ar, shared_from_this());
       if (sym && !sym->isIndirectAltered() && sym->isStatic()) {
         ConstructPtr init = sym->getClsInitVal();
         if (init) {
@@ -221,12 +220,12 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       ar->getCodeError()->record(self, CodeError::MissingObjectContext, self);
     }
 
-    m_valid = !p || (p & VariableTable::VariableStatic) ||
+    m_valid = (p & VariableTable::VariableStatic) ||
       m_redeclared || m_dynamicClass;
-    ClassScopePtr parent;
+    ClassScopePtr parent = cls;
     Symbol *sym = m_redeclared ? NULL :
       cls->findProperty(parent, name, ar, self);
-    if (sym && parent) {
+    if (sym && sym->isStatic()) {
       m_resolvedClassName = parent->getName();
     } else {
       m_resolvedClassName = m_className;

@@ -209,16 +209,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     return Type::Variant; // we have to use a variant to hold dynamic value
   }
 
-  bool debug = false;
-  if (ClassScopePtr cur = ar->getClassScope()) {
-    if (!strcasecmp(cur->getName().c_str(), "FBTExternalObjectPreparable")) {
-      FunctionScopePtr func = ar->getFunctionScope();
-      if (!strcasecmp(func->getName().c_str(), "prepare")) {
-        debug = true;
-      }
-    }
-  }
-
   ScalarExpressionPtr exp = dynamic_pointer_cast<ScalarExpression>(m_property);
   string name = exp->getString();
   ASSERT(!name.empty());

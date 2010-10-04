@@ -1359,6 +1359,10 @@ static bool StringDescending(CStrRef s1, CStrRef s2) {
   return s1.more(s2);
 }
 
+static bool StringAscending(CStrRef s1, CStrRef s2) {
+  return s1.less(s2);
+}
+
 Variant f_scandir(CStrRef directory, bool descending /* = false */,
                   CObjRef context /* = null */) {
   DIR *dir = opendir(File::TranslatePath(directory).data());
@@ -1380,6 +1384,8 @@ Variant f_scandir(CStrRef directory, bool descending /* = false */,
 
   if (descending) {
     sort(names.begin(), names.end(), StringDescending);
+  } else {
+    sort(names.begin(), names.end(), StringAscending);
   }
 
   Array ret;

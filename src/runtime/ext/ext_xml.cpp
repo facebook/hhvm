@@ -525,10 +525,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         val = xml_utf8_decode(attributes[1],
                               strlen((const char*)attributes[1]),
                               &val_len, parser->target_encoding);
-        args.lvalAt(2).set(String(att, CopyString),
-                           String(val, val_len, CopyString));
+        args.lvalAt(2).set(String(att, AttachString),
+                           String(val, val_len, AttachString));
         attributes += 2;
-        free(att);
       }
 
       xml_call_handler(parser, parser->startElementHandler, args);
@@ -556,10 +555,9 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
         val = xml_utf8_decode(attributes[1],
                               strlen((const char*)attributes[1]),
                               &val_len, parser->target_encoding);
-        atr.set(String(att,CopyString), String(val,val_len,CopyString));
+        atr.set(String(att, AttachString), String(val, val_len, AttachString));
         atcnt++;
         attributes += 2;
-        free(att);
       }
 
       if (atcnt) {

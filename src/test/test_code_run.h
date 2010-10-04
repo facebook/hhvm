@@ -171,6 +171,7 @@ class TestCodeRun : public TestBase {
   bool TestInlining();
   bool TestRenameFunction();
   bool TestIntercept();
+  bool TestMaxInt();
 
   // PHP 5.3
   bool TestVariableClassName();

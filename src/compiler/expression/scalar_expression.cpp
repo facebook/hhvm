@@ -456,7 +456,7 @@ void ScalarExpression::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
     Variant &v = getVariant();
     ASSERT(v.isInteger());
     if (v.toInt64() == LONG_MIN) {
-      cg_printf("0x%llxLL", LONG_MIN);
+      cg_printf("(int64)0x%llxLL", LONG_MIN);
     } else {
       cg_printf("%lldLL", v.toInt64());
     }

@@ -419,6 +419,7 @@ bool TestCodeRun::RunTests(const std::string &which) {
   RUN_TEST(TestDynamicFunctions);
   RUN_TEST(TestRenameFunction);
   //RUN_TEST(TestIntercept); // requires ENABLE_INTERCEPT
+  RUN_TEST(TestMaxInt);
   RUN_TEST(TestDynamicMethods);
   RUN_TEST(TestVolatile);
   RUN_TEST(TestHereDoc);
@@ -5949,6 +5950,16 @@ bool TestCodeRun::TestIntercept() {
         //"int(10)\nint(30)\nint(456)\n"
        );
 
+  return true;
+}
+
+bool TestCodeRun::TestMaxInt() {
+  MVCR("<?php "
+       "$val1 = ~PHP_INT_MAX; "
+       "$val2 = PHP_INT_MAX; "
+       "var_dump($val1); "
+       "var_dump($val2); "
+       );
   return true;
 }
 

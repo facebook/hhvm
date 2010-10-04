@@ -123,7 +123,7 @@ ExpressionPtr StaticMemberExpression::postOptimize(AnalysisResultPtr ar) {
   } else if (!m_redeclared && m_valid &&
              m_exp->is(Expression::KindOfScalarExpression)) {
     ClassScopePtr cls = ar->findExactClass(m_className);
-    if (cls) {
+    if (cls && (!cls->isVolatile() || ar->checkClassPresent(m_className))) {
       ScalarExpressionPtr var = dynamic_pointer_cast<ScalarExpression>(m_exp);
       const std::string &name = var->getString();
 

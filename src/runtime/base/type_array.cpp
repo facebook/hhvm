@@ -304,7 +304,7 @@ bool Array::equal(CArrRef v2) const {
 
 bool Array::equal(CObjRef v2) const {
   if (m_px == NULL || v2.get() == NULL) {
-    return HPHP::more(toBoolean(), v2.toBoolean());
+    return HPHP::equal(toBoolean(), v2.toBoolean());
   }
   return false;
 }

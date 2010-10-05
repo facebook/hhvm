@@ -5292,7 +5292,17 @@ bool TestCodeRun::TestComparisons() {
   MVCR("<?php "
        "$part = ' 1';"
        "var_dump(trim($part) !== $part);");
-
+  MVCR("<?php "
+       "class C { }"
+       "function foo($p) {"
+       "  if ($p) {"
+       "    $obj = new C;"
+       "  } else {"
+       "    $a = array(1);"
+       "  }"
+       "  var_dump($obj == $a);"
+       "}"
+       "foo(false);");
   return true;
 }
 

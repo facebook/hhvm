@@ -27,7 +27,7 @@ const Object Object::s_nullObject = Object();
 ///////////////////////////////////////////////////////////////////////////////
 
 Array Object::toArray() const {
-  return m_px ? m_px->o_toArray() : Array();
+  return HPHP::toArray(m_px);
 }
 
 Variant Object::toKey() const {

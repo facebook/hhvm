@@ -13076,7 +13076,14 @@ bool TestCodeRun::TestTypes() {
       "function q() {"
       "  p(null);"
       "}");
-
+  MVCR("<?php "
+      "function foo($p) {"
+      "  if ($p) {"
+      "    $a = array();"
+      "  }"
+      "  var_dump((string)$a);"
+      "}"
+      "foo(false);");
   return true;
 }
 

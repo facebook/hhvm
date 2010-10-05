@@ -274,10 +274,7 @@ Array Array::slice(int offset, int length, bool preserve_keys) const {
 // type conversions
 
 Object Array::toObject() const {
-  if (m_px) {
-    return m_px->toObject();
-  }
-  return Object(NEW(c_stdClass)());
+  return HPHP::toObject(m_px);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

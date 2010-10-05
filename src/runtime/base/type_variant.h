@@ -258,9 +258,21 @@ class Variant {
    */
   int getRefCount() const;
 
+  bool getBoolean() const {
+    ASSERT(getType() == KindOfBoolean);
+    bool val = m_type == KindOfVariant ? m_data.pvar->m_data.num : m_data.num;
+    return val;
+  }
+  int64 getInt64() const {
+    ASSERT(getType() == KindOfByte    ||
+           getType() == KindOfInt16   ||
+           getType() == KindOfInt32   ||
+           getType() == KindOfInt64);
+    return m_type == KindOfVariant ? m_data.pvar->m_data.num : m_data.num;
+  }
   double getDouble() const {
-    ASSERT(m_type == KindOfDouble);
-    return m_data.dbl;
+    ASSERT(getType() == KindOfDouble);
+    return m_type == KindOfVariant ? m_data.pvar->m_data.dbl : m_data.dbl;
   }
 
   /**
@@ -885,6 +897,50 @@ class Variant {
   int64 getNumData() const { return m_data.num; }
   bool isStatic() const { return _count == (1 << 30); }
   void setStatic() const;
+
+  /**
+   * Based on the order in complex_types.h, TypedValue is defined before.
+   * TypedValue is binary compatible with Variant
+   */
+  typedef struct TypedValue* TypedValueAccessor;
+  TypedValueAccessor getTypedAccessor() const {
+    const Variant *value = m_type == KindOfVariant ? m_data.pvar : this;
+    return (TypedValueAccessor)value;
+  }
+  static DataType GetAccessorType(TypedValueAccessor acc) {
+    ASSERT(acc);
+    return acc->m_type;
+  }
+  static bool GetBoolean(TypedValueAccessor acc) {
+    ASSERT(acc && acc->m_type == KindOfBoolean);
+    return acc->m_data.num;
+  }
+  static int64 GetInt64(TypedValueAccessor acc) {
+    ASSERT(acc);
+    ASSERT(acc->m_type == KindOfByte  ||
+           acc->m_type == KindOfInt16 ||
+           acc->m_type == KindOfInt32 ||
+           acc->m_type == KindOfInt64);
+    return acc->m_data.num;
+  }
+  static double GetDouble(TypedValueAccessor acc) {
+    ASSERT(acc && acc->m_type == KindOfDouble);
+    return acc->m_data.dbl;
+  }
+  static StringData *GetStringData(TypedValueAccessor acc) {
+    ASSERT(acc);
+    ASSERT(acc->m_type == KindOfString || acc->m_type == KindOfStaticString);
+    return acc->m_data.pstr;
+  }
+  static ArrayData *GetArrayData(TypedValueAccessor acc) {
+    ASSERT(acc && acc->m_type == KindOfArray);
+    return acc->m_data.parr;
+  }
+  static ObjectData *GetObjectData(TypedValueAccessor acc) {
+    ASSERT(acc && acc->m_type == KindOfObject);
+    return acc->m_data.pobj;
+  }
+
 
   /**
    * The order of the data members is significant. The _count field must

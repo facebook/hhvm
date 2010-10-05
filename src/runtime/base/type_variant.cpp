@@ -1598,7 +1598,7 @@ Variant::operator Object() const {
 // comparisons
 
 bool Variant::same(bool v2) const {
-  return is(KindOfBoolean) && equal(v2);
+  return isBoolean() && HPHP::equal(v2, getBoolean());
 }
 
 bool Variant::same(char v2) const {
@@ -1614,12 +1614,13 @@ bool Variant::same(int v2) const {
 }
 
 bool Variant::same(int64 v2) const {
-  switch (getType()) {
+  TypedValueAccessor acc = getTypedAccessor();
+  switch (GetAccessorType(acc)) {
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
   case KindOfInt64:
-    return equal(v2);
+    return HPHP::equal(v2, GetInt64(acc));
   default:
     break;
   }
@@ -1627,7 +1628,7 @@ bool Variant::same(int64 v2) const {
 }
 
 bool Variant::same(double v2) const {
-  return isDouble() && equal(v2);
+  return isDouble() && HPHP::equal(v2, getDouble());
 }
 
 bool Variant::same(litstr v2) const {
@@ -1652,7 +1653,7 @@ bool Variant::same(CArrRef v2) const {
   bool null2 = v2.isNull();
   if (null1 && null2) return true;
   if (null1 || null2) return false;
-  return is(KindOfArray) && toArray().same(v2);
+  return is(KindOfArray) && Array(getArrayData()).same(v2);
 }
 
 bool Variant::same(CObjRef v2) const {
@@ -1669,34 +1670,38 @@ bool Variant::same(CVarRef v2) const {
   if (null1 && null2) return true;
   if (null1 || null2) return false;
 
-  switch (getType()) {
+  TypedValueAccessor acc = getTypedAccessor();
+  switch (GetAccessorType(acc)) {
   case KindOfByte:
   case KindOfInt16:
   case KindOfInt32:
-  case KindOfInt64:
-    switch (v2.getType()) {
+  case KindOfInt64: {
+    TypedValueAccessor acc2 = v2.getTypedAccessor();
+    switch (GetAccessorType(acc2)) {
     case KindOfByte:
     case KindOfInt16:
     case KindOfInt32:
     case KindOfInt64:
-      return equal(v2);
+      return HPHP::equal(GetInt64(acc), GetInt64(acc2));
     default:
       break;
     }
     break;
+  }
   case KindOfStaticString:
   case KindOfString: {
-    switch (v2.getType()) {
+    TypedValueAccessor acc2 = v2.getTypedAccessor();
+    switch (GetAccessorType(acc2)) {
     case KindOfStaticString:
     case KindOfString:
-      return getStringData()->same(v2.getStringData());
+      return GetStringData(acc)->same(v2.GetStringData(acc2));
     default:
       return false;
     }
   }
   case KindOfArray:
     if (v2.is(KindOfArray)) {
-      return toArray().same(v2.toArray());
+      return Array(getArrayData()).same(Array(v2.getArrayData()));
     }
     break;
   case KindOfObject:
@@ -1709,114 +1714,119 @@ bool Variant::same(CVarRef v2) const {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-#define UNWRAP(reverse)                                         \
-  switch (getType()) {                                          \
-  case KindOfNull:                                              \
-  case KindOfBoolean: return HPHP::reverse(v2, toBoolean());    \
-  case KindOfByte:                                              \
-  case KindOfInt16:                                             \
-  case KindOfInt32:                                             \
-  case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
-  case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, getStringData());\
-  case KindOfArray:   return HPHP::reverse(v2, toArray());      \
-  case KindOfObject:  return HPHP::reverse(v2, toObject());     \
-  default:                                                      \
-    ASSERT(false);                                              \
-    break;                                                      \
-  }                                                             \
-  return false;                                                 \
+#define UNWRAP(reverse)                                                    \
+  TypedValueAccessor acc = getTypedAccessor();                             \
+  switch (GetAccessorType(acc)) {                                          \
+  case KindOfNull:    return HPHP::reverse(v2, false);                     \
+  case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
+  case KindOfByte:                                                         \
+  case KindOfInt16:                                                        \
+  case KindOfInt32:                                                        \
+  case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
+  case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
+  case KindOfStaticString:                                                 \
+  case KindOfString:  return HPHP::reverse(v2, GetStringData(acc));        \
+  case KindOfArray:   return HPHP::reverse(v2, Array(GetArrayData(acc)));  \
+  case KindOfObject:  return HPHP::reverse(v2, Object(GetObjectData(acc)));\
+  default:                                                                 \
+    ASSERT(false);                                                         \
+    break;                                                                 \
+  }                                                                        \
+  return false;                                                            \
 
 // "null" needs to convert to "" before comparing with a string
-#define UNWRAP_STR(reverse)                                     \
-  switch (getType()) {                                          \
-  case KindOfNull:    return HPHP::reverse(v2, "");             \
-  case KindOfBoolean: return HPHP::reverse(v2, toBoolean());    \
-  case KindOfByte:                                              \
-  case KindOfInt16:                                             \
-  case KindOfInt32:                                             \
-  case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
-  case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, getStringData());\
-  case KindOfArray:   return HPHP::reverse(v2, toArray());      \
-  case KindOfObject:  return HPHP::reverse(v2, toObject());     \
-  default:                                                      \
-    ASSERT(false);                                              \
-    break;                                                      \
-  }                                                             \
-  return false;                                                 \
+#define UNWRAP_STR(reverse)                                                \
+  TypedValueAccessor acc = getTypedAccessor();                             \
+  switch (GetAccessorType(acc)) {                                          \
+  case KindOfNull:    return HPHP::reverse(v2, empty_string);              \
+  case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
+  case KindOfByte:                                                         \
+  case KindOfInt16:                                                        \
+  case KindOfInt32:                                                        \
+  case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
+  case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
+  case KindOfStaticString:                                                 \
+  case KindOfString:  return HPHP::reverse(v2, GetStringData(acc));        \
+  case KindOfArray:   return HPHP::reverse(v2, Array(GetArrayData(acc)));  \
+  case KindOfObject:  return HPHP::reverse(v2, Object(GetObjectData(acc)));\
+  default:                                                                 \
+    ASSERT(false);                                                         \
+    break;                                                                 \
+  }                                                                        \
+  return false;                                                            \
 
 // Array needs to convert to "Array" and Object to String
-#define UNWRAP_STRING(reverse)                                  \
-  switch (getType()) {                                          \
-  case KindOfNull:    return HPHP::reverse(v2, "");             \
-  case KindOfBoolean: return HPHP::reverse(v2, toBoolean());    \
-  case KindOfByte:                                              \
-  case KindOfInt16:                                             \
-  case KindOfInt32:                                             \
-  case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
-  case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, getStringData());\
-  case KindOfArray:   return HPHP::reverse(v2, "Array");        \
-  case KindOfObject:                                            \
-    return HPHP::reverse(v2, toObject().toString());            \
-  default:                                                      \
-    ASSERT(false);                                              \
-    break;                                                      \
-  }                                                             \
-  return false;                                                 \
-
+#define UNWRAP_STRING(reverse)                                             \
+  TypedValueAccessor acc = getTypedAccessor();                             \
+  switch (GetAccessorType(acc)) {                                          \
+  case KindOfNull:    return HPHP::reverse(v2, empty_string);              \
+  case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
+  case KindOfByte:                                                         \
+  case KindOfInt16:                                                        \
+  case KindOfInt32:                                                        \
+  case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
+  case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
+  case KindOfStaticString:                                                 \
+  case KindOfString:  return HPHP::reverse(v2, GetStringData(acc));        \
+  case KindOfArray:   return HPHP::reverse(v2, s_array);                   \
+  case KindOfObject:                                                       \
+    return HPHP::reverse(v2, Object(GetObjectData(acc)).toString());       \
+  default:                                                                 \
+    ASSERT(false);                                                         \
+    break;                                                                 \
+  }                                                                        \
+  return false;                                                            \
 
 // "null" needs to convert to "" before comparing with a string
-#define UNWRAP_VAR(forward, reverse)                            \
-  switch (getType()) {                                          \
-  case KindOfNull:                                              \
-    if (v2.isString()) {                                        \
-      return HPHP::reverse(v2, "");                             \
-    } /* otherwise fall through */                              \
-  case KindOfBoolean: return HPHP::reverse(v2, toBoolean());    \
-  case KindOfByte:                                              \
-  case KindOfInt16:                                             \
-  case KindOfInt32:                                             \
-  case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
-  case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, getStringData());\
-  case KindOfArray:                                             \
-    if (v2.is(KindOfArray)) {                                   \
-      return toArray().forward(v2.toArray());                   \
-    }                                                           \
-    return HPHP::reverse(v2, toArray());                        \
-  case KindOfObject:  return HPHP::reverse(v2, toObject());     \
-  default:                                                      \
-    ASSERT(false);                                              \
-    break;                                                      \
-  }                                                             \
-  return false;                                                 \
+#define UNWRAP_VAR(forward, reverse)                                       \
+  TypedValueAccessor acc = getTypedAccessor();                             \
+  switch (GetAccessorType(acc)) {                                          \
+  case KindOfNull:                                                         \
+    if (v2.isString()) {                                                   \
+      return HPHP::reverse(v2.getStringData(), empty_string);              \
+    }                                                                      \
+    return HPHP::reverse(v2, false);                                       \
+  case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
+  case KindOfByte:                                                         \
+  case KindOfInt16:                                                        \
+  case KindOfInt32:                                                        \
+  case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
+  case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
+  case KindOfStaticString:                                                 \
+  case KindOfString:  return HPHP::reverse(v2, GetStringData(acc));        \
+  case KindOfArray:                                                        \
+    if (v2.isArray()) {                                                    \
+      return Array(GetArrayData(acc)).forward(Array(v2.getArrayData()));   \
+    }                                                                      \
+    return HPHP::reverse(v2, Array(GetArrayData(acc)));                    \
+  case KindOfObject:  return HPHP::reverse(v2, Object(GetObjectData(acc)));\
+  default:                                                                 \
+    ASSERT(false);                                                         \
+    break;                                                                 \
+  }                                                                        \
+  return false;                                                            \
 
 // array comparison is directional when they are uncomparable
 // also, ">" is implemented as "!<=" in Zend
-#define UNWRAP_ARR(forward, reverse)                            \
-  switch (getType()) {                                          \
-  case KindOfNull:                                              \
-  case KindOfBoolean: return HPHP::reverse(v2, toBoolean());    \
-  case KindOfByte:                                              \
-  case KindOfInt16:                                             \
-  case KindOfInt32:                                             \
-  case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
-  case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
-  case KindOfStaticString:                                      \
-  case KindOfString:  return HPHP::reverse(v2, getStringData());\
-  case KindOfArray:   return toArray().forward(v2);             \
-  case KindOfObject:  return HPHP::reverse(v2, toObject());     \
-  default:                                                      \
-    ASSERT(false);                                              \
-    break;                                                      \
-  }                                                             \
-  return false;                                                 \
+#define UNWRAP_ARR(forward, reverse)                                       \
+  TypedValueAccessor acc = getTypedAccessor();                             \
+  switch (GetAccessorType(acc)) {                                          \
+  case KindOfNull:    return HPHP::reverse(v2, false);                     \
+  case KindOfBoolean: return HPHP::reverse(v2, GetBoolean(acc));           \
+  case KindOfByte:                                                         \
+  case KindOfInt16:                                                        \
+  case KindOfInt32:                                                        \
+  case KindOfInt64:   return HPHP::reverse(v2, GetInt64(acc));             \
+  case KindOfDouble:  return HPHP::reverse(v2, GetDouble(acc));            \
+  case KindOfStaticString:                                                 \
+  case KindOfString:  return HPHP::reverse(v2, GetStringData(acc));        \
+  case KindOfArray:   return Array(GetArrayData(acc)).forward(v2);         \
+  case KindOfObject:  return HPHP::reverse(v2, Object(GetObjectData(acc)));\
+  default:                                                                 \
+    ASSERT(false);                                                         \
+    break;                                                                 \
+  }                                                                        \
+  return false;                                                            \
 
 bool Variant::equal(bool    v2) const { UNWRAP(equal);}
 bool Variant::equal(char    v2) const { UNWRAP(equal);}

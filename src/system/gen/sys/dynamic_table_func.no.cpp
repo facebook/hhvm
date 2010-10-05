@@ -955,6 +955,31 @@ Variant ifa_bcmul(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 2) return (f_bcmul(a0, a1));
   return (f_bcmul(a0, a1, a2));
 }
+Variant i_imap_header(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_header);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 5) return throw_wrong_arguments("imap_header", count, 2, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_header(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_imap_header(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_imap_header(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_header(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant ifa_imap_header(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 5) return throw_wrong_arguments("imap_header", count, 2, 5, 1);
+  if (count <= 2) return (f_imap_header(a0, a1));
+  if (count == 3) return (f_imap_header(a0, a1, a2));
+  if (count == 4) return (f_imap_header(a0, a1, a2, a3));
+  return (f_imap_header(a0, a1, a2, a3, a4));
+}
 Variant i_openlog(void *extra, CArrRef params) {
   FUNCTION_INJECTION(openlog);
   int count __attribute__((__unused__)) = params.size();
@@ -1230,6 +1255,21 @@ Variant ifa_deg2rad(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("deg2rad", count, 1, 1, 1);
   return (f_deg2rad(a0));
 }
+Variant i_imap_mime_header_decode(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_mime_header_decode);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_mime_header_decode", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_mime_header_decode(arg0));
+  }
+}
+Variant ifa_imap_mime_header_decode(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_mime_header_decode", count, 1, 1, 1);
+  return (f_imap_mime_header_decode(a0));
+}
 Variant i_magickrollimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickrollimage);
   int count __attribute__((__unused__)) = params.size();
@@ -1246,6 +1286,23 @@ Variant i_magickrollimage(void *extra, CArrRef params) {
 Variant ifa_magickrollimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 3) return throw_wrong_arguments("magickrollimage", count, 3, 3, 1);
   return (f_magickrollimage(a0, a1, a2));
+}
+Variant i_imap_getmailboxes(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_getmailboxes);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_getmailboxes", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_getmailboxes(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_getmailboxes(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_getmailboxes", count, 3, 3, 1);
+  return (f_imap_getmailboxes(a0, a1, a2));
 }
 Variant i_ldap_sort(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ldap_sort);
@@ -1891,6 +1948,16 @@ Variant i_magickresampleimage(void *extra, CArrRef params) {
 Variant ifa_magickresampleimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 5) return throw_wrong_arguments("magickresampleimage", count, 5, 5, 1);
   return (f_magickresampleimage(a0, a1, a2, a3, a4));
+}
+Variant i_imap_last_error(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_last_error);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("imap_last_error", 0, 1);
+  return (f_imap_last_error());
+}
+Variant ifa_imap_last_error(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("imap_last_error", 0, 1);
+  return (f_imap_last_error());
 }
 Variant i_i18n_loc_get_default(void *extra, CArrRef params) {
   FUNCTION_INJECTION(i18n_loc_get_default);
@@ -3186,6 +3253,25 @@ Variant ifa_magickadaptivethresholdimage(void *extra, int count, INVOKE_FEW_ARGS
   if (count != 4) return throw_wrong_arguments("magickadaptivethresholdimage", count, 4, 4, 1);
   return (f_magickadaptivethresholdimage(a0, a1, a2, a3));
 }
+Variant i_imap_body(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_body);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_body", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_body(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_body(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_body(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_body", count, 2, 3, 1);
+  if (count <= 2) return (f_imap_body(a0, a1));
+  return (f_imap_body(a0, a1, a2));
+}
 Variant i_each(void *extra, CArrRef params) {
   FUNCTION_INJECTION(each);
   int count __attribute__((__unused__)) = params.size();
@@ -4063,6 +4149,26 @@ Variant ifa_hphp_splfileobject_getflags(void *extra, int count, INVOKE_FEW_ARGS_
   if (count != 1) return throw_wrong_arguments("hphp_splfileobject_getflags", count, 1, 1, 1);
   return (f_hphp_splfileobject_getflags(a0));
 }
+Variant i_imap_mail_move(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_mail_move);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_mail_move", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_mail_move(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_mail_move(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_mail_move(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_mail_move", count, 3, 4, 1);
+  if (count <= 3) return (f_imap_mail_move(a0, a1, a2));
+  return (f_imap_mail_move(a0, a1, a2, a3));
+}
 Variant i_hphp_recursivedirectoryiterator_rewind(void *extra, CArrRef params) {
   FUNCTION_INJECTION(hphp_recursivedirectoryiterator_rewind);
   int count __attribute__((__unused__)) = params.size();
@@ -4097,6 +4203,22 @@ Variant ifa_magickgetstringwidth(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
   if (count < 3 || count > 4) return throw_wrong_arguments("magickgetstringwidth", count, 3, 4, 1);
   if (count <= 3) return (f_magickgetstringwidth(a0, a1, a2));
   return (f_magickgetstringwidth(a0, a1, a2, a3));
+}
+Variant i_imap_createmailbox(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_createmailbox);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_createmailbox", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_createmailbox(arg0, arg1));
+  }
+}
+Variant ifa_imap_createmailbox(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_createmailbox", count, 2, 2, 1);
+  return (f_imap_createmailbox(a0, a1));
 }
 Variant i_echo(void *extra, CArrRef params) {
   FUNCTION_INJECTION(echo);
@@ -5057,6 +5179,21 @@ Variant ifa_dom_document_create_text_node(void *extra, int count, INVOKE_FEW_ARG
   if (count != 2) return throw_wrong_arguments("dom_document_create_text_node", count, 2, 2, 1);
   return (f_dom_document_create_text_node(a0, a1));
 }
+Variant i_imap_num_msg(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_num_msg);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_num_msg", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_num_msg(arg0));
+  }
+}
+Variant ifa_imap_num_msg(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_num_msg", count, 1, 1, 1);
+  return (f_imap_num_msg(a0));
+}
 Variant i_getrandmax(void *extra, CArrRef params) {
   FUNCTION_INJECTION(getrandmax);
   int count __attribute__((__unused__)) = params.size();
@@ -5128,6 +5265,21 @@ Variant i_set_exception_handler(void *extra, CArrRef params) {
 Variant ifa_set_exception_handler(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("set_exception_handler", count, 1, 1, 1);
   return (f_set_exception_handler(a0));
+}
+Variant i_imap_qprint(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_qprint);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_qprint", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_qprint(arg0));
+  }
+}
+Variant ifa_imap_qprint(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_qprint", count, 1, 1, 1);
+  return (f_imap_qprint(a0));
 }
 Variant i_imagegrabwindow(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagegrabwindow);
@@ -5541,6 +5693,21 @@ Variant ifa_parse_url(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("parse_url", count, 1, 2, 1);
   if (count <= 1) return (f_parse_url(a0));
   return (f_parse_url(a0, a1));
+}
+Variant i_imap_headers(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_headers);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_headers", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_headers(arg0));
+  }
+}
+Variant ifa_imap_headers(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_headers", count, 1, 1, 1);
+  return (f_imap_headers(a0));
 }
 Variant i_magickreadimageblob(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickreadimageblob);
@@ -9525,6 +9692,23 @@ Variant ifa_curl_exec(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("curl_exec", count, 1, 1, 1);
   return (f_curl_exec(a0));
 }
+Variant i_imap_renamemailbox(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_renamemailbox);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_renamemailbox", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_renamemailbox(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_renamemailbox(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_renamemailbox", count, 3, 3, 1);
+  return (f_imap_renamemailbox(a0, a1, a2));
+}
 Variant i_magickgetexceptiontype(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickgetexceptiontype);
   int count __attribute__((__unused__)) = params.size();
@@ -9650,6 +9834,21 @@ Variant ifa_exec(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 1) return (f_exec(a0));
   if (count == 2) return (f_exec(a0, ref(a1)));
   return (f_exec(a0, ref(a1), ref(a2)));
+}
+Variant i_imap_binary(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_binary);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_binary", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_binary(arg0));
+  }
+}
+Variant ifa_imap_binary(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_binary", count, 1, 1, 1);
+  return (f_imap_binary(a0));
 }
 Variant i_apd_continue(void *extra, CArrRef params) {
   FUNCTION_INJECTION(apd_continue);
@@ -9797,6 +9996,21 @@ Variant i_ldap_get_entries(void *extra, CArrRef params) {
 Variant ifa_ldap_get_entries(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("ldap_get_entries", count, 2, 2, 1);
   return (f_ldap_get_entries(a0, a1));
+}
+Variant i_imap_8bit(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_8bit);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_8bit", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_8bit(arg0));
+  }
+}
+Variant ifa_imap_8bit(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_8bit", count, 1, 1, 1);
+  return (f_imap_8bit(a0));
 }
 Variant i_ob_iconv_handler(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ob_iconv_handler);
@@ -10247,6 +10461,28 @@ Variant ifa_in_array(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 2) return (f_in_array(a0, a1));
   return (f_in_array(a0, a1, a2));
 }
+Variant i_imap_search(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_search);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 4) return throw_wrong_arguments("imap_search", count, 2, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_search(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_imap_search(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_search(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_search(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 4) return throw_wrong_arguments("imap_search", count, 2, 4, 1);
+  if (count <= 2) return (f_imap_search(a0, a1));
+  if (count == 3) return (f_imap_search(a0, a1, a2));
+  return (f_imap_search(a0, a1, a2, a3));
+}
 Variant i_drawpathcurvetoquadraticbezierabsolute(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawpathcurvetoquadraticbezierabsolute);
   int count __attribute__((__unused__)) = params.size();
@@ -10372,6 +10608,22 @@ Variant i_i18n_loc_set_default(void *extra, CArrRef params) {
 Variant ifa_i18n_loc_set_default(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("i18n_loc_set_default", count, 1, 1, 1);
   return (f_i18n_loc_set_default(a0));
+}
+Variant i_imap_subscribe(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_subscribe);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_subscribe", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_subscribe(arg0, arg1));
+  }
+}
+Variant ifa_imap_subscribe(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_subscribe", count, 2, 2, 1);
+  return (f_imap_subscribe(a0, a1));
 }
 Variant i_ftok(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ftok);
@@ -10703,6 +10955,42 @@ Variant ifa_mb_strstr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 2) return (f_mb_strstr(a0, a1));
   if (count == 3) return (f_mb_strstr(a0, a1, a2));
   return (f_mb_strstr(a0, a1, a2, a3));
+}
+Variant i_imap_fetchheader(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_fetchheader);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetchheader", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_fetchheader(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_fetchheader(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_fetchheader(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetchheader", count, 2, 3, 1);
+  if (count <= 2) return (f_imap_fetchheader(a0, a1));
+  return (f_imap_fetchheader(a0, a1, a2));
+}
+Variant i_imap_listsubscribed(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_listsubscribed);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_listsubscribed", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_listsubscribed(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_listsubscribed(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_listsubscribed", count, 3, 3, 1);
+  return (f_imap_listsubscribed(a0, a1, a2));
 }
 Variant i_pixelgetblack(void *extra, CArrRef params) {
   FUNCTION_INJECTION(pixelgetblack);
@@ -11237,6 +11525,22 @@ Variant ifa_mcrypt_enc_get_key_size(void *extra, int count, INVOKE_FEW_ARGS_IMPL
   if (count != 1) return throw_wrong_arguments("mcrypt_enc_get_key_size", count, 1, 1, 1);
   return (f_mcrypt_enc_get_key_size(a0));
 }
+Variant i_imap_get_quotaroot(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_get_quotaroot);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_get_quotaroot", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_get_quotaroot(arg0, arg1));
+  }
+}
+Variant ifa_imap_get_quotaroot(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_get_quotaroot", count, 2, 2, 1);
+  return (f_imap_get_quotaroot(a0, a1));
+}
 Variant i_mysql_num_fields(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mysql_num_fields);
   int count __attribute__((__unused__)) = params.size();
@@ -11658,6 +11962,21 @@ Variant i_hphp_splfileinfo_isreadable(void *extra, CArrRef params) {
 Variant ifa_hphp_splfileinfo_isreadable(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("hphp_splfileinfo_isreadable", count, 1, 1, 1);
   return (f_hphp_splfileinfo_isreadable(a0));
+}
+Variant i_imap_check(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_check);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_check", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_check(arg0));
+  }
+}
+Variant ifa_imap_check(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_check", count, 1, 1, 1);
+  return (f_imap_check(a0));
 }
 Variant i_chroot(void *extra, CArrRef params) {
   FUNCTION_INJECTION(chroot);
@@ -12778,6 +13097,21 @@ Variant ifa_xml_set_object(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("xml_set_object", count, 2, 2, 1);
   return (f_xml_set_object(a0, ref(a1)));
 }
+Variant i_imap_utf7_encode(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_utf7_encode);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_utf7_encode", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_utf7_encode(arg0));
+  }
+}
+Variant ifa_imap_utf7_encode(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_utf7_encode", count, 1, 1, 1);
+  return (f_imap_utf7_encode(a0));
+}
 Variant i_ctype_print(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ctype_print);
   int count __attribute__((__unused__)) = params.size();
@@ -13359,6 +13693,25 @@ Variant ifa_magickposterizeimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
   if (count != 3) return throw_wrong_arguments("magickposterizeimage", count, 3, 3, 1);
   return (f_magickposterizeimage(a0, a1, a2));
 }
+Variant i_imap_status(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_status);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_status", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_status(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_status(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_status(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_status", count, 2, 3, 1);
+  if (count <= 2) return (f_imap_status(a0, a1));
+  return (f_imap_status(a0, a1, a2));
+}
 Variant i_dom_namednodemap_get_named_item(void *extra, CArrRef params) {
   FUNCTION_INJECTION(dom_namednodemap_get_named_item);
   int count __attribute__((__unused__)) = params.size();
@@ -13488,6 +13841,22 @@ Variant i_mysql_get_client_info(void *extra, CArrRef params) {
 Variant ifa_mysql_get_client_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("mysql_get_client_info", 0, 1);
   return (f_mysql_get_client_info());
+}
+Variant i_imap_mail_compose(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_mail_compose);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_mail_compose", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_mail_compose(arg0, arg1));
+  }
+}
+Variant ifa_imap_mail_compose(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_mail_compose", count, 2, 2, 1);
+  return (f_imap_mail_compose(a0, a1));
 }
 Variant i_fb_crossall_query(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fb_crossall_query);
@@ -14101,6 +14470,23 @@ Variant ifa_wandgetexceptionstring(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   if (count != 1) return throw_wrong_arguments("wandgetexceptionstring", count, 1, 1, 1);
   return (f_wandgetexceptionstring(a0));
 }
+Variant i_imap_set_quota(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_set_quota);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_set_quota", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_set_quota(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_set_quota(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_set_quota", count, 3, 3, 1);
+  return (f_imap_set_quota(a0, a1, a2));
+}
 Variant i_proc_open(void *extra, CArrRef params) {
   FUNCTION_INJECTION(proc_open);
   int count __attribute__((__unused__)) = params.size();
@@ -14447,6 +14833,16 @@ Variant ifa_magickgettextascent(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count <= 3) return (f_magickgettextascent(a0, a1, a2));
   return (f_magickgettextascent(a0, a1, a2, a3));
 }
+Variant i_imap_errors(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_errors);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("imap_errors", 0, 1);
+  return (f_imap_errors());
+}
+Variant ifa_imap_errors(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("imap_errors", 0, 1);
+  return (f_imap_errors());
+}
 Variant i_mb_regex_encoding(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mb_regex_encoding);
   int count __attribute__((__unused__)) = params.size();
@@ -14501,6 +14897,34 @@ Variant i_mcrypt_enc_self_test(void *extra, CArrRef params) {
 Variant ifa_mcrypt_enc_self_test(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("mcrypt_enc_self_test", count, 1, 1, 1);
   return (f_mcrypt_enc_self_test(a0));
+}
+Variant i_imap_mail(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_mail);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 7) return throw_wrong_arguments("imap_mail", count, 3, 7, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_mail(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_imap_mail(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 5) return (f_imap_mail(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 6) return (f_imap_mail(arg0, arg1, arg2, arg3, arg4, arg5));
+    CVarRef arg6((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_mail(arg0, arg1, arg2, arg3, arg4, arg5, arg6));
+  }
+}
+Variant ifa_imap_mail(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 7) return throw_wrong_arguments("imap_mail", count, 3, 7, 1);
+  if (count <= 3) return (f_imap_mail(a0, a1, a2));
+  if (count == 4) return (f_imap_mail(a0, a1, a2, a3));
+  if (count == 5) return (f_imap_mail(a0, a1, a2, a3, a4));
+  return (f_imap_mail(a0, a1, a2, a3, a4, a5));
 }
 Variant i_ignore_user_abort(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ignore_user_abort);
@@ -15175,6 +15599,25 @@ Variant ifa_mcrypt_get_key_size(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count != 2) return throw_wrong_arguments("mcrypt_get_key_size", count, 2, 2, 1);
   return (f_mcrypt_get_key_size(a0, a1));
 }
+Variant i_imap_delete(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_delete);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_delete", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_delete(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_delete(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_delete(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_delete", count, 2, 3, 1);
+  if (count <= 2) return (f_imap_delete(a0, a1));
+  return (f_imap_delete(a0, a1, a2));
+}
 Variant i_drawsettextalignment(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawsettextalignment);
   int count __attribute__((__unused__)) = params.size();
@@ -15667,6 +16110,23 @@ Variant ifa_iconv_mime_decode_headers(void *extra, int count, INVOKE_FEW_ARGS_IM
   if (count == 2) return (f_iconv_mime_decode_headers(a0, a1));
   return (f_iconv_mime_decode_headers(a0, a1, a2));
 }
+Variant i_imap_getsubscribed(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_getsubscribed);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_getsubscribed", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_getsubscribed(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_getsubscribed(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_getsubscribed", count, 3, 3, 1);
+  return (f_imap_getsubscribed(a0, a1, a2));
+}
 Variant i_ini_get_all(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ini_get_all);
   int count __attribute__((__unused__)) = params.size();
@@ -16143,6 +16603,23 @@ Variant i_drawgetfillopacity(void *extra, CArrRef params) {
 Variant ifa_drawgetfillopacity(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("drawgetfillopacity", count, 1, 1, 1);
   return (f_drawgetfillopacity(a0));
+}
+Variant i_imap_list(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_list);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_list", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_list(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_list(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_list", count, 3, 3, 1);
+  return (f_imap_list(a0, a1, a2));
 }
 Variant i_xml_parser_create_ns(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xml_parser_create_ns);
@@ -17621,6 +18098,24 @@ Variant ifa_extract(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count == 2) return (f_extract(a0, a1));
   return (f_extract(a0, a1, a2));
 }
+Variant i_imap_thread(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_thread);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_thread", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_imap_thread(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_thread(arg0, arg1));
+  }
+}
+Variant ifa_imap_thread(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_thread", count, 1, 2, 1);
+  if (count <= 1) return (f_imap_thread(a0));
+  return (f_imap_thread(a0, a1));
+}
 Variant i_session_decode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(session_decode);
   int count __attribute__((__unused__)) = params.size();
@@ -17819,6 +18314,24 @@ Variant ifa_gzinflate(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("gzinflate", count, 1, 2, 1);
   if (count <= 1) return (f_gzinflate(a0));
   return (f_gzinflate(a0, a1));
+}
+Variant i_imap_rfc822_parse_headers(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_rfc822_parse_headers);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_rfc822_parse_headers", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_imap_rfc822_parse_headers(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_rfc822_parse_headers(arg0, arg1));
+  }
+}
+Variant ifa_imap_rfc822_parse_headers(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_rfc822_parse_headers", count, 1, 2, 1);
+  if (count <= 1) return (f_imap_rfc822_parse_headers(a0));
+  return (f_imap_rfc822_parse_headers(a0, a1));
 }
 Variant i_openssl_pkcs7_sign(void *extra, CArrRef params) {
   FUNCTION_INJECTION(openssl_pkcs7_sign);
@@ -18213,6 +18726,24 @@ Variant i_magickgetexception(void *extra, CArrRef params) {
 Variant ifa_magickgetexception(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("magickgetexception", count, 1, 1, 1);
   return (f_magickgetexception(a0));
+}
+Variant i_imap_listscan(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_listscan);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("imap_listscan", count, 4, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_listscan(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_listscan(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 4) return throw_wrong_arguments("imap_listscan", count, 4, 4, 1);
+  return (f_imap_listscan(a0, a1, a2, a3));
 }
 Variant i_ctype_punct(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ctype_punct);
@@ -18659,6 +19190,21 @@ Variant ifa_basename(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 1) return (f_basename(a0));
   return (f_basename(a0, a1));
 }
+Variant i_imap_utf7_decode(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_utf7_decode);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_utf7_decode", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_utf7_decode(arg0));
+  }
+}
+Variant ifa_imap_utf7_decode(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_utf7_decode", count, 1, 1, 1);
+  return (f_imap_utf7_decode(a0));
+}
 Variant i_krsort(void *extra, CArrRef params) {
   FUNCTION_INJECTION(krsort);
   int count __attribute__((__unused__)) = params.size();
@@ -19060,6 +19606,39 @@ Variant ifa_mcrypt_module_is_block_algorithm(void *extra, int count, INVOKE_FEW_
   if (count <= 1) return (f_mcrypt_module_is_block_algorithm(a0));
   return (f_mcrypt_module_is_block_algorithm(a0, a1));
 }
+Variant i_imap_unsubscribe(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_unsubscribe);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_unsubscribe", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_unsubscribe(arg0, arg1));
+  }
+}
+Variant ifa_imap_unsubscribe(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_unsubscribe", count, 2, 2, 1);
+  return (f_imap_unsubscribe(a0, a1));
+}
+Variant i_imap_lsub(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_lsub);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_lsub", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_lsub(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_lsub(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_lsub", count, 3, 3, 1);
+  return (f_imap_lsub(a0, a1, a2));
+}
 Variant i_wandgetexception(void *extra, CArrRef params) {
   FUNCTION_INJECTION(wandgetexception);
   int count __attribute__((__unused__)) = params.size();
@@ -19437,6 +20016,22 @@ Variant ifa_posix_access(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 1) return (f_posix_access(a0));
   return (f_posix_access(a0, a1));
 }
+Variant i_imap_uid(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_uid);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_uid", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_uid(arg0, arg1));
+  }
+}
+Variant ifa_imap_uid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_uid", count, 2, 2, 1);
+  return (f_imap_uid(a0, a1));
+}
 Variant i_explode(void *extra, CArrRef params) {
   FUNCTION_INJECTION(explode);
   int count __attribute__((__unused__)) = params.size();
@@ -19630,6 +20225,31 @@ Variant ifa_hphp_get_extension_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL
   if (count != 1) return throw_wrong_arguments("hphp_get_extension_info", count, 1, 1, 1);
   return (f_hphp_get_extension_info(a0));
 }
+Variant i_imap_headerinfo(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_headerinfo);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 5) return throw_wrong_arguments("imap_headerinfo", count, 2, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_headerinfo(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_imap_headerinfo(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_imap_headerinfo(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_headerinfo(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant ifa_imap_headerinfo(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 5) return throw_wrong_arguments("imap_headerinfo", count, 2, 5, 1);
+  if (count <= 2) return (f_imap_headerinfo(a0, a1));
+  if (count == 3) return (f_imap_headerinfo(a0, a1, a2));
+  if (count == 4) return (f_imap_headerinfo(a0, a1, a2, a3));
+  return (f_imap_headerinfo(a0, a1, a2, a3, a4));
+}
 Variant i_output_add_rewrite_var(void *extra, CArrRef params) {
   FUNCTION_INJECTION(output_add_rewrite_var);
   int count __attribute__((__unused__)) = params.size();
@@ -19813,6 +20433,26 @@ Variant i_openssl_pkey_get_public(void *extra, CArrRef params) {
 Variant ifa_openssl_pkey_get_public(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("openssl_pkey_get_public", count, 1, 1, 1);
   return (f_openssl_pkey_get_public(a0));
+}
+Variant i_imap_fetchbody(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_fetchbody);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_fetchbody", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_fetchbody(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_fetchbody(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_fetchbody(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_fetchbody", count, 3, 4, 1);
+  if (count <= 3) return (f_imap_fetchbody(a0, a1, a2));
+  return (f_imap_fetchbody(a0, a1, a2, a3));
 }
 Variant i_interface_exists(void *extra, CArrRef params) {
   FUNCTION_INJECTION(interface_exists);
@@ -20792,6 +21432,24 @@ Variant ifa_stream_filter_prepend(void *extra, int count, INVOKE_FEW_ARGS_IMPL_A
   if (count == 3) return (f_stream_filter_prepend(a0, a1, a2));
   return (f_stream_filter_prepend(a0, a1, a2, a3));
 }
+Variant i_imap_close(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_close);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_close", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_imap_close(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_close(arg0, arg1));
+  }
+}
+Variant ifa_imap_close(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_close", count, 1, 2, 1);
+  if (count <= 1) return (f_imap_close(a0));
+  return (f_imap_close(a0, a1));
+}
 Variant i_substr(void *extra, CArrRef params) {
   FUNCTION_INJECTION(substr);
   int count __attribute__((__unused__)) = params.size();
@@ -21144,6 +21802,21 @@ Variant ifa_magickmedianfilterimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL
   if (count != 2) return throw_wrong_arguments("magickmedianfilterimage", count, 2, 2, 1);
   return (f_magickmedianfilterimage(a0, a1));
 }
+Variant i_imap_ping(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_ping);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_ping", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_ping(arg0));
+  }
+}
+Variant ifa_imap_ping(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_ping", count, 1, 1, 1);
+  return (f_imap_ping(a0));
+}
 Variant i_xbox_task_result(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xbox_task_result);
   int count __attribute__((__unused__)) = params.size();
@@ -21208,6 +21881,29 @@ Variant i_money_format(void *extra, CArrRef params) {
 Variant ifa_money_format(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("money_format", count, 2, 2, 1);
   return (f_money_format(a0, a1));
+}
+Variant i_imap_open(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_open);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("imap_open", count, 3, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_open(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_imap_open(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_open(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant ifa_imap_open(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 5) return throw_wrong_arguments("imap_open", count, 3, 5, 1);
+  if (count <= 3) return (f_imap_open(a0, a1, a2));
+  if (count == 4) return (f_imap_open(a0, a1, a2, a3));
+  return (f_imap_open(a0, a1, a2, a3, a4));
 }
 Variant i_clearmagickwand(void *extra, CArrRef params) {
   FUNCTION_INJECTION(clearmagickwand);
@@ -21865,6 +22561,16 @@ Variant ifa_strtotime(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 1) return (f_strtotime(a0));
   return (f_strtotime(a0, a1));
 }
+Variant i_imap_alerts(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_alerts);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("imap_alerts", 0, 1);
+  return (f_imap_alerts());
+}
+Variant ifa_imap_alerts(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("imap_alerts", 0, 1);
+  return (f_imap_alerts());
+}
 Variant i_dom_element_set_id_attribute(void *extra, CArrRef params) {
   FUNCTION_INJECTION(dom_element_set_id_attribute);
   int count __attribute__((__unused__)) = params.size();
@@ -21896,6 +22602,26 @@ Variant i_hphp_recursivedirectoryiterator_getsubpath(void *extra, CArrRef params
 Variant ifa_hphp_recursivedirectoryiterator_getsubpath(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("hphp_recursivedirectoryiterator_getsubpath", count, 1, 1, 1);
   return (f_hphp_recursivedirectoryiterator_getsubpath(a0));
+}
+Variant i_imap_setflag_full(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_setflag_full);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_setflag_full", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_setflag_full(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_setflag_full(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_setflag_full(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_setflag_full", count, 3, 4, 1);
+  if (count <= 3) return (f_imap_setflag_full(a0, a1, a2));
+  return (f_imap_setflag_full(a0, a1, a2, a3));
 }
 Variant i_apc_clear_cache(void *extra, CArrRef params) {
   FUNCTION_INJECTION(apc_clear_cache);
@@ -22710,6 +23436,24 @@ Variant ifa_hphp_splfileobject_fgetc(void *extra, int count, INVOKE_FEW_ARGS_IMP
   if (count != 1) return throw_wrong_arguments("hphp_splfileobject_fgetc", count, 1, 1, 1);
   return (f_hphp_splfileobject_fgetc(a0));
 }
+Variant i_imap_timeout(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_timeout);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_timeout", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_imap_timeout(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_timeout(arg0, arg1));
+  }
+}
+Variant ifa_imap_timeout(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_timeout", count, 1, 2, 1);
+  if (count <= 1) return (f_imap_timeout(a0));
+  return (f_imap_timeout(a0, a1));
+}
 Variant i_magickshaveimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickshaveimage);
   int count __attribute__((__unused__)) = params.size();
@@ -22956,6 +23700,22 @@ Variant i_magicktrimimage(void *extra, CArrRef params) {
 Variant ifa_magicktrimimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("magicktrimimage", count, 2, 2, 1);
   return (f_magicktrimimage(a0, a1));
+}
+Variant i_imap_gc(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_gc);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_gc", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_gc(arg0, arg1));
+  }
+}
+Variant ifa_imap_gc(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_gc", count, 2, 2, 1);
+  return (f_imap_gc(a0, a1));
 }
 Variant i_hphp_splfileinfo_getpathinfo(void *extra, CArrRef params) {
   FUNCTION_INJECTION(hphp_splfileinfo_getpathinfo);
@@ -23652,6 +24412,26 @@ Variant ifa_fgetss(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count == 2) return (f_fgetss(a0, a1));
   return (f_fgetss(a0, a1, a2));
 }
+Variant i_imap_mail_copy(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_mail_copy);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_mail_copy", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_mail_copy(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_mail_copy(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_mail_copy(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_mail_copy", count, 3, 4, 1);
+  if (count <= 3) return (f_imap_mail_copy(a0, a1, a2));
+  return (f_imap_mail_copy(a0, a1, a2, a3));
+}
 Variant i_drawarc(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawarc);
   int count __attribute__((__unused__)) = params.size();
@@ -24283,6 +25063,24 @@ Variant ifa_preg_match_all(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 3) return (f_preg_match_all(a0, a1, ref(a2)));
   if (count == 4) return (f_preg_match_all(a0, a1, ref(a2), a3));
   return (f_preg_match_all(a0, a1, ref(a2), a3, a4));
+}
+Variant i_imap_scanmailbox(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_scanmailbox);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("imap_scanmailbox", count, 4, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_scanmailbox(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_scanmailbox(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 4) return throw_wrong_arguments("imap_scanmailbox", count, 4, 4, 1);
+  return (f_imap_scanmailbox(a0, a1, a2, a3));
 }
 Variant i_proc_terminate(void *extra, CArrRef params) {
   FUNCTION_INJECTION(proc_terminate);
@@ -25071,6 +25869,25 @@ Variant ifa_dom_element_set_attribute_ns(void *extra, int count, INVOKE_FEW_ARGS
   if (count != 4) return throw_wrong_arguments("dom_element_set_attribute_ns", count, 4, 4, 1);
   return (f_dom_element_set_attribute_ns(a0, a1, a2, a3));
 }
+Variant i_imap_undelete(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_undelete);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_undelete", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_undelete(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_undelete(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_undelete(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_undelete", count, 2, 3, 1);
+  if (count <= 2) return (f_imap_undelete(a0, a1));
+  return (f_imap_undelete(a0, a1, a2));
+}
 Variant i_dom_xpath_evaluate(void *extra, CArrRef params) {
   FUNCTION_INJECTION(dom_xpath_evaluate);
   int count __attribute__((__unused__)) = params.size();
@@ -25308,6 +26125,22 @@ Variant ifa_cleardrawingwand(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count != 1) return throw_wrong_arguments("cleardrawingwand", count, 1, 1, 1);
   return (f_cleardrawingwand(a0), null);
 }
+Variant i_imap_getacl(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_getacl);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_getacl", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_getacl(arg0, arg1));
+  }
+}
+Variant ifa_imap_getacl(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_getacl", count, 2, 2, 1);
+  return (f_imap_getacl(a0, a1));
+}
 Variant i_imagecolorset(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagecolorset);
   int count __attribute__((__unused__)) = params.size();
@@ -25349,24 +26182,26 @@ Variant ifa_openssl_x509_checkpurpose(void *extra, int count, INVOKE_FEW_ARGS_IM
   if (count == 3) return (f_openssl_x509_checkpurpose(a0, a1, a2));
   return (f_openssl_x509_checkpurpose(a0, a1, a2, a3));
 }
-Variant i_drawpathcurvetosmoothabsolute(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(drawpathcurvetosmoothabsolute);
+Variant i_timezone_name_from_abbr(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(timezone_name_from_abbr);
   int count __attribute__((__unused__)) = params.size();
-  if (count != 5) return throw_wrong_arguments("drawpathcurvetosmoothabsolute", count, 5, 5, 1);
+  if (count < 1 || count > 3) return throw_wrong_arguments("timezone_name_from_abbr", count, 1, 3, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_timezone_name_from_abbr(arg0));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 2) return (f_timezone_name_from_abbr(arg0, arg1));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
-    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_drawpathcurvetosmoothabsolute(arg0, arg1, arg2, arg3, arg4), null);
+    return (f_timezone_name_from_abbr(arg0, arg1, arg2));
   }
 }
-Variant ifa_drawpathcurvetosmoothabsolute(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 5) return throw_wrong_arguments("drawpathcurvetosmoothabsolute", count, 5, 5, 1);
-  return (f_drawpathcurvetosmoothabsolute(a0, a1, a2, a3, a4), null);
+Variant ifa_timezone_name_from_abbr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 3) return throw_wrong_arguments("timezone_name_from_abbr", count, 1, 3, 1);
+  if (count <= 1) return (f_timezone_name_from_abbr(a0));
+  if (count == 2) return (f_timezone_name_from_abbr(a0, a1));
+  return (f_timezone_name_from_abbr(a0, a1, a2));
 }
 Variant i_array_intersect_ukey(void *extra, CArrRef params) {
   FUNCTION_INJECTION(array_intersect_ukey);
@@ -25391,26 +26226,24 @@ Variant ifa_array_intersect_ukey(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
   if (count >= 6) params.append(a5);
   return (f_array_intersect_ukey(count,a0, a1, a2, params));
 }
-Variant i_timezone_name_from_abbr(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(timezone_name_from_abbr);
+Variant i_drawpathcurvetosmoothabsolute(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(drawpathcurvetosmoothabsolute);
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 3) return throw_wrong_arguments("timezone_name_from_abbr", count, 1, 3, 1);
+  if (count != 5) return throw_wrong_arguments("drawpathcurvetosmoothabsolute", count, 5, 5, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (f_timezone_name_from_abbr(arg0));
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 2) return (f_timezone_name_from_abbr(arg0, arg1));
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_timezone_name_from_abbr(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_drawpathcurvetosmoothabsolute(arg0, arg1, arg2, arg3, arg4), null);
   }
 }
-Variant ifa_timezone_name_from_abbr(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count < 1 || count > 3) return throw_wrong_arguments("timezone_name_from_abbr", count, 1, 3, 1);
-  if (count <= 1) return (f_timezone_name_from_abbr(a0));
-  if (count == 2) return (f_timezone_name_from_abbr(a0, a1));
-  return (f_timezone_name_from_abbr(a0, a1, a2));
+Variant ifa_drawpathcurvetosmoothabsolute(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 5) return throw_wrong_arguments("drawpathcurvetosmoothabsolute", count, 5, 5, 1);
+  return (f_drawpathcurvetosmoothabsolute(a0, a1, a2, a3, a4), null);
 }
 Variant i_imagefilledellipse(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagefilledellipse);
@@ -25447,16 +26280,6 @@ Variant ifa_pcntl_wstopsig(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("pcntl_wstopsig", count, 1, 1, 1);
   return (f_pcntl_wstopsig(a0));
 }
-Variant i_get_defined_vars(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(get_defined_vars);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("get_defined_vars", 0, 1);
-  return (f_get_defined_vars());
-}
-Variant ifa_get_defined_vars(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("get_defined_vars", 0, 1);
-  return (f_get_defined_vars());
-}
 Variant i_memory_get_usage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(memory_get_usage);
   int count __attribute__((__unused__)) = params.size();
@@ -25473,6 +26296,16 @@ Variant ifa_memory_get_usage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) 
   if (count > 1) return throw_toomany_arguments("memory_get_usage", 1, 1);
   if (count <= 0) return (f_memory_get_usage());
   return (f_memory_get_usage(a0));
+}
+Variant i_get_defined_vars(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(get_defined_vars);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("get_defined_vars", 0, 1);
+  return (f_get_defined_vars());
+}
+Variant ifa_get_defined_vars(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("get_defined_vars", 0, 1);
+  return (f_get_defined_vars());
 }
 Variant i_intval(void *extra, CArrRef params) {
   FUNCTION_INJECTION(intval);
@@ -25540,6 +26373,22 @@ Variant ifa_iconv_set_encoding(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   if (count != 2) return throw_wrong_arguments("iconv_set_encoding", count, 2, 2, 1);
   return (f_iconv_set_encoding(a0, a1));
 }
+Variant i_mailparse_msg_get_part(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(mailparse_msg_get_part);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("mailparse_msg_get_part", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_mailparse_msg_get_part(arg0, arg1));
+  }
+}
+Variant ifa_mailparse_msg_get_part(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("mailparse_msg_get_part", count, 2, 2, 1);
+  return (f_mailparse_msg_get_part(a0, a1));
+}
 Variant i_magickmattefloodfillimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickmattefloodfillimage);
   int count __attribute__((__unused__)) = params.size();
@@ -25559,22 +26408,6 @@ Variant i_magickmattefloodfillimage(void *extra, CArrRef params) {
 Variant ifa_magickmattefloodfillimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 6) return throw_wrong_arguments("magickmattefloodfillimage", count, 6, 6, 1);
   return (f_magickmattefloodfillimage(a0, a1, a2, a3, a4, a5));
-}
-Variant i_mailparse_msg_get_part(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(mailparse_msg_get_part);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("mailparse_msg_get_part", count, 2, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_mailparse_msg_get_part(arg0, arg1));
-  }
-}
-Variant ifa_mailparse_msg_get_part(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("mailparse_msg_get_part", count, 2, 2, 1);
-  return (f_mailparse_msg_get_part(a0, a1));
 }
 Variant i_mb_check_encoding(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mb_check_encoding);
@@ -25596,37 +26429,6 @@ Variant ifa_mb_check_encoding(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
   if (count == 1) return (f_mb_check_encoding(a0));
   return (f_mb_check_encoding(a0, a1));
 }
-Variant i_ldap_get_dn(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(ldap_get_dn);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ldap_get_dn", count, 2, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_ldap_get_dn(arg0, arg1));
-  }
-}
-Variant ifa_ldap_get_dn(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("ldap_get_dn", count, 2, 2, 1);
-  return (f_ldap_get_dn(a0, a1));
-}
-Variant i_newpixeliterator(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(newpixeliterator);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixeliterator", count, 1, 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_newpixeliterator(arg0));
-  }
-}
-Variant ifa_newpixeliterator(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 1) return throw_wrong_arguments("newpixeliterator", count, 1, 1, 1);
-  return (f_newpixeliterator(a0));
-}
 Variant i_magicksetimagefilename(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magicksetimagefilename);
   int count __attribute__((__unused__)) = params.size();
@@ -25644,6 +26446,55 @@ Variant ifa_magicksetimagefilename(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   if (count < 1 || count > 2) return throw_wrong_arguments("magicksetimagefilename", count, 1, 2, 1);
   if (count <= 1) return (f_magicksetimagefilename(a0));
   return (f_magicksetimagefilename(a0, a1));
+}
+Variant i_newpixeliterator(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(newpixeliterator);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("newpixeliterator", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_newpixeliterator(arg0));
+  }
+}
+Variant ifa_newpixeliterator(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("newpixeliterator", count, 1, 1, 1);
+  return (f_newpixeliterator(a0));
+}
+Variant i_ldap_get_dn(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(ldap_get_dn);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("ldap_get_dn", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_ldap_get_dn(arg0, arg1));
+  }
+}
+Variant ifa_ldap_get_dn(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("ldap_get_dn", count, 2, 2, 1);
+  return (f_ldap_get_dn(a0, a1));
+}
+Variant i_mysql_list_tables(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(mysql_list_tables);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("mysql_list_tables", count, 1, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    if (count <= 1) return (f_mysql_list_tables(arg0));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_mysql_list_tables(arg0, arg1));
+  }
+}
+Variant ifa_mysql_list_tables(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 1 || count > 2) return throw_wrong_arguments("mysql_list_tables", count, 1, 2, 1);
+  if (count <= 1) return (f_mysql_list_tables(a0));
+  return (f_mysql_list_tables(a0, a1));
 }
 Variant i_call_user_func(void *extra, CArrRef params) {
   FUNCTION_INJECTION(call_user_func);
@@ -25668,23 +26519,20 @@ Variant ifa_call_user_func(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count >= 6) params.append(a5);
   return (f_call_user_func(count,a0, params));
 }
-Variant i_mysql_list_tables(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(mysql_list_tables);
+Variant i_imap_base64(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_base64);
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 2) return throw_wrong_arguments("mysql_list_tables", count, 1, 2, 1);
+  if (count != 1) return throw_wrong_arguments("imap_base64", count, 1, 1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    if (count <= 1) return (f_mysql_list_tables(arg0));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_mysql_list_tables(arg0, arg1));
+    return (f_imap_base64(arg0));
   }
 }
-Variant ifa_mysql_list_tables(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count < 1 || count > 2) return throw_wrong_arguments("mysql_list_tables", count, 1, 2, 1);
-  if (count <= 1) return (f_mysql_list_tables(a0));
-  return (f_mysql_list_tables(a0, a1));
+Variant ifa_imap_base64(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_base64", count, 1, 1, 1);
+  return (f_imap_base64(a0));
 }
 Variant i_magickgetinterlacescheme(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickgetinterlacescheme);
@@ -25754,23 +26602,6 @@ Variant ifa_mb_ereg_match(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 2) return (f_mb_ereg_match(a0, a1));
   return (f_mb_ereg_match(a0, a1, a2));
 }
-Variant i_mt_srand(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(mt_srand);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 1) return throw_toomany_arguments("mt_srand", 1, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (f_mt_srand(), null);
-    CVarRef arg0((ad->getValue(pos)));
-    return (f_mt_srand(arg0), null);
-  }
-}
-Variant ifa_mt_srand(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 1) return throw_toomany_arguments("mt_srand", 1, 1);
-  if (count <= 0) return (f_mt_srand(), null);
-  return (f_mt_srand(a0), null);
-}
 Variant i_imagecolorallocate(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagecolorallocate);
   int count __attribute__((__unused__)) = params.size();
@@ -25789,6 +26620,23 @@ Variant ifa_imagecolorallocate(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   if (count != 4) return throw_wrong_arguments("imagecolorallocate", count, 4, 4, 1);
   return (f_imagecolorallocate(a0, a1, a2, a3));
 }
+Variant i_mt_srand(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(mt_srand);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("mt_srand", 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    if (count <= 0) return (f_mt_srand(), null);
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_mt_srand(arg0), null);
+  }
+}
+Variant ifa_mt_srand(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 1) return throw_toomany_arguments("mt_srand", 1, 1);
+  if (count <= 0) return (f_mt_srand(), null);
+  return (f_mt_srand(a0), null);
+}
 Variant i_define_syslog_variables(void *extra, CArrRef params) {
   FUNCTION_INJECTION(define_syslog_variables);
   int count __attribute__((__unused__)) = params.size();
@@ -25798,16 +26646,6 @@ Variant i_define_syslog_variables(void *extra, CArrRef params) {
 Variant ifa_define_syslog_variables(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("define_syslog_variables", 0, 1);
   return (f_define_syslog_variables(), null);
-}
-Variant i_fb_get_code_coverage(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(fb_get_code_coverage);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
-  return (f_fb_get_code_coverage());
-}
-Variant ifa_fb_get_code_coverage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
-  return (f_fb_get_code_coverage());
 }
 Variant i_mcrypt_enc_get_modes_name(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mcrypt_enc_get_modes_name);
@@ -25823,6 +26661,16 @@ Variant i_mcrypt_enc_get_modes_name(void *extra, CArrRef params) {
 Variant ifa_mcrypt_enc_get_modes_name(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("mcrypt_enc_get_modes_name", count, 1, 1, 1);
   return (f_mcrypt_enc_get_modes_name(a0));
+}
+Variant i_fb_get_code_coverage(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(fb_get_code_coverage);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
+  return (f_fb_get_code_coverage());
+}
+Variant ifa_fb_get_code_coverage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
+  return (f_fb_get_code_coverage());
 }
 Variant i_array_flip(void *extra, CArrRef params) {
   FUNCTION_INJECTION(array_flip);
@@ -25971,6 +26819,22 @@ Variant ifa_hphp_splfileinfo_gettype(void *extra, int count, INVOKE_FEW_ARGS_IMP
   if (count != 1) return throw_wrong_arguments("hphp_splfileinfo_gettype", count, 1, 1, 1);
   return (f_hphp_splfileinfo_gettype(a0));
 }
+Variant i_imap_rfc822_parse_adrlist(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_rfc822_parse_adrlist);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_rfc822_parse_adrlist", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_rfc822_parse_adrlist(arg0, arg1));
+  }
+}
+Variant ifa_imap_rfc822_parse_adrlist(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_rfc822_parse_adrlist", count, 2, 2, 1);
+  return (f_imap_rfc822_parse_adrlist(a0, a1));
+}
 Variant i_xhprof_run_trace(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xhprof_run_trace);
   int count __attribute__((__unused__)) = params.size();
@@ -25986,6 +26850,16 @@ Variant i_xhprof_run_trace(void *extra, CArrRef params) {
 Variant ifa_xhprof_run_trace(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("xhprof_run_trace", count, 2, 2, 1);
   return (f_xhprof_run_trace(a0, a1));
+}
+Variant i_libxml_clear_errors(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(libxml_clear_errors);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
+  return (f_libxml_clear_errors(), null);
+}
+Variant ifa_libxml_clear_errors(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
+  return (f_libxml_clear_errors(), null);
 }
 Variant i_xmlwriter_start_document(void *extra, CArrRef params) {
   FUNCTION_INJECTION(xmlwriter_start_document);
@@ -26010,16 +26884,6 @@ Variant ifa_xmlwriter_start_document(void *extra, int count, INVOKE_FEW_ARGS_IMP
   if (count == 2) return (f_xmlwriter_start_document(a0, a1));
   if (count == 3) return (f_xmlwriter_start_document(a0, a1, a2));
   return (f_xmlwriter_start_document(a0, a1, a2, a3));
-}
-Variant i_libxml_clear_errors(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(libxml_clear_errors);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
-  return (f_libxml_clear_errors(), null);
-}
-Variant ifa_libxml_clear_errors(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
-  return (f_libxml_clear_errors(), null);
 }
 Variant i_magicknormalizeimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magicknormalizeimage);
@@ -26098,6 +26962,26 @@ Variant ifa_dom_element_remove_attribute_ns(void *extra, int count, INVOKE_FEW_A
   if (count != 3) return throw_wrong_arguments("dom_element_remove_attribute_ns", count, 3, 3, 1);
   return (f_dom_element_remove_attribute_ns(a0, a1, a2));
 }
+Variant i_imap_append(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_append);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_append", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_append(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_append(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_append(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_append", count, 3, 4, 1);
+  if (count <= 3) return (f_imap_append(a0, a1, a2));
+  return (f_imap_append(a0, a1, a2, a3));
+}
 Variant i_openssl_csr_new(void *extra, CArrRef params) {
   FUNCTION_INJECTION(openssl_csr_new);
   int count __attribute__((__unused__)) = params.size();
@@ -26168,6 +27052,16 @@ Variant ifa_mb_get_info(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count <= 0) return (f_mb_get_info());
   return (f_mb_get_info(a0));
 }
+Variant i_getcwd(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(getcwd);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  return (f_getcwd());
+}
+Variant ifa_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  return (f_getcwd());
+}
 Variant i_posix_getrlimit(void *extra, CArrRef params) {
   FUNCTION_INJECTION(posix_getrlimit);
   int count __attribute__((__unused__)) = params.size();
@@ -26178,15 +27072,21 @@ Variant ifa_posix_getrlimit(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("posix_getrlimit", 0, 1);
   return (f_posix_getrlimit());
 }
-Variant i_getcwd(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(getcwd);
+Variant i_imap_deletemailbox(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_deletemailbox);
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  return (f_getcwd());
+  if (count != 2) return throw_wrong_arguments("imap_deletemailbox", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_deletemailbox(arg0, arg1));
+  }
 }
-Variant ifa_getcwd(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
-  return (f_getcwd());
+Variant ifa_imap_deletemailbox(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_deletemailbox", count, 2, 2, 1);
+  return (f_imap_deletemailbox(a0, a1));
 }
 Variant i_fputcsv(void *extra, CArrRef params) {
   FUNCTION_INJECTION(fputcsv);
@@ -26682,6 +27582,23 @@ Variant ifa_stream_socket_server(void *extra, int count, INVOKE_FEW_ARGS_IMPL_AR
   if (count == 4) return (f_stream_socket_server(a0, ref(a1), ref(a2), a3));
   return (f_stream_socket_server(a0, ref(a1), ref(a2), a3, a4));
 }
+Variant i_imap_listmailbox(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_listmailbox);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_listmailbox", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_listmailbox(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_listmailbox(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_listmailbox", count, 3, 3, 1);
+  return (f_imap_listmailbox(a0, a1, a2));
+}
 Variant i_apd_set_pprof_trace(void *extra, CArrRef params) {
   FUNCTION_INJECTION(apd_set_pprof_trace);
   int count __attribute__((__unused__)) = params.size();
@@ -26701,22 +27618,6 @@ Variant ifa_apd_set_pprof_trace(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARG
   if (count <= 0) return (f_apd_set_pprof_trace());
   if (count == 1) return (f_apd_set_pprof_trace(a0));
   return (f_apd_set_pprof_trace(a0, a1));
-}
-Variant i_ini_set(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(ini_set);
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
-  {
-    ArrayData *ad(params.get());
-    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    CVarRef arg0((ad->getValue(pos)));
-    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    return (f_ini_set(arg0, arg1));
-  }
-}
-Variant ifa_ini_set(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
-  return (f_ini_set(a0, a1));
 }
 Variant i_sort(void *extra, CArrRef params) {
   FUNCTION_INJECTION(sort);
@@ -26740,6 +27641,22 @@ Variant ifa_sort(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count == 2) return (f_sort(ref(a0), a1));
   return (f_sort(ref(a0), a1, a2));
 }
+Variant i_ini_set(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(ini_set);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_ini_set(arg0, arg1));
+  }
+}
+Variant ifa_ini_set(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
+  return (f_ini_set(a0, a1));
+}
 Variant i_drawgetfont(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawgetfont);
   int count __attribute__((__unused__)) = params.size();
@@ -26754,6 +27671,32 @@ Variant i_drawgetfont(void *extra, CArrRef params) {
 Variant ifa_drawgetfont(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("drawgetfont", count, 1, 1, 1);
   return (f_drawgetfont(a0));
+}
+Variant i_imap_sort(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_sort);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 6) return throw_wrong_arguments("imap_sort", count, 3, 6, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_sort(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_imap_sort(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 5) return (f_imap_sort(arg0, arg1, arg2, arg3, arg4));
+    CVarRef arg5((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_sort(arg0, arg1, arg2, arg3, arg4, arg5));
+  }
+}
+Variant ifa_imap_sort(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 6) return throw_wrong_arguments("imap_sort", count, 3, 6, 1);
+  if (count <= 3) return (f_imap_sort(a0, a1, a2));
+  if (count == 4) return (f_imap_sort(a0, a1, a2, a3));
+  if (count == 5) return (f_imap_sort(a0, a1, a2, a3, a4));
+  return (f_imap_sort(a0, a1, a2, a3, a4, a5));
 }
 Variant i_readdir(void *extra, CArrRef params) {
   FUNCTION_INJECTION(readdir);
@@ -27111,16 +28054,6 @@ Variant ifa_stat(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("stat", count, 1, 1, 1);
   return (f_stat(a0));
 }
-Variant i_posix_getpid(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(posix_getpid);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getpid", 0, 1);
-  return (f_posix_getpid());
-}
-Variant ifa_posix_getpid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("posix_getpid", 0, 1);
-  return (f_posix_getpid());
-}
 Variant i_hphp_directoryiterator_key(void *extra, CArrRef params) {
   FUNCTION_INJECTION(hphp_directoryiterator_key);
   int count __attribute__((__unused__)) = params.size();
@@ -27135,6 +28068,16 @@ Variant i_hphp_directoryiterator_key(void *extra, CArrRef params) {
 Variant ifa_hphp_directoryiterator_key(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("hphp_directoryiterator_key", count, 1, 1, 1);
   return (f_hphp_directoryiterator_key(a0));
+}
+Variant i_posix_getpid(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(posix_getpid);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getpid", 0, 1);
+  return (f_posix_getpid());
+}
+Variant ifa_posix_getpid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("posix_getpid", 0, 1);
+  return (f_posix_getpid());
 }
 Variant i_get_current_user(void *extra, CArrRef params) {
   FUNCTION_INJECTION(get_current_user);
@@ -27370,6 +28313,25 @@ Variant i_pixelsetopacityquantum(void *extra, CArrRef params) {
 Variant ifa_pixelsetopacityquantum(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("pixelsetopacityquantum", count, 2, 2, 1);
   return (f_pixelsetopacityquantum(a0, a1), null);
+}
+Variant i_imap_fetch_overview(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_fetch_overview);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetch_overview", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_fetch_overview(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_fetch_overview(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_fetch_overview(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetch_overview", count, 2, 3, 1);
+  if (count <= 2) return (f_imap_fetch_overview(a0, a1));
+  return (f_imap_fetch_overview(a0, a1, a2));
 }
 Variant i_ctype_space(void *extra, CArrRef params) {
   FUNCTION_INJECTION(ctype_space);
@@ -28131,6 +29093,21 @@ Variant ifa_socket_create_pair(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   if (count != 4) return throw_wrong_arguments("socket_create_pair", count, 4, 4, 1);
   return (f_socket_create_pair(a0, a1, a2, ref(a3)));
 }
+Variant i_imap_num_recent(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_num_recent);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_num_recent", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_num_recent(arg0));
+  }
+}
+Variant ifa_imap_num_recent(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_num_recent", count, 1, 1, 1);
+  return (f_imap_num_recent(a0));
+}
 Variant i_openssl_x509_check_private_key(void *extra, CArrRef params) {
   FUNCTION_INJECTION(openssl_x509_check_private_key);
   int count __attribute__((__unused__)) = params.size();
@@ -28162,6 +29139,26 @@ Variant i_collator_get_attribute(void *extra, CArrRef params) {
 Variant ifa_collator_get_attribute(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("collator_get_attribute", count, 2, 2, 1);
   return (f_collator_get_attribute(a0, a1));
+}
+Variant i_imap_clearflag_full(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_clearflag_full);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_clearflag_full", count, 3, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_clearflag_full(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_clearflag_full(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_clearflag_full(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_clearflag_full", count, 3, 4, 1);
+  if (count <= 3) return (f_imap_clearflag_full(a0, a1, a2));
+  return (f_imap_clearflag_full(a0, a1, a2, a3));
 }
 Variant i_shm_put_var(void *extra, CArrRef params) {
   FUNCTION_INJECTION(shm_put_var);
@@ -28205,6 +29202,28 @@ Variant i_hphp_splfileobject_seek(void *extra, CArrRef params) {
 Variant ifa_hphp_splfileobject_seek(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("hphp_splfileobject_seek", count, 2, 2, 1);
   return (f_hphp_splfileobject_seek(a0, a1), null);
+}
+Variant i_imap_reopen(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_reopen);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 4) return throw_wrong_arguments("imap_reopen", count, 2, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_reopen(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 3) return (f_imap_reopen(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_reopen(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_reopen(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 4) return throw_wrong_arguments("imap_reopen", count, 2, 4, 1);
+  if (count <= 2) return (f_imap_reopen(a0, a1));
+  if (count == 3) return (f_imap_reopen(a0, a1, a2));
+  return (f_imap_reopen(a0, a1, a2, a3));
 }
 Variant i_stream_set_blocking(void *extra, CArrRef params) {
   FUNCTION_INJECTION(stream_set_blocking);
@@ -28378,6 +29397,21 @@ Variant i_connection_timeout(void *extra, CArrRef params) {
 Variant ifa_connection_timeout(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("connection_timeout", 0, 1);
   return (f_connection_timeout());
+}
+Variant i_imap_mailboxmsginfo(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_mailboxmsginfo);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_mailboxmsginfo", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_mailboxmsginfo(arg0));
+  }
+}
+Variant ifa_imap_mailboxmsginfo(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_mailboxmsginfo", count, 1, 1, 1);
+  return (f_imap_mailboxmsginfo(a0));
 }
 Variant i_mysql_data_seek(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mysql_data_seek);
@@ -28602,16 +29636,6 @@ Variant ifa_is_integer(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("is_integer", count, 1, 1, 1);
   return (f_is_integer(a0));
 }
-Variant i_posix_getuid(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(posix_getuid);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getuid", 0, 1);
-  return (f_posix_getuid());
-}
-Variant ifa_posix_getuid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("posix_getuid", 0, 1);
-  return (f_posix_getuid());
-}
 Variant i_imagecreatefromgif(void *extra, CArrRef params) {
   FUNCTION_INJECTION(imagecreatefromgif);
   int count __attribute__((__unused__)) = params.size();
@@ -28626,6 +29650,16 @@ Variant i_imagecreatefromgif(void *extra, CArrRef params) {
 Variant ifa_imagecreatefromgif(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("imagecreatefromgif", count, 1, 1, 1);
   return (f_imagecreatefromgif(a0));
+}
+Variant i_posix_getuid(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(posix_getuid);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getuid", 0, 1);
+  return (f_posix_getuid());
+}
+Variant ifa_posix_getuid(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("posix_getuid", 0, 1);
+  return (f_posix_getuid());
 }
 Variant i_mb_send_mail(void *extra, CArrRef params) {
   FUNCTION_INJECTION(mb_send_mail);
@@ -28665,6 +29699,22 @@ Variant i_hphp_splfileinfo___construct(void *extra, CArrRef params) {
 Variant ifa_hphp_splfileinfo___construct(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("hphp_splfileinfo___construct", count, 2, 2, 1);
   return (f_hphp_splfileinfo___construct(a0, a1));
+}
+Variant i_imap_msgno(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_msgno);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_msgno", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_msgno(arg0, arg1));
+  }
+}
+Variant ifa_imap_msgno(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_msgno", count, 2, 2, 1);
+  return (f_imap_msgno(a0, a1));
 }
 Variant i_register_postsend_function(void *extra, CArrRef params) {
   FUNCTION_INJECTION(register_postsend_function);
@@ -29297,16 +30347,6 @@ Variant ifa_drawsetstrokedashoffset(void *extra, int count, INVOKE_FEW_ARGS_IMPL
   if (count != 2) return throw_wrong_arguments("drawsetstrokedashoffset", count, 2, 2, 1);
   return (f_drawsetstrokedashoffset(a0, a1), null);
 }
-Variant i_php_ini_scanned_files(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(php_ini_scanned_files);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("php_ini_scanned_files", 0, 1);
-  return (f_php_ini_scanned_files());
-}
-Variant ifa_php_ini_scanned_files(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("php_ini_scanned_files", 0, 1);
-  return (f_php_ini_scanned_files());
-}
 Variant i_disk_free_space(void *extra, CArrRef params) {
   FUNCTION_INJECTION(disk_free_space);
   int count __attribute__((__unused__)) = params.size();
@@ -29321,6 +30361,16 @@ Variant i_disk_free_space(void *extra, CArrRef params) {
 Variant ifa_disk_free_space(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("disk_free_space", count, 1, 1, 1);
   return (f_disk_free_space(a0));
+}
+Variant i_php_ini_scanned_files(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(php_ini_scanned_files);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("php_ini_scanned_files", 0, 1);
+  return (f_php_ini_scanned_files());
+}
+Variant ifa_php_ini_scanned_files(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("php_ini_scanned_files", 0, 1);
+  return (f_php_ini_scanned_files());
 }
 Variant i_pixelsetyellowquantum(void *extra, CArrRef params) {
   FUNCTION_INJECTION(pixelsetyellowquantum);
@@ -29758,6 +30808,21 @@ Variant ifa_magickhaspreviousimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   if (count != 1) return throw_wrong_arguments("magickhaspreviousimage", count, 1, 1, 1);
   return (f_magickhaspreviousimage(a0));
 }
+Variant i_imap_utf8(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_utf8);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_utf8", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_utf8(arg0));
+  }
+}
+Variant ifa_imap_utf8(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_utf8", count, 1, 1, 1);
+  return (f_imap_utf8(a0));
+}
 Variant i_drawgetstrokecolor(void *extra, CArrRef params) {
   FUNCTION_INJECTION(drawgetstrokecolor);
   int count __attribute__((__unused__)) = params.size();
@@ -29877,16 +30942,6 @@ Variant ifa_apc_dec(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count == 3) return (f_apc_dec(a0, a1, ref(a2)));
   return (f_apc_dec(a0, a1, ref(a2), a3));
 }
-Variant i_posix_get_last_error(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(posix_get_last_error);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
-  return (f_posix_get_last_error());
-}
-Variant ifa_posix_get_last_error(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
-  return (f_posix_get_last_error());
-}
 Variant i_iptcparse(void *extra, CArrRef params) {
   FUNCTION_INJECTION(iptcparse);
   int count __attribute__((__unused__)) = params.size();
@@ -29901,6 +30956,16 @@ Variant i_iptcparse(void *extra, CArrRef params) {
 Variant ifa_iptcparse(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("iptcparse", count, 1, 1, 1);
   return (f_iptcparse(a0));
+}
+Variant i_posix_get_last_error(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(posix_get_last_error);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
+  return (f_posix_get_last_error());
+}
+Variant ifa_posix_get_last_error(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
+  return (f_posix_get_last_error());
 }
 Variant i_iterator_count(void *extra, CArrRef params) {
   FUNCTION_INJECTION(iterator_count);
@@ -31045,16 +32110,6 @@ Variant ifa_is_double(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("is_double", count, 1, 1, 1);
   return (f_is_double(a0));
 }
-Variant i_output_reset_rewrite_vars(void *extra, CArrRef params) {
-  FUNCTION_INJECTION(output_reset_rewrite_vars);
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("output_reset_rewrite_vars", 0, 1);
-  return (f_output_reset_rewrite_vars());
-}
-Variant ifa_output_reset_rewrite_vars(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  if (count > 0) return throw_toomany_arguments("output_reset_rewrite_vars", 0, 1);
-  return (f_output_reset_rewrite_vars());
-}
 Variant i_get_declared_interfaces(void *extra, CArrRef params) {
   FUNCTION_INJECTION(get_declared_interfaces);
   int count __attribute__((__unused__)) = params.size();
@@ -31064,6 +32119,16 @@ Variant i_get_declared_interfaces(void *extra, CArrRef params) {
 Variant ifa_get_declared_interfaces(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count > 0) return throw_toomany_arguments("get_declared_interfaces", 0, 1);
   return (f_get_declared_interfaces());
+}
+Variant i_output_reset_rewrite_vars(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(output_reset_rewrite_vars);
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("output_reset_rewrite_vars", 0, 1);
+  return (f_output_reset_rewrite_vars());
+}
+Variant ifa_output_reset_rewrite_vars(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count > 0) return throw_toomany_arguments("output_reset_rewrite_vars", 0, 1);
+  return (f_output_reset_rewrite_vars());
 }
 Variant i_passthru(void *extra, CArrRef params) {
   FUNCTION_INJECTION(passthru);
@@ -31578,6 +32643,24 @@ Variant ifa_imagecreatefrompng(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS
   if (count != 1) return throw_wrong_arguments("imagecreatefrompng", count, 1, 1, 1);
   return (f_imagecreatefrompng(a0));
 }
+Variant i_imap_setacl(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_setacl);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("imap_setacl", count, 4, 4, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_setacl(arg0, arg1, arg2, arg3));
+  }
+}
+Variant ifa_imap_setacl(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 4) return throw_wrong_arguments("imap_setacl", count, 4, 4, 1);
+  return (f_imap_setacl(a0, a1, a2, a3));
+}
 Variant i_magickgetimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickgetimage);
   int count __attribute__((__unused__)) = params.size();
@@ -32053,6 +33136,23 @@ Variant ifa_call_user_method_array(void *extra, int count, INVOKE_FEW_ARGS_IMPL_
   if (count != 3) return throw_wrong_arguments("call_user_method_array", count, 3, 3, 1);
   return (f_call_user_method_array(a0, ref(a1), a2));
 }
+Variant i_imap_bodystruct(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_bodystruct);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_bodystruct", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_bodystruct(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_bodystruct(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_bodystruct", count, 3, 3, 1);
+  return (f_imap_bodystruct(a0, a1, a2));
+}
 Variant i_magickmagnifyimage(void *extra, CArrRef params) {
   FUNCTION_INJECTION(magickmagnifyimage);
   int count __attribute__((__unused__)) = params.size();
@@ -32427,6 +33527,29 @@ Variant ifa_hphp_stats(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("hphp_stats", count, 2, 2, 1);
   return (f_hphp_stats(a0, a1), null);
 }
+Variant i_imap_savebody(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_savebody);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("imap_savebody", count, 3, 5, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 3) return (f_imap_savebody(arg0, arg1, arg2));
+    CVarRef arg3((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count == 4) return (f_imap_savebody(arg0, arg1, arg2, arg3));
+    CVarRef arg4((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_savebody(arg0, arg1, arg2, arg3, arg4));
+  }
+}
+Variant ifa_imap_savebody(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 3 || count > 5) return throw_wrong_arguments("imap_savebody", count, 3, 5, 1);
+  if (count <= 3) return (f_imap_savebody(a0, a1, a2));
+  if (count == 4) return (f_imap_savebody(a0, a1, a2, a3));
+  return (f_imap_savebody(a0, a1, a2, a3, a4));
+}
 Variant i_opendir(void *extra, CArrRef params) {
   FUNCTION_INJECTION(opendir);
   int count __attribute__((__unused__)) = params.size();
@@ -32538,6 +33661,25 @@ Variant i_escapeshellarg(void *extra, CArrRef params) {
 Variant ifa_escapeshellarg(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 1) return throw_wrong_arguments("escapeshellarg", count, 1, 1, 1);
   return (f_escapeshellarg(a0));
+}
+Variant i_imap_fetchstructure(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_fetchstructure);
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetchstructure", count, 2, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    if (count <= 2) return (f_imap_fetchstructure(arg0, arg1));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_fetchstructure(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_fetchstructure(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetchstructure", count, 2, 3, 1);
+  if (count <= 2) return (f_imap_fetchstructure(a0, a1));
+  return (f_imap_fetchstructure(a0, a1, a2));
 }
 Variant i_is_scalar(void *extra, CArrRef params) {
   FUNCTION_INJECTION(is_scalar);
@@ -33112,6 +34254,23 @@ Variant ifa_gzuncompress(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count < 1 || count > 2) return throw_wrong_arguments("gzuncompress", count, 1, 2, 1);
   if (count <= 1) return (f_gzuncompress(a0));
   return (f_gzuncompress(a0, a1));
+}
+Variant i_imap_rfc822_write_address(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_rfc822_write_address);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_rfc822_write_address", count, 3, 3, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_rfc822_write_address(arg0, arg1, arg2));
+  }
+}
+Variant ifa_imap_rfc822_write_address(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 3) return throw_wrong_arguments("imap_rfc822_write_address", count, 3, 3, 1);
+  return (f_imap_rfc822_write_address(a0, a1, a2));
 }
 Variant i_is_executable(void *extra, CArrRef params) {
   FUNCTION_INJECTION(is_executable);
@@ -33747,6 +34906,21 @@ Variant ifa_magicknegateimage(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS)
   if (count == 2) return (f_magicknegateimage(a0, a1));
   return (f_magicknegateimage(a0, a1, a2));
 }
+Variant i_imap_expunge(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_expunge);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_expunge", count, 1, 1, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    return (f_imap_expunge(arg0));
+  }
+}
+Variant ifa_imap_expunge(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 1) return throw_wrong_arguments("imap_expunge", count, 1, 1, 1);
+  return (f_imap_expunge(a0));
+}
 Variant i_socket_last_error(void *extra, CArrRef params) {
   FUNCTION_INJECTION(socket_last_error);
   int count __attribute__((__unused__)) = params.size();
@@ -33779,6 +34953,22 @@ Variant i_create_function(void *extra, CArrRef params) {
 Variant ifa_create_function(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   if (count != 2) return throw_wrong_arguments("create_function", count, 2, 2, 1);
   return (f_create_function(a0, a1));
+}
+Variant i_imap_get_quota(void *extra, CArrRef params) {
+  FUNCTION_INJECTION(imap_get_quota);
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_get_quota", count, 2, 2, 1);
+  {
+    ArrayData *ad(params.get());
+    ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
+    CVarRef arg0((ad->getValue(pos)));
+    CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
+    return (f_imap_get_quota(arg0, arg1));
+  }
+}
+Variant ifa_imap_get_quota(void *extra, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  if (count != 2) return throw_wrong_arguments("imap_get_quota", count, 2, 2, 1);
+  return (f_imap_get_quota(a0, a1));
 }
 Variant i_str_split(void *extra, CArrRef params) {
   FUNCTION_INJECTION(str_split);
@@ -34981,6 +36171,41 @@ Variant ei_bcmul(Eval::VariableEnvironment &env, const Eval::FunctionCallExpress
   if (count <= 2) return (x_bcmul(a0, a1));
   else return (x_bcmul(a0, a1, a2));
 }
+Variant ei_imap_header(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 5) return throw_wrong_arguments("imap_header", count, 2, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_header(a0, a1));
+  else if (count == 3) return (x_imap_header(a0, a1, a2));
+  else if (count == 4) return (x_imap_header(a0, a1, a2, a3));
+  else return (x_imap_header(a0, a1, a2, a3, a4));
+}
 Variant ei_openlog(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -35322,6 +36547,22 @@ Variant ei_deg2rad(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   }
   return (x_deg2rad(a0));
 }
+Variant ei_imap_mime_header_decode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_mime_header_decode", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_mime_header_decode(a0));
+}
 Variant ei_magickrollimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -35345,6 +36586,30 @@ Variant ei_magickrollimage(Eval::VariableEnvironment &env, const Eval::FunctionC
     (*it)->eval(env);
   }
   return (x_magickrollimage(a0, a1, a2));
+}
+Variant ei_imap_getmailboxes(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_getmailboxes", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_getmailboxes(a0, a1, a2));
 }
 Variant ei_ldap_sort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -36131,6 +37396,18 @@ Variant ei_magickresampleimage(Eval::VariableEnvironment &env, const Eval::Funct
     (*it)->eval(env);
   }
   return (x_magickresampleimage(a0, a1, a2, a3, a4));
+}
+Variant ei_imap_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("imap_last_error", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_last_error());
 }
 Variant ei_i18n_loc_get_default(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -37705,6 +38982,31 @@ Variant ei_magickadaptivethresholdimage(Eval::VariableEnvironment &env, const Ev
   }
   return (x_magickadaptivethresholdimage(a0, a1, a2, a3));
 }
+Variant ei_imap_body(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_body", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_body(a0, a1));
+  else return (x_imap_body(a0, a1, a2));
+}
 Variant ei_each(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -38751,6 +40053,35 @@ Variant ei_hphp_splfileobject_getflags(Eval::VariableEnvironment &env, const Eva
   }
   return (x_hphp_splfileobject_getflags(a0));
 }
+Variant ei_imap_mail_move(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_mail_move", count, 3, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_mail_move(a0, a1, a2));
+  else return (x_imap_mail_move(a0, a1, a2, a3));
+}
 Variant ei_hphp_recursivedirectoryiterator_rewind(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -38795,6 +40126,26 @@ Variant ei_magickgetstringwidth(Eval::VariableEnvironment &env, const Eval::Func
   }
   if (count <= 3) return (x_magickgetstringwidth(a0, a1, a2));
   else return (x_magickgetstringwidth(a0, a1, a2, a3));
+}
+Variant ei_imap_createmailbox(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_createmailbox", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_createmailbox(a0, a1));
 }
 Variant ei_echo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -39992,6 +41343,22 @@ Variant ei_dom_document_create_text_node(Eval::VariableEnvironment &env, const E
   }
   return (x_dom_document_create_text_node(a0, a1));
 }
+Variant ei_imap_num_msg(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_num_msg", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_num_msg(a0));
+}
 Variant ei_getrandmax(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -40075,6 +41442,22 @@ Variant ei_set_exception_handler(Eval::VariableEnvironment &env, const Eval::Fun
     (*it)->eval(env);
   }
   return (x_set_exception_handler(a0));
+}
+Variant ei_imap_qprint(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_qprint", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_qprint(a0));
 }
 Variant ei_imagegrabwindow(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -40591,6 +41974,22 @@ Variant ei_parse_url(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   }
   if (count <= 1) return (x_parse_url(a0));
   else return (x_parse_url(a0, a1));
+}
+Variant ei_imap_headers(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_headers", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_headers(a0));
 }
 Variant ei_magickreadimageblob(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -45406,6 +46805,30 @@ Variant ei_curl_exec(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   }
   return (x_curl_exec(a0));
 }
+Variant ei_imap_renamemailbox(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_renamemailbox", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_renamemailbox(a0, a1, a2));
+}
 Variant ei_magickgetexceptiontype(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -45548,6 +46971,22 @@ Variant ei_exec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   if (count <= 1) return (x_exec(a0));
   else if (count == 2) return (x_exec(a0, ref(a1)));
   else return (x_exec(a0, ref(a1), ref(a2)));
+}
+Variant ei_imap_binary(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_binary", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_binary(a0));
 }
 Variant ei_apd_continue(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -45728,6 +47167,22 @@ Variant ei_ldap_get_entries(Eval::VariableEnvironment &env, const Eval::Function
     (*it)->eval(env);
   }
   return (x_ldap_get_entries(a0, a1));
+}
+Variant ei_imap_8bit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_8bit", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_8bit(a0));
 }
 Variant ei_ob_iconv_handler(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -46289,6 +47744,36 @@ Variant ei_in_array(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   if (count <= 2) return (x_in_array(a0, a1));
   else return (x_in_array(a0, a1, a2));
 }
+Variant ei_imap_search(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 4) return throw_wrong_arguments("imap_search", count, 2, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_search(a0, a1));
+  else if (count == 3) return (x_imap_search(a0, a1, a2));
+  else return (x_imap_search(a0, a1, a2, a3));
+}
 Variant ei_drawpathcurvetoquadraticbezierabsolute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -46449,6 +47934,26 @@ Variant ei_i18n_loc_set_default(Eval::VariableEnvironment &env, const Eval::Func
     (*it)->eval(env);
   }
   return (x_i18n_loc_set_default(a0));
+}
+Variant ei_imap_subscribe(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_subscribe", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_subscribe(a0, a1));
 }
 Variant ei_ftok(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -46861,6 +48366,55 @@ Variant ei_mb_strstr(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   if (count <= 2) return (x_mb_strstr(a0, a1));
   else if (count == 3) return (x_mb_strstr(a0, a1, a2));
   else return (x_mb_strstr(a0, a1, a2, a3));
+}
+Variant ei_imap_fetchheader(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetchheader", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_fetchheader(a0, a1));
+  else return (x_imap_fetchheader(a0, a1, a2));
+}
+Variant ei_imap_listsubscribed(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_listsubscribed", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_listsubscribed(a0, a1, a2));
 }
 Variant ei_pixelgetblack(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -47495,6 +49049,26 @@ Variant ei_mcrypt_enc_get_key_size(Eval::VariableEnvironment &env, const Eval::F
   }
   return (x_mcrypt_enc_get_key_size(a0));
 }
+Variant ei_imap_get_quotaroot(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_get_quotaroot", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_get_quotaroot(a0, a1));
+}
 Variant ei_mysql_num_fields(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -48001,6 +49575,22 @@ Variant ei_hphp_splfileinfo_isreadable(Eval::VariableEnvironment &env, const Eva
     (*it)->eval(env);
   }
   return (x_hphp_splfileinfo_isreadable(a0));
+}
+Variant ei_imap_check(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_check", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_check(a0));
 }
 Variant ei_chroot(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -49381,6 +50971,22 @@ Variant ei_xml_set_object(Eval::VariableEnvironment &env, const Eval::FunctionCa
   }
   return (x_xml_set_object(a0, ref(a1)));
 }
+Variant ei_imap_utf7_encode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_utf7_encode", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_utf7_encode(a0));
+}
 Variant ei_ctype_print(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -50116,6 +51722,31 @@ Variant ei_magickposterizeimage(Eval::VariableEnvironment &env, const Eval::Func
   }
   return (x_magickposterizeimage(a0, a1, a2));
 }
+Variant ei_imap_status(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_status", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_status(a0, a1));
+  else return (x_imap_status(a0, a1, a2));
+}
 Variant ei_dom_namednodemap_get_named_item(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -50274,6 +51905,26 @@ Variant ei_mysql_get_client_info(Eval::VariableEnvironment &env, const Eval::Fun
     (*it)->eval(env);
   }
   return (x_mysql_get_client_info());
+}
+Variant ei_imap_mail_compose(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_mail_compose", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_mail_compose(a0, a1));
 }
 Variant ei_fb_crossall_query(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -51067,6 +52718,30 @@ Variant ei_wandgetexceptionstring(Eval::VariableEnvironment &env, const Eval::Fu
   }
   return (x_wandgetexceptionstring(a0));
 }
+Variant ei_imap_set_quota(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_set_quota", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_set_quota(a0, a1, a2));
+}
 Variant ei_proc_open(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -51495,6 +53170,18 @@ Variant ei_magickgettextascent(Eval::VariableEnvironment &env, const Eval::Funct
   if (count <= 3) return (x_magickgettextascent(a0, a1, a2));
   else return (x_magickgettextascent(a0, a1, a2, a3));
 }
+Variant ei_imap_errors(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("imap_errors", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_errors());
+}
 Variant ei_mb_regex_encoding(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -51561,6 +53248,50 @@ Variant ei_mcrypt_enc_self_test(Eval::VariableEnvironment &env, const Eval::Func
     (*it)->eval(env);
   }
   return (x_mcrypt_enc_self_test(a0));
+}
+Variant ei_imap_mail(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  Variant a5;
+  Variant a6;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 7) return throw_wrong_arguments("imap_mail", count, 3, 7, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a5 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a6 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_mail(a0, a1, a2));
+  else if (count == 4) return (x_imap_mail(a0, a1, a2, a3));
+  else if (count == 5) return (x_imap_mail(a0, a1, a2, a3, a4));
+  else if (count == 6) return (x_imap_mail(a0, a1, a2, a3, a4, a5));
+  else return (x_imap_mail(a0, a1, a2, a3, a4, a5, a6));
 }
 Variant ei_ignore_user_abort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -52422,6 +54153,31 @@ Variant ei_mcrypt_get_key_size(Eval::VariableEnvironment &env, const Eval::Funct
   }
   return (x_mcrypt_get_key_size(a0, a1));
 }
+Variant ei_imap_delete(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_delete", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_delete(a0, a1));
+  else return (x_imap_delete(a0, a1, a2));
+}
 Variant ei_drawsettextalignment(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -53019,6 +54775,30 @@ Variant ei_iconv_mime_decode_headers(Eval::VariableEnvironment &env, const Eval:
   if (count <= 1) return (x_iconv_mime_decode_headers(a0));
   else if (count == 2) return (x_iconv_mime_decode_headers(a0, a1));
   else return (x_iconv_mime_decode_headers(a0, a1, a2));
+}
+Variant ei_imap_getsubscribed(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_getsubscribed", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_getsubscribed(a0, a1, a2));
 }
 Variant ei_ini_get_all(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -53634,6 +55414,30 @@ Variant ei_drawgetfillopacity(Eval::VariableEnvironment &env, const Eval::Functi
     (*it)->eval(env);
   }
   return (x_drawgetfillopacity(a0));
+}
+Variant ei_imap_list(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_list", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_list(a0, a1, a2));
 }
 Variant ei_xml_parser_create_ns(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -55402,6 +57206,27 @@ Variant ei_extract(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   else if (count == 2) return (x_extract(a0, a1));
   else return (x_extract(a0, a1, a2));
 }
+Variant ei_imap_thread(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_thread", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_imap_thread(a0));
+  else return (x_imap_thread(a0, a1));
+}
 Variant ei_session_decode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -55633,6 +57458,27 @@ Variant ei_gzinflate(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   }
   if (count <= 1) return (x_gzinflate(a0));
   else return (x_gzinflate(a0, a1));
+}
+Variant ei_imap_rfc822_parse_headers(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_rfc822_parse_headers", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_imap_rfc822_parse_headers(a0));
+  else return (x_imap_rfc822_parse_headers(a0, a1));
 }
 Variant ei_openssl_pkcs7_sign(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -56103,6 +57949,34 @@ Variant ei_magickgetexception(Eval::VariableEnvironment &env, const Eval::Functi
     (*it)->eval(env);
   }
   return (x_magickgetexception(a0));
+}
+Variant ei_imap_listscan(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("imap_listscan", count, 4, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_listscan(a0, a1, a2, a3));
 }
 Variant ei_ctype_punct(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -56626,6 +58500,22 @@ Variant ei_basename(Eval::VariableEnvironment &env, const Eval::FunctionCallExpr
   if (count <= 1) return (x_basename(a0));
   else return (x_basename(a0, a1));
 }
+Variant ei_imap_utf7_decode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_utf7_decode", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_utf7_decode(a0));
+}
 Variant ei_krsort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -57126,6 +59016,50 @@ Variant ei_mcrypt_module_is_block_algorithm(Eval::VariableEnvironment &env, cons
   if (count <= 1) return (x_mcrypt_module_is_block_algorithm(a0));
   else return (x_mcrypt_module_is_block_algorithm(a0, a1));
 }
+Variant ei_imap_unsubscribe(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_unsubscribe", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_unsubscribe(a0, a1));
+}
+Variant ei_imap_lsub(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_lsub", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_lsub(a0, a1, a2));
+}
 Variant ei_wandgetexception(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -57579,6 +59513,26 @@ Variant ei_posix_access(Eval::VariableEnvironment &env, const Eval::FunctionCall
   if (count <= 1) return (x_posix_access(a0));
   else return (x_posix_access(a0, a1));
 }
+Variant ei_imap_uid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_uid", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_uid(a0, a1));
+}
 Variant ei_explode(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -57828,6 +59782,41 @@ Variant ei_hphp_get_extension_info(Eval::VariableEnvironment &env, const Eval::F
   }
   return (x_hphp_get_extension_info(a0));
 }
+Variant ei_imap_headerinfo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 5) return throw_wrong_arguments("imap_headerinfo", count, 2, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_headerinfo(a0, a1));
+  else if (count == 3) return (x_imap_headerinfo(a0, a1, a2));
+  else if (count == 4) return (x_imap_headerinfo(a0, a1, a2, a3));
+  else return (x_imap_headerinfo(a0, a1, a2, a3, a4));
+}
 Variant ei_output_add_rewrite_var(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -58029,6 +60018,35 @@ Variant ei_openssl_pkey_get_public(Eval::VariableEnvironment &env, const Eval::F
     (*it)->eval(env);
   }
   return (x_openssl_pkey_get_public(a0));
+}
+Variant ei_imap_fetchbody(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_fetchbody", count, 3, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_fetchbody(a0, a1, a2));
+  else return (x_imap_fetchbody(a0, a1, a2, a3));
 }
 Variant ei_interface_exists(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -59260,6 +61278,27 @@ Variant ei_stream_filter_prepend(Eval::VariableEnvironment &env, const Eval::Fun
   else if (count == 3) return (x_stream_filter_prepend(a0, a1, a2));
   else return (x_stream_filter_prepend(a0, a1, a2, a3));
 }
+Variant ei_imap_close(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_close", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_imap_close(a0));
+  else return (x_imap_close(a0, a1));
+}
 Variant ei_substr(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -59706,6 +61745,22 @@ Variant ei_magickmedianfilterimage(Eval::VariableEnvironment &env, const Eval::F
   }
   return (x_magickmedianfilterimage(a0, a1));
 }
+Variant ei_imap_ping(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_ping", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_ping(a0));
+}
 Variant ei_xbox_task_result(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -59785,6 +61840,40 @@ Variant ei_money_format(Eval::VariableEnvironment &env, const Eval::FunctionCall
     (*it)->eval(env);
   }
   return (x_money_format(a0, a1));
+}
+Variant ei_imap_open(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("imap_open", count, 3, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_open(a0, a1, a2));
+  else if (count == 4) return (x_imap_open(a0, a1, a2, a3));
+  else return (x_imap_open(a0, a1, a2, a3, a4));
 }
 Variant ei_clearmagickwand(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -60569,6 +62658,18 @@ Variant ei_strtotime(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   if (count <= 1) return (x_strtotime(a0));
   else return (x_strtotime(a0, a1));
 }
+Variant ei_imap_alerts(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("imap_alerts", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_alerts());
+}
 Variant ei_dom_element_set_id_attribute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -60608,6 +62709,35 @@ Variant ei_hphp_recursivedirectoryiterator_getsubpath(Eval::VariableEnvironment 
     (*it)->eval(env);
   }
   return (x_hphp_recursivedirectoryiterator_getsubpath(a0));
+}
+Variant ei_imap_setflag_full(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_setflag_full", count, 3, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_setflag_full(a0, a1, a2));
+  else return (x_imap_setflag_full(a0, a1, a2, a3));
 }
 Variant ei_apc_clear_cache(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -61585,6 +63715,27 @@ Variant ei_hphp_splfileobject_fgetc(Eval::VariableEnvironment &env, const Eval::
   }
   return (x_hphp_splfileobject_fgetc(a0));
 }
+Variant ei_imap_timeout(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 2) return throw_wrong_arguments("imap_timeout", count, 1, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_imap_timeout(a0));
+  else return (x_imap_timeout(a0, a1));
+}
 Variant ei_magickshaveimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -61891,6 +64042,26 @@ Variant ei_magicktrimimage(Eval::VariableEnvironment &env, const Eval::FunctionC
     (*it)->eval(env);
   }
   return (x_magicktrimimage(a0, a1));
+}
+Variant ei_imap_gc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_gc", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_gc(a0, a1));
 }
 Variant ei_hphp_splfileinfo_getpathinfo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -62743,6 +64914,35 @@ Variant ei_fgetss(Eval::VariableEnvironment &env, const Eval::FunctionCallExpres
   else if (count == 2) return (x_fgetss(a0, a1));
   else return (x_fgetss(a0, a1, a2));
 }
+Variant ei_imap_mail_copy(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_mail_copy", count, 3, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_mail_copy(a0, a1, a2));
+  else return (x_imap_mail_copy(a0, a1, a2, a3));
+}
 Variant ei_drawarc(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -63564,6 +65764,34 @@ Variant ei_preg_match_all(Eval::VariableEnvironment &env, const Eval::FunctionCa
   if (count <= 3) return (x_preg_match_all(a0, a1, ref(a2)));
   else if (count == 4) return (x_preg_match_all(a0, a1, ref(a2), a3));
   else return (x_preg_match_all(a0, a1, ref(a2), a3, a4));
+}
+Variant ei_imap_scanmailbox(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("imap_scanmailbox", count, 4, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_scanmailbox(a0, a1, a2, a3));
 }
 Variant ei_proc_terminate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -64565,6 +66793,31 @@ Variant ei_dom_element_set_attribute_ns(Eval::VariableEnvironment &env, const Ev
   }
   return (x_dom_element_set_attribute_ns(a0, a1, a2, a3));
 }
+Variant ei_imap_undelete(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_undelete", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_undelete(a0, a1));
+  else return (x_imap_undelete(a0, a1, a2));
+}
 Variant ei_dom_xpath_evaluate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -64857,6 +67110,26 @@ Variant ei_cleardrawingwand(Eval::VariableEnvironment &env, const Eval::Function
   }
   return (x_cleardrawingwand(a0), null);
 }
+Variant ei_imap_getacl(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_getacl", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_getacl(a0, a1));
+}
 Variant ei_imagecolorset(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -64919,6 +67192,58 @@ Variant ei_openssl_x509_checkpurpose(Eval::VariableEnvironment &env, const Eval:
   else if (count == 3) return (x_openssl_x509_checkpurpose(a0, a1, a2));
   else return (x_openssl_x509_checkpurpose(a0, a1, a2, a3));
 }
+Variant ei_timezone_name_from_abbr(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1 || count > 3) return throw_wrong_arguments("timezone_name_from_abbr", count, 1, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 1) return (x_timezone_name_from_abbr(a0));
+  else if (count == 2) return (x_timezone_name_from_abbr(a0, a1));
+  else return (x_timezone_name_from_abbr(a0, a1, a2));
+}
+Variant ei_array_intersect_ukey(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3) return throw_missing_arguments("array_intersect_ukey", count+1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  Array vargs;
+  for (; it != params.end(); ++it) {
+    vargs.append((*it)->eval(env));
+  }
+  if (count <= 3) return (x_array_intersect_ukey(count, a0, a1, a2));
+  return (x_array_intersect_ukey(count, a0, a1, a2,vargs));
+}
 Variant ei_drawpathcurvetosmoothabsolute(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -64950,58 +67275,6 @@ Variant ei_drawpathcurvetosmoothabsolute(Eval::VariableEnvironment &env, const E
     (*it)->eval(env);
   }
   return (x_drawpathcurvetosmoothabsolute(a0, a1, a2, a3, a4), null);
-}
-Variant ei_array_intersect_ukey(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 3) return throw_missing_arguments("array_intersect_ukey", count+1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a2 = (*it)->eval(env);
-    it++;
-  } while(false);
-  Array vargs;
-  for (; it != params.end(); ++it) {
-    vargs.append((*it)->eval(env));
-  }
-  if (count <= 3) return (x_array_intersect_ukey(count, a0, a1, a2));
-  return (x_array_intersect_ukey(count, a0, a1, a2,vargs));
-}
-Variant ei_timezone_name_from_abbr(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  Variant a2;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count < 1 || count > 3) return throw_wrong_arguments("timezone_name_from_abbr", count, 1, 3, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a2 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  if (count <= 1) return (x_timezone_name_from_abbr(a0));
-  else if (count == 2) return (x_timezone_name_from_abbr(a0, a1));
-  else return (x_timezone_name_from_abbr(a0, a1, a2));
 }
 Variant ei_imagefilledellipse(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65055,18 +67328,6 @@ Variant ei_pcntl_wstopsig(Eval::VariableEnvironment &env, const Eval::FunctionCa
   }
   return (x_pcntl_wstopsig(a0));
 }
-Variant ei_get_defined_vars(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("get_defined_vars", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_get_defined_vars());
-}
 Variant ei_memory_get_usage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -65083,6 +67344,18 @@ Variant ei_memory_get_usage(Eval::VariableEnvironment &env, const Eval::Function
   }
   if (count <= 0) return (x_memory_get_usage());
   else return (x_memory_get_usage(a0));
+}
+Variant ei_get_defined_vars(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("get_defined_vars", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_get_defined_vars());
 }
 Variant ei_intval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65165,6 +67438,26 @@ Variant ei_iconv_set_encoding(Eval::VariableEnvironment &env, const Eval::Functi
   }
   return (x_iconv_set_encoding(a0, a1));
 }
+Variant ei_mailparse_msg_get_part(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("mailparse_msg_get_part", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_mailparse_msg_get_part(a0, a1));
+}
 Variant ei_magickmattefloodfillimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -65201,26 +67494,6 @@ Variant ei_magickmattefloodfillimage(Eval::VariableEnvironment &env, const Eval:
   }
   return (x_magickmattefloodfillimage(a0, a1, a2, a3, a4, a5));
 }
-Variant ei_mailparse_msg_get_part(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("mailparse_msg_get_part", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_mailparse_msg_get_part(a0, a1));
-}
 Variant ei_mb_check_encoding(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -65243,42 +67516,6 @@ Variant ei_mb_check_encoding(Eval::VariableEnvironment &env, const Eval::Functio
   else if (count == 1) return (x_mb_check_encoding(a0));
   else return (x_mb_check_encoding(a0, a1));
 }
-Variant ei_ldap_get_dn(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ldap_get_dn", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_ldap_get_dn(a0, a1));
-}
-Variant ei_newpixeliterator(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 1) return throw_wrong_arguments("newpixeliterator", count, 1, 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_newpixeliterator(a0));
-}
 Variant ei_magicksetimagefilename(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -65300,23 +67537,41 @@ Variant ei_magicksetimagefilename(Eval::VariableEnvironment &env, const Eval::Fu
   if (count <= 1) return (x_magicksetimagefilename(a0));
   else return (x_magicksetimagefilename(a0, a1));
 }
-Variant ei_call_user_func(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_newpixeliterator(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count < 1) return throw_missing_arguments("call_user_func", count+1, 1);
+  if (count != 1) return throw_wrong_arguments("newpixeliterator", count, 1, 1, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
     if (it == params.end()) break;
     a0 = (*it)->eval(env);
     it++;
   } while(false);
-  Array vargs;
   for (; it != params.end(); ++it) {
-    vargs.append(ref((*it)->refval(env, false)));
+    (*it)->eval(env);
   }
-  if (count <= 1) return (x_call_user_func(count, a0));
-  return (x_call_user_func(count, a0,vargs));
+  return (x_newpixeliterator(a0));
+}
+Variant ei_ldap_get_dn(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("ldap_get_dn", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_ldap_get_dn(a0, a1));
 }
 Variant ei_mysql_list_tables(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65338,6 +67593,40 @@ Variant ei_mysql_list_tables(Eval::VariableEnvironment &env, const Eval::Functio
   }
   if (count <= 1) return (x_mysql_list_tables(a0));
   else return (x_mysql_list_tables(a0, a1));
+}
+Variant ei_call_user_func(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 1) return throw_missing_arguments("call_user_func", count+1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  Array vargs;
+  for (; it != params.end(); ++it) {
+    vargs.append(ref((*it)->refval(env, false)));
+  }
+  if (count <= 1) return (x_call_user_func(count, a0));
+  return (x_call_user_func(count, a0,vargs));
+}
+Variant ei_imap_base64(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_base64", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_base64(a0));
 }
 Variant ei_magickgetinterlacescheme(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65421,23 +67710,6 @@ Variant ei_mb_ereg_match(Eval::VariableEnvironment &env, const Eval::FunctionCal
   if (count <= 2) return (x_mb_ereg_match(a0, a1));
   else return (x_mb_ereg_match(a0, a1, a2));
 }
-Variant ei_mt_srand(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 1) return throw_toomany_arguments("mt_srand", 1, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  if (count <= 0) return (x_mt_srand(), null);
-  else return (x_mt_srand(a0), null);
-}
 Variant ei_imagecolorallocate(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -65466,6 +67738,23 @@ Variant ei_imagecolorallocate(Eval::VariableEnvironment &env, const Eval::Functi
   }
   return (x_imagecolorallocate(a0, a1, a2, a3));
 }
+Variant ei_mt_srand(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 1) return throw_toomany_arguments("mt_srand", 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 0) return (x_mt_srand(), null);
+  else return (x_mt_srand(a0), null);
+}
 Variant ei_define_syslog_variables(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -65477,18 +67766,6 @@ Variant ei_define_syslog_variables(Eval::VariableEnvironment &env, const Eval::F
     (*it)->eval(env);
   }
   return (x_define_syslog_variables(), null);
-}
-Variant ei_fb_get_code_coverage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_fb_get_code_coverage());
 }
 Variant ei_mcrypt_enc_get_modes_name(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65505,6 +67782,18 @@ Variant ei_mcrypt_enc_get_modes_name(Eval::VariableEnvironment &env, const Eval:
     (*it)->eval(env);
   }
   return (x_mcrypt_enc_get_modes_name(a0));
+}
+Variant ei_fb_get_code_coverage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("fb_get_code_coverage", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_fb_get_code_coverage());
 }
 Variant ei_array_flip(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65677,6 +67966,26 @@ Variant ei_hphp_splfileinfo_gettype(Eval::VariableEnvironment &env, const Eval::
   }
   return (x_hphp_splfileinfo_gettype(a0));
 }
+Variant ei_imap_rfc822_parse_adrlist(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_rfc822_parse_adrlist", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_rfc822_parse_adrlist(a0, a1));
+}
 Variant ei_xhprof_run_trace(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -65696,6 +68005,18 @@ Variant ei_xhprof_run_trace(Eval::VariableEnvironment &env, const Eval::Function
     (*it)->eval(env);
   }
   return (x_xhprof_run_trace(a0, a1));
+}
+Variant ei_libxml_clear_errors(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_libxml_clear_errors(), null);
 }
 Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65727,18 +68048,6 @@ Variant ei_xmlwriter_start_document(Eval::VariableEnvironment &env, const Eval::
   else if (count == 2) return (x_xmlwriter_start_document(a0, a1));
   else if (count == 3) return (x_xmlwriter_start_document(a0, a1, a2));
   else return (x_xmlwriter_start_document(a0, a1, a2, a3));
-}
-Variant ei_libxml_clear_errors(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("libxml_clear_errors", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_libxml_clear_errors(), null);
 }
 Variant ei_magicknormalizeimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -65828,6 +68137,35 @@ Variant ei_dom_element_remove_attribute_ns(Eval::VariableEnvironment &env, const
   }
   return (x_dom_element_remove_attribute_ns(a0, a1, a2));
 }
+Variant ei_imap_append(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_append", count, 3, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_append(a0, a1, a2));
+  else return (x_imap_append(a0, a1, a2, a3));
+}
 Variant ei_openssl_csr_new(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -65907,6 +68245,18 @@ Variant ei_mb_get_info(Eval::VariableEnvironment &env, const Eval::FunctionCallE
   if (count <= 0) return (x_mb_get_info());
   else return (x_mb_get_info(a0));
 }
+Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_getcwd());
+}
 Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -65919,17 +68269,25 @@ Variant ei_posix_getrlimit(Eval::VariableEnvironment &env, const Eval::FunctionC
   }
   return (x_posix_getrlimit());
 }
-Variant ei_getcwd(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+Variant ei_imap_deletemailbox(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("getcwd", 0, 1);
+  if (count != 2) return throw_wrong_arguments("imap_deletemailbox", count, 2, 2, 1);
   std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
   do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
   } while(false);
   for (; it != params.end(); ++it) {
     (*it)->eval(env);
   }
-  return (x_getcwd());
+  return (x_imap_deletemailbox(a0, a1));
 }
 Variant ei_fputcsv(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -66531,6 +68889,30 @@ Variant ei_stream_socket_server(Eval::VariableEnvironment &env, const Eval::Func
   else if (count == 4) return (x_stream_socket_server(a0, ref(a1), ref(a2), a3));
   else return (x_stream_socket_server(a0, ref(a1), ref(a2), a3, a4));
 }
+Variant ei_imap_listmailbox(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_listmailbox", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_listmailbox(a0, a1, a2));
+}
 Variant ei_apd_set_pprof_trace(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -66552,26 +68934,6 @@ Variant ei_apd_set_pprof_trace(Eval::VariableEnvironment &env, const Eval::Funct
   if (count <= 0) return (x_apd_set_pprof_trace());
   else if (count == 1) return (x_apd_set_pprof_trace(a0));
   else return (x_apd_set_pprof_trace(a0, a1));
-}
-Variant ei_ini_set(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  Variant a0;
-  Variant a1;
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-    if (it == params.end()) break;
-    a0 = (*it)->eval(env);
-    it++;
-    if (it == params.end()) break;
-    a1 = (*it)->eval(env);
-    it++;
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_ini_set(a0, a1));
 }
 Variant ei_sort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -66599,6 +68961,26 @@ Variant ei_sort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   else if (count == 2) return (x_sort(ref(a0), a1));
   else return (x_sort(ref(a0), a1, a2));
 }
+Variant ei_ini_set(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("ini_set", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_ini_set(a0, a1));
+}
 Variant ei_drawgetfont(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -66614,6 +68996,45 @@ Variant ei_drawgetfont(Eval::VariableEnvironment &env, const Eval::FunctionCallE
     (*it)->eval(env);
   }
   return (x_drawgetfont(a0));
+}
+Variant ei_imap_sort(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  Variant a5;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 6) return throw_wrong_arguments("imap_sort", count, 3, 6, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a5 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_sort(a0, a1, a2));
+  else if (count == 4) return (x_imap_sort(a0, a1, a2, a3));
+  else if (count == 5) return (x_imap_sort(a0, a1, a2, a3, a4));
+  else return (x_imap_sort(a0, a1, a2, a3, a4, a5));
 }
 Variant ei_readdir(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -67048,18 +69469,6 @@ Variant ei_stat(Eval::VariableEnvironment &env, const Eval::FunctionCallExpressi
   }
   return (x_stat(a0));
 }
-Variant ei_posix_getpid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getpid", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_getpid());
-}
 Variant ei_hphp_directoryiterator_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -67075,6 +69484,18 @@ Variant ei_hphp_directoryiterator_key(Eval::VariableEnvironment &env, const Eval
     (*it)->eval(env);
   }
   return (x_hphp_directoryiterator_key(a0));
+}
+Variant ei_posix_getpid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getpid", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_getpid());
 }
 Variant ei_get_current_user(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -67342,6 +69763,31 @@ Variant ei_pixelsetopacityquantum(Eval::VariableEnvironment &env, const Eval::Fu
     (*it)->eval(env);
   }
   return (x_pixelsetopacityquantum(a0, a1), null);
+}
+Variant ei_imap_fetch_overview(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetch_overview", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_fetch_overview(a0, a1));
+  else return (x_imap_fetch_overview(a0, a1, a2));
 }
 Variant ei_ctype_space(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -68312,6 +70758,22 @@ Variant ei_socket_create_pair(Eval::VariableEnvironment &env, const Eval::Functi
   }
   return (x_socket_create_pair(a0, a1, a2, ref(a3)));
 }
+Variant ei_imap_num_recent(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_num_recent", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_num_recent(a0));
+}
 Variant ei_openssl_x509_check_private_key(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -68351,6 +70813,35 @@ Variant ei_collator_get_attribute(Eval::VariableEnvironment &env, const Eval::Fu
     (*it)->eval(env);
   }
   return (x_collator_get_attribute(a0, a1));
+}
+Variant ei_imap_clearflag_full(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 4) return throw_wrong_arguments("imap_clearflag_full", count, 3, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_clearflag_full(a0, a1, a2));
+  else return (x_imap_clearflag_full(a0, a1, a2, a3));
 }
 Variant ei_shm_put_var(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -68407,6 +70898,36 @@ Variant ei_hphp_splfileobject_seek(Eval::VariableEnvironment &env, const Eval::F
     (*it)->eval(env);
   }
   return (x_hphp_splfileobject_seek(a0, a1), null);
+}
+Variant ei_imap_reopen(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 4) return throw_wrong_arguments("imap_reopen", count, 2, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_reopen(a0, a1));
+  else if (count == 3) return (x_imap_reopen(a0, a1, a2));
+  else return (x_imap_reopen(a0, a1, a2, a3));
 }
 Variant ei_stream_set_blocking(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -68610,6 +71131,22 @@ Variant ei_connection_timeout(Eval::VariableEnvironment &env, const Eval::Functi
     (*it)->eval(env);
   }
   return (x_connection_timeout());
+}
+Variant ei_imap_mailboxmsginfo(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_mailboxmsginfo", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_mailboxmsginfo(a0));
 }
 Variant ei_mysql_data_seek(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -68879,18 +71416,6 @@ Variant ei_is_integer(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   }
   return (x_is_integer(a0));
 }
-Variant ei_posix_getuid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_getuid", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_getuid());
-}
 Variant ei_imagecreatefromgif(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -68906,6 +71431,18 @@ Variant ei_imagecreatefromgif(Eval::VariableEnvironment &env, const Eval::Functi
     (*it)->eval(env);
   }
   return (x_imagecreatefromgif(a0));
+}
+Variant ei_posix_getuid(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_getuid", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_getuid());
 }
 Variant ei_mb_send_mail(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -68960,6 +71497,26 @@ Variant ei_hphp_splfileinfo___construct(Eval::VariableEnvironment &env, const Ev
     (*it)->eval(env);
   }
   return (x_hphp_splfileinfo___construct(a0, a1));
+}
+Variant ei_imap_msgno(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_msgno", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_msgno(a0, a1));
 }
 Variant ei_register_postsend_function(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -69732,18 +72289,6 @@ Variant ei_drawsetstrokedashoffset(Eval::VariableEnvironment &env, const Eval::F
   }
   return (x_drawsetstrokedashoffset(a0, a1), null);
 }
-Variant ei_php_ini_scanned_files(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("php_ini_scanned_files", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_php_ini_scanned_files());
-}
 Variant ei_disk_free_space(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -69759,6 +72304,18 @@ Variant ei_disk_free_space(Eval::VariableEnvironment &env, const Eval::FunctionC
     (*it)->eval(env);
   }
   return (x_disk_free_space(a0));
+}
+Variant ei_php_ini_scanned_files(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("php_ini_scanned_files", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_php_ini_scanned_files());
 }
 Variant ei_pixelsetyellowquantum(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -70299,6 +72856,22 @@ Variant ei_magickhaspreviousimage(Eval::VariableEnvironment &env, const Eval::Fu
   }
   return (x_magickhaspreviousimage(a0));
 }
+Variant ei_imap_utf8(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_utf8", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_utf8(a0));
+}
 Variant ei_drawgetstrokecolor(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -70453,18 +73026,6 @@ Variant ei_apc_dec(Eval::VariableEnvironment &env, const Eval::FunctionCallExpre
   else if (count == 3) return (x_apc_dec(a0, a1, ref(a2)));
   else return (x_apc_dec(a0, a1, ref(a2), a3));
 }
-Variant ei_posix_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_posix_get_last_error());
-}
 Variant ei_iptcparse(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -70480,6 +73041,18 @@ Variant ei_iptcparse(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
     (*it)->eval(env);
   }
   return (x_iptcparse(a0));
+}
+Variant ei_posix_get_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("posix_get_last_error", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_posix_get_last_error());
 }
 Variant ei_iterator_count(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -71897,18 +74470,6 @@ Variant ei_is_double(Eval::VariableEnvironment &env, const Eval::FunctionCallExp
   }
   return (x_is_double(a0));
 }
-Variant ei_output_reset_rewrite_vars(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
-  const std::vector<Eval::ExpressionPtr> &params = caller->params();
-  int count __attribute__((__unused__)) = params.size();
-  if (count > 0) return throw_toomany_arguments("output_reset_rewrite_vars", 0, 1);
-  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
-  do {
-  } while(false);
-  for (; it != params.end(); ++it) {
-    (*it)->eval(env);
-  }
-  return (x_output_reset_rewrite_vars());
-}
 Variant ei_get_declared_interfaces(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
   int count __attribute__((__unused__)) = params.size();
@@ -71920,6 +74481,18 @@ Variant ei_get_declared_interfaces(Eval::VariableEnvironment &env, const Eval::F
     (*it)->eval(env);
   }
   return (x_get_declared_interfaces());
+}
+Variant ei_output_reset_rewrite_vars(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count > 0) return throw_toomany_arguments("output_reset_rewrite_vars", 0, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_output_reset_rewrite_vars());
 }
 Variant ei_passthru(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -72556,6 +75129,34 @@ Variant ei_imagecreatefrompng(Eval::VariableEnvironment &env, const Eval::Functi
   }
   return (x_imagecreatefrompng(a0));
 }
+Variant ei_imap_setacl(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 4) return throw_wrong_arguments("imap_setacl", count, 4, 4, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_setacl(a0, a1, a2, a3));
+}
 Variant ei_magickgetimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -73163,6 +75764,30 @@ Variant ei_call_user_method_array(Eval::VariableEnvironment &env, const Eval::Fu
   }
   return (x_call_user_method_array(a0, ref(a1), a2));
 }
+Variant ei_imap_bodystruct(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_bodystruct", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_bodystruct(a0, a1, a2));
+}
 Variant ei_magickmagnifyimage(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -73620,6 +76245,40 @@ Variant ei_hphp_stats(Eval::VariableEnvironment &env, const Eval::FunctionCallEx
   }
   return (x_hphp_stats(a0, a1), null);
 }
+Variant ei_imap_savebody(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  Variant a3;
+  Variant a4;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 3 || count > 5) return throw_wrong_arguments("imap_savebody", count, 3, 5, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a3 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a4 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 3) return (x_imap_savebody(a0, a1, a2));
+  else if (count == 4) return (x_imap_savebody(a0, a1, a2, a3));
+  else return (x_imap_savebody(a0, a1, a2, a3, a4));
+}
 Variant ei_opendir(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   Variant a1;
@@ -73750,6 +76409,31 @@ Variant ei_escapeshellarg(Eval::VariableEnvironment &env, const Eval::FunctionCa
     (*it)->eval(env);
   }
   return (x_escapeshellarg(a0));
+}
+Variant ei_imap_fetchstructure(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count < 2 || count > 3) return throw_wrong_arguments("imap_fetchstructure", count, 2, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  if (count <= 2) return (x_imap_fetchstructure(a0, a1));
+  else return (x_imap_fetchstructure(a0, a1, a2));
 }
 Variant ei_is_scalar(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -74455,6 +77139,30 @@ Variant ei_gzuncompress(Eval::VariableEnvironment &env, const Eval::FunctionCall
   }
   if (count <= 1) return (x_gzuncompress(a0));
   else return (x_gzuncompress(a0, a1));
+}
+Variant ei_imap_rfc822_write_address(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  Variant a2;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 3) return throw_wrong_arguments("imap_rfc822_write_address", count, 3, 3, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a2 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_rfc822_write_address(a0, a1, a2));
 }
 Variant ei_is_executable(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -75250,6 +77958,22 @@ Variant ei_magicknegateimage(Eval::VariableEnvironment &env, const Eval::Functio
   else if (count == 2) return (x_magicknegateimage(a0, a1));
   else return (x_magicknegateimage(a0, a1, a2));
 }
+Variant ei_imap_expunge(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 1) return throw_wrong_arguments("imap_expunge", count, 1, 1, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_expunge(a0));
+}
 Variant ei_socket_last_error(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
   const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -75286,6 +78010,26 @@ Variant ei_create_function(Eval::VariableEnvironment &env, const Eval::FunctionC
     (*it)->eval(env);
   }
   return (x_create_function(a0, a1));
+}
+Variant ei_imap_get_quota(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
+  Variant a0;
+  Variant a1;
+  const std::vector<Eval::ExpressionPtr> &params = caller->params();
+  int count __attribute__((__unused__)) = params.size();
+  if (count != 2) return throw_wrong_arguments("imap_get_quota", count, 2, 2, 1);
+  std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
+  do {
+    if (it == params.end()) break;
+    a0 = (*it)->eval(env);
+    it++;
+    if (it == params.end()) break;
+    a1 = (*it)->eval(env);
+    it++;
+  } while(false);
+  for (; it != params.end(); ++it) {
+    (*it)->eval(env);
+  }
+  return (x_imap_get_quota(a0, a1));
 }
 Variant ei_str_split(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller) {
   Variant a0;
@@ -75404,7 +78148,7 @@ Variant ei_fb_call_user_func_array_safe(Eval::VariableEnvironment &env, const Ev
 }
 Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 4095) {
+  switch (hash & 8191) {
     case 1:
       HASH_INVOKE_FROM_EVAL(0x4F7230DC25F0E001LL, magicknormalizeimage);
       break;
@@ -75414,33 +78158,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3:
       HASH_INVOKE_FROM_EVAL(0x7E0EC3E131BCA003LL, token_name);
       break;
-    case 5:
-      HASH_INVOKE_FROM_EVAL(0x20D579E7E4131005LL, imagecolorclosest);
-      HASH_INVOKE_FROM_EVAL(0x18A0F1EE8E249005LL, msg_send);
-      break;
-    case 10:
-      HASH_INVOKE_FROM_EVAL(0x555D7A3FB939300ALL, apache_setenv);
-      break;
     case 11:
       HASH_INVOKE_FROM_EVAL(0x4FDCCE1C7754600BLL, ob_iconv_handler);
       break;
-    case 13:
-      HASH_INVOKE_FROM_EVAL(0x40FA17130FA7100DLL, openssl_seal);
-      break;
-    case 22:
-      HASH_INVOKE_FROM_EVAL(0x5623A698A728F016LL, getlastmod);
-      break;
     case 24:
       HASH_INVOKE_FROM_EVAL(0x4C915E3480E94018LL, mb_substr_count);
-      break;
-    case 26:
-      HASH_INVOKE_FROM_EVAL(0x03834225EBBC101ALL, drawsettextundercolor);
-      break;
-    case 34:
-      HASH_INVOKE_FROM_EVAL(0x145D42B2AB55D022LL, drawmatte);
-      break;
-    case 35:
-      HASH_INVOKE_FROM_EVAL(0x35C74650867B7023LL, imagesetpixel);
       break;
     case 40:
       HASH_INVOKE_FROM_EVAL(0x601C5152277AE028LL, readfile);
@@ -75451,22 +78173,13 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 45:
       HASH_INVOKE_FROM_EVAL(0x3BE730D90618202DLL, collator_sort_with_sort_keys);
       break;
-    case 51:
-      HASH_INVOKE_FROM_EVAL(0x48F35DFD653D7033LL, pclose);
-      break;
     case 54:
       HASH_INVOKE_FROM_EVAL(0x32F23F206C394036LL, curl_setopt_array);
       break;
     case 55:
       HASH_INVOKE_FROM_EVAL(0x418D937957ECE037LL, tanh);
       break;
-    case 59:
-      HASH_INVOKE_FROM_EVAL(0x40329F2A6B84D03BLL, dom_node_lookup_prefix);
-      break;
     case 62:
-      HASH_INVOKE_FROM_EVAL(0x32E6E5D3CCE3703ELL, magickgetimagewidth);
-      HASH_INVOKE_FROM_EVAL(0x43461C4D9130103ELL, exit);
-      HASH_INVOKE_FROM_EVAL(0x67C1ED9B816E503ELL, md5_file);
       HASH_INVOKE_FROM_EVAL(0x497E31C70409603ELL, timezone_name_from_abbr);
       break;
     case 63:
@@ -75475,14 +78188,13 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 65:
       HASH_INVOKE_FROM_EVAL(0x65B39B11F5D7C041LL, array_unique);
       break;
-    case 67:
-      HASH_INVOKE_FROM_EVAL(0x5ACCF9166CD9D043LL, ftruncate);
+    case 66:
+      HASH_INVOKE_FROM_EVAL(0x0547079C94282042LL, imap_utf7_decode);
       break;
     case 68:
       HASH_INVOKE_FROM_EVAL(0x378A73FF98B60044LL, curl_init);
       break;
     case 73:
-      HASH_INVOKE_FROM_EVAL(0x047A8BF04DB51049LL, range);
       HASH_INVOKE_FROM_EVAL(0x4282E0231F600049LL, fseek);
       break;
     case 75:
@@ -75493,21 +78205,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x7848970191D5A04CLL, mysql_connect_with_db);
       HASH_INVOKE_FROM_EVAL(0x03047FD5FC67204CLL, exif_read_data);
       break;
-    case 83:
-      HASH_INVOKE_FROM_EVAL(0x15A9EB33DA6E9053LL, getimagesize);
-      HASH_INVOKE_FROM_EVAL(0x07EB5C3A3BEA3053LL, acosh);
-      break;
     case 87:
       HASH_INVOKE_FROM_EVAL(0x12B22A2E6B344057LL, ldap_sort);
       break;
-    case 90:
-      HASH_INVOKE_FROM_EVAL(0x271AB768D202F05ALL, mcrypt_module_is_block_algorithm);
-      break;
     case 92:
       HASH_INVOKE_FROM_EVAL(0x2B7532A070BF605CLL, openssl_get_privatekey);
-      break;
-    case 95:
-      HASH_INVOKE_FROM_EVAL(0x4B70746F965E705FLL, preg_last_error);
       break;
     case 98:
       HASH_INVOKE_FROM_EVAL(0x745910AD5C922062LL, magickgetmimetype);
@@ -75519,36 +78221,19 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x777FE52584FAE065LL, apc_bin_dump);
       break;
     case 103:
-      HASH_INVOKE_FROM_EVAL(0x0CE1918B30DF5067LL, sys_getloadavg);
       HASH_INVOKE_FROM_EVAL(0x4512BD5EA7076067LL, openssl_csr_export_to_file);
-      break;
-    case 111:
-      HASH_INVOKE_FROM_EVAL(0x4C6FD8808A62506FLL, session_set_save_handler);
-      break;
-    case 112:
-      HASH_INVOKE_FROM_EVAL(0x3C466098FF7B5070LL, mb_check_encoding);
       break;
     case 118:
       HASH_INVOKE_FROM_EVAL(0x0CFFD02753B98076LL, bzread);
       break;
     case 120:
-      HASH_INVOKE_FROM_EVAL(0x6B268C26E21C1078LL, arsort);
       HASH_INVOKE_FROM_EVAL(0x01AE1DE8FA116078LL, call_user_func_array_async);
-      break;
-    case 121:
-      HASH_INVOKE_FROM_EVAL(0x08AA4EA901C9B079LL, session_encode);
       break;
     case 122:
       HASH_INVOKE_FROM_EVAL(0x5F9DDC342A83807ALL, date_default_timezone_get);
       break;
     case 131:
       HASH_INVOKE_FROM_EVAL(0x1A90213EE1A56083LL, array_pop);
-      break;
-    case 132:
-      HASH_INVOKE_FROM_EVAL(0x53FD8C9AC3F4D084LL, dangling_server_proxy_new_request);
-      break;
-    case 135:
-      HASH_INVOKE_FROM_EVAL(0x255D919D501C5087LL, dom_characterdata_delete_data);
       break;
     case 137:
       HASH_INVOKE_FROM_EVAL(0x4AD554CBAB9CC089LL, call_user_method_array);
@@ -75560,26 +78245,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 141:
       HASH_INVOKE_FROM_EVAL(0x200864F8F053C08DLL, magickgetversionstring);
       break;
-    case 142:
-      HASH_INVOKE_FROM_EVAL(0x3E4AE974AFA9708ELL, pixelsetquantumcolor);
-      break;
     case 145:
       HASH_INVOKE_FROM_EVAL(0x3E5CF6378A49C091LL, ldap_get_attributes);
-      HASH_INVOKE_FROM_EVAL(0x673B36244DC87091LL, closelog);
       HASH_INVOKE_FROM_EVAL(0x1C32BB63986C8091LL, socket_strerror);
       break;
     case 147:
       HASH_INVOKE_FROM_EVAL(0x3B5E32078E37A093LL, imagedestroy);
-      break;
-    case 158:
-      HASH_INVOKE_FROM_EVAL(0x4AF87BA91163D09ELL, mysql_db_name);
-      HASH_INVOKE_FROM_EVAL(0x74F0D6D8F1F2709ELL, drawsetstrokedashoffset);
-      break;
-    case 159:
-      HASH_INVOKE_FROM_EVAL(0x2B130322DEC4B09FLL, pixelgetopacityquantum);
-      break;
-    case 161:
-      HASH_INVOKE_FROM_EVAL(0x0DF945F12533F0A1LL, abs);
       break;
     case 162:
       HASH_INVOKE_FROM_EVAL(0x10DF7941C3F3E0A2LL, socket_bind);
@@ -75587,40 +78258,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 163:
       HASH_INVOKE_FROM_EVAL(0x54242D2846BC60A3LL, magickunsharpmaskimage);
       break;
-    case 167:
-      HASH_INVOKE_FROM_EVAL(0x74C787060F7290A7LL, icu_transliterate);
-      break;
     case 168:
       HASH_INVOKE_FROM_EVAL(0x6E8C61326DCE40A8LL, var_export);
       break;
     case 171:
-      HASH_INVOKE_FROM_EVAL(0x439DF153FC32D0ABLL, printf);
       HASH_INVOKE_FROM_EVAL(0x5B1D9F56698A40ABLL, html_entity_decode);
-      break;
-    case 172:
-      HASH_INVOKE_FROM_EVAL(0x6E27DC1E74C5B0ACLL, drawpathstart);
       break;
     case 173:
       HASH_INVOKE_FROM_EVAL(0x4C9252FB9C3300ADLL, pixelsetalphaquantum);
       break;
-    case 174:
-      HASH_INVOKE_FROM_EVAL(0x47AB4A08446BD0AELL, bcmod);
-      HASH_INVOKE_FROM_EVAL(0x4BBD5D8A6E0110AELL, error_log);
-      break;
-    case 175:
-      HASH_INVOKE_FROM_EVAL(0x3954FFED1E0650AFLL, stream_register_wrapper);
-      break;
-    case 176:
-      HASH_INVOKE_FROM_EVAL(0x5B9F8B3E1D8330B0LL, stream_socket_sendto);
-      break;
     case 177:
       HASH_INVOKE_FROM_EVAL(0x191B5F1B190BC0B1LL, dom_xpath_register_ns);
-      break;
-    case 178:
-      HASH_INVOKE_FROM_EVAL(0x48BBFB59FB7F90B2LL, iconv_strlen);
-      break;
-    case 184:
-      HASH_INVOKE_FROM_EVAL(0x05A4C165810A30B8LL, gzread);
       break;
     case 185:
       HASH_INVOKE_FROM_EVAL(0x5C659372B2CD80B9LL, imagecolorstotal);
@@ -75628,15 +78276,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 187:
       HASH_INVOKE_FROM_EVAL(0x331E7DFBE6E240BBLL, libxml_get_errors);
       break;
-    case 188:
-      HASH_INVOKE_FROM_EVAL(0x3900350CD9D990BCLL, imagecreatefromjpeg);
-      break;
-    case 192:
-      HASH_INVOKE_FROM_EVAL(0x6EDC1E7A8D5710C0LL, memcache_add_server);
-      break;
     case 197:
       HASH_INVOKE_FROM_EVAL(0x7424946F7ED520C5LL, magickgetimagefilename);
-      HASH_INVOKE_FROM_EVAL(0x6B477F3B9CDB10C5LL, base64_decode);
       break;
     case 199:
       HASH_INVOKE_FROM_EVAL(0x677F33E78342A0C7LL, function_exists);
@@ -75656,53 +78297,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5365BD7509BE60D2LL, ldap_dn2ufn);
       HASH_INVOKE_FROM_EVAL(0x3E4DAD592CD0A0D2LL, magickdescribeimage);
       break;
-    case 213:
-      HASH_INVOKE_FROM_EVAL(0x3BF44C6DECD790D5LL, xmlwriter_start_dtd_entity);
-      break;
-    case 216:
-      HASH_INVOKE_FROM_EVAL(0x79F2E516A3B070D8LL, libxml_disable_entity_loader);
-      break;
-    case 217:
-      HASH_INVOKE_FROM_EVAL(0x08F6B727D60670D9LL, magicksetimagedepth);
-      break;
-    case 218:
-      HASH_INVOKE_FROM_EVAL(0x6F242340B2E930DALL, hphp_splfileinfo_setfileclass);
-      break;
-    case 219:
-      HASH_INVOKE_FROM_EVAL(0x3801923AD84670DBLL, apc_inc);
-      break;
-    case 224:
-      HASH_INVOKE_FROM_EVAL(0x2E4612DF112010E0LL, imagecopyresized);
-      break;
-    case 228:
-      HASH_INVOKE_FROM_EVAL(0x2B9425038D4230E4LL, imagecreatefromxpm);
-      break;
-    case 231:
-      HASH_INVOKE_FROM_EVAL(0x79E6FD78989B10E7LL, tmpfile);
-      HASH_INVOKE_FROM_EVAL(0x59DE3A26AFF570E7LL, magickshaveimage);
-      break;
     case 232:
       HASH_INVOKE_FROM_EVAL(0x476F4B6CC987E0E8LL, magickframeimage);
-      HASH_INVOKE_FROM_EVAL(0x17CB328F55FDF0E8LL, drawsetstrokeantialias);
       break;
     case 234:
       HASH_INVOKE_FROM_EVAL(0x53BA3992F8C240EALL, imagegrabwindow);
       break;
-    case 243:
-      HASH_INVOKE_FROM_EVAL(0x315CCBC8C5C7D0F3LL, xmlwriter_write_raw);
-      break;
     case 249:
       HASH_INVOKE_FROM_EVAL(0x480797DB7165A0F9LL, xmlwriter_set_indent);
       break;
-    case 259:
-      HASH_INVOKE_FROM_EVAL(0x1FFCBCF1927D7103LL, posix_setpgid);
-      break;
     case 261:
       HASH_INVOKE_FROM_EVAL(0x71E3372AA1AD0105LL, is_infinite);
-      HASH_INVOKE_FROM_EVAL(0x509B763CDAD9D105LL, gethostbyaddr);
-      break;
-    case 264:
-      HASH_INVOKE_FROM_EVAL(0x60B8B61133F59108LL, quoted_printable_decode);
       break;
     case 267:
       HASH_INVOKE_FROM_EVAL(0x7DE1BEE0C35D010BLL, pcntl_signal);
@@ -75713,28 +78318,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 273:
       HASH_INVOKE_FROM_EVAL(0x3A9A5D4FEE79A111LL, getmxrr);
       break;
-    case 274:
-      HASH_INVOKE_FROM_EVAL(0x0B1BA48B0CFB1112LL, strval);
-      HASH_INVOKE_FROM_EVAL(0x28C44527BD59D112LL, is_link);
-      break;
-    case 276:
-      HASH_INVOKE_FROM_EVAL(0x02A4724E6A881114LL, mb_decode_numericentity);
-      break;
-    case 281:
-      HASH_INVOKE_FROM_EVAL(0x3AB82455A70F5119LL, imagecolortransparent);
-      HASH_INVOKE_FROM_EVAL(0x2B31A877824A1119LL, stristr);
-      break;
-    case 284:
-      HASH_INVOKE_FROM_EVAL(0x070A63F6A0B8711CLL, array_walk_recursive);
-      break;
-    case 285:
-      HASH_INVOKE_FROM_EVAL(0x291088666B8BF11DLL, drawsetfontfamily);
-      break;
     case 286:
       HASH_INVOKE_FROM_EVAL(0x658444BB4E29E11ELL, openssl_free_key);
-      break;
-    case 287:
-      HASH_INVOKE_FROM_EVAL(0x4C70C24C84F5511FLL, magicksetimagegamma);
       break;
     case 291:
       HASH_INVOKE_FROM_EVAL(0x3669138315204123LL, mcrypt_module_get_algo_key_size);
@@ -75742,43 +78327,23 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 292:
       HASH_INVOKE_FROM_EVAL(0x7D4D28D561392124LL, drawsettextalignment);
       break;
-    case 293:
-      HASH_INVOKE_FROM_EVAL(0x7A8B3EC0235EF125LL, magickprofileimage);
-      break;
     case 301:
       HASH_INVOKE_FROM_EVAL(0x7579DBE83CE5812DLL, imagerectangle);
-      break;
-    case 307:
-      HASH_INVOKE_FROM_EVAL(0x6A7E0B15FF689133LL, mb_ereg_search_init);
-      break;
-    case 311:
-      HASH_INVOKE_FROM_EVAL(0x5666016FA3C0F137LL, socket_clear_error);
-      break;
-    case 312:
-      HASH_INVOKE_FROM_EVAL(0x2676902697E37138LL, xmlwriter_start_comment);
-      break;
-    case 314:
-      HASH_INVOKE_FROM_EVAL(0x2A57E5D29D73D13ALL, register_tick_function);
       break;
     case 315:
       HASH_INVOKE_FROM_EVAL(0x1F61AFCDC510413BLL, imagefilter);
       break;
-    case 319:
-      HASH_INVOKE_FROM_EVAL(0x5BFDE63106CE713FLL, dom_element_get_attribute);
+    case 321:
+      HASH_INVOKE_FROM_EVAL(0x6B03203C8A01C141LL, imap_timeout);
       break;
     case 323:
       HASH_INVOKE_FROM_EVAL(0x296C739F28D6C143LL, drawsetfontsize);
-      break;
-    case 335:
-      HASH_INVOKE_FROM_EVAL(0x61A61E91C477514FLL, chop);
-      HASH_INVOKE_FROM_EVAL(0x7863294A8F33D14FLL, file);
       break;
     case 337:
       HASH_INVOKE_FROM_EVAL(0x3044E9F91628E151LL, mb_strlen);
       break;
     case 338:
       HASH_INVOKE_FROM_EVAL(0x5D170BCBBBA02152LL, system);
-      HASH_INVOKE_FROM_EVAL(0x26DD46D8C1F47152LL, ldap_bind);
       break;
     case 341:
       HASH_INVOKE_FROM_EVAL(0x2623917110168155LL, fclose);
@@ -75796,149 +78361,64 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 353:
       HASH_INVOKE_FROM_EVAL(0x309E780586D6C161LL, socket_set_nonblock);
       break;
-    case 355:
-      HASH_INVOKE_FROM_EVAL(0x36D6B73D289DD163LL, date_sunset);
-      break;
-    case 360:
-      HASH_INVOKE_FROM_EVAL(0x14E46EA3CBCFB168LL, magickgetsamplingfactors);
-      break;
     case 361:
       HASH_INVOKE_FROM_EVAL(0x4983571BFEAE6169LL, magickaffinetransformimage);
       HASH_INVOKE_FROM_EVAL(0x1612E331D1726169LL, drawsetstrokecolor);
       break;
     case 366:
-      HASH_INVOKE_FROM_EVAL(0x15B61E061268B16ELL, magickenhanceimage);
       HASH_INVOKE_FROM_EVAL(0x0125F8B9428E416ELL, hphp_create_object);
-      break;
-    case 370:
-      HASH_INVOKE_FROM_EVAL(0x59FE6A862E1CB172LL, get_browser);
-      break;
-    case 372:
-      HASH_INVOKE_FROM_EVAL(0x345E070844E3F174LL, create_function);
-      break;
-    case 375:
-      HASH_INVOKE_FROM_EVAL(0x174DB93CAF0D1177LL, hphp_splfileinfo___tostring);
-      break;
-    case 377:
-      HASH_INVOKE_FROM_EVAL(0x6884FAF0D1EF3179LL, posix_mknod);
       break;
     case 379:
       HASH_INVOKE_FROM_EVAL(0x59594143EFC7617BLL, mcrypt_module_open);
       break;
-    case 380:
-      HASH_INVOKE_FROM_EVAL(0x3E1343B4A3AD717CLL, magickgettextascent);
-      break;
-    case 383:
-      HASH_INVOKE_FROM_EVAL(0x4EF9496D16F9D17FLL, xmlwriter_start_element_ns);
-      break;
     case 385:
-      HASH_INVOKE_FROM_EVAL(0x2227E30BAB23B181LL, dom_xpath_query);
       HASH_INVOKE_FROM_EVAL(0x1CBD3B58296C8181LL, xmlwriter_write_dtd);
       break;
     case 386:
       HASH_INVOKE_FROM_EVAL(0x7BB7C27B2C118182LL, get_magic_quotes_gpc);
-      HASH_INVOKE_FROM_EVAL(0x130B62A8C77F3182LL, mb_ereg_search_getregs);
       break;
     case 389:
-      HASH_INVOKE_FROM_EVAL(0x13E90F8874839185LL, ob_get_status);
       HASH_INVOKE_FROM_EVAL(0x54DB5DC6A069A185LL, hphp_get_class_info);
-      break;
-    case 390:
-      HASH_INVOKE_FROM_EVAL(0x5DB5E45860801186LL, openssl_csr_export);
       break;
     case 391:
       HASH_INVOKE_FROM_EVAL(0x1BC448670BA4E187LL, iconv_strpos);
       break;
-    case 393:
-      HASH_INVOKE_FROM_EVAL(0x0CC53B2F0D38D189LL, timezone_offset_get);
-      break;
     case 402:
       HASH_INVOKE_FROM_EVAL(0x07B5BF934F6EA192LL, imagesettile);
-      break;
-    case 407:
-      HASH_INVOKE_FROM_EVAL(0x15AD9CE061C75197LL, timezone_transitions_get);
       break;
     case 409:
       HASH_INVOKE_FROM_EVAL(0x0CE71BC3B75D8199LL, mb_strimwidth);
       break;
     case 411:
-      HASH_INVOKE_FROM_EVAL(0x7FF6C2A693CE119BLL, magickcyclecolormapimage);
       HASH_INVOKE_FROM_EVAL(0x74F20C284227219BLL, similar_text);
-      break;
-    case 416:
-      HASH_INVOKE_FROM_EVAL(0x6FB5104FC97A31A0LL, drawpathcurvetorelative);
       break;
     case 418:
       HASH_INVOKE_FROM_EVAL(0x6DFC0765EBAB81A2LL, mcrypt_decrypt);
-      HASH_INVOKE_FROM_EVAL(0x2A9015499A2EB1A2LL, fnmatch);
       HASH_INVOKE_FROM_EVAL(0x615723D21421A1A2LL, sem_remove);
       break;
-    case 419:
-      HASH_INVOKE_FROM_EVAL(0x735B81C45C2971A3LL, drawgetfillopacity);
-      break;
-    case 422:
-      HASH_INVOKE_FROM_EVAL(0x37B4612178EF91A6LL, memcache_get_version);
-      break;
     case 425:
-      HASH_INVOKE_FROM_EVAL(0x740DC7FFAD8BB1A9LL, imagecolorat);
       HASH_INVOKE_FROM_EVAL(0x0DDFE3B1F6EEE1A9LL, array_reduce);
-      break;
-    case 426:
-      HASH_INVOKE_FROM_EVAL(0x11A5C66A3D0711AALL, apc_sma_info);
-      break;
-    case 429:
-      HASH_INVOKE_FROM_EVAL(0x5A6EFF8C71A431ADLL, socket_get_status);
-      HASH_INVOKE_FROM_EVAL(0x50538F37398AF1ADLL, ldap_get_option);
-      break;
-    case 431:
-      HASH_INVOKE_FROM_EVAL(0x5B1F9C2E9FE111AFLL, fb_utf8ize);
       break;
     case 434:
       HASH_INVOKE_FROM_EVAL(0x4B96F870584541B2LL, hphp_splfileobject_setflags);
+      break;
+    case 436:
+      HASH_INVOKE_FROM_EVAL(0x6F6C85F4855DE1B4LL, imap_check);
       break;
     case 438:
       HASH_INVOKE_FROM_EVAL(0x33BD672B4AC301B6LL, mt_rand);
       break;
     case 445:
       HASH_INVOKE_FROM_EVAL(0x589F7316EDC581BDLL, fb_serialize);
-      HASH_INVOKE_FROM_EVAL(0x4B3F35310DEA31BDLL, socket_create_pair);
       break;
     case 447:
       HASH_INVOKE_FROM_EVAL(0x0E88ACEB15A581BFLL, magickgetimageextrema);
-      HASH_INVOKE_FROM_EVAL(0x681CD0E7D9DB71BFLL, pow);
-      break;
-    case 450:
-      HASH_INVOKE_FROM_EVAL(0x02103322F88C71C2LL, pixelgetcolorcount);
-      break;
-    case 452:
-      HASH_INVOKE_FROM_EVAL(0x3617DAE43A23D1C4LL, xml_parser_set_option);
-      break;
-    case 454:
-      HASH_INVOKE_FROM_EVAL(0x188D37410B6051C6LL, session_unregister);
       break;
     case 455:
       HASH_INVOKE_FROM_EVAL(0x5AE12CB1FFDC21C7LL, drawellipse);
       break;
-    case 456:
-      HASH_INVOKE_FROM_EVAL(0x11C0B5DA066891C8LL, preg_match_all);
-      break;
     case 458:
       HASH_INVOKE_FROM_EVAL(0x75CA86838D24A1CALL, hash_algos);
-      break;
-    case 460:
-      HASH_INVOKE_FROM_EVAL(0x3DF488365DAAF1CCLL, drawgettextencoding);
-      break;
-    case 461:
-      HASH_INVOKE_FROM_EVAL(0x37340B707E7CD1CDLL, magickgetimagebordercolor);
-      break;
-    case 462:
-      HASH_INVOKE_FROM_EVAL(0x2E7741B5440FB1CELL, magicksetlastiterator);
-      break;
-    case 464:
-      HASH_INVOKE_FROM_EVAL(0x03012F3DDD7AB1D0LL, getservbyport);
-      break;
-    case 468:
-      HASH_INVOKE_FROM_EVAL(0x219F3257BA3371D4LL, decbin);
       break;
     case 470:
       HASH_INVOKE_FROM_EVAL(0x78831282736801D6LL, stream_context_get_default);
@@ -75946,35 +78426,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 472:
       HASH_INVOKE_FROM_EVAL(0x60E9E392663921D8LL, readlink);
       break;
-    case 473:
-      HASH_INVOKE_FROM_EVAL(0x7A69D0078F4F31D9LL, ldap_start_tls);
-      break;
-    case 474:
-      HASH_INVOKE_FROM_EVAL(0x0482E069503A91DALL, posix_setgid);
-      break;
-    case 475:
-      HASH_INVOKE_FROM_EVAL(0x3FEBBC0DA79F31DBLL, fb_call_user_func_safe);
-      break;
     case 476:
-      HASH_INVOKE_FROM_EVAL(0x14FB46333D6D11DCLL, xml_set_default_handler);
       HASH_INVOKE_FROM_EVAL(0x5B3A4A72846B21DCLL, current);
       break;
     case 477:
       HASH_INVOKE_FROM_EVAL(0x04666D6F67C7A1DDLL, mysql_list_processes);
-      HASH_INVOKE_FROM_EVAL(0x03A183D73942B1DDLL, apc_filehits);
-      break;
-    case 478:
-      HASH_INVOKE_FROM_EVAL(0x44563CC8FA9B11DELL, memcache_set_server_params);
-      break;
-    case 479:
-      HASH_INVOKE_FROM_EVAL(0x7403251412E931DFLL, syslog);
-      break;
-    case 480:
-      HASH_INVOKE_FROM_EVAL(0x5932D2750A8A91E0LL, magickgetpackagename);
-      break;
-    case 481:
-      HASH_INVOKE_FROM_EVAL(0x2771C632A60371E1LL, ftok);
-      HASH_INVOKE_FROM_EVAL(0x0ED729A444C611E1LL, openssl_x509_read);
       break;
     case 482:
       HASH_INVOKE_FROM_EVAL(0x67D4BA8513BF41E2LL, newpixelwand);
@@ -75983,12 +78439,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x131D11F79A8801E3LL, mb_http_output);
       HASH_INVOKE_FROM_EVAL(0x406BDC51A3FD81E3LL, pcntl_waitpid);
       break;
-    case 484:
-      HASH_INVOKE_FROM_EVAL(0x08F7A6C37FC7B1E4LL, shm_get_var);
-      break;
-    case 488:
-      HASH_INVOKE_FROM_EVAL(0x7F843353646391E8LL, rad2deg);
-      break;
     case 493:
       HASH_INVOKE_FROM_EVAL(0x1B09A9A533FFA1EDLL, drawgetexceptiontype);
       HASH_INVOKE_FROM_EVAL(0x19932EEC5CAE01EDLL, hphp_splfileinfo_getfileinfo);
@@ -75996,25 +78446,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 497:
       HASH_INVOKE_FROM_EVAL(0x02BCE5B0FBED61F1LL, strlen);
       break;
-    case 498:
-      HASH_INVOKE_FROM_EVAL(0x46AFE55982B371F2LL, posix_geteuid);
-      break;
     case 499:
       HASH_INVOKE_FROM_EVAL(0x582D10141D5601F3LL, stream_context_set_option);
-      HASH_INVOKE_FROM_EVAL(0x11BB3CDC5E4971F3LL, xmlwriter_end_pi);
-      break;
-    case 501:
-      HASH_INVOKE_FROM_EVAL(0x542FBDCF960031F5LL, fprintf);
-      HASH_INVOKE_FROM_EVAL(0x02ABC00C046291F5LL, imageellipse);
       break;
     case 502:
       HASH_INVOKE_FROM_EVAL(0x06DAF95935D221F6LL, dom_namednodemap_item);
-      break;
-    case 506:
-      HASH_INVOKE_FROM_EVAL(0x135D5CBF936B11FALL, msg_receive);
-      break;
-    case 509:
-      HASH_INVOKE_FROM_EVAL(0x5304E6B47ED0B1FDLL, srand);
       break;
     case 514:
       HASH_INVOKE_FROM_EVAL(0x16699E33370A8202LL, idn_to_unicode);
@@ -76028,39 +78464,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 523:
       HASH_INVOKE_FROM_EVAL(0x2F5144AB3647C20BLL, dom_text_is_whitespace_in_element_content);
       break;
-    case 524:
-      HASH_INVOKE_FROM_EVAL(0x41B15671649A320CLL, curl_multi_getcontent);
-      HASH_INVOKE_FROM_EVAL(0x257BEA4D6DC9920CLL, ctype_alnum);
-      break;
     case 525:
       HASH_INVOKE_FROM_EVAL(0x5C0DECC8CC67E20DLL, magickwriteimagesfile);
-      break;
-    case 526:
-      HASH_INVOKE_FROM_EVAL(0x533642044A00520ELL, pixelgetmagentaquantum);
-      break;
-    case 527:
-      HASH_INVOKE_FROM_EVAL(0x08DC8BF3ADAE520FLL, getallheaders);
-      HASH_INVOKE_FROM_EVAL(0x53631CF3A937320FLL, get_class_methods);
-      break;
-    case 528:
-      HASH_INVOKE_FROM_EVAL(0x15EF510022CAF210LL, xml_parser_create_ns);
-      HASH_INVOKE_FROM_EVAL(0x2D41D7F8F4113210LL, sinh);
       break;
     case 529:
       HASH_INVOKE_FROM_EVAL(0x438CD1A0327A8211LL, apc_define_constants);
       break;
-    case 532:
-      HASH_INVOKE_FROM_EVAL(0x7D85E9FACB92D214LL, magickgetimageblob);
-      break;
     case 535:
       HASH_INVOKE_FROM_EVAL(0x4BC4B81CC5F32217LL, dom_node_append_child);
-      break;
-    case 536:
-      HASH_INVOKE_FROM_EVAL(0x56C95225813A5218LL, memory_get_usage);
-      HASH_INVOKE_FROM_EVAL(0x4D63F2C9AAB79218LL, fb_renamed_functions);
-      break;
-    case 538:
-      HASH_INVOKE_FROM_EVAL(0x72C0C89D897E721ALL, magicksetimagetype);
       break;
     case 539:
       HASH_INVOKE_FROM_EVAL(0x3A90CC67D58A021BLL, hash_hmac_file);
@@ -76074,45 +78485,24 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 547:
       HASH_INVOKE_FROM_EVAL(0x5208E8B08455E223LL, dom_node_has_child_nodes);
       break;
-    case 550:
-      HASH_INVOKE_FROM_EVAL(0x007B6BD94D767226LL, hphp_splfileobject_fpassthru);
-      break;
-    case 551:
-      HASH_INVOKE_FROM_EVAL(0x5A26F00A81BA5227LL, xmlwriter_start_attribute_ns);
-      break;
-    case 552:
-      HASH_INVOKE_FROM_EVAL(0x44911AEE34D63228LL, time_sleep_until);
-      HASH_INVOKE_FROM_EVAL(0x7CD3C6F6495D3228LL, memcache_get_stats);
-      break;
     case 556:
       HASH_INVOKE_FROM_EVAL(0x4129FFBF3548E22CLL, mb_strpos);
       break;
     case 557:
       HASH_INVOKE_FROM_EVAL(0x3B0FE36F9A7AE22DLL, bzflush);
       break;
-    case 558:
-      HASH_INVOKE_FROM_EVAL(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler);
-      break;
     case 560:
       HASH_INVOKE_FROM_EVAL(0x036A5935D9936230LL, hphp_splfileinfo_openfile);
       break;
     case 561:
       HASH_INVOKE_FROM_EVAL(0x61A192D10C004231LL, magickconvolveimage);
-      HASH_INVOKE_FROM_EVAL(0x7C07D66F70E43231LL, mailparse_determine_best_xfer_encoding);
       break;
     case 564:
-      HASH_INVOKE_FROM_EVAL(0x23C478B2D95F3234LL, dom_element_has_attribute_ns);
       HASH_INVOKE_FROM_EVAL(0x422C51C95928A234LL, str_replace);
-      break;
-    case 566:
-      HASH_INVOKE_FROM_EVAL(0x5542AABF33A2F236LL, stream_filter_remove);
       break;
     case 568:
       HASH_INVOKE_FROM_EVAL(0x0B7BB85A435F8238LL, bzdecompress);
       HASH_INVOKE_FROM_EVAL(0x695AC59F79E2A238LL, mb_encode_mimeheader);
-      break;
-    case 570:
-      HASH_INVOKE_FROM_EVAL(0x679ABBE5A08C523ALL, xml_parse_into_struct);
       break;
     case 572:
       HASH_INVOKE_FROM_EVAL(0x306F1D92E413A23CLL, check_user_func_async);
@@ -76123,9 +78513,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 576:
       HASH_INVOKE_FROM_EVAL(0x0DB9DD4AE24B0240LL, base64_encode);
       break;
-    case 579:
-      HASH_INVOKE_FROM_EVAL(0x78183A24F2ACB243LL, strtotime);
-      break;
     case 584:
       HASH_INVOKE_FROM_EVAL(0x7071BB6F0591E248LL, serialize);
       break;
@@ -76135,17 +78522,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 591:
       HASH_INVOKE_FROM_EVAL(0x1D8FE8E68F7EA24FLL, pixelsetiteratorrow);
       break;
-    case 592:
-      HASH_INVOKE_FROM_EVAL(0x30747B708DA1D250LL, pushdrawingwand);
-      break;
-    case 598:
-      HASH_INVOKE_FROM_EVAL(0x0384346A8857D256LL, clonemagickwand);
-      break;
     case 600:
       HASH_INVOKE_FROM_EVAL(0x32C51FFF185F4258LL, memcache_set);
-      break;
-    case 603:
-      HASH_INVOKE_FROM_EVAL(0x2F8F40E95EDF925BLL, sizeof);
       break;
     case 605:
       HASH_INVOKE_FROM_EVAL(0x7E6024E53AEEE25DLL, apc_delete);
@@ -76159,37 +78537,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 610:
       HASH_INVOKE_FROM_EVAL(0x63AC0EED6D946262LL, pcntl_fork);
       break;
-    case 612:
-      HASH_INVOKE_FROM_EVAL(0x261F403C4174D264LL, posix_getsid);
-      break;
     case 613:
       HASH_INVOKE_FROM_EVAL(0x561DB8F1DC0BC265LL, magickseparateimagechannel);
       break;
     case 615:
       HASH_INVOKE_FROM_EVAL(0x50C5488E19492267LL, mb_list_encodings_alias_names);
-      HASH_INVOKE_FROM_EVAL(0x38B376B9D9091267LL, xmlwriter_write_attribute);
-      break;
-    case 620:
-      HASH_INVOKE_FROM_EVAL(0x188DF1EB5FD1B26CLL, mailparse_msg_parse_file);
-      break;
-    case 622:
-      HASH_INVOKE_FROM_EVAL(0x5672949384A4F26ELL, stream_filter_register);
       break;
     case 625:
       HASH_INVOKE_FROM_EVAL(0x135CE067FA0A6271LL, bzerrno);
       break;
     case 626:
       HASH_INVOKE_FROM_EVAL(0x1C65F32FF28BC272LL, pathinfo);
-      break;
-    case 627:
-      HASH_INVOKE_FROM_EVAL(0x61C991F216E85273LL, inet_ntop);
-      HASH_INVOKE_FROM_EVAL(0x08CC1E49661DB273LL, dom_element_get_attribute_ns);
-      break;
-    case 634:
-      HASH_INVOKE_FROM_EVAL(0x39E05F957C7DD27ALL, magickgetimagedepth);
-      break;
-    case 636:
-      HASH_INVOKE_FROM_EVAL(0x0F7E33D551E0727CLL, posix_getpid);
       break;
     case 637:
       HASH_INVOKE_FROM_EVAL(0x7DB57C59E607627DLL, mcrypt_generic_deinit);
@@ -76199,14 +78557,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 639:
       HASH_INVOKE_FROM_EVAL(0x5B94A6962F1EC27FLL, magickechoimagesblob);
-      HASH_INVOKE_FROM_EVAL(0x57E8781CF111727FLL, fileowner);
       break;
     case 640:
       HASH_INVOKE_FROM_EVAL(0x2E54EF1891172280LL, hphp_splfileinfo_isexecutable);
       break;
     case 641:
       HASH_INVOKE_FROM_EVAL(0x1765A2E5186DE281LL, socket_write);
-      HASH_INVOKE_FROM_EVAL(0x0881440DCF5D3281LL, magickflattenimages);
       break;
     case 643:
       HASH_INVOKE_FROM_EVAL(0x4C83B098C8BDA283LL, posix_setsid);
@@ -76237,11 +78593,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5665CB664C38A299LL, parse_ini_string);
       break;
     case 666:
-      HASH_INVOKE_FROM_EVAL(0x68272A37CC9E729ALL, mb_strtolower);
       HASH_INVOKE_FROM_EVAL(0x24BD9EBDC721E29ALL, hphp_debug_caller_info);
-      break;
-    case 667:
-      HASH_INVOKE_FROM_EVAL(0x4A09634AE6DFF29BLL, fileperms);
       break;
     case 668:
       HASH_INVOKE_FROM_EVAL(0x0F71D3E47044E29CLL, drawpathcurvetosmoothrelative);
@@ -76249,22 +78601,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 674:
       HASH_INVOKE_FROM_EVAL(0x1FBF8A270331C2A2LL, write_hdf_file);
       break;
-    case 675:
-      HASH_INVOKE_FROM_EVAL(0x10E7B5A0E29CF2A3LL, bcscale);
-      HASH_INVOKE_FROM_EVAL(0x743EA4BF2CC8F2A3LL, mysql_field_type);
-      break;
-    case 678:
-      HASH_INVOKE_FROM_EVAL(0x73EF3A19F76872A6LL, iconv_strrpos);
-      break;
-    case 680:
-      HASH_INVOKE_FROM_EVAL(0x5409127FEDE332A8LL, exif_imagetype);
-      break;
     case 685:
       HASH_INVOKE_FROM_EVAL(0x35D259398CDDA2ADLL, pixelgetredquantum);
       HASH_INVOKE_FROM_EVAL(0x00AB6FC4E9EE62ADLL, imagefilledrectangle);
-      break;
-    case 686:
-      HASH_INVOKE_FROM_EVAL(0x36AB9E6AA687F2AELL, xmlwriter_start_dtd_element);
       break;
     case 691:
       HASH_INVOKE_FROM_EVAL(0x44530C37F2B522B3LL, drawgetstrokedasharray);
@@ -76272,70 +78611,32 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 694:
       HASH_INVOKE_FROM_EVAL(0x0C4B98B47B0862B6LL, apd_echo);
-      HASH_INVOKE_FROM_EVAL(0x0E9C9B409F94B2B6LL, setcookie);
       break;
     case 696:
       HASH_INVOKE_FROM_EVAL(0x3C6D50F3BB8102B8LL, next);
       break;
-    case 698:
-      HASH_INVOKE_FROM_EVAL(0x4A3D2113D3DFD2BALL, newpixelwandarray);
-      break;
     case 700:
       HASH_INVOKE_FROM_EVAL(0x33E08846F3EB42BCLL, ldap_get_values);
-      HASH_INVOKE_FROM_EVAL(0x41F7E2214DDE12BCLL, mcrypt_enc_self_test);
-      break;
-    case 701:
-      HASH_INVOKE_FROM_EVAL(0x327C865E52FD12BDLL, ldap_get_values_len);
-      break;
-    case 702:
-      HASH_INVOKE_FROM_EVAL(0x72D6F9B3661AB2BELL, magickgetimage);
-      break;
-    case 704:
-      HASH_INVOKE_FROM_EVAL(0x5B7C1B74BA3452C0LL, newpixelregioniterator);
-      break;
-    case 707:
-      HASH_INVOKE_FROM_EVAL(0x446D76A95365D2C3LL, pixelgetyellow);
       break;
     case 708:
       HASH_INVOKE_FROM_EVAL(0x6018C9F7DF40C2C4LL, xml_get_current_column_number);
-      HASH_INVOKE_FROM_EVAL(0x1C7B8161F3C412C4LL, dom_document_create_document_fragment);
       break;
     case 716:
-      HASH_INVOKE_FROM_EVAL(0x407EF03C23BF92CCLL, drawpathellipticarcabsolute);
       HASH_INVOKE_FROM_EVAL(0x44273F8BA3F542CCLL, imagesx);
       break;
     case 718:
       HASH_INVOKE_FROM_EVAL(0x1922D51F3E1522CELL, xmlwriter_end_dtd_attlist);
       break;
-    case 719:
-      HASH_INVOKE_FROM_EVAL(0x4ACE27EC476632CFLL, apc_bin_dumpfile);
-      break;
     case 722:
       HASH_INVOKE_FROM_EVAL(0x4D9A87BD0CF742D2LL, imagepsextendfont);
       break;
-    case 725:
-      HASH_INVOKE_FROM_EVAL(0x4D04C580CF9212D5LL, posix_getgroups);
-      break;
-    case 726:
-      HASH_INVOKE_FROM_EVAL(0x06E9C984B5F0B2D6LL, furchash_hphp_ext);
-      break;
-    case 728:
-      HASH_INVOKE_FROM_EVAL(0x56C4896BA2FF52D8LL, drawsetstrokeopacity);
-      break;
-    case 730:
-      HASH_INVOKE_FROM_EVAL(0x5C6A85B448C352DALL, posix_uname);
-      break;
     case 733:
       HASH_INVOKE_FROM_EVAL(0x5F585DF7CB82E2DDLL, hphp_splfileinfo_iswritable);
-      break;
-    case 738:
-      HASH_INVOKE_FROM_EVAL(0x4AEC19D75BF652E2LL, magickremoveimage);
       break;
     case 739:
       HASH_INVOKE_FROM_EVAL(0x45382D0BA5B262E3LL, mysql_get_proto_info);
       break;
     case 749:
-      HASH_INVOKE_FROM_EVAL(0x1B9FC9E27B8AB2EDLL, memcache_flush);
       HASH_INVOKE_FROM_EVAL(0x215E0E2EFA7422EDLL, drawgetstrokeantialias);
       break;
     case 750:
@@ -76345,37 +78646,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 752:
       HASH_INVOKE_FROM_EVAL(0x25CA0794823AA2F0LL, openssl_csr_get_public_key);
       break;
-    case 754:
-      HASH_INVOKE_FROM_EVAL(0x2EE56D216BB832F2LL, time_nanosleep);
-      break;
-    case 756:
-      HASH_INVOKE_FROM_EVAL(0x418EC805C5FD32F4LL, mcrypt_get_key_size);
-      break;
     case 761:
       HASH_INVOKE_FROM_EVAL(0x00CFD56391DF82F9LL, mysql_data_seek);
-      HASH_INVOKE_FROM_EVAL(0x319EF52B36AAB2F9LL, posix_isatty);
-      break;
-    case 763:
-      HASH_INVOKE_FROM_EVAL(0x4D393D30CE1112FBLL, drawpathmovetoabsolute);
       break;
     case 764:
       HASH_INVOKE_FROM_EVAL(0x66D59E4DBC7382FCLL, drawscale);
       break;
-    case 766:
-      HASH_INVOKE_FROM_EVAL(0x208B66A8731F72FELL, sem_get);
-      HASH_INVOKE_FROM_EVAL(0x755A9950B65472FELL, drawgetgravity);
-      break;
-    case 770:
-      HASH_INVOKE_FROM_EVAL(0x0103FE1E2C307302LL, socket_recvfrom);
-      break;
     case 772:
       HASH_INVOKE_FROM_EVAL(0x33A532FDB8EAC304LL, memcache_delete);
-      break;
-    case 773:
-      HASH_INVOKE_FROM_EVAL(0x65D40C6B4842F305LL, clearpixelwand);
-      break;
-    case 774:
-      HASH_INVOKE_FROM_EVAL(0x689D60184DD81306LL, htmlspecialchars_decode);
       break;
     case 777:
       HASH_INVOKE_FROM_EVAL(0x414038596F552309LL, magickgetversionnumber);
@@ -76384,35 +78662,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 779:
       HASH_INVOKE_FROM_EVAL(0x0C6F751411F5E30BLL, strrev);
       HASH_INVOKE_FROM_EVAL(0x65F586C35A88030BLL, magickresizeimage);
-      HASH_INVOKE_FROM_EVAL(0x2D2BC1125ECA930BLL, dom_document_relaxng_validate_file);
       break;
-    case 780:
-      HASH_INVOKE_FROM_EVAL(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen);
-      break;
-    case 785:
-      HASH_INVOKE_FROM_EVAL(0x141EDCAE1D155311LL, xbox_get_thread_time);
-      break;
-    case 789:
-      HASH_INVOKE_FROM_EVAL(0x4F1E663AE18FD315LL, msg_remove_queue);
-      break;
-    case 798:
-      HASH_INVOKE_FROM_EVAL(0x27FF9DB54420531ELL, xml_error_string);
-      break;
-    case 804:
-      HASH_INVOKE_FROM_EVAL(0x5E5E4F998C8E7324LL, pcntl_wifexited);
-      break;
-    case 808:
-      HASH_INVOKE_FROM_EVAL(0x73FEB3BF75FFB328LL, ctype_space);
-      break;
-    case 811:
-      HASH_INVOKE_FROM_EVAL(0x2BDB1EE3869E132BLL, restore_error_handler);
-      break;
-    case 815:
-      HASH_INVOKE_FROM_EVAL(0x7DD6461A6290B32FLL, mysql_real_escape_string);
+    case 814:
+      HASH_INVOKE_FROM_EVAL(0x7D1DCB9F4168032ELL, imap_getsubscribed);
       break;
     case 816:
       HASH_INVOKE_FROM_EVAL(0x300F758BB0E16330LL, mysql_num_rows);
-      HASH_INVOKE_FROM_EVAL(0x1601C1826E90B330LL, strptime);
       break;
     case 817:
       HASH_INVOKE_FROM_EVAL(0x00DAFE46631AE331LL, stream_set_timeout);
@@ -76435,48 +78690,21 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 830:
       HASH_INVOKE_FROM_EVAL(0x758EA7E9AA45C33ELL, xmlwriter_end_document);
       break;
-    case 835:
-      HASH_INVOKE_FROM_EVAL(0x6794CFB89DEEF343LL, curl_exec);
-      break;
     case 836:
       HASH_INVOKE_FROM_EVAL(0x1A9DC76AB74F6344LL, openssl_verify);
-      break;
-    case 837:
-      HASH_INVOKE_FROM_EVAL(0x45FAE3D08E96B345LL, curl_errno);
       break;
     case 838:
       HASH_INVOKE_FROM_EVAL(0x4B30FBA18042E346LL, session_cache_expire);
       break;
-    case 842:
-      HASH_INVOKE_FROM_EVAL(0x208BB4C3C0BA534ALL, xmlwriter_write_dtd_element);
-      break;
     case 843:
       HASH_INVOKE_FROM_EVAL(0x3880550F6AD8034BLL, session_destroy);
-      HASH_INVOKE_FROM_EVAL(0x57A9E8878872D34BLL, parse_ini_file);
-      break;
-    case 844:
-      HASH_INVOKE_FROM_EVAL(0x0644E5FB91C8134CLL, array_udiff);
       break;
     case 845:
       HASH_INVOKE_FROM_EVAL(0x5998E61D600D634DLL, drawaffine);
       break;
-    case 847:
-      HASH_INVOKE_FROM_EVAL(0x4F2D0EFF0D4B534FLL, fb_get_taint);
-      HASH_INVOKE_FROM_EVAL(0x5C8B3B9FA833934FLL, ldap_first_attribute);
-      break;
-    case 849:
-      HASH_INVOKE_FROM_EVAL(0x2B422699C3A57351LL, sha1);
-      break;
-    case 852:
-      HASH_INVOKE_FROM_EVAL(0x501F4DF5C8997354LL, hphp_get_property);
-      HASH_INVOKE_FROM_EVAL(0x77EB4D2F5BDDB354LL, magickgetimageresolution);
-      break;
     case 858:
       HASH_INVOKE_FROM_EVAL(0x4BF5DEBDB76EC35ALL, mcrypt_enc_get_iv_size);
       HASH_INVOKE_FROM_EVAL(0x0E0C79E42812235ALL, imagepng);
-      break;
-    case 859:
-      HASH_INVOKE_FROM_EVAL(0x1AC48909BEEF935BLL, func_get_arg);
       break;
     case 861:
       HASH_INVOKE_FROM_EVAL(0x54C3E9AB6FB8E35DLL, magickswirlimage);
@@ -76493,20 +78721,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 871:
       HASH_INVOKE_FROM_EVAL(0x4810A9774785C367LL, posix_getpgrp);
       break;
-    case 872:
-      HASH_INVOKE_FROM_EVAL(0x5D406167C673D368LL, magickcompareimages);
-      break;
     case 873:
       HASH_INVOKE_FROM_EVAL(0x6C715D7DD63DA369LL, is_integer);
-      break;
-    case 878:
-      HASH_INVOKE_FROM_EVAL(0x7CE90898E882F36ELL, pixelsetyellow);
-      break;
-    case 882:
-      HASH_INVOKE_FROM_EVAL(0x7107AE03689F5372LL, hphp_invoke);
-      break;
-    case 888:
-      HASH_INVOKE_FROM_EVAL(0x34BAEFD8AE59D378LL, hphp_set_error_page);
       break;
     case 889:
       HASH_INVOKE_FROM_EVAL(0x5ED8901DB5D14379LL, magickcharcoalimage);
@@ -76517,35 +78733,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 893:
       HASH_INVOKE_FROM_EVAL(0x7C40E2514FB5437DLL, dom_namednodemap_get_named_item_ns);
       break;
-    case 900:
-      HASH_INVOKE_FROM_EVAL(0x44C1BC500D175384LL, wandgetexception);
-      break;
-    case 901:
-      HASH_INVOKE_FROM_EVAL(0x7C5CA3E2E3C8F385LL, magickflipimage);
-      HASH_INVOKE_FROM_EVAL(0x57554E082E0ED385LL, pcntl_exec);
-      HASH_INVOKE_FROM_EVAL(0x0B0B8765A4CDD385LL, hphp_splfileobject_fgets);
-      break;
-    case 902:
-      HASH_INVOKE_FROM_EVAL(0x589E24C7664D5386LL, doubleval);
-      break;
     case 904:
       HASH_INVOKE_FROM_EVAL(0x791E946E04F50388LL, magicksetresourcelimit);
       break;
     case 907:
-      HASH_INVOKE_FROM_EVAL(0x32354CC291ECF38BLL, fb_intercept);
+      HASH_INVOKE_FROM_EVAL(0x7CC683891D5F038BLL, imap_qprint);
       HASH_INVOKE_FROM_EVAL(0x73A3F87C0A56238BLL, stat);
-      break;
-    case 908:
-      HASH_INVOKE_FROM_EVAL(0x7F18BA1FBD95B38CLL, hphp_directoryiterator_next);
       break;
     case 909:
       HASH_INVOKE_FROM_EVAL(0x4127DE142CD4A38DLL, xml_get_error_code);
       break;
-    case 913:
-      HASH_INVOKE_FROM_EVAL(0x25FA64929C619391LL, asin);
-      break;
     case 914:
-      HASH_INVOKE_FROM_EVAL(0x2052D8D4822EF392LL, is_subclass_of);
       HASH_INVOKE_FROM_EVAL(0x2395B0A85E292392LL, hphp_splfileobject_flock);
       break;
     case 916:
@@ -76553,7 +78751,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x36953788781F4394LL, mailparse_msg_extract_part);
       break;
     case 917:
-      HASH_INVOKE_FROM_EVAL(0x7B0552A224E27395LL, bcsqrt);
       HASH_INVOKE_FROM_EVAL(0x422599B9E8AC0395LL, stream_bucket_make_writeable);
       break;
     case 918:
@@ -76565,44 +78762,27 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 920:
       HASH_INVOKE_FROM_EVAL(0x215547858BA7E398LL, hphp_recursiveiteratoriterator___construct);
       break;
-    case 921:
-      HASH_INVOKE_FROM_EVAL(0x66DA89629BA5D399LL, posix_getgrgid);
-      break;
     case 922:
       HASH_INVOKE_FROM_EVAL(0x0CC562CBD773639ALL, i18n_loc_get_default);
-      HASH_INVOKE_FROM_EVAL(0x4C24BC37D807D39ALL, collator_get_strength);
       break;
     case 923:
       HASH_INVOKE_FROM_EVAL(0x25DF28703309C39BLL, idate);
-      HASH_INVOKE_FROM_EVAL(0x5B33B55D4B7E339BLL, fpassthru);
       break;
     case 924:
       HASH_INVOKE_FROM_EVAL(0x0136F8F03932E39CLL, session_unset);
       break;
-    case 926:
-      HASH_INVOKE_FROM_EVAL(0x27AD0D17AA7FB39ELL, ldap_set_rebind_proc);
-      break;
     case 927:
       HASH_INVOKE_FROM_EVAL(0x57E72C21F67D039FLL, user_error);
       HASH_INVOKE_FROM_EVAL(0x0368F1779E3AE39FLL, mysql_field_table);
-      HASH_INVOKE_FROM_EVAL(0x4019A6916456339FLL, dom_node_remove_child);
       break;
     case 929:
       HASH_INVOKE_FROM_EVAL(0x5C29B6D7973903A1LL, proc_nice);
       break;
     case 930:
       HASH_INVOKE_FROM_EVAL(0x0207E332D629A3A2LL, mailparse_msg_get_structure);
-      HASH_INVOKE_FROM_EVAL(0x0A2A4AA078D433A2LL, hexdec);
-      break;
-    case 932:
-      HASH_INVOKE_FROM_EVAL(0x1676FB393F8493A4LL, constant);
-      break;
-    case 934:
-      HASH_INVOKE_FROM_EVAL(0x40E0D496EE29B3A6LL, call_user_func_array);
       break;
     case 936:
       HASH_INVOKE_FROM_EVAL(0x0121CD6CDCE1C3A8LL, mysql_pconnect_with_db);
-      HASH_INVOKE_FROM_EVAL(0x4120B8157ED413A8LL, i18n_loc_set_strength);
       break;
     case 937:
       HASH_INVOKE_FROM_EVAL(0x7F9E810BC93023A9LL, memcache_close);
@@ -76615,33 +78795,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 947:
       HASH_INVOKE_FROM_EVAL(0x61720D771D1A23B3LL, posix_getpwnam);
-      HASH_INVOKE_FROM_EVAL(0x6077CFE09EE4D3B3LL, session_save_path);
-      break;
-    case 950:
-      HASH_INVOKE_FROM_EVAL(0x6E6C0E9A715073B6LL, dom_xpath_register_php_functions);
-      HASH_INVOKE_FROM_EVAL(0x6C07640F7C5BD3B6LL, imagettfbbox);
       break;
     case 955:
       HASH_INVOKE_FROM_EVAL(0x5A3F5AAD1B13A3BBLL, is_executable);
       break;
-    case 956:
-      HASH_INVOKE_FROM_EVAL(0x0629158C42C893BCLL, compact);
-      break;
     case 957:
       HASH_INVOKE_FROM_EVAL(0x60294C2616F6A3BDLL, mcrypt_enc_get_supported_key_sizes);
       break;
-    case 958:
-      HASH_INVOKE_FROM_EVAL(0x49A34964289453BELL, eregi);
-      break;
-    case 959:
-      HASH_INVOKE_FROM_EVAL(0x0E38CDC93E5893BFLL, magicksetimagemattecolor);
-      break;
     case 968:
-      HASH_INVOKE_FROM_EVAL(0x4D100C70E86593C8LL, stream_set_write_buffer);
       HASH_INVOKE_FROM_EVAL(0x3101CE70BA49A3C8LL, error_reporting);
       break;
     case 971:
-      HASH_INVOKE_FROM_EVAL(0x0173CC6FACAB93CBLL, quotemeta);
       HASH_INVOKE_FROM_EVAL(0x4C3B6BE9112E63CBLL, str_split);
       break;
     case 972:
@@ -76649,20 +78813,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 974:
       HASH_INVOKE_FROM_EVAL(0x4F9F68F60FD7A3CELL, drawgetfillrule);
-      HASH_INVOKE_FROM_EVAL(0x02BEFBEE8287D3CELL, get_magic_quotes_runtime);
-      break;
-    case 978:
-      HASH_INVOKE_FROM_EVAL(0x67C155632E5373D2LL, mailparse_msg_create);
       break;
     case 979:
       HASH_INVOKE_FROM_EVAL(0x734FD402E190E3D3LL, evhttp_async_get);
-      HASH_INVOKE_FROM_EVAL(0x0A8D4FAF266973D3LL, bcpow);
       break;
     case 980:
       HASH_INVOKE_FROM_EVAL(0x0FF21F9BE4CCC3D4LL, call_user_func_rpc);
-      break;
-    case 983:
-      HASH_INVOKE_FROM_EVAL(0x382B5B1EF00153D7LL, imagecreatefrompng);
       break;
     case 996:
       HASH_INVOKE_FROM_EVAL(0x7E7718CC939D63E4LL, setrawcookie);
@@ -76672,7 +78828,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x4A3127C309B0C3E8LL, drawsetstrokelinecap);
       break;
     case 1002:
-      HASH_INVOKE_FROM_EVAL(0x0D3C8F00B0C633EALL, inet_pton);
       HASH_INVOKE_FROM_EVAL(0x6DA49696220FE3EALL, mailparse_rfc822_parse_addresses);
       break;
     case 1003:
@@ -76681,30 +78836,13 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1006:
       HASH_INVOKE_FROM_EVAL(0x598472448937E3EELL, magickqueryfontmetrics);
       break;
-    case 1009:
-      HASH_INVOKE_FROM_EVAL(0x5EFE291585A713F1LL, method_exists);
-      break;
-    case 1010:
-      HASH_INVOKE_FROM_EVAL(0x0FE12E46BC9853F2LL, stream_filter_append);
-      HASH_INVOKE_FROM_EVAL(0x41A19AE18BC8B3F2LL, curl_error);
-      HASH_INVOKE_FROM_EVAL(0x696241660648B3F2LL, magickwhitethresholdimage);
+    case 1008:
+      HASH_INVOKE_FROM_EVAL(0x69C07B1F19CE83F0LL, imap_rfc822_parse_headers);
       break;
     case 1012:
       HASH_INVOKE_FROM_EVAL(0x1938C8715806E3F4LL, spl_classes);
-      HASH_INVOKE_FROM_EVAL(0x26D53A77483EF3F4LL, drawbezier);
-      break;
-    case 1015:
-      HASH_INVOKE_FROM_EVAL(0x43F22CB4E3E8F3F7LL, apache_note);
-      break;
-    case 1016:
-      HASH_INVOKE_FROM_EVAL(0x4C024573FCD5B3F8LL, var_dump);
-      HASH_INVOKE_FROM_EVAL(0x514EA9C8FF5B33F8LL, posix_getrlimit);
-      break;
-    case 1018:
-      HASH_INVOKE_FROM_EVAL(0x1B217E78CBC713FALL, zend_thread_id);
       break;
     case 1025:
-      HASH_INVOKE_FROM_EVAL(0x36B9C440B1881401LL, fmod);
       HASH_INVOKE_FROM_EVAL(0x3DCB1C92B5864401LL, gzrewind);
       break;
     case 1028:
@@ -76713,43 +78851,15 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1033:
       HASH_INVOKE_FROM_EVAL(0x2E57E06900594409LL, xbox_send_message);
       break;
-    case 1034:
-      HASH_INVOKE_FROM_EVAL(0x6DC61C51FA1D340ALL, show_source);
-      break;
-    case 1035:
-      HASH_INVOKE_FROM_EVAL(0x6C2CE092B900D40BLL, hphp_splfileinfo___construct);
-      break;
     case 1037:
       HASH_INVOKE_FROM_EVAL(0x2939C5BAE0C4A40DLL, nl2br);
       HASH_INVOKE_FROM_EVAL(0x267529454569840DLL, ob_flush);
-      HASH_INVOKE_FROM_EVAL(0x152C7161567F940DLL, func_num_args);
       HASH_INVOKE_FROM_EVAL(0x002CCCD877D9640DLL, drawpathclose);
-      break;
-    case 1043:
-      HASH_INVOKE_FROM_EVAL(0x56EC1A6732D07413LL, drawgetfontsize);
-      HASH_INVOKE_FROM_EVAL(0x20C24D873DC65413LL, openssl_csr_get_subject);
-      break;
-    case 1051:
-      HASH_INVOKE_FROM_EVAL(0x47279C717370B41BLL, acos);
-      break;
-    case 1054:
-      HASH_INVOKE_FROM_EVAL(0x3E4E7C561D3A541ELL, fgetss);
-      break;
-    case 1055:
-      HASH_INVOKE_FROM_EVAL(0x301963016A91741FLL, hphp_stats);
-      break;
-    case 1059:
-      HASH_INVOKE_FROM_EVAL(0x4C9108B5A5807423LL, drawsetfillcolor);
       break;
     case 1062:
       HASH_INVOKE_FROM_EVAL(0x21EFB0B9D1514426LL, magicksetpassphrase);
-      HASH_INVOKE_FROM_EVAL(0x161D8EA3339AB426LL, apc_cas);
-      break;
-    case 1068:
-      HASH_INVOKE_FROM_EVAL(0x12D324CC744BF42CLL, pixelgetcolorasstring);
       break;
     case 1069:
-      HASH_INVOKE_FROM_EVAL(0x333D1E2E28B0942DLL, imagejpeg);
       HASH_INVOKE_FROM_EVAL(0x2A5A519E4BFE442DLL, mb_eregi);
       break;
     case 1071:
@@ -76761,67 +78871,27 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1074:
       HASH_INVOKE_FROM_EVAL(0x71C6E38BC56CE432LL, stream_wrapper_register);
       break;
-    case 1075:
-      HASH_INVOKE_FROM_EVAL(0x6829094421CDB433LL, touch);
-      break;
-    case 1077:
-      HASH_INVOKE_FROM_EVAL(0x75DAFEF5BFEF1435LL, imagesetstyle);
-      HASH_INVOKE_FROM_EVAL(0x044386A0E8B25435LL, drawgetclipunits);
-      break;
-    case 1079:
-      HASH_INVOKE_FROM_EVAL(0x1AAF02CF6DEBB437LL, magickdeconstructimages);
-      break;
-    case 1081:
-      HASH_INVOKE_FROM_EVAL(0x34C52EF423EFD439LL, proc_open);
-      break;
     case 1082:
       HASH_INVOKE_FROM_EVAL(0x5019A1FBF377C43ALL, imagepsbbox);
       break;
     case 1084:
       HASH_INVOKE_FROM_EVAL(0x59ECE01C7629643CLL, mysql_drop_db);
       break;
-    case 1088:
-      HASH_INVOKE_FROM_EVAL(0x5247425ED698B440LL, hphp_thread_is_warmup_enabled);
-      break;
     case 1089:
       HASH_INVOKE_FROM_EVAL(0x158E2271E381C441LL, hash_file);
-      HASH_INVOKE_FROM_EVAL(0x05892E3C5B9EB441LL, closedir);
       break;
     case 1090:
       HASH_INVOKE_FROM_EVAL(0x3F869126D0336442LL, trigger_error);
       break;
-    case 1105:
-      HASH_INVOKE_FROM_EVAL(0x7539134E1CC61451LL, xmlwriter_start_cdata);
-      break;
     case 1106:
       HASH_INVOKE_FROM_EVAL(0x1056EF1C14D2A452LL, socket_connect);
-      break;
-    case 1116:
-      HASH_INVOKE_FROM_EVAL(0x436AB52B2099145CLL, ldap_close);
       break;
     case 1117:
       HASH_INVOKE_FROM_EVAL(0x0246AF48CD31245DLL, count_chars);
       break;
-    case 1118:
-      HASH_INVOKE_FROM_EVAL(0x0ED191E71A60545ELL, magicksetfirstiterator);
-      break;
     case 1125:
       HASH_INVOKE_FROM_EVAL(0x05D72365192CE465LL, fwrite);
       HASH_INVOKE_FROM_EVAL(0x406A1404F48E4465LL, posix_getuid);
-      break;
-    case 1130:
-      HASH_INVOKE_FROM_EVAL(0x32643AE461D3F46ALL, mailparse_stream_encode);
-      break;
-    case 1132:
-      HASH_INVOKE_FROM_EVAL(0x07D959A8C0CF546CLL, stream_wrapper_unregister);
-      HASH_INVOKE_FROM_EVAL(0x4F39BD300305746CLL, hphp_splfileobject_key);
-      break;
-    case 1133:
-      HASH_INVOKE_FROM_EVAL(0x738D381800CE946DLL, ldap_parse_result);
-      HASH_INVOKE_FROM_EVAL(0x5229C0069FD7D46DLL, vfprintf);
-      break;
-    case 1135:
-      HASH_INVOKE_FROM_EVAL(0x5B8F2ABBB480346FLL, bzwrite);
       break;
     case 1136:
       HASH_INVOKE_FROM_EVAL(0x0C626F268F120470LL, __halt_compiler);
@@ -76832,60 +78902,23 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1141:
       HASH_INVOKE_FROM_EVAL(0x268706C46202C475LL, sem_acquire);
       break;
-    case 1143:
-      HASH_INVOKE_FROM_EVAL(0x18666906A8001477LL, array_diff_assoc);
-      break;
-    case 1144:
-      HASH_INVOKE_FROM_EVAL(0x080594ABE715B478LL, hphp_splfileobject_current);
-      HASH_INVOKE_FROM_EVAL(0x6497CC8295DDB478LL, fb_thrift_unserialize);
-      break;
-    case 1145:
-      HASH_INVOKE_FROM_EVAL(0x4859AF715D5A3479LL, magickmagnifyimage);
-      break;
     case 1148:
       HASH_INVOKE_FROM_EVAL(0x1A08C578AD3BC47CLL, apache_response_headers);
-      HASH_INVOKE_FROM_EVAL(0x2FA7269AB0E1147CLL, mysql_field_seek);
       break;
     case 1150:
-      HASH_INVOKE_FROM_EVAL(0x1D583AA4F7F6547ELL, drawpathlinetorelative);
       HASH_INVOKE_FROM_EVAL(0x0AC36D9F961B247ELL, newpixeliterator);
       break;
-    case 1151:
-      HASH_INVOKE_FROM_EVAL(0x68AE04B02253B47FLL, mb_parse_str);
-      break;
-    case 1153:
-      HASH_INVOKE_FROM_EVAL(0x1876287F59CEB481LL, bzerror);
-      break;
-    case 1154:
-      HASH_INVOKE_FROM_EVAL(0x4590C853C2027482LL, magickembossimage);
-      break;
     case 1157:
-      HASH_INVOKE_FROM_EVAL(0x250DD3D58EA37485LL, gmstrftime);
       HASH_INVOKE_FROM_EVAL(0x61499C92F4FBA485LL, hphp_splfileobject_fgetc);
       break;
     case 1161:
-      HASH_INVOKE_FROM_EVAL(0x4F7EAF5B37663489LL, magickgetimageredprimary);
       HASH_INVOKE_FROM_EVAL(0x7505924F05854489LL, dom_element_set_attribute_ns);
       break;
-    case 1162:
-      HASH_INVOKE_FROM_EVAL(0x7E88764A1DE8548ALL, drawgetstrokewidth);
-      break;
-    case 1163:
-      HASH_INVOKE_FROM_EVAL(0x5860ACF621DD948BLL, is_file);
-      break;
     case 1165:
-      HASH_INVOKE_FROM_EVAL(0x23511F83C2BC548DLL, header);
       HASH_INVOKE_FROM_EVAL(0x275D127C87EF048DLL, mysql_db_query);
       break;
     case 1167:
       HASH_INVOKE_FROM_EVAL(0x43672229728A648FLL, drawpushpattern);
-      break;
-    case 1171:
-      HASH_INVOKE_FROM_EVAL(0x56377FCC2447D493LL, magicksetimagepixels);
-      break;
-    case 1175:
-      HASH_INVOKE_FROM_EVAL(0x353E2A635A47F497LL, evhttp_get);
-      HASH_INVOKE_FROM_EVAL(0x5388045C2D13D497LL, mysql_num_fields);
       break;
     case 1181:
       HASH_INVOKE_FROM_EVAL(0x7A59813AC331449DLL, mb_ereg_search_regs);
@@ -76896,14 +78929,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1188:
       HASH_INVOKE_FROM_EVAL(0x6EC476E42A53A4A4LL, ldap_err2str);
       break;
-    case 1189:
-      HASH_INVOKE_FROM_EVAL(0x18BE9B1C2DE6D4A5LL, imagexbm);
-      break;
     case 1192:
       HASH_INVOKE_FROM_EVAL(0x6F4497457F1584A8LL, dom_element_set_id_attribute_node);
-      break;
-    case 1193:
-      HASH_INVOKE_FROM_EVAL(0x386378F2BA3234A9LL, magickevaluateimage);
       break;
     case 1196:
       HASH_INVOKE_FROM_EVAL(0x245AA2790C87C4ACLL, image_type_to_mime_type);
@@ -76912,39 +78939,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1197:
       HASH_INVOKE_FROM_EVAL(0x3D98ACFCEBB764ADLL, hphp_set_property);
       break;
-    case 1199:
-      HASH_INVOKE_FROM_EVAL(0x42463E7E5C3434AFLL, mb_strrichr);
-      HASH_INVOKE_FROM_EVAL(0x6AC751181531F4AFLL, simplexml_load_string);
-      break;
     case 1200:
-      HASH_INVOKE_FROM_EVAL(0x0E11D317044974B0LL, magickgetnumberimages);
       HASH_INVOKE_FROM_EVAL(0x3AF65A9F3653E4B0LL, addslashes);
-      break;
-    case 1201:
-      HASH_INVOKE_FROM_EVAL(0x060619D7A1B5F4B1LL, checkdate);
-      break;
-    case 1203:
-      HASH_INVOKE_FROM_EVAL(0x57034CAD772AF4B3LL, magickgetimagechannelmean);
       break;
     case 1204:
       HASH_INVOKE_FROM_EVAL(0x00621C58E54D44B4LL, hphp_recursiveiteratoriterator_key);
       break;
-    case 1206:
-      HASH_INVOKE_FROM_EVAL(0x3DE291DCBA5134B6LL, dom_document_create_element);
-      HASH_INVOKE_FROM_EVAL(0x12A9166E68DCF4B6LL, pixelgetgreen);
-      break;
-    case 1207:
-      HASH_INVOKE_FROM_EVAL(0x7EEBC81AF9BC54B7LL, xml_parser_free);
-      break;
     case 1209:
       HASH_INVOKE_FROM_EVAL(0x5351290CD139A4B9LL, mb_strrpos);
       break;
-    case 1210:
-      HASH_INVOKE_FROM_EVAL(0x6B49D11E633274BALL, fopen);
-      break;
     case 1213:
       HASH_INVOKE_FROM_EVAL(0x35BE8F6E7726C4BDLL, dechex);
-      HASH_INVOKE_FROM_EVAL(0x5BA371A93F60F4BDLL, use_soap_error_handler);
       break;
     case 1214:
       HASH_INVOKE_FROM_EVAL(0x57278846B8B0E4BELL, ldap_count_entries);
@@ -76957,17 +78962,10 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1220:
       HASH_INVOKE_FROM_EVAL(0x67EADCF4E81084C4LL, mb_ereg);
-      HASH_INVOKE_FROM_EVAL(0x4A24DB9D6B0334C4LL, hphp_recursivedirectoryiterator_next);
-      break;
-    case 1221:
-      HASH_INVOKE_FROM_EVAL(0x34A38DDF2CD914C5LL, long2ip);
       break;
     case 1222:
       HASH_INVOKE_FROM_EVAL(0x651F7FBBA90604C6LL, magickgetimageindex);
       HASH_INVOKE_FROM_EVAL(0x4F7AA8120E33E4C6LL, collator_get_attribute);
-      break;
-    case 1224:
-      HASH_INVOKE_FROM_EVAL(0x1B8BBFC882FDB4C8LL, magicktintimage);
       break;
     case 1230:
       HASH_INVOKE_FROM_EVAL(0x60783C20BF7724CELL, mailparse_msg_free);
@@ -76975,47 +78973,26 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1231:
       HASH_INVOKE_FROM_EVAL(0x72DECE786967A4CFLL, magickpreviousimage);
       break;
-    case 1233:
-      HASH_INVOKE_FROM_EVAL(0x29EE24C41FD3D4D1LL, mysql_field_name);
-      break;
-    case 1238:
-      HASH_INVOKE_FROM_EVAL(0x19ECDD5A937DD4D6LL, mailparse_msg_get_part_data);
-      break;
     case 1239:
       HASH_INVOKE_FROM_EVAL(0x215403F1E335C4D7LL, magicksolarizeimage);
       break;
     case 1240:
       HASH_INVOKE_FROM_EVAL(0x2532EB687D51E4D8LL, unregister_tick_function);
-      HASH_INVOKE_FROM_EVAL(0x14BF763DDDC014D8LL, imagepsencodefont);
-      HASH_INVOKE_FROM_EVAL(0x56B908FC91C834D8LL, magickflopimage);
-      HASH_INVOKE_FROM_EVAL(0x1301F911ED6D54D8LL, is_nan);
-      HASH_INVOKE_FROM_EVAL(0x575C5AE3D2A694D8LL, ob_end_clean);
       break;
     case 1247:
-      HASH_INVOKE_FROM_EVAL(0x747A7F585CD694DFLL, zend_version);
       HASH_INVOKE_FROM_EVAL(0x2E5E5A0FC3B5C4DFLL, xml_set_character_data_handler);
       break;
     case 1248:
       HASH_INVOKE_FROM_EVAL(0x340A51AE22A924E0LL, reset);
       break;
-    case 1251:
-      HASH_INVOKE_FROM_EVAL(0x7D57A0D72D6254E3LL, ob_implicit_flush);
-      break;
-    case 1262:
-      HASH_INVOKE_FROM_EVAL(0x5895ADDD91F354EELL, hphp_thread_set_warmup_enabled);
+    case 1260:
+      HASH_INVOKE_FROM_EVAL(0x784F675D436004ECLL, imap_close);
       break;
     case 1265:
       HASH_INVOKE_FROM_EVAL(0x65BD541EAB38E4F1LL, mysql_close);
       break;
-    case 1266:
-      HASH_INVOKE_FROM_EVAL(0x41276F8DE35354F2LL, dom_document_get_elements_by_tag_name);
-      break;
-    case 1268:
-      HASH_INVOKE_FROM_EVAL(0x436B36C5EB8DB4F4LL, mcrypt_generic);
-      break;
     case 1269:
       HASH_INVOKE_FROM_EVAL(0x528AC8D252D224F5LL, log10);
-      HASH_INVOKE_FROM_EVAL(0x112A0ACDD8B9D4F5LL, mb_list_mime_names);
       break;
     case 1271:
       HASH_INVOKE_FROM_EVAL(0x0BD9C5D811CB04F7LL, dom_element_set_id_attribute_ns);
@@ -77028,11 +79005,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x2CEAE845E4F404FDLL, dom_document_save);
       break;
     case 1287:
-      HASH_INVOKE_FROM_EVAL(0x4FC9FE38A748B507LL, intl_get_error_message);
       HASH_INVOKE_FROM_EVAL(0x197A5D237BD4C507LL, mb_ereg_search_getpos);
-      break;
-    case 1288:
-      HASH_INVOKE_FROM_EVAL(0x63A08D6AD1209508LL, magickgetexception);
       break;
     case 1291:
       HASH_INVOKE_FROM_EVAL(0x71DCF11E3640C50BLL, hphp_directoryiterator_valid);
@@ -77042,25 +79015,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1297:
       HASH_INVOKE_FROM_EVAL(0x09D5355CA8198511LL, mb_internal_encoding);
-      HASH_INVOKE_FROM_EVAL(0x3C0304A55503D511LL, magickgetimageiterations);
-      break;
-    case 1299:
-      HASH_INVOKE_FROM_EVAL(0x772E8BF114FEF513LL, eregi_replace);
-      break;
-    case 1300:
-      HASH_INVOKE_FROM_EVAL(0x100385A0988FD514LL, magickgetfilename);
       break;
     case 1305:
       HASH_INVOKE_FROM_EVAL(0x54EDBB6BAF318519LL, memcache_add);
       break;
-    case 1314:
-      HASH_INVOKE_FROM_EVAL(0x7DA98E0379D33522LL, chdir);
-      break;
     case 1316:
       HASH_INVOKE_FROM_EVAL(0x28E724EDE0BB6524LL, mb_strcut);
-      break;
-    case 1317:
-      HASH_INVOKE_FROM_EVAL(0x230FE1D6EC599525LL, link);
       break;
     case 1318:
       HASH_INVOKE_FROM_EVAL(0x57DDA4C3F7FF8526LL, fputcsv);
@@ -77068,54 +79028,23 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1319:
       HASH_INVOKE_FROM_EVAL(0x6B2B942CAF1A2527LL, array_shift);
       break;
-    case 1324:
-      HASH_INVOKE_FROM_EVAL(0x1AB55BBA0967952CLL, mb_convert_variables);
-      break;
-    case 1327:
-      HASH_INVOKE_FROM_EVAL(0x6770E2559C9A152FLL, openssl_private_decrypt);
-      break;
-    case 1329:
-      HASH_INVOKE_FROM_EVAL(0x6776C27C6123D531LL, dl);
-      break;
-    case 1330:
-      HASH_INVOKE_FROM_EVAL(0x6193A26936F4D532LL, disk_total_space);
-      break;
     case 1331:
       HASH_INVOKE_FROM_EVAL(0x313D2A505076A533LL, dir);
       break;
-    case 1333:
-      HASH_INVOKE_FROM_EVAL(0x6C87406DDC0AB535LL, mcrypt_ecb);
-      break;
     case 1334:
-      HASH_INVOKE_FROM_EVAL(0x0E80D04691227536LL, eval);
       HASH_INVOKE_FROM_EVAL(0x746DC7AD953EA536LL, memcache_set_compress_threshold);
       break;
     case 1335:
-      HASH_INVOKE_FROM_EVAL(0x0830FF7C379D7537LL, dom_text_split_text);
-      HASH_INVOKE_FROM_EVAL(0x557C72DE98679537LL, hash_update_stream);
       HASH_INVOKE_FROM_EVAL(0x175B86BCB3124537LL, magickgetexceptionstring);
-      break;
-    case 1337:
-      HASH_INVOKE_FROM_EVAL(0x3C88F0FAC3EDD539LL, phpversion);
-      break;
-    case 1340:
-      HASH_INVOKE_FROM_EVAL(0x5CA55E62F2A5953CLL, drawgetstrokeopacity);
       break;
     case 1341:
       HASH_INVOKE_FROM_EVAL(0x0F32841DBF7A053DLL, fb_crossall_query);
-      break;
-    case 1342:
-      HASH_INVOKE_FROM_EVAL(0x36A80B48E08B753ELL, implode);
       break;
     case 1346:
       HASH_INVOKE_FROM_EVAL(0x59A44591E67D4542LL, drawrender);
       break;
     case 1347:
       HASH_INVOKE_FROM_EVAL(0x20E2B1D920122543LL, die);
-      HASH_INVOKE_FROM_EVAL(0x0962EACAE0F0B543LL, hphp_splfileinfo_getlinktarget);
-      break;
-    case 1348:
-      HASH_INVOKE_FROM_EVAL(0x4D397FE5D0C0B544LL, magickmedianfilterimage);
       break;
     case 1350:
       HASH_INVOKE_FROM_EVAL(0x12A739BE0ED32546LL, ignore_user_abort);
@@ -77124,31 +79053,13 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1352:
       HASH_INVOKE_FROM_EVAL(0x0AD3BFAB5F780548LL, magickcoalesceimages);
       break;
-    case 1355:
-      HASH_INVOKE_FROM_EVAL(0x40CE61115E11154BLL, msg_stat_queue);
-      break;
-    case 1356:
-      HASH_INVOKE_FROM_EVAL(0x1D011CB0E810D54CLL, pdo_drivers);
-      break;
     case 1357:
-      HASH_INVOKE_FROM_EVAL(0x0F0702D91EAFB54DLL, drawgettextantialias);
       HASH_INVOKE_FROM_EVAL(0x1B9E769FFEC3C54DLL, pcntl_wtermsig);
       break;
     case 1359:
-      HASH_INVOKE_FROM_EVAL(0x30DE78E7131B954FLL, furchash_hphp_ext_supported);
       HASH_INVOKE_FROM_EVAL(0x063200B5AAFEC54FLL, mysql_thread_id);
       break;
-    case 1370:
-      HASH_INVOKE_FROM_EVAL(0x268EE73DB2EA555ALL, get_object_vars);
-      break;
-    case 1372:
-      HASH_INVOKE_FROM_EVAL(0x5749AD20CAFCD55CLL, pixelgetbluequantum);
-      break;
-    case 1379:
-      HASH_INVOKE_FROM_EVAL(0x1B1B2D70792D9563LL, mysql_get_client_info);
-      break;
     case 1382:
-      HASH_INVOKE_FROM_EVAL(0x6E2FDBD28F895566LL, timezone_abbreviations_list);
       HASH_INVOKE_FROM_EVAL(0x3DA2058E5C540566LL, spliti);
       break;
     case 1386:
@@ -77160,23 +79071,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1390:
       HASH_INVOKE_FROM_EVAL(0x2A1F1B52160DE56ELL, zend_logo_guid);
       break;
-    case 1391:
-      HASH_INVOKE_FROM_EVAL(0x016722439BBA756FLL, filetype);
-      break;
     case 1392:
       HASH_INVOKE_FROM_EVAL(0x13D0427F3BB3E570LL, get_declared_interfaces);
       HASH_INVOKE_FROM_EVAL(0x21B3935EB3140570LL, mysql_fetch_object);
       break;
-    case 1393:
-      HASH_INVOKE_FROM_EVAL(0x2AD3361DE8B1D571LL, pcntl_signal_dispatch);
-      break;
-    case 1396:
-      HASH_INVOKE_FROM_EVAL(0x636C871213F37574LL, mcrypt_encrypt);
-      break;
     case 1399:
-      HASH_INVOKE_FROM_EVAL(0x412521E7ADB21577LL, iconv_mime_decode_headers);
       HASH_INVOKE_FROM_EVAL(0x72E1FD3DCD45C577LL, bzopen);
-      HASH_INVOKE_FROM_EVAL(0x1E154D823451B577LL, magicksetresolution);
       break;
     case 1401:
       HASH_INVOKE_FROM_EVAL(0x1DC8A386E219C579LL, ldap_add);
@@ -77186,12 +79086,10 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x22E08DEDF360057DLL, pixelsetmagenta);
       break;
     case 1406:
-      HASH_INVOKE_FROM_EVAL(0x31529E9BCA1E157ELL, shm_remove);
       HASH_INVOKE_FROM_EVAL(0x132776D93181E57ELL, ldap_set_option);
       break;
     case 1410:
       HASH_INVOKE_FROM_EVAL(0x02688986D5D76582LL, magickspreadimage);
-      HASH_INVOKE_FROM_EVAL(0x0B1F0EB755BDB582LL, ispixeliterator);
       break;
     case 1411:
       HASH_INVOKE_FROM_EVAL(0x3B2CD86F5DB72583LL, magickblackthresholdimage);
@@ -77207,6 +79105,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x3E9519FE856C4592LL, curl_multi_init);
       HASH_INVOKE_FROM_EVAL(0x5464E148E8A0C592LL, get_extension_funcs);
       HASH_INVOKE_FROM_EVAL(0x7F65501600346592LL, mcrypt_get_block_size);
+      HASH_INVOKE_FROM_EVAL(0x66B19094ED494592LL, imap_uid);
       break;
     case 1427:
       HASH_INVOKE_FROM_EVAL(0x0F5984B8A7FD8593LL, hphp_splfileinfo_getperms);
@@ -77217,43 +79116,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1433:
       HASH_INVOKE_FROM_EVAL(0x12F502A88E0AA599LL, magickcompositeimage);
       break;
-    case 1434:
-      HASH_INVOKE_FROM_EVAL(0x77F1EDE7D5EF759ALL, apc_cache_info);
-      break;
-    case 1435:
-      HASH_INVOKE_FROM_EVAL(0x37D003B09D0C759BLL, stream_get_contents);
-      break;
-    case 1440:
-      HASH_INVOKE_FROM_EVAL(0x20502FCACBB9F5A0LL, convert_uuencode);
-      break;
-    case 1441:
-      HASH_INVOKE_FROM_EVAL(0x297690F3A63335A1LL, magickrotateimage);
-      break;
-    case 1444:
-      HASH_INVOKE_FROM_EVAL(0x3C014439AE5D75A4LL, magickgetcharheight);
-      break;
     case 1448:
       HASH_INVOKE_FROM_EVAL(0x4FBB1F662399A5A8LL, is_soap_fault);
-      break;
-    case 1452:
-      HASH_INVOKE_FROM_EVAL(0x763BA2B1C60A55ACLL, pixelgetalphaquantum);
       break;
     case 1453:
       HASH_INVOKE_FROM_EVAL(0x4110AF96B98B25ADLL, gzeof);
       break;
-    case 1455:
-      HASH_INVOKE_FROM_EVAL(0x1636FBA5043CF5AFLL, ldap_error);
-      break;
-    case 1459:
-      HASH_INVOKE_FROM_EVAL(0x001DBE44BC0B55B3LL, magicksetimagecolormapcolor);
-      HASH_INVOKE_FROM_EVAL(0x7AFA32F70E8195B3LL, xbox_set_thread_timeout);
-      break;
     case 1461:
-      HASH_INVOKE_FROM_EVAL(0x3F9C5B4708FC55B5LL, timezone_name_get);
       HASH_INVOKE_FROM_EVAL(0x5EFE573046B565B5LL, mcrypt_module_close);
-      break;
-    case 1462:
-      HASH_INVOKE_FROM_EVAL(0x1A05907F563235B6LL, collator_set_attribute);
       break;
     case 1466:
       HASH_INVOKE_FROM_EVAL(0x05B8EB2C515885BALL, vprintf);
@@ -77261,18 +79131,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1472:
       HASH_INVOKE_FROM_EVAL(0x61465CD8C67905C0LL, openssl_pkey_free);
       break;
-    case 1473:
-      HASH_INVOKE_FROM_EVAL(0x7731B90FB7C975C1LL, magickremoveimageprofile);
-      break;
     case 1478:
       HASH_INVOKE_FROM_EVAL(0x3B3D5CE69B1565C6LL, mcrypt_module_is_block_mode);
       break;
     case 1480:
       HASH_INVOKE_FROM_EVAL(0x1CE8175A87C785C8LL, dom_document_validate);
-      break;
-    case 1481:
-      HASH_INVOKE_FROM_EVAL(0x75B299F5E35A95C9LL, mb_strwidth);
-      HASH_INVOKE_FROM_EVAL(0x60F8818C0F38D5C9LL, hphp_directoryiterator___tostring);
       break;
     case 1483:
       HASH_INVOKE_FROM_EVAL(0x6751946191FBE5CBLL, override_function);
@@ -77289,9 +79152,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1489:
       HASH_INVOKE_FROM_EVAL(0x054503DBBF5CA5D1LL, imagecopy);
       break;
-    case 1492:
-      HASH_INVOKE_FROM_EVAL(0x2FE56B4C457AB5D4LL, ctype_graph);
-      break;
     case 1493:
       HASH_INVOKE_FROM_EVAL(0x43901543EA8625D5LL, curl_multi_select);
       break;
@@ -77304,15 +79164,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1508:
       HASH_INVOKE_FROM_EVAL(0x3A9643992AC805E4LL, magickdrawimage);
       break;
-    case 1509:
-      HASH_INVOKE_FROM_EVAL(0x470F990B218315E5LL, fb_unset_taint);
-      break;
     case 1510:
       HASH_INVOKE_FROM_EVAL(0x6FE2E44FBC44E5E6LL, magickaddnoiseimage);
       HASH_INVOKE_FROM_EVAL(0x08069ECE0EA3C5E6LL, imagecopymergegray);
-      break;
-    case 1514:
-      HASH_INVOKE_FROM_EVAL(0x0B7ACBAB402015EALL, mb_send_mail);
       break;
     case 1518:
       HASH_INVOKE_FROM_EVAL(0x3076D369F63E65EELL, pixelgetalpha);
@@ -77321,35 +79175,15 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1E89F15B7F2805F4LL, openssl_pkcs7_encrypt);
       HASH_INVOKE_FROM_EVAL(0x459330C31956A5F4LL, vsprintf);
       break;
-    case 1525:
-      HASH_INVOKE_FROM_EVAL(0x0D1BD0E5AF4175F5LL, drawsetfont);
-      HASH_INVOKE_FROM_EVAL(0x73A1F34DF95B35F5LL, get_defined_constants);
-      break;
     case 1527:
       HASH_INVOKE_FROM_EVAL(0x18E4CC945005E5F7LL, drawpushclippath);
       break;
-    case 1528:
-      HASH_INVOKE_FROM_EVAL(0x7C48F6EA39B7B5F8LL, magickadaptivethresholdimage);
-      break;
     case 1531:
       HASH_INVOKE_FROM_EVAL(0x3535B6615F2B05FBLL, session_cache_limiter);
-      HASH_INVOKE_FROM_EVAL(0x0FEC4ED541B7F5FBLL, magickgetimagevirtualpixelmethod);
-      break;
-    case 1532:
-      HASH_INVOKE_FROM_EVAL(0x39156C7CCE2D75FCLL, hash_update);
       break;
     case 1533:
       HASH_INVOKE_FROM_EVAL(0x0C1CB24A3FC065FDLL, bcmul);
       HASH_INVOKE_FROM_EVAL(0x46832743CAF5C5FDLL, dom_element_set_attribute_node);
-      break;
-    case 1534:
-      HASH_INVOKE_FROM_EVAL(0x397D3C6576ED75FELL, set_include_path);
-      break;
-    case 1535:
-      HASH_INVOKE_FROM_EVAL(0x40A557CBB9FC35FFLL, mysql_tablename);
-      break;
-    case 1536:
-      HASH_INVOKE_FROM_EVAL(0x552D7CAD93755600LL, dom_document_create_comment);
       break;
     case 1537:
       HASH_INVOKE_FROM_EVAL(0x0F3403D8676C2601LL, mysql_query);
@@ -77361,35 +79195,18 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x36783304F63C4613LL, sscanf);
       HASH_INVOKE_FROM_EVAL(0x4AC405EA2B8C4613LL, magickresetiterator);
       break;
-    case 1557:
-      HASH_INVOKE_FROM_EVAL(0x6AD774816F8F7615LL, mb_strrchr);
-      break;
     case 1558:
       HASH_INVOKE_FROM_EVAL(0x66C7616225F1C616LL, pixelsetgreen);
       HASH_INVOKE_FROM_EVAL(0x7FA6D13B0D38E616LL, imagegif);
       break;
-    case 1561:
-      HASH_INVOKE_FROM_EVAL(0x6DD51BF03F003619LL, mailparse_uudecode_all);
-      HASH_INVOKE_FROM_EVAL(0x2F29627AF1A97619LL, shm_attach);
-      break;
     case 1563:
       HASH_INVOKE_FROM_EVAL(0x40DDE277D934061BLL, gzputs);
       break;
-    case 1564:
-      HASH_INVOKE_FROM_EVAL(0x70725954DC99F61CLL, mcrypt_create_iv);
-      break;
     case 1565:
-      HASH_INVOKE_FROM_EVAL(0x69E1368FD737F61DLL, dom_namednodemap_get_named_item);
       HASH_INVOKE_FROM_EVAL(0x7E98B97C1B5D861DLL, magickqueryconfigureoptions);
-      break;
-    case 1569:
-      HASH_INVOKE_FROM_EVAL(0x0F71DDE51AA55621LL, hphp_output_global_state);
       break;
     case 1570:
       HASH_INVOKE_FROM_EVAL(0x134550B9EB596622LL, drawgetfontstyle);
-      break;
-    case 1576:
-      HASH_INVOKE_FROM_EVAL(0x1E77B3BCF062D628LL, magickreadimage);
       break;
     case 1577:
       HASH_INVOKE_FROM_EVAL(0x679B81CE06EE0629LL, bcdiv);
@@ -77397,18 +79214,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1578:
       HASH_INVOKE_FROM_EVAL(0x608EA42B08A7462ALL, linkinfo);
       break;
-    case 1580:
-      HASH_INVOKE_FROM_EVAL(0x5CEA60D9C54A162CLL, pcntl_wifstopped);
-      break;
-    case 1583:
-      HASH_INVOKE_FROM_EVAL(0x652C331CE138362FLL, is_string);
-      break;
     case 1585:
       HASH_INVOKE_FROM_EVAL(0x5AD6595ACA656631LL, pixelresetiterator);
-      break;
-    case 1591:
-      HASH_INVOKE_FROM_EVAL(0x60276BC7990F9637LL, mysql_list_dbs);
-      HASH_INVOKE_FROM_EVAL(0x75AFA49220C9B637LL, collator_sort);
       break;
     case 1595:
       HASH_INVOKE_FROM_EVAL(0x391C68F2BE85E63BLL, pixelgetiteratorexceptionstring);
@@ -77416,25 +79223,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1596:
       HASH_INVOKE_FROM_EVAL(0x62DE03461EF4663CLL, symlink);
       break;
-    case 1598:
-      HASH_INVOKE_FROM_EVAL(0x60302D15A677963ELL, ldap_free_result);
-      break;
-    case 1599:
-      HASH_INVOKE_FROM_EVAL(0x17242BC6C9C9563FLL, crypt);
-      break;
     case 1606:
-      HASH_INVOKE_FROM_EVAL(0x4901517CB796F646LL, msg_set_queue);
       HASH_INVOKE_FROM_EVAL(0x234F6A0A486E8646LL, natcasesort);
       break;
     case 1614:
       HASH_INVOKE_FROM_EVAL(0x7E978C38D741664ELL, fgetcsv);
-      HASH_INVOKE_FROM_EVAL(0x769E5C6A5369F64ELL, ob_list_handlers);
       break;
     case 1618:
       HASH_INVOKE_FROM_EVAL(0x03066277F647E652LL, hphp_splfileobject_ftell);
       break;
-    case 1621:
-      HASH_INVOKE_FROM_EVAL(0x629EDDC1E74ED655LL, array_uintersect_assoc);
+    case 1623:
+      HASH_INVOKE_FROM_EVAL(0x33CBF1153473A657LL, imap_base64);
       break;
     case 1625:
       HASH_INVOKE_FROM_EVAL(0x7A4B37C23D674659LL, collator_get_error_message);
@@ -77444,13 +79243,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1630:
       HASH_INVOKE_FROM_EVAL(0x1491ED033E39465ELL, dom_document_schema_validate_xml);
-      HASH_INVOKE_FROM_EVAL(0x205BB9CFF397B65ELL, ldap_mod_replace);
-      break;
-    case 1631:
-      HASH_INVOKE_FROM_EVAL(0x1355AFB40AB1165FLL, drawsetfontstyle);
-      break;
-    case 1634:
-      HASH_INVOKE_FROM_EVAL(0x5629E14D6B9FF662LL, dom_document_get_element_by_id);
       break;
     case 1636:
       HASH_INVOKE_FROM_EVAL(0x5B0759F776EC2664LL, newdrawingwand);
@@ -77464,34 +79256,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1647:
       HASH_INVOKE_FROM_EVAL(0x7D68CADB8069466FLL, magickaverageimages);
       break;
-    case 1651:
-      HASH_INVOKE_FROM_EVAL(0x126FC82D358E9673LL, magicksetimagevirtualpixelmethod);
-      break;
-    case 1655:
-      HASH_INVOKE_FROM_EVAL(0x001F23CAC36E3677LL, magickgetimagescene);
-      break;
     case 1658:
       HASH_INVOKE_FROM_EVAL(0x583AA7498A40E67ALL, drawgetcliprule);
       break;
-    case 1659:
-      HASH_INVOKE_FROM_EVAL(0x5BCED33A57D9B67BLL, intval);
-      break;
-    case 1660:
-      HASH_INVOKE_FROM_EVAL(0x43B1BAFFB27F367CLL, session_is_registered);
-      break;
     case 1661:
-      HASH_INVOKE_FROM_EVAL(0x69616E2817E1967DLL, fileinode);
       HASH_INVOKE_FROM_EVAL(0x111DACCF8628267DLL, array_replace_recursive);
       break;
     case 1666:
       HASH_INVOKE_FROM_EVAL(0x665D2615E377A682LL, pagelet_server_task_start);
-      HASH_INVOKE_FROM_EVAL(0x5F6750E1C7E5D682LL, imageinterlace);
-      break;
-    case 1677:
-      HASH_INVOKE_FROM_EVAL(0x07A946E3DD8E968DLL, ldap_connect);
-      break;
-    case 1679:
-      HASH_INVOKE_FROM_EVAL(0x2EFF4F69EB1DF68FLL, apache_get_config);
       break;
     case 1680:
       HASH_INVOKE_FROM_EVAL(0x166D5E2336878690LL, imagepolygon);
@@ -77505,12 +79277,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1684:
       HASH_INVOKE_FROM_EVAL(0x2673FAB2B4DE4694LL, destroypixelwands);
       break;
-    case 1685:
-      HASH_INVOKE_FROM_EVAL(0x7186EF5EF0581695LL, exp);
-      break;
-    case 1686:
-      HASH_INVOKE_FROM_EVAL(0x0DD7A2DB53093696LL, utf8_decode);
-      break;
     case 1690:
       HASH_INVOKE_FROM_EVAL(0x5CC40F6A365FE69ALL, session_register);
       break;
@@ -77523,22 +79289,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1702:
       HASH_INVOKE_FROM_EVAL(0x0D841874977646A6LL, krsort);
       break;
-    case 1703:
-      HASH_INVOKE_FROM_EVAL(0x38BBEE42F136D6A7LL, magickgetimageblueprimary);
-      break;
     case 1704:
       HASH_INVOKE_FROM_EVAL(0x45AB8F419BA666A8LL, drawpathlinetohorizontalabsolute);
       break;
     case 1706:
-      HASH_INVOKE_FROM_EVAL(0x6E9D4D3A119D76AALL, wandgetexceptiontype);
-      HASH_INVOKE_FROM_EVAL(0x48C4DB333172F6AALL, parse_url);
       HASH_INVOKE_FROM_EVAL(0x541926FB6D6FC6AALL, magickgetimagecolors);
-      break;
-    case 1707:
-      HASH_INVOKE_FROM_EVAL(0x72B3F8E02D8B16ABLL, array_unshift);
-      break;
-    case 1711:
-      HASH_INVOKE_FROM_EVAL(0x65497D63C0D716AFLL, getdate);
       break;
     case 1712:
       HASH_INVOKE_FROM_EVAL(0x23AAF570C78AC6B0LL, ip2long);
@@ -77547,9 +79302,10 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x0D669C546C0EC6B2LL, proc_terminate);
       break;
     case 1717:
-      HASH_INVOKE_FROM_EVAL(0x798B4197212456B5LL, bcpowmod);
       HASH_INVOKE_FROM_EVAL(0x623CE67C41A9E6B5LL, ldap_next_attribute);
-      HASH_INVOKE_FROM_EVAL(0x7E773A36449576B5LL, imagecharup);
+      break;
+    case 1718:
+      HASH_INVOKE_FROM_EVAL(0x0553DE5D0C70C6B6LL, imap_headers);
       break;
     case 1719:
       HASH_INVOKE_FROM_EVAL(0x0C44E5EEB9C646B7LL, memcache_connect);
@@ -77559,18 +79315,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1722:
       HASH_INVOKE_FROM_EVAL(0x4605D48C234606BALL, dom_document_import_node);
-      HASH_INVOKE_FROM_EVAL(0x72B901C3605CB6BALL, pixelsetopacity);
-      break;
-    case 1726:
-      HASH_INVOKE_FROM_EVAL(0x081D5EA9920076BELL, drawgetfillalpha);
       break;
     case 1732:
       HASH_INVOKE_FROM_EVAL(0x4842AF70A71BE6C4LL, uksort);
       HASH_INVOKE_FROM_EVAL(0x34184B42D6AA86C4LL, mb_ereg_search_pos);
       HASH_INVOKE_FROM_EVAL(0x3C042C09F662C6C4LL, drawsetstrokepatternurl);
-      break;
-    case 1733:
-      HASH_INVOKE_FROM_EVAL(0x28526EF49FF516C5LL, pixelsetgreenquantum);
       break;
     case 1736:
       HASH_INVOKE_FROM_EVAL(0x29DD2C9F889246C8LL, passthru);
@@ -77578,50 +79327,20 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1737:
       HASH_INVOKE_FROM_EVAL(0x2D8DF100C30D06C9LL, xmlwriter_set_indent_string);
       break;
-    case 1738:
-      HASH_INVOKE_FROM_EVAL(0x41BCD0A72B1396CALL, xmlwriter_start_dtd_attlist);
-      break;
-    case 1745:
-      HASH_INVOKE_FROM_EVAL(0x2B3D5B9AF915D6D1LL, imagecopymerge);
-      break;
-    case 1746:
-      HASH_INVOKE_FROM_EVAL(0x1FDF80EA9B8A96D2LL, collator_set_strength);
-      break;
-    case 1748:
-      HASH_INVOKE_FROM_EVAL(0x04A0E6E8337E56D4LL, drawcolor);
-      break;
-    case 1749:
-      HASH_INVOKE_FROM_EVAL(0x317FFA522A7D96D5LL, imagefilledpolygon);
-      break;
     case 1750:
       HASH_INVOKE_FROM_EVAL(0x158348EB08F406D6LL, strtr);
       break;
-    case 1761:
-      HASH_INVOKE_FROM_EVAL(0x11DA0A0EB8E0D6E1LL, clock_getres);
-      break;
     case 1764:
       HASH_INVOKE_FROM_EVAL(0x40D0E3AF799226E4LL, bin2hex);
-      HASH_INVOKE_FROM_EVAL(0x1CF3544CB5C9D6E4LL, xml_set_processing_instruction_handler);
-      HASH_INVOKE_FROM_EVAL(0x31FFFC333AA6D6E4LL, drawsetfillrule);
-      break;
-    case 1767:
-      HASH_INVOKE_FROM_EVAL(0x44201A16F3D876E7LL, trim);
       break;
     case 1772:
       HASH_INVOKE_FROM_EVAL(0x0A5EFECAE87EA6ECLL, hphp_splfileobject_eof);
       break;
     case 1773:
-      HASH_INVOKE_FROM_EVAL(0x04BD4B43921956EDLL, ldap_search);
       HASH_INVOKE_FROM_EVAL(0x2B661CD43C6006EDLL, hphpd_break);
-      break;
-    case 1774:
-      HASH_INVOKE_FROM_EVAL(0x76382756EA00B6EELL, is_object);
       break;
     case 1775:
       HASH_INVOKE_FROM_EVAL(0x0FA74D85885F86EFLL, output_add_rewrite_var);
-      break;
-    case 1776:
-      HASH_INVOKE_FROM_EVAL(0x014BD9A6823256F0LL, extract);
       break;
     case 1777:
       HASH_INVOKE_FROM_EVAL(0x6B7347DF1AA7E6F1LL, drawpopdefs);
@@ -77630,56 +79349,29 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x314DA880FE2CE6F2LL, session_start);
       break;
     case 1779:
-      HASH_INVOKE_FROM_EVAL(0x6F1968BE449FB6F3LL, stream_socket_pair);
       HASH_INVOKE_FROM_EVAL(0x5768A80BB0B926F3LL, apd_set_session_trace_socket);
       break;
     case 1782:
       HASH_INVOKE_FROM_EVAL(0x534C1A5E626C26F6LL, collator_get_error_code);
       break;
-    case 1785:
-      HASH_INVOKE_FROM_EVAL(0x20740D956F0236F9LL, image2wbmp);
-      break;
     case 1791:
       HASH_INVOKE_FROM_EVAL(0x623C20A027A606FFLL, array_uintersect_uassoc);
-      break;
-    case 1793:
-      HASH_INVOKE_FROM_EVAL(0x1A80392751AA7701LL, magickgetformat);
-      break;
-    case 1796:
-      HASH_INVOKE_FROM_EVAL(0x5EFE15CE970A5704LL, drawpolyline);
       break;
     case 1801:
       HASH_INVOKE_FROM_EVAL(0x7681C631B34CC709LL, hphp_splfileobject_fflush);
       HASH_INVOKE_FROM_EVAL(0x21972B2BC7A14709LL, imageistruecolor);
       break;
     case 1803:
-      HASH_INVOKE_FROM_EVAL(0x27AF8F6A5DF0B70BLL, dom_document_xinclude);
       HASH_INVOKE_FROM_EVAL(0x5F7873F2DF5BE70BLL, ctype_cntrl);
-      break;
-    case 1805:
-      HASH_INVOKE_FROM_EVAL(0x7CE752299E80B70DLL, unserialize);
-      HASH_INVOKE_FROM_EVAL(0x4F3C0DB2F6C8F70DLL, unlink);
       break;
     case 1807:
       HASH_INVOKE_FROM_EVAL(0x2FB2FA1DD832C70FLL, xmlwriter_write_attribute_ns);
-      break;
-    case 1812:
-      HASH_INVOKE_FROM_EVAL(0x1778ED2AF035F714LL, rsort);
-      break;
-    case 1813:
-      HASH_INVOKE_FROM_EVAL(0x25D578B4772C1715LL, define);
-      break;
-    case 1816:
-      HASH_INVOKE_FROM_EVAL(0x7971A5647C957718LL, date_time_set);
       break;
     case 1819:
       HASH_INVOKE_FROM_EVAL(0x3C16230CBC6D471BLL, imagecreatetruecolor);
       break;
     case 1820:
       HASH_INVOKE_FROM_EVAL(0x50AC61A28C5AC71CLL, imagecolorclosestalpha);
-      break;
-    case 1824:
-      HASH_INVOKE_FROM_EVAL(0x2D213FD80048F720LL, usleep);
       break;
     case 1827:
       HASH_INVOKE_FROM_EVAL(0x78420E0B5D110723LL, imagetruecolortopalette);
@@ -77690,21 +79382,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1829:
       HASH_INVOKE_FROM_EVAL(0x31EAD049860CE725LL, posix_kill);
       break;
-    case 1830:
-      HASH_INVOKE_FROM_EVAL(0x523AB2EA95DAD726LL, get_included_files);
-      break;
-    case 1831:
-      HASH_INVOKE_FROM_EVAL(0x11641BE0F11CD727LL, magickgammaimage);
-      break;
-    case 1833:
-      HASH_INVOKE_FROM_EVAL(0x1D30F1E638D71729LL, readgzfile);
-      break;
     case 1834:
       HASH_INVOKE_FROM_EVAL(0x17C0D9B1C10B872ALL, openssl_x509_export);
       HASH_INVOKE_FROM_EVAL(0x1F98B41362CDA72ALL, magickgetimagegreenprimary);
-      break;
-    case 1837:
-      HASH_INVOKE_FROM_EVAL(0x14563723F798172DLL, magickpaintopaqueimage);
       break;
     case 1840:
       HASH_INVOKE_FROM_EVAL(0x0D558F552A784730LL, ob_get_contents);
@@ -77712,14 +79392,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1842:
       HASH_INVOKE_FROM_EVAL(0x2B1C192C419B8732LL, drawgetexception);
       break;
-    case 1850:
-      HASH_INVOKE_FROM_EVAL(0x404236CC5ABD973ALL, xhprof_run_trace);
-      break;
     case 1855:
       HASH_INVOKE_FROM_EVAL(0x650E641CC0E3873FLL, connection_aborted);
-      break;
-    case 1857:
-      HASH_INVOKE_FROM_EVAL(0x5062777D2B947741LL, wordwrap);
       break;
     case 1863:
       HASH_INVOKE_FROM_EVAL(0x3CD58419E181A747LL, magickstereoimage);
@@ -77727,18 +79401,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1864:
       HASH_INVOKE_FROM_EVAL(0x0D7BBA9608A36748LL, magickcombineimages);
-      break;
-    case 1865:
-      HASH_INVOKE_FROM_EVAL(0x73E4417BA7B49749LL, curl_multi_info_read);
-      break;
-    case 1866:
-      HASH_INVOKE_FROM_EVAL(0x1FF03B7DE19DD74ALL, drawpathmovetorelative);
-      break;
-    case 1867:
-      HASH_INVOKE_FROM_EVAL(0x7DA9307A6149B74BLL, get_meta_tags);
-      break;
-    case 1873:
-      HASH_INVOKE_FROM_EVAL(0x017FF216C00D9751LL, property_exists);
       break;
     case 1875:
       HASH_INVOKE_FROM_EVAL(0x42795829DF700753LL, mysql_get_host_info);
@@ -77748,13 +79410,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 1879:
       HASH_INVOKE_FROM_EVAL(0x7554E3E8674F2757LL, mb_list_encodings);
-      break;
-    case 1883:
-      HASH_INVOKE_FROM_EVAL(0x05D293F45C15F75BLL, ldap_mod_del);
-      HASH_INVOKE_FROM_EVAL(0x0ED4D905630EB75BLL, openssl_random_pseudo_bytes);
-      break;
-    case 1884:
-      HASH_INVOKE_FROM_EVAL(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename);
       break;
     case 1887:
       HASH_INVOKE_FROM_EVAL(0x3EDB48C5DDD9675FLL, socket_select);
@@ -77769,13 +79424,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1891:
       HASH_INVOKE_FROM_EVAL(0x7FCE6DD53FED6763LL, intl_is_failure);
       break;
-    case 1893:
-      HASH_INVOKE_FROM_EVAL(0x1D803CE961921765LL, md5);
-      HASH_INVOKE_FROM_EVAL(0x45631C592AD6D765LL, str_ireplace);
-      break;
-    case 1894:
-      HASH_INVOKE_FROM_EVAL(0x1F4505BE6460D766LL, scandir);
-      break;
     case 1895:
       HASH_INVOKE_FROM_EVAL(0x2FC27987B3F88767LL, dom_node_clone_node);
       HASH_INVOKE_FROM_EVAL(0x6C280D5855D20767LL, drawsetfillalpha);
@@ -77783,48 +79431,21 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1896:
       HASH_INVOKE_FROM_EVAL(0x179A72074C778768LL, openssl_x509_export_to_file);
       break;
-    case 1901:
-      HASH_INVOKE_FROM_EVAL(0x3304663FBC6C976DLL, get_html_translation_table);
-      HASH_INVOKE_FROM_EVAL(0x553ADA5A41AE976DLL, mb_ereg_replace);
-      break;
-    case 1902:
-      HASH_INVOKE_FROM_EVAL(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf);
-      break;
     case 1904:
       HASH_INVOKE_FROM_EVAL(0x6F6C5B9E3DC64770LL, drawgetstrokemiterlimit);
       break;
-    case 1909:
-      HASH_INVOKE_FROM_EVAL(0x04D9076808F79775LL, getenv);
-      break;
     case 1910:
       HASH_INVOKE_FROM_EVAL(0x616DDB67073A0776LL, ord);
-      HASH_INVOKE_FROM_EVAL(0x4102C410C5031776LL, magickcolorizeimage);
       break;
     case 1914:
       HASH_INVOKE_FROM_EVAL(0x1FBF36B5D65E677ALL, fb_call_user_func_safe_return);
       HASH_INVOKE_FROM_EVAL(0x4330CE9C9002477ALL, array_udiff_uassoc);
-      break;
-    case 1915:
-      HASH_INVOKE_FROM_EVAL(0x129E39AC523A977BLL, magickgethomeurl);
       break;
     case 1920:
       HASH_INVOKE_FROM_EVAL(0x29824AAA934CE780LL, array_filter);
       break;
     case 1923:
       HASH_INVOKE_FROM_EVAL(0x53B4DBE58B356783LL, imagesetthickness);
-      HASH_INVOKE_FROM_EVAL(0x38704D99FEA9B783LL, mysql_fetch_array);
-      break;
-    case 1924:
-      HASH_INVOKE_FROM_EVAL(0x784FD2E7191A3784LL, drawpathellipticarcrelative);
-      break;
-    case 1925:
-      HASH_INVOKE_FROM_EVAL(0x5BFC6198960A5785LL, in_array);
-      break;
-    case 1927:
-      HASH_INVOKE_FROM_EVAL(0x4991643BD854D787LL, drawgetexceptionstring);
-      break;
-    case 1928:
-      HASH_INVOKE_FROM_EVAL(0x32D8CE5D0FA6D788LL, ldap_rename);
       break;
     case 1930:
       HASH_INVOKE_FROM_EVAL(0x70A1EC006032E78ALL, pixelgetquantumcolor);
@@ -77835,46 +79456,26 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 1938:
       HASH_INVOKE_FROM_EVAL(0x0D4891A5E1A20792LL, get_defined_functions);
       break;
+    case 1940:
+      HASH_INVOKE_FROM_EVAL(0x66ECE26DDCC12794LL, imap_fetchheader);
+      break;
     case 1941:
       HASH_INVOKE_FROM_EVAL(0x34BA3AAA6711C795LL, dom_document_create_entity_reference);
       break;
-    case 1942:
-      HASH_INVOKE_FROM_EVAL(0x5B42B2AB1B57D796LL, array_replace);
-      break;
     case 1945:
       HASH_INVOKE_FROM_EVAL(0x26D226FD28566799LL, date_isodate_set);
-      break;
-    case 1947:
-      HASH_INVOKE_FROM_EVAL(0x1196D899ACCD379BLL, evhttp_recv);
-      break;
-    case 1949:
-      HASH_INVOKE_FROM_EVAL(0x02ECD8C169DF579DLL, feof);
-      break;
-    case 1951:
-      HASH_INVOKE_FROM_EVAL(0x4B092931EFB7979FLL, mysql_create_db);
       break;
     case 1959:
       HASH_INVOKE_FROM_EVAL(0x1F76E954F9A147A7LL, magickcontrastimage);
       break;
     case 1961:
       HASH_INVOKE_FROM_EVAL(0x7C251B7DE8DB87A9LL, mcrypt_list_algorithms);
-      HASH_INVOKE_FROM_EVAL(0x7707A7FEA07FB7A9LL, hphp_recursivedirectoryiterator___construct);
       break;
     case 1962:
       HASH_INVOKE_FROM_EVAL(0x45A53A884414A7AALL, pack);
       HASH_INVOKE_FROM_EVAL(0x58D6464A3A9127AALL, apc_bin_loadfile);
       break;
-    case 1965:
-      HASH_INVOKE_FROM_EVAL(0x7DA08D9D148837ADLL, posix_mkfifo);
-      break;
-    case 1966:
-      HASH_INVOKE_FROM_EVAL(0x00141B0E3E6F77AELL, xml_set_unparsed_entity_decl_handler);
-      break;
-    case 1967:
-      HASH_INVOKE_FROM_EVAL(0x16CB9891EF26D7AFLL, drawgetstrokedashoffset);
-      break;
     case 1977:
-      HASH_INVOKE_FROM_EVAL(0x1FC9406FD7FCD7B9LL, strrpos);
       HASH_INVOKE_FROM_EVAL(0x1B6467AD87E167B9LL, log1p);
       break;
     case 1983:
@@ -77884,34 +79485,24 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x152D1AB941A647C0LL, hphp_get_extension_info);
       HASH_INVOKE_FROM_EVAL(0x52FDAC1D298D67C0LL, mcrypt_enc_get_algorithms_name);
       break;
-    case 1985:
-      HASH_INVOKE_FROM_EVAL(0x4E172EA6743697C1LL, ldap_first_entry);
-      break;
     case 1988:
       HASH_INVOKE_FROM_EVAL(0x3C696836396BE7C4LL, mb_language);
       break;
     case 1990:
-      HASH_INVOKE_FROM_EVAL(0x0C8A7BE6ABC957C6LL, clearpixeliterator);
       HASH_INVOKE_FROM_EVAL(0x3D6D684AF537A7C6LL, ldap_explode_dn);
-      break;
-    case 1991:
-      HASH_INVOKE_FROM_EVAL(0x686C5142FD0337C7LL, lcg_value);
-      break;
-    case 1993:
-      HASH_INVOKE_FROM_EVAL(0x6BF7D7B5FBFF77C9LL, hphp_get_thread_id);
       break;
     case 1994:
       HASH_INVOKE_FROM_EVAL(0x3C781898488687CALL, xml_parse);
       HASH_INVOKE_FROM_EVAL(0x55B68546CFAC87CALL, magicksetimageresolution);
+      break;
+    case 1997:
+      HASH_INVOKE_FROM_EVAL(0x4C19B770DFFFE7CDLL, imap_listmailbox);
       break;
     case 1998:
       HASH_INVOKE_FROM_EVAL(0x3AE33FEA6830C7CELL, magickshearimage);
       break;
     case 1999:
       HASH_INVOKE_FROM_EVAL(0x2FAB1F75659707CFLL, is_scalar);
-      break;
-    case 2001:
-      HASH_INVOKE_FROM_EVAL(0x35B661C87484D7D1LL, openssl_csr_sign);
       break;
     case 2009:
       HASH_INVOKE_FROM_EVAL(0x2ED6760DAA3A67D9LL, strcasecmp);
@@ -77928,12 +79519,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2018:
       HASH_INVOKE_FROM_EVAL(0x0888289CBD2887E2LL, iconv_substr);
       break;
-    case 2020:
-      HASH_INVOKE_FROM_EVAL(0x2621680306BC97E4LL, magicksetimagescene);
-      break;
-    case 2023:
-      HASH_INVOKE_FROM_EVAL(0x4215DDB57604F7E7LL, xmlwriter_start_pi);
-      break;
     case 2024:
       HASH_INVOKE_FROM_EVAL(0x53B7BF8991FA67E8LL, i18n_loc_get_error_code);
       break;
@@ -77944,19 +79529,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x54AE7140B95027EBLL, pixelgetgreenquantum);
       HASH_INVOKE_FROM_EVAL(0x1A397501431EC7EBLL, is_numeric);
       break;
-    case 2029:
-      HASH_INVOKE_FROM_EVAL(0x0DC2C2D372EC97EDLL, hphp_crash_log);
-      break;
-    case 2031:
-      HASH_INVOKE_FROM_EVAL(0x5367B0F3A4D2D7EFLL, ldap_list);
-      break;
-    case 2032:
-      HASH_INVOKE_FROM_EVAL(0x14F700DD189DB7F0LL, drawsetclipunits);
-      break;
     case 2035:
-      HASH_INVOKE_FROM_EVAL(0x73877357478137F3LL, posix_ctermid);
       HASH_INVOKE_FROM_EVAL(0x4B57E07A323FE7F3LL, drawpathlinetoverticalabsolute);
-      HASH_INVOKE_FROM_EVAL(0x7F436B50B7BBD7F3LL, getcwd);
       break;
     case 2041:
       HASH_INVOKE_FROM_EVAL(0x376FB2649384A7F9LL, str_pad);
@@ -77973,55 +79547,26 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2049:
       HASH_INVOKE_FROM_EVAL(0x290E54137CF06801LL, dom_nodelist_item);
       break;
-    case 2051:
-      HASH_INVOKE_FROM_EVAL(0x10F7244AA9CB5803LL, imagepstext);
-      break;
     case 2052:
       HASH_INVOKE_FROM_EVAL(0x349A0DF6723B6804LL, pixelsetcolorcount);
       break;
-    case 2054:
-      HASH_INVOKE_FROM_EVAL(0x4D832DD6A72AB806LL, dom_document_create_attribute);
-      break;
     case 2056:
       HASH_INVOKE_FROM_EVAL(0x19279D6DB4F70808LL, hash_hmac);
-      HASH_INVOKE_FROM_EVAL(0x083B8F01AE15B808LL, assert);
-      break;
-    case 2057:
-      HASH_INVOKE_FROM_EVAL(0x52DCFB6F41D41809LL, dom_characterdata_append_data);
-      HASH_INVOKE_FROM_EVAL(0x221F5A9D5E021809LL, magickwriteimages);
-      break;
-    case 2058:
-      HASH_INVOKE_FROM_EVAL(0x5A0D1AE1D4C6F80ALL, array_slice);
       break;
     case 2060:
       HASH_INVOKE_FROM_EVAL(0x3FF63423EC4B280CLL, posix_getegid);
       break;
     case 2061:
       HASH_INVOKE_FROM_EVAL(0x11EC19E702F2C80DLL, getmyinode);
-      HASH_INVOKE_FROM_EVAL(0x727F5A6D8E26B80DLL, extension_loaded);
       break;
     case 2064:
       HASH_INVOKE_FROM_EVAL(0x4297B1072CE76810LL, fb_call_user_func_array_safe);
       break;
     case 2067:
       HASH_INVOKE_FROM_EVAL(0x1A6B577442218813LL, pixelsetmagentaquantum);
-      HASH_INVOKE_FROM_EVAL(0x5F7940A713863813LL, floor);
-      break;
-    case 2068:
-      HASH_INVOKE_FROM_EVAL(0x3C0DFA15D3447814LL, rawurldecode);
-      break;
-    case 2071:
-      HASH_INVOKE_FROM_EVAL(0x0D8B1D0A8C381817LL, stream_bucket_new);
-      break;
-    case 2072:
-      HASH_INVOKE_FROM_EVAL(0x0FBDB0B22A59B818LL, mailparse_msg_parse);
-      break;
-    case 2077:
-      HASH_INVOKE_FROM_EVAL(0x4D624A655A9B581DLL, drawpoint);
       break;
     case 2081:
       HASH_INVOKE_FROM_EVAL(0x2D52FB9B52EC2821LL, xml_set_notation_decl_handler);
-      HASH_INVOKE_FROM_EVAL(0x107DBCA79C15B821LL, addcslashes);
       break;
     case 2082:
       HASH_INVOKE_FROM_EVAL(0x13C241C02DE72822LL, dom_document_relaxng_validate_xml);
@@ -78034,7 +79579,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2089:
       HASH_INVOKE_FROM_EVAL(0x39EE4CCCA716E829LL, stream_context_get_options);
-      HASH_INVOKE_FROM_EVAL(0x57FFCEB7FA2D9829LL, usort);
       break;
     case 2092:
       HASH_INVOKE_FROM_EVAL(0x34F0E032AB05C82CLL, pixelsetblue);
@@ -78042,33 +79586,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2093:
       HASH_INVOKE_FROM_EVAL(0x1C4AE57BF4E4A82DLL, apc_dec);
       break;
-    case 2094:
-      HASH_INVOKE_FROM_EVAL(0x3402C1E7544C382ELL, lstat);
-      break;
     case 2095:
       HASH_INVOKE_FROM_EVAL(0x79A05154A7F5482FLL, magickgetimagedelay);
       break;
-    case 2096:
-      HASH_INVOKE_FROM_EVAL(0x5BBFA7EAEBD25830LL, pixelgetcyanquantum);
-      break;
-    case 2100:
-      HASH_INVOKE_FROM_EVAL(0x605132E71CE7D834LL, array_push);
-      break;
-    case 2101:
-      HASH_INVOKE_FROM_EVAL(0x1C4A162E6635B835LL, imageftbbox);
-      HASH_INVOKE_FROM_EVAL(0x43A96BA7F58EB835LL, hphp_splfileobject_valid);
-      break;
     case 2104:
       HASH_INVOKE_FROM_EVAL(0x63E554E0F11CE838LL, mysql_unbuffered_query);
-      HASH_INVOKE_FROM_EVAL(0x03098F16B0AD5838LL, mcrypt_module_get_supported_key_sizes);
       HASH_INVOKE_FROM_EVAL(0x0890F9052322E838LL, fstat);
-      break;
-    case 2107:
-      HASH_INVOKE_FROM_EVAL(0x63E2EA180786B83BLL, pixelsetblack);
-      break;
-    case 2108:
-      HASH_INVOKE_FROM_EVAL(0x7C8969C75CA1783CLL, get_declared_classes);
-      HASH_INVOKE_FROM_EVAL(0x034EDEBD109FD83CLL, filesize);
       break;
     case 2115:
       HASH_INVOKE_FROM_EVAL(0x567A7139AD476843LL, socket_listen);
@@ -78085,9 +79608,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2123:
       HASH_INVOKE_FROM_EVAL(0x68B7597C22FA484BLL, openssl_public_encrypt);
       break;
-    case 2124:
-      HASH_INVOKE_FROM_EVAL(0x26A2BBC465A2B84CLL, strcoll);
-      break;
     case 2126:
       HASH_INVOKE_FROM_EVAL(0x488C2F267BF2884ELL, array_intersect);
       break;
@@ -78097,36 +79617,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2128:
       HASH_INVOKE_FROM_EVAL(0x4DDB82A3632FA850LL, atan);
       break;
-    case 2129:
-      HASH_INVOKE_FROM_EVAL(0x488BFCC942C73851LL, gzopen);
-      break;
-    case 2134:
-      HASH_INVOKE_FROM_EVAL(0x51FD8C9B5109F856LL, dom_characterdata_replace_data);
-      break;
     case 2140:
       HASH_INVOKE_FROM_EVAL(0x5A017A4C6A41E85CLL, curl_multi_add_handle);
       break;
     case 2142:
-      HASH_INVOKE_FROM_EVAL(0x3D8327794429585ELL, hphpd_install_user_command);
       HASH_INVOKE_FROM_EVAL(0x6B4DE6865142285ELL, destroypixeliterator);
-      break;
-    case 2145:
-      HASH_INVOKE_FROM_EVAL(0x2AD6B0E3B9F3B861LL, array_search);
-      break;
-    case 2147:
-      HASH_INVOKE_FROM_EVAL(0x21B30164F5D49863LL, is_resource);
       break;
     case 2148:
       HASH_INVOKE_FROM_EVAL(0x168EDA8238EEE864LL, mb_detect_order);
       break;
-    case 2151:
-      HASH_INVOKE_FROM_EVAL(0x65A68A31B96E7867LL, hash);
-      break;
     case 2152:
       HASH_INVOKE_FROM_EVAL(0x785C812E6292E868LL, i18n_loc_set_default);
-      break;
-    case 2153:
-      HASH_INVOKE_FROM_EVAL(0x246EC2B1844DB869LL, pixelgetexception);
       break;
     case 2155:
       HASH_INVOKE_FROM_EVAL(0x0C1BBEDECEF1C86BLL, newmagickwand);
@@ -78147,22 +79648,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2163:
       HASH_INVOKE_FROM_EVAL(0x4C06B4AFC1C08873LL, str_shuffle);
       break;
-    case 2167:
-      HASH_INVOKE_FROM_EVAL(0x6AA3788C9B737877LL, magickdespeckleimage);
-      break;
-    case 2168:
-      HASH_INVOKE_FROM_EVAL(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute);
-      break;
-    case 2172:
-      HASH_INVOKE_FROM_EVAL(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate);
-      HASH_INVOKE_FROM_EVAL(0x6451BCB825D1787CLL, chroot);
-      break;
     case 2173:
       HASH_INVOKE_FROM_EVAL(0x54F84DC9A334287DLL, gzencode);
       HASH_INVOKE_FROM_EVAL(0x2B36081E0828487DLL, debug_print_backtrace);
-      break;
-    case 2176:
-      HASH_INVOKE_FROM_EVAL(0x7549612A72BA5880LL, hphp_splfileinfo_getrealpath);
       break;
     case 2179:
       HASH_INVOKE_FROM_EVAL(0x3EBD8F559B4EA883LL, hphp_splfileobject_getflags);
@@ -78170,49 +79658,23 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2180:
       HASH_INVOKE_FROM_EVAL(0x766CD15A7F2A0884LL, array_uintersect);
       break;
-    case 2184:
-      HASH_INVOKE_FROM_EVAL(0x1062CF2DA5443888LL, imagedashedline);
-      break;
     case 2191:
-      HASH_INVOKE_FROM_EVAL(0x5DDC2A079AB7988FLL, dom_document_schema_validate_file);
       HASH_INVOKE_FROM_EVAL(0x539868C56806688FLL, imagecopyresampled);
       break;
     case 2200:
       HASH_INVOKE_FROM_EVAL(0x4AC522FF7BB60898LL, xmlwriter_write_dtd_entity);
       break;
-    case 2205:
-      HASH_INVOKE_FROM_EVAL(0x1FC855F0E4F1189DLL, magickminifyimage);
-      break;
     case 2208:
       HASH_INVOKE_FROM_EVAL(0x6B1A3BCE67BAC8A0LL, openssl_csr_new);
       break;
-    case 2209:
-      HASH_INVOKE_FROM_EVAL(0x1756D4437A4098A1LL, date_modify);
-      break;
-    case 2215:
-      HASH_INVOKE_FROM_EVAL(0x57105D4E43B078A7LL, magicksetformat);
-      HASH_INVOKE_FROM_EVAL(0x6C6B4B739AE1B8A7LL, curl_close);
-      break;
-    case 2217:
-      HASH_INVOKE_FROM_EVAL(0x346B2DB3BA2378A9LL, imagecolormatch);
-      break;
-    case 2218:
-      HASH_INVOKE_FROM_EVAL(0x44BC069A75EE98AALL, xhprof_disable);
-      break;
-    case 2219:
-      HASH_INVOKE_FROM_EVAL(0x39F11BA6A4D778ABLL, strnatcmp);
-      break;
     case 2220:
-      HASH_INVOKE_FROM_EVAL(0x5B1F4C6424DDD8ACLL, openlog);
-      break;
-    case 2224:
-      HASH_INVOKE_FROM_EVAL(0x2CEF8DDC092698B0LL, drawgetvectorgraphics);
+      HASH_INVOKE_FROM_EVAL(0x1EFFE951E79348ACLL, imap_expunge);
       break;
     case 2226:
       HASH_INVOKE_FROM_EVAL(0x31830AA5032428B2LL, is_double);
       break;
-    case 2230:
-      HASH_INVOKE_FROM_EVAL(0x5866C5DF3A1AD8B6LL, dom_element_get_attribute_node);
+    case 2234:
+      HASH_INVOKE_FROM_EVAL(0x28D343EC901608BALL, imap_listsubscribed);
       break;
     case 2236:
       HASH_INVOKE_FROM_EVAL(0x7AE3AE9B634988BCLL, stream_context_create);
@@ -78230,9 +79692,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2254:
       HASH_INVOKE_FROM_EVAL(0x3FFAA982E4B1E8CELL, date_offset_get);
       break;
-    case 2257:
-      HASH_INVOKE_FROM_EVAL(0x1015EB3F52B098D1LL, print);
-      break;
     case 2258:
       HASH_INVOKE_FROM_EVAL(0x74EB6C564ABC68D2LL, dom_document_create_text_node);
       break;
@@ -78244,13 +79703,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x26DC8AB4A9CBE8D6LL, iconv);
       break;
     case 2264:
+      HASH_INVOKE_FROM_EVAL(0x69FB5DBA88A308D8LL, imap_8bit);
       HASH_INVOKE_FROM_EVAL(0x3A65182A3E8908D8LL, openssl_open);
       break;
     case 2265:
       HASH_INVOKE_FROM_EVAL(0x18B64D6BFE4208D9LL, stream_get_transports);
-      break;
-    case 2267:
-      HASH_INVOKE_FROM_EVAL(0x4052842EC87038DBLL, magickcropimage);
       break;
     case 2268:
       HASH_INVOKE_FROM_EVAL(0x31F50FDA18B888DCLL, magickgetimagetype);
@@ -78264,12 +79721,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2279:
       HASH_INVOKE_FROM_EVAL(0x608729F27FA428E7LL, error_get_last);
       break;
-    case 2280:
-      HASH_INVOKE_FROM_EVAL(0x4F7ED8C3156AD8E8LL, magicksetimagedispose);
-      break;
-    case 2293:
-      HASH_INVOKE_FROM_EVAL(0x45DA105C5B48F8F5LL, apd_set_pprof_trace);
-      break;
     case 2295:
       HASH_INVOKE_FROM_EVAL(0x17582BEA497D48F7LL, ctype_alpha);
       break;
@@ -78279,19 +79730,13 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2299:
       HASH_INVOKE_FROM_EVAL(0x214532C4A2BC28FBLL, ldap_next_entry);
       break;
-    case 2300:
-      HASH_INVOKE_FROM_EVAL(0x4C2AFB2EFDB1B8FCLL, stripslashes);
-      break;
     case 2302:
       HASH_INVOKE_FROM_EVAL(0x047BF4D3D0ED08FELL, strchr);
       break;
     case 2315:
-      HASH_INVOKE_FROM_EVAL(0x67B879A1120C190BLL, headers_sent);
       HASH_INVOKE_FROM_EVAL(0x2987B15E11FE890BLL, clock_settime);
       break;
     case 2321:
-      HASH_INVOKE_FROM_EVAL(0x04F822B7817E5911LL, bindec);
-      HASH_INVOKE_FROM_EVAL(0x0AFD4F231D6CB911LL, magickaddimage);
       HASH_INVOKE_FROM_EVAL(0x5B9B2C3B32906911LL, drawsetfillpatternurl);
       break;
     case 2323:
@@ -78300,55 +79745,34 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2324:
       HASH_INVOKE_FROM_EVAL(0x6E22C6D840B44914LL, mcrypt_generic_init);
       break;
-    case 2329:
-      HASH_INVOKE_FROM_EVAL(0x022B16C0D64D7919LL, file_put_contents);
-      break;
     case 2331:
       HASH_INVOKE_FROM_EVAL(0x37A3DF6E0795091BLL, memcache_increment);
       break;
     case 2333:
       HASH_INVOKE_FROM_EVAL(0x069C028EFEF8C91DLL, date);
       break;
-    case 2335:
-      HASH_INVOKE_FROM_EVAL(0x277D7E2D1F5C191FLL, drawpathcurvetoquadraticbezierrelative);
-      HASH_INVOKE_FROM_EVAL(0x4E2C55C92D71F91FLL, magickcolorfloodfillimage);
-      break;
     case 2337:
       HASH_INVOKE_FROM_EVAL(0x0F5917FFCDD6C921LL, mb_substr);
       break;
-    case 2339:
-      HASH_INVOKE_FROM_EVAL(0x044B276686B77923LL, fscanf);
-      break;
     case 2346:
       HASH_INVOKE_FROM_EVAL(0x174C510386E6492ALL, hphp_directoryiterator_key);
-      break;
-    case 2349:
-      HASH_INVOKE_FROM_EVAL(0x27363CE6CBFC392DLL, pcntl_wexitstatus);
-      HASH_INVOKE_FROM_EVAL(0x2337F8C3EE17192DLL, sprintf);
       break;
     case 2350:
       HASH_INVOKE_FROM_EVAL(0x26E8B741BDDDC92ELL, xmlwriter_start_element);
       break;
     case 2352:
       HASH_INVOKE_FROM_EVAL(0x507CE1912FD74930LL, mail);
-      HASH_INVOKE_FROM_EVAL(0x30972530BD557930LL, shell_exec);
-      break;
-    case 2354:
-      HASH_INVOKE_FROM_EVAL(0x72C01E1D90BE5932LL, mcrypt_enc_get_block_size);
       break;
     case 2356:
       HASH_INVOKE_FROM_EVAL(0x4FB95164A5F84934LL, mcrypt_generic_end);
       break;
     case 2357:
       HASH_INVOKE_FROM_EVAL(0x46BD9A56BDE40935LL, mysql_escape_string);
-      HASH_INVOKE_FROM_EVAL(0x06486B6912479935LL, zlib_get_coding_type);
-      HASH_INVOKE_FROM_EVAL(0x48D3CA6CA0B29935LL, mb_regex_set_options);
       break;
     case 2361:
       HASH_INVOKE_FROM_EVAL(0x5B60C8396C624939LL, mb_substitute_character);
       break;
     case 2366:
-      HASH_INVOKE_FROM_EVAL(0x3946D67A0D16D93ELL, hphp_splfileinfo_isreadable);
       HASH_INVOKE_FROM_EVAL(0x0CADFE289C92893ELL, socket_getpeername);
       break;
     case 2371:
@@ -78360,20 +79784,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2375:
       HASH_INVOKE_FROM_EVAL(0x630288865DE68947LL, php_strip_whitespace);
       break;
-    case 2376:
-      HASH_INVOKE_FROM_EVAL(0x6A3412DE82715948LL, openssl_x509_checkpurpose);
-      break;
-    case 2377:
-      HASH_INVOKE_FROM_EVAL(0x243BB8B284895949LL, apache_get_rewrite_rules);
-      break;
-    case 2379:
-      HASH_INVOKE_FROM_EVAL(0x37F356F578FA394BLL, substr);
-      break;
     case 2381:
       HASH_INVOKE_FROM_EVAL(0x3D3AD12E52FF294DLL, imagecreatefromwbmp);
-      break;
-    case 2387:
-      HASH_INVOKE_FROM_EVAL(0x068438AFD33A9953LL, imagecolorclosesthwb);
       break;
     case 2391:
       HASH_INVOKE_FROM_EVAL(0x253AC5D4E450A957LL, magickgetreleasedate);
@@ -78391,13 +79803,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2407:
       HASH_INVOKE_FROM_EVAL(0x1419B3BF428B2967LL, evhttp_async_post);
       break;
-    case 2415:
-      HASH_INVOKE_FROM_EVAL(0x134EF88685C0396FLL, magickgetexceptiontype);
-      break;
-    case 2417:
-      HASH_INVOKE_FROM_EVAL(0x442A28FB6F6C3971LL, xmlwriter_start_attribute);
-      HASH_INVOKE_FROM_EVAL(0x72C73F5DA7D6F971LL, magickgetimagecolormapcolor);
-      break;
     case 2418:
       HASH_INVOKE_FROM_EVAL(0x758263CEBF2E8972LL, assert_options);
       break;
@@ -78411,15 +79816,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2430:
       HASH_INVOKE_FROM_EVAL(0x5067A65AD1D0297ELL, pixelgetiteratorexception);
       break;
-    case 2432:
-      HASH_INVOKE_FROM_EVAL(0x3D3445105C335980LL, filectime);
-      break;
-    case 2434:
-      HASH_INVOKE_FROM_EVAL(0x214EA70BDD8FB982LL, magickmorphimages);
-      break;
-    case 2435:
-      HASH_INVOKE_FROM_EVAL(0x3DA64BF893DBF983LL, strncmp);
-      break;
     case 2438:
       HASH_INVOKE_FROM_EVAL(0x6ECE4BDB8842E986LL, posix_strerror);
       break;
@@ -78428,33 +79824,21 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2440:
       HASH_INVOKE_FROM_EVAL(0x489355BDBE396988LL, drawsettextencoding);
-      HASH_INVOKE_FROM_EVAL(0x55BE7AE8DEF3F988LL, magickgetstringheight);
       break;
     case 2441:
       HASH_INVOKE_FROM_EVAL(0x60BF7CDD733A2989LL, bzerrstr);
       break;
-    case 2443:
-      HASH_INVOKE_FROM_EVAL(0x0E863EF8C11A598BLL, is_writable);
-      break;
-    case 2445:
-      HASH_INVOKE_FROM_EVAL(0x69003892F71C798DLL, apache_get_scoreboard);
-      HASH_INVOKE_FROM_EVAL(0x651A8CBB8D2A398DLL, mysql_stat);
-      break;
     case 2446:
-      HASH_INVOKE_FROM_EVAL(0x45CFDEE19995398ELL, hphp_recursiveiteratoriterator_next);
       HASH_INVOKE_FROM_EVAL(0x333D4DFD4927898ELL, magickgetimagewhitepoint);
       break;
-    case 2448:
-      HASH_INVOKE_FROM_EVAL(0x342D957A86A03990LL, hphp_splfileobject_seek);
+    case 2451:
+      HASH_INVOKE_FROM_EVAL(0x79AD7C6D77A3A993LL, imap_reopen);
       break;
     case 2456:
       HASH_INVOKE_FROM_EVAL(0x501AAD31C8086998LL, posix_getcwd);
       break;
     case 2459:
       HASH_INVOKE_FROM_EVAL(0x564D8D3DA1E8E99BLL, xml_get_current_line_number);
-      break;
-    case 2462:
-      HASH_INVOKE_FROM_EVAL(0x59D2DFF08F4DB99ELL, imagecreate);
       break;
     case 2464:
       HASH_INVOKE_FROM_EVAL(0x047EF9173590C9A0LL, session_decode);
@@ -78466,45 +79850,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x43D1339C52E309A3LL, hphp_service_thread_started);
       HASH_INVOKE_FROM_EVAL(0x78261FA60B8D89A3LL, imagepsloadfont);
       break;
-    case 2468:
-      HASH_INVOKE_FROM_EVAL(0x6F8676B049C919A4LL, array_intersect_uassoc);
-      break;
     case 2469:
       HASH_INVOKE_FROM_EVAL(0x76988956F35329A5LL, xmlwriter_end_cdata);
       break;
     case 2473:
       HASH_INVOKE_FROM_EVAL(0x6F9CF95104CAE9A9LL, pixelgetyellowquantum);
       break;
-    case 2476:
-      HASH_INVOKE_FROM_EVAL(0x522256BAA78159ACLL, popen);
-      break;
-    case 2477:
-      HASH_INVOKE_FROM_EVAL(0x05C5AD90751159ADLL, drawpathcurvetoquadraticbeziersmoothabsolute);
-      break;
-    case 2479:
-      HASH_INVOKE_FROM_EVAL(0x25268012A48A99AFLL, magickclipimage);
-      break;
     case 2481:
       HASH_INVOKE_FROM_EVAL(0x7C1CE38F14E529B1LL, date_default_timezone_set);
       break;
     case 2482:
       HASH_INVOKE_FROM_EVAL(0x65D7CBE8681CE9B2LL, gzgetss);
-      break;
-    case 2486:
-      HASH_INVOKE_FROM_EVAL(0x5FC1B94446EA59B6LL, magickremoveimageprofiles);
-      break;
-    case 2487:
-      HASH_INVOKE_FROM_EVAL(0x18F2C246FACAD9B7LL, each);
-      break;
-    case 2488:
-      HASH_INVOKE_FROM_EVAL(0x3741447B159359B8LL, mcrypt_get_cipher_name);
-      HASH_INVOKE_FROM_EVAL(0x4EFD7A9C90E559B8LL, posix_ttyname);
-      break;
-    case 2489:
-      HASH_INVOKE_FROM_EVAL(0x145702974C97F9B9LL, ltrim);
-      break;
-    case 2490:
-      HASH_INVOKE_FROM_EVAL(0x13B3172E092D99BALL, is_dir);
       break;
     case 2492:
       HASH_INVOKE_FROM_EVAL(0x7E7BF1BDA6DB49BCLL, hphp_splfileinfo_getgroup);
@@ -78515,20 +79871,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2498:
       HASH_INVOKE_FROM_EVAL(0x6A7BDB900E7429C2LL, magickconstituteimage);
       break;
-    case 2500:
-      HASH_INVOKE_FROM_EVAL(0x47B7D3745D80B9C4LL, socket_get_option);
-      break;
     case 2502:
       HASH_INVOKE_FROM_EVAL(0x080F661DB8BFC9C6LL, hphp_splfileinfo_getmtime);
       break;
     case 2503:
       HASH_INVOKE_FROM_EVAL(0x6ECDF24B29D789C7LL, strtolower);
-      break;
-    case 2506:
-      HASH_INVOKE_FROM_EVAL(0x5C5B0CC85133B9CALL, mkdir);
-      break;
-    case 2507:
-      HASH_INVOKE_FROM_EVAL(0x032DFAC5B24679CBLL, header_remove);
       break;
     case 2509:
       HASH_INVOKE_FROM_EVAL(0x4E61FE901C1C29CDLL, array_intersect_key);
@@ -78539,16 +79886,10 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2511:
       HASH_INVOKE_FROM_EVAL(0x415B91CAEE0689CFLL, magickgetimageinterlacescheme);
       break;
-    case 2514:
-      HASH_INVOKE_FROM_EVAL(0x3DCCD1FEAD8759D2LL, array_sum);
-      break;
     case 2515:
       HASH_INVOKE_FROM_EVAL(0x1C31A9E1207209D3LL, mb_split);
       HASH_INVOKE_FROM_EVAL(0x10C82F357BB7E9D3LL, curl_version);
       HASH_INVOKE_FROM_EVAL(0x25CA0299103F49D3LL, magickgetsize);
-      break;
-    case 2517:
-      HASH_INVOKE_FROM_EVAL(0x245860A2FE4CB9D5LL, socket_set_blocking);
       break;
     case 2519:
       HASH_INVOKE_FROM_EVAL(0x7628053EFCC0C9D7LL, hphp_clear_unflushed);
@@ -78559,28 +79900,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2526:
       HASH_INVOKE_FROM_EVAL(0x5C039967E60089DELL, array_intersect_ukey);
       break;
-    case 2527:
-      HASH_INVOKE_FROM_EVAL(0x349E2E0F2CD7B9DFLL, magickgetversion);
-      break;
     case 2534:
       HASH_INVOKE_FROM_EVAL(0x1B44CF284E9B09E6LL, interface_exists);
       break;
     case 2537:
-      HASH_INVOKE_FROM_EVAL(0x4ADFA265F07AB9E9LL, drawgettextalignment);
       HASH_INVOKE_FROM_EVAL(0x6A45EB471332A9E9LL, imagecolorexactalpha);
       HASH_INVOKE_FROM_EVAL(0x330EE2729DB7C9E9LL, drawgetfontstretch);
-      break;
-    case 2538:
-      HASH_INVOKE_FROM_EVAL(0x25DDD924EFE979EALL, hash_update_file);
-      break;
-    case 2539:
-      HASH_INVOKE_FROM_EVAL(0x71B0FF80B88459EBLL, diskfreespace);
-      break;
-    case 2543:
-      HASH_INVOKE_FROM_EVAL(0x7EA6200B688459EFLL, ldap_modify);
-      break;
-    case 2544:
-      HASH_INVOKE_FROM_EVAL(0x1FC307200E8959F0LL, stream_bucket_append);
       break;
     case 2547:
       HASH_INVOKE_FROM_EVAL(0x6535B60A4BC449F3LL, dns_get_record);
@@ -78590,27 +79915,15 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2549:
       HASH_INVOKE_FROM_EVAL(0x2BC61637253BE9F5LL, drawgetfontweight);
-      HASH_INVOKE_FROM_EVAL(0x35BABFBC091759F5LL, socket_server);
       break;
     case 2557:
       HASH_INVOKE_FROM_EVAL(0x2394D4E030AB69FDLL, getmypid);
       break;
     case 2564:
       HASH_INVOKE_FROM_EVAL(0x0B88D3F582D16A04LL, memcache_get_extended_stats);
-      HASH_INVOKE_FROM_EVAL(0x17B83C425BD09A04LL, atanh);
       break;
-    case 2567:
-      HASH_INVOKE_FROM_EVAL(0x391E0A4CF1EC9A07LL, stream_socket_recvfrom);
-      break;
-    case 2568:
-      HASH_INVOKE_FROM_EVAL(0x0436CA4DFB315A08LL, soundex);
-      break;
-    case 2571:
-      HASH_INVOKE_FROM_EVAL(0x70075DC878825A0BLL, ctype_lower);
-      break;
-    case 2573:
-      HASH_INVOKE_FROM_EVAL(0x736C133EFF8E5A0DLL, mysql_list_fields);
-      HASH_INVOKE_FROM_EVAL(0x50A7146A79877A0DLL, pcntl_alarm);
+    case 2572:
+      HASH_INVOKE_FROM_EVAL(0x13E0C91488484A0CLL, imap_unsubscribe);
       break;
     case 2577:
       HASH_INVOKE_FROM_EVAL(0x472CA39715598A11LL, mb_eregi_replace);
@@ -78637,9 +79950,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x5EC0A3DD935EEA25LL, magickresampleimage);
       HASH_INVOKE_FROM_EVAL(0x1DB9A1FB97A3AA25LL, magicksetimageoption);
       break;
-    case 2601:
-      HASH_INVOKE_FROM_EVAL(0x618D2A98986B1A29LL, ldap_unbind);
-      break;
     case 2602:
       HASH_INVOKE_FROM_EVAL(0x3CAEA6B8D1C92A2ALL, stream_bucket_prepend);
       break;
@@ -78649,49 +79959,22 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2609:
       HASH_INVOKE_FROM_EVAL(0x1F3E32847C1CCA31LL, mb_ereg_match);
       break;
-    case 2612:
-      HASH_INVOKE_FROM_EVAL(0x2D948E4099975A34LL, restore_include_path);
-      HASH_INVOKE_FROM_EVAL(0x5AB266C6E7075A34LL, mysql_error);
-      break;
-    case 2616:
-      HASH_INVOKE_FROM_EVAL(0x3E65EF9761BE5A38LL, pixelgetiteratorexceptiontype);
-      break;
     case 2619:
       HASH_INVOKE_FROM_EVAL(0x545A7BE199EC4A3BLL, pcntl_getpriority);
-      HASH_INVOKE_FROM_EVAL(0x785ECCF53D98BA3BLL, curl_multi_exec);
       break;
     case 2620:
       HASH_INVOKE_FROM_EVAL(0x21DF7BAEEFABCA3CLL, umask);
-      break;
-    case 2622:
-      HASH_INVOKE_FROM_EVAL(0x31C3A072D092FA3ELL, socket_create_listen);
-      break;
-    case 2623:
-      HASH_INVOKE_FROM_EVAL(0x4C0E2C6882051A3FLL, magickgetresourcelimit);
       break;
     case 2624:
       HASH_INVOKE_FROM_EVAL(0x4926EE59103B2A40LL, destroydrawingwand);
       HASH_INVOKE_FROM_EVAL(0x682C14726D484A40LL, fileatime);
       break;
-    case 2626:
-      HASH_INVOKE_FROM_EVAL(0x128914E131AFFA42LL, microtime);
-      HASH_INVOKE_FROM_EVAL(0x5FF7C3A6BDDCFA42LL, mb_convert_kana);
-      break;
     case 2628:
       HASH_INVOKE_FROM_EVAL(0x7F6A6306BBE8AA44LL, imagelayereffect);
-      break;
-    case 2629:
-      HASH_INVOKE_FROM_EVAL(0x7CDF1FB642529A45LL, dom_characterdata_insert_data);
-      break;
-    case 2631:
-      HASH_INVOKE_FROM_EVAL(0x1B45CFF586F85A47LL, utf8_encode);
       break;
     case 2636:
       HASH_INVOKE_FROM_EVAL(0x4894583F517C6A4CLL, intl_get_error_code);
       HASH_INVOKE_FROM_EVAL(0x7039B1C3356B8A4CLL, hphp_splfileobject_rewind);
-      break;
-    case 2638:
-      HASH_INVOKE_FROM_EVAL(0x1635DCC4882CBA4ELL, dom_node_has_attributes);
       break;
     case 2640:
       HASH_INVOKE_FROM_EVAL(0x506BBFC1B32AEA50LL, memcache_replace);
@@ -78702,9 +79985,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2648:
       HASH_INVOKE_FROM_EVAL(0x6E823A722DE1EA58LL, stream_socket_client);
-      break;
-    case 2651:
-      HASH_INVOKE_FROM_EVAL(0x2B18DFF183C0BA5BLL, mb_get_info);
       break;
     case 2653:
       HASH_INVOKE_FROM_EVAL(0x7E1E9C4C3D4E8A5DLL, stream_select);
@@ -78719,91 +79999,34 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x469199B8FD886A65LL, putenv);
       HASH_INVOKE_FROM_EVAL(0x3590F3AAC94E0A65LL, array_change_key_case);
       break;
-    case 2662:
-      HASH_INVOKE_FROM_EVAL(0x60C4B9EEDBD5FA66LL, pos);
-      break;
-    case 2664:
-      HASH_INVOKE_FROM_EVAL(0x01DD2057FD9B1A68LL, xmlwriter_write_cdata);
-      HASH_INVOKE_FROM_EVAL(0x32AD0455A7689A68LL, magickoilpaintimage);
-      break;
     case 2665:
       HASH_INVOKE_FROM_EVAL(0x1DD37E722E11AA69LL, session_regenerate_id);
-      HASH_INVOKE_FROM_EVAL(0x10CDCF2BB4057A69LL, debug_zval_dump);
-      break;
-    case 2667:
-      HASH_INVOKE_FROM_EVAL(0x0912965F4440FA6BLL, str_repeat);
-      break;
-    case 2673:
-      HASH_INVOKE_FROM_EVAL(0x5B5DA6AD0AD63A71LL, drawannotation);
-      break;
-    case 2674:
-      HASH_INVOKE_FROM_EVAL(0x71AFF1D58D103A72LL, imagefontheight);
-      break;
-    case 2677:
-      HASH_INVOKE_FROM_EVAL(0x7A957BEC6CA57A75LL, preg_replace_callback);
       break;
     case 2681:
       HASH_INVOKE_FROM_EVAL(0x28AC28C54C4E6A79LL, openssl_error_string);
-      break;
-    case 2685:
-      HASH_INVOKE_FROM_EVAL(0x414C2E31304E9A7DLL, stream_get_filters);
       break;
     case 2689:
       HASH_INVOKE_FROM_EVAL(0x09367774F803EA81LL, hphp_recursiveiteratoriterator_valid);
       break;
     case 2690:
       HASH_INVOKE_FROM_EVAL(0x258205B54DC06A82LL, newpixelwands);
-      HASH_INVOKE_FROM_EVAL(0x79786FABC5551A82LL, jpeg2wbmp);
-      break;
-    case 2691:
-      HASH_INVOKE_FROM_EVAL(0x11149278DB0A9A83LL, levenshtein);
       break;
     case 2692:
       HASH_INVOKE_FROM_EVAL(0x08C1A5A05B6A0A84LL, ob_get_length);
       break;
     case 2693:
-      HASH_INVOKE_FROM_EVAL(0x755DEFDEDF35DA85LL, ctype_print);
       HASH_INVOKE_FROM_EVAL(0x2180916F8D4F6A85LL, drawcomment);
       break;
     case 2695:
       HASH_INVOKE_FROM_EVAL(0x7C5A22328CAB4A87LL, ereg_replace);
       break;
-    case 2696:
-      HASH_INVOKE_FROM_EVAL(0x1818A3CFBA357A88LL, magicksetwandsize);
-      break;
     case 2699:
-      HASH_INVOKE_FROM_EVAL(0x7588BD0546C8BA8BLL, hphp_recursivedirectoryiterator_valid);
       HASH_INVOKE_FROM_EVAL(0x7ACBCD9CF335AA8BLL, xmlwriter_start_document);
-      break;
-    case 2700:
-      HASH_INVOKE_FROM_EVAL(0x6A2EEE463F969A8CLL, getservbyname);
-      break;
-    case 2706:
-      HASH_INVOKE_FROM_EVAL(0x1257DB9F159E9A92LL, magickmontageimage);
-      break;
-    case 2707:
-      HASH_INVOKE_FROM_EVAL(0x4A32653C8E719A93LL, pixelgetcyan);
       break;
     case 2708:
       HASH_INVOKE_FROM_EVAL(0x465E6C67F885AA94LL, drawgetstrokelinejoin);
       HASH_INVOKE_FROM_EVAL(0x7761D019E0B5EA94LL, magickstripimage);
-      HASH_INVOKE_FROM_EVAL(0x4B1501C4C22FFA94LL, quoted_printable_encode);
       HASH_INVOKE_FROM_EVAL(0x0AC7CBCE30442A94LL, imagepalettecopy);
-      break;
-    case 2709:
-      HASH_INVOKE_FROM_EVAL(0x34B8A4E5AE0EFA95LL, pixelgetopacity);
-      break;
-    case 2711:
-      HASH_INVOKE_FROM_EVAL(0x0089115038C03A97LL, array_diff_ukey);
-      break;
-    case 2714:
-      HASH_INVOKE_FROM_EVAL(0x19AFF8596E19DA9ALL, xhprof_enable);
-      break;
-    case 2717:
-      HASH_INVOKE_FROM_EVAL(0x1234AB687C515A9DLL, mb_encode_numericentity);
-      break;
-    case 2719:
-      HASH_INVOKE_FROM_EVAL(0x2E5E23ECA0525A9FLL, bcadd);
       break;
     case 2720:
       HASH_INVOKE_FROM_EVAL(0x55FAF12AF1920AA0LL, sha1_file);
@@ -78811,14 +80034,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2723:
       HASH_INVOKE_FROM_EVAL(0x2B75B48A53AACAA3LL, imagestring);
       break;
-    case 2725:
-      HASH_INVOKE_FROM_EVAL(0x2418528164415AA5LL, magickscaleimage);
-      break;
     case 2726:
       HASH_INVOKE_FROM_EVAL(0x4BBA1E164DF9CAA6LL, localeconv);
-      break;
-    case 2727:
-      HASH_INVOKE_FROM_EVAL(0x797CEC173CBB7AA7LL, ob_get_flush);
       break;
     case 2729:
       HASH_INVOKE_FROM_EVAL(0x2238FC7870E9CAA9LL, strspn);
@@ -78834,20 +80051,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2738:
       HASH_INVOKE_FROM_EVAL(0x569EED88F20BAAB2LL, drawgettextundercolor);
-      HASH_INVOKE_FROM_EVAL(0x62519270CC9F1AB2LL, stream_get_meta_data);
       break;
     case 2740:
       HASH_INVOKE_FROM_EVAL(0x1BAFB965204D0AB4LL, openssl_x509_check_private_key);
-      break;
-    case 2751:
-      HASH_INVOKE_FROM_EVAL(0x030DFC3D3C88BABFLL, filegroup);
       break;
     case 2757:
       HASH_INVOKE_FROM_EVAL(0x3754E97715176AC5LL, hphp_get_stats);
       break;
     case 2759:
-      HASH_INVOKE_FROM_EVAL(0x5D2F899A270D9AC7LL, xmlwriter_end_dtd_element);
-      HASH_INVOKE_FROM_EVAL(0x79215854355CBAC7LL, proc_get_status);
       HASH_INVOKE_FROM_EVAL(0x3886D2664F874AC7LL, openssl_pkcs7_verify);
       break;
     case 2761:
@@ -78861,17 +80072,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2764:
       HASH_INVOKE_FROM_EVAL(0x750D0396676E6ACCLL, imagecolorexact);
-      HASH_INVOKE_FROM_EVAL(0x2BD6476D2C467ACCLL, pagelet_server_task_status);
       break;
     case 2765:
-      HASH_INVOKE_FROM_EVAL(0x173EDC165B673ACDLL, magicktransformimage);
-      break;
-    case 2769:
-      HASH_INVOKE_FROM_EVAL(0x47E2B4F7B8DE5AD1LL, xmlwriter_write_dtd_attlist);
-      HASH_INVOKE_FROM_EVAL(0x314317450857FAD1LL, ctype_punct);
+      HASH_INVOKE_FROM_EVAL(0x604572CB0314EACDLL, imap_listscan);
       break;
     case 2773:
-      HASH_INVOKE_FROM_EVAL(0x0D5DAF8034B41AD5LL, get_include_path);
       HASH_INVOKE_FROM_EVAL(0x5338F971C6DCEAD5LL, hphp_splfileinfo_islink);
       break;
     case 2774:
@@ -78882,16 +80087,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 2779:
       HASH_INVOKE_FROM_EVAL(0x24771ED112008ADBLL, echo);
-      HASH_INVOKE_FROM_EVAL(0x56E867A1F7507ADBLL, dom_document_create_processing_instruction);
       break;
     case 2780:
       HASH_INVOKE_FROM_EVAL(0x547E7EE64761AADCLL, imagecreatefromxbm);
-      break;
-    case 2781:
-      HASH_INVOKE_FROM_EVAL(0x3E319E451A32FADDLL, magicksharpenimage);
-      break;
-    case 2782:
-      HASH_INVOKE_FROM_EVAL(0x31D1C58F7BD89ADELL, hphp_directoryiterator_seek);
       break;
     case 2788:
       HASH_INVOKE_FROM_EVAL(0x47B15A7136E94AE4LL, strnatcasecmp);
@@ -78901,46 +80099,22 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x0E09D0FEA30B6AE6LL, hphp_get_function_info);
       break;
     case 2795:
-      HASH_INVOKE_FROM_EVAL(0x225F05071947BAEBLL, drawpathlinetoabsolute);
-      break;
-    case 2797:
-      HASH_INVOKE_FROM_EVAL(0x46C33B4739C2FAEDLL, shm_remove_var);
-      break;
-    case 2798:
-      HASH_INVOKE_FROM_EVAL(0x160A82E3E2CBBAEELL, is_finite);
-      break;
-    case 2800:
-      HASH_INVOKE_FROM_EVAL(0x6B259D5D9D681AF0LL, register_postsend_function);
-      break;
-    case 2804:
-      HASH_INVOKE_FROM_EVAL(0x2EC0ABF9A979FAF4LL, ob_get_level);
-      break;
-    case 2806:
-      HASH_INVOKE_FROM_EVAL(0x2C7C9772AE983AF6LL, drawsetgravity);
+      HASH_INVOKE_FROM_EVAL(0x528D41A17B8FCAEBLL, imap_set_quota);
       break;
     case 2808:
-      HASH_INVOKE_FROM_EVAL(0x12859AD75BAF3AF8LL, magickreadimageblob);
       HASH_INVOKE_FROM_EVAL(0x757229A894864AF8LL, session_set_cookie_params);
       break;
-    case 2813:
-      HASH_INVOKE_FROM_EVAL(0x16BA422EB6C51AFDLL, gzwrite);
-      break;
-    case 2814:
-      HASH_INVOKE_FROM_EVAL(0x04E86BA79B6CBAFELL, stream_socket_shutdown);
+    case 2810:
+      HASH_INVOKE_FROM_EVAL(0x3C32181DDB860AFALL, imap_getacl);
       break;
     case 2815:
       HASH_INVOKE_FROM_EVAL(0x7833F4C337542AFFLL, openssl_pkey_export);
       break;
-    case 2817:
-      HASH_INVOKE_FROM_EVAL(0x6F3503C7FB12DB01LL, lchgrp);
-      break;
     case 2819:
-      HASH_INVOKE_FROM_EVAL(0x673A96C50F00FB03LL, str_word_count);
       HASH_INVOKE_FROM_EVAL(0x32458C11C6E74B03LL, pixelsetblackquantum);
       break;
     case 2826:
       HASH_INVOKE_FROM_EVAL(0x14B366EF64A66B0ALL, get_loaded_extensions);
-      HASH_INVOKE_FROM_EVAL(0x14AF32A23B507B0ALL, metaphone);
       break;
     case 2829:
       HASH_INVOKE_FROM_EVAL(0x368DBC0699272B0DLL, magicknegateimage);
@@ -78952,12 +80126,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x24D0895FBB7BCB15LL, is_callable);
       HASH_INVOKE_FROM_EVAL(0x773E3809C4954B15LL, hphp_recursivedirectoryiterator_current);
       break;
-    case 2839:
-      HASH_INVOKE_FROM_EVAL(0x66F9A476DAB47B17LL, pixelsetcolor);
-      break;
-    case 2840:
-      HASH_INVOKE_FROM_EVAL(0x70448A629A74FB18LL, ksort);
-      break;
     case 2841:
       HASH_INVOKE_FROM_EVAL(0x0551EACBE8278B19LL, decoct);
       break;
@@ -78967,73 +80135,26 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2843:
       HASH_INVOKE_FROM_EVAL(0x1B7CE8114AEACB1BLL, magickannotateimage);
       break;
-    case 2844:
-      HASH_INVOKE_FROM_EVAL(0x249399CEC35B7B1CLL, png2wbmp);
-      break;
-    case 2846:
-      HASH_INVOKE_FROM_EVAL(0x7160AA24D4251B1ELL, mb_strripos);
-      break;
-    case 2848:
-      HASH_INVOKE_FROM_EVAL(0x1112712715D75B20LL, pixelgetblackquantum);
-      break;
     case 2853:
       HASH_INVOKE_FROM_EVAL(0x798F2776FECAEB25LL, get_required_files);
       break;
-    case 2854:
-      HASH_INVOKE_FROM_EVAL(0x24CE95457EACBB26LL, get_parent_class);
-      break;
     case 2857:
       HASH_INVOKE_FROM_EVAL(0x17C38BE3A6EE8B29LL, mysql_field_flags);
-      break;
-    case 2858:
-      HASH_INVOKE_FROM_EVAL(0x1F4984938E1DBB2ALL, sort);
-      break;
-    case 2860:
-      HASH_INVOKE_FROM_EVAL(0x70742211FA3EFB2CLL, imagettftext);
       break;
     case 2865:
       HASH_INVOKE_FROM_EVAL(0x442B1E05FC146B31LL, stream_context_set_param);
       break;
     case 2867:
       HASH_INVOKE_FROM_EVAL(0x00DCD60DD8752B33LL, set_exception_handler);
-      HASH_INVOKE_FROM_EVAL(0x4D5D45D1F1EB3B33LL, posix_access);
-      break;
-    case 2868:
-      HASH_INVOKE_FROM_EVAL(0x0B7D52E2540ABB34LL, tan);
       break;
     case 2869:
       HASH_INVOKE_FROM_EVAL(0x78842C1950B38B35LL, drawpathfinish);
       break;
-    case 2871:
-      HASH_INVOKE_FROM_EVAL(0x053B14F52350FB37LL, socket_shutdown);
-      break;
-    case 2872:
-      HASH_INVOKE_FROM_EVAL(0x68C09D6CB8E79B38LL, class_exists);
-      break;
-    case 2873:
-      HASH_INVOKE_FROM_EVAL(0x02A2C373E54FFB39LL, hash_init);
-      break;
-    case 2874:
-      HASH_INVOKE_FROM_EVAL(0x49A45F75B2B25B3ALL, apd_breakpoint);
-      break;
-    case 2876:
-      HASH_INVOKE_FROM_EVAL(0x35F4A0789F367B3CLL, drawpathlinetohorizontalrelative);
-      break;
     case 2878:
       HASH_INVOKE_FROM_EVAL(0x5E2AF775FEB04B3ELL, posix_getppid);
       break;
-    case 2879:
-      HASH_INVOKE_FROM_EVAL(0x0B07AD87DF1B5B3FLL, urldecode);
-      break;
-    case 2880:
-      HASH_INVOKE_FROM_EVAL(0x24CBCBA5C4407B40LL, evhttp_set_cache);
-      break;
-    case 2884:
-      HASH_INVOKE_FROM_EVAL(0x4E4449EBAADD7B44LL, magickpingimage);
-      break;
     case 2885:
       HASH_INVOKE_FROM_EVAL(0x684881C79ED1AB45LL, func_get_args);
-      HASH_INVOKE_FROM_EVAL(0x72E3AE55A0B33B45LL, ispixelwand);
       break;
     case 2886:
       HASH_INVOKE_FROM_EVAL(0x00D8FE7A00252B46LL, escapeshellarg);
@@ -79047,9 +80168,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2899:
       HASH_INVOKE_FROM_EVAL(0x40F0B69D55F7EB53LL, drawsetstrokealpha);
       break;
-    case 2901:
-      HASH_INVOKE_FROM_EVAL(0x333FB673518A1B55LL, ldap_get_entries);
-      break;
     case 2904:
       HASH_INVOKE_FROM_EVAL(0x6158E2E0A5ACCB58LL, idn_to_ascii);
       break;
@@ -79057,20 +80175,10 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x29203294F6214B5BLL, memcache_debug);
       HASH_INVOKE_FROM_EVAL(0x23FD09A13E0D8B5BLL, xmlwriter_open_memory);
       break;
-    case 2909:
-      HASH_INVOKE_FROM_EVAL(0x4888951358F53B5DLL, dom_document_get_elements_by_tag_name_ns);
-      break;
-    case 2913:
-      HASH_INVOKE_FROM_EVAL(0x7636825871399B61LL, highlight_file);
-      break;
-    case 2920:
-      HASH_INVOKE_FROM_EVAL(0x674F1DA24EDE7B68LL, xmlwriter_end_attribute);
-      break;
     case 2922:
       HASH_INVOKE_FROM_EVAL(0x4BD4E9D9D4A56B6ALL, exif_tagname);
       break;
     case 2923:
-      HASH_INVOKE_FROM_EVAL(0x5543A0CACD153B6BLL, substr_replace);
       HASH_INVOKE_FROM_EVAL(0x1D4136B4CEAE4B6BLL, stripcslashes);
       break;
     case 2927:
@@ -79079,27 +80187,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2928:
       HASH_INVOKE_FROM_EVAL(0x1A73FD4416FECB70LL, magickwriteimagefile);
       break;
-    case 2929:
-      HASH_INVOKE_FROM_EVAL(0x5E5C875DB04CFB71LL, drawrectangle);
-      break;
-    case 2933:
-      HASH_INVOKE_FROM_EVAL(0x42F0AED7599C1B75LL, magickechoimageblob);
-      break;
-    case 2934:
-      HASH_INVOKE_FROM_EVAL(0x2A63A0BF9B7E3B76LL, ini_alter);
-      break;
-    case 2935:
-      HASH_INVOKE_FROM_EVAL(0x7F5F29D8E63ABB77LL, mcrypt_module_self_test);
-      HASH_INVOKE_FROM_EVAL(0x5025B43B46679B77LL, openssl_x509_free);
-      break;
     case 2937:
       HASH_INVOKE_FROM_EVAL(0x31242F51AA828B79LL, drawpoppattern);
-      break;
-    case 2940:
-      HASH_INVOKE_FROM_EVAL(0x3A096F905FBF7B7CLL, magickcommentimage);
-      break;
-    case 2941:
-      HASH_INVOKE_FROM_EVAL(0x28DE19828167FB7DLL, magickmapimage);
       break;
     case 2943:
       HASH_INVOKE_FROM_EVAL(0x308C90AD9478CB7FLL, substr_compare);
@@ -79110,26 +80199,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2949:
       HASH_INVOKE_FROM_EVAL(0x41F8FDD700C0CB85LL, socket_last_error);
       break;
-    case 2955:
-      HASH_INVOKE_FROM_EVAL(0x3B72159A4B04FB8BLL, set_time_limit);
-      break;
-    case 2957:
-      HASH_INVOKE_FROM_EVAL(0x3B831DB1A615FB8DLL, xhprof_sample_enable);
-      break;
-    case 2958:
-      HASH_INVOKE_FROM_EVAL(0x62A4D7A03F7C3B8ELL, ceil);
-      break;
     case 2967:
       HASH_INVOKE_FROM_EVAL(0x09837A82A928AB97LL, is_null);
-      break;
-    case 2969:
-      HASH_INVOKE_FROM_EVAL(0x076E66D4089A3B99LL, mb_stripos);
-      break;
-    case 2970:
-      HASH_INVOKE_FROM_EVAL(0x023133732CB51B9ALL, exif_thumbnail);
-      break;
-    case 2975:
-      HASH_INVOKE_FROM_EVAL(0x390A267EC6B51B9FLL, socket_sendto);
       break;
     case 2978:
       HASH_INVOKE_FROM_EVAL(0x4870ADD98EE02BA2LL, pcntl_wifsignaled);
@@ -79137,21 +80208,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 2979:
       HASH_INVOKE_FROM_EVAL(0x444A3375EFBC2BA3LL, openssl_public_decrypt);
       break;
-    case 2980:
-      HASH_INVOKE_FROM_EVAL(0x0D95DD13A2D3BBA4LL, drawtranslate);
-      break;
-    case 2986:
-      HASH_INVOKE_FROM_EVAL(0x7C833A303C7CFBAALL, getrandmax);
-      break;
     case 2987:
       HASH_INVOKE_FROM_EVAL(0x006481EAF2A70BABLL, ldap_errno);
       break;
     case 2991:
       HASH_INVOKE_FROM_EVAL(0x6A2236CDDFF12BAFLL, magickhaspreviousimage);
-      break;
-    case 2992:
-      HASH_INVOKE_FROM_EVAL(0x1F3E4C6660247BB0LL, imagecolorresolve);
-      HASH_INVOKE_FROM_EVAL(0x7D9BF61D6CDE3BB0LL, fb_parallel_query);
       break;
     case 2993:
       HASH_INVOKE_FROM_EVAL(0x04A24B397CF46BB1LL, strrchr);
@@ -79164,12 +80225,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3006:
       HASH_INVOKE_FROM_EVAL(0x79617ED8EFD1ABBELL, get_class_vars);
-      HASH_INVOKE_FROM_EVAL(0x3F56AF1511AEDBBELL, magicklabelimage);
       HASH_INVOKE_FROM_EVAL(0x5ECB0B145B88EBBELL, imagefilledarc);
       HASH_INVOKE_FROM_EVAL(0x42684202E2E62BBELL, mcrypt_get_iv_size);
-      break;
-    case 3015:
-      HASH_INVOKE_FROM_EVAL(0x10C5CF7B55173BC7LL, settype);
       break;
     case 3017:
       HASH_INVOKE_FROM_EVAL(0x0B4E7B9180C4ABC9LL, xml_set_end_namespace_decl_handler);
@@ -79177,39 +80234,24 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3018:
       HASH_INVOKE_FROM_EVAL(0x0D375A94E75ACBCALL, hphp_throw_fatal_error);
-      HASH_INVOKE_FROM_EVAL(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner);
       break;
     case 3021:
       HASH_INVOKE_FROM_EVAL(0x22251ECF8CD58BCDLL, array_product);
-      HASH_INVOKE_FROM_EVAL(0x53A88C8F973CFBCDLL, apc_clear_cache);
       break;
     case 3022:
-      HASH_INVOKE_FROM_EVAL(0x45D6BA980AFFDBCELL, msg_get_queue);
       HASH_INVOKE_FROM_EVAL(0x600AFF0A6378ABCELL, is_writeable);
       break;
     case 3024:
       HASH_INVOKE_FROM_EVAL(0x7046755D8374EBD0LL, ctype_digit);
-      HASH_INVOKE_FROM_EVAL(0x6846CA07A5E21BD0LL, hphp_directoryiterator___construct);
-      break;
-    case 3026:
-      HASH_INVOKE_FROM_EVAL(0x6FE3C5FF5E883BD2LL, round);
       break;
     case 3028:
       HASH_INVOKE_FROM_EVAL(0x5B2F2A23D8368BD4LL, magickraiseimage);
-      HASH_INVOKE_FROM_EVAL(0x4E4EB301A994DBD4LL, drawpolygon);
       break;
     case 3032:
-      HASH_INVOKE_FROM_EVAL(0x21E44C7C7A911BD8LL, phpinfo);
       HASH_INVOKE_FROM_EVAL(0x06D5979AB150EBD8LL, dom_node_lookup_namespace_uri);
       break;
-    case 3038:
-      HASH_INVOKE_FROM_EVAL(0x58D0D9B66F045BDELL, strpos);
-      break;
-    case 3040:
-      HASH_INVOKE_FROM_EVAL(0x2E10B74DC6067BE0LL, strip_tags);
-      break;
-    case 3041:
-      HASH_INVOKE_FROM_EVAL(0x25FBB61480091BE1LL, mysql_client_encoding);
+    case 3045:
+      HASH_INVOKE_FROM_EVAL(0x0E804FCE5C14CBE5LL, imap_sort);
       break;
     case 3047:
       HASH_INVOKE_FROM_EVAL(0x1BB5D99C1D29CBE7LL, strstr);
@@ -79217,81 +80259,38 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3048:
       HASH_INVOKE_FROM_EVAL(0x4E903B706977ABE8LL, imagepsslantfont);
       break;
-    case 3051:
-      HASH_INVOKE_FROM_EVAL(0x505B44DDF2383BEBLL, drawgetfillcolor);
-      HASH_INVOKE_FROM_EVAL(0x0C1904372E8EDBEBLL, stream_copy_to_stream);
-      break;
-    case 3052:
-      HASH_INVOKE_FROM_EVAL(0x44279BB3E2191BECLL, socket_accept);
-      HASH_INVOKE_FROM_EVAL(0x5A22BA9B012A9BECLL, dom_document_save_html);
-      break;
     case 3054:
       HASH_INVOKE_FROM_EVAL(0x03F50E435DE20BEELL, magickclippathimage);
       HASH_INVOKE_FROM_EVAL(0x790B7C44A3442BEELL, asort);
       break;
-    case 3056:
-      HASH_INVOKE_FROM_EVAL(0x187C049E785A1BF0LL, iconv_get_encoding);
-      HASH_INVOKE_FROM_EVAL(0x04C0582DB1AD7BF0LL, mt_srand);
-      break;
-    case 3057:
-      HASH_INVOKE_FROM_EVAL(0x0CA96856E5BEFBF1LL, iptcparse);
-      break;
     case 3060:
-      HASH_INVOKE_FROM_EVAL(0x1444DB037B4D5BF4LL, imagegammacorrect);
+      HASH_INVOKE_FROM_EVAL(0x46EC26486531ABF4LL, imap_deletemailbox);
       break;
     case 3062:
       HASH_INVOKE_FROM_EVAL(0x08B4BEBAB3312BF6LL, image_type_to_extension);
       break;
-    case 3063:
-      HASH_INVOKE_FROM_EVAL(0x74ABB4A1E10BBBF7LL, time);
-      break;
-    case 3065:
-      HASH_INVOKE_FROM_EVAL(0x5B7F6E0A642BBBF9LL, sleep);
-      break;
-    case 3068:
-      HASH_INVOKE_FROM_EVAL(0x64F52E1DB5E95BFCLL, curl_multi_remove_handle);
-      break;
-    case 3074:
-      HASH_INVOKE_FROM_EVAL(0x249340DF734D9C02LL, magickgetimageheight);
-      break;
     case 3077:
       HASH_INVOKE_FROM_EVAL(0x2EC378A759F9EC05LL, xbox_task_status);
       break;
-    case 3080:
-      HASH_INVOKE_FROM_EVAL(0x48E1616EE837FC08LL, is_uploaded_file);
-      break;
-    case 3082:
-      HASH_INVOKE_FROM_EVAL(0x1E47C281193ABC0ALL, collator_compare);
+    case 3079:
+      HASH_INVOKE_FROM_EVAL(0x66EF68EF3C144C07LL, imap_gc);
       break;
     case 3083:
       HASH_INVOKE_FROM_EVAL(0x0EEE484739520C0BLL, magickthresholdimage);
       HASH_INVOKE_FROM_EVAL(0x0833BCE91C40CC0BLL, magickqueryconfigureoption);
       break;
     case 3090:
-      HASH_INVOKE_FROM_EVAL(0x062C0FFA8E29DC12LL, intl_error_name);
       HASH_INVOKE_FROM_EVAL(0x510B683F2E764C12LL, fb_load_local_databases);
-      break;
-    case 3095:
-      HASH_INVOKE_FROM_EVAL(0x3A702EF906B37C17LL, collator_get_locale);
       break;
     case 3099:
       HASH_INVOKE_FROM_EVAL(0x67742A0F218F6C1BLL, posix_initgroups);
       HASH_INVOKE_FROM_EVAL(0x7D615C7E3ADB2C1BLL, xmlwriter_write_comment);
       break;
-    case 3100:
-      HASH_INVOKE_FROM_EVAL(0x758A62BD65E6FC1CLL, imagegd2);
-      break;
     case 3102:
-      HASH_INVOKE_FROM_EVAL(0x7039C5EBB1D6BC1ELL, array_walk);
-      break;
-    case 3103:
-      HASH_INVOKE_FROM_EVAL(0x3A5D921797669C1FLL, hphp_log);
+      HASH_INVOKE_FROM_EVAL(0x32D5F30455C90C1ELL, imap_subscribe);
       break;
     case 3104:
       HASH_INVOKE_FROM_EVAL(0x7BD43EB167198C20LL, xmlwriter_write_pi);
-      break;
-    case 3105:
-      HASH_INVOKE_FROM_EVAL(0x0179CBA2C5F4DC21LL, magickgetimageformat);
       break;
     case 3111:
       HASH_INVOKE_FROM_EVAL(0x5A02EE8ED39F0C27LL, posix_getgrnam);
@@ -79305,29 +80304,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3116:
       HASH_INVOKE_FROM_EVAL(0x116C3EC924B9AC2CLL, imagegd);
       break;
-    case 3122:
-      HASH_INVOKE_FROM_EVAL(0x0B9B362534621C32LL, isdrawingwand);
-      break;
-    case 3123:
-      HASH_INVOKE_FROM_EVAL(0x49965C44E9EE3C33LL, set_file_buffer);
-      break;
     case 3125:
       HASH_INVOKE_FROM_EVAL(0x2B9A380A29D0EC35LL, session_write_close);
       break;
-    case 3128:
-      HASH_INVOKE_FROM_EVAL(0x21564F9315F3FC38LL, drawsettextdecoration);
-      break;
-    case 3132:
-      HASH_INVOKE_FROM_EVAL(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator);
-      break;
-    case 3134:
-      HASH_INVOKE_FROM_EVAL(0x15EC581662651C3ELL, date_parse);
-      break;
     case 3141:
       HASH_INVOKE_FROM_EVAL(0x6EF89BCAD607CC45LL, strncasecmp);
-      break;
-    case 3142:
-      HASH_INVOKE_FROM_EVAL(0x7D992445F5E37C46LL, magicktextureimage);
       break;
     case 3143:
       HASH_INVOKE_FROM_EVAL(0x44055093E56E4C47LL, mcrypt_enc_get_key_size);
@@ -79339,14 +80320,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3146:
       HASH_INVOKE_FROM_EVAL(0x3C23768CFB492C4ALL, gzinflate);
       break;
-    case 3147:
-      HASH_INVOKE_FROM_EVAL(0x120E7B01366DFC4BLL, call_user_func_serialized);
-      break;
     case 3150:
       HASH_INVOKE_FROM_EVAL(0x5DAC1C64D8F08C4ELL, openssl_pkey_get_private);
-      break;
-    case 3152:
-      HASH_INVOKE_FROM_EVAL(0x04534F26B8D05C50LL, drawgetstrokecolor);
       break;
     case 3153:
       HASH_INVOKE_FROM_EVAL(0x56EDB60C824E8C51LL, key);
@@ -79356,32 +80331,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3159:
       HASH_INVOKE_FROM_EVAL(0x793259E03C37CC57LL, memcache_decrement);
-      HASH_INVOKE_FROM_EVAL(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
-      break;
-    case 3160:
-      HASH_INVOKE_FROM_EVAL(0x1B8C3DA27170DC58LL, dirname);
-      break;
-    case 3161:
-      HASH_INVOKE_FROM_EVAL(0x57633BDF8DB3FC59LL, i18n_loc_set_attribute);
-      break;
-    case 3166:
-      HASH_INVOKE_FROM_EVAL(0x47B38F1E4FA29C5ELL, fb_get_code_coverage);
-      break;
-    case 3169:
-      HASH_INVOKE_FROM_EVAL(0x6E54EEDA1D887C61LL, magicksetimageinterlacescheme);
-      HASH_INVOKE_FROM_EVAL(0x5176725DA884DC61LL, curl_setopt);
       break;
     case 3171:
       HASH_INVOKE_FROM_EVAL(0x43C0E9827D502C63LL, array_intersect_assoc);
       break;
     case 3172:
       HASH_INVOKE_FROM_EVAL(0x3409D717D9246C64LL, libxml_use_internal_errors);
-      break;
-    case 3175:
-      HASH_INVOKE_FROM_EVAL(0x07DC355325165C67LL, magickwriteimage);
-      break;
-    case 3176:
-      HASH_INVOKE_FROM_EVAL(0x10D6AE9D688D1C68LL, copy);
       break;
     case 3178:
       HASH_INVOKE_FROM_EVAL(0x41BD9EA0BC5E4C6ALL, move_uploaded_file);
@@ -79391,10 +80346,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3185:
       HASH_INVOKE_FROM_EVAL(0x1E074215FE5FCC71LL, set_error_handler);
-      HASH_INVOKE_FROM_EVAL(0x18D9ED67E8E0FC71LL, dom_attr_is_id);
-      break;
-    case 3188:
-      HASH_INVOKE_FROM_EVAL(0x20F0AAA486F39C74LL, dom_element_get_elements_by_tag_name_ns);
       break;
     case 3189:
       HASH_INVOKE_FROM_EVAL(0x528366F3195ACC75LL, xbox_task_result);
@@ -79416,14 +80367,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3198:
       HASH_INVOKE_FROM_EVAL(0x5F41821072A06C7ELL, hphp_splfileinfo_getctime);
       break;
-    case 3201:
-      HASH_INVOKE_FROM_EVAL(0x767806D6F1053C81LL, sin);
-      break;
     case 3204:
       HASH_INVOKE_FROM_EVAL(0x5D49AF7004696C84LL, shm_detach);
-      break;
-    case 3205:
-      HASH_INVOKE_FROM_EVAL(0x56DA17241B793C85LL, mysql_set_timeout);
       break;
     case 3209:
       HASH_INVOKE_FROM_EVAL(0x0F9C0C82F40F2C89LL, pixelsetcyanquantum);
@@ -79438,23 +80383,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x05556EDFC1BB0C90LL, mysql_info);
       HASH_INVOKE_FROM_EVAL(0x3F0C947E68D02C90LL, ini_get_all);
       break;
-    case 3217:
-      HASH_INVOKE_FROM_EVAL(0x4E04B71729485C91LL, clonedrawingwand);
-      break;
-    case 3219:
-      HASH_INVOKE_FROM_EVAL(0x0F8242C6327B5C93LL, dns_check_record);
-      break;
     case 3222:
       HASH_INVOKE_FROM_EVAL(0x47C5BC101A512C96LL, magickquantizeimage);
       break;
     case 3225:
       HASH_INVOKE_FROM_EVAL(0x2EA6E1D600786C99LL, mb_strtoupper);
-      break;
-    case 3226:
-      HASH_INVOKE_FROM_EVAL(0x374F20BDAF709C9ALL, mb_preferred_mime_name);
-      break;
-    case 3227:
-      HASH_INVOKE_FROM_EVAL(0x36F7F9FD7766DC9BLL, xmlwriter_end_comment);
       break;
     case 3230:
       HASH_INVOKE_FROM_EVAL(0x50296037C7968C9ELL, preg_split);
@@ -79469,14 +80402,9 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1C1216F2B7C16CADLL, ftell);
       break;
     case 3246:
-      HASH_INVOKE_FROM_EVAL(0x12580A083B0D7CAELL, iterator_apply);
       HASH_INVOKE_FROM_EVAL(0x3ACD2F1EA5282CAELL, magickmattefloodfillimage);
       break;
-    case 3248:
-      HASH_INVOKE_FROM_EVAL(0x373B3FADEACB7CB0LL, openssl_private_encrypt);
-      break;
     case 3249:
-      HASH_INVOKE_FROM_EVAL(0x40D8DC24FA917CB1LL, hphp_splfileobject_fgetss);
       HASH_INVOKE_FROM_EVAL(0x735555B148E58CB1LL, ldap_read);
       break;
     case 3250:
@@ -79489,10 +80417,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3254:
       HASH_INVOKE_FROM_EVAL(0x560637BE51C36CB6LL, ezmlm_hash);
       break;
-    case 3255:
-      HASH_INVOKE_FROM_EVAL(0x3DFD5CA79919DCB7LL, imageantialias);
-      HASH_INVOKE_FROM_EVAL(0x39E03AAC188D3CB7LL, magickgetimagecompressionquality);
-      break;
     case 3259:
       HASH_INVOKE_FROM_EVAL(0x031F9B7B9A08ECBBLL, bzcompress);
       HASH_INVOKE_FROM_EVAL(0x41D3B07854936CBBLL, token_get_all);
@@ -79503,38 +80427,20 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x3978BE548631ECBCLL, hash_final);
       HASH_INVOKE_FROM_EVAL(0x733137183026ACBCLL, hphp_splfileobject_next);
       break;
-    case 3264:
-      HASH_INVOKE_FROM_EVAL(0x3033FE14E114FCC0LL, magicksetimageblueprimary);
-      break;
     case 3266:
       HASH_INVOKE_FROM_EVAL(0x42BCEFCF899D0CC2LL, magickgetimagecolorspace);
-      HASH_INVOKE_FROM_EVAL(0x34B6388D7730BCC2LL, drawline);
       break;
     case 3267:
       HASH_INVOKE_FROM_EVAL(0x7A147B8B98C76CC3LL, key_exists);
       break;
-    case 3278:
-      HASH_INVOKE_FROM_EVAL(0x0183A548B759BCCELL, posix_getpgid);
-      HASH_INVOKE_FROM_EVAL(0x66273C5932B1FCCELL, clock_gettime);
-      break;
-    case 3279:
-      HASH_INVOKE_FROM_EVAL(0x407B1F3AFEC43CCFLL, pixelgetblue);
-      break;
-    case 3281:
-      HASH_INVOKE_FROM_EVAL(0x576C5DC462663CD1LL, explode);
+    case 3272:
+      HASH_INVOKE_FROM_EVAL(0x4CF625DF902F8CC8LL, imap_get_quotaroot);
       break;
     case 3282:
       HASH_INVOKE_FROM_EVAL(0x1FD3FB2AB0F48CD2LL, magickgetimagesignature);
       break;
     case 3283:
-      HASH_INVOKE_FROM_EVAL(0x544302E2FAD3FCD3LL, magicknextimage);
       HASH_INVOKE_FROM_EVAL(0x6406BC03A5D84CD3LL, dom_element_remove_attribute);
-      break;
-    case 3284:
-      HASH_INVOKE_FROM_EVAL(0x323FE1D92C9B3CD4LL, gzdecode);
-      break;
-    case 3285:
-      HASH_INVOKE_FROM_EVAL(0x757BC444FDF79CD5LL, posix_get_last_error);
       break;
     case 3286:
       HASH_INVOKE_FROM_EVAL(0x11166D3106DB6CD6LL, wandhasexception);
@@ -79544,13 +80450,10 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3290:
       HASH_INVOKE_FROM_EVAL(0x674AA2DBDA5E4CDALL, imageloadfont);
-      HASH_INVOKE_FROM_EVAL(0x09C6455B4BC6FCDALL, drawsetviewbox);
       break;
     case 3298:
       HASH_INVOKE_FROM_EVAL(0x6B92530A9ABA0CE2LL, session_commit);
-      break;
-    case 3300:
-      HASH_INVOKE_FROM_EVAL(0x7CDDF96AFEA2DCE4LL, chunk_split);
+      HASH_INVOKE_FROM_EVAL(0x2D5A5580B9FD2CE2LL, imap_setacl);
       break;
     case 3306:
       HASH_INVOKE_FROM_EVAL(0x5A8AF4F880DA4CEALL, mailparse_msg_extract_whole_part_file);
@@ -79559,17 +80462,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3310:
       HASH_INVOKE_FROM_EVAL(0x78FFA0E69D6AACEELL, mcrypt_cfb);
       break;
-    case 3311:
-      HASH_INVOKE_FROM_EVAL(0x6AA89C314C647CEFLL, magickgetimagehistogram);
-      break;
     case 3313:
       HASH_INVOKE_FROM_EVAL(0x21C8FC9A94404CF1LL, php_ini_scanned_files);
-      break;
-    case 3314:
-      HASH_INVOKE_FROM_EVAL(0x26C49BBC67475CF2LL, magicksetimagewhitepoint);
-      break;
-    case 3315:
-      HASH_INVOKE_FROM_EVAL(0x5C1F75D51C077CF3LL, pixelgetindex);
       break;
     case 3317:
       HASH_INVOKE_FROM_EVAL(0x26729ECB00B8ECF5LL, end_user_func_async);
@@ -79580,14 +80474,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3321:
       HASH_INVOKE_FROM_EVAL(0x537CF5DE8C43CCF9LL, curl_getinfo);
       break;
-    case 3323:
-      HASH_INVOKE_FROM_EVAL(0x09B4EE276DCCFCFBLL, mysql_fetch_row);
-      break;
-    case 3326:
-      HASH_INVOKE_FROM_EVAL(0x768F3E6D1CBA5CFELL, socket_recv);
-      break;
     case 3327:
-      HASH_INVOKE_FROM_EVAL(0x748D3DFF0EB57CFFLL, uniqid);
       HASH_INVOKE_FROM_EVAL(0x48A2F2A7A4620CFFLL, pixelsetyellowquantum);
       break;
     case 3330:
@@ -79597,80 +80484,38 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3332:
       HASH_INVOKE_FROM_EVAL(0x1248250E701DAD04LL, magickgaussianblurimage);
       break;
-    case 3334:
-      HASH_INVOKE_FROM_EVAL(0x2BA9FB0F8B76DD06LL, number_format);
-      break;
     case 3335:
       HASH_INVOKE_FROM_EVAL(0x19B643D858DC6D07LL, magickgetimagerenderingintent);
-      break;
-    case 3337:
-      HASH_INVOKE_FROM_EVAL(0x153F7DBFC9047D09LL, pixelsetred);
       break;
     case 3338:
       HASH_INVOKE_FROM_EVAL(0x6E8996DD071CED0ALL, dom_element_remove_attribute_node);
       break;
-    case 3340:
-      HASH_INVOKE_FROM_EVAL(0x30A8326034801D0CLL, mysql_pconnect);
-      break;
-    case 3341:
-      HASH_INVOKE_FROM_EVAL(0x3ACE8A8BC9ACDD0DLL, iconv_mime_decode);
-      break;
     case 3344:
-      HASH_INVOKE_FROM_EVAL(0x42BEEC88EE81FD10LL, imagechar);
-      HASH_INVOKE_FROM_EVAL(0x08F41A00D5D57D10LL, mb_decode_mimeheader);
       HASH_INVOKE_FROM_EVAL(0x5CEFA5A265104D10LL, count);
       break;
     case 3345:
       HASH_INVOKE_FROM_EVAL(0x2D484921B5400D11LL, magickradialblurimage);
-      break;
-    case 3346:
-      HASH_INVOKE_FROM_EVAL(0x5F165B40AEEE5D12LL, hphp_splfileinfo_getfilename);
-      break;
-    case 3348:
-      HASH_INVOKE_FROM_EVAL(0x63837ECAF6235D14LL, preg_replace);
       break;
     case 3351:
       HASH_INVOKE_FROM_EVAL(0x12BB5E00E714ED17LL, magickgetimagecompose);
       break;
     case 3354:
       HASH_INVOKE_FROM_EVAL(0x75DB75CA9DE56D1ALL, xml_parser_get_option);
-      HASH_INVOKE_FROM_EVAL(0x39994614C6315D1ALL, hphp_recursivedirectoryiterator_key);
       break;
     case 3355:
       HASH_INVOKE_FROM_EVAL(0x70C22A7EEF54CD1BLL, ldap_compare);
       break;
-    case 3358:
-      HASH_INVOKE_FROM_EVAL(0x25DADFF238A15D1ELL, collator_create);
-      break;
     case 3359:
       HASH_INVOKE_FROM_EVAL(0x566465036CCBCD1FLL, min);
-      break;
-    case 3365:
-      HASH_INVOKE_FROM_EVAL(0x71DF0C17F47EDD25LL, getprotobynumber);
       break;
     case 3366:
       HASH_INVOKE_FROM_EVAL(0x429D088E9779CD26LL, dom_document_normalize_document);
       break;
-    case 3368:
-      HASH_INVOKE_FROM_EVAL(0x7C12261259F87D28LL, mcrypt_enc_is_block_algorithm_mode);
-      break;
     case 3369:
       HASH_INVOKE_FROM_EVAL(0x632D50B69429ED29LL, socket_set_block);
       break;
-    case 3370:
-      HASH_INVOKE_FROM_EVAL(0x7A9C06B9CF853D2ALL, substr_count);
-      break;
-    case 3378:
-      HASH_INVOKE_FROM_EVAL(0x4DAC43060BA57D32LL, stream_wrapper_restore);
-      break;
     case 3382:
       HASH_INVOKE_FROM_EVAL(0x515841235FADCD36LL, class_implements);
-      break;
-    case 3383:
-      HASH_INVOKE_FROM_EVAL(0x3ACF745D381E9D37LL, rtrim);
-      break;
-    case 3384:
-      HASH_INVOKE_FROM_EVAL(0x0BA3AD85EB597D38LL, pagelet_server_task_result);
       break;
     case 3387:
       HASH_INVOKE_FROM_EVAL(0x0784B2B034560D3BLL, destroypixelwand);
@@ -79679,37 +80524,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3392:
       HASH_INVOKE_FROM_EVAL(0x198627C81DABAD40LL, register_cleanup_function);
       break;
-    case 3393:
-      HASH_INVOKE_FROM_EVAL(0x6B6DA1EE18673D41LL, xmlwriter_end_dtd_entity);
-      break;
-    case 3394:
-      HASH_INVOKE_FROM_EVAL(0x40497FCA4EC4DD42LL, posix_seteuid);
-      HASH_INVOKE_FROM_EVAL(0x298BA735FA3ABD42LL, nl_langinfo);
-      break;
-    case 3397:
-      HASH_INVOKE_FROM_EVAL(0x400A44045A999D45LL, rawurlencode);
-      break;
-    case 3398:
-      HASH_INVOKE_FROM_EVAL(0x502CF4EB0A747D46LL, magicksetimagebias);
-      HASH_INVOKE_FROM_EVAL(0x455DB7F86BCEDD46LL, pixelsetopacityquantum);
-      HASH_INVOKE_FROM_EVAL(0x59AD2C922FF75D46LL, mdecrypt_generic);
-      break;
     case 3401:
-      HASH_INVOKE_FROM_EVAL(0x113ED435AEFDDD49LL, imagecolorallocatealpha);
       HASH_INVOKE_FROM_EVAL(0x41785512C45FCD49LL, mysql_ping);
-      break;
-    case 3407:
-      HASH_INVOKE_FROM_EVAL(0x0FBCF35ADD209D4FLL, drawarc);
       break;
     case 3408:
       HASH_INVOKE_FROM_EVAL(0x39B11A2A25E40D50LL, mysql_get_server_info);
       HASH_INVOKE_FROM_EVAL(0x337D2252CDA22D50LL, is_real);
-      break;
-    case 3413:
-      HASH_INVOKE_FROM_EVAL(0x36D672EF4FBEFD55LL, json_encode);
-      break;
-    case 3416:
-      HASH_INVOKE_FROM_EVAL(0x146109BDD2F97D58LL, hphp_splfileobject_setmaxlinelen);
       break;
     case 3418:
       HASH_INVOKE_FROM_EVAL(0x4ACCF26A7AE80D5ALL, imagefilltoborder);
@@ -79721,12 +80541,10 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1371413B4F6F8D5CLL, pixelgetred);
       break;
     case 3424:
-      HASH_INVOKE_FROM_EVAL(0x6FACBD7F02B6FD60LL, uasort);
       HASH_INVOKE_FROM_EVAL(0x567276D68FE12D60LL, preg_quote);
       break;
     case 3425:
       HASH_INVOKE_FROM_EVAL(0x34F150F3D94E6D61LL, gzpassthru);
-      HASH_INVOKE_FROM_EVAL(0x357BAB6E700EBD61LL, destroypixelwandarray);
       break;
     case 3430:
       HASH_INVOKE_FROM_EVAL(0x0C393EE8F6540D66LL, bccomp);
@@ -79736,27 +80554,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x7D9E024FD8696D6DLL, get_class);
       HASH_INVOKE_FROM_EVAL(0x4351AFD0FD818D6DLL, magickmotionblurimage);
       break;
-    case 3438:
-      HASH_INVOKE_FROM_EVAL(0x0B1348D1540E7D6ELL, magicksetimageformat);
-      break;
     case 3441:
       HASH_INVOKE_FROM_EVAL(0x74FDC4596C654D71LL, dom_node_is_default_namespace);
-      break;
-    case 3443:
-      HASH_INVOKE_FROM_EVAL(0x7D8DCC72522CBD73LL, mb_detect_encoding);
       break;
     case 3446:
       HASH_INVOKE_FROM_EVAL(0x7467E8107EF08D76LL, unpack);
       break;
     case 3447:
       HASH_INVOKE_FROM_EVAL(0x3ED49C2BBDDFAD77LL, ldap_next_reference);
-      HASH_INVOKE_FROM_EVAL(0x7FCAAAB932C57D77LL, iterator_count);
-      break;
-    case 3448:
-      HASH_INVOKE_FROM_EVAL(0x6352349F97557D78LL, stream_socket_get_name);
-      break;
-    case 3451:
-      HASH_INVOKE_FROM_EVAL(0x680A7EB3DA1F5D7BLL, prev);
       break;
     case 3454:
       HASH_INVOKE_FROM_EVAL(0x384E8BC9B5FE2D7ELL, magickfximage);
@@ -79768,10 +80573,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x25EA810DAEA74D81LL, ob_clean);
       break;
     case 3458:
-      HASH_INVOKE_FROM_EVAL(0x2D15262403ADDD82LL, drawcomposite);
-      break;
-    case 3459:
-      HASH_INVOKE_FROM_EVAL(0x1B0FF5C02F571D83LL, fb_rename_function);
+      HASH_INVOKE_FROM_EVAL(0x363D0D4E6D8ACD82LL, imap_alerts);
       break;
     case 3463:
       HASH_INVOKE_FROM_EVAL(0x344091B785FE8D87LL, socket_set_timeout);
@@ -79779,9 +80581,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3464:
       HASH_INVOKE_FROM_EVAL(0x2AFF8525E93D6D88LL, drawsetfillopacity);
       HASH_INVOKE_FROM_EVAL(0x1F22C82816F9AD88LL, hphp_splfileinfo_getpath);
-      break;
-    case 3465:
-      HASH_INVOKE_FROM_EVAL(0x230E7AD147721D89LL, end);
       break;
     case 3470:
       HASH_INVOKE_FROM_EVAL(0x6A351AEDFC4D0D8ELL, magickgetimagemimetype);
@@ -79795,100 +80594,53 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3473:
       HASH_INVOKE_FROM_EVAL(0x5695393CF6428D91LL, dom_element_set_id_attribute);
       HASH_INVOKE_FROM_EVAL(0x48444F8F18E60D91LL, strftime);
-      HASH_INVOKE_FROM_EVAL(0x7C2B3FE61FBDFD91LL, openssl_pkey_get_details);
-      break;
-    case 3480:
-      HASH_INVOKE_FROM_EVAL(0x06A796D329C21D98LL, call_user_func);
-      break;
-    case 3485:
-      HASH_INVOKE_FROM_EVAL(0x74BE8836F3B13D9DLL, session_name);
       break;
     case 3486:
       HASH_INVOKE_FROM_EVAL(0x30C1AE2B06990D9ELL, gzseek);
       break;
     case 3488:
-      HASH_INVOKE_FROM_EVAL(0x73B43ABDD5C61DA0LL, shuffle);
-      HASH_INVOKE_FROM_EVAL(0x5E8606470A09BDA0LL, magickposterizeimage);
       HASH_INVOKE_FROM_EVAL(0x7084C6294240CDA0LL, octdec);
-      HASH_INVOKE_FROM_EVAL(0x167A11C41EB71DA0LL, pixelgetexceptiontype);
-      break;
-    case 3490:
-      HASH_INVOKE_FROM_EVAL(0x71583A8FEF5C7DA2LL, sys_get_temp_dir);
-      break;
-    case 3493:
-      HASH_INVOKE_FROM_EVAL(0x46B2F287D2FC7DA5LL, memcache_get);
-      break;
-    case 3494:
-      HASH_INVOKE_FROM_EVAL(0x28DC1AD6DA9E7DA6LL, gethostbyname);
       break;
     case 3496:
       HASH_INVOKE_FROM_EVAL(0x18FEAF2459E5ADA8LL, dom_element_has_attribute);
-      HASH_INVOKE_FROM_EVAL(0x572AE270D9E4FDA8LL, socket_set_option);
       HASH_INVOKE_FROM_EVAL(0x474A096265502DA8LL, glob);
-      break;
-    case 3498:
-      HASH_INVOKE_FROM_EVAL(0x6326C14D0FFA7DAALL, fb_thrift_serialize);
+      HASH_INVOKE_FROM_EVAL(0x7FB39C41E339ADA8LL, imap_setflag_full);
       break;
     case 3499:
-      HASH_INVOKE_FROM_EVAL(0x188720048AB37DABLL, magickquantizeimages);
       HASH_INVOKE_FROM_EVAL(0x66764CAABFF4CDABLL, array_keys);
-      break;
-    case 3505:
-      HASH_INVOKE_FROM_EVAL(0x67EAC6D7332F3DB1LL, hphp_splfileobject_fgetcsv);
       break;
     case 3506:
       HASH_INVOKE_FROM_EVAL(0x257371BC40186DB2LL, magickblurimage);
       break;
     case 3507:
-      HASH_INVOKE_FROM_EVAL(0x628069E483F35DB3LL, hphp_splfileobject_fstat);
       HASH_INVOKE_FROM_EVAL(0x53F2C6F5AE244DB3LL, drawpushdefs);
       break;
     case 3512:
       HASH_INVOKE_FROM_EVAL(0x2B1D442AEA06ADB8LL, strpbrk);
       break;
-    case 3514:
-      HASH_INVOKE_FROM_EVAL(0x5E0C6E797607DDBALL, mysql_result);
-      HASH_INVOKE_FROM_EVAL(0x7964DE73DCA17DBALL, magickhasnextimage);
-      break;
     case 3516:
       HASH_INVOKE_FROM_EVAL(0x770DEDCB168B0DBCLL, mb_ereg_search_setpos);
       break;
     case 3517:
-      HASH_INVOKE_FROM_EVAL(0x48AA091B1E493DBDLL, setlocale);
       HASH_INVOKE_FROM_EVAL(0x01E6FF7D9746CDBDLL, stream_socket_accept);
-      break;
-    case 3521:
-      HASH_INVOKE_FROM_EVAL(0x683E88F441F9BDC1LL, chgrp);
       break;
     case 3523:
       HASH_INVOKE_FROM_EVAL(0x069EE6F604BA2DC3LL, array_reverse);
-      HASH_INVOKE_FROM_EVAL(0x0433140BB339DDC3LL, log);
-      break;
-    case 3524:
-      HASH_INVOKE_FROM_EVAL(0x2A38BA8B4A0F9DC4LL, apc_fetch);
       break;
     case 3526:
       HASH_INVOKE_FROM_EVAL(0x73210FEAA2EACDC6LL, imagecolorsforindex);
-      break;
-    case 3528:
-      HASH_INVOKE_FROM_EVAL(0x66C3E73210067DC8LL, magickgetimageunits);
       break;
     case 3530:
       HASH_INVOKE_FROM_EVAL(0x3BB701F2BDD0ADCALL, magickgetimageprofile);
       break;
     case 3534:
       HASH_INVOKE_FROM_EVAL(0x3E5C990C32470DCELL, array_combine);
-      HASH_INVOKE_FROM_EVAL(0x4AD5B65BCE665DCELL, array_key_exists);
       HASH_INVOKE_FROM_EVAL(0x40C3C7DE46D62DCELL, ob_start);
       break;
     case 3536:
       HASH_INVOKE_FROM_EVAL(0x0E1C354339208DD0LL, imagetypes);
       break;
-    case 3541:
-      HASH_INVOKE_FROM_EVAL(0x7E1801C8E70D1DD5LL, imagefontwidth);
-      break;
     case 3543:
-      HASH_INVOKE_FROM_EVAL(0x638690DF6D06FDD7LL, imageconvolution);
       HASH_INVOKE_FROM_EVAL(0x1AE08377A1630DD7LL, mysql_insert_id);
       break;
     case 3548:
@@ -79901,67 +80653,26 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3560:
       HASH_INVOKE_FROM_EVAL(0x47A4BA8616D02DE8LL, restore_exception_handler);
       break;
-    case 3564:
-      HASH_INVOKE_FROM_EVAL(0x5B51DD18C3E13DECLL, openssl_x509_parse);
-      HASH_INVOKE_FROM_EVAL(0x5ABB7486CE861DECLL, array_merge_recursive);
-      break;
-    case 3567:
-      HASH_INVOKE_FROM_EVAL(0x0BB22147ADADDDEFLL, pfsockopen);
-      HASH_INVOKE_FROM_EVAL(0x72293DCE8CC4BDEFLL, htmlspecialchars);
-      break;
-    case 3571:
-      HASH_INVOKE_FROM_EVAL(0x7AE1BE187F18FDF3LL, fgets);
-      break;
     case 3572:
       HASH_INVOKE_FROM_EVAL(0x73B30E65808A6DF4LL, ctype_xdigit);
-      HASH_INVOKE_FROM_EVAL(0x5046A0D9DFDB5DF4LL, strcspn);
-      break;
-    case 3575:
-      HASH_INVOKE_FROM_EVAL(0x23E563F1EC919DF7LL, hphp_splfileinfo_getpathname);
-      break;
-    case 3576:
-      HASH_INVOKE_FROM_EVAL(0x5E43280BC8DD1DF8LL, magicktrimimage);
-      break;
-    case 3579:
-      HASH_INVOKE_FROM_EVAL(0x47C62D58B0B65DFBLL, thrift_protocol_write_binary);
-      break;
-    case 3582:
-      HASH_INVOKE_FROM_EVAL(0x21F24104004CFDFELL, evhttp_post);
-      HASH_INVOKE_FROM_EVAL(0x072690BF719D7DFELL, hphp_recursivedirectoryiterator_rewind);
-      break;
-    case 3586:
-      HASH_INVOKE_FROM_EVAL(0x7829D2171DFBFE02LL, magickgetimagegamma);
       break;
     case 3596:
       HASH_INVOKE_FROM_EVAL(0x3AD6E084483B2E0CLL, array_udiff_assoc);
       break;
     case 3597:
       HASH_INVOKE_FROM_EVAL(0x5EB0A2F93E650E0DLL, array_diff_key);
-      HASH_INVOKE_FROM_EVAL(0x756B92411E7FBE0DLL, stream_get_wrappers);
       break;
     case 3598:
       HASH_INVOKE_FROM_EVAL(0x5230E4C9D8D64E0ELL, highlight_string);
       break;
     case 3602:
-      HASH_INVOKE_FROM_EVAL(0x05FAA2085D94FE12LL, urlencode);
       HASH_INVOKE_FROM_EVAL(0x76636D0F0C090E12LL, curl_copy_handle);
       break;
     case 3604:
-      HASH_INVOKE_FROM_EVAL(0x41E394B12170BE14LL, socket_send);
-      HASH_INVOKE_FROM_EVAL(0x3192209D50C1FE14LL, pixelsetalpha);
-      break;
-    case 3605:
-      HASH_INVOKE_FROM_EVAL(0x525F197D74423E15LL, get_resource_type);
+      HASH_INVOKE_FROM_EVAL(0x58F426377837AE14LL, imap_body);
       break;
     case 3607:
-      HASH_INVOKE_FROM_EVAL(0x0F5759A501FAFE17LL, imagecreatefromgd2part);
       HASH_INVOKE_FROM_EVAL(0x3D13FD5FE3AF6E17LL, imagestringup);
-      break;
-    case 3609:
-      HASH_INVOKE_FROM_EVAL(0x4A694B42B21A9E19LL, destroymagickwand);
-      break;
-    case 3611:
-      HASH_INVOKE_FROM_EVAL(0x7FA0B63054221E1BLL, magickrollimage);
       break;
     case 3616:
       HASH_INVOKE_FROM_EVAL(0x7BDA47B5C47EAE20LL, fread);
@@ -79969,17 +80680,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3617:
       HASH_INVOKE_FROM_EVAL(0x5B7F218FA08D8E21LL, imagefilledellipse);
       break;
-    case 3621:
-      HASH_INVOKE_FROM_EVAL(0x1C6246FA51EBDE25LL, hphp_get_static_property);
-      break;
-    case 3624:
-      HASH_INVOKE_FROM_EVAL(0x3456885FF0679E28LL, lchown);
-      break;
     case 3625:
       HASH_INVOKE_FROM_EVAL(0x73FE5C79E14A0E29LL, pixelsetbluequantum);
       break;
-    case 3629:
-      HASH_INVOKE_FROM_EVAL(0x7817FA38BAAEFE2DLL, fsockopen);
+    case 3628:
+      HASH_INVOKE_FROM_EVAL(0x19AB40AB4CC50E2CLL, imap_fetch_overview);
       break;
     case 3630:
       HASH_INVOKE_FROM_EVAL(0x3E62C1A48E9EEE2ELL, hphp_splfileinfo_getsize);
@@ -79990,11 +80695,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3635:
       HASH_INVOKE_FROM_EVAL(0x38433635F28B4E33LL, is_readable);
       break;
-    case 3638:
-      HASH_INVOKE_FROM_EVAL(0x2E42ED1E15CCFE36LL, mysql_affected_rows);
-      break;
     case 3642:
-      HASH_INVOKE_FROM_EVAL(0x6E2CF6ECA0987E3ALL, get_headers);
       HASH_INVOKE_FROM_EVAL(0x13048F0A79F7CE3ALL, magicksetsamplingfactors);
       break;
     case 3648:
@@ -80002,9 +80703,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3650:
       HASH_INVOKE_FROM_EVAL(0x160B01F095B20E42LL, mb_output_handler);
-      break;
-    case 3652:
-      HASH_INVOKE_FROM_EVAL(0x71B7756BD1B43E44LL, dom_document_savexml);
       break;
     case 3654:
       HASH_INVOKE_FROM_EVAL(0x7F4C1DF551150E46LL, pixelgetnextiteratorrow);
@@ -80023,11 +80721,7 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x7B6BF544EB420E54LL, hphp_recursivedirectoryiterator_haschildren);
       break;
     case 3671:
-      HASH_INVOKE_FROM_EVAL(0x21B07F1F212BDE57LL, hphp_get_original_class_name);
       HASH_INVOKE_FROM_EVAL(0x2DEF52641933CE57LL, magickgetimagemattecolor);
-      break;
-    case 3675:
-      HASH_INVOKE_FROM_EVAL(0x299F1A5895461E5BLL, curl_multi_close);
       break;
     case 3676:
       HASH_INVOKE_FROM_EVAL(0x532D0D905CE60E5CLL, posix_times);
@@ -80043,16 +80737,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3683:
       HASH_INVOKE_FROM_EVAL(0x4B6FE37D66784E63LL, imagesy);
-      HASH_INVOKE_FROM_EVAL(0x5697E5F6AAF47E63LL, mb_http_input);
       break;
     case 3684:
       HASH_INVOKE_FROM_EVAL(0x4F0DF8BBC4340E64LL, stream_socket_server);
       break;
     case 3685:
       HASH_INVOKE_FROM_EVAL(0x21D5A3208639EE65LL, dom_element_get_attribute_node_ns);
-      break;
-    case 3686:
-      HASH_INVOKE_FROM_EVAL(0x6CB3DEB458A2DE66LL, apc_bin_load);
       break;
     case 3688:
       HASH_INVOKE_FROM_EVAL(0x5B1DFB89BFC1CE68LL, realpath);
@@ -80062,7 +80752,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3690:
       HASH_INVOKE_FROM_EVAL(0x2F9816D9A2B2CE6ALL, mysql_set_charset);
-      HASH_INVOKE_FROM_EVAL(0x25C0C5E961AFDE6ALL, xmlwriter_full_end_element);
       break;
     case 3693:
       HASH_INVOKE_FROM_EVAL(0x714001ABB0D76E6DLL, magickgetinterlacescheme);
@@ -80070,39 +80759,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3695:
       HASH_INVOKE_FROM_EVAL(0x7E6223D0CF184E6FLL, magickqueryformats);
       break;
-    case 3697:
-      HASH_INVOKE_FROM_EVAL(0x6AC126DCE941FE71LL, memory_get_peak_usage);
-      break;
-    case 3699:
-      HASH_INVOKE_FROM_EVAL(0x3B28CA1BE1D0DE73LL, xbox_get_thread_timeout);
-      break;
-    case 3700:
-      HASH_INVOKE_FROM_EVAL(0x47D0510206B89E74LL, ini_restore);
-      break;
     case 3701:
       HASH_INVOKE_FROM_EVAL(0x4EC7C66593DDEE75LL, sql_regcase);
-      break;
-    case 3702:
-      HASH_INVOKE_FROM_EVAL(0x36E9EC047FC73E76LL, mb_convert_encoding);
       break;
     case 3703:
       HASH_INVOKE_FROM_EVAL(0x12B7B2D835B80E77LL, chmod);
       break;
-    case 3706:
-      HASH_INVOKE_FROM_EVAL(0x6A3D9F8EDB005E7ALL, flush);
-      break;
     case 3708:
       HASH_INVOKE_FROM_EVAL(0x4D9C5B9A944CCE7CLL, convert_uudecode);
       break;
-    case 3710:
-      HASH_INVOKE_FROM_EVAL(0x51060D186C703E7ELL, headers_list);
-      break;
     case 3713:
-      HASH_INVOKE_FROM_EVAL(0x0ECFC3676B4FDE81LL, chr);
       HASH_INVOKE_FROM_EVAL(0x3B426B13FA584E81LL, fb_unserialize);
-      break;
-    case 3714:
-      HASH_INVOKE_FROM_EVAL(0x379F7BF525FF1E82LL, magicksetimagecolorspace);
       break;
     case 3715:
       HASH_INVOKE_FROM_EVAL(0x724011CF7C31AE83LL, sqrt);
@@ -80119,21 +80786,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3722:
       HASH_INVOKE_FROM_EVAL(0x15C9E5C16374EE8ALL, gzclose);
       break;
-    case 3726:
-      HASH_INVOKE_FROM_EVAL(0x29A2FBD427647E8ELL, mysql_connect);
-      break;
     case 3728:
       HASH_INVOKE_FROM_EVAL(0x33D6CC3959D3CE90LL, clearmagickwand);
       break;
     case 3731:
-      HASH_INVOKE_FROM_EVAL(0x5E968924197F5E93LL, mcrypt_ofb);
       HASH_INVOKE_FROM_EVAL(0x37A9E8F91C33EE93LL, magickborderimage);
-      break;
-    case 3735:
-      HASH_INVOKE_FROM_EVAL(0x6254E9BDC11F3E97LL, imagecreatefromgd2);
-      break;
-    case 3739:
-      HASH_INVOKE_FROM_EVAL(0x2A019CAA1188BE9BLL, preg_grep);
       break;
     case 3742:
       HASH_INVOKE_FROM_EVAL(0x76EBE919625D8E9ELL, openssl_pkcs12_export);
@@ -80142,20 +80799,11 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x224004A728974E9FLL, spl_object_hash);
       HASH_INVOKE_FROM_EVAL(0x7CFF820207DC6E9FLL, debug_backtrace);
       break;
-    case 3744:
-      HASH_INVOKE_FROM_EVAL(0x37C5AF6E7E8B5EA0LL, fputs);
-      break;
-    case 3747:
-      HASH_INVOKE_FROM_EVAL(0x6467FFB910B8BEA3LL, magickspliceimage);
-      break;
     case 3750:
       HASH_INVOKE_FROM_EVAL(0x1D7B8E395613AEA6LL, dom_element_remove_attribute_ns);
       break;
     case 3753:
       HASH_INVOKE_FROM_EVAL(0x308D76DB12424EA9LL, magicksetimageindex);
-      break;
-    case 3755:
-      HASH_INVOKE_FROM_EVAL(0x632D4FC346797EABLL, pixelgetexceptionstring);
       break;
     case 3758:
       HASH_INVOKE_FROM_EVAL(0x5772A0B8C16DAEAELL, posix_setuid);
@@ -80167,39 +80815,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x33FE101882726EB1LL, proc_close);
       break;
     case 3763:
-      HASH_INVOKE_FROM_EVAL(0x7DB9D839ACE0DEB3LL, natsort);
+      HASH_INVOKE_FROM_EVAL(0x732DAA2292946EB3LL, imap_header);
       HASH_INVOKE_FROM_EVAL(0x7379B5B97EC2EEB3LL, hypot);
-      break;
-    case 3764:
-      HASH_INVOKE_FROM_EVAL(0x1F936B3C5406DEB4LL, fb_set_taint);
-      break;
-    case 3767:
-      HASH_INVOKE_FROM_EVAL(0x58B9EFA0FB35FEB7LL, stream_filter_prepend);
-      break;
-    case 3769:
-      HASH_INVOKE_FROM_EVAL(0x2A483AD7A3D07EB9LL, magickgetwandsize);
-      break;
-    case 3770:
-      HASH_INVOKE_FROM_EVAL(0x1F5B2728DE875EBALL, magicksetimage);
-      break;
-    case 3773:
-      HASH_INVOKE_FROM_EVAL(0x31A30B274AD2DEBDLL, call_user_func_array_rpc);
       break;
     case 3776:
       HASH_INVOKE_FROM_EVAL(0x2475D7045D9DEEC0LL, magicksetimagecompression);
-      HASH_INVOKE_FROM_EVAL(0x495316E596537EC0LL, imagefttext);
-      break;
-    case 3778:
-      HASH_INVOKE_FROM_EVAL(0x4CDD0B7BF826FEC2LL, rewinddir);
       break;
     case 3780:
       HASH_INVOKE_FROM_EVAL(0x7052903F1B17AEC4LL, parse_str);
-      break;
-    case 3781:
-      HASH_INVOKE_FROM_EVAL(0x7D69B3537C353EC5LL, hphp_splfileinfo_isfile);
-      break;
-    case 3783:
-      HASH_INVOKE_FROM_EVAL(0x4FC99DC20A955EC7LL, session_module_name);
       break;
     case 3785:
       HASH_INVOKE_FROM_EVAL(0x58C8DCAAE5B7CEC9LL, get_cfg_var);
@@ -80211,74 +80834,37 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3794:
       HASH_INVOKE_FROM_EVAL(0x3CCD09EC3511CED2LL, apd_stop_trace);
       break;
-    case 3798:
-      HASH_INVOKE_FROM_EVAL(0x134B37520683DED6LL, imagesetbrush);
-      break;
-    case 3800:
-      HASH_INVOKE_FROM_EVAL(0x338D9D95095D1ED8LL, magicksetimagedelay);
-      break;
-    case 3801:
-      HASH_INVOKE_FROM_EVAL(0x7F802A06996BBED9LL, apd_set_browser_trace);
-      break;
-    case 3802:
-      HASH_INVOKE_FROM_EVAL(0x29E2771785CCBEDALL, magickgettextdescent);
-      break;
     case 3803:
       HASH_INVOKE_FROM_EVAL(0x16331E18B5CD8EDBLL, timezone_open);
-      HASH_INVOKE_FROM_EVAL(0x1340509769275EDBLL, magickgetimagecompression);
       break;
     case 3808:
       HASH_INVOKE_FROM_EVAL(0x7A1C6E429399CEE0LL, iconv_set_encoding);
       break;
-    case 3809:
-      HASH_INVOKE_FROM_EVAL(0x528BA9796BD0FEE1LL, fb_rpc_intercept_handler);
-      break;
     case 3811:
       HASH_INVOKE_FROM_EVAL(0x1F4AACF075E9CEE3LL, memcache_get_server_status);
-      HASH_INVOKE_FROM_EVAL(0x28A98134BD97BEE3LL, mb_regex_encoding);
       HASH_INVOKE_FROM_EVAL(0x0E1368A3BDFE6EE3LL, hphp_recursiveiteratoriterator_rewind);
       break;
     case 3812:
-      HASH_INVOKE_FROM_EVAL(0x5B6FF42ACB2FBEE4LL, getmyuid);
+      HASH_INVOKE_FROM_EVAL(0x6C4B9D0271790EE4LL, imap_rfc822_parse_adrlist);
       break;
     case 3813:
       HASH_INVOKE_FROM_EVAL(0x367CFD20B4446EE5LL, is_array);
       break;
     case 3816:
       HASH_INVOKE_FROM_EVAL(0x6CB6650E66CE4EE8LL, magicksetimagebordercolor);
-      HASH_INVOKE_FROM_EVAL(0x32B3951DFD2B9EE8LL, hphp_directoryiterator_isdot);
       break;
     case 3819:
       HASH_INVOKE_FROM_EVAL(0x72882DBF2D49CEEBLL, set_magic_quotes_runtime);
       break;
-    case 3820:
-      HASH_INVOKE_FROM_EVAL(0x115CC08BC872FEECLL, fb_output_compression);
-      break;
-    case 3824:
-      HASH_INVOKE_FROM_EVAL(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request);
-      break;
     case 3832:
       HASH_INVOKE_FROM_EVAL(0x33FD10AC81146EF8LL, thrift_protocol_read_binary);
-      break;
-    case 3833:
-      HASH_INVOKE_FROM_EVAL(0x200FC256EB093EF9LL, gettimeofday);
-      break;
-    case 3835:
-      HASH_INVOKE_FROM_EVAL(0x6D450F078F02BEFBLL, apd_continue);
       break;
     case 3837:
       HASH_INVOKE_FROM_EVAL(0x0CF27A6BC84CEEFDLL, openssl_get_publickey);
       HASH_INVOKE_FROM_EVAL(0x283E167EB3F04EFDLL, posix_getgid);
       break;
-    case 3840:
-      HASH_INVOKE_FROM_EVAL(0x09637D7CA2E33F00LL, fgetc);
-      break;
     case 3841:
-      HASH_INVOKE_FROM_EVAL(0x66137942508EBF01LL, date_create);
       HASH_INVOKE_FROM_EVAL(0x7B6A0D7510184F01LL, mysql_fetch_assoc);
-      break;
-    case 3842:
-      HASH_INVOKE_FROM_EVAL(0x78A02A603FA6FF02LL, magickreducenoiseimage);
       break;
     case 3845:
       HASH_INVOKE_FROM_EVAL(0x6842585E79988F05LL, magickmosaicimages);
@@ -80287,21 +80873,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x1D3B08AA0AF50F06LL, gettype);
       HASH_INVOKE_FROM_EVAL(0x6692475BA65A2F06LL, imagearc);
       break;
+    case 3850:
+      HASH_INVOKE_FROM_EVAL(0x36EA41EEA02D4F0ALL, imap_mail_copy);
+      break;
     case 3851:
       HASH_INVOKE_FROM_EVAL(0x7756593AAC1F6F0BLL, imagecreatefromstring);
-      break;
-    case 3855:
-      HASH_INVOKE_FROM_EVAL(0x61E7A36CA7FF5F0FLL, drawsetcliprule);
-      HASH_INVOKE_FROM_EVAL(0x4BD54A631F665F0FLL, drawpathcurvetosmoothabsolute);
       break;
     case 3856:
       HASH_INVOKE_FROM_EVAL(0x700A75BF904DAF10LL, magickgetcharwidth);
       break;
     case 3858:
       HASH_INVOKE_FROM_EVAL(0x042492DDA48C4F12LL, gzdeflate);
-      break;
-    case 3859:
-      HASH_INVOKE_FROM_EVAL(0x3B197C0731233F13LL, dom_characterdata_substring_data);
       break;
     case 3860:
       HASH_INVOKE_FROM_EVAL(0x04525BA2AE51EF14LL, date_sun_info);
@@ -80314,19 +80896,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x38664EFE3E0A0F16LL, json_decode);
       HASH_INVOKE_FROM_EVAL(0x0287B907DDA3EF16LL, hphpd_get_user_commands);
       break;
-    case 3867:
-      HASH_INVOKE_FROM_EVAL(0x27A4633381195F1BLL, chown);
-      break;
-    case 3871:
-      HASH_INVOKE_FROM_EVAL(0x7C0C145EFE0EBF1FLL, defined);
-      break;
     case 3872:
       HASH_INVOKE_FROM_EVAL(0x2C4206A0BD904F20LL, hphp_splfileobject_fseek);
       break;
     case 3873:
       HASH_INVOKE_FROM_EVAL(0x4282496A4BF42F21LL, php_uname);
       HASH_INVOKE_FROM_EVAL(0x77EC28645855AF21LL, magicksetcompressionquality);
-      HASH_INVOKE_FROM_EVAL(0x1FF5B9A4FC78BF21LL, drawsettextantialias);
       break;
     case 3876:
       HASH_INVOKE_FROM_EVAL(0x05BD68F1D09CEF24LL, array_count_values);
@@ -80335,16 +80910,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3879:
       HASH_INVOKE_FROM_EVAL(0x4BAA5B688E6F6F27LL, gd_info);
       break;
-    case 3884:
-      HASH_INVOKE_FROM_EVAL(0x035EFF9E1757DF2CLL, http_build_query);
-      break;
-    case 3890:
-      HASH_INVOKE_FROM_EVAL(0x78257F34467BDF32LL, drawsetstrokedasharray);
-      HASH_INVOKE_FROM_EVAL(0x2B66EACB77AE9F32LL, print_r);
-      break;
     case 3897:
       HASH_INVOKE_FROM_EVAL(0x0D4446B2DBC8EF39LL, hphp_splfileinfo_getinode);
-      HASH_INVOKE_FROM_EVAL(0x3E9146C06AAEFF39LL, magicksetimagecompressionquality);
       HASH_INVOKE_FROM_EVAL(0x496CF4113CEA8F39LL, magicksetimagefilename);
       break;
     case 3899:
@@ -80370,24 +80937,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3920:
       HASH_INVOKE_FROM_EVAL(0x7978A278AEAFAF50LL, pixelgetmagenta);
       break;
-    case 3925:
-      HASH_INVOKE_FROM_EVAL(0x49D986274B1C5F55LL, collator_asort);
-      break;
     case 3926:
       HASH_INVOKE_FROM_EVAL(0x621590803EC88F56LL, imageline);
-      break;
-    case 3928:
-      HASH_INVOKE_FROM_EVAL(0x0551AAE8F1A6FF58LL, magicklevelimage);
       break;
     case 3929:
       HASH_INVOKE_FROM_EVAL(0x38246B6BDE246F59LL, magickgetimagedispose);
       break;
     case 3931:
       HASH_INVOKE_FROM_EVAL(0x24F698A8A4B5AF5BLL, imagecolordeallocate);
-      HASH_INVOKE_FROM_EVAL(0x76418F884500DF5BLL, stream_socket_enable_crypto);
-      break;
-    case 3933:
-      HASH_INVOKE_FROM_EVAL(0x07FF92CF46DDFF5DLL, imagepsfreefont);
       break;
     case 3935:
       HASH_INVOKE_FROM_EVAL(0x703D339DD44E8F5FLL, dom_element_get_elements_by_tag_name);
@@ -80398,10 +80955,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3939:
       HASH_INVOKE_FROM_EVAL(0x1FFD204252F60F63LL, magicksetimageprofile);
       break;
-    case 3940:
-      HASH_INVOKE_FROM_EVAL(0x41EF51E62AD3DF64LL, pagelet_server_is_enabled);
-      HASH_INVOKE_FROM_EVAL(0x280051555A21DF64LL, rename);
-      break;
     case 3942:
       HASH_INVOKE_FROM_EVAL(0x6FFF1304EA444F66LL, drawsetstrokemiterlimit);
       break;
@@ -80410,12 +80963,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       break;
     case 3946:
       HASH_INVOKE_FROM_EVAL(0x1670096FDE27AF6ALL, rewind);
-      break;
-    case 3947:
-      HASH_INVOKE_FROM_EVAL(0x56EF59D6CB0A5F6BLL, dom_document_save_html_file);
-      break;
-    case 3948:
-      HASH_INVOKE_FROM_EVAL(0x23D5E9E53D11BF6CLL, gmdate);
       break;
     case 3950:
       HASH_INVOKE_FROM_EVAL(0x3A56371CDDEA0F6ELL, gzgetc);
@@ -80427,9 +80974,6 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
       HASH_INVOKE_FROM_EVAL(0x68C257B62A36EF70LL, magicksetimagebackgroundcolor);
       HASH_INVOKE_FROM_EVAL(0x71557D108E5C0F70LL, xml_set_object);
       break;
-    case 3954:
-      HASH_INVOKE_FROM_EVAL(0x4B22EF06BAA83F72LL, version_compare);
-      break;
     case 3956:
       HASH_INVOKE_FROM_EVAL(0x18BC9BF6D1E3CF74LL, magickpreviewimages);
       break;
@@ -80439,36 +80983,17 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3962:
       HASH_INVOKE_FROM_EVAL(0x7B0E6DB649084F7ALL, clearstatcache);
       break;
-    case 3966:
-      HASH_INVOKE_FROM_EVAL(0x7064BEBF508F3F7ELL, socket_read);
-      break;
-    case 3968:
-      HASH_INVOKE_FROM_EVAL(0x63F18DE0DB807F80LL, magickqueryfonts);
-      break;
-    case 3972:
-      HASH_INVOKE_FROM_EVAL(0x14402B01D00E9F84LL, magicksteganoimage);
+    case 3967:
+      HASH_INVOKE_FROM_EVAL(0x5E3767128C04CF7FLL, imap_open);
       break;
     case 3973:
       HASH_INVOKE_FROM_EVAL(0x7EF68B9A55222F85LL, wandgetexceptionstring);
-      break;
-    case 3974:
-      HASH_INVOKE_FROM_EVAL(0x44CE4DB1CE7E9F86LL, flock);
       break;
     case 3977:
       HASH_INVOKE_FROM_EVAL(0x13F52A829BAC0F89LL, timezone_identifiers_list);
       break;
     case 3979:
-      HASH_INVOKE_FROM_EVAL(0x2755DD4112AA5F8BLL, magicksampleimage);
       HASH_INVOKE_FROM_EVAL(0x3703D22147C24F8BLL, pixelsetcyan);
-      break;
-    case 3982:
-      HASH_INVOKE_FROM_EVAL(0x7A8F1104B0CCDF8ELL, phpcredits);
-      break;
-    case 3983:
-      HASH_INVOKE_FROM_EVAL(0x4A6C46DC7FE29F8FLL, hphp_recursivedirectoryiterator_getchildren);
-      break;
-    case 3985:
-      HASH_INVOKE_FROM_EVAL(0x78463112BE739F91LL, connection_timeout);
       break;
     case 3986:
       HASH_INVOKE_FROM_EVAL(0x288D61E7DE28AF92LL, ucwords);
@@ -80476,34 +81001,14 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 3988:
       HASH_INVOKE_FROM_EVAL(0x76B9D87BC7F02F94LL, preg_match);
       break;
-    case 3989:
-      HASH_INVOKE_FROM_EVAL(0x40D620CBA0D41F95LL, opendir);
-      break;
     case 3991:
-      HASH_INVOKE_FROM_EVAL(0x35117886C885DF97LL, hphp_recursivedirectoryiterator_getsubpathname);
       HASH_INVOKE_FROM_EVAL(0x6F9651265C096F97LL, magickreadimages);
       break;
     case 3992:
-      HASH_INVOKE_FROM_EVAL(0x0293F60B46511F98LL, drawsetfontstretch);
       HASH_INVOKE_FROM_EVAL(0x66F1F0DB16C82F98LL, imagesavealpha);
-      break;
-    case 3994:
-      HASH_INVOKE_FROM_EVAL(0x2B7CAC006AF27F9ALL, fflush);
       break;
     case 3995:
       HASH_INVOKE_FROM_EVAL(0x44244ECFB9F76F9BLL, dom_document_create_element_ns);
-      break;
-    case 3997:
-      HASH_INVOKE_FROM_EVAL(0x0AD6DE8829773F9DLL, apc_compile_file);
-      break;
-    case 4004:
-      HASH_INVOKE_FROM_EVAL(0x0E7E9AA21AE99FA4LL, hphp_recursiveiteratoriterator_current);
-      break;
-    case 4006:
-      HASH_INVOKE_FROM_EVAL(0x0DEEA8C3E3A47FA6LL, read_exif_data);
-      break;
-    case 4014:
-      HASH_INVOKE_FROM_EVAL(0x64D269A505D51FAELL, array_map);
       break;
     case 4015:
       HASH_INVOKE_FROM_EVAL(0x03979AACDBB24FAFLL, mailparse_msg_get_part);
@@ -80511,21 +81016,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4016:
       HASH_INVOKE_FROM_EVAL(0x4A0B5F4676578FB0LL, imagecolorresolvealpha);
       break;
-    case 4017:
-      HASH_INVOKE_FROM_EVAL(0x0F78ECF42C30DFB1LL, array_chunk);
-      break;
     case 4020:
       HASH_INVOKE_FROM_EVAL(0x3900FDF1C97BEFB4LL, drawrotate);
       break;
     case 4022:
       HASH_INVOKE_FROM_EVAL(0x56C0CCB57BB6EFB6LL, magicksetimageunits);
       HASH_INVOKE_FROM_EVAL(0x2B451EF5D52C4FB6LL, array_diff);
-      break;
-    case 4023:
-      HASH_INVOKE_FROM_EVAL(0x6465CD999F4C5FB7LL, hphp_invoke_method);
-      break;
-    case 4024:
-      HASH_INVOKE_FROM_EVAL(0x6DB2DB341ECF3FB8LL, file_exists);
       break;
     case 4026:
       HASH_INVOKE_FROM_EVAL(0x0664323CB1CC2FBALL, imagecolorset);
@@ -80536,12 +81032,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4031:
       HASH_INVOKE_FROM_EVAL(0x70B38AB9EAE16FBFLL, ini_set);
       break;
-    case 4033:
-      HASH_INVOKE_FROM_EVAL(0x3FF9AAFF85DDDFC1LL, class_parents);
-      break;
     case 4034:
       HASH_INVOKE_FROM_EVAL(0x6CA22E62D4762FC2LL, magickpainttransparentimage);
-      HASH_INVOKE_FROM_EVAL(0x460470C490FAFFC2LL, dom_node_normalize);
       break;
     case 4037:
       HASH_INVOKE_FROM_EVAL(0x38498DD4C28D0FC5LL, hphp_splfileinfo_getatime);
@@ -80552,16 +81044,12 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4045:
       HASH_INVOKE_FROM_EVAL(0x474566F3A2BE0FCDLL, mcrypt_enc_is_block_algorithm);
       break;
-    case 4046:
-      HASH_INVOKE_FROM_EVAL(0x042193C97C65FFCELL, magickwaveimage);
-      break;
     case 4047:
       HASH_INVOKE_FROM_EVAL(0x3A3CFC1F001A6FCFLL, magickreadimagefile);
       break;
     case 4048:
       HASH_INVOKE_FROM_EVAL(0x21104CCA2942AFD0LL, fb_const_fetch);
       HASH_INVOKE_FROM_EVAL(0x2EAA47FA6C3FEFD0LL, drawgetstrokealpha);
-      HASH_INVOKE_FROM_EVAL(0x53DB5D0490C51FD0LL, xhprof_sample_disable);
       break;
     case 4052:
       HASH_INVOKE_FROM_EVAL(0x4970B72A182E4FD4LL, readdir);
@@ -80569,30 +81057,8 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4053:
       HASH_INVOKE_FROM_EVAL(0x751283FE764CAFD5LL, mysql_select_db);
       break;
-    case 4054:
-      HASH_INVOKE_FROM_EVAL(0x7FC00035D14B9FD6LL, apc_delete_file);
-      break;
-    case 4056:
-      HASH_INVOKE_FROM_EVAL(0x4234F2B59531FFD8LL, posix_getlogin);
-      break;
-    case 4061:
-      HASH_INVOKE_FROM_EVAL(0x4EDEDA4278CD3FDDLL, magickchopimage);
-      break;
-    case 4062:
-      HASH_INVOKE_FROM_EVAL(0x7F5FC3CAF8CE9FDELL, gzcompress);
-      HASH_INVOKE_FROM_EVAL(0x72925D2DF7E61FDELL, drawpathcurvetoquadraticbeziersmoothrelative);
-      break;
     case 4071:
       HASH_INVOKE_FROM_EVAL(0x217067889854CFE7LL, xmlwriter_start_dtd);
-      break;
-    case 4072:
-      HASH_INVOKE_FROM_EVAL(0x4D7AEC41CFD73FE8LL, hphp_recursivedirectoryiterator_getsubpath);
-      break;
-    case 4075:
-      HASH_INVOKE_FROM_EVAL(0x67D1EE05DFE71FEBLL, hphp_splfileobject_getcvscontrol);
-      break;
-    case 4079:
-      HASH_INVOKE_FROM_EVAL(0x00EEEE9C6CEA5FEFLL, xmlwriter_write_element_ns);
       break;
     case 4080:
       HASH_INVOKE_FROM_EVAL(0x1189B7C4F4874FF0LL, php_check_syntax);
@@ -80600,20 +81066,2852 @@ Variant Eval::invoke_from_eval_builtin(const char *s, Eval::VariableEnvironment 
     case 4085:
       HASH_INVOKE_FROM_EVAL(0x191ECE88E06E6FF5LL, dom_node_is_supported);
       break;
-    case 4086:
-      HASH_INVOKE_FROM_EVAL(0x25FCE64E12505FF6LL, magicksetimagerenderingintent);
-      break;
     case 4087:
       HASH_INVOKE_FROM_EVAL(0x7883232CD1A7CFF7LL, dom_node_is_same_node);
       break;
-    case 4090:
-      HASH_INVOKE_FROM_EVAL(0x13EE24AF67113FFALL, ob_end_flush);
-      break;
-    case 4091:
-      HASH_INVOKE_FROM_EVAL(0x63BE4CEF1FC47FFBLL, imagefill);
+    case 4092:
+      HASH_INVOKE_FROM_EVAL(0x51647BC5C0A14FFCLL, imap_clearflag_full);
       break;
     case 4094:
       HASH_INVOKE_FROM_EVAL(0x32F8747E480CCFFELL, connection_status);
+      break;
+    case 4097:
+      HASH_INVOKE_FROM_EVAL(0x7585739E84DBF001LL, imap_delete);
+      break;
+    case 4101:
+      HASH_INVOKE_FROM_EVAL(0x20D579E7E4131005LL, imagecolorclosest);
+      HASH_INVOKE_FROM_EVAL(0x18A0F1EE8E249005LL, msg_send);
+      break;
+    case 4106:
+      HASH_INVOKE_FROM_EVAL(0x555D7A3FB939300ALL, apache_setenv);
+      break;
+    case 4109:
+      HASH_INVOKE_FROM_EVAL(0x40FA17130FA7100DLL, openssl_seal);
+      break;
+    case 4118:
+      HASH_INVOKE_FROM_EVAL(0x5623A698A728F016LL, getlastmod);
+      break;
+    case 4122:
+      HASH_INVOKE_FROM_EVAL(0x03834225EBBC101ALL, drawsettextundercolor);
+      break;
+    case 4130:
+      HASH_INVOKE_FROM_EVAL(0x145D42B2AB55D022LL, drawmatte);
+      break;
+    case 4131:
+      HASH_INVOKE_FROM_EVAL(0x35C74650867B7023LL, imagesetpixel);
+      break;
+    case 4147:
+      HASH_INVOKE_FROM_EVAL(0x48F35DFD653D7033LL, pclose);
+      break;
+    case 4149:
+      HASH_INVOKE_FROM_EVAL(0x280EC96FB50A9035LL, imap_ping);
+      break;
+    case 4155:
+      HASH_INVOKE_FROM_EVAL(0x40329F2A6B84D03BLL, dom_node_lookup_prefix);
+      break;
+    case 4158:
+      HASH_INVOKE_FROM_EVAL(0x32E6E5D3CCE3703ELL, magickgetimagewidth);
+      HASH_INVOKE_FROM_EVAL(0x43461C4D9130103ELL, exit);
+      HASH_INVOKE_FROM_EVAL(0x67C1ED9B816E503ELL, md5_file);
+      break;
+    case 4163:
+      HASH_INVOKE_FROM_EVAL(0x5ACCF9166CD9D043LL, ftruncate);
+      break;
+    case 4169:
+      HASH_INVOKE_FROM_EVAL(0x047A8BF04DB51049LL, range);
+      break;
+    case 4179:
+      HASH_INVOKE_FROM_EVAL(0x15A9EB33DA6E9053LL, getimagesize);
+      HASH_INVOKE_FROM_EVAL(0x07EB5C3A3BEA3053LL, acosh);
+      break;
+    case 4186:
+      HASH_INVOKE_FROM_EVAL(0x271AB768D202F05ALL, mcrypt_module_is_block_algorithm);
+      break;
+    case 4187:
+      HASH_INVOKE_FROM_EVAL(0x7BDA06BD1F8AD05BLL, imap_scanmailbox);
+      break;
+    case 4191:
+      HASH_INVOKE_FROM_EVAL(0x4B70746F965E705FLL, preg_last_error);
+      break;
+    case 4199:
+      HASH_INVOKE_FROM_EVAL(0x0CE1918B30DF5067LL, sys_getloadavg);
+      break;
+    case 4207:
+      HASH_INVOKE_FROM_EVAL(0x04D1CF7E4592106FLL, imap_mail_move);
+      HASH_INVOKE_FROM_EVAL(0x4C6FD8808A62506FLL, session_set_save_handler);
+      break;
+    case 4208:
+      HASH_INVOKE_FROM_EVAL(0x3C466098FF7B5070LL, mb_check_encoding);
+      break;
+    case 4216:
+      HASH_INVOKE_FROM_EVAL(0x6B268C26E21C1078LL, arsort);
+      break;
+    case 4217:
+      HASH_INVOKE_FROM_EVAL(0x08AA4EA901C9B079LL, session_encode);
+      break;
+    case 4228:
+      HASH_INVOKE_FROM_EVAL(0x53FD8C9AC3F4D084LL, dangling_server_proxy_new_request);
+      break;
+    case 4231:
+      HASH_INVOKE_FROM_EVAL(0x255D919D501C5087LL, dom_characterdata_delete_data);
+      break;
+    case 4238:
+      HASH_INVOKE_FROM_EVAL(0x3E4AE974AFA9708ELL, pixelsetquantumcolor);
+      break;
+    case 4241:
+      HASH_INVOKE_FROM_EVAL(0x673B36244DC87091LL, closelog);
+      break;
+    case 4254:
+      HASH_INVOKE_FROM_EVAL(0x4AF87BA91163D09ELL, mysql_db_name);
+      HASH_INVOKE_FROM_EVAL(0x74F0D6D8F1F2709ELL, drawsetstrokedashoffset);
+      break;
+    case 4255:
+      HASH_INVOKE_FROM_EVAL(0x2B130322DEC4B09FLL, pixelgetopacityquantum);
+      break;
+    case 4257:
+      HASH_INVOKE_FROM_EVAL(0x0DF945F12533F0A1LL, abs);
+      break;
+    case 4263:
+      HASH_INVOKE_FROM_EVAL(0x74C787060F7290A7LL, icu_transliterate);
+      break;
+    case 4267:
+      HASH_INVOKE_FROM_EVAL(0x439DF153FC32D0ABLL, printf);
+      break;
+    case 4268:
+      HASH_INVOKE_FROM_EVAL(0x6E27DC1E74C5B0ACLL, drawpathstart);
+      break;
+    case 4270:
+      HASH_INVOKE_FROM_EVAL(0x47AB4A08446BD0AELL, bcmod);
+      HASH_INVOKE_FROM_EVAL(0x4BBD5D8A6E0110AELL, error_log);
+      break;
+    case 4271:
+      HASH_INVOKE_FROM_EVAL(0x3954FFED1E0650AFLL, stream_register_wrapper);
+      break;
+    case 4272:
+      HASH_INVOKE_FROM_EVAL(0x5B9F8B3E1D8330B0LL, stream_socket_sendto);
+      break;
+    case 4274:
+      HASH_INVOKE_FROM_EVAL(0x48BBFB59FB7F90B2LL, iconv_strlen);
+      break;
+    case 4280:
+      HASH_INVOKE_FROM_EVAL(0x05A4C165810A30B8LL, gzread);
+      break;
+    case 4284:
+      HASH_INVOKE_FROM_EVAL(0x3900350CD9D990BCLL, imagecreatefromjpeg);
+      break;
+    case 4288:
+      HASH_INVOKE_FROM_EVAL(0x6EDC1E7A8D5710C0LL, memcache_add_server);
+      break;
+    case 4293:
+      HASH_INVOKE_FROM_EVAL(0x6B477F3B9CDB10C5LL, base64_decode);
+      break;
+    case 4309:
+      HASH_INVOKE_FROM_EVAL(0x3BF44C6DECD790D5LL, xmlwriter_start_dtd_entity);
+      break;
+    case 4312:
+      HASH_INVOKE_FROM_EVAL(0x79F2E516A3B070D8LL, libxml_disable_entity_loader);
+      break;
+    case 4313:
+      HASH_INVOKE_FROM_EVAL(0x08F6B727D60670D9LL, magicksetimagedepth);
+      break;
+    case 4314:
+      HASH_INVOKE_FROM_EVAL(0x6F242340B2E930DALL, hphp_splfileinfo_setfileclass);
+      break;
+    case 4315:
+      HASH_INVOKE_FROM_EVAL(0x3801923AD84670DBLL, apc_inc);
+      break;
+    case 4320:
+      HASH_INVOKE_FROM_EVAL(0x2E4612DF112010E0LL, imagecopyresized);
+      break;
+    case 4324:
+      HASH_INVOKE_FROM_EVAL(0x2B9425038D4230E4LL, imagecreatefromxpm);
+      break;
+    case 4327:
+      HASH_INVOKE_FROM_EVAL(0x79E6FD78989B10E7LL, tmpfile);
+      HASH_INVOKE_FROM_EVAL(0x59DE3A26AFF570E7LL, magickshaveimage);
+      break;
+    case 4328:
+      HASH_INVOKE_FROM_EVAL(0x17CB328F55FDF0E8LL, drawsetstrokeantialias);
+      break;
+    case 4339:
+      HASH_INVOKE_FROM_EVAL(0x315CCBC8C5C7D0F3LL, xmlwriter_write_raw);
+      break;
+    case 4355:
+      HASH_INVOKE_FROM_EVAL(0x1FFCBCF1927D7103LL, posix_setpgid);
+      break;
+    case 4357:
+      HASH_INVOKE_FROM_EVAL(0x509B763CDAD9D105LL, gethostbyaddr);
+      break;
+    case 4360:
+      HASH_INVOKE_FROM_EVAL(0x60B8B61133F59108LL, quoted_printable_decode);
+      break;
+    case 4370:
+      HASH_INVOKE_FROM_EVAL(0x0B1BA48B0CFB1112LL, strval);
+      HASH_INVOKE_FROM_EVAL(0x28C44527BD59D112LL, is_link);
+      break;
+    case 4372:
+      HASH_INVOKE_FROM_EVAL(0x02A4724E6A881114LL, mb_decode_numericentity);
+      break;
+    case 4377:
+      HASH_INVOKE_FROM_EVAL(0x3AB82455A70F5119LL, imagecolortransparent);
+      HASH_INVOKE_FROM_EVAL(0x2B31A877824A1119LL, stristr);
+      break;
+    case 4380:
+      HASH_INVOKE_FROM_EVAL(0x070A63F6A0B8711CLL, array_walk_recursive);
+      break;
+    case 4381:
+      HASH_INVOKE_FROM_EVAL(0x291088666B8BF11DLL, drawsetfontfamily);
+      break;
+    case 4383:
+      HASH_INVOKE_FROM_EVAL(0x4C70C24C84F5511FLL, magicksetimagegamma);
+      break;
+    case 4389:
+      HASH_INVOKE_FROM_EVAL(0x7A8B3EC0235EF125LL, magickprofileimage);
+      break;
+    case 4403:
+      HASH_INVOKE_FROM_EVAL(0x6A7E0B15FF689133LL, mb_ereg_search_init);
+      break;
+    case 4407:
+      HASH_INVOKE_FROM_EVAL(0x5666016FA3C0F137LL, socket_clear_error);
+      break;
+    case 4408:
+      HASH_INVOKE_FROM_EVAL(0x2676902697E37138LL, xmlwriter_start_comment);
+      break;
+    case 4410:
+      HASH_INVOKE_FROM_EVAL(0x2A57E5D29D73D13ALL, register_tick_function);
+      break;
+    case 4411:
+      HASH_INVOKE_FROM_EVAL(0x3E0C793B95A9713BLL, imap_bodystruct);
+      break;
+    case 4415:
+      HASH_INVOKE_FROM_EVAL(0x5BFDE63106CE713FLL, dom_element_get_attribute);
+      break;
+    case 4431:
+      HASH_INVOKE_FROM_EVAL(0x61A61E91C477514FLL, chop);
+      HASH_INVOKE_FROM_EVAL(0x7863294A8F33D14FLL, file);
+      break;
+    case 4434:
+      HASH_INVOKE_FROM_EVAL(0x26DD46D8C1F47152LL, ldap_bind);
+      break;
+    case 4451:
+      HASH_INVOKE_FROM_EVAL(0x36D6B73D289DD163LL, date_sunset);
+      break;
+    case 4456:
+      HASH_INVOKE_FROM_EVAL(0x14E46EA3CBCFB168LL, magickgetsamplingfactors);
+      break;
+    case 4462:
+      HASH_INVOKE_FROM_EVAL(0x15B61E061268B16ELL, magickenhanceimage);
+      break;
+    case 4466:
+      HASH_INVOKE_FROM_EVAL(0x59FE6A862E1CB172LL, get_browser);
+      break;
+    case 4468:
+      HASH_INVOKE_FROM_EVAL(0x345E070844E3F174LL, create_function);
+      break;
+    case 4471:
+      HASH_INVOKE_FROM_EVAL(0x174DB93CAF0D1177LL, hphp_splfileinfo___tostring);
+      break;
+    case 4473:
+      HASH_INVOKE_FROM_EVAL(0x6884FAF0D1EF3179LL, posix_mknod);
+      break;
+    case 4476:
+      HASH_INVOKE_FROM_EVAL(0x3E1343B4A3AD717CLL, magickgettextascent);
+      break;
+    case 4479:
+      HASH_INVOKE_FROM_EVAL(0x4EF9496D16F9D17FLL, xmlwriter_start_element_ns);
+      break;
+    case 4481:
+      HASH_INVOKE_FROM_EVAL(0x2227E30BAB23B181LL, dom_xpath_query);
+      break;
+    case 4482:
+      HASH_INVOKE_FROM_EVAL(0x130B62A8C77F3182LL, mb_ereg_search_getregs);
+      break;
+    case 4485:
+      HASH_INVOKE_FROM_EVAL(0x13E90F8874839185LL, ob_get_status);
+      break;
+    case 4486:
+      HASH_INVOKE_FROM_EVAL(0x5DB5E45860801186LL, openssl_csr_export);
+      break;
+    case 4489:
+      HASH_INVOKE_FROM_EVAL(0x0CC53B2F0D38D189LL, timezone_offset_get);
+      break;
+    case 4503:
+      HASH_INVOKE_FROM_EVAL(0x15AD9CE061C75197LL, timezone_transitions_get);
+      break;
+    case 4507:
+      HASH_INVOKE_FROM_EVAL(0x7FF6C2A693CE119BLL, magickcyclecolormapimage);
+      break;
+    case 4512:
+      HASH_INVOKE_FROM_EVAL(0x6FB5104FC97A31A0LL, drawpathcurvetorelative);
+      break;
+    case 4514:
+      HASH_INVOKE_FROM_EVAL(0x2A9015499A2EB1A2LL, fnmatch);
+      break;
+    case 4515:
+      HASH_INVOKE_FROM_EVAL(0x735B81C45C2971A3LL, drawgetfillopacity);
+      break;
+    case 4518:
+      HASH_INVOKE_FROM_EVAL(0x37B4612178EF91A6LL, memcache_get_version);
+      break;
+    case 4521:
+      HASH_INVOKE_FROM_EVAL(0x740DC7FFAD8BB1A9LL, imagecolorat);
+      break;
+    case 4522:
+      HASH_INVOKE_FROM_EVAL(0x11A5C66A3D0711AALL, apc_sma_info);
+      break;
+    case 4525:
+      HASH_INVOKE_FROM_EVAL(0x5A6EFF8C71A431ADLL, socket_get_status);
+      HASH_INVOKE_FROM_EVAL(0x50538F37398AF1ADLL, ldap_get_option);
+      break;
+    case 4527:
+      HASH_INVOKE_FROM_EVAL(0x5B1F9C2E9FE111AFLL, fb_utf8ize);
+      break;
+    case 4541:
+      HASH_INVOKE_FROM_EVAL(0x4B3F35310DEA31BDLL, socket_create_pair);
+      break;
+    case 4543:
+      HASH_INVOKE_FROM_EVAL(0x681CD0E7D9DB71BFLL, pow);
+      break;
+    case 4546:
+      HASH_INVOKE_FROM_EVAL(0x02103322F88C71C2LL, pixelgetcolorcount);
+      break;
+    case 4548:
+      HASH_INVOKE_FROM_EVAL(0x3617DAE43A23D1C4LL, xml_parser_set_option);
+      break;
+    case 4550:
+      HASH_INVOKE_FROM_EVAL(0x188D37410B6051C6LL, session_unregister);
+      break;
+    case 4552:
+      HASH_INVOKE_FROM_EVAL(0x11C0B5DA066891C8LL, preg_match_all);
+      break;
+    case 4556:
+      HASH_INVOKE_FROM_EVAL(0x3DF488365DAAF1CCLL, drawgettextencoding);
+      break;
+    case 4557:
+      HASH_INVOKE_FROM_EVAL(0x37340B707E7CD1CDLL, magickgetimagebordercolor);
+      break;
+    case 4558:
+      HASH_INVOKE_FROM_EVAL(0x2E7741B5440FB1CELL, magicksetlastiterator);
+      break;
+    case 4560:
+      HASH_INVOKE_FROM_EVAL(0x03012F3DDD7AB1D0LL, getservbyport);
+      break;
+    case 4564:
+      HASH_INVOKE_FROM_EVAL(0x219F3257BA3371D4LL, decbin);
+      break;
+    case 4569:
+      HASH_INVOKE_FROM_EVAL(0x7A69D0078F4F31D9LL, ldap_start_tls);
+      break;
+    case 4570:
+      HASH_INVOKE_FROM_EVAL(0x0482E069503A91DALL, posix_setgid);
+      break;
+    case 4571:
+      HASH_INVOKE_FROM_EVAL(0x3FEBBC0DA79F31DBLL, fb_call_user_func_safe);
+      break;
+    case 4572:
+      HASH_INVOKE_FROM_EVAL(0x1D626FADDFCA11DCLL, imap_num_msg);
+      HASH_INVOKE_FROM_EVAL(0x14FB46333D6D11DCLL, xml_set_default_handler);
+      break;
+    case 4573:
+      HASH_INVOKE_FROM_EVAL(0x03A183D73942B1DDLL, apc_filehits);
+      break;
+    case 4574:
+      HASH_INVOKE_FROM_EVAL(0x44563CC8FA9B11DELL, memcache_set_server_params);
+      break;
+    case 4575:
+      HASH_INVOKE_FROM_EVAL(0x7403251412E931DFLL, syslog);
+      break;
+    case 4576:
+      HASH_INVOKE_FROM_EVAL(0x5932D2750A8A91E0LL, magickgetpackagename);
+      break;
+    case 4577:
+      HASH_INVOKE_FROM_EVAL(0x2771C632A60371E1LL, ftok);
+      HASH_INVOKE_FROM_EVAL(0x0ED729A444C611E1LL, openssl_x509_read);
+      break;
+    case 4580:
+      HASH_INVOKE_FROM_EVAL(0x08F7A6C37FC7B1E4LL, shm_get_var);
+      break;
+    case 4584:
+      HASH_INVOKE_FROM_EVAL(0x7F843353646391E8LL, rad2deg);
+      break;
+    case 4594:
+      HASH_INVOKE_FROM_EVAL(0x46AFE55982B371F2LL, posix_geteuid);
+      break;
+    case 4595:
+      HASH_INVOKE_FROM_EVAL(0x11BB3CDC5E4971F3LL, xmlwriter_end_pi);
+      break;
+    case 4597:
+      HASH_INVOKE_FROM_EVAL(0x542FBDCF960031F5LL, fprintf);
+      HASH_INVOKE_FROM_EVAL(0x02ABC00C046291F5LL, imageellipse);
+      break;
+    case 4602:
+      HASH_INVOKE_FROM_EVAL(0x135D5CBF936B11FALL, msg_receive);
+      break;
+    case 4605:
+      HASH_INVOKE_FROM_EVAL(0x5304E6B47ED0B1FDLL, srand);
+      break;
+    case 4620:
+      HASH_INVOKE_FROM_EVAL(0x41B15671649A320CLL, curl_multi_getcontent);
+      HASH_INVOKE_FROM_EVAL(0x257BEA4D6DC9920CLL, ctype_alnum);
+      break;
+    case 4622:
+      HASH_INVOKE_FROM_EVAL(0x533642044A00520ELL, pixelgetmagentaquantum);
+      break;
+    case 4623:
+      HASH_INVOKE_FROM_EVAL(0x08DC8BF3ADAE520FLL, getallheaders);
+      HASH_INVOKE_FROM_EVAL(0x53631CF3A937320FLL, get_class_methods);
+      break;
+    case 4624:
+      HASH_INVOKE_FROM_EVAL(0x15EF510022CAF210LL, xml_parser_create_ns);
+      HASH_INVOKE_FROM_EVAL(0x2D41D7F8F4113210LL, sinh);
+      break;
+    case 4628:
+      HASH_INVOKE_FROM_EVAL(0x7D85E9FACB92D214LL, magickgetimageblob);
+      break;
+    case 4632:
+      HASH_INVOKE_FROM_EVAL(0x56C95225813A5218LL, memory_get_usage);
+      HASH_INVOKE_FROM_EVAL(0x4D63F2C9AAB79218LL, fb_renamed_functions);
+      break;
+    case 4634:
+      HASH_INVOKE_FROM_EVAL(0x72C0C89D897E721ALL, magicksetimagetype);
+      break;
+    case 4636:
+      HASH_INVOKE_FROM_EVAL(0x482D58D8EE3A521CLL, imap_lsub);
+      break;
+    case 4646:
+      HASH_INVOKE_FROM_EVAL(0x007B6BD94D767226LL, hphp_splfileobject_fpassthru);
+      break;
+    case 4647:
+      HASH_INVOKE_FROM_EVAL(0x5A26F00A81BA5227LL, xmlwriter_start_attribute_ns);
+      break;
+    case 4648:
+      HASH_INVOKE_FROM_EVAL(0x44911AEE34D63228LL, time_sleep_until);
+      HASH_INVOKE_FROM_EVAL(0x7CD3C6F6495D3228LL, memcache_get_stats);
+      break;
+    case 4654:
+      HASH_INVOKE_FROM_EVAL(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler);
+      break;
+    case 4657:
+      HASH_INVOKE_FROM_EVAL(0x7C07D66F70E43231LL, mailparse_determine_best_xfer_encoding);
+      break;
+    case 4660:
+      HASH_INVOKE_FROM_EVAL(0x23C478B2D95F3234LL, dom_element_has_attribute_ns);
+      break;
+    case 4662:
+      HASH_INVOKE_FROM_EVAL(0x5542AABF33A2F236LL, stream_filter_remove);
+      break;
+    case 4666:
+      HASH_INVOKE_FROM_EVAL(0x679ABBE5A08C523ALL, xml_parse_into_struct);
+      break;
+    case 4675:
+      HASH_INVOKE_FROM_EVAL(0x78183A24F2ACB243LL, strtotime);
+      break;
+    case 4688:
+      HASH_INVOKE_FROM_EVAL(0x30747B708DA1D250LL, pushdrawingwand);
+      break;
+    case 4694:
+      HASH_INVOKE_FROM_EVAL(0x0384346A8857D256LL, clonemagickwand);
+      break;
+    case 4699:
+      HASH_INVOKE_FROM_EVAL(0x2F8F40E95EDF925BLL, sizeof);
+      break;
+    case 4708:
+      HASH_INVOKE_FROM_EVAL(0x261F403C4174D264LL, posix_getsid);
+      break;
+    case 4711:
+      HASH_INVOKE_FROM_EVAL(0x38B376B9D9091267LL, xmlwriter_write_attribute);
+      break;
+    case 4716:
+      HASH_INVOKE_FROM_EVAL(0x188DF1EB5FD1B26CLL, mailparse_msg_parse_file);
+      break;
+    case 4718:
+      HASH_INVOKE_FROM_EVAL(0x5672949384A4F26ELL, stream_filter_register);
+      break;
+    case 4723:
+      HASH_INVOKE_FROM_EVAL(0x61C991F216E85273LL, inet_ntop);
+      HASH_INVOKE_FROM_EVAL(0x08CC1E49661DB273LL, dom_element_get_attribute_ns);
+      break;
+    case 4730:
+      HASH_INVOKE_FROM_EVAL(0x39E05F957C7DD27ALL, magickgetimagedepth);
+      break;
+    case 4732:
+      HASH_INVOKE_FROM_EVAL(0x0F7E33D551E0727CLL, posix_getpid);
+      break;
+    case 4735:
+      HASH_INVOKE_FROM_EVAL(0x57E8781CF111727FLL, fileowner);
+      break;
+    case 4736:
+      HASH_INVOKE_FROM_EVAL(0x0C61AE35699F1280LL, imap_thread);
+      break;
+    case 4737:
+      HASH_INVOKE_FROM_EVAL(0x0881440DCF5D3281LL, magickflattenimages);
+      break;
+    case 4762:
+      HASH_INVOKE_FROM_EVAL(0x68272A37CC9E729ALL, mb_strtolower);
+      break;
+    case 4763:
+      HASH_INVOKE_FROM_EVAL(0x4A09634AE6DFF29BLL, fileperms);
+      break;
+    case 4771:
+      HASH_INVOKE_FROM_EVAL(0x10E7B5A0E29CF2A3LL, bcscale);
+      HASH_INVOKE_FROM_EVAL(0x743EA4BF2CC8F2A3LL, mysql_field_type);
+      break;
+    case 4774:
+      HASH_INVOKE_FROM_EVAL(0x73EF3A19F76872A6LL, iconv_strrpos);
+      break;
+    case 4776:
+      HASH_INVOKE_FROM_EVAL(0x5409127FEDE332A8LL, exif_imagetype);
+      break;
+    case 4782:
+      HASH_INVOKE_FROM_EVAL(0x36AB9E6AA687F2AELL, xmlwriter_start_dtd_element);
+      break;
+    case 4790:
+      HASH_INVOKE_FROM_EVAL(0x0E9C9B409F94B2B6LL, setcookie);
+      break;
+    case 4794:
+      HASH_INVOKE_FROM_EVAL(0x4A3D2113D3DFD2BALL, newpixelwandarray);
+      break;
+    case 4796:
+      HASH_INVOKE_FROM_EVAL(0x41F7E2214DDE12BCLL, mcrypt_enc_self_test);
+      break;
+    case 4797:
+      HASH_INVOKE_FROM_EVAL(0x327C865E52FD12BDLL, ldap_get_values_len);
+      break;
+    case 4798:
+      HASH_INVOKE_FROM_EVAL(0x72D6F9B3661AB2BELL, magickgetimage);
+      break;
+    case 4800:
+      HASH_INVOKE_FROM_EVAL(0x5B7C1B74BA3452C0LL, newpixelregioniterator);
+      break;
+    case 4803:
+      HASH_INVOKE_FROM_EVAL(0x446D76A95365D2C3LL, pixelgetyellow);
+      break;
+    case 4804:
+      HASH_INVOKE_FROM_EVAL(0x1C7B8161F3C412C4LL, dom_document_create_document_fragment);
+      break;
+    case 4812:
+      HASH_INVOKE_FROM_EVAL(0x407EF03C23BF92CCLL, drawpathellipticarcabsolute);
+      break;
+    case 4815:
+      HASH_INVOKE_FROM_EVAL(0x4ACE27EC476632CFLL, apc_bin_dumpfile);
+      break;
+    case 4821:
+      HASH_INVOKE_FROM_EVAL(0x4D04C580CF9212D5LL, posix_getgroups);
+      break;
+    case 4822:
+      HASH_INVOKE_FROM_EVAL(0x06E9C984B5F0B2D6LL, furchash_hphp_ext);
+      break;
+    case 4824:
+      HASH_INVOKE_FROM_EVAL(0x56C4896BA2FF52D8LL, drawsetstrokeopacity);
+      break;
+    case 4826:
+      HASH_INVOKE_FROM_EVAL(0x5C6A85B448C352DALL, posix_uname);
+      break;
+    case 4834:
+      HASH_INVOKE_FROM_EVAL(0x4AEC19D75BF652E2LL, magickremoveimage);
+      break;
+    case 4845:
+      HASH_INVOKE_FROM_EVAL(0x1B9FC9E27B8AB2EDLL, memcache_flush);
+      break;
+    case 4850:
+      HASH_INVOKE_FROM_EVAL(0x2EE56D216BB832F2LL, time_nanosleep);
+      break;
+    case 4852:
+      HASH_INVOKE_FROM_EVAL(0x418EC805C5FD32F4LL, mcrypt_get_key_size);
+      break;
+    case 4857:
+      HASH_INVOKE_FROM_EVAL(0x319EF52B36AAB2F9LL, posix_isatty);
+      break;
+    case 4859:
+      HASH_INVOKE_FROM_EVAL(0x4D393D30CE1112FBLL, drawpathmovetoabsolute);
+      break;
+    case 4862:
+      HASH_INVOKE_FROM_EVAL(0x208B66A8731F72FELL, sem_get);
+      HASH_INVOKE_FROM_EVAL(0x755A9950B65472FELL, drawgetgravity);
+      break;
+    case 4866:
+      HASH_INVOKE_FROM_EVAL(0x0103FE1E2C307302LL, socket_recvfrom);
+      break;
+    case 4869:
+      HASH_INVOKE_FROM_EVAL(0x65D40C6B4842F305LL, clearpixelwand);
+      break;
+    case 4870:
+      HASH_INVOKE_FROM_EVAL(0x689D60184DD81306LL, htmlspecialchars_decode);
+      break;
+    case 4875:
+      HASH_INVOKE_FROM_EVAL(0x2D2BC1125ECA930BLL, dom_document_relaxng_validate_file);
+      break;
+    case 4876:
+      HASH_INVOKE_FROM_EVAL(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen);
+      break;
+    case 4881:
+      HASH_INVOKE_FROM_EVAL(0x141EDCAE1D155311LL, xbox_get_thread_time);
+      break;
+    case 4885:
+      HASH_INVOKE_FROM_EVAL(0x4F1E663AE18FD315LL, msg_remove_queue);
+      break;
+    case 4894:
+      HASH_INVOKE_FROM_EVAL(0x27FF9DB54420531ELL, xml_error_string);
+      break;
+    case 4900:
+      HASH_INVOKE_FROM_EVAL(0x5E5E4F998C8E7324LL, pcntl_wifexited);
+      break;
+    case 4904:
+      HASH_INVOKE_FROM_EVAL(0x73FEB3BF75FFB328LL, ctype_space);
+      break;
+    case 4907:
+      HASH_INVOKE_FROM_EVAL(0x2BDB1EE3869E132BLL, restore_error_handler);
+      break;
+    case 4911:
+      HASH_INVOKE_FROM_EVAL(0x7DD6461A6290B32FLL, mysql_real_escape_string);
+      break;
+    case 4912:
+      HASH_INVOKE_FROM_EVAL(0x1601C1826E90B330LL, strptime);
+      break;
+    case 4931:
+      HASH_INVOKE_FROM_EVAL(0x6794CFB89DEEF343LL, curl_exec);
+      break;
+    case 4933:
+      HASH_INVOKE_FROM_EVAL(0x45FAE3D08E96B345LL, curl_errno);
+      break;
+    case 4938:
+      HASH_INVOKE_FROM_EVAL(0x208BB4C3C0BA534ALL, xmlwriter_write_dtd_element);
+      break;
+    case 4939:
+      HASH_INVOKE_FROM_EVAL(0x57A9E8878872D34BLL, parse_ini_file);
+      break;
+    case 4940:
+      HASH_INVOKE_FROM_EVAL(0x0644E5FB91C8134CLL, array_udiff);
+      break;
+    case 4943:
+      HASH_INVOKE_FROM_EVAL(0x4F2D0EFF0D4B534FLL, fb_get_taint);
+      HASH_INVOKE_FROM_EVAL(0x5C8B3B9FA833934FLL, ldap_first_attribute);
+      break;
+    case 4945:
+      HASH_INVOKE_FROM_EVAL(0x2B422699C3A57351LL, sha1);
+      break;
+    case 4948:
+      HASH_INVOKE_FROM_EVAL(0x501F4DF5C8997354LL, hphp_get_property);
+      HASH_INVOKE_FROM_EVAL(0x77EB4D2F5BDDB354LL, magickgetimageresolution);
+      break;
+    case 4955:
+      HASH_INVOKE_FROM_EVAL(0x1AC48909BEEF935BLL, func_get_arg);
+      break;
+    case 4968:
+      HASH_INVOKE_FROM_EVAL(0x5D406167C673D368LL, magickcompareimages);
+      break;
+    case 4974:
+      HASH_INVOKE_FROM_EVAL(0x7CE90898E882F36ELL, pixelsetyellow);
+      break;
+    case 4978:
+      HASH_INVOKE_FROM_EVAL(0x7107AE03689F5372LL, hphp_invoke);
+      break;
+    case 4984:
+      HASH_INVOKE_FROM_EVAL(0x34BAEFD8AE59D378LL, hphp_set_error_page);
+      break;
+    case 4996:
+      HASH_INVOKE_FROM_EVAL(0x44C1BC500D175384LL, wandgetexception);
+      break;
+    case 4997:
+      HASH_INVOKE_FROM_EVAL(0x7C5CA3E2E3C8F385LL, magickflipimage);
+      HASH_INVOKE_FROM_EVAL(0x57554E082E0ED385LL, pcntl_exec);
+      HASH_INVOKE_FROM_EVAL(0x0B0B8765A4CDD385LL, hphp_splfileobject_fgets);
+      break;
+    case 4998:
+      HASH_INVOKE_FROM_EVAL(0x589E24C7664D5386LL, doubleval);
+      break;
+    case 5003:
+      HASH_INVOKE_FROM_EVAL(0x32354CC291ECF38BLL, fb_intercept);
+      break;
+    case 5004:
+      HASH_INVOKE_FROM_EVAL(0x7F18BA1FBD95B38CLL, hphp_directoryiterator_next);
+      break;
+    case 5009:
+      HASH_INVOKE_FROM_EVAL(0x25FA64929C619391LL, asin);
+      break;
+    case 5010:
+      HASH_INVOKE_FROM_EVAL(0x2052D8D4822EF392LL, is_subclass_of);
+      break;
+    case 5013:
+      HASH_INVOKE_FROM_EVAL(0x7B0552A224E27395LL, bcsqrt);
+      break;
+    case 5017:
+      HASH_INVOKE_FROM_EVAL(0x66DA89629BA5D399LL, posix_getgrgid);
+      break;
+    case 5018:
+      HASH_INVOKE_FROM_EVAL(0x4C24BC37D807D39ALL, collator_get_strength);
+      break;
+    case 5019:
+      HASH_INVOKE_FROM_EVAL(0x5B33B55D4B7E339BLL, fpassthru);
+      break;
+    case 5022:
+      HASH_INVOKE_FROM_EVAL(0x27AD0D17AA7FB39ELL, ldap_set_rebind_proc);
+      break;
+    case 5023:
+      HASH_INVOKE_FROM_EVAL(0x4019A6916456339FLL, dom_node_remove_child);
+      break;
+    case 5026:
+      HASH_INVOKE_FROM_EVAL(0x0A2A4AA078D433A2LL, hexdec);
+      break;
+    case 5028:
+      HASH_INVOKE_FROM_EVAL(0x1676FB393F8493A4LL, constant);
+      break;
+    case 5030:
+      HASH_INVOKE_FROM_EVAL(0x40E0D496EE29B3A6LL, call_user_func_array);
+      break;
+    case 5032:
+      HASH_INVOKE_FROM_EVAL(0x4120B8157ED413A8LL, i18n_loc_set_strength);
+      break;
+    case 5043:
+      HASH_INVOKE_FROM_EVAL(0x6077CFE09EE4D3B3LL, session_save_path);
+      break;
+    case 5046:
+      HASH_INVOKE_FROM_EVAL(0x6E6C0E9A715073B6LL, dom_xpath_register_php_functions);
+      HASH_INVOKE_FROM_EVAL(0x6C07640F7C5BD3B6LL, imagettfbbox);
+      break;
+    case 5052:
+      HASH_INVOKE_FROM_EVAL(0x0629158C42C893BCLL, compact);
+      break;
+    case 5054:
+      HASH_INVOKE_FROM_EVAL(0x49A34964289453BELL, eregi);
+      break;
+    case 5055:
+      HASH_INVOKE_FROM_EVAL(0x0E38CDC93E5893BFLL, magicksetimagemattecolor);
+      break;
+    case 5064:
+      HASH_INVOKE_FROM_EVAL(0x4D100C70E86593C8LL, stream_set_write_buffer);
+      break;
+    case 5067:
+      HASH_INVOKE_FROM_EVAL(0x0173CC6FACAB93CBLL, quotemeta);
+      break;
+    case 5070:
+      HASH_INVOKE_FROM_EVAL(0x02BEFBEE8287D3CELL, get_magic_quotes_runtime);
+      break;
+    case 5074:
+      HASH_INVOKE_FROM_EVAL(0x67C155632E5373D2LL, mailparse_msg_create);
+      HASH_INVOKE_FROM_EVAL(0x4363FF80EEC953D2LL, imap_undelete);
+      break;
+    case 5075:
+      HASH_INVOKE_FROM_EVAL(0x0A8D4FAF266973D3LL, bcpow);
+      break;
+    case 5079:
+      HASH_INVOKE_FROM_EVAL(0x382B5B1EF00153D7LL, imagecreatefrompng);
+      break;
+    case 5084:
+      HASH_INVOKE_FROM_EVAL(0x7BCD0D27FFD953DCLL, imap_num_recent);
+      break;
+    case 5098:
+      HASH_INVOKE_FROM_EVAL(0x0D3C8F00B0C633EALL, inet_pton);
+      break;
+    case 5105:
+      HASH_INVOKE_FROM_EVAL(0x5EFE291585A713F1LL, method_exists);
+      break;
+    case 5106:
+      HASH_INVOKE_FROM_EVAL(0x0FE12E46BC9853F2LL, stream_filter_append);
+      HASH_INVOKE_FROM_EVAL(0x41A19AE18BC8B3F2LL, curl_error);
+      HASH_INVOKE_FROM_EVAL(0x696241660648B3F2LL, magickwhitethresholdimage);
+      break;
+    case 5108:
+      HASH_INVOKE_FROM_EVAL(0x26D53A77483EF3F4LL, drawbezier);
+      break;
+    case 5111:
+      HASH_INVOKE_FROM_EVAL(0x43F22CB4E3E8F3F7LL, apache_note);
+      break;
+    case 5112:
+      HASH_INVOKE_FROM_EVAL(0x4C024573FCD5B3F8LL, var_dump);
+      HASH_INVOKE_FROM_EVAL(0x514EA9C8FF5B33F8LL, posix_getrlimit);
+      break;
+    case 5114:
+      HASH_INVOKE_FROM_EVAL(0x1B217E78CBC713FALL, zend_thread_id);
+      break;
+    case 5121:
+      HASH_INVOKE_FROM_EVAL(0x36B9C440B1881401LL, fmod);
+      break;
+    case 5130:
+      HASH_INVOKE_FROM_EVAL(0x6DC61C51FA1D340ALL, show_source);
+      break;
+    case 5131:
+      HASH_INVOKE_FROM_EVAL(0x6C2CE092B900D40BLL, hphp_splfileinfo___construct);
+      break;
+    case 5133:
+      HASH_INVOKE_FROM_EVAL(0x152C7161567F940DLL, func_num_args);
+      break;
+    case 5139:
+      HASH_INVOKE_FROM_EVAL(0x56EC1A6732D07413LL, drawgetfontsize);
+      HASH_INVOKE_FROM_EVAL(0x20C24D873DC65413LL, openssl_csr_get_subject);
+      break;
+    case 5147:
+      HASH_INVOKE_FROM_EVAL(0x47279C717370B41BLL, acos);
+      break;
+    case 5150:
+      HASH_INVOKE_FROM_EVAL(0x3E4E7C561D3A541ELL, fgetss);
+      break;
+    case 5151:
+      HASH_INVOKE_FROM_EVAL(0x301963016A91741FLL, hphp_stats);
+      break;
+    case 5155:
+      HASH_INVOKE_FROM_EVAL(0x4C9108B5A5807423LL, drawsetfillcolor);
+      break;
+    case 5158:
+      HASH_INVOKE_FROM_EVAL(0x161D8EA3339AB426LL, apc_cas);
+      break;
+    case 5164:
+      HASH_INVOKE_FROM_EVAL(0x12D324CC744BF42CLL, pixelgetcolorasstring);
+      break;
+    case 5165:
+      HASH_INVOKE_FROM_EVAL(0x333D1E2E28B0942DLL, imagejpeg);
+      break;
+    case 5171:
+      HASH_INVOKE_FROM_EVAL(0x6829094421CDB433LL, touch);
+      break;
+    case 5173:
+      HASH_INVOKE_FROM_EVAL(0x75DAFEF5BFEF1435LL, imagesetstyle);
+      HASH_INVOKE_FROM_EVAL(0x044386A0E8B25435LL, drawgetclipunits);
+      break;
+    case 5175:
+      HASH_INVOKE_FROM_EVAL(0x1AAF02CF6DEBB437LL, magickdeconstructimages);
+      break;
+    case 5177:
+      HASH_INVOKE_FROM_EVAL(0x34C52EF423EFD439LL, proc_open);
+      break;
+    case 5184:
+      HASH_INVOKE_FROM_EVAL(0x5247425ED698B440LL, hphp_thread_is_warmup_enabled);
+      break;
+    case 5185:
+      HASH_INVOKE_FROM_EVAL(0x05892E3C5B9EB441LL, closedir);
+      break;
+    case 5201:
+      HASH_INVOKE_FROM_EVAL(0x7539134E1CC61451LL, xmlwriter_start_cdata);
+      break;
+    case 5212:
+      HASH_INVOKE_FROM_EVAL(0x436AB52B2099145CLL, ldap_close);
+      break;
+    case 5214:
+      HASH_INVOKE_FROM_EVAL(0x0ED191E71A60545ELL, magicksetfirstiterator);
+      break;
+    case 5226:
+      HASH_INVOKE_FROM_EVAL(0x32643AE461D3F46ALL, mailparse_stream_encode);
+      break;
+    case 5228:
+      HASH_INVOKE_FROM_EVAL(0x07D959A8C0CF546CLL, stream_wrapper_unregister);
+      HASH_INVOKE_FROM_EVAL(0x4F39BD300305746CLL, hphp_splfileobject_key);
+      break;
+    case 5229:
+      HASH_INVOKE_FROM_EVAL(0x738D381800CE946DLL, ldap_parse_result);
+      HASH_INVOKE_FROM_EVAL(0x5229C0069FD7D46DLL, vfprintf);
+      break;
+    case 5231:
+      HASH_INVOKE_FROM_EVAL(0x5B8F2ABBB480346FLL, bzwrite);
+      break;
+    case 5239:
+      HASH_INVOKE_FROM_EVAL(0x18666906A8001477LL, array_diff_assoc);
+      break;
+    case 5240:
+      HASH_INVOKE_FROM_EVAL(0x080594ABE715B478LL, hphp_splfileobject_current);
+      HASH_INVOKE_FROM_EVAL(0x6497CC8295DDB478LL, fb_thrift_unserialize);
+      break;
+    case 5241:
+      HASH_INVOKE_FROM_EVAL(0x4859AF715D5A3479LL, magickmagnifyimage);
+      break;
+    case 5244:
+      HASH_INVOKE_FROM_EVAL(0x2FA7269AB0E1147CLL, mysql_field_seek);
+      break;
+    case 5246:
+      HASH_INVOKE_FROM_EVAL(0x1D583AA4F7F6547ELL, drawpathlinetorelative);
+      break;
+    case 5247:
+      HASH_INVOKE_FROM_EVAL(0x68AE04B02253B47FLL, mb_parse_str);
+      break;
+    case 5249:
+      HASH_INVOKE_FROM_EVAL(0x1876287F59CEB481LL, bzerror);
+      break;
+    case 5250:
+      HASH_INVOKE_FROM_EVAL(0x4590C853C2027482LL, magickembossimage);
+      break;
+    case 5253:
+      HASH_INVOKE_FROM_EVAL(0x250DD3D58EA37485LL, gmstrftime);
+      break;
+    case 5257:
+      HASH_INVOKE_FROM_EVAL(0x4F7EAF5B37663489LL, magickgetimageredprimary);
+      break;
+    case 5258:
+      HASH_INVOKE_FROM_EVAL(0x7E88764A1DE8548ALL, drawgetstrokewidth);
+      break;
+    case 5259:
+      HASH_INVOKE_FROM_EVAL(0x5860ACF621DD948BLL, is_file);
+      break;
+    case 5261:
+      HASH_INVOKE_FROM_EVAL(0x23511F83C2BC548DLL, header);
+      break;
+    case 5267:
+      HASH_INVOKE_FROM_EVAL(0x56377FCC2447D493LL, magicksetimagepixels);
+      break;
+    case 5271:
+      HASH_INVOKE_FROM_EVAL(0x353E2A635A47F497LL, evhttp_get);
+      HASH_INVOKE_FROM_EVAL(0x5388045C2D13D497LL, mysql_num_fields);
+      break;
+    case 5285:
+      HASH_INVOKE_FROM_EVAL(0x18BE9B1C2DE6D4A5LL, imagexbm);
+      break;
+    case 5289:
+      HASH_INVOKE_FROM_EVAL(0x386378F2BA3234A9LL, magickevaluateimage);
+      break;
+    case 5295:
+      HASH_INVOKE_FROM_EVAL(0x42463E7E5C3434AFLL, mb_strrichr);
+      HASH_INVOKE_FROM_EVAL(0x6AC751181531F4AFLL, simplexml_load_string);
+      break;
+    case 5296:
+      HASH_INVOKE_FROM_EVAL(0x0E11D317044974B0LL, magickgetnumberimages);
+      break;
+    case 5297:
+      HASH_INVOKE_FROM_EVAL(0x060619D7A1B5F4B1LL, checkdate);
+      break;
+    case 5299:
+      HASH_INVOKE_FROM_EVAL(0x57034CAD772AF4B3LL, magickgetimagechannelmean);
+      break;
+    case 5302:
+      HASH_INVOKE_FROM_EVAL(0x3DE291DCBA5134B6LL, dom_document_create_element);
+      HASH_INVOKE_FROM_EVAL(0x12A9166E68DCF4B6LL, pixelgetgreen);
+      break;
+    case 5303:
+      HASH_INVOKE_FROM_EVAL(0x7EEBC81AF9BC54B7LL, xml_parser_free);
+      break;
+    case 5306:
+      HASH_INVOKE_FROM_EVAL(0x6B49D11E633274BALL, fopen);
+      break;
+    case 5309:
+      HASH_INVOKE_FROM_EVAL(0x5BA371A93F60F4BDLL, use_soap_error_handler);
+      break;
+    case 5316:
+      HASH_INVOKE_FROM_EVAL(0x4A24DB9D6B0334C4LL, hphp_recursivedirectoryiterator_next);
+      break;
+    case 5317:
+      HASH_INVOKE_FROM_EVAL(0x34A38DDF2CD914C5LL, long2ip);
+      break;
+    case 5320:
+      HASH_INVOKE_FROM_EVAL(0x1B8BBFC882FDB4C8LL, magicktintimage);
+      break;
+    case 5325:
+      HASH_INVOKE_FROM_EVAL(0x02B0E99C1E68F4CDLL, imap_createmailbox);
+      break;
+    case 5329:
+      HASH_INVOKE_FROM_EVAL(0x29EE24C41FD3D4D1LL, mysql_field_name);
+      break;
+    case 5334:
+      HASH_INVOKE_FROM_EVAL(0x19ECDD5A937DD4D6LL, mailparse_msg_get_part_data);
+      break;
+    case 5336:
+      HASH_INVOKE_FROM_EVAL(0x14BF763DDDC014D8LL, imagepsencodefont);
+      HASH_INVOKE_FROM_EVAL(0x56B908FC91C834D8LL, magickflopimage);
+      HASH_INVOKE_FROM_EVAL(0x1301F911ED6D54D8LL, is_nan);
+      HASH_INVOKE_FROM_EVAL(0x575C5AE3D2A694D8LL, ob_end_clean);
+      break;
+    case 5343:
+      HASH_INVOKE_FROM_EVAL(0x747A7F585CD694DFLL, zend_version);
+      break;
+    case 5347:
+      HASH_INVOKE_FROM_EVAL(0x7D57A0D72D6254E3LL, ob_implicit_flush);
+      break;
+    case 5358:
+      HASH_INVOKE_FROM_EVAL(0x5895ADDD91F354EELL, hphp_thread_set_warmup_enabled);
+      break;
+    case 5362:
+      HASH_INVOKE_FROM_EVAL(0x41276F8DE35354F2LL, dom_document_get_elements_by_tag_name);
+      break;
+    case 5364:
+      HASH_INVOKE_FROM_EVAL(0x436B36C5EB8DB4F4LL, mcrypt_generic);
+      break;
+    case 5365:
+      HASH_INVOKE_FROM_EVAL(0x112A0ACDD8B9D4F5LL, mb_list_mime_names);
+      break;
+    case 5383:
+      HASH_INVOKE_FROM_EVAL(0x4FC9FE38A748B507LL, intl_get_error_message);
+      break;
+    case 5384:
+      HASH_INVOKE_FROM_EVAL(0x63A08D6AD1209508LL, magickgetexception);
+      break;
+    case 5393:
+      HASH_INVOKE_FROM_EVAL(0x3C0304A55503D511LL, magickgetimageiterations);
+      break;
+    case 5395:
+      HASH_INVOKE_FROM_EVAL(0x772E8BF114FEF513LL, eregi_replace);
+      break;
+    case 5396:
+      HASH_INVOKE_FROM_EVAL(0x100385A0988FD514LL, magickgetfilename);
+      break;
+    case 5410:
+      HASH_INVOKE_FROM_EVAL(0x7DA98E0379D33522LL, chdir);
+      break;
+    case 5413:
+      HASH_INVOKE_FROM_EVAL(0x230FE1D6EC599525LL, link);
+      break;
+    case 5420:
+      HASH_INVOKE_FROM_EVAL(0x1AB55BBA0967952CLL, mb_convert_variables);
+      break;
+    case 5423:
+      HASH_INVOKE_FROM_EVAL(0x6770E2559C9A152FLL, openssl_private_decrypt);
+      break;
+    case 5425:
+      HASH_INVOKE_FROM_EVAL(0x6776C27C6123D531LL, dl);
+      break;
+    case 5426:
+      HASH_INVOKE_FROM_EVAL(0x6193A26936F4D532LL, disk_total_space);
+      break;
+    case 5429:
+      HASH_INVOKE_FROM_EVAL(0x6C87406DDC0AB535LL, mcrypt_ecb);
+      break;
+    case 5430:
+      HASH_INVOKE_FROM_EVAL(0x0E80D04691227536LL, eval);
+      break;
+    case 5431:
+      HASH_INVOKE_FROM_EVAL(0x0830FF7C379D7537LL, dom_text_split_text);
+      HASH_INVOKE_FROM_EVAL(0x557C72DE98679537LL, hash_update_stream);
+      break;
+    case 5433:
+      HASH_INVOKE_FROM_EVAL(0x3C88F0FAC3EDD539LL, phpversion);
+      break;
+    case 5436:
+      HASH_INVOKE_FROM_EVAL(0x5CA55E62F2A5953CLL, drawgetstrokeopacity);
+      break;
+    case 5438:
+      HASH_INVOKE_FROM_EVAL(0x36A80B48E08B753ELL, implode);
+      break;
+    case 5443:
+      HASH_INVOKE_FROM_EVAL(0x0962EACAE0F0B543LL, hphp_splfileinfo_getlinktarget);
+      break;
+    case 5444:
+      HASH_INVOKE_FROM_EVAL(0x4D397FE5D0C0B544LL, magickmedianfilterimage);
+      break;
+    case 5451:
+      HASH_INVOKE_FROM_EVAL(0x40CE61115E11154BLL, msg_stat_queue);
+      break;
+    case 5452:
+      HASH_INVOKE_FROM_EVAL(0x1D011CB0E810D54CLL, pdo_drivers);
+      break;
+    case 5453:
+      HASH_INVOKE_FROM_EVAL(0x0F0702D91EAFB54DLL, drawgettextantialias);
+      break;
+    case 5455:
+      HASH_INVOKE_FROM_EVAL(0x30DE78E7131B954FLL, furchash_hphp_ext_supported);
+      break;
+    case 5466:
+      HASH_INVOKE_FROM_EVAL(0x268EE73DB2EA555ALL, get_object_vars);
+      break;
+    case 5468:
+      HASH_INVOKE_FROM_EVAL(0x5749AD20CAFCD55CLL, pixelgetbluequantum);
+      break;
+    case 5475:
+      HASH_INVOKE_FROM_EVAL(0x1B1B2D70792D9563LL, mysql_get_client_info);
+      break;
+    case 5478:
+      HASH_INVOKE_FROM_EVAL(0x6E2FDBD28F895566LL, timezone_abbreviations_list);
+      break;
+    case 5487:
+      HASH_INVOKE_FROM_EVAL(0x016722439BBA756FLL, filetype);
+      break;
+    case 5489:
+      HASH_INVOKE_FROM_EVAL(0x2AD3361DE8B1D571LL, pcntl_signal_dispatch);
+      break;
+    case 5492:
+      HASH_INVOKE_FROM_EVAL(0x636C871213F37574LL, mcrypt_encrypt);
+      break;
+    case 5495:
+      HASH_INVOKE_FROM_EVAL(0x412521E7ADB21577LL, iconv_mime_decode_headers);
+      HASH_INVOKE_FROM_EVAL(0x1E154D823451B577LL, magicksetresolution);
+      break;
+    case 5502:
+      HASH_INVOKE_FROM_EVAL(0x31529E9BCA1E157ELL, shm_remove);
+      break;
+    case 5506:
+      HASH_INVOKE_FROM_EVAL(0x0B1F0EB755BDB582LL, ispixeliterator);
+      break;
+    case 5530:
+      HASH_INVOKE_FROM_EVAL(0x77F1EDE7D5EF759ALL, apc_cache_info);
+      break;
+    case 5531:
+      HASH_INVOKE_FROM_EVAL(0x37D003B09D0C759BLL, stream_get_contents);
+      break;
+    case 5536:
+      HASH_INVOKE_FROM_EVAL(0x20502FCACBB9F5A0LL, convert_uuencode);
+      break;
+    case 5537:
+      HASH_INVOKE_FROM_EVAL(0x297690F3A63335A1LL, magickrotateimage);
+      break;
+    case 5540:
+      HASH_INVOKE_FROM_EVAL(0x3C014439AE5D75A4LL, magickgetcharheight);
+      break;
+    case 5548:
+      HASH_INVOKE_FROM_EVAL(0x763BA2B1C60A55ACLL, pixelgetalphaquantum);
+      break;
+    case 5551:
+      HASH_INVOKE_FROM_EVAL(0x1636FBA5043CF5AFLL, ldap_error);
+      break;
+    case 5554:
+      HASH_INVOKE_FROM_EVAL(0x1887622B9AAE75B2LL, imap_mime_header_decode);
+      break;
+    case 5555:
+      HASH_INVOKE_FROM_EVAL(0x001DBE44BC0B55B3LL, magicksetimagecolormapcolor);
+      HASH_INVOKE_FROM_EVAL(0x7AFA32F70E8195B3LL, xbox_set_thread_timeout);
+      break;
+    case 5557:
+      HASH_INVOKE_FROM_EVAL(0x3F9C5B4708FC55B5LL, timezone_name_get);
+      break;
+    case 5558:
+      HASH_INVOKE_FROM_EVAL(0x1A05907F563235B6LL, collator_set_attribute);
+      break;
+    case 5569:
+      HASH_INVOKE_FROM_EVAL(0x7731B90FB7C975C1LL, magickremoveimageprofile);
+      break;
+    case 5577:
+      HASH_INVOKE_FROM_EVAL(0x75B299F5E35A95C9LL, mb_strwidth);
+      HASH_INVOKE_FROM_EVAL(0x60F8818C0F38D5C9LL, hphp_directoryiterator___tostring);
+      break;
+    case 5588:
+      HASH_INVOKE_FROM_EVAL(0x2FE56B4C457AB5D4LL, ctype_graph);
+      break;
+    case 5605:
+      HASH_INVOKE_FROM_EVAL(0x470F990B218315E5LL, fb_unset_taint);
+      break;
+    case 5610:
+      HASH_INVOKE_FROM_EVAL(0x0B7ACBAB402015EALL, mb_send_mail);
+      break;
+    case 5621:
+      HASH_INVOKE_FROM_EVAL(0x0D1BD0E5AF4175F5LL, drawsetfont);
+      HASH_INVOKE_FROM_EVAL(0x73A1F34DF95B35F5LL, get_defined_constants);
+      break;
+    case 5624:
+      HASH_INVOKE_FROM_EVAL(0x7C48F6EA39B7B5F8LL, magickadaptivethresholdimage);
+      break;
+    case 5627:
+      HASH_INVOKE_FROM_EVAL(0x0FEC4ED541B7F5FBLL, magickgetimagevirtualpixelmethod);
+      break;
+    case 5628:
+      HASH_INVOKE_FROM_EVAL(0x39156C7CCE2D75FCLL, hash_update);
+      break;
+    case 5630:
+      HASH_INVOKE_FROM_EVAL(0x397D3C6576ED75FELL, set_include_path);
+      break;
+    case 5631:
+      HASH_INVOKE_FROM_EVAL(0x40A557CBB9FC35FFLL, mysql_tablename);
+      break;
+    case 5632:
+      HASH_INVOKE_FROM_EVAL(0x552D7CAD93755600LL, dom_document_create_comment);
+      break;
+    case 5653:
+      HASH_INVOKE_FROM_EVAL(0x6AD774816F8F7615LL, mb_strrchr);
+      break;
+    case 5657:
+      HASH_INVOKE_FROM_EVAL(0x6DD51BF03F003619LL, mailparse_uudecode_all);
+      HASH_INVOKE_FROM_EVAL(0x2F29627AF1A97619LL, shm_attach);
+      break;
+    case 5660:
+      HASH_INVOKE_FROM_EVAL(0x70725954DC99F61CLL, mcrypt_create_iv);
+      break;
+    case 5661:
+      HASH_INVOKE_FROM_EVAL(0x69E1368FD737F61DLL, dom_namednodemap_get_named_item);
+      break;
+    case 5665:
+      HASH_INVOKE_FROM_EVAL(0x0F71DDE51AA55621LL, hphp_output_global_state);
+      break;
+    case 5672:
+      HASH_INVOKE_FROM_EVAL(0x1E77B3BCF062D628LL, magickreadimage);
+      break;
+    case 5676:
+      HASH_INVOKE_FROM_EVAL(0x5CEA60D9C54A162CLL, pcntl_wifstopped);
+      break;
+    case 5679:
+      HASH_INVOKE_FROM_EVAL(0x652C331CE138362FLL, is_string);
+      break;
+    case 5684:
+      HASH_INVOKE_FROM_EVAL(0x5E6328F2E6C61634LL, imap_binary);
+      break;
+    case 5687:
+      HASH_INVOKE_FROM_EVAL(0x60276BC7990F9637LL, mysql_list_dbs);
+      HASH_INVOKE_FROM_EVAL(0x75AFA49220C9B637LL, collator_sort);
+      break;
+    case 5694:
+      HASH_INVOKE_FROM_EVAL(0x60302D15A677963ELL, ldap_free_result);
+      break;
+    case 5695:
+      HASH_INVOKE_FROM_EVAL(0x17242BC6C9C9563FLL, crypt);
+      break;
+    case 5702:
+      HASH_INVOKE_FROM_EVAL(0x4901517CB796F646LL, msg_set_queue);
+      break;
+    case 5710:
+      HASH_INVOKE_FROM_EVAL(0x769E5C6A5369F64ELL, ob_list_handlers);
+      break;
+    case 5711:
+      HASH_INVOKE_FROM_EVAL(0x1F3F16CED6BDD64FLL, imap_utf8);
+      break;
+    case 5717:
+      HASH_INVOKE_FROM_EVAL(0x629EDDC1E74ED655LL, array_uintersect_assoc);
+      break;
+    case 5726:
+      HASH_INVOKE_FROM_EVAL(0x205BB9CFF397B65ELL, ldap_mod_replace);
+      break;
+    case 5727:
+      HASH_INVOKE_FROM_EVAL(0x1355AFB40AB1165FLL, drawsetfontstyle);
+      break;
+    case 5730:
+      HASH_INVOKE_FROM_EVAL(0x5629E14D6B9FF662LL, dom_document_get_element_by_id);
+      break;
+    case 5747:
+      HASH_INVOKE_FROM_EVAL(0x126FC82D358E9673LL, magicksetimagevirtualpixelmethod);
+      break;
+    case 5751:
+      HASH_INVOKE_FROM_EVAL(0x001F23CAC36E3677LL, magickgetimagescene);
+      break;
+    case 5755:
+      HASH_INVOKE_FROM_EVAL(0x5BCED33A57D9B67BLL, intval);
+      break;
+    case 5756:
+      HASH_INVOKE_FROM_EVAL(0x43B1BAFFB27F367CLL, session_is_registered);
+      break;
+    case 5757:
+      HASH_INVOKE_FROM_EVAL(0x69616E2817E1967DLL, fileinode);
+      break;
+    case 5762:
+      HASH_INVOKE_FROM_EVAL(0x5F6750E1C7E5D682LL, imageinterlace);
+      break;
+    case 5773:
+      HASH_INVOKE_FROM_EVAL(0x07A946E3DD8E968DLL, ldap_connect);
+      break;
+    case 5775:
+      HASH_INVOKE_FROM_EVAL(0x2EFF4F69EB1DF68FLL, apache_get_config);
+      break;
+    case 5779:
+      HASH_INVOKE_FROM_EVAL(0x7CA1300231493693LL, imap_get_quota);
+      break;
+    case 5781:
+      HASH_INVOKE_FROM_EVAL(0x7186EF5EF0581695LL, exp);
+      break;
+    case 5782:
+      HASH_INVOKE_FROM_EVAL(0x0DD7A2DB53093696LL, utf8_decode);
+      break;
+    case 5799:
+      HASH_INVOKE_FROM_EVAL(0x38BBEE42F136D6A7LL, magickgetimageblueprimary);
+      break;
+    case 5802:
+      HASH_INVOKE_FROM_EVAL(0x6E9D4D3A119D76AALL, wandgetexceptiontype);
+      HASH_INVOKE_FROM_EVAL(0x48C4DB333172F6AALL, parse_url);
+      break;
+    case 5803:
+      HASH_INVOKE_FROM_EVAL(0x72B3F8E02D8B16ABLL, array_unshift);
+      break;
+    case 5807:
+      HASH_INVOKE_FROM_EVAL(0x65497D63C0D716AFLL, getdate);
+      break;
+    case 5813:
+      HASH_INVOKE_FROM_EVAL(0x798B4197212456B5LL, bcpowmod);
+      HASH_INVOKE_FROM_EVAL(0x7E773A36449576B5LL, imagecharup);
+      break;
+    case 5818:
+      HASH_INVOKE_FROM_EVAL(0x72B901C3605CB6BALL, pixelsetopacity);
+      break;
+    case 5822:
+      HASH_INVOKE_FROM_EVAL(0x081D5EA9920076BELL, drawgetfillalpha);
+      break;
+    case 5829:
+      HASH_INVOKE_FROM_EVAL(0x28526EF49FF516C5LL, pixelsetgreenquantum);
+      break;
+    case 5834:
+      HASH_INVOKE_FROM_EVAL(0x41BCD0A72B1396CALL, xmlwriter_start_dtd_attlist);
+      break;
+    case 5841:
+      HASH_INVOKE_FROM_EVAL(0x2B3D5B9AF915D6D1LL, imagecopymerge);
+      break;
+    case 5842:
+      HASH_INVOKE_FROM_EVAL(0x1FDF80EA9B8A96D2LL, collator_set_strength);
+      break;
+    case 5844:
+      HASH_INVOKE_FROM_EVAL(0x04A0E6E8337E56D4LL, drawcolor);
+      break;
+    case 5845:
+      HASH_INVOKE_FROM_EVAL(0x317FFA522A7D96D5LL, imagefilledpolygon);
+      break;
+    case 5857:
+      HASH_INVOKE_FROM_EVAL(0x11DA0A0EB8E0D6E1LL, clock_getres);
+      break;
+    case 5860:
+      HASH_INVOKE_FROM_EVAL(0x1CF3544CB5C9D6E4LL, xml_set_processing_instruction_handler);
+      HASH_INVOKE_FROM_EVAL(0x31FFFC333AA6D6E4LL, drawsetfillrule);
+      break;
+    case 5863:
+      HASH_INVOKE_FROM_EVAL(0x44201A16F3D876E7LL, trim);
+      break;
+    case 5869:
+      HASH_INVOKE_FROM_EVAL(0x04BD4B43921956EDLL, ldap_search);
+      break;
+    case 5870:
+      HASH_INVOKE_FROM_EVAL(0x76382756EA00B6EELL, is_object);
+      break;
+    case 5872:
+      HASH_INVOKE_FROM_EVAL(0x014BD9A6823256F0LL, extract);
+      break;
+    case 5875:
+      HASH_INVOKE_FROM_EVAL(0x6F1968BE449FB6F3LL, stream_socket_pair);
+      break;
+    case 5881:
+      HASH_INVOKE_FROM_EVAL(0x20740D956F0236F9LL, image2wbmp);
+      break;
+    case 5889:
+      HASH_INVOKE_FROM_EVAL(0x1A80392751AA7701LL, magickgetformat);
+      break;
+    case 5892:
+      HASH_INVOKE_FROM_EVAL(0x5EFE15CE970A5704LL, drawpolyline);
+      break;
+    case 5899:
+      HASH_INVOKE_FROM_EVAL(0x27AF8F6A5DF0B70BLL, dom_document_xinclude);
+      break;
+    case 5901:
+      HASH_INVOKE_FROM_EVAL(0x7CE752299E80B70DLL, unserialize);
+      HASH_INVOKE_FROM_EVAL(0x4F3C0DB2F6C8F70DLL, unlink);
+      break;
+    case 5908:
+      HASH_INVOKE_FROM_EVAL(0x1778ED2AF035F714LL, rsort);
+      break;
+    case 5909:
+      HASH_INVOKE_FROM_EVAL(0x25D578B4772C1715LL, define);
+      break;
+    case 5912:
+      HASH_INVOKE_FROM_EVAL(0x7971A5647C957718LL, date_time_set);
+      break;
+    case 5920:
+      HASH_INVOKE_FROM_EVAL(0x2D213FD80048F720LL, usleep);
+      break;
+    case 5926:
+      HASH_INVOKE_FROM_EVAL(0x523AB2EA95DAD726LL, get_included_files);
+      break;
+    case 5927:
+      HASH_INVOKE_FROM_EVAL(0x11641BE0F11CD727LL, magickgammaimage);
+      break;
+    case 5929:
+      HASH_INVOKE_FROM_EVAL(0x1D30F1E638D71729LL, readgzfile);
+      break;
+    case 5933:
+      HASH_INVOKE_FROM_EVAL(0x14563723F798172DLL, magickpaintopaqueimage);
+      break;
+    case 5946:
+      HASH_INVOKE_FROM_EVAL(0x404236CC5ABD973ALL, xhprof_run_trace);
+      break;
+    case 5953:
+      HASH_INVOKE_FROM_EVAL(0x5062777D2B947741LL, wordwrap);
+      break;
+    case 5961:
+      HASH_INVOKE_FROM_EVAL(0x73E4417BA7B49749LL, curl_multi_info_read);
+      break;
+    case 5962:
+      HASH_INVOKE_FROM_EVAL(0x1FF03B7DE19DD74ALL, drawpathmovetorelative);
+      break;
+    case 5963:
+      HASH_INVOKE_FROM_EVAL(0x7DA9307A6149B74BLL, get_meta_tags);
+      break;
+    case 5969:
+      HASH_INVOKE_FROM_EVAL(0x017FF216C00D9751LL, property_exists);
+      break;
+    case 5979:
+      HASH_INVOKE_FROM_EVAL(0x05D293F45C15F75BLL, ldap_mod_del);
+      HASH_INVOKE_FROM_EVAL(0x0ED4D905630EB75BLL, openssl_random_pseudo_bytes);
+      break;
+    case 5980:
+      HASH_INVOKE_FROM_EVAL(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename);
+      break;
+    case 5989:
+      HASH_INVOKE_FROM_EVAL(0x1D803CE961921765LL, md5);
+      HASH_INVOKE_FROM_EVAL(0x45631C592AD6D765LL, str_ireplace);
+      break;
+    case 5990:
+      HASH_INVOKE_FROM_EVAL(0x1F4505BE6460D766LL, scandir);
+      break;
+    case 5997:
+      HASH_INVOKE_FROM_EVAL(0x3304663FBC6C976DLL, get_html_translation_table);
+      HASH_INVOKE_FROM_EVAL(0x553ADA5A41AE976DLL, mb_ereg_replace);
+      break;
+    case 5998:
+      HASH_INVOKE_FROM_EVAL(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf);
+      break;
+    case 6005:
+      HASH_INVOKE_FROM_EVAL(0x04D9076808F79775LL, getenv);
+      break;
+    case 6006:
+      HASH_INVOKE_FROM_EVAL(0x4102C410C5031776LL, magickcolorizeimage);
+      break;
+    case 6011:
+      HASH_INVOKE_FROM_EVAL(0x129E39AC523A977BLL, magickgethomeurl);
+      break;
+    case 6019:
+      HASH_INVOKE_FROM_EVAL(0x38704D99FEA9B783LL, mysql_fetch_array);
+      break;
+    case 6020:
+      HASH_INVOKE_FROM_EVAL(0x784FD2E7191A3784LL, drawpathellipticarcrelative);
+      break;
+    case 6021:
+      HASH_INVOKE_FROM_EVAL(0x5BFC6198960A5785LL, in_array);
+      break;
+    case 6023:
+      HASH_INVOKE_FROM_EVAL(0x4991643BD854D787LL, drawgetexceptionstring);
+      break;
+    case 6024:
+      HASH_INVOKE_FROM_EVAL(0x32D8CE5D0FA6D788LL, ldap_rename);
+      break;
+    case 6038:
+      HASH_INVOKE_FROM_EVAL(0x5B42B2AB1B57D796LL, array_replace);
+      break;
+    case 6043:
+      HASH_INVOKE_FROM_EVAL(0x1196D899ACCD379BLL, evhttp_recv);
+      break;
+    case 6045:
+      HASH_INVOKE_FROM_EVAL(0x02ECD8C169DF579DLL, feof);
+      break;
+    case 6047:
+      HASH_INVOKE_FROM_EVAL(0x4B092931EFB7979FLL, mysql_create_db);
+      break;
+    case 6057:
+      HASH_INVOKE_FROM_EVAL(0x7707A7FEA07FB7A9LL, hphp_recursivedirectoryiterator___construct);
+      break;
+    case 6061:
+      HASH_INVOKE_FROM_EVAL(0x7DA08D9D148837ADLL, posix_mkfifo);
+      break;
+    case 6062:
+      HASH_INVOKE_FROM_EVAL(0x00141B0E3E6F77AELL, xml_set_unparsed_entity_decl_handler);
+      break;
+    case 6063:
+      HASH_INVOKE_FROM_EVAL(0x16CB9891EF26D7AFLL, drawgetstrokedashoffset);
+      break;
+    case 6073:
+      HASH_INVOKE_FROM_EVAL(0x1FC9406FD7FCD7B9LL, strrpos);
+      break;
+    case 6081:
+      HASH_INVOKE_FROM_EVAL(0x4E172EA6743697C1LL, ldap_first_entry);
+      break;
+    case 6086:
+      HASH_INVOKE_FROM_EVAL(0x0C8A7BE6ABC957C6LL, clearpixeliterator);
+      break;
+    case 6087:
+      HASH_INVOKE_FROM_EVAL(0x686C5142FD0337C7LL, lcg_value);
+      break;
+    case 6089:
+      HASH_INVOKE_FROM_EVAL(0x6BF7D7B5FBFF77C9LL, hphp_get_thread_id);
+      break;
+    case 6097:
+      HASH_INVOKE_FROM_EVAL(0x35B661C87484D7D1LL, openssl_csr_sign);
+      break;
+    case 6116:
+      HASH_INVOKE_FROM_EVAL(0x2621680306BC97E4LL, magicksetimagescene);
+      break;
+    case 6119:
+      HASH_INVOKE_FROM_EVAL(0x4215DDB57604F7E7LL, xmlwriter_start_pi);
+      break;
+    case 6125:
+      HASH_INVOKE_FROM_EVAL(0x0DC2C2D372EC97EDLL, hphp_crash_log);
+      break;
+    case 6127:
+      HASH_INVOKE_FROM_EVAL(0x5367B0F3A4D2D7EFLL, ldap_list);
+      break;
+    case 6128:
+      HASH_INVOKE_FROM_EVAL(0x14F700DD189DB7F0LL, drawsetclipunits);
+      break;
+    case 6131:
+      HASH_INVOKE_FROM_EVAL(0x73877357478137F3LL, posix_ctermid);
+      HASH_INVOKE_FROM_EVAL(0x7F436B50B7BBD7F3LL, getcwd);
+      break;
+    case 6146:
+      HASH_INVOKE_FROM_EVAL(0x2BA2A6480C563802LL, imap_errors);
+      break;
+    case 6147:
+      HASH_INVOKE_FROM_EVAL(0x10F7244AA9CB5803LL, imagepstext);
+      break;
+    case 6150:
+      HASH_INVOKE_FROM_EVAL(0x4D832DD6A72AB806LL, dom_document_create_attribute);
+      break;
+    case 6152:
+      HASH_INVOKE_FROM_EVAL(0x083B8F01AE15B808LL, assert);
+      break;
+    case 6153:
+      HASH_INVOKE_FROM_EVAL(0x52DCFB6F41D41809LL, dom_characterdata_append_data);
+      HASH_INVOKE_FROM_EVAL(0x221F5A9D5E021809LL, magickwriteimages);
+      break;
+    case 6154:
+      HASH_INVOKE_FROM_EVAL(0x5A0D1AE1D4C6F80ALL, array_slice);
+      break;
+    case 6157:
+      HASH_INVOKE_FROM_EVAL(0x727F5A6D8E26B80DLL, extension_loaded);
+      break;
+    case 6163:
+      HASH_INVOKE_FROM_EVAL(0x5F7940A713863813LL, floor);
+      break;
+    case 6164:
+      HASH_INVOKE_FROM_EVAL(0x3C0DFA15D3447814LL, rawurldecode);
+      break;
+    case 6167:
+      HASH_INVOKE_FROM_EVAL(0x0D8B1D0A8C381817LL, stream_bucket_new);
+      break;
+    case 6168:
+      HASH_INVOKE_FROM_EVAL(0x0FBDB0B22A59B818LL, mailparse_msg_parse);
+      break;
+    case 6173:
+      HASH_INVOKE_FROM_EVAL(0x4D624A655A9B581DLL, drawpoint);
+      break;
+    case 6177:
+      HASH_INVOKE_FROM_EVAL(0x107DBCA79C15B821LL, addcslashes);
+      break;
+    case 6185:
+      HASH_INVOKE_FROM_EVAL(0x57FFCEB7FA2D9829LL, usort);
+      break;
+    case 6190:
+      HASH_INVOKE_FROM_EVAL(0x3402C1E7544C382ELL, lstat);
+      break;
+    case 6192:
+      HASH_INVOKE_FROM_EVAL(0x5BBFA7EAEBD25830LL, pixelgetcyanquantum);
+      break;
+    case 6196:
+      HASH_INVOKE_FROM_EVAL(0x605132E71CE7D834LL, array_push);
+      break;
+    case 6197:
+      HASH_INVOKE_FROM_EVAL(0x1C4A162E6635B835LL, imageftbbox);
+      HASH_INVOKE_FROM_EVAL(0x43A96BA7F58EB835LL, hphp_splfileobject_valid);
+      break;
+    case 6200:
+      HASH_INVOKE_FROM_EVAL(0x03098F16B0AD5838LL, mcrypt_module_get_supported_key_sizes);
+      break;
+    case 6203:
+      HASH_INVOKE_FROM_EVAL(0x63E2EA180786B83BLL, pixelsetblack);
+      break;
+    case 6204:
+      HASH_INVOKE_FROM_EVAL(0x7C8969C75CA1783CLL, get_declared_classes);
+      HASH_INVOKE_FROM_EVAL(0x034EDEBD109FD83CLL, filesize);
+      break;
+    case 6220:
+      HASH_INVOKE_FROM_EVAL(0x26A2BBC465A2B84CLL, strcoll);
+      break;
+    case 6225:
+      HASH_INVOKE_FROM_EVAL(0x488BFCC942C73851LL, gzopen);
+      break;
+    case 6230:
+      HASH_INVOKE_FROM_EVAL(0x51FD8C9B5109F856LL, dom_characterdata_replace_data);
+      break;
+    case 6233:
+      HASH_INVOKE_FROM_EVAL(0x41924CBA5B717859LL, imap_append);
+      break;
+    case 6238:
+      HASH_INVOKE_FROM_EVAL(0x3D8327794429585ELL, hphpd_install_user_command);
+      break;
+    case 6241:
+      HASH_INVOKE_FROM_EVAL(0x2AD6B0E3B9F3B861LL, array_search);
+      break;
+    case 6243:
+      HASH_INVOKE_FROM_EVAL(0x21B30164F5D49863LL, is_resource);
+      break;
+    case 6247:
+      HASH_INVOKE_FROM_EVAL(0x65A68A31B96E7867LL, hash);
+      break;
+    case 6249:
+      HASH_INVOKE_FROM_EVAL(0x246EC2B1844DB869LL, pixelgetexception);
+      break;
+    case 6263:
+      HASH_INVOKE_FROM_EVAL(0x6AA3788C9B737877LL, magickdespeckleimage);
+      break;
+    case 6264:
+      HASH_INVOKE_FROM_EVAL(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute);
+      break;
+    case 6268:
+      HASH_INVOKE_FROM_EVAL(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate);
+      HASH_INVOKE_FROM_EVAL(0x6451BCB825D1787CLL, chroot);
+      break;
+    case 6272:
+      HASH_INVOKE_FROM_EVAL(0x7549612A72BA5880LL, hphp_splfileinfo_getrealpath);
+      break;
+    case 6280:
+      HASH_INVOKE_FROM_EVAL(0x1062CF2DA5443888LL, imagedashedline);
+      break;
+    case 6287:
+      HASH_INVOKE_FROM_EVAL(0x5DDC2A079AB7988FLL, dom_document_schema_validate_file);
+      break;
+    case 6301:
+      HASH_INVOKE_FROM_EVAL(0x1FC855F0E4F1189DLL, magickminifyimage);
+      break;
+    case 6305:
+      HASH_INVOKE_FROM_EVAL(0x1756D4437A4098A1LL, date_modify);
+      break;
+    case 6311:
+      HASH_INVOKE_FROM_EVAL(0x57105D4E43B078A7LL, magicksetformat);
+      HASH_INVOKE_FROM_EVAL(0x6C6B4B739AE1B8A7LL, curl_close);
+      break;
+    case 6313:
+      HASH_INVOKE_FROM_EVAL(0x346B2DB3BA2378A9LL, imagecolormatch);
+      break;
+    case 6314:
+      HASH_INVOKE_FROM_EVAL(0x44BC069A75EE98AALL, xhprof_disable);
+      break;
+    case 6315:
+      HASH_INVOKE_FROM_EVAL(0x39F11BA6A4D778ABLL, strnatcmp);
+      break;
+    case 6316:
+      HASH_INVOKE_FROM_EVAL(0x5B1F4C6424DDD8ACLL, openlog);
+      break;
+    case 6320:
+      HASH_INVOKE_FROM_EVAL(0x2CEF8DDC092698B0LL, drawgetvectorgraphics);
+      break;
+    case 6326:
+      HASH_INVOKE_FROM_EVAL(0x5866C5DF3A1AD8B6LL, dom_element_get_attribute_node);
+      break;
+    case 6353:
+      HASH_INVOKE_FROM_EVAL(0x1015EB3F52B098D1LL, print);
+      break;
+    case 6363:
+      HASH_INVOKE_FROM_EVAL(0x4052842EC87038DBLL, magickcropimage);
+      break;
+    case 6376:
+      HASH_INVOKE_FROM_EVAL(0x4F7ED8C3156AD8E8LL, magicksetimagedispose);
+      break;
+    case 6389:
+      HASH_INVOKE_FROM_EVAL(0x45DA105C5B48F8F5LL, apd_set_pprof_trace);
+      break;
+    case 6396:
+      HASH_INVOKE_FROM_EVAL(0x4C2AFB2EFDB1B8FCLL, stripslashes);
+      break;
+    case 6411:
+      HASH_INVOKE_FROM_EVAL(0x67B879A1120C190BLL, headers_sent);
+      break;
+    case 6417:
+      HASH_INVOKE_FROM_EVAL(0x04F822B7817E5911LL, bindec);
+      HASH_INVOKE_FROM_EVAL(0x0AFD4F231D6CB911LL, magickaddimage);
+      break;
+    case 6425:
+      HASH_INVOKE_FROM_EVAL(0x022B16C0D64D7919LL, file_put_contents);
+      break;
+    case 6431:
+      HASH_INVOKE_FROM_EVAL(0x277D7E2D1F5C191FLL, drawpathcurvetoquadraticbezierrelative);
+      HASH_INVOKE_FROM_EVAL(0x4E2C55C92D71F91FLL, magickcolorfloodfillimage);
+      break;
+    case 6435:
+      HASH_INVOKE_FROM_EVAL(0x044B276686B77923LL, fscanf);
+      break;
+    case 6445:
+      HASH_INVOKE_FROM_EVAL(0x27363CE6CBFC392DLL, pcntl_wexitstatus);
+      HASH_INVOKE_FROM_EVAL(0x2337F8C3EE17192DLL, sprintf);
+      break;
+    case 6447:
+      HASH_INVOKE_FROM_EVAL(0x13A6C6CAF50EB92FLL, imap_search);
+      break;
+    case 6448:
+      HASH_INVOKE_FROM_EVAL(0x30972530BD557930LL, shell_exec);
+      break;
+    case 6450:
+      HASH_INVOKE_FROM_EVAL(0x72C01E1D90BE5932LL, mcrypt_enc_get_block_size);
+      break;
+    case 6453:
+      HASH_INVOKE_FROM_EVAL(0x06486B6912479935LL, zlib_get_coding_type);
+      HASH_INVOKE_FROM_EVAL(0x48D3CA6CA0B29935LL, mb_regex_set_options);
+      break;
+    case 6462:
+      HASH_INVOKE_FROM_EVAL(0x3946D67A0D16D93ELL, hphp_splfileinfo_isreadable);
+      break;
+    case 6471:
+      HASH_INVOKE_FROM_EVAL(0x1E694036FEBA3947LL, imap_fetchstructure);
+      break;
+    case 6472:
+      HASH_INVOKE_FROM_EVAL(0x6A3412DE82715948LL, openssl_x509_checkpurpose);
+      break;
+    case 6473:
+      HASH_INVOKE_FROM_EVAL(0x243BB8B284895949LL, apache_get_rewrite_rules);
+      break;
+    case 6475:
+      HASH_INVOKE_FROM_EVAL(0x37F356F578FA394BLL, substr);
+      break;
+    case 6476:
+      HASH_INVOKE_FROM_EVAL(0x10DB229871AB794CLL, imap_msgno);
+      break;
+    case 6483:
+      HASH_INVOKE_FROM_EVAL(0x068438AFD33A9953LL, imagecolorclosesthwb);
+      break;
+    case 6511:
+      HASH_INVOKE_FROM_EVAL(0x134EF88685C0396FLL, magickgetexceptiontype);
+      break;
+    case 6513:
+      HASH_INVOKE_FROM_EVAL(0x442A28FB6F6C3971LL, xmlwriter_start_attribute);
+      HASH_INVOKE_FROM_EVAL(0x72C73F5DA7D6F971LL, magickgetimagecolormapcolor);
+      break;
+    case 6528:
+      HASH_INVOKE_FROM_EVAL(0x3D3445105C335980LL, filectime);
+      break;
+    case 6530:
+      HASH_INVOKE_FROM_EVAL(0x214EA70BDD8FB982LL, magickmorphimages);
+      break;
+    case 6531:
+      HASH_INVOKE_FROM_EVAL(0x3DA64BF893DBF983LL, strncmp);
+      break;
+    case 6536:
+      HASH_INVOKE_FROM_EVAL(0x55BE7AE8DEF3F988LL, magickgetstringheight);
+      break;
+    case 6539:
+      HASH_INVOKE_FROM_EVAL(0x0E863EF8C11A598BLL, is_writable);
+      break;
+    case 6541:
+      HASH_INVOKE_FROM_EVAL(0x69003892F71C798DLL, apache_get_scoreboard);
+      HASH_INVOKE_FROM_EVAL(0x651A8CBB8D2A398DLL, mysql_stat);
+      break;
+    case 6542:
+      HASH_INVOKE_FROM_EVAL(0x45CFDEE19995398ELL, hphp_recursiveiteratoriterator_next);
+      break;
+    case 6544:
+      HASH_INVOKE_FROM_EVAL(0x342D957A86A03990LL, hphp_splfileobject_seek);
+      break;
+    case 6558:
+      HASH_INVOKE_FROM_EVAL(0x59D2DFF08F4DB99ELL, imagecreate);
+      break;
+    case 6564:
+      HASH_INVOKE_FROM_EVAL(0x6F8676B049C919A4LL, array_intersect_uassoc);
+      break;
+    case 6572:
+      HASH_INVOKE_FROM_EVAL(0x522256BAA78159ACLL, popen);
+      break;
+    case 6573:
+      HASH_INVOKE_FROM_EVAL(0x05C5AD90751159ADLL, drawpathcurvetoquadraticbeziersmoothabsolute);
+      break;
+    case 6575:
+      HASH_INVOKE_FROM_EVAL(0x25268012A48A99AFLL, magickclipimage);
+      break;
+    case 6582:
+      HASH_INVOKE_FROM_EVAL(0x5FC1B94446EA59B6LL, magickremoveimageprofiles);
+      break;
+    case 6583:
+      HASH_INVOKE_FROM_EVAL(0x18F2C246FACAD9B7LL, each);
+      break;
+    case 6584:
+      HASH_INVOKE_FROM_EVAL(0x3741447B159359B8LL, mcrypt_get_cipher_name);
+      HASH_INVOKE_FROM_EVAL(0x4EFD7A9C90E559B8LL, posix_ttyname);
+      break;
+    case 6585:
+      HASH_INVOKE_FROM_EVAL(0x145702974C97F9B9LL, ltrim);
+      break;
+    case 6586:
+      HASH_INVOKE_FROM_EVAL(0x13B3172E092D99BALL, is_dir);
+      break;
+    case 6596:
+      HASH_INVOKE_FROM_EVAL(0x47B7D3745D80B9C4LL, socket_get_option);
+      break;
+    case 6602:
+      HASH_INVOKE_FROM_EVAL(0x5C5B0CC85133B9CALL, mkdir);
+      break;
+    case 6603:
+      HASH_INVOKE_FROM_EVAL(0x032DFAC5B24679CBLL, header_remove);
+      break;
+    case 6610:
+      HASH_INVOKE_FROM_EVAL(0x3DCCD1FEAD8759D2LL, array_sum);
+      break;
+    case 6613:
+      HASH_INVOKE_FROM_EVAL(0x245860A2FE4CB9D5LL, socket_set_blocking);
+      break;
+    case 6623:
+      HASH_INVOKE_FROM_EVAL(0x349E2E0F2CD7B9DFLL, magickgetversion);
+      break;
+    case 6633:
+      HASH_INVOKE_FROM_EVAL(0x4ADFA265F07AB9E9LL, drawgettextalignment);
+      break;
+    case 6634:
+      HASH_INVOKE_FROM_EVAL(0x25DDD924EFE979EALL, hash_update_file);
+      break;
+    case 6635:
+      HASH_INVOKE_FROM_EVAL(0x71B0FF80B88459EBLL, diskfreespace);
+      break;
+    case 6639:
+      HASH_INVOKE_FROM_EVAL(0x7EA6200B688459EFLL, ldap_modify);
+      break;
+    case 6640:
+      HASH_INVOKE_FROM_EVAL(0x1FC307200E8959F0LL, stream_bucket_append);
+      break;
+    case 6645:
+      HASH_INVOKE_FROM_EVAL(0x35BABFBC091759F5LL, socket_server);
+      break;
+    case 6652:
+      HASH_INVOKE_FROM_EVAL(0x55814D0EC267B9FCLL, imap_status);
+      break;
+    case 6660:
+      HASH_INVOKE_FROM_EVAL(0x17B83C425BD09A04LL, atanh);
+      break;
+    case 6663:
+      HASH_INVOKE_FROM_EVAL(0x391E0A4CF1EC9A07LL, stream_socket_recvfrom);
+      break;
+    case 6664:
+      HASH_INVOKE_FROM_EVAL(0x0436CA4DFB315A08LL, soundex);
+      break;
+    case 6667:
+      HASH_INVOKE_FROM_EVAL(0x70075DC878825A0BLL, ctype_lower);
+      break;
+    case 6669:
+      HASH_INVOKE_FROM_EVAL(0x736C133EFF8E5A0DLL, mysql_list_fields);
+      HASH_INVOKE_FROM_EVAL(0x50A7146A79877A0DLL, pcntl_alarm);
+      break;
+    case 6697:
+      HASH_INVOKE_FROM_EVAL(0x618D2A98986B1A29LL, ldap_unbind);
+      break;
+    case 6708:
+      HASH_INVOKE_FROM_EVAL(0x2D948E4099975A34LL, restore_include_path);
+      HASH_INVOKE_FROM_EVAL(0x5AB266C6E7075A34LL, mysql_error);
+      break;
+    case 6712:
+      HASH_INVOKE_FROM_EVAL(0x3E65EF9761BE5A38LL, pixelgetiteratorexceptiontype);
+      break;
+    case 6715:
+      HASH_INVOKE_FROM_EVAL(0x785ECCF53D98BA3BLL, curl_multi_exec);
+      break;
+    case 6718:
+      HASH_INVOKE_FROM_EVAL(0x31C3A072D092FA3ELL, socket_create_listen);
+      break;
+    case 6719:
+      HASH_INVOKE_FROM_EVAL(0x4C0E2C6882051A3FLL, magickgetresourcelimit);
+      break;
+    case 6722:
+      HASH_INVOKE_FROM_EVAL(0x128914E131AFFA42LL, microtime);
+      HASH_INVOKE_FROM_EVAL(0x5FF7C3A6BDDCFA42LL, mb_convert_kana);
+      break;
+    case 6725:
+      HASH_INVOKE_FROM_EVAL(0x7CDF1FB642529A45LL, dom_characterdata_insert_data);
+      break;
+    case 6727:
+      HASH_INVOKE_FROM_EVAL(0x1B45CFF586F85A47LL, utf8_encode);
+      break;
+    case 6734:
+      HASH_INVOKE_FROM_EVAL(0x1635DCC4882CBA4ELL, dom_node_has_attributes);
+      break;
+    case 6747:
+      HASH_INVOKE_FROM_EVAL(0x2B18DFF183C0BA5BLL, mb_get_info);
+      break;
+    case 6758:
+      HASH_INVOKE_FROM_EVAL(0x60C4B9EEDBD5FA66LL, pos);
+      break;
+    case 6760:
+      HASH_INVOKE_FROM_EVAL(0x01DD2057FD9B1A68LL, xmlwriter_write_cdata);
+      HASH_INVOKE_FROM_EVAL(0x32AD0455A7689A68LL, magickoilpaintimage);
+      break;
+    case 6761:
+      HASH_INVOKE_FROM_EVAL(0x10CDCF2BB4057A69LL, debug_zval_dump);
+      break;
+    case 6763:
+      HASH_INVOKE_FROM_EVAL(0x0912965F4440FA6BLL, str_repeat);
+      break;
+    case 6769:
+      HASH_INVOKE_FROM_EVAL(0x5B5DA6AD0AD63A71LL, drawannotation);
+      break;
+    case 6770:
+      HASH_INVOKE_FROM_EVAL(0x71AFF1D58D103A72LL, imagefontheight);
+      break;
+    case 6773:
+      HASH_INVOKE_FROM_EVAL(0x7A957BEC6CA57A75LL, preg_replace_callback);
+      break;
+    case 6781:
+      HASH_INVOKE_FROM_EVAL(0x414C2E31304E9A7DLL, stream_get_filters);
+      break;
+    case 6786:
+      HASH_INVOKE_FROM_EVAL(0x79786FABC5551A82LL, jpeg2wbmp);
+      break;
+    case 6787:
+      HASH_INVOKE_FROM_EVAL(0x11149278DB0A9A83LL, levenshtein);
+      break;
+    case 6789:
+      HASH_INVOKE_FROM_EVAL(0x755DEFDEDF35DA85LL, ctype_print);
+      break;
+    case 6792:
+      HASH_INVOKE_FROM_EVAL(0x1818A3CFBA357A88LL, magicksetwandsize);
+      break;
+    case 6795:
+      HASH_INVOKE_FROM_EVAL(0x7588BD0546C8BA8BLL, hphp_recursivedirectoryiterator_valid);
+      break;
+    case 6796:
+      HASH_INVOKE_FROM_EVAL(0x6A2EEE463F969A8CLL, getservbyname);
+      break;
+    case 6802:
+      HASH_INVOKE_FROM_EVAL(0x1257DB9F159E9A92LL, magickmontageimage);
+      break;
+    case 6803:
+      HASH_INVOKE_FROM_EVAL(0x4A32653C8E719A93LL, pixelgetcyan);
+      break;
+    case 6804:
+      HASH_INVOKE_FROM_EVAL(0x4B1501C4C22FFA94LL, quoted_printable_encode);
+      break;
+    case 6805:
+      HASH_INVOKE_FROM_EVAL(0x34B8A4E5AE0EFA95LL, pixelgetopacity);
+      break;
+    case 6807:
+      HASH_INVOKE_FROM_EVAL(0x0089115038C03A97LL, array_diff_ukey);
+      break;
+    case 6809:
+      HASH_INVOKE_FROM_EVAL(0x1382CEA1527CFA99LL, imap_utf7_encode);
+      break;
+    case 6810:
+      HASH_INVOKE_FROM_EVAL(0x19AFF8596E19DA9ALL, xhprof_enable);
+      break;
+    case 6813:
+      HASH_INVOKE_FROM_EVAL(0x1234AB687C515A9DLL, mb_encode_numericentity);
+      break;
+    case 6815:
+      HASH_INVOKE_FROM_EVAL(0x2E5E23ECA0525A9FLL, bcadd);
+      break;
+    case 6821:
+      HASH_INVOKE_FROM_EVAL(0x2418528164415AA5LL, magickscaleimage);
+      break;
+    case 6823:
+      HASH_INVOKE_FROM_EVAL(0x797CEC173CBB7AA7LL, ob_get_flush);
+      break;
+    case 6834:
+      HASH_INVOKE_FROM_EVAL(0x62519270CC9F1AB2LL, stream_get_meta_data);
+      break;
+    case 6847:
+      HASH_INVOKE_FROM_EVAL(0x030DFC3D3C88BABFLL, filegroup);
+      break;
+    case 6855:
+      HASH_INVOKE_FROM_EVAL(0x5D2F899A270D9AC7LL, xmlwriter_end_dtd_element);
+      HASH_INVOKE_FROM_EVAL(0x79215854355CBAC7LL, proc_get_status);
+      break;
+    case 6860:
+      HASH_INVOKE_FROM_EVAL(0x2BD6476D2C467ACCLL, pagelet_server_task_status);
+      break;
+    case 6861:
+      HASH_INVOKE_FROM_EVAL(0x173EDC165B673ACDLL, magicktransformimage);
+      break;
+    case 6865:
+      HASH_INVOKE_FROM_EVAL(0x47E2B4F7B8DE5AD1LL, xmlwriter_write_dtd_attlist);
+      HASH_INVOKE_FROM_EVAL(0x314317450857FAD1LL, ctype_punct);
+      break;
+    case 6869:
+      HASH_INVOKE_FROM_EVAL(0x0D5DAF8034B41AD5LL, get_include_path);
+      break;
+    case 6875:
+      HASH_INVOKE_FROM_EVAL(0x56E867A1F7507ADBLL, dom_document_create_processing_instruction);
+      break;
+    case 6877:
+      HASH_INVOKE_FROM_EVAL(0x3E319E451A32FADDLL, magicksharpenimage);
+      break;
+    case 6878:
+      HASH_INVOKE_FROM_EVAL(0x31D1C58F7BD89ADELL, hphp_directoryiterator_seek);
+      break;
+    case 6891:
+      HASH_INVOKE_FROM_EVAL(0x225F05071947BAEBLL, drawpathlinetoabsolute);
+      break;
+    case 6893:
+      HASH_INVOKE_FROM_EVAL(0x46C33B4739C2FAEDLL, shm_remove_var);
+      break;
+    case 6894:
+      HASH_INVOKE_FROM_EVAL(0x160A82E3E2CBBAEELL, is_finite);
+      break;
+    case 6896:
+      HASH_INVOKE_FROM_EVAL(0x6B259D5D9D681AF0LL, register_postsend_function);
+      break;
+    case 6900:
+      HASH_INVOKE_FROM_EVAL(0x2EC0ABF9A979FAF4LL, ob_get_level);
+      break;
+    case 6902:
+      HASH_INVOKE_FROM_EVAL(0x2C7C9772AE983AF6LL, drawsetgravity);
+      break;
+    case 6904:
+      HASH_INVOKE_FROM_EVAL(0x12859AD75BAF3AF8LL, magickreadimageblob);
+      break;
+    case 6909:
+      HASH_INVOKE_FROM_EVAL(0x16BA422EB6C51AFDLL, gzwrite);
+      break;
+    case 6910:
+      HASH_INVOKE_FROM_EVAL(0x04E86BA79B6CBAFELL, stream_socket_shutdown);
+      break;
+    case 6913:
+      HASH_INVOKE_FROM_EVAL(0x6F3503C7FB12DB01LL, lchgrp);
+      break;
+    case 6915:
+      HASH_INVOKE_FROM_EVAL(0x673A96C50F00FB03LL, str_word_count);
+      break;
+    case 6922:
+      HASH_INVOKE_FROM_EVAL(0x14AF32A23B507B0ALL, metaphone);
+      break;
+    case 6924:
+      HASH_INVOKE_FROM_EVAL(0x000A2D80D67ADB0CLL, imap_mail);
+      break;
+    case 6935:
+      HASH_INVOKE_FROM_EVAL(0x66F9A476DAB47B17LL, pixelsetcolor);
+      break;
+    case 6936:
+      HASH_INVOKE_FROM_EVAL(0x70448A629A74FB18LL, ksort);
+      break;
+    case 6940:
+      HASH_INVOKE_FROM_EVAL(0x249399CEC35B7B1CLL, png2wbmp);
+      break;
+    case 6942:
+      HASH_INVOKE_FROM_EVAL(0x7160AA24D4251B1ELL, mb_strripos);
+      break;
+    case 6944:
+      HASH_INVOKE_FROM_EVAL(0x1112712715D75B20LL, pixelgetblackquantum);
+      break;
+    case 6950:
+      HASH_INVOKE_FROM_EVAL(0x24CE95457EACBB26LL, get_parent_class);
+      break;
+    case 6954:
+      HASH_INVOKE_FROM_EVAL(0x1F4984938E1DBB2ALL, sort);
+      break;
+    case 6956:
+      HASH_INVOKE_FROM_EVAL(0x70742211FA3EFB2CLL, imagettftext);
+      break;
+    case 6963:
+      HASH_INVOKE_FROM_EVAL(0x4D5D45D1F1EB3B33LL, posix_access);
+      break;
+    case 6964:
+      HASH_INVOKE_FROM_EVAL(0x0B7D52E2540ABB34LL, tan);
+      break;
+    case 6967:
+      HASH_INVOKE_FROM_EVAL(0x053B14F52350FB37LL, socket_shutdown);
+      break;
+    case 6968:
+      HASH_INVOKE_FROM_EVAL(0x68C09D6CB8E79B38LL, class_exists);
+      break;
+    case 6969:
+      HASH_INVOKE_FROM_EVAL(0x02A2C373E54FFB39LL, hash_init);
+      break;
+    case 6970:
+      HASH_INVOKE_FROM_EVAL(0x49A45F75B2B25B3ALL, apd_breakpoint);
+      break;
+    case 6972:
+      HASH_INVOKE_FROM_EVAL(0x35F4A0789F367B3CLL, drawpathlinetohorizontalrelative);
+      break;
+    case 6975:
+      HASH_INVOKE_FROM_EVAL(0x0B07AD87DF1B5B3FLL, urldecode);
+      break;
+    case 6976:
+      HASH_INVOKE_FROM_EVAL(0x24CBCBA5C4407B40LL, evhttp_set_cache);
+      break;
+    case 6980:
+      HASH_INVOKE_FROM_EVAL(0x4E4449EBAADD7B44LL, magickpingimage);
+      break;
+    case 6981:
+      HASH_INVOKE_FROM_EVAL(0x72E3AE55A0B33B45LL, ispixelwand);
+      break;
+    case 6997:
+      HASH_INVOKE_FROM_EVAL(0x333FB673518A1B55LL, ldap_get_entries);
+      break;
+    case 7005:
+      HASH_INVOKE_FROM_EVAL(0x4888951358F53B5DLL, dom_document_get_elements_by_tag_name_ns);
+      break;
+    case 7009:
+      HASH_INVOKE_FROM_EVAL(0x7636825871399B61LL, highlight_file);
+      break;
+    case 7016:
+      HASH_INVOKE_FROM_EVAL(0x674F1DA24EDE7B68LL, xmlwriter_end_attribute);
+      break;
+    case 7019:
+      HASH_INVOKE_FROM_EVAL(0x5543A0CACD153B6BLL, substr_replace);
+      break;
+    case 7025:
+      HASH_INVOKE_FROM_EVAL(0x5E5C875DB04CFB71LL, drawrectangle);
+      break;
+    case 7029:
+      HASH_INVOKE_FROM_EVAL(0x42F0AED7599C1B75LL, magickechoimageblob);
+      break;
+    case 7030:
+      HASH_INVOKE_FROM_EVAL(0x2A63A0BF9B7E3B76LL, ini_alter);
+      break;
+    case 7031:
+      HASH_INVOKE_FROM_EVAL(0x7F5F29D8E63ABB77LL, mcrypt_module_self_test);
+      HASH_INVOKE_FROM_EVAL(0x5025B43B46679B77LL, openssl_x509_free);
+      break;
+    case 7033:
+      HASH_INVOKE_FROM_EVAL(0x1AD83CBEA1E87B79LL, imap_getmailboxes);
+      break;
+    case 7036:
+      HASH_INVOKE_FROM_EVAL(0x3A096F905FBF7B7CLL, magickcommentimage);
+      break;
+    case 7037:
+      HASH_INVOKE_FROM_EVAL(0x28DE19828167FB7DLL, magickmapimage);
+      break;
+    case 7051:
+      HASH_INVOKE_FROM_EVAL(0x3B72159A4B04FB8BLL, set_time_limit);
+      break;
+    case 7053:
+      HASH_INVOKE_FROM_EVAL(0x3B831DB1A615FB8DLL, xhprof_sample_enable);
+      break;
+    case 7054:
+      HASH_INVOKE_FROM_EVAL(0x62A4D7A03F7C3B8ELL, ceil);
+      break;
+    case 7065:
+      HASH_INVOKE_FROM_EVAL(0x076E66D4089A3B99LL, mb_stripos);
+      break;
+    case 7066:
+      HASH_INVOKE_FROM_EVAL(0x023133732CB51B9ALL, exif_thumbnail);
+      break;
+    case 7071:
+      HASH_INVOKE_FROM_EVAL(0x390A267EC6B51B9FLL, socket_sendto);
+      break;
+    case 7076:
+      HASH_INVOKE_FROM_EVAL(0x0D95DD13A2D3BBA4LL, drawtranslate);
+      break;
+    case 7082:
+      HASH_INVOKE_FROM_EVAL(0x7C833A303C7CFBAALL, getrandmax);
+      break;
+    case 7086:
+      HASH_INVOKE_FROM_EVAL(0x66F099E732977BAELL, imap_renamemailbox);
+      break;
+    case 7088:
+      HASH_INVOKE_FROM_EVAL(0x1F3E4C6660247BB0LL, imagecolorresolve);
+      HASH_INVOKE_FROM_EVAL(0x7D9BF61D6CDE3BB0LL, fb_parallel_query);
+      break;
+    case 7102:
+      HASH_INVOKE_FROM_EVAL(0x3F56AF1511AEDBBELL, magicklabelimage);
+      break;
+    case 7111:
+      HASH_INVOKE_FROM_EVAL(0x10C5CF7B55173BC7LL, settype);
+      break;
+    case 7114:
+      HASH_INVOKE_FROM_EVAL(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner);
+      break;
+    case 7117:
+      HASH_INVOKE_FROM_EVAL(0x53A88C8F973CFBCDLL, apc_clear_cache);
+      break;
+    case 7118:
+      HASH_INVOKE_FROM_EVAL(0x45D6BA980AFFDBCELL, msg_get_queue);
+      break;
+    case 7120:
+      HASH_INVOKE_FROM_EVAL(0x02A0F9CE4022BBD0LL, imap_fetchbody);
+      HASH_INVOKE_FROM_EVAL(0x6846CA07A5E21BD0LL, hphp_directoryiterator___construct);
+      break;
+    case 7122:
+      HASH_INVOKE_FROM_EVAL(0x6FE3C5FF5E883BD2LL, round);
+      break;
+    case 7124:
+      HASH_INVOKE_FROM_EVAL(0x4E4EB301A994DBD4LL, drawpolygon);
+      break;
+    case 7128:
+      HASH_INVOKE_FROM_EVAL(0x21E44C7C7A911BD8LL, phpinfo);
+      break;
+    case 7134:
+      HASH_INVOKE_FROM_EVAL(0x58D0D9B66F045BDELL, strpos);
+      break;
+    case 7136:
+      HASH_INVOKE_FROM_EVAL(0x2E10B74DC6067BE0LL, strip_tags);
+      break;
+    case 7137:
+      HASH_INVOKE_FROM_EVAL(0x25FBB61480091BE1LL, mysql_client_encoding);
+      break;
+    case 7147:
+      HASH_INVOKE_FROM_EVAL(0x505B44DDF2383BEBLL, drawgetfillcolor);
+      HASH_INVOKE_FROM_EVAL(0x0C1904372E8EDBEBLL, stream_copy_to_stream);
+      break;
+    case 7148:
+      HASH_INVOKE_FROM_EVAL(0x44279BB3E2191BECLL, socket_accept);
+      HASH_INVOKE_FROM_EVAL(0x5A22BA9B012A9BECLL, dom_document_save_html);
+      break;
+    case 7152:
+      HASH_INVOKE_FROM_EVAL(0x187C049E785A1BF0LL, iconv_get_encoding);
+      HASH_INVOKE_FROM_EVAL(0x04C0582DB1AD7BF0LL, mt_srand);
+      break;
+    case 7153:
+      HASH_INVOKE_FROM_EVAL(0x0CA96856E5BEFBF1LL, iptcparse);
+      break;
+    case 7156:
+      HASH_INVOKE_FROM_EVAL(0x1444DB037B4D5BF4LL, imagegammacorrect);
+      break;
+    case 7159:
+      HASH_INVOKE_FROM_EVAL(0x74ABB4A1E10BBBF7LL, time);
+      break;
+    case 7161:
+      HASH_INVOKE_FROM_EVAL(0x5B7F6E0A642BBBF9LL, sleep);
+      break;
+    case 7164:
+      HASH_INVOKE_FROM_EVAL(0x64F52E1DB5E95BFCLL, curl_multi_remove_handle);
+      break;
+    case 7170:
+      HASH_INVOKE_FROM_EVAL(0x249340DF734D9C02LL, magickgetimageheight);
+      break;
+    case 7176:
+      HASH_INVOKE_FROM_EVAL(0x48E1616EE837FC08LL, is_uploaded_file);
+      break;
+    case 7178:
+      HASH_INVOKE_FROM_EVAL(0x1E47C281193ABC0ALL, collator_compare);
+      break;
+    case 7186:
+      HASH_INVOKE_FROM_EVAL(0x062C0FFA8E29DC12LL, intl_error_name);
+      break;
+    case 7191:
+      HASH_INVOKE_FROM_EVAL(0x3A702EF906B37C17LL, collator_get_locale);
+      break;
+    case 7196:
+      HASH_INVOKE_FROM_EVAL(0x758A62BD65E6FC1CLL, imagegd2);
+      break;
+    case 7198:
+      HASH_INVOKE_FROM_EVAL(0x7039C5EBB1D6BC1ELL, array_walk);
+      break;
+    case 7199:
+      HASH_INVOKE_FROM_EVAL(0x3A5D921797669C1FLL, hphp_log);
+      break;
+    case 7201:
+      HASH_INVOKE_FROM_EVAL(0x0179CBA2C5F4DC21LL, magickgetimageformat);
+      break;
+    case 7218:
+      HASH_INVOKE_FROM_EVAL(0x0B9B362534621C32LL, isdrawingwand);
+      break;
+    case 7219:
+      HASH_INVOKE_FROM_EVAL(0x49965C44E9EE3C33LL, set_file_buffer);
+      break;
+    case 7224:
+      HASH_INVOKE_FROM_EVAL(0x21564F9315F3FC38LL, drawsettextdecoration);
+      break;
+    case 7228:
+      HASH_INVOKE_FROM_EVAL(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator);
+      break;
+    case 7230:
+      HASH_INVOKE_FROM_EVAL(0x15EC581662651C3ELL, date_parse);
+      break;
+    case 7238:
+      HASH_INVOKE_FROM_EVAL(0x7D992445F5E37C46LL, magicktextureimage);
+      break;
+    case 7243:
+      HASH_INVOKE_FROM_EVAL(0x120E7B01366DFC4BLL, call_user_func_serialized);
+      break;
+    case 7248:
+      HASH_INVOKE_FROM_EVAL(0x04534F26B8D05C50LL, drawgetstrokecolor);
+      break;
+    case 7255:
+      HASH_INVOKE_FROM_EVAL(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass);
+      break;
+    case 7256:
+      HASH_INVOKE_FROM_EVAL(0x1B8C3DA27170DC58LL, dirname);
+      break;
+    case 7257:
+      HASH_INVOKE_FROM_EVAL(0x57633BDF8DB3FC59LL, i18n_loc_set_attribute);
+      break;
+    case 7262:
+      HASH_INVOKE_FROM_EVAL(0x47B38F1E4FA29C5ELL, fb_get_code_coverage);
+      break;
+    case 7265:
+      HASH_INVOKE_FROM_EVAL(0x6E54EEDA1D887C61LL, magicksetimageinterlacescheme);
+      HASH_INVOKE_FROM_EVAL(0x5176725DA884DC61LL, curl_setopt);
+      break;
+    case 7271:
+      HASH_INVOKE_FROM_EVAL(0x07DC355325165C67LL, magickwriteimage);
+      break;
+    case 7272:
+      HASH_INVOKE_FROM_EVAL(0x10D6AE9D688D1C68LL, copy);
+      break;
+    case 7281:
+      HASH_INVOKE_FROM_EVAL(0x18D9ED67E8E0FC71LL, dom_attr_is_id);
+      break;
+    case 7284:
+      HASH_INVOKE_FROM_EVAL(0x20F0AAA486F39C74LL, dom_element_get_elements_by_tag_name_ns);
+      break;
+    case 7297:
+      HASH_INVOKE_FROM_EVAL(0x767806D6F1053C81LL, sin);
+      break;
+    case 7301:
+      HASH_INVOKE_FROM_EVAL(0x56DA17241B793C85LL, mysql_set_timeout);
+      break;
+    case 7313:
+      HASH_INVOKE_FROM_EVAL(0x4E04B71729485C91LL, clonedrawingwand);
+      break;
+    case 7315:
+      HASH_INVOKE_FROM_EVAL(0x0F8242C6327B5C93LL, dns_check_record);
+      break;
+    case 7322:
+      HASH_INVOKE_FROM_EVAL(0x374F20BDAF709C9ALL, mb_preferred_mime_name);
+      break;
+    case 7323:
+      HASH_INVOKE_FROM_EVAL(0x36F7F9FD7766DC9BLL, xmlwriter_end_comment);
+      break;
+    case 7342:
+      HASH_INVOKE_FROM_EVAL(0x12580A083B0D7CAELL, iterator_apply);
+      break;
+    case 7344:
+      HASH_INVOKE_FROM_EVAL(0x373B3FADEACB7CB0LL, openssl_private_encrypt);
+      break;
+    case 7345:
+      HASH_INVOKE_FROM_EVAL(0x40D8DC24FA917CB1LL, hphp_splfileobject_fgetss);
+      break;
+    case 7351:
+      HASH_INVOKE_FROM_EVAL(0x3DFD5CA79919DCB7LL, imageantialias);
+      HASH_INVOKE_FROM_EVAL(0x39E03AAC188D3CB7LL, magickgetimagecompressionquality);
+      break;
+    case 7360:
+      HASH_INVOKE_FROM_EVAL(0x3033FE14E114FCC0LL, magicksetimageblueprimary);
+      break;
+    case 7362:
+      HASH_INVOKE_FROM_EVAL(0x34B6388D7730BCC2LL, drawline);
+      break;
+    case 7374:
+      HASH_INVOKE_FROM_EVAL(0x0183A548B759BCCELL, posix_getpgid);
+      HASH_INVOKE_FROM_EVAL(0x66273C5932B1FCCELL, clock_gettime);
+      break;
+    case 7375:
+      HASH_INVOKE_FROM_EVAL(0x407B1F3AFEC43CCFLL, pixelgetblue);
+      break;
+    case 7377:
+      HASH_INVOKE_FROM_EVAL(0x576C5DC462663CD1LL, explode);
+      break;
+    case 7379:
+      HASH_INVOKE_FROM_EVAL(0x544302E2FAD3FCD3LL, magicknextimage);
+      break;
+    case 7380:
+      HASH_INVOKE_FROM_EVAL(0x323FE1D92C9B3CD4LL, gzdecode);
+      break;
+    case 7381:
+      HASH_INVOKE_FROM_EVAL(0x757BC444FDF79CD5LL, posix_get_last_error);
+      break;
+    case 7386:
+      HASH_INVOKE_FROM_EVAL(0x09C6455B4BC6FCDALL, drawsetviewbox);
+      break;
+    case 7396:
+      HASH_INVOKE_FROM_EVAL(0x7CDDF96AFEA2DCE4LL, chunk_split);
+      break;
+    case 7407:
+      HASH_INVOKE_FROM_EVAL(0x6AA89C314C647CEFLL, magickgetimagehistogram);
+      break;
+    case 7410:
+      HASH_INVOKE_FROM_EVAL(0x26C49BBC67475CF2LL, magicksetimagewhitepoint);
+      break;
+    case 7411:
+      HASH_INVOKE_FROM_EVAL(0x6CA8CF41D27D1CF3LL, imap_headerinfo);
+      HASH_INVOKE_FROM_EVAL(0x5C1F75D51C077CF3LL, pixelgetindex);
+      break;
+    case 7419:
+      HASH_INVOKE_FROM_EVAL(0x09B4EE276DCCFCFBLL, mysql_fetch_row);
+      break;
+    case 7422:
+      HASH_INVOKE_FROM_EVAL(0x768F3E6D1CBA5CFELL, socket_recv);
+      break;
+    case 7423:
+      HASH_INVOKE_FROM_EVAL(0x748D3DFF0EB57CFFLL, uniqid);
+      break;
+    case 7430:
+      HASH_INVOKE_FROM_EVAL(0x2BA9FB0F8B76DD06LL, number_format);
+      break;
+    case 7433:
+      HASH_INVOKE_FROM_EVAL(0x153F7DBFC9047D09LL, pixelsetred);
+      break;
+    case 7436:
+      HASH_INVOKE_FROM_EVAL(0x30A8326034801D0CLL, mysql_pconnect);
+      break;
+    case 7437:
+      HASH_INVOKE_FROM_EVAL(0x3ACE8A8BC9ACDD0DLL, iconv_mime_decode);
+      break;
+    case 7440:
+      HASH_INVOKE_FROM_EVAL(0x42BEEC88EE81FD10LL, imagechar);
+      HASH_INVOKE_FROM_EVAL(0x08F41A00D5D57D10LL, mb_decode_mimeheader);
+      break;
+    case 7442:
+      HASH_INVOKE_FROM_EVAL(0x5F165B40AEEE5D12LL, hphp_splfileinfo_getfilename);
+      break;
+    case 7444:
+      HASH_INVOKE_FROM_EVAL(0x63837ECAF6235D14LL, preg_replace);
+      break;
+    case 7450:
+      HASH_INVOKE_FROM_EVAL(0x39994614C6315D1ALL, hphp_recursivedirectoryiterator_key);
+      break;
+    case 7454:
+      HASH_INVOKE_FROM_EVAL(0x25DADFF238A15D1ELL, collator_create);
+      break;
+    case 7461:
+      HASH_INVOKE_FROM_EVAL(0x71DF0C17F47EDD25LL, getprotobynumber);
+      break;
+    case 7464:
+      HASH_INVOKE_FROM_EVAL(0x7C12261259F87D28LL, mcrypt_enc_is_block_algorithm_mode);
+      break;
+    case 7466:
+      HASH_INVOKE_FROM_EVAL(0x7A9C06B9CF853D2ALL, substr_count);
+      break;
+    case 7474:
+      HASH_INVOKE_FROM_EVAL(0x4DAC43060BA57D32LL, stream_wrapper_restore);
+      break;
+    case 7479:
+      HASH_INVOKE_FROM_EVAL(0x6F2182E089377D37LL, imap_list);
+      HASH_INVOKE_FROM_EVAL(0x3ACF745D381E9D37LL, rtrim);
+      break;
+    case 7480:
+      HASH_INVOKE_FROM_EVAL(0x0BA3AD85EB597D38LL, pagelet_server_task_result);
+      break;
+    case 7489:
+      HASH_INVOKE_FROM_EVAL(0x6B6DA1EE18673D41LL, xmlwriter_end_dtd_entity);
+      break;
+    case 7490:
+      HASH_INVOKE_FROM_EVAL(0x40497FCA4EC4DD42LL, posix_seteuid);
+      HASH_INVOKE_FROM_EVAL(0x298BA735FA3ABD42LL, nl_langinfo);
+      break;
+    case 7493:
+      HASH_INVOKE_FROM_EVAL(0x400A44045A999D45LL, rawurlencode);
+      break;
+    case 7494:
+      HASH_INVOKE_FROM_EVAL(0x502CF4EB0A747D46LL, magicksetimagebias);
+      HASH_INVOKE_FROM_EVAL(0x455DB7F86BCEDD46LL, pixelsetopacityquantum);
+      HASH_INVOKE_FROM_EVAL(0x59AD2C922FF75D46LL, mdecrypt_generic);
+      break;
+    case 7497:
+      HASH_INVOKE_FROM_EVAL(0x113ED435AEFDDD49LL, imagecolorallocatealpha);
+      break;
+    case 7503:
+      HASH_INVOKE_FROM_EVAL(0x0FBCF35ADD209D4FLL, drawarc);
+      break;
+    case 7509:
+      HASH_INVOKE_FROM_EVAL(0x36D672EF4FBEFD55LL, json_encode);
+      break;
+    case 7512:
+      HASH_INVOKE_FROM_EVAL(0x146109BDD2F97D58LL, hphp_splfileobject_setmaxlinelen);
+      break;
+    case 7520:
+      HASH_INVOKE_FROM_EVAL(0x6FACBD7F02B6FD60LL, uasort);
+      break;
+    case 7521:
+      HASH_INVOKE_FROM_EVAL(0x357BAB6E700EBD61LL, destroypixelwandarray);
+      break;
+    case 7534:
+      HASH_INVOKE_FROM_EVAL(0x0B1348D1540E7D6ELL, magicksetimageformat);
+      break;
+    case 7539:
+      HASH_INVOKE_FROM_EVAL(0x7D8DCC72522CBD73LL, mb_detect_encoding);
+      break;
+    case 7540:
+      HASH_INVOKE_FROM_EVAL(0x51E8B5B728E33D74LL, imap_last_error);
+      break;
+    case 7543:
+      HASH_INVOKE_FROM_EVAL(0x7FCAAAB932C57D77LL, iterator_count);
+      break;
+    case 7544:
+      HASH_INVOKE_FROM_EVAL(0x6352349F97557D78LL, stream_socket_get_name);
+      break;
+    case 7547:
+      HASH_INVOKE_FROM_EVAL(0x680A7EB3DA1F5D7BLL, prev);
+      break;
+    case 7554:
+      HASH_INVOKE_FROM_EVAL(0x2D15262403ADDD82LL, drawcomposite);
+      break;
+    case 7555:
+      HASH_INVOKE_FROM_EVAL(0x1B0FF5C02F571D83LL, fb_rename_function);
+      break;
+    case 7561:
+      HASH_INVOKE_FROM_EVAL(0x230E7AD147721D89LL, end);
+      break;
+    case 7569:
+      HASH_INVOKE_FROM_EVAL(0x7C2B3FE61FBDFD91LL, openssl_pkey_get_details);
+      break;
+    case 7576:
+      HASH_INVOKE_FROM_EVAL(0x06A796D329C21D98LL, call_user_func);
+      break;
+    case 7581:
+      HASH_INVOKE_FROM_EVAL(0x74BE8836F3B13D9DLL, session_name);
+      break;
+    case 7584:
+      HASH_INVOKE_FROM_EVAL(0x73B43ABDD5C61DA0LL, shuffle);
+      HASH_INVOKE_FROM_EVAL(0x5E8606470A09BDA0LL, magickposterizeimage);
+      HASH_INVOKE_FROM_EVAL(0x167A11C41EB71DA0LL, pixelgetexceptiontype);
+      break;
+    case 7586:
+      HASH_INVOKE_FROM_EVAL(0x71583A8FEF5C7DA2LL, sys_get_temp_dir);
+      break;
+    case 7589:
+      HASH_INVOKE_FROM_EVAL(0x46B2F287D2FC7DA5LL, memcache_get);
+      break;
+    case 7590:
+      HASH_INVOKE_FROM_EVAL(0x28DC1AD6DA9E7DA6LL, gethostbyname);
+      break;
+    case 7592:
+      HASH_INVOKE_FROM_EVAL(0x572AE270D9E4FDA8LL, socket_set_option);
+      break;
+    case 7594:
+      HASH_INVOKE_FROM_EVAL(0x6326C14D0FFA7DAALL, fb_thrift_serialize);
+      break;
+    case 7595:
+      HASH_INVOKE_FROM_EVAL(0x188720048AB37DABLL, magickquantizeimages);
+      break;
+    case 7601:
+      HASH_INVOKE_FROM_EVAL(0x67EAC6D7332F3DB1LL, hphp_splfileobject_fgetcsv);
+      break;
+    case 7603:
+      HASH_INVOKE_FROM_EVAL(0x628069E483F35DB3LL, hphp_splfileobject_fstat);
+      break;
+    case 7610:
+      HASH_INVOKE_FROM_EVAL(0x5E0C6E797607DDBALL, mysql_result);
+      HASH_INVOKE_FROM_EVAL(0x7964DE73DCA17DBALL, magickhasnextimage);
+      break;
+    case 7613:
+      HASH_INVOKE_FROM_EVAL(0x48AA091B1E493DBDLL, setlocale);
+      break;
+    case 7617:
+      HASH_INVOKE_FROM_EVAL(0x683E88F441F9BDC1LL, chgrp);
+      break;
+    case 7619:
+      HASH_INVOKE_FROM_EVAL(0x0433140BB339DDC3LL, log);
+      break;
+    case 7620:
+      HASH_INVOKE_FROM_EVAL(0x2A38BA8B4A0F9DC4LL, apc_fetch);
+      break;
+    case 7624:
+      HASH_INVOKE_FROM_EVAL(0x66C3E73210067DC8LL, magickgetimageunits);
+      break;
+    case 7630:
+      HASH_INVOKE_FROM_EVAL(0x4AD5B65BCE665DCELL, array_key_exists);
+      break;
+    case 7637:
+      HASH_INVOKE_FROM_EVAL(0x7E1801C8E70D1DD5LL, imagefontwidth);
+      break;
+    case 7639:
+      HASH_INVOKE_FROM_EVAL(0x638690DF6D06FDD7LL, imageconvolution);
+      break;
+    case 7660:
+      HASH_INVOKE_FROM_EVAL(0x5B51DD18C3E13DECLL, openssl_x509_parse);
+      HASH_INVOKE_FROM_EVAL(0x5ABB7486CE861DECLL, array_merge_recursive);
+      break;
+    case 7663:
+      HASH_INVOKE_FROM_EVAL(0x0BB22147ADADDDEFLL, pfsockopen);
+      HASH_INVOKE_FROM_EVAL(0x72293DCE8CC4BDEFLL, htmlspecialchars);
+      break;
+    case 7667:
+      HASH_INVOKE_FROM_EVAL(0x7AE1BE187F18FDF3LL, fgets);
+      break;
+    case 7668:
+      HASH_INVOKE_FROM_EVAL(0x5046A0D9DFDB5DF4LL, strcspn);
+      break;
+    case 7671:
+      HASH_INVOKE_FROM_EVAL(0x23E563F1EC919DF7LL, hphp_splfileinfo_getpathname);
+      break;
+    case 7672:
+      HASH_INVOKE_FROM_EVAL(0x5E43280BC8DD1DF8LL, magicktrimimage);
+      break;
+    case 7675:
+      HASH_INVOKE_FROM_EVAL(0x47C62D58B0B65DFBLL, thrift_protocol_write_binary);
+      break;
+    case 7678:
+      HASH_INVOKE_FROM_EVAL(0x21F24104004CFDFELL, evhttp_post);
+      HASH_INVOKE_FROM_EVAL(0x072690BF719D7DFELL, hphp_recursivedirectoryiterator_rewind);
+      break;
+    case 7682:
+      HASH_INVOKE_FROM_EVAL(0x7829D2171DFBFE02LL, magickgetimagegamma);
+      break;
+    case 7693:
+      HASH_INVOKE_FROM_EVAL(0x756B92411E7FBE0DLL, stream_get_wrappers);
+      break;
+    case 7698:
+      HASH_INVOKE_FROM_EVAL(0x05FAA2085D94FE12LL, urlencode);
+      break;
+    case 7700:
+      HASH_INVOKE_FROM_EVAL(0x41E394B12170BE14LL, socket_send);
+      HASH_INVOKE_FROM_EVAL(0x3192209D50C1FE14LL, pixelsetalpha);
+      break;
+    case 7701:
+      HASH_INVOKE_FROM_EVAL(0x525F197D74423E15LL, get_resource_type);
+      break;
+    case 7703:
+      HASH_INVOKE_FROM_EVAL(0x0F5759A501FAFE17LL, imagecreatefromgd2part);
+      break;
+    case 7705:
+      HASH_INVOKE_FROM_EVAL(0x4A694B42B21A9E19LL, destroymagickwand);
+      break;
+    case 7707:
+      HASH_INVOKE_FROM_EVAL(0x7FA0B63054221E1BLL, magickrollimage);
+      break;
+    case 7717:
+      HASH_INVOKE_FROM_EVAL(0x1C6246FA51EBDE25LL, hphp_get_static_property);
+      break;
+    case 7720:
+      HASH_INVOKE_FROM_EVAL(0x3456885FF0679E28LL, lchown);
+      break;
+    case 7725:
+      HASH_INVOKE_FROM_EVAL(0x7817FA38BAAEFE2DLL, fsockopen);
+      break;
+    case 7734:
+      HASH_INVOKE_FROM_EVAL(0x2E42ED1E15CCFE36LL, mysql_affected_rows);
+      break;
+    case 7738:
+      HASH_INVOKE_FROM_EVAL(0x6E2CF6ECA0987E3ALL, get_headers);
+      break;
+    case 7748:
+      HASH_INVOKE_FROM_EVAL(0x71B7756BD1B43E44LL, dom_document_savexml);
+      break;
+    case 7767:
+      HASH_INVOKE_FROM_EVAL(0x21B07F1F212BDE57LL, hphp_get_original_class_name);
+      break;
+    case 7771:
+      HASH_INVOKE_FROM_EVAL(0x299F1A5895461E5BLL, curl_multi_close);
+      break;
+    case 7779:
+      HASH_INVOKE_FROM_EVAL(0x5697E5F6AAF47E63LL, mb_http_input);
+      break;
+    case 7782:
+      HASH_INVOKE_FROM_EVAL(0x6CB3DEB458A2DE66LL, apc_bin_load);
+      break;
+    case 7786:
+      HASH_INVOKE_FROM_EVAL(0x25C0C5E961AFDE6ALL, xmlwriter_full_end_element);
+      break;
+    case 7793:
+      HASH_INVOKE_FROM_EVAL(0x6AC126DCE941FE71LL, memory_get_peak_usage);
+      break;
+    case 7795:
+      HASH_INVOKE_FROM_EVAL(0x3B28CA1BE1D0DE73LL, xbox_get_thread_timeout);
+      break;
+    case 7796:
+      HASH_INVOKE_FROM_EVAL(0x47D0510206B89E74LL, ini_restore);
+      break;
+    case 7798:
+      HASH_INVOKE_FROM_EVAL(0x36E9EC047FC73E76LL, mb_convert_encoding);
+      break;
+    case 7802:
+      HASH_INVOKE_FROM_EVAL(0x6A3D9F8EDB005E7ALL, flush);
+      break;
+    case 7806:
+      HASH_INVOKE_FROM_EVAL(0x51060D186C703E7ELL, headers_list);
+      break;
+    case 7809:
+      HASH_INVOKE_FROM_EVAL(0x0ECFC3676B4FDE81LL, chr);
+      break;
+    case 7810:
+      HASH_INVOKE_FROM_EVAL(0x379F7BF525FF1E82LL, magicksetimagecolorspace);
+      break;
+    case 7822:
+      HASH_INVOKE_FROM_EVAL(0x29A2FBD427647E8ELL, mysql_connect);
+      break;
+    case 7827:
+      HASH_INVOKE_FROM_EVAL(0x5E968924197F5E93LL, mcrypt_ofb);
+      break;
+    case 7831:
+      HASH_INVOKE_FROM_EVAL(0x6254E9BDC11F3E97LL, imagecreatefromgd2);
+      break;
+    case 7835:
+      HASH_INVOKE_FROM_EVAL(0x2A019CAA1188BE9BLL, preg_grep);
+      break;
+    case 7840:
+      HASH_INVOKE_FROM_EVAL(0x37C5AF6E7E8B5EA0LL, fputs);
+      break;
+    case 7843:
+      HASH_INVOKE_FROM_EVAL(0x6467FFB910B8BEA3LL, magickspliceimage);
+      break;
+    case 7851:
+      HASH_INVOKE_FROM_EVAL(0x632D4FC346797EABLL, pixelgetexceptionstring);
+      break;
+    case 7859:
+      HASH_INVOKE_FROM_EVAL(0x7DB9D839ACE0DEB3LL, natsort);
+      break;
+    case 7860:
+      HASH_INVOKE_FROM_EVAL(0x1F936B3C5406DEB4LL, fb_set_taint);
+      break;
+    case 7863:
+      HASH_INVOKE_FROM_EVAL(0x58B9EFA0FB35FEB7LL, stream_filter_prepend);
+      break;
+    case 7865:
+      HASH_INVOKE_FROM_EVAL(0x2A483AD7A3D07EB9LL, magickgetwandsize);
+      break;
+    case 7866:
+      HASH_INVOKE_FROM_EVAL(0x1F5B2728DE875EBALL, magicksetimage);
+      break;
+    case 7869:
+      HASH_INVOKE_FROM_EVAL(0x31A30B274AD2DEBDLL, call_user_func_array_rpc);
+      break;
+    case 7872:
+      HASH_INVOKE_FROM_EVAL(0x495316E596537EC0LL, imagefttext);
+      break;
+    case 7874:
+      HASH_INVOKE_FROM_EVAL(0x4CDD0B7BF826FEC2LL, rewinddir);
+      break;
+    case 7877:
+      HASH_INVOKE_FROM_EVAL(0x7D69B3537C353EC5LL, hphp_splfileinfo_isfile);
+      break;
+    case 7879:
+      HASH_INVOKE_FROM_EVAL(0x4FC99DC20A955EC7LL, session_module_name);
+      break;
+    case 7894:
+      HASH_INVOKE_FROM_EVAL(0x134B37520683DED6LL, imagesetbrush);
+      break;
+    case 7896:
+      HASH_INVOKE_FROM_EVAL(0x338D9D95095D1ED8LL, magicksetimagedelay);
+      break;
+    case 7897:
+      HASH_INVOKE_FROM_EVAL(0x7F802A06996BBED9LL, apd_set_browser_trace);
+      break;
+    case 7898:
+      HASH_INVOKE_FROM_EVAL(0x29E2771785CCBEDALL, magickgettextdescent);
+      break;
+    case 7899:
+      HASH_INVOKE_FROM_EVAL(0x1340509769275EDBLL, magickgetimagecompression);
+      break;
+    case 7905:
+      HASH_INVOKE_FROM_EVAL(0x528BA9796BD0FEE1LL, fb_rpc_intercept_handler);
+      break;
+    case 7907:
+      HASH_INVOKE_FROM_EVAL(0x28A98134BD97BEE3LL, mb_regex_encoding);
+      HASH_INVOKE_FROM_EVAL(0x0D76FFBE30B13EE3LL, imap_mailboxmsginfo);
+      break;
+    case 7908:
+      HASH_INVOKE_FROM_EVAL(0x5B6FF42ACB2FBEE4LL, getmyuid);
+      break;
+    case 7912:
+      HASH_INVOKE_FROM_EVAL(0x32B3951DFD2B9EE8LL, hphp_directoryiterator_isdot);
+      break;
+    case 7916:
+      HASH_INVOKE_FROM_EVAL(0x115CC08BC872FEECLL, fb_output_compression);
+      break;
+    case 7920:
+      HASH_INVOKE_FROM_EVAL(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request);
+      break;
+    case 7929:
+      HASH_INVOKE_FROM_EVAL(0x200FC256EB093EF9LL, gettimeofday);
+      break;
+    case 7931:
+      HASH_INVOKE_FROM_EVAL(0x6D450F078F02BEFBLL, apd_continue);
+      break;
+    case 7936:
+      HASH_INVOKE_FROM_EVAL(0x09637D7CA2E33F00LL, fgetc);
+      break;
+    case 7937:
+      HASH_INVOKE_FROM_EVAL(0x66137942508EBF01LL, date_create);
+      break;
+    case 7938:
+      HASH_INVOKE_FROM_EVAL(0x78A02A603FA6FF02LL, magickreducenoiseimage);
+      break;
+    case 7951:
+      HASH_INVOKE_FROM_EVAL(0x61E7A36CA7FF5F0FLL, drawsetcliprule);
+      HASH_INVOKE_FROM_EVAL(0x4BD54A631F665F0FLL, drawpathcurvetosmoothabsolute);
+      break;
+    case 7955:
+      HASH_INVOKE_FROM_EVAL(0x3B197C0731233F13LL, dom_characterdata_substring_data);
+      break;
+    case 7963:
+      HASH_INVOKE_FROM_EVAL(0x27A4633381195F1BLL, chown);
+      break;
+    case 7967:
+      HASH_INVOKE_FROM_EVAL(0x7C0C145EFE0EBF1FLL, defined);
+      break;
+    case 7969:
+      HASH_INVOKE_FROM_EVAL(0x1FF5B9A4FC78BF21LL, drawsettextantialias);
+      HASH_INVOKE_FROM_EVAL(0x20DD4631AD975F21LL, imap_rfc822_write_address);
+      break;
+    case 7980:
+      HASH_INVOKE_FROM_EVAL(0x035EFF9E1757DF2CLL, http_build_query);
+      HASH_INVOKE_FROM_EVAL(0x22607B4EE253DF2CLL, imap_savebody);
+      break;
+    case 7986:
+      HASH_INVOKE_FROM_EVAL(0x78257F34467BDF32LL, drawsetstrokedasharray);
+      HASH_INVOKE_FROM_EVAL(0x2B66EACB77AE9F32LL, print_r);
+      break;
+    case 7993:
+      HASH_INVOKE_FROM_EVAL(0x3E9146C06AAEFF39LL, magicksetimagecompressionquality);
+      break;
+    case 8004:
+      HASH_INVOKE_FROM_EVAL(0x65353A823EB91F44LL, imap_mail_compose);
+      break;
+    case 8021:
+      HASH_INVOKE_FROM_EVAL(0x49D986274B1C5F55LL, collator_asort);
+      break;
+    case 8024:
+      HASH_INVOKE_FROM_EVAL(0x0551AAE8F1A6FF58LL, magicklevelimage);
+      break;
+    case 8027:
+      HASH_INVOKE_FROM_EVAL(0x76418F884500DF5BLL, stream_socket_enable_crypto);
+      break;
+    case 8029:
+      HASH_INVOKE_FROM_EVAL(0x07FF92CF46DDFF5DLL, imagepsfreefont);
+      break;
+    case 8036:
+      HASH_INVOKE_FROM_EVAL(0x41EF51E62AD3DF64LL, pagelet_server_is_enabled);
+      HASH_INVOKE_FROM_EVAL(0x280051555A21DF64LL, rename);
+      break;
+    case 8043:
+      HASH_INVOKE_FROM_EVAL(0x56EF59D6CB0A5F6BLL, dom_document_save_html_file);
+      break;
+    case 8044:
+      HASH_INVOKE_FROM_EVAL(0x23D5E9E53D11BF6CLL, gmdate);
+      break;
+    case 8050:
+      HASH_INVOKE_FROM_EVAL(0x4B22EF06BAA83F72LL, version_compare);
+      break;
+    case 8062:
+      HASH_INVOKE_FROM_EVAL(0x7064BEBF508F3F7ELL, socket_read);
+      break;
+    case 8064:
+      HASH_INVOKE_FROM_EVAL(0x63F18DE0DB807F80LL, magickqueryfonts);
+      break;
+    case 8068:
+      HASH_INVOKE_FROM_EVAL(0x14402B01D00E9F84LL, magicksteganoimage);
+      break;
+    case 8070:
+      HASH_INVOKE_FROM_EVAL(0x44CE4DB1CE7E9F86LL, flock);
+      break;
+    case 8075:
+      HASH_INVOKE_FROM_EVAL(0x2755DD4112AA5F8BLL, magicksampleimage);
+      break;
+    case 8078:
+      HASH_INVOKE_FROM_EVAL(0x7A8F1104B0CCDF8ELL, phpcredits);
+      break;
+    case 8079:
+      HASH_INVOKE_FROM_EVAL(0x4A6C46DC7FE29F8FLL, hphp_recursivedirectoryiterator_getchildren);
+      break;
+    case 8081:
+      HASH_INVOKE_FROM_EVAL(0x78463112BE739F91LL, connection_timeout);
+      break;
+    case 8085:
+      HASH_INVOKE_FROM_EVAL(0x40D620CBA0D41F95LL, opendir);
+      break;
+    case 8087:
+      HASH_INVOKE_FROM_EVAL(0x35117886C885DF97LL, hphp_recursivedirectoryiterator_getsubpathname);
+      break;
+    case 8088:
+      HASH_INVOKE_FROM_EVAL(0x0293F60B46511F98LL, drawsetfontstretch);
+      break;
+    case 8090:
+      HASH_INVOKE_FROM_EVAL(0x2B7CAC006AF27F9ALL, fflush);
+      break;
+    case 8093:
+      HASH_INVOKE_FROM_EVAL(0x0AD6DE8829773F9DLL, apc_compile_file);
+      break;
+    case 8100:
+      HASH_INVOKE_FROM_EVAL(0x0E7E9AA21AE99FA4LL, hphp_recursiveiteratoriterator_current);
+      break;
+    case 8102:
+      HASH_INVOKE_FROM_EVAL(0x0DEEA8C3E3A47FA6LL, read_exif_data);
+      break;
+    case 8110:
+      HASH_INVOKE_FROM_EVAL(0x64D269A505D51FAELL, array_map);
+      break;
+    case 8113:
+      HASH_INVOKE_FROM_EVAL(0x0F78ECF42C30DFB1LL, array_chunk);
+      break;
+    case 8119:
+      HASH_INVOKE_FROM_EVAL(0x6465CD999F4C5FB7LL, hphp_invoke_method);
+      break;
+    case 8120:
+      HASH_INVOKE_FROM_EVAL(0x6DB2DB341ECF3FB8LL, file_exists);
+      break;
+    case 8129:
+      HASH_INVOKE_FROM_EVAL(0x3FF9AAFF85DDDFC1LL, class_parents);
+      break;
+    case 8130:
+      HASH_INVOKE_FROM_EVAL(0x460470C490FAFFC2LL, dom_node_normalize);
+      break;
+    case 8142:
+      HASH_INVOKE_FROM_EVAL(0x042193C97C65FFCELL, magickwaveimage);
+      break;
+    case 8144:
+      HASH_INVOKE_FROM_EVAL(0x53DB5D0490C51FD0LL, xhprof_sample_disable);
+      break;
+    case 8150:
+      HASH_INVOKE_FROM_EVAL(0x7FC00035D14B9FD6LL, apc_delete_file);
+      break;
+    case 8152:
+      HASH_INVOKE_FROM_EVAL(0x4234F2B59531FFD8LL, posix_getlogin);
+      break;
+    case 8157:
+      HASH_INVOKE_FROM_EVAL(0x4EDEDA4278CD3FDDLL, magickchopimage);
+      break;
+    case 8158:
+      HASH_INVOKE_FROM_EVAL(0x7F5FC3CAF8CE9FDELL, gzcompress);
+      HASH_INVOKE_FROM_EVAL(0x72925D2DF7E61FDELL, drawpathcurvetoquadraticbeziersmoothrelative);
+      break;
+    case 8168:
+      HASH_INVOKE_FROM_EVAL(0x4D7AEC41CFD73FE8LL, hphp_recursivedirectoryiterator_getsubpath);
+      break;
+    case 8171:
+      HASH_INVOKE_FROM_EVAL(0x67D1EE05DFE71FEBLL, hphp_splfileobject_getcvscontrol);
+      break;
+    case 8175:
+      HASH_INVOKE_FROM_EVAL(0x00EEEE9C6CEA5FEFLL, xmlwriter_write_element_ns);
+      break;
+    case 8182:
+      HASH_INVOKE_FROM_EVAL(0x25FCE64E12505FF6LL, magicksetimagerenderingintent);
+      break;
+    case 8186:
+      HASH_INVOKE_FROM_EVAL(0x13EE24AF67113FFALL, ob_end_flush);
+      break;
+    case 8187:
+      HASH_INVOKE_FROM_EVAL(0x63BE4CEF1FC47FFBLL, imagefill);
       break;
     default:
       break;
@@ -80677,6 +83975,7 @@ CallInfo ci_msg_set_queue((void*)&i_msg_set_queue, (void*)&ifa_msg_set_queue, 2,
 CallInfo ci_cos((void*)&i_cos, (void*)&ifa_cos, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursivedirectoryiterator_valid((void*)&i_hphp_recursivedirectoryiterator_valid, (void*)&ifa_hphp_recursivedirectoryiterator_valid, 1, 0, 0x0000000000000000LL);
 CallInfo ci_bcmul((void*)&i_bcmul, (void*)&ifa_bcmul, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_header((void*)&i_imap_header, (void*)&ifa_imap_header, 5, 0, 0x0000000000000000LL);
 CallInfo ci_openlog((void*)&i_openlog, (void*)&ifa_openlog, 3, 0, 0x0000000000000000LL);
 CallInfo ci_get_include_path((void*)&i_get_include_path, (void*)&ifa_get_include_path, 0, 0, 0x0000000000000000LL);
 CallInfo ci_socket_select((void*)&i_socket_select, (void*)&ifa_socket_select, 5, 0, 0x0000000000000007LL);
@@ -80694,7 +83993,9 @@ CallInfo ci_preg_last_error((void*)&i_preg_last_error, (void*)&ifa_preg_last_err
 CallInfo ci_end((void*)&i_end, (void*)&ifa_end, 1, 0, 0x0000000000000001LL);
 CallInfo ci_stream_get_line((void*)&i_stream_get_line, (void*)&ifa_stream_get_line, 3, 0, 0x0000000000000000LL);
 CallInfo ci_deg2rad((void*)&i_deg2rad, (void*)&ifa_deg2rad, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_mime_header_decode((void*)&i_imap_mime_header_decode, (void*)&ifa_imap_mime_header_decode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickrollimage((void*)&i_magickrollimage, (void*)&ifa_magickrollimage, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_getmailboxes((void*)&i_imap_getmailboxes, (void*)&ifa_imap_getmailboxes, 3, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_sort((void*)&i_ldap_sort, (void*)&ifa_ldap_sort, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imagetruecolortopalette((void*)&i_imagetruecolortopalette, (void*)&ifa_imagetruecolortopalette, 3, 0, 0x0000000000000000LL);
 CallInfo ci_defined((void*)&i_defined, (void*)&ifa_defined, 1, 0, 0x0000000000000000LL);
@@ -80733,6 +84034,7 @@ CallInfo ci_get_headers((void*)&i_get_headers, (void*)&ifa_get_headers, 2, 0, 0x
 CallInfo ci_mysql_drop_db((void*)&i_mysql_drop_db, (void*)&ifa_mysql_drop_db, 2, 0, 0x0000000000000000LL);
 CallInfo ci_spl_object_hash((void*)&i_spl_object_hash, (void*)&ifa_spl_object_hash, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickresampleimage((void*)&i_magickresampleimage, (void*)&ifa_magickresampleimage, 5, 0, 0x0000000000000000LL);
+CallInfo ci_imap_last_error((void*)&i_imap_last_error, (void*)&ifa_imap_last_error, 0, 0, 0x0000000000000000LL);
 CallInfo ci_i18n_loc_get_default((void*)&i_i18n_loc_get_default, (void*)&ifa_i18n_loc_get_default, 0, 0, 0x0000000000000000LL);
 CallInfo ci_strtok((void*)&i_strtok, (void*)&ifa_strtok, 2, 0, 0x0000000000000000LL);
 CallInfo ci_array_key_exists((void*)&i_array_key_exists, (void*)&ifa_array_key_exists, 2, 0, 0x0000000000000000LL);
@@ -80809,6 +84111,7 @@ CallInfo ci_hphp_recursivedirectoryiterator_getsubpathname((void*)&i_hphp_recurs
 CallInfo ci_socket_close((void*)&i_socket_close, (void*)&ifa_socket_close, 1, 0, 0x0000000000000000LL);
 CallInfo ci_max((void*)&i_max, (void*)&ifa_max, 1, 1, 0x0000000000000000LL);
 CallInfo ci_magickadaptivethresholdimage((void*)&i_magickadaptivethresholdimage, (void*)&ifa_magickadaptivethresholdimage, 4, 0, 0x0000000000000000LL);
+CallInfo ci_imap_body((void*)&i_imap_body, (void*)&ifa_imap_body, 3, 0, 0x0000000000000000LL);
 CallInfo ci_each((void*)&i_each, (void*)&ifa_each, 1, 0, 0x0000000000000001LL);
 CallInfo ci_magickremoveimageprofiles((void*)&i_magickremoveimageprofiles, (void*)&ifa_magickremoveimageprofiles, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawgettextalignment((void*)&i_drawgettextalignment, (void*)&ifa_drawgettextalignment, 1, 0, 0x0000000000000000LL);
@@ -80862,8 +84165,10 @@ CallInfo ci_magickpainttransparentimage((void*)&i_magickpainttransparentimage, (
 CallInfo ci_drawsettextundercolor((void*)&i_drawsettextundercolor, (void*)&ifa_drawsettextundercolor, 2, 0, 0x0000000000000000LL);
 CallInfo ci_memcache_get_version((void*)&i_memcache_get_version, (void*)&ifa_memcache_get_version, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_getflags((void*)&i_hphp_splfileobject_getflags, (void*)&ifa_hphp_splfileobject_getflags, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_mail_move((void*)&i_imap_mail_move, (void*)&ifa_imap_mail_move, 4, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursivedirectoryiterator_rewind((void*)&i_hphp_recursivedirectoryiterator_rewind, (void*)&ifa_hphp_recursivedirectoryiterator_rewind, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetstringwidth((void*)&i_magickgetstringwidth, (void*)&ifa_magickgetstringwidth, 4, 0, 0x0000000000000000LL);
+CallInfo ci_imap_createmailbox((void*)&i_imap_createmailbox, (void*)&ifa_imap_createmailbox, 2, 0, 0x0000000000000000LL);
 CallInfo ci_echo((void*)&i_echo, (void*)&ifa_echo, 1, 1, 0x0000000000000000LL);
 CallInfo ci_ldap_parse_reference((void*)&i_ldap_parse_reference, (void*)&ifa_ldap_parse_reference, 3, 0, 0x0000000000000004LL);
 CallInfo ci_ctype_xdigit((void*)&i_ctype_xdigit, (void*)&ifa_ctype_xdigit, 1, 0, 0x0000000000000000LL);
@@ -80919,11 +84224,13 @@ CallInfo ci_magickpingimage((void*)&i_magickpingimage, (void*)&ifa_magickpingima
 CallInfo ci_bcpowmod((void*)&i_bcpowmod, (void*)&ifa_bcpowmod, 4, 0, 0x0000000000000000LL);
 CallInfo ci_timezone_offset_get((void*)&i_timezone_offset_get, (void*)&ifa_timezone_offset_get, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_create_text_node((void*)&i_dom_document_create_text_node, (void*)&ifa_dom_document_create_text_node, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_num_msg((void*)&i_imap_num_msg, (void*)&ifa_imap_num_msg, 1, 0, 0x0000000000000000LL);
 CallInfo ci_getrandmax((void*)&i_getrandmax, (void*)&ifa_getrandmax, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fseek((void*)&i_hphp_splfileobject_fseek, (void*)&ifa_hphp_splfileobject_fseek, 3, 0, 0x0000000000000000LL);
 CallInfo ci_ctype_alnum((void*)&i_ctype_alnum, (void*)&ifa_ctype_alnum, 1, 0, 0x0000000000000000LL);
 CallInfo ci_tan((void*)&i_tan, (void*)&ifa_tan, 1, 0, 0x0000000000000000LL);
 CallInfo ci_set_exception_handler((void*)&i_set_exception_handler, (void*)&ifa_set_exception_handler, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_qprint((void*)&i_imap_qprint, (void*)&ifa_imap_qprint, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagegrabwindow((void*)&i_imagegrabwindow, (void*)&ifa_imagegrabwindow, 2, 0, 0x0000000000000000LL);
 CallInfo ci_memcache_add((void*)&i_memcache_add, (void*)&ifa_memcache_add, 5, 0, 0x0000000000000000LL);
 CallInfo ci_magickstereoimage((void*)&i_magickstereoimage, (void*)&ifa_magickstereoimage, 2, 0, 0x0000000000000000LL);
@@ -80948,6 +84255,7 @@ CallInfo ci_newpixelwand((void*)&i_newpixelwand, (void*)&ifa_newpixelwand, 1, 0,
 CallInfo ci_pcntl_wait((void*)&i_pcntl_wait, (void*)&ifa_pcntl_wait, 2, 0, 0x0000000000000001LL);
 CallInfo ci_hypot((void*)&i_hypot, (void*)&ifa_hypot, 2, 0, 0x0000000000000000LL);
 CallInfo ci_parse_url((void*)&i_parse_url, (void*)&ifa_parse_url, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_headers((void*)&i_imap_headers, (void*)&ifa_imap_headers, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickreadimageblob((void*)&i_magickreadimageblob, (void*)&ifa_magickreadimageblob, 2, 0, 0x0000000000000000LL);
 CallInfo ci_eregi((void*)&i_eregi, (void*)&ifa_eregi, 3, 0, 0x0000000000000004LL);
 CallInfo ci_pixelsetcolorcount((void*)&i_pixelsetcolorcount, (void*)&ifa_pixelsetcolorcount, 2, 0, 0x0000000000000000LL);
@@ -81183,6 +84491,7 @@ CallInfo ci_socket_get_status((void*)&i_socket_get_status, (void*)&ifa_socket_ge
 CallInfo ci_checkdnsrr((void*)&i_checkdnsrr, (void*)&ifa_checkdnsrr, 2, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_verify((void*)&i_openssl_verify, (void*)&ifa_openssl_verify, 4, 0, 0x0000000000000000LL);
 CallInfo ci_curl_exec((void*)&i_curl_exec, (void*)&ifa_curl_exec, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_renamemailbox((void*)&i_imap_renamemailbox, (void*)&ifa_imap_renamemailbox, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetexceptiontype((void*)&i_magickgetexceptiontype, (void*)&ifa_magickgetexceptiontype, 1, 0, 0x0000000000000000LL);
 CallInfo ci_array_sum((void*)&i_array_sum, (void*)&ifa_array_sum, 1, 0, 0x0000000000000000LL);
 CallInfo ci_unregister_tick_function((void*)&i_unregister_tick_function, (void*)&ifa_unregister_tick_function, 1, 0, 0x0000000000000000LL);
@@ -81191,6 +84500,7 @@ CallInfo ci_magickgetversion((void*)&i_magickgetversion, (void*)&ifa_magickgetve
 CallInfo ci_imagelayereffect((void*)&i_imagelayereffect, (void*)&ifa_imagelayereffect, 2, 0, 0x0000000000000000LL);
 CallInfo ci_glob((void*)&i_glob, (void*)&ifa_glob, 2, 0, 0x0000000000000000LL);
 CallInfo ci_exec((void*)&i_exec, (void*)&ifa_exec, 3, 0, 0x0000000000000006LL);
+CallInfo ci_imap_binary((void*)&i_imap_binary, (void*)&ifa_imap_binary, 1, 0, 0x0000000000000000LL);
 CallInfo ci_apd_continue((void*)&i_apd_continue, (void*)&ifa_apd_continue, 0, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagedepth((void*)&i_magickgetimagedepth, (void*)&ifa_magickgetimagedepth, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pclose((void*)&i_pclose, (void*)&ifa_pclose, 1, 0, 0x0000000000000000LL);
@@ -81200,6 +84510,7 @@ CallInfo ci_xmlwriter_write_dtd_attlist((void*)&i_xmlwriter_write_dtd_attlist, (
 CallInfo ci_xml_set_element_handler((void*)&i_xml_set_element_handler, (void*)&ifa_xml_set_element_handler, 3, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetstrokeopacity((void*)&i_drawgetstrokeopacity, (void*)&ifa_drawgetstrokeopacity, 1, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_get_entries((void*)&i_ldap_get_entries, (void*)&ifa_ldap_get_entries, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_8bit((void*)&i_imap_8bit, (void*)&ifa_imap_8bit, 1, 0, 0x0000000000000000LL);
 CallInfo ci_ob_iconv_handler((void*)&i_ob_iconv_handler, (void*)&ifa_ob_iconv_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_throw_fatal_error((void*)&i_hphp_throw_fatal_error, (void*)&ifa_hphp_throw_fatal_error, 1, 0, 0x0000000000000000LL);
 CallInfo ci_pathinfo((void*)&i_pathinfo, (void*)&ifa_pathinfo, 2, 0, 0x0000000000000000LL);
@@ -81226,6 +84537,7 @@ CallInfo ci_mysql_escape_string((void*)&i_mysql_escape_string, (void*)&ifa_mysql
 CallInfo ci_idn_to_utf8((void*)&i_idn_to_utf8, (void*)&ifa_idn_to_utf8, 2, 0, 0x0000000000000002LL);
 CallInfo ci_sql_regcase((void*)&i_sql_regcase, (void*)&ifa_sql_regcase, 1, 0, 0x0000000000000000LL);
 CallInfo ci_in_array((void*)&i_in_array, (void*)&ifa_in_array, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_search((void*)&i_imap_search, (void*)&ifa_imap_search, 4, 0, 0x0000000000000000LL);
 CallInfo ci_drawpathcurvetoquadraticbezierabsolute((void*)&i_drawpathcurvetoquadraticbezierabsolute, (void*)&ifa_drawpathcurvetoquadraticbezierabsolute, 5, 0, 0x0000000000000000LL);
 CallInfo ci_socket_set_timeout((void*)&i_socket_set_timeout, (void*)&ifa_socket_set_timeout, 3, 0, 0x0000000000000000LL);
 CallInfo ci_bin2hex((void*)&i_bin2hex, (void*)&ifa_bin2hex, 1, 0, 0x0000000000000000LL);
@@ -81234,6 +84546,7 @@ CallInfo ci_is_link((void*)&i_is_link, (void*)&ifa_is_link, 1, 0, 0x000000000000
 CallInfo ci_set_file_buffer((void*)&i_set_file_buffer, (void*)&ifa_set_file_buffer, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimageredprimary((void*)&i_magicksetimageredprimary, (void*)&ifa_magicksetimageredprimary, 3, 0, 0x0000000000000000LL);
 CallInfo ci_i18n_loc_set_default((void*)&i_i18n_loc_set_default, (void*)&ifa_i18n_loc_set_default, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_subscribe((void*)&i_imap_subscribe, (void*)&ifa_imap_subscribe, 2, 0, 0x0000000000000000LL);
 CallInfo ci_ftok((void*)&i_ftok, (void*)&ifa_ftok, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_list_fields((void*)&i_mysql_list_fields, (void*)&ifa_mysql_list_fields, 3, 0, 0x0000000000000000LL);
 CallInfo ci_stream_wrapper_register((void*)&i_stream_wrapper_register, (void*)&ifa_stream_wrapper_register, 2, 0, 0x0000000000000000LL);
@@ -81253,6 +84566,8 @@ CallInfo ci_mysql_pconnect_with_db((void*)&i_mysql_pconnect_with_db, (void*)&ifa
 CallInfo ci_imagepsslantfont((void*)&i_imagepsslantfont, (void*)&ifa_imagepsslantfont, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagemattecolor((void*)&i_magickgetimagemattecolor, (void*)&ifa_magickgetimagemattecolor, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_strstr((void*)&i_mb_strstr, (void*)&ifa_mb_strstr, 4, 0, 0x0000000000000000LL);
+CallInfo ci_imap_fetchheader((void*)&i_imap_fetchheader, (void*)&ifa_imap_fetchheader, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_listsubscribed((void*)&i_imap_listsubscribed, (void*)&ifa_imap_listsubscribed, 3, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetblack((void*)&i_pixelgetblack, (void*)&ifa_pixelgetblack, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_field_table((void*)&i_mysql_field_table, (void*)&ifa_mysql_field_table, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimagescene((void*)&i_magicksetimagescene, (void*)&ifa_magicksetimagescene, 2, 0, 0x0000000000000000LL);
@@ -81284,6 +84599,7 @@ CallInfo ci_xmlwriter_text((void*)&i_xmlwriter_text, (void*)&ifa_xmlwriter_text,
 CallInfo ci_pixelsetindex((void*)&i_pixelsetindex, (void*)&ifa_pixelsetindex, 2, 0, 0x0000000000000000LL);
 CallInfo ci_php_sapi_name((void*)&i_php_sapi_name, (void*)&ifa_php_sapi_name, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_enc_get_key_size((void*)&i_mcrypt_enc_get_key_size, (void*)&ifa_mcrypt_enc_get_key_size, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_get_quotaroot((void*)&i_imap_get_quotaroot, (void*)&ifa_imap_get_quotaroot, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_num_fields((void*)&i_mysql_num_fields, (void*)&ifa_mysql_num_fields, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_xpath_register_php_functions((void*)&i_dom_xpath_register_php_functions, (void*)&ifa_dom_xpath_register_php_functions, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicksteganoimage((void*)&i_magicksteganoimage, (void*)&ifa_magicksteganoimage, 3, 0, 0x0000000000000000LL);
@@ -81310,6 +84626,7 @@ CallInfo ci_pfsockopen((void*)&i_pfsockopen, (void*)&ifa_pfsockopen, 5, 0, 0x000
 CallInfo ci_dom_element_get_elements_by_tag_name_ns((void*)&i_dom_element_get_elements_by_tag_name_ns, (void*)&ifa_dom_element_get_elements_by_tag_name_ns, 3, 0, 0x0000000000000000LL);
 CallInfo ci_ucfirst((void*)&i_ucfirst, (void*)&ifa_ucfirst, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo_isreadable((void*)&i_hphp_splfileinfo_isreadable, (void*)&ifa_hphp_splfileinfo_isreadable, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_check((void*)&i_imap_check, (void*)&ifa_imap_check, 1, 0, 0x0000000000000000LL);
 CallInfo ci_chroot((void*)&i_chroot, (void*)&ifa_chroot, 1, 0, 0x0000000000000000LL);
 CallInfo ci_chdir((void*)&i_chdir, (void*)&ifa_chdir, 1, 0, 0x0000000000000000LL);
 CallInfo ci_socket_write((void*)&i_socket_write, (void*)&ifa_socket_write, 3, 0, 0x0000000000000000LL);
@@ -81379,6 +84696,7 @@ CallInfo ci_magickqueryfonts((void*)&i_magickqueryfonts, (void*)&ifa_magickquery
 CallInfo ci_floatval((void*)&i_floatval, (void*)&ifa_floatval, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_get_attribute_node_ns((void*)&i_dom_element_get_attribute_node_ns, (void*)&ifa_dom_element_get_attribute_node_ns, 3, 0, 0x0000000000000000LL);
 CallInfo ci_xml_set_object((void*)&i_xml_set_object, (void*)&ifa_xml_set_object, 2, 0, 0x0000000000000002LL);
+CallInfo ci_imap_utf7_encode((void*)&i_imap_utf7_encode, (void*)&ifa_imap_utf7_encode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_ctype_print((void*)&i_ctype_print, (void*)&ifa_ctype_print, 1, 0, 0x0000000000000000LL);
 CallInfo ci_gzwrite((void*)&i_gzwrite, (void*)&ifa_gzwrite, 3, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo___tostring((void*)&i_hphp_splfileinfo___tostring, (void*)&ifa_hphp_splfileinfo___tostring, 1, 0, 0x0000000000000000LL);
@@ -81413,6 +84731,7 @@ CallInfo ci_magickcommentimage((void*)&i_magickcommentimage, (void*)&ifa_magickc
 CallInfo ci_hphp_splfileinfo_islink((void*)&i_hphp_splfileinfo_islink, (void*)&ifa_hphp_splfileinfo_islink, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimagedelay((void*)&i_magicksetimagedelay, (void*)&ifa_magicksetimagedelay, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickposterizeimage((void*)&i_magickposterizeimage, (void*)&ifa_magickposterizeimage, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_status((void*)&i_imap_status, (void*)&ifa_imap_status, 3, 0, 0x0000000000000000LL);
 CallInfo ci_dom_namednodemap_get_named_item((void*)&i_dom_namednodemap_get_named_item, (void*)&ifa_dom_namednodemap_get_named_item, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_get_attribute_ns((void*)&i_dom_element_get_attribute_ns, (void*)&ifa_dom_element_get_attribute_ns, 3, 0, 0x0000000000000000LL);
 CallInfo ci_stream_socket_accept((void*)&i_stream_socket_accept, (void*)&ifa_stream_socket_accept, 3, 0, 0x0000000000000004LL);
@@ -81421,6 +84740,7 @@ CallInfo ci_magickevaluateimage((void*)&i_magickevaluateimage, (void*)&ifa_magic
 CallInfo ci_imagesx((void*)&i_imagesx, (void*)&ifa_imagesx, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagesy((void*)&i_imagesy, (void*)&ifa_imagesy, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_get_client_info((void*)&i_mysql_get_client_info, (void*)&ifa_mysql_get_client_info, 0, 0, 0x0000000000000000LL);
+CallInfo ci_imap_mail_compose((void*)&i_imap_mail_compose, (void*)&ifa_imap_mail_compose, 2, 0, 0x0000000000000000LL);
 CallInfo ci_fb_crossall_query((void*)&i_fb_crossall_query, (void*)&ifa_fb_crossall_query, 6, 0, 0x0000000000000000LL);
 CallInfo ci_fseek((void*)&i_fseek, (void*)&ifa_fseek, 3, 0, 0x0000000000000000LL);
 CallInfo ci_call_user_func_array_async((void*)&i_call_user_func_array_async, (void*)&ifa_call_user_func_array_async, 2, 0, 0x0000000000000000LL);
@@ -81455,6 +84775,7 @@ CallInfo ci_dom_document_create_attribute_ns((void*)&i_dom_document_create_attri
 CallInfo ci_drawsetfillalpha((void*)&i_drawsetfillalpha, (void*)&ifa_drawsetfillalpha, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mb_convert_encoding((void*)&i_mb_convert_encoding, (void*)&ifa_mb_convert_encoding, 3, 0, 0x0000000000000000LL);
 CallInfo ci_wandgetexceptionstring((void*)&i_wandgetexceptionstring, (void*)&ifa_wandgetexceptionstring, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_set_quota((void*)&i_imap_set_quota, (void*)&ifa_imap_set_quota, 3, 0, 0x0000000000000000LL);
 CallInfo ci_proc_open((void*)&i_proc_open, (void*)&ifa_proc_open, 6, 0, 0x0000000000000004LL);
 CallInfo ci_hphp_splfileobject_fgetss((void*)&i_hphp_splfileobject_fgetss, (void*)&ifa_hphp_splfileobject_fgetss, 2, 0, 0x0000000000000000LL);
 CallInfo ci_clearpixeliterator((void*)&i_clearpixeliterator, (void*)&ifa_clearpixeliterator, 1, 0, 0x0000000000000000LL);
@@ -81475,9 +84796,11 @@ CallInfo ci_mysql_fetch_field((void*)&i_mysql_fetch_field, (void*)&ifa_mysql_fet
 CallInfo ci_chmod((void*)&i_chmod, (void*)&ifa_chmod, 2, 0, 0x0000000000000000LL);
 CallInfo ci_bzerror((void*)&i_bzerror, (void*)&ifa_bzerror, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgettextascent((void*)&i_magickgettextascent, (void*)&ifa_magickgettextascent, 4, 0, 0x0000000000000000LL);
+CallInfo ci_imap_errors((void*)&i_imap_errors, (void*)&ifa_imap_errors, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mb_regex_encoding((void*)&i_mb_regex_encoding, (void*)&ifa_mb_regex_encoding, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mail((void*)&i_mail, (void*)&ifa_mail, 5, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_enc_self_test((void*)&i_mcrypt_enc_self_test, (void*)&ifa_mcrypt_enc_self_test, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_mail((void*)&i_imap_mail, (void*)&ifa_imap_mail, 7, 0, 0x0000000000000000LL);
 CallInfo ci_ignore_user_abort((void*)&i_ignore_user_abort, (void*)&ifa_ignore_user_abort, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagesetthickness((void*)&i_imagesetthickness, (void*)&ifa_imagesetthickness, 2, 0, 0x0000000000000000LL);
 CallInfo ci_str_pad((void*)&i_str_pad, (void*)&ifa_str_pad, 4, 0, 0x0000000000000000LL);
@@ -81517,6 +84840,7 @@ CallInfo ci_pixelsetyellow((void*)&i_pixelsetyellow, (void*)&ifa_pixelsetyellow,
 CallInfo ci_furchash_hphp_ext_supported((void*)&i_furchash_hphp_ext_supported, (void*)&ifa_furchash_hphp_ext_supported, 0, 0, 0x0000000000000000LL);
 CallInfo ci_inet_pton((void*)&i_inet_pton, (void*)&ifa_inet_pton, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_get_key_size((void*)&i_mcrypt_get_key_size, (void*)&ifa_mcrypt_get_key_size, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_delete((void*)&i_imap_delete, (void*)&ifa_imap_delete, 3, 0, 0x0000000000000000LL);
 CallInfo ci_drawsettextalignment((void*)&i_drawsettextalignment, (void*)&ifa_drawsettextalignment, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimageredprimary((void*)&i_magickgetimageredprimary, (void*)&ifa_magickgetimageredprimary, 1, 0, 0x0000000000000000LL);
 CallInfo ci_addslashes((void*)&i_addslashes, (void*)&ifa_addslashes, 1, 0, 0x0000000000000000LL);
@@ -81546,6 +84870,7 @@ CallInfo ci_drawsetfillpatternurl((void*)&i_drawsetfillpatternurl, (void*)&ifa_d
 CallInfo ci_iconv((void*)&i_iconv, (void*)&ifa_iconv, 3, 0, 0x0000000000000000LL);
 CallInfo ci_highlight_file((void*)&i_highlight_file, (void*)&ifa_highlight_file, 2, 0, 0x0000000000000000LL);
 CallInfo ci_iconv_mime_decode_headers((void*)&i_iconv_mime_decode_headers, (void*)&ifa_iconv_mime_decode_headers, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_getsubscribed((void*)&i_imap_getsubscribed, (void*)&ifa_imap_getsubscribed, 3, 0, 0x0000000000000000LL);
 CallInfo ci_ini_get_all((void*)&i_ini_get_all, (void*)&ifa_ini_get_all, 1, 0, 0x0000000000000000LL);
 CallInfo ci_collator_get_strength((void*)&i_collator_get_strength, (void*)&ifa_collator_get_strength, 1, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_get_values_len((void*)&i_ldap_get_values_len, (void*)&ifa_ldap_get_values_len, 3, 0, 0x0000000000000000LL);
@@ -81573,6 +84898,7 @@ CallInfo ci_uniqid((void*)&i_uniqid, (void*)&ifa_uniqid, 2, 0, 0x000000000000000
 CallInfo ci_strncasecmp((void*)&i_strncasecmp, (void*)&ifa_strncasecmp, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimagepixels((void*)&i_magicksetimagepixels, (void*)&ifa_magicksetimagepixels, 8, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetfillopacity((void*)&i_drawgetfillopacity, (void*)&ifa_drawgetfillopacity, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_list((void*)&i_imap_list, (void*)&ifa_imap_list, 3, 0, 0x0000000000000000LL);
 CallInfo ci_xml_parser_create_ns((void*)&i_xml_parser_create_ns, (void*)&ifa_xml_parser_create_ns, 2, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_delete((void*)&i_ldap_delete, (void*)&ifa_ldap_delete, 2, 0, 0x0000000000000000LL);
 CallInfo ci_fnmatch((void*)&i_fnmatch, (void*)&ifa_fnmatch, 3, 0, 0x0000000000000000LL);
@@ -81659,6 +84985,7 @@ CallInfo ci_usleep((void*)&i_usleep, (void*)&ifa_usleep, 1, 0, 0x000000000000000
 CallInfo ci_mb_strrpos((void*)&i_mb_strrpos, (void*)&ifa_mb_strrpos, 4, 0, 0x0000000000000000LL);
 CallInfo ci_collator_compare((void*)&i_collator_compare, (void*)&ifa_collator_compare, 3, 0, 0x0000000000000000LL);
 CallInfo ci_extract((void*)&i_extract, (void*)&ifa_extract, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_thread((void*)&i_imap_thread, (void*)&ifa_imap_thread, 2, 0, 0x0000000000000000LL);
 CallInfo ci_session_decode((void*)&i_session_decode, (void*)&ifa_session_decode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_get_browser((void*)&i_get_browser, (void*)&ifa_get_browser, 2, 0, 0x0000000000000000LL);
 CallInfo ci_html_entity_decode((void*)&i_html_entity_decode, (void*)&ifa_html_entity_decode, 3, 0, 0x0000000000000000LL);
@@ -81672,6 +84999,7 @@ CallInfo ci_xhprof_sample_enable((void*)&i_xhprof_sample_enable, (void*)&ifa_xhp
 CallInfo ci_hphp_splfileobject_key((void*)&i_hphp_splfileobject_key, (void*)&ifa_hphp_splfileobject_key, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_http_input((void*)&i_mb_http_input, (void*)&ifa_mb_http_input, 1, 0, 0x0000000000000000LL);
 CallInfo ci_gzinflate((void*)&i_gzinflate, (void*)&ifa_gzinflate, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_rfc822_parse_headers((void*)&i_imap_rfc822_parse_headers, (void*)&ifa_imap_rfc822_parse_headers, 2, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_pkcs7_sign((void*)&i_openssl_pkcs7_sign, (void*)&ifa_openssl_pkcs7_sign, 7, 0, 0x0000000000000000LL);
 CallInfo ci_assert((void*)&i_assert, (void*)&ifa_assert, 1, 0, 0x0000000000000000LL);
 CallInfo ci_stream_get_wrappers((void*)&i_stream_get_wrappers, (void*)&ifa_stream_get_wrappers, 0, 0, 0x0000000000000000LL);
@@ -81697,6 +85025,7 @@ CallInfo ci_strip_tags((void*)&i_strip_tags, (void*)&ifa_strip_tags, 2, 0, 0x000
 CallInfo ci_mb_ereg_search_getpos((void*)&i_mb_ereg_search_getpos, (void*)&ifa_mb_ereg_search_getpos, 0, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetcyanquantum((void*)&i_pixelgetcyanquantum, (void*)&ifa_pixelgetcyanquantum, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetexception((void*)&i_magickgetexception, (void*)&ifa_magickgetexception, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_listscan((void*)&i_imap_listscan, (void*)&ifa_imap_listscan, 4, 0, 0x0000000000000000LL);
 CallInfo ci_ctype_punct((void*)&i_ctype_punct, (void*)&ifa_ctype_punct, 1, 0, 0x0000000000000000LL);
 CallInfo ci_next((void*)&i_next, (void*)&ifa_next, 1, 0, 0x0000000000000001LL);
 CallInfo ci_shm_detach((void*)&i_shm_detach, (void*)&ifa_shm_detach, 1, 0, 0x0000000000000000LL);
@@ -81723,6 +85052,7 @@ CallInfo ci_pack((void*)&i_pack, (void*)&ifa_pack, 1, 1, 0x0000000000000000LL);
 CallInfo ci_gzgets((void*)&i_gzgets, (void*)&ifa_gzgets, 2, 0, 0x0000000000000000LL);
 CallInfo ci_array_intersect_uassoc((void*)&i_array_intersect_uassoc, (void*)&ifa_array_intersect_uassoc, 3, 1, 0x0000000000000000LL);
 CallInfo ci_basename((void*)&i_basename, (void*)&ifa_basename, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_utf7_decode((void*)&i_imap_utf7_decode, (void*)&ifa_imap_utf7_decode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_krsort((void*)&i_krsort, (void*)&ifa_krsort, 2, 0, 0x0000000000000001LL);
 CallInfo ci_clock_gettime((void*)&i_clock_gettime, (void*)&ifa_clock_gettime, 3, 0, 0x0000000000000006LL);
 CallInfo ci_pushdrawingwand((void*)&i_pushdrawingwand, (void*)&ifa_pushdrawingwand, 1, 0, 0x0000000000000000LL);
@@ -81745,6 +85075,8 @@ CallInfo ci_imagepsloadfont((void*)&i_imagepsloadfont, (void*)&ifa_imagepsloadfo
 CallInfo ci_iconv_mime_decode((void*)&i_iconv_mime_decode, (void*)&ifa_iconv_mime_decode, 3, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursiveiteratoriterator_key((void*)&i_hphp_recursiveiteratoriterator_key, (void*)&ifa_hphp_recursiveiteratoriterator_key, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_module_is_block_algorithm((void*)&i_mcrypt_module_is_block_algorithm, (void*)&ifa_mcrypt_module_is_block_algorithm, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_unsubscribe((void*)&i_imap_unsubscribe, (void*)&ifa_imap_unsubscribe, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_lsub((void*)&i_imap_lsub, (void*)&ifa_imap_lsub, 3, 0, 0x0000000000000000LL);
 CallInfo ci_wandgetexception((void*)&i_wandgetexception, (void*)&ifa_wandgetexception, 1, 0, 0x0000000000000000LL);
 CallInfo ci_fsockopen((void*)&i_fsockopen, (void*)&ifa_fsockopen, 5, 0, 0x000000000000000CLL);
 CallInfo ci_usort((void*)&i_usort, (void*)&ifa_usort, 2, 0, 0x0000000000000001LL);
@@ -81768,6 +85100,7 @@ CallInfo ci_magickgetimagecolormapcolor((void*)&i_magickgetimagecolormapcolor, (
 CallInfo ci_hphp_splfileobject_getcvscontrol((void*)&i_hphp_splfileobject_getcvscontrol, (void*)&ifa_hphp_splfileobject_getcvscontrol, 1, 0, 0x0000000000000000LL);
 CallInfo ci_settype((void*)&i_settype, (void*)&ifa_settype, 2, 0, 0x0000000000000001LL);
 CallInfo ci_posix_access((void*)&i_posix_access, (void*)&ifa_posix_access, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_uid((void*)&i_imap_uid, (void*)&ifa_imap_uid, 2, 0, 0x0000000000000000LL);
 CallInfo ci_explode((void*)&i_explode, (void*)&ifa_explode, 3, 0, 0x0000000000000000LL);
 CallInfo ci_fb_load_local_databases((void*)&i_fb_load_local_databases, (void*)&ifa_fb_load_local_databases, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreatefromgd((void*)&i_imagecreatefromgd, (void*)&ifa_imagecreatefromgd, 1, 0, 0x0000000000000000LL);
@@ -81779,6 +85112,7 @@ CallInfo ci_mailparse_msg_free((void*)&i_mailparse_msg_free, (void*)&ifa_mailpar
 CallInfo ci_openssl_private_decrypt((void*)&i_openssl_private_decrypt, (void*)&ifa_openssl_private_decrypt, 4, 0, 0x0000000000000002LL);
 CallInfo ci_dom_document_save((void*)&i_dom_document_save, (void*)&ifa_dom_document_save, 3, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_get_extension_info((void*)&i_hphp_get_extension_info, (void*)&ifa_hphp_get_extension_info, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_headerinfo((void*)&i_imap_headerinfo, (void*)&ifa_imap_headerinfo, 5, 0, 0x0000000000000000LL);
 CallInfo ci_output_add_rewrite_var((void*)&i_output_add_rewrite_var, (void*)&ifa_output_add_rewrite_var, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_cdata((void*)&i_xmlwriter_write_cdata, (void*)&ifa_xmlwriter_write_cdata, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mb_list_mime_names((void*)&i_mb_list_mime_names, (void*)&ifa_mb_list_mime_names, 1, 0, 0x0000000000000000LL);
@@ -81790,6 +85124,7 @@ CallInfo ci_session_cache_limiter((void*)&i_session_cache_limiter, (void*)&ifa_s
 CallInfo ci_stream_context_create((void*)&i_stream_context_create, (void*)&ifa_stream_context_create, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetstrokedashoffset((void*)&i_drawgetstrokedashoffset, (void*)&ifa_drawgetstrokedashoffset, 1, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_pkey_get_public((void*)&i_openssl_pkey_get_public, (void*)&ifa_openssl_pkey_get_public, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_fetchbody((void*)&i_imap_fetchbody, (void*)&ifa_imap_fetchbody, 4, 0, 0x0000000000000000LL);
 CallInfo ci_interface_exists((void*)&i_interface_exists, (void*)&ifa_interface_exists, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_directoryiterator___construct((void*)&i_hphp_directoryiterator___construct, (void*)&ifa_hphp_directoryiterator___construct, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawpathmovetorelative((void*)&i_drawpathmovetorelative, (void*)&ifa_drawpathmovetorelative, 3, 0, 0x0000000000000000LL);
@@ -81850,6 +85185,7 @@ CallInfo ci_zend_thread_id((void*)&i_zend_thread_id, (void*)&ifa_zend_thread_id,
 CallInfo ci_ldap_mod_replace((void*)&i_ldap_mod_replace, (void*)&ifa_ldap_mod_replace, 3, 0, 0x0000000000000000LL);
 CallInfo ci_collator_get_error_code((void*)&i_collator_get_error_code, (void*)&ifa_collator_get_error_code, 1, 0, 0x0000000000000000LL);
 CallInfo ci_stream_filter_prepend((void*)&i_stream_filter_prepend, (void*)&ifa_stream_filter_prepend, 4, 0, 0x0000000000000000LL);
+CallInfo ci_imap_close((void*)&i_imap_close, (void*)&ifa_imap_close, 2, 0, 0x0000000000000000LL);
 CallInfo ci_substr((void*)&i_substr, (void*)&ifa_substr, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magickcombineimages((void*)&i_magickcombineimages, (void*)&ifa_magickcombineimages, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetexceptiontype((void*)&i_pixelgetexceptiontype, (void*)&ifa_pixelgetexceptiontype, 1, 0, 0x0000000000000000LL);
@@ -81871,10 +85207,12 @@ CallInfo ci_mb_internal_encoding((void*)&i_mb_internal_encoding, (void*)&ifa_mb_
 CallInfo ci_msg_get_queue((void*)&i_msg_get_queue, (void*)&ifa_msg_get_queue, 2, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getegid((void*)&i_posix_getegid, (void*)&ifa_posix_getegid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_magickmedianfilterimage((void*)&i_magickmedianfilterimage, (void*)&ifa_magickmedianfilterimage, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_ping((void*)&i_imap_ping, (void*)&ifa_imap_ping, 1, 0, 0x0000000000000000LL);
 CallInfo ci_xbox_task_result((void*)&i_xbox_task_result, (void*)&ifa_xbox_task_result, 3, 0, 0x0000000000000004LL);
 CallInfo ci_mcrypt_generic_deinit((void*)&i_mcrypt_generic_deinit, (void*)&ifa_mcrypt_generic_deinit, 1, 0, 0x0000000000000000LL);
 CallInfo ci_method_exists((void*)&i_method_exists, (void*)&ifa_method_exists, 2, 0, 0x0000000000000000LL);
 CallInfo ci_money_format((void*)&i_money_format, (void*)&ifa_money_format, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_open((void*)&i_imap_open, (void*)&ifa_imap_open, 5, 0, 0x0000000000000000LL);
 CallInfo ci_clearmagickwand((void*)&i_clearmagickwand, (void*)&ifa_clearmagickwand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_remove_attribute_node((void*)&i_dom_element_remove_attribute_node, (void*)&ifa_dom_element_remove_attribute_node, 2, 0, 0x0000000000000000LL);
 CallInfo ci_array_udiff_assoc((void*)&i_array_udiff_assoc, (void*)&ifa_array_udiff_assoc, 3, 1, 0x0000000000000000LL);
@@ -81914,8 +85252,10 @@ CallInfo ci_magickgetstringheight((void*)&i_magickgetstringheight, (void*)&ifa_m
 CallInfo ci_dom_document_relaxng_validate_xml((void*)&i_dom_document_relaxng_validate_xml, (void*)&ifa_dom_document_relaxng_validate_xml, 2, 0, 0x0000000000000000LL);
 CallInfo ci_rawurlencode((void*)&i_rawurlencode, (void*)&ifa_rawurlencode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_strtotime((void*)&i_strtotime, (void*)&ifa_strtotime, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_alerts((void*)&i_imap_alerts, (void*)&ifa_imap_alerts, 0, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_set_id_attribute((void*)&i_dom_element_set_id_attribute, (void*)&ifa_dom_element_set_id_attribute, 3, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursivedirectoryiterator_getsubpath((void*)&i_hphp_recursivedirectoryiterator_getsubpath, (void*)&ifa_hphp_recursivedirectoryiterator_getsubpath, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_setflag_full((void*)&i_imap_setflag_full, (void*)&ifa_imap_setflag_full, 4, 0, 0x0000000000000000LL);
 CallInfo ci_apc_clear_cache((void*)&i_apc_clear_cache, (void*)&ifa_apc_clear_cache, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dirname((void*)&i_dirname, (void*)&ifa_dirname, 1, 0, 0x0000000000000000LL);
 CallInfo ci_strnatcasecmp((void*)&i_strnatcasecmp, (void*)&ifa_strnatcasecmp, 2, 0, 0x0000000000000000LL);
@@ -81964,6 +85304,7 @@ CallInfo ci_is_array((void*)&i_is_array, (void*)&ifa_is_array, 1, 0, 0x000000000
 CallInfo ci_rename((void*)&i_rename, (void*)&ifa_rename, 3, 0, 0x0000000000000000LL);
 CallInfo ci_date_format((void*)&i_date_format, (void*)&ifa_date_format, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_fgetc((void*)&i_hphp_splfileobject_fgetc, (void*)&ifa_hphp_splfileobject_fgetc, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_timeout((void*)&i_imap_timeout, (void*)&ifa_imap_timeout, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickshaveimage((void*)&i_magickshaveimage, (void*)&ifa_magickshaveimage, 3, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_set_attribute_node_ns((void*)&i_dom_element_set_attribute_node_ns, (void*)&ifa_dom_element_set_attribute_node_ns, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_output_memory((void*)&i_xmlwriter_output_memory, (void*)&ifa_xmlwriter_output_memory, 2, 0, 0x0000000000000000LL);
@@ -81979,6 +85320,7 @@ CallInfo ci_dom_node_lookup_namespace_uri((void*)&i_dom_node_lookup_namespace_ur
 CallInfo ci_fb_unserialize((void*)&i_fb_unserialize, (void*)&ifa_fb_unserialize, 3, 0, 0x0000000000000006LL);
 CallInfo ci_clock_getres((void*)&i_clock_getres, (void*)&ifa_clock_getres, 3, 0, 0x0000000000000006LL);
 CallInfo ci_magicktrimimage((void*)&i_magicktrimimage, (void*)&ifa_magicktrimimage, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_gc((void*)&i_imap_gc, (void*)&ifa_imap_gc, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo_getpathinfo((void*)&i_hphp_splfileinfo_getpathinfo, (void*)&ifa_hphp_splfileinfo_getpathinfo, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagegamma((void*)&i_magickgetimagegamma, (void*)&ifa_magickgetimagegamma, 1, 0, 0x0000000000000000LL);
 CallInfo ci_newdrawingwand((void*)&i_newdrawingwand, (void*)&ifa_newdrawingwand, 0, 0, 0x0000000000000000LL);
@@ -82019,6 +85361,7 @@ CallInfo ci_drawpolygon((void*)&i_drawpolygon, (void*)&ifa_drawpolygon, 2, 0, 0x
 CallInfo ci_mysql_connect((void*)&i_mysql_connect, (void*)&ifa_mysql_connect, 7, 0, 0x0000000000000000LL);
 CallInfo ci_xmlwriter_write_raw((void*)&i_xmlwriter_write_raw, (void*)&ifa_xmlwriter_write_raw, 2, 0, 0x0000000000000000LL);
 CallInfo ci_fgetss((void*)&i_fgetss, (void*)&ifa_fgetss, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_mail_copy((void*)&i_imap_mail_copy, (void*)&ifa_imap_mail_copy, 4, 0, 0x0000000000000000LL);
 CallInfo ci_drawarc((void*)&i_drawarc, (void*)&ifa_drawarc, 7, 0, 0x0000000000000000LL);
 CallInfo ci_set_error_handler((void*)&i_set_error_handler, (void*)&ifa_set_error_handler, 2, 0, 0x0000000000000000LL);
 CallInfo ci_str_word_count((void*)&i_str_word_count, (void*)&ifa_str_word_count, 3, 0, 0x0000000000000000LL);
@@ -82054,6 +85397,7 @@ CallInfo ci_memcache_add_server((void*)&i_memcache_add_server, (void*)&ifa_memca
 CallInfo ci_dom_node_remove_child((void*)&i_dom_node_remove_child, (void*)&ifa_dom_node_remove_child, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imageinterlace((void*)&i_imageinterlace, (void*)&ifa_imageinterlace, 2, 0, 0x0000000000000000LL);
 CallInfo ci_preg_match_all((void*)&i_preg_match_all, (void*)&ifa_preg_match_all, 5, 0, 0x0000000000000004LL);
+CallInfo ci_imap_scanmailbox((void*)&i_imap_scanmailbox, (void*)&ifa_imap_scanmailbox, 4, 0, 0x0000000000000000LL);
 CallInfo ci_proc_terminate((void*)&i_proc_terminate, (void*)&ifa_proc_terminate, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apc_bin_loadfile((void*)&i_apc_bin_loadfile, (void*)&ifa_apc_bin_loadfile, 4, 0, 0x0000000000000000LL);
 CallInfo ci_posix_getcwd((void*)&i_posix_getcwd, (void*)&ifa_posix_getcwd, 0, 0, 0x0000000000000000LL);
@@ -82101,6 +85445,7 @@ CallInfo ci_magicksetimageoption((void*)&i_magicksetimageoption, (void*)&ifa_mag
 CallInfo ci_xmlwriter_write_comment((void*)&i_xmlwriter_write_comment, (void*)&ifa_xmlwriter_write_comment, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetfontstyle((void*)&i_drawgetfontstyle, (void*)&ifa_drawgetfontstyle, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_set_attribute_ns((void*)&i_dom_element_set_attribute_ns, (void*)&ifa_dom_element_set_attribute_ns, 4, 0, 0x0000000000000000LL);
+CallInfo ci_imap_undelete((void*)&i_imap_undelete, (void*)&ifa_imap_undelete, 3, 0, 0x0000000000000000LL);
 CallInfo ci_dom_xpath_evaluate((void*)&i_dom_xpath_evaluate, (void*)&ifa_dom_xpath_evaluate, 3, 0, 0x0000000000000000LL);
 CallInfo ci_bzclose((void*)&i_bzclose, (void*)&ifa_bzclose, 1, 0, 0x0000000000000000LL);
 CallInfo ci_strtoupper((void*)&i_strtoupper, (void*)&ifa_strtoupper, 1, 0, 0x0000000000000000LL);
@@ -82116,36 +85461,38 @@ CallInfo ci_stream_set_write_buffer((void*)&i_stream_set_write_buffer, (void*)&i
 CallInfo ci_mb_list_encodings((void*)&i_mb_list_encodings, (void*)&ifa_mb_list_encodings, 0, 0, 0x0000000000000000LL);
 CallInfo ci_sleep((void*)&i_sleep, (void*)&ifa_sleep, 1, 0, 0x0000000000000000LL);
 CallInfo ci_cleardrawingwand((void*)&i_cleardrawingwand, (void*)&ifa_cleardrawingwand, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_getacl((void*)&i_imap_getacl, (void*)&ifa_imap_getacl, 2, 0, 0x0000000000000000LL);
 CallInfo ci_imagecolorset((void*)&i_imagecolorset, (void*)&ifa_imagecolorset, 5, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_x509_checkpurpose((void*)&i_openssl_x509_checkpurpose, (void*)&ifa_openssl_x509_checkpurpose, 4, 0, 0x0000000000000000LL);
-CallInfo ci_drawpathcurvetosmoothabsolute((void*)&i_drawpathcurvetosmoothabsolute, (void*)&ifa_drawpathcurvetosmoothabsolute, 5, 0, 0x0000000000000000LL);
-CallInfo ci_array_intersect_ukey((void*)&i_array_intersect_ukey, (void*)&ifa_array_intersect_ukey, 3, 1, 0x0000000000000000LL);
 CallInfo ci_timezone_name_from_abbr((void*)&i_timezone_name_from_abbr, (void*)&ifa_timezone_name_from_abbr, 3, 0, 0x0000000000000000LL);
+CallInfo ci_array_intersect_ukey((void*)&i_array_intersect_ukey, (void*)&ifa_array_intersect_ukey, 3, 1, 0x0000000000000000LL);
+CallInfo ci_drawpathcurvetosmoothabsolute((void*)&i_drawpathcurvetosmoothabsolute, (void*)&ifa_drawpathcurvetosmoothabsolute, 5, 0, 0x0000000000000000LL);
 CallInfo ci_imagefilledellipse((void*)&i_imagefilledellipse, (void*)&ifa_imagefilledellipse, 6, 0, 0x0000000000000000LL);
 CallInfo ci_pcntl_wstopsig((void*)&i_pcntl_wstopsig, (void*)&ifa_pcntl_wstopsig, 1, 0, 0x0000000000000000LL);
-CallInfo ci_get_defined_vars((void*)&i_get_defined_vars, (void*)&ifa_get_defined_vars, 0, 0, 0x0000000000000000LL);
 CallInfo ci_memory_get_usage((void*)&i_memory_get_usage, (void*)&ifa_memory_get_usage, 1, 0, 0x0000000000000000LL);
+CallInfo ci_get_defined_vars((void*)&i_get_defined_vars, (void*)&ifa_get_defined_vars, 0, 0, 0x0000000000000000LL);
 CallInfo ci_intval((void*)&i_intval, (void*)&ifa_intval, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pagelet_server_task_status((void*)&i_pagelet_server_task_status, (void*)&ifa_pagelet_server_task_status, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_get_elements_by_tag_name_ns((void*)&i_dom_document_get_elements_by_tag_name_ns, (void*)&ifa_dom_document_get_elements_by_tag_name_ns, 3, 0, 0x0000000000000000LL);
 CallInfo ci_iconv_set_encoding((void*)&i_iconv_set_encoding, (void*)&ifa_iconv_set_encoding, 2, 0, 0x0000000000000000LL);
-CallInfo ci_magickmattefloodfillimage((void*)&i_magickmattefloodfillimage, (void*)&ifa_magickmattefloodfillimage, 6, 0, 0x0000000000000000LL);
 CallInfo ci_mailparse_msg_get_part((void*)&i_mailparse_msg_get_part, (void*)&ifa_mailparse_msg_get_part, 2, 0, 0x0000000000000000LL);
+CallInfo ci_magickmattefloodfillimage((void*)&i_magickmattefloodfillimage, (void*)&ifa_magickmattefloodfillimage, 6, 0, 0x0000000000000000LL);
 CallInfo ci_mb_check_encoding((void*)&i_mb_check_encoding, (void*)&ifa_mb_check_encoding, 2, 0, 0x0000000000000000LL);
-CallInfo ci_ldap_get_dn((void*)&i_ldap_get_dn, (void*)&ifa_ldap_get_dn, 2, 0, 0x0000000000000000LL);
-CallInfo ci_newpixeliterator((void*)&i_newpixeliterator, (void*)&ifa_newpixeliterator, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimagefilename((void*)&i_magicksetimagefilename, (void*)&ifa_magicksetimagefilename, 2, 0, 0x0000000000000000LL);
-CallInfo ci_call_user_func((void*)&i_call_user_func, (void*)&ifa_call_user_func, 1, 2, 0x0000000000000000LL);
+CallInfo ci_newpixeliterator((void*)&i_newpixeliterator, (void*)&ifa_newpixeliterator, 1, 0, 0x0000000000000000LL);
+CallInfo ci_ldap_get_dn((void*)&i_ldap_get_dn, (void*)&ifa_ldap_get_dn, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_list_tables((void*)&i_mysql_list_tables, (void*)&ifa_mysql_list_tables, 2, 0, 0x0000000000000000LL);
+CallInfo ci_call_user_func((void*)&i_call_user_func, (void*)&ifa_call_user_func, 1, 2, 0x0000000000000000LL);
+CallInfo ci_imap_base64((void*)&i_imap_base64, (void*)&ifa_imap_base64, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetinterlacescheme((void*)&i_magickgetinterlacescheme, (void*)&ifa_magickgetinterlacescheme, 1, 0, 0x0000000000000000LL);
 CallInfo ci_ltrim((void*)&i_ltrim, (void*)&ifa_ltrim, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicktextureimage((void*)&i_magicktextureimage, (void*)&ifa_magicktextureimage, 2, 0, 0x0000000000000000LL);
 CallInfo ci_mb_ereg_match((void*)&i_mb_ereg_match, (void*)&ifa_mb_ereg_match, 3, 0, 0x0000000000000000LL);
-CallInfo ci_mt_srand((void*)&i_mt_srand, (void*)&ifa_mt_srand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagecolorallocate((void*)&i_imagecolorallocate, (void*)&ifa_imagecolorallocate, 4, 0, 0x0000000000000000LL);
+CallInfo ci_mt_srand((void*)&i_mt_srand, (void*)&ifa_mt_srand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_define_syslog_variables((void*)&i_define_syslog_variables, (void*)&ifa_define_syslog_variables, 0, 0, 0x0000000000000000LL);
-CallInfo ci_fb_get_code_coverage((void*)&i_fb_get_code_coverage, (void*)&ifa_fb_get_code_coverage, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_enc_get_modes_name((void*)&i_mcrypt_enc_get_modes_name, (void*)&ifa_mcrypt_enc_get_modes_name, 1, 0, 0x0000000000000000LL);
+CallInfo ci_fb_get_code_coverage((void*)&i_fb_get_code_coverage, (void*)&ifa_fb_get_code_coverage, 0, 0, 0x0000000000000000LL);
 CallInfo ci_array_flip((void*)&i_array_flip, (void*)&ifa_array_flip, 1, 0, 0x0000000000000000LL);
 CallInfo ci_count((void*)&i_count, (void*)&ifa_count, 2, 0, 0x0000000000000000LL);
 CallInfo ci_lcg_value((void*)&i_lcg_value, (void*)&ifa_lcg_value, 0, 0, 0x0000000000000000LL);
@@ -82156,20 +85503,23 @@ CallInfo ci_pixelgetquantumcolor((void*)&i_pixelgetquantumcolor, (void*)&ifa_pix
 CallInfo ci_openssl_private_encrypt((void*)&i_openssl_private_encrypt, (void*)&ifa_openssl_private_encrypt, 4, 0, 0x0000000000000002LL);
 CallInfo ci_xhprof_enable((void*)&i_xhprof_enable, (void*)&ifa_xhprof_enable, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo_gettype((void*)&i_hphp_splfileinfo_gettype, (void*)&ifa_hphp_splfileinfo_gettype, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_rfc822_parse_adrlist((void*)&i_imap_rfc822_parse_adrlist, (void*)&ifa_imap_rfc822_parse_adrlist, 2, 0, 0x0000000000000000LL);
 CallInfo ci_xhprof_run_trace((void*)&i_xhprof_run_trace, (void*)&ifa_xhprof_run_trace, 2, 0, 0x0000000000000000LL);
-CallInfo ci_xmlwriter_start_document((void*)&i_xmlwriter_start_document, (void*)&ifa_xmlwriter_start_document, 4, 0, 0x0000000000000000LL);
 CallInfo ci_libxml_clear_errors((void*)&i_libxml_clear_errors, (void*)&ifa_libxml_clear_errors, 0, 0, 0x0000000000000000LL);
+CallInfo ci_xmlwriter_start_document((void*)&i_xmlwriter_start_document, (void*)&ifa_xmlwriter_start_document, 4, 0, 0x0000000000000000LL);
 CallInfo ci_magicknormalizeimage((void*)&i_magicknormalizeimage, (void*)&ifa_magicknormalizeimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetformat((void*)&i_magickgetformat, (void*)&ifa_magickgetformat, 1, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_get_class_info((void*)&i_hphp_get_class_info, (void*)&ifa_hphp_get_class_info, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mailparse_msg_get_part_data((void*)&i_mailparse_msg_get_part_data, (void*)&ifa_mailparse_msg_get_part_data, 1, 0, 0x0000000000000000LL);
 CallInfo ci_dom_element_remove_attribute_ns((void*)&i_dom_element_remove_attribute_ns, (void*)&ifa_dom_element_remove_attribute_ns, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_append((void*)&i_imap_append, (void*)&ifa_imap_append, 4, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_csr_new((void*)&i_openssl_csr_new, (void*)&ifa_openssl_csr_new, 4, 0, 0x0000000000000002LL);
 CallInfo ci_xbox_task_start((void*)&i_xbox_task_start, (void*)&ifa_xbox_task_start, 1, 0, 0x0000000000000000LL);
 CallInfo ci_newpixelwands((void*)&i_newpixelwands, (void*)&ifa_newpixelwands, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mb_get_info((void*)&i_mb_get_info, (void*)&ifa_mb_get_info, 1, 0, 0x0000000000000000LL);
-CallInfo ci_posix_getrlimit((void*)&i_posix_getrlimit, (void*)&ifa_posix_getrlimit, 0, 0, 0x0000000000000000LL);
 CallInfo ci_getcwd((void*)&i_getcwd, (void*)&ifa_getcwd, 0, 0, 0x0000000000000000LL);
+CallInfo ci_posix_getrlimit((void*)&i_posix_getrlimit, (void*)&ifa_posix_getrlimit, 0, 0, 0x0000000000000000LL);
+CallInfo ci_imap_deletemailbox((void*)&i_imap_deletemailbox, (void*)&ifa_imap_deletemailbox, 2, 0, 0x0000000000000000LL);
 CallInfo ci_fputcsv((void*)&i_fputcsv, (void*)&ifa_fputcsv, 4, 0, 0x0000000000000000LL);
 CallInfo ci_stream_bucket_prepend((void*)&i_stream_bucket_prepend, (void*)&ifa_stream_bucket_prepend, 2, 0, 0x0000000000000000LL);
 CallInfo ci_apache_get_scoreboard((void*)&i_apache_get_scoreboard, (void*)&ifa_apache_get_scoreboard, 0, 0, 0x0000000000000000LL);
@@ -82198,10 +85548,12 @@ CallInfo ci_magickgetcharwidth((void*)&i_magickgetcharwidth, (void*)&ifa_magickg
 CallInfo ci_magickshearimage((void*)&i_magickshearimage, (void*)&ifa_magickshearimage, 4, 0, 0x0000000000000000LL);
 CallInfo ci_stream_socket_enable_crypto((void*)&i_stream_socket_enable_crypto, (void*)&ifa_stream_socket_enable_crypto, 4, 0, 0x0000000000000000LL);
 CallInfo ci_stream_socket_server((void*)&i_stream_socket_server, (void*)&ifa_stream_socket_server, 5, 0, 0x0000000000000006LL);
+CallInfo ci_imap_listmailbox((void*)&i_imap_listmailbox, (void*)&ifa_imap_listmailbox, 3, 0, 0x0000000000000000LL);
 CallInfo ci_apd_set_pprof_trace((void*)&i_apd_set_pprof_trace, (void*)&ifa_apd_set_pprof_trace, 2, 0, 0x0000000000000000LL);
-CallInfo ci_ini_set((void*)&i_ini_set, (void*)&ifa_ini_set, 2, 0, 0x0000000000000000LL);
 CallInfo ci_sort((void*)&i_sort, (void*)&ifa_sort, 3, 0, 0x0000000000000001LL);
+CallInfo ci_ini_set((void*)&i_ini_set, (void*)&ifa_ini_set, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetfont((void*)&i_drawgetfont, (void*)&ifa_drawgetfont, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_sort((void*)&i_imap_sort, (void*)&ifa_imap_sort, 6, 0, 0x0000000000000000LL);
 CallInfo ci_readdir((void*)&i_readdir, (void*)&ifa_readdir, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_close((void*)&i_mysql_close, (void*)&ifa_mysql_close, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magicksetimagerenderingintent((void*)&i_magicksetimagerenderingintent, (void*)&ifa_magicksetimagerenderingintent, 2, 0, 0x0000000000000000LL);
@@ -82223,8 +85575,8 @@ CallInfo ci_mb_eregi_replace((void*)&i_mb_eregi_replace, (void*)&ifa_mb_eregi_re
 CallInfo ci_hphp_splfileinfo_getatime((void*)&i_hphp_splfileinfo_getatime, (void*)&ifa_hphp_splfileinfo_getatime, 1, 0, 0x0000000000000000LL);
 CallInfo ci_array_unshift((void*)&i_array_unshift, (void*)&ifa_array_unshift, 2, 1, 0x0000000000000001LL);
 CallInfo ci_stat((void*)&i_stat, (void*)&ifa_stat, 1, 0, 0x0000000000000000LL);
-CallInfo ci_posix_getpid((void*)&i_posix_getpid, (void*)&ifa_posix_getpid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_directoryiterator_key((void*)&i_hphp_directoryiterator_key, (void*)&ifa_hphp_directoryiterator_key, 1, 0, 0x0000000000000000LL);
+CallInfo ci_posix_getpid((void*)&i_posix_getpid, (void*)&ifa_posix_getpid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_get_current_user((void*)&i_get_current_user, (void*)&ifa_get_current_user, 0, 0, 0x0000000000000000LL);
 CallInfo ci_filesize((void*)&i_filesize, (void*)&ifa_filesize, 1, 0, 0x0000000000000000LL);
 CallInfo ci_round((void*)&i_round, (void*)&ifa_round, 2, 0, 0x0000000000000000LL);
@@ -82240,6 +85592,7 @@ CallInfo ci_mb_detect_order((void*)&i_mb_detect_order, (void*)&ifa_mb_detect_ord
 CallInfo ci_magickmapimage((void*)&i_magickmapimage, (void*)&ifa_magickmapimage, 3, 0, 0x0000000000000000LL);
 CallInfo ci_get_magic_quotes_runtime((void*)&i_get_magic_quotes_runtime, (void*)&ifa_get_magic_quotes_runtime, 0, 0, 0x0000000000000000LL);
 CallInfo ci_pixelsetopacityquantum((void*)&i_pixelsetopacityquantum, (void*)&ifa_pixelsetopacityquantum, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_fetch_overview((void*)&i_imap_fetch_overview, (void*)&ifa_imap_fetch_overview, 3, 0, 0x0000000000000000LL);
 CallInfo ci_ctype_space((void*)&i_ctype_space, (void*)&ifa_ctype_space, 1, 0, 0x0000000000000000LL);
 CallInfo ci_destroymagickwand((void*)&i_destroymagickwand, (void*)&ifa_destroymagickwand, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_generic_init((void*)&i_mcrypt_generic_init, (void*)&ifa_mcrypt_generic_init, 3, 0, 0x0000000000000000LL);
@@ -82286,11 +85639,14 @@ CallInfo ci_posix_getsid((void*)&i_posix_getsid, (void*)&ifa_posix_getsid, 1, 0,
 CallInfo ci_imagegd2((void*)&i_imagegd2, (void*)&ifa_imagegd2, 4, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreate((void*)&i_imagecreate, (void*)&ifa_imagecreate, 2, 0, 0x0000000000000000LL);
 CallInfo ci_socket_create_pair((void*)&i_socket_create_pair, (void*)&ifa_socket_create_pair, 4, 0, 0x0000000000000008LL);
+CallInfo ci_imap_num_recent((void*)&i_imap_num_recent, (void*)&ifa_imap_num_recent, 1, 0, 0x0000000000000000LL);
 CallInfo ci_openssl_x509_check_private_key((void*)&i_openssl_x509_check_private_key, (void*)&ifa_openssl_x509_check_private_key, 2, 0, 0x0000000000000000LL);
 CallInfo ci_collator_get_attribute((void*)&i_collator_get_attribute, (void*)&ifa_collator_get_attribute, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_clearflag_full((void*)&i_imap_clearflag_full, (void*)&ifa_imap_clearflag_full, 4, 0, 0x0000000000000000LL);
 CallInfo ci_shm_put_var((void*)&i_shm_put_var, (void*)&ifa_shm_put_var, 3, 0, 0x0000000000000000LL);
 CallInfo ci_debug_print_backtrace((void*)&i_debug_print_backtrace, (void*)&ifa_debug_print_backtrace, 0, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileobject_seek((void*)&i_hphp_splfileobject_seek, (void*)&ifa_hphp_splfileobject_seek, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_reopen((void*)&i_imap_reopen, (void*)&ifa_imap_reopen, 4, 0, 0x0000000000000000LL);
 CallInfo ci_stream_set_blocking((void*)&i_stream_set_blocking, (void*)&ifa_stream_set_blocking, 2, 0, 0x0000000000000000LL);
 CallInfo ci_ezmlm_hash((void*)&i_ezmlm_hash, (void*)&ifa_ezmlm_hash, 1, 0, 0x0000000000000000LL);
 CallInfo ci_xml_parser_get_option((void*)&i_xml_parser_get_option, (void*)&ifa_xml_parser_get_option, 2, 0, 0x0000000000000000LL);
@@ -82302,6 +85658,7 @@ CallInfo ci_trim((void*)&i_trim, (void*)&ifa_trim, 2, 0, 0x0000000000000000LL);
 CallInfo ci_drawpathclose((void*)&i_drawpathclose, (void*)&ifa_drawpathclose, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickprofileimage((void*)&i_magickprofileimage, (void*)&ifa_magickprofileimage, 3, 0, 0x0000000000000000LL);
 CallInfo ci_connection_timeout((void*)&i_connection_timeout, (void*)&ifa_connection_timeout, 0, 0, 0x0000000000000000LL);
+CallInfo ci_imap_mailboxmsginfo((void*)&i_imap_mailboxmsginfo, (void*)&ifa_imap_mailboxmsginfo, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mysql_data_seek((void*)&i_mysql_data_seek, (void*)&ifa_mysql_data_seek, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetindex((void*)&i_pixelgetindex, (void*)&ifa_pixelgetindex, 1, 0, 0x0000000000000000LL);
 CallInfo ci_class_implements((void*)&i_class_implements, (void*)&ifa_class_implements, 2, 0, 0x0000000000000000LL);
@@ -82315,10 +85672,11 @@ CallInfo ci_mysql_stat((void*)&i_mysql_stat, (void*)&ifa_mysql_stat, 1, 0, 0x000
 CallInfo ci_get_object_vars((void*)&i_get_object_vars, (void*)&ifa_get_object_vars, 1, 0, 0x0000000000000000LL);
 CallInfo ci_msg_receive((void*)&i_msg_receive, (void*)&ifa_msg_receive, 8, 0, 0x0000000000000094LL);
 CallInfo ci_is_integer((void*)&i_is_integer, (void*)&ifa_is_integer, 1, 0, 0x0000000000000000LL);
-CallInfo ci_posix_getuid((void*)&i_posix_getuid, (void*)&ifa_posix_getuid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreatefromgif((void*)&i_imagecreatefromgif, (void*)&ifa_imagecreatefromgif, 1, 0, 0x0000000000000000LL);
+CallInfo ci_posix_getuid((void*)&i_posix_getuid, (void*)&ifa_posix_getuid, 0, 0, 0x0000000000000000LL);
 CallInfo ci_mb_send_mail((void*)&i_mb_send_mail, (void*)&ifa_mb_send_mail, 5, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_splfileinfo___construct((void*)&i_hphp_splfileinfo___construct, (void*)&ifa_hphp_splfileinfo___construct, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_msgno((void*)&i_imap_msgno, (void*)&ifa_imap_msgno, 2, 0, 0x0000000000000000LL);
 CallInfo ci_register_postsend_function((void*)&i_register_postsend_function, (void*)&ifa_register_postsend_function, 1, 1, 0x0000000000000000LL);
 CallInfo ci_getrusage((void*)&i_getrusage, (void*)&ifa_getrusage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_long2ip((void*)&i_long2ip, (void*)&ifa_long2ip, 1, 0, 0x0000000000000000LL);
@@ -82354,8 +85712,8 @@ CallInfo ci_get_defined_constants((void*)&i_get_defined_constants, (void*)&ifa_g
 CallInfo ci_mcrypt_enc_is_block_mode((void*)&i_mcrypt_enc_is_block_mode, (void*)&ifa_mcrypt_enc_is_block_mode, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mailparse_stream_encode((void*)&i_mailparse_stream_encode, (void*)&ifa_mailparse_stream_encode, 3, 0, 0x0000000000000000LL);
 CallInfo ci_drawsetstrokedashoffset((void*)&i_drawsetstrokedashoffset, (void*)&ifa_drawsetstrokedashoffset, 2, 0, 0x0000000000000000LL);
-CallInfo ci_php_ini_scanned_files((void*)&i_php_ini_scanned_files, (void*)&ifa_php_ini_scanned_files, 0, 0, 0x0000000000000000LL);
 CallInfo ci_disk_free_space((void*)&i_disk_free_space, (void*)&ifa_disk_free_space, 1, 0, 0x0000000000000000LL);
+CallInfo ci_php_ini_scanned_files((void*)&i_php_ini_scanned_files, (void*)&ifa_php_ini_scanned_files, 0, 0, 0x0000000000000000LL);
 CallInfo ci_pixelsetyellowquantum((void*)&i_pixelsetyellowquantum, (void*)&ifa_pixelsetyellowquantum, 2, 0, 0x0000000000000000LL);
 CallInfo ci_bzread((void*)&i_bzread, (void*)&ifa_bzread, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dom_document_create_element_ns((void*)&i_dom_document_create_element_ns, (void*)&ifa_dom_document_create_element_ns, 4, 0, 0x0000000000000000LL);
@@ -82382,14 +85740,15 @@ CallInfo ci_openssl_csr_export((void*)&i_openssl_csr_export, (void*)&ifa_openssl
 CallInfo ci_socket_connect((void*)&i_socket_connect, (void*)&ifa_socket_connect, 3, 0, 0x0000000000000000LL);
 CallInfo ci_stripslashes((void*)&i_stripslashes, (void*)&ifa_stripslashes, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickhaspreviousimage((void*)&i_magickhaspreviousimage, (void*)&ifa_magickhaspreviousimage, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_utf8((void*)&i_imap_utf8, (void*)&ifa_imap_utf8, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawgetstrokecolor((void*)&i_drawgetstrokecolor, (void*)&ifa_drawgetstrokecolor, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreatefromwbmp((void*)&i_imagecreatefromwbmp, (void*)&ifa_imagecreatefromwbmp, 1, 0, 0x0000000000000000LL);
 CallInfo ci_str_repeat((void*)&i_str_repeat, (void*)&ifa_str_repeat, 2, 0, 0x0000000000000000LL);
 CallInfo ci_stream_resolve_include_path((void*)&i_stream_resolve_include_path, (void*)&ifa_stream_resolve_include_path, 2, 0, 0x0000000000000000LL);
 CallInfo ci_ldap_read((void*)&i_ldap_read, (void*)&ifa_ldap_read, 8, 0, 0x0000000000000000LL);
 CallInfo ci_apc_dec((void*)&i_apc_dec, (void*)&ifa_apc_dec, 4, 0, 0x0000000000000004LL);
-CallInfo ci_posix_get_last_error((void*)&i_posix_get_last_error, (void*)&ifa_posix_get_last_error, 0, 0, 0x0000000000000000LL);
 CallInfo ci_iptcparse((void*)&i_iptcparse, (void*)&ifa_iptcparse, 1, 0, 0x0000000000000000LL);
+CallInfo ci_posix_get_last_error((void*)&i_posix_get_last_error, (void*)&ifa_posix_get_last_error, 0, 0, 0x0000000000000000LL);
 CallInfo ci_iterator_count((void*)&i_iterator_count, (void*)&ifa_iterator_count, 1, 0, 0x0000000000000000LL);
 CallInfo ci_curl_setopt_array((void*)&i_curl_setopt_array, (void*)&ifa_curl_setopt_array, 2, 0, 0x0000000000000000LL);
 CallInfo ci_socket_recvfrom((void*)&i_socket_recvfrom, (void*)&ifa_socket_recvfrom, 6, 0, 0x0000000000000032LL);
@@ -82458,8 +85817,8 @@ CallInfo ci_destroypixelwandarray((void*)&i_destroypixelwandarray, (void*)&ifa_d
 CallInfo ci_spliti((void*)&i_spliti, (void*)&ifa_spliti, 3, 0, 0x0000000000000000LL);
 CallInfo ci_posix_setgid((void*)&i_posix_setgid, (void*)&ifa_posix_setgid, 1, 0, 0x0000000000000000LL);
 CallInfo ci_is_double((void*)&i_is_double, (void*)&ifa_is_double, 1, 0, 0x0000000000000000LL);
-CallInfo ci_output_reset_rewrite_vars((void*)&i_output_reset_rewrite_vars, (void*)&ifa_output_reset_rewrite_vars, 0, 0, 0x0000000000000000LL);
 CallInfo ci_get_declared_interfaces((void*)&i_get_declared_interfaces, (void*)&ifa_get_declared_interfaces, 0, 0, 0x0000000000000000LL);
+CallInfo ci_output_reset_rewrite_vars((void*)&i_output_reset_rewrite_vars, (void*)&ifa_output_reset_rewrite_vars, 0, 0, 0x0000000000000000LL);
 CallInfo ci_passthru((void*)&i_passthru, (void*)&ifa_passthru, 2, 0, 0x0000000000000002LL);
 CallInfo ci_magickmontageimage((void*)&i_magickmontageimage, (void*)&ifa_magickmontageimage, 6, 0, 0x0000000000000000LL);
 CallInfo ci_session_commit((void*)&i_session_commit, (void*)&ifa_session_commit, 0, 0, 0x0000000000000000LL);
@@ -82491,6 +85850,7 @@ CallInfo ci_move_uploaded_file((void*)&i_move_uploaded_file, (void*)&ifa_move_up
 CallInfo ci_hphp_splfileobject_flock((void*)&i_hphp_splfileobject_flock, (void*)&ifa_hphp_splfileobject_flock, 2, 0, 0x0000000000000002LL);
 CallInfo ci_imagecopyresampled((void*)&i_imagecopyresampled, (void*)&ifa_imagecopyresampled, 10, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreatefrompng((void*)&i_imagecreatefrompng, (void*)&ifa_imagecreatefrompng, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_setacl((void*)&i_imap_setacl, (void*)&ifa_imap_setacl, 4, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimage((void*)&i_magickgetimage, (void*)&ifa_magickgetimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagesettile((void*)&i_imagesettile, (void*)&ifa_imagesettile, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_recursiveiteratoriterator_valid((void*)&i_hphp_recursiveiteratoriterator_valid, (void*)&ifa_hphp_recursiveiteratoriterator_valid, 1, 0, 0x0000000000000000LL);
@@ -82518,6 +85878,7 @@ CallInfo ci_drawsetstrokelinecap((void*)&i_drawsetstrokelinecap, (void*)&ifa_dra
 CallInfo ci_xmlwriter_write_attribute_ns((void*)&i_xmlwriter_write_attribute_ns, (void*)&ifa_xmlwriter_write_attribute_ns, 5, 0, 0x0000000000000000LL);
 CallInfo ci_array_keys((void*)&i_array_keys, (void*)&ifa_array_keys, 3, 0, 0x0000000000000000LL);
 CallInfo ci_call_user_method_array((void*)&i_call_user_method_array, (void*)&ifa_call_user_method_array, 3, 0, 0x0000000000000002LL);
+CallInfo ci_imap_bodystruct((void*)&i_imap_bodystruct, (void*)&ifa_imap_bodystruct, 3, 0, 0x0000000000000000LL);
 CallInfo ci_magickmagnifyimage((void*)&i_magickmagnifyimage, (void*)&ifa_magickmagnifyimage, 1, 0, 0x0000000000000000LL);
 CallInfo ci_is_bool((void*)&i_is_bool, (void*)&ifa_is_bool, 1, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetimagegreenprimary((void*)&i_magickgetimagegreenprimary, (void*)&ifa_magickgetimagegreenprimary, 1, 0, 0x0000000000000000LL);
@@ -82541,6 +85902,7 @@ CallInfo ci_apc_bin_load((void*)&i_apc_bin_load, (void*)&ifa_apc_bin_load, 3, 0,
 CallInfo ci_current((void*)&i_current, (void*)&ifa_current, 1, 0, 0x0000000000000001LL);
 CallInfo ci_stream_register_wrapper((void*)&i_stream_register_wrapper, (void*)&ifa_stream_register_wrapper, 2, 0, 0x0000000000000000LL);
 CallInfo ci_hphp_stats((void*)&i_hphp_stats, (void*)&ifa_hphp_stats, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_savebody((void*)&i_imap_savebody, (void*)&ifa_imap_savebody, 5, 0, 0x0000000000000000LL);
 CallInfo ci_opendir((void*)&i_opendir, (void*)&ifa_opendir, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magickgetexceptionstring((void*)&i_magickgetexceptionstring, (void*)&ifa_magickgetexceptionstring, 1, 0, 0x0000000000000000LL);
 CallInfo ci_mcrypt_module_is_block_algorithm_mode((void*)&i_mcrypt_module_is_block_algorithm_mode, (void*)&ifa_mcrypt_module_is_block_algorithm_mode, 2, 0, 0x0000000000000000LL);
@@ -82548,6 +85910,7 @@ CallInfo ci_dns_get_mx((void*)&i_dns_get_mx, (void*)&ifa_dns_get_mx, 3, 0, 0x000
 CallInfo ci_posix_setpgid((void*)&i_posix_setpgid, (void*)&ifa_posix_setpgid, 2, 0, 0x0000000000000000LL);
 CallInfo ci_headers_list((void*)&i_headers_list, (void*)&ifa_headers_list, 0, 0, 0x0000000000000000LL);
 CallInfo ci_escapeshellarg((void*)&i_escapeshellarg, (void*)&ifa_escapeshellarg, 1, 0, 0x0000000000000000LL);
+CallInfo ci_imap_fetchstructure((void*)&i_imap_fetchstructure, (void*)&ifa_imap_fetchstructure, 3, 0, 0x0000000000000000LL);
 CallInfo ci_is_scalar((void*)&i_is_scalar, (void*)&ifa_is_scalar, 1, 0, 0x0000000000000000LL);
 CallInfo ci_acos((void*)&i_acos, (void*)&ifa_acos, 1, 0, 0x0000000000000000LL);
 CallInfo ci_drawgettextencoding((void*)&i_drawgettextencoding, (void*)&ifa_drawgettextencoding, 1, 0, 0x0000000000000000LL);
@@ -82581,6 +85944,7 @@ CallInfo ci_imagecreatefromxbm((void*)&i_imagecreatefromxbm, (void*)&ifa_imagecr
 CallInfo ci_mysql_db_query((void*)&i_mysql_db_query, (void*)&ifa_mysql_db_query, 3, 0, 0x0000000000000000LL);
 CallInfo ci_imagecolorclosestalpha((void*)&i_imagecolorclosestalpha, (void*)&ifa_imagecolorclosestalpha, 5, 0, 0x0000000000000000LL);
 CallInfo ci_gzuncompress((void*)&i_gzuncompress, (void*)&ifa_gzuncompress, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_rfc822_write_address((void*)&i_imap_rfc822_write_address, (void*)&ifa_imap_rfc822_write_address, 3, 0, 0x0000000000000000LL);
 CallInfo ci_is_executable((void*)&i_is_executable, (void*)&ifa_is_executable, 1, 0, 0x0000000000000000LL);
 CallInfo ci_socket_create_listen((void*)&i_socket_create_listen, (void*)&ifa_socket_create_listen, 2, 0, 0x0000000000000000LL);
 CallInfo ci_pixelgetcolorcount((void*)&i_pixelgetcolorcount, (void*)&ifa_pixelgetcolorcount, 1, 0, 0x0000000000000000LL);
@@ -82618,8 +85982,10 @@ CallInfo ci_is_numeric((void*)&i_is_numeric, (void*)&ifa_is_numeric, 1, 0, 0x000
 CallInfo ci_gzdeflate((void*)&i_gzdeflate, (void*)&ifa_gzdeflate, 2, 0, 0x0000000000000000LL);
 CallInfo ci_dns_check_record((void*)&i_dns_check_record, (void*)&ifa_dns_check_record, 2, 0, 0x0000000000000000LL);
 CallInfo ci_magicknegateimage((void*)&i_magicknegateimage, (void*)&ifa_magicknegateimage, 3, 0, 0x0000000000000000LL);
+CallInfo ci_imap_expunge((void*)&i_imap_expunge, (void*)&ifa_imap_expunge, 1, 0, 0x0000000000000000LL);
 CallInfo ci_socket_last_error((void*)&i_socket_last_error, (void*)&ifa_socket_last_error, 1, 0, 0x0000000000000000LL);
 CallInfo ci_create_function((void*)&i_create_function, (void*)&ifa_create_function, 2, 0, 0x0000000000000000LL);
+CallInfo ci_imap_get_quota((void*)&i_imap_get_quota, (void*)&ifa_imap_get_quota, 2, 0, 0x0000000000000000LL);
 CallInfo ci_str_split((void*)&i_str_split, (void*)&ifa_str_split, 2, 0, 0x0000000000000000LL);
 CallInfo ci_date_parse((void*)&i_date_parse, (void*)&ifa_date_parse, 1, 0, 0x0000000000000000LL);
 CallInfo ci_imagecreatefromxpm((void*)&i_imagecreatefromxpm, (void*)&ifa_imagecreatefromxpm, 1, 0, 0x0000000000000000LL);
@@ -82629,7 +85995,7 @@ CallInfo ci_fb_call_user_func_array_safe((void*)&i_fb_call_user_func_array_safe,
 bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int64 hash) {
   extra = NULL;
   if (hash < 0) hash = hash_string(s);
-  switch (hash & 4095) {
+  switch (hash & 8191) {
     case 1:
       HASH_GUARD(0x4F7230DC25F0E001LL, magicknormalizeimage) {
         ci = &ci_magicknormalizeimage;
@@ -82648,61 +86014,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 5:
-      HASH_GUARD(0x20D579E7E4131005LL, imagecolorclosest) {
-        ci = &ci_imagecolorclosest;
-        return true;
-      }
-      HASH_GUARD(0x18A0F1EE8E249005LL, msg_send) {
-        ci = &ci_msg_send;
-        return true;
-      }
-      break;
-    case 10:
-      HASH_GUARD(0x555D7A3FB939300ALL, apache_setenv) {
-        ci = &ci_apache_setenv;
-        return true;
-      }
-      break;
     case 11:
       HASH_GUARD(0x4FDCCE1C7754600BLL, ob_iconv_handler) {
         ci = &ci_ob_iconv_handler;
         return true;
       }
       break;
-    case 13:
-      HASH_GUARD(0x40FA17130FA7100DLL, openssl_seal) {
-        ci = &ci_openssl_seal;
-        return true;
-      }
-      break;
-    case 22:
-      HASH_GUARD(0x5623A698A728F016LL, getlastmod) {
-        ci = &ci_getlastmod;
-        return true;
-      }
-      break;
     case 24:
       HASH_GUARD(0x4C915E3480E94018LL, mb_substr_count) {
         ci = &ci_mb_substr_count;
-        return true;
-      }
-      break;
-    case 26:
-      HASH_GUARD(0x03834225EBBC101ALL, drawsettextundercolor) {
-        ci = &ci_drawsettextundercolor;
-        return true;
-      }
-      break;
-    case 34:
-      HASH_GUARD(0x145D42B2AB55D022LL, drawmatte) {
-        ci = &ci_drawmatte;
-        return true;
-      }
-      break;
-    case 35:
-      HASH_GUARD(0x35C74650867B7023LL, imagesetpixel) {
-        ci = &ci_imagesetpixel;
         return true;
       }
       break;
@@ -82724,12 +86044,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 51:
-      HASH_GUARD(0x48F35DFD653D7033LL, pclose) {
-        ci = &ci_pclose;
-        return true;
-      }
-      break;
     case 54:
       HASH_GUARD(0x32F23F206C394036LL, curl_setopt_array) {
         ci = &ci_curl_setopt_array;
@@ -82742,25 +86056,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 59:
-      HASH_GUARD(0x40329F2A6B84D03BLL, dom_node_lookup_prefix) {
-        ci = &ci_dom_node_lookup_prefix;
-        return true;
-      }
-      break;
     case 62:
-      HASH_GUARD(0x32E6E5D3CCE3703ELL, magickgetimagewidth) {
-        ci = &ci_magickgetimagewidth;
-        return true;
-      }
-      HASH_GUARD(0x43461C4D9130103ELL, exit) {
-        ci = &ci_exit;
-        return true;
-      }
-      HASH_GUARD(0x67C1ED9B816E503ELL, md5_file) {
-        ci = &ci_md5_file;
-        return true;
-      }
       HASH_GUARD(0x497E31C70409603ELL, timezone_name_from_abbr) {
         ci = &ci_timezone_name_from_abbr;
         return true;
@@ -82778,9 +86074,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 67:
-      HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
-        ci = &ci_ftruncate;
+    case 66:
+      HASH_GUARD(0x0547079C94282042LL, imap_utf7_decode) {
+        ci = &ci_imap_utf7_decode;
         return true;
       }
       break;
@@ -82791,10 +86087,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 73:
-      HASH_GUARD(0x047A8BF04DB51049LL, range) {
-        ci = &ci_range;
-        return true;
-      }
       HASH_GUARD(0x4282E0231F600049LL, fseek) {
         ci = &ci_fseek;
         return true;
@@ -82820,37 +86112,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 83:
-      HASH_GUARD(0x15A9EB33DA6E9053LL, getimagesize) {
-        ci = &ci_getimagesize;
-        return true;
-      }
-      HASH_GUARD(0x07EB5C3A3BEA3053LL, acosh) {
-        ci = &ci_acosh;
-        return true;
-      }
-      break;
     case 87:
       HASH_GUARD(0x12B22A2E6B344057LL, ldap_sort) {
         ci = &ci_ldap_sort;
         return true;
       }
       break;
-    case 90:
-      HASH_GUARD(0x271AB768D202F05ALL, mcrypt_module_is_block_algorithm) {
-        ci = &ci_mcrypt_module_is_block_algorithm;
-        return true;
-      }
-      break;
     case 92:
       HASH_GUARD(0x2B7532A070BF605CLL, openssl_get_privatekey) {
         ci = &ci_openssl_get_privatekey;
-        return true;
-      }
-      break;
-    case 95:
-      HASH_GUARD(0x4B70746F965E705FLL, preg_last_error) {
-        ci = &ci_preg_last_error;
         return true;
       }
       break;
@@ -82873,24 +86143,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 103:
-      HASH_GUARD(0x0CE1918B30DF5067LL, sys_getloadavg) {
-        ci = &ci_sys_getloadavg;
-        return true;
-      }
       HASH_GUARD(0x4512BD5EA7076067LL, openssl_csr_export_to_file) {
         ci = &ci_openssl_csr_export_to_file;
-        return true;
-      }
-      break;
-    case 111:
-      HASH_GUARD(0x4C6FD8808A62506FLL, session_set_save_handler) {
-        ci = &ci_session_set_save_handler;
-        return true;
-      }
-      break;
-    case 112:
-      HASH_GUARD(0x3C466098FF7B5070LL, mb_check_encoding) {
-        ci = &ci_mb_check_encoding;
         return true;
       }
       break;
@@ -82901,18 +86155,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 120:
-      HASH_GUARD(0x6B268C26E21C1078LL, arsort) {
-        ci = &ci_arsort;
-        return true;
-      }
       HASH_GUARD(0x01AE1DE8FA116078LL, call_user_func_array_async) {
         ci = &ci_call_user_func_array_async;
-        return true;
-      }
-      break;
-    case 121:
-      HASH_GUARD(0x08AA4EA901C9B079LL, session_encode) {
-        ci = &ci_session_encode;
         return true;
       }
       break;
@@ -82925,18 +86169,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 131:
       HASH_GUARD(0x1A90213EE1A56083LL, array_pop) {
         ci = &ci_array_pop;
-        return true;
-      }
-      break;
-    case 132:
-      HASH_GUARD(0x53FD8C9AC3F4D084LL, dangling_server_proxy_new_request) {
-        ci = &ci_dangling_server_proxy_new_request;
-        return true;
-      }
-      break;
-    case 135:
-      HASH_GUARD(0x255D919D501C5087LL, dom_characterdata_delete_data) {
-        ci = &ci_dom_characterdata_delete_data;
         return true;
       }
       break;
@@ -82962,19 +86194,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 142:
-      HASH_GUARD(0x3E4AE974AFA9708ELL, pixelsetquantumcolor) {
-        ci = &ci_pixelsetquantumcolor;
-        return true;
-      }
-      break;
     case 145:
       HASH_GUARD(0x3E5CF6378A49C091LL, ldap_get_attributes) {
         ci = &ci_ldap_get_attributes;
-        return true;
-      }
-      HASH_GUARD(0x673B36244DC87091LL, closelog) {
-        ci = &ci_closelog;
         return true;
       }
       HASH_GUARD(0x1C32BB63986C8091LL, socket_strerror) {
@@ -82985,28 +86207,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 147:
       HASH_GUARD(0x3B5E32078E37A093LL, imagedestroy) {
         ci = &ci_imagedestroy;
-        return true;
-      }
-      break;
-    case 158:
-      HASH_GUARD(0x4AF87BA91163D09ELL, mysql_db_name) {
-        ci = &ci_mysql_db_name;
-        return true;
-      }
-      HASH_GUARD(0x74F0D6D8F1F2709ELL, drawsetstrokedashoffset) {
-        ci = &ci_drawsetstrokedashoffset;
-        return true;
-      }
-      break;
-    case 159:
-      HASH_GUARD(0x2B130322DEC4B09FLL, pixelgetopacityquantum) {
-        ci = &ci_pixelgetopacityquantum;
-        return true;
-      }
-      break;
-    case 161:
-      HASH_GUARD(0x0DF945F12533F0A1LL, abs) {
-        ci = &ci_abs;
         return true;
       }
       break;
@@ -83022,12 +86222,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 167:
-      HASH_GUARD(0x74C787060F7290A7LL, icu_transliterate) {
-        ci = &ci_icu_transliterate;
-        return true;
-      }
-      break;
     case 168:
       HASH_GUARD(0x6E8C61326DCE40A8LL, var_export) {
         ci = &ci_var_export;
@@ -83035,18 +86229,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 171:
-      HASH_GUARD(0x439DF153FC32D0ABLL, printf) {
-        ci = &ci_printf;
-        return true;
-      }
       HASH_GUARD(0x5B1D9F56698A40ABLL, html_entity_decode) {
         ci = &ci_html_entity_decode;
-        return true;
-      }
-      break;
-    case 172:
-      HASH_GUARD(0x6E27DC1E74C5B0ACLL, drawpathstart) {
-        ci = &ci_drawpathstart;
         return true;
       }
       break;
@@ -83056,43 +86240,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 174:
-      HASH_GUARD(0x47AB4A08446BD0AELL, bcmod) {
-        ci = &ci_bcmod;
-        return true;
-      }
-      HASH_GUARD(0x4BBD5D8A6E0110AELL, error_log) {
-        ci = &ci_error_log;
-        return true;
-      }
-      break;
-    case 175:
-      HASH_GUARD(0x3954FFED1E0650AFLL, stream_register_wrapper) {
-        ci = &ci_stream_register_wrapper;
-        return true;
-      }
-      break;
-    case 176:
-      HASH_GUARD(0x5B9F8B3E1D8330B0LL, stream_socket_sendto) {
-        ci = &ci_stream_socket_sendto;
-        return true;
-      }
-      break;
     case 177:
       HASH_GUARD(0x191B5F1B190BC0B1LL, dom_xpath_register_ns) {
         ci = &ci_dom_xpath_register_ns;
-        return true;
-      }
-      break;
-    case 178:
-      HASH_GUARD(0x48BBFB59FB7F90B2LL, iconv_strlen) {
-        ci = &ci_iconv_strlen;
-        return true;
-      }
-      break;
-    case 184:
-      HASH_GUARD(0x05A4C165810A30B8LL, gzread) {
-        ci = &ci_gzread;
         return true;
       }
       break;
@@ -83108,25 +86258,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 188:
-      HASH_GUARD(0x3900350CD9D990BCLL, imagecreatefromjpeg) {
-        ci = &ci_imagecreatefromjpeg;
-        return true;
-      }
-      break;
-    case 192:
-      HASH_GUARD(0x6EDC1E7A8D5710C0LL, memcache_add_server) {
-        ci = &ci_memcache_add_server;
-        return true;
-      }
-      break;
     case 197:
       HASH_GUARD(0x7424946F7ED520C5LL, magickgetimagefilename) {
         ci = &ci_magickgetimagefilename;
-        return true;
-      }
-      HASH_GUARD(0x6B477F3B9CDB10C5LL, base64_decode) {
-        ci = &ci_base64_decode;
         return true;
       }
       break;
@@ -83172,65 +86306,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 213:
-      HASH_GUARD(0x3BF44C6DECD790D5LL, xmlwriter_start_dtd_entity) {
-        ci = &ci_xmlwriter_start_dtd_entity;
-        return true;
-      }
-      break;
-    case 216:
-      HASH_GUARD(0x79F2E516A3B070D8LL, libxml_disable_entity_loader) {
-        ci = &ci_libxml_disable_entity_loader;
-        return true;
-      }
-      break;
-    case 217:
-      HASH_GUARD(0x08F6B727D60670D9LL, magicksetimagedepth) {
-        ci = &ci_magicksetimagedepth;
-        return true;
-      }
-      break;
-    case 218:
-      HASH_GUARD(0x6F242340B2E930DALL, hphp_splfileinfo_setfileclass) {
-        ci = &ci_hphp_splfileinfo_setfileclass;
-        return true;
-      }
-      break;
-    case 219:
-      HASH_GUARD(0x3801923AD84670DBLL, apc_inc) {
-        ci = &ci_apc_inc;
-        return true;
-      }
-      break;
-    case 224:
-      HASH_GUARD(0x2E4612DF112010E0LL, imagecopyresized) {
-        ci = &ci_imagecopyresized;
-        return true;
-      }
-      break;
-    case 228:
-      HASH_GUARD(0x2B9425038D4230E4LL, imagecreatefromxpm) {
-        ci = &ci_imagecreatefromxpm;
-        return true;
-      }
-      break;
-    case 231:
-      HASH_GUARD(0x79E6FD78989B10E7LL, tmpfile) {
-        ci = &ci_tmpfile;
-        return true;
-      }
-      HASH_GUARD(0x59DE3A26AFF570E7LL, magickshaveimage) {
-        ci = &ci_magickshaveimage;
-        return true;
-      }
-      break;
     case 232:
       HASH_GUARD(0x476F4B6CC987E0E8LL, magickframeimage) {
         ci = &ci_magickframeimage;
-        return true;
-      }
-      HASH_GUARD(0x17CB328F55FDF0E8LL, drawsetstrokeantialias) {
-        ci = &ci_drawsetstrokeantialias;
         return true;
       }
       break;
@@ -83240,37 +86318,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 243:
-      HASH_GUARD(0x315CCBC8C5C7D0F3LL, xmlwriter_write_raw) {
-        ci = &ci_xmlwriter_write_raw;
-        return true;
-      }
-      break;
     case 249:
       HASH_GUARD(0x480797DB7165A0F9LL, xmlwriter_set_indent) {
         ci = &ci_xmlwriter_set_indent;
         return true;
       }
       break;
-    case 259:
-      HASH_GUARD(0x1FFCBCF1927D7103LL, posix_setpgid) {
-        ci = &ci_posix_setpgid;
-        return true;
-      }
-      break;
     case 261:
       HASH_GUARD(0x71E3372AA1AD0105LL, is_infinite) {
         ci = &ci_is_infinite;
-        return true;
-      }
-      HASH_GUARD(0x509B763CDAD9D105LL, gethostbyaddr) {
-        ci = &ci_gethostbyaddr;
-        return true;
-      }
-      break;
-    case 264:
-      HASH_GUARD(0x60B8B61133F59108LL, quoted_printable_decode) {
-        ci = &ci_quoted_printable_decode;
         return true;
       }
       break;
@@ -83292,53 +86348,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 274:
-      HASH_GUARD(0x0B1BA48B0CFB1112LL, strval) {
-        ci = &ci_strval;
-        return true;
-      }
-      HASH_GUARD(0x28C44527BD59D112LL, is_link) {
-        ci = &ci_is_link;
-        return true;
-      }
-      break;
-    case 276:
-      HASH_GUARD(0x02A4724E6A881114LL, mb_decode_numericentity) {
-        ci = &ci_mb_decode_numericentity;
-        return true;
-      }
-      break;
-    case 281:
-      HASH_GUARD(0x3AB82455A70F5119LL, imagecolortransparent) {
-        ci = &ci_imagecolortransparent;
-        return true;
-      }
-      HASH_GUARD(0x2B31A877824A1119LL, stristr) {
-        ci = &ci_stristr;
-        return true;
-      }
-      break;
-    case 284:
-      HASH_GUARD(0x070A63F6A0B8711CLL, array_walk_recursive) {
-        ci = &ci_array_walk_recursive;
-        return true;
-      }
-      break;
-    case 285:
-      HASH_GUARD(0x291088666B8BF11DLL, drawsetfontfamily) {
-        ci = &ci_drawsetfontfamily;
-        return true;
-      }
-      break;
     case 286:
       HASH_GUARD(0x658444BB4E29E11ELL, openssl_free_key) {
         ci = &ci_openssl_free_key;
-        return true;
-      }
-      break;
-    case 287:
-      HASH_GUARD(0x4C70C24C84F5511FLL, magicksetimagegamma) {
-        ci = &ci_magicksetimagegamma;
         return true;
       }
       break;
@@ -83354,39 +86366,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 293:
-      HASH_GUARD(0x7A8B3EC0235EF125LL, magickprofileimage) {
-        ci = &ci_magickprofileimage;
-        return true;
-      }
-      break;
     case 301:
       HASH_GUARD(0x7579DBE83CE5812DLL, imagerectangle) {
         ci = &ci_imagerectangle;
-        return true;
-      }
-      break;
-    case 307:
-      HASH_GUARD(0x6A7E0B15FF689133LL, mb_ereg_search_init) {
-        ci = &ci_mb_ereg_search_init;
-        return true;
-      }
-      break;
-    case 311:
-      HASH_GUARD(0x5666016FA3C0F137LL, socket_clear_error) {
-        ci = &ci_socket_clear_error;
-        return true;
-      }
-      break;
-    case 312:
-      HASH_GUARD(0x2676902697E37138LL, xmlwriter_start_comment) {
-        ci = &ci_xmlwriter_start_comment;
-        return true;
-      }
-      break;
-    case 314:
-      HASH_GUARD(0x2A57E5D29D73D13ALL, register_tick_function) {
-        ci = &ci_register_tick_function;
         return true;
       }
       break;
@@ -83396,25 +86378,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 319:
-      HASH_GUARD(0x5BFDE63106CE713FLL, dom_element_get_attribute) {
-        ci = &ci_dom_element_get_attribute;
+    case 321:
+      HASH_GUARD(0x6B03203C8A01C141LL, imap_timeout) {
+        ci = &ci_imap_timeout;
         return true;
       }
       break;
     case 323:
       HASH_GUARD(0x296C739F28D6C143LL, drawsetfontsize) {
         ci = &ci_drawsetfontsize;
-        return true;
-      }
-      break;
-    case 335:
-      HASH_GUARD(0x61A61E91C477514FLL, chop) {
-        ci = &ci_chop;
-        return true;
-      }
-      HASH_GUARD(0x7863294A8F33D14FLL, file) {
-        ci = &ci_file;
         return true;
       }
       break;
@@ -83427,10 +86399,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 338:
       HASH_GUARD(0x5D170BCBBBA02152LL, system) {
         ci = &ci_system;
-        return true;
-      }
-      HASH_GUARD(0x26DD46D8C1F47152LL, ldap_bind) {
-        ci = &ci_ldap_bind;
         return true;
       }
       break;
@@ -83468,18 +86436,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 355:
-      HASH_GUARD(0x36D6B73D289DD163LL, date_sunset) {
-        ci = &ci_date_sunset;
-        return true;
-      }
-      break;
-    case 360:
-      HASH_GUARD(0x14E46EA3CBCFB168LL, magickgetsamplingfactors) {
-        ci = &ci_magickgetsamplingfactors;
-        return true;
-      }
-      break;
     case 361:
       HASH_GUARD(0x4983571BFEAE6169LL, magickaffinetransformimage) {
         ci = &ci_magickaffinetransformimage;
@@ -83491,36 +86447,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 366:
-      HASH_GUARD(0x15B61E061268B16ELL, magickenhanceimage) {
-        ci = &ci_magickenhanceimage;
-        return true;
-      }
       HASH_GUARD(0x0125F8B9428E416ELL, hphp_create_object) {
         ci = &ci_hphp_create_object;
-        return true;
-      }
-      break;
-    case 370:
-      HASH_GUARD(0x59FE6A862E1CB172LL, get_browser) {
-        ci = &ci_get_browser;
-        return true;
-      }
-      break;
-    case 372:
-      HASH_GUARD(0x345E070844E3F174LL, create_function) {
-        ci = &ci_create_function;
-        return true;
-      }
-      break;
-    case 375:
-      HASH_GUARD(0x174DB93CAF0D1177LL, hphp_splfileinfo___tostring) {
-        ci = &ci_hphp_splfileinfo___tostring;
-        return true;
-      }
-      break;
-    case 377:
-      HASH_GUARD(0x6884FAF0D1EF3179LL, posix_mknod) {
-        ci = &ci_posix_mknod;
         return true;
       }
       break;
@@ -83530,23 +86458,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 380:
-      HASH_GUARD(0x3E1343B4A3AD717CLL, magickgettextascent) {
-        ci = &ci_magickgettextascent;
-        return true;
-      }
-      break;
-    case 383:
-      HASH_GUARD(0x4EF9496D16F9D17FLL, xmlwriter_start_element_ns) {
-        ci = &ci_xmlwriter_start_element_ns;
-        return true;
-      }
-      break;
     case 385:
-      HASH_GUARD(0x2227E30BAB23B181LL, dom_xpath_query) {
-        ci = &ci_dom_xpath_query;
-        return true;
-      }
       HASH_GUARD(0x1CBD3B58296C8181LL, xmlwriter_write_dtd) {
         ci = &ci_xmlwriter_write_dtd;
         return true;
@@ -83557,24 +86469,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_get_magic_quotes_gpc;
         return true;
       }
-      HASH_GUARD(0x130B62A8C77F3182LL, mb_ereg_search_getregs) {
-        ci = &ci_mb_ereg_search_getregs;
-        return true;
-      }
       break;
     case 389:
-      HASH_GUARD(0x13E90F8874839185LL, ob_get_status) {
-        ci = &ci_ob_get_status;
-        return true;
-      }
       HASH_GUARD(0x54DB5DC6A069A185LL, hphp_get_class_info) {
         ci = &ci_hphp_get_class_info;
-        return true;
-      }
-      break;
-    case 390:
-      HASH_GUARD(0x5DB5E45860801186LL, openssl_csr_export) {
-        ci = &ci_openssl_csr_export;
         return true;
       }
       break;
@@ -83584,21 +86482,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 393:
-      HASH_GUARD(0x0CC53B2F0D38D189LL, timezone_offset_get) {
-        ci = &ci_timezone_offset_get;
-        return true;
-      }
-      break;
     case 402:
       HASH_GUARD(0x07B5BF934F6EA192LL, imagesettile) {
         ci = &ci_imagesettile;
-        return true;
-      }
-      break;
-    case 407:
-      HASH_GUARD(0x15AD9CE061C75197LL, timezone_transitions_get) {
-        ci = &ci_timezone_transitions_get;
         return true;
       }
       break;
@@ -83609,18 +86495,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 411:
-      HASH_GUARD(0x7FF6C2A693CE119BLL, magickcyclecolormapimage) {
-        ci = &ci_magickcyclecolormapimage;
-        return true;
-      }
       HASH_GUARD(0x74F20C284227219BLL, similar_text) {
         ci = &ci_similar_text;
-        return true;
-      }
-      break;
-    case 416:
-      HASH_GUARD(0x6FB5104FC97A31A0LL, drawpathcurvetorelative) {
-        ci = &ci_drawpathcurvetorelative;
         return true;
       }
       break;
@@ -83629,62 +86505,26 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mcrypt_decrypt;
         return true;
       }
-      HASH_GUARD(0x2A9015499A2EB1A2LL, fnmatch) {
-        ci = &ci_fnmatch;
-        return true;
-      }
       HASH_GUARD(0x615723D21421A1A2LL, sem_remove) {
         ci = &ci_sem_remove;
         return true;
       }
       break;
-    case 419:
-      HASH_GUARD(0x735B81C45C2971A3LL, drawgetfillopacity) {
-        ci = &ci_drawgetfillopacity;
-        return true;
-      }
-      break;
-    case 422:
-      HASH_GUARD(0x37B4612178EF91A6LL, memcache_get_version) {
-        ci = &ci_memcache_get_version;
-        return true;
-      }
-      break;
     case 425:
-      HASH_GUARD(0x740DC7FFAD8BB1A9LL, imagecolorat) {
-        ci = &ci_imagecolorat;
-        return true;
-      }
       HASH_GUARD(0x0DDFE3B1F6EEE1A9LL, array_reduce) {
         ci = &ci_array_reduce;
-        return true;
-      }
-      break;
-    case 426:
-      HASH_GUARD(0x11A5C66A3D0711AALL, apc_sma_info) {
-        ci = &ci_apc_sma_info;
-        return true;
-      }
-      break;
-    case 429:
-      HASH_GUARD(0x5A6EFF8C71A431ADLL, socket_get_status) {
-        ci = &ci_socket_get_status;
-        return true;
-      }
-      HASH_GUARD(0x50538F37398AF1ADLL, ldap_get_option) {
-        ci = &ci_ldap_get_option;
-        return true;
-      }
-      break;
-    case 431:
-      HASH_GUARD(0x5B1F9C2E9FE111AFLL, fb_utf8ize) {
-        ci = &ci_fb_utf8ize;
         return true;
       }
       break;
     case 434:
       HASH_GUARD(0x4B96F870584541B2LL, hphp_splfileobject_setflags) {
         ci = &ci_hphp_splfileobject_setflags;
+        return true;
+      }
+      break;
+    case 436:
+      HASH_GUARD(0x6F6C85F4855DE1B4LL, imap_check) {
+        ci = &ci_imap_check;
         return true;
       }
       break;
@@ -83699,36 +86539,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_fb_serialize;
         return true;
       }
-      HASH_GUARD(0x4B3F35310DEA31BDLL, socket_create_pair) {
-        ci = &ci_socket_create_pair;
-        return true;
-      }
       break;
     case 447:
       HASH_GUARD(0x0E88ACEB15A581BFLL, magickgetimageextrema) {
         ci = &ci_magickgetimageextrema;
-        return true;
-      }
-      HASH_GUARD(0x681CD0E7D9DB71BFLL, pow) {
-        ci = &ci_pow;
-        return true;
-      }
-      break;
-    case 450:
-      HASH_GUARD(0x02103322F88C71C2LL, pixelgetcolorcount) {
-        ci = &ci_pixelgetcolorcount;
-        return true;
-      }
-      break;
-    case 452:
-      HASH_GUARD(0x3617DAE43A23D1C4LL, xml_parser_set_option) {
-        ci = &ci_xml_parser_set_option;
-        return true;
-      }
-      break;
-    case 454:
-      HASH_GUARD(0x188D37410B6051C6LL, session_unregister) {
-        ci = &ci_session_unregister;
         return true;
       }
       break;
@@ -83738,45 +86552,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 456:
-      HASH_GUARD(0x11C0B5DA066891C8LL, preg_match_all) {
-        ci = &ci_preg_match_all;
-        return true;
-      }
-      break;
     case 458:
       HASH_GUARD(0x75CA86838D24A1CALL, hash_algos) {
         ci = &ci_hash_algos;
-        return true;
-      }
-      break;
-    case 460:
-      HASH_GUARD(0x3DF488365DAAF1CCLL, drawgettextencoding) {
-        ci = &ci_drawgettextencoding;
-        return true;
-      }
-      break;
-    case 461:
-      HASH_GUARD(0x37340B707E7CD1CDLL, magickgetimagebordercolor) {
-        ci = &ci_magickgetimagebordercolor;
-        return true;
-      }
-      break;
-    case 462:
-      HASH_GUARD(0x2E7741B5440FB1CELL, magicksetlastiterator) {
-        ci = &ci_magicksetlastiterator;
-        return true;
-      }
-      break;
-    case 464:
-      HASH_GUARD(0x03012F3DDD7AB1D0LL, getservbyport) {
-        ci = &ci_getservbyport;
-        return true;
-      }
-      break;
-    case 468:
-      HASH_GUARD(0x219F3257BA3371D4LL, decbin) {
-        ci = &ci_decbin;
         return true;
       }
       break;
@@ -83792,29 +86570,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 473:
-      HASH_GUARD(0x7A69D0078F4F31D9LL, ldap_start_tls) {
-        ci = &ci_ldap_start_tls;
-        return true;
-      }
-      break;
-    case 474:
-      HASH_GUARD(0x0482E069503A91DALL, posix_setgid) {
-        ci = &ci_posix_setgid;
-        return true;
-      }
-      break;
-    case 475:
-      HASH_GUARD(0x3FEBBC0DA79F31DBLL, fb_call_user_func_safe) {
-        ci = &ci_fb_call_user_func_safe;
-        return true;
-      }
-      break;
     case 476:
-      HASH_GUARD(0x14FB46333D6D11DCLL, xml_set_default_handler) {
-        ci = &ci_xml_set_default_handler;
-        return true;
-      }
       HASH_GUARD(0x5B3A4A72846B21DCLL, current) {
         ci = &ci_current;
         return true;
@@ -83823,38 +86579,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 477:
       HASH_GUARD(0x04666D6F67C7A1DDLL, mysql_list_processes) {
         ci = &ci_mysql_list_processes;
-        return true;
-      }
-      HASH_GUARD(0x03A183D73942B1DDLL, apc_filehits) {
-        ci = &ci_apc_filehits;
-        return true;
-      }
-      break;
-    case 478:
-      HASH_GUARD(0x44563CC8FA9B11DELL, memcache_set_server_params) {
-        ci = &ci_memcache_set_server_params;
-        return true;
-      }
-      break;
-    case 479:
-      HASH_GUARD(0x7403251412E931DFLL, syslog) {
-        ci = &ci_syslog;
-        return true;
-      }
-      break;
-    case 480:
-      HASH_GUARD(0x5932D2750A8A91E0LL, magickgetpackagename) {
-        ci = &ci_magickgetpackagename;
-        return true;
-      }
-      break;
-    case 481:
-      HASH_GUARD(0x2771C632A60371E1LL, ftok) {
-        ci = &ci_ftok;
-        return true;
-      }
-      HASH_GUARD(0x0ED729A444C611E1LL, openssl_x509_read) {
-        ci = &ci_openssl_x509_read;
         return true;
       }
       break;
@@ -83874,18 +86598,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 484:
-      HASH_GUARD(0x08F7A6C37FC7B1E4LL, shm_get_var) {
-        ci = &ci_shm_get_var;
-        return true;
-      }
-      break;
-    case 488:
-      HASH_GUARD(0x7F843353646391E8LL, rad2deg) {
-        ci = &ci_rad2deg;
-        return true;
-      }
-      break;
     case 493:
       HASH_GUARD(0x1B09A9A533FFA1EDLL, drawgetexceptiontype) {
         ci = &ci_drawgetexceptiontype;
@@ -83902,47 +86614,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 498:
-      HASH_GUARD(0x46AFE55982B371F2LL, posix_geteuid) {
-        ci = &ci_posix_geteuid;
-        return true;
-      }
-      break;
     case 499:
       HASH_GUARD(0x582D10141D5601F3LL, stream_context_set_option) {
         ci = &ci_stream_context_set_option;
-        return true;
-      }
-      HASH_GUARD(0x11BB3CDC5E4971F3LL, xmlwriter_end_pi) {
-        ci = &ci_xmlwriter_end_pi;
-        return true;
-      }
-      break;
-    case 501:
-      HASH_GUARD(0x542FBDCF960031F5LL, fprintf) {
-        ci = &ci_fprintf;
-        return true;
-      }
-      HASH_GUARD(0x02ABC00C046291F5LL, imageellipse) {
-        ci = &ci_imageellipse;
         return true;
       }
       break;
     case 502:
       HASH_GUARD(0x06DAF95935D221F6LL, dom_namednodemap_item) {
         ci = &ci_dom_namednodemap_item;
-        return true;
-      }
-      break;
-    case 506:
-      HASH_GUARD(0x135D5CBF936B11FALL, msg_receive) {
-        ci = &ci_msg_receive;
-        return true;
-      }
-      break;
-    case 509:
-      HASH_GUARD(0x5304E6B47ED0B1FDLL, srand) {
-        ci = &ci_srand;
         return true;
       }
       break;
@@ -83970,45 +86650,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 524:
-      HASH_GUARD(0x41B15671649A320CLL, curl_multi_getcontent) {
-        ci = &ci_curl_multi_getcontent;
-        return true;
-      }
-      HASH_GUARD(0x257BEA4D6DC9920CLL, ctype_alnum) {
-        ci = &ci_ctype_alnum;
-        return true;
-      }
-      break;
     case 525:
       HASH_GUARD(0x5C0DECC8CC67E20DLL, magickwriteimagesfile) {
         ci = &ci_magickwriteimagesfile;
-        return true;
-      }
-      break;
-    case 526:
-      HASH_GUARD(0x533642044A00520ELL, pixelgetmagentaquantum) {
-        ci = &ci_pixelgetmagentaquantum;
-        return true;
-      }
-      break;
-    case 527:
-      HASH_GUARD(0x08DC8BF3ADAE520FLL, getallheaders) {
-        ci = &ci_getallheaders;
-        return true;
-      }
-      HASH_GUARD(0x53631CF3A937320FLL, get_class_methods) {
-        ci = &ci_get_class_methods;
-        return true;
-      }
-      break;
-    case 528:
-      HASH_GUARD(0x15EF510022CAF210LL, xml_parser_create_ns) {
-        ci = &ci_xml_parser_create_ns;
-        return true;
-      }
-      HASH_GUARD(0x2D41D7F8F4113210LL, sinh) {
-        ci = &ci_sinh;
         return true;
       }
       break;
@@ -84018,31 +86662,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 532:
-      HASH_GUARD(0x7D85E9FACB92D214LL, magickgetimageblob) {
-        ci = &ci_magickgetimageblob;
-        return true;
-      }
-      break;
     case 535:
       HASH_GUARD(0x4BC4B81CC5F32217LL, dom_node_append_child) {
         ci = &ci_dom_node_append_child;
-        return true;
-      }
-      break;
-    case 536:
-      HASH_GUARD(0x56C95225813A5218LL, memory_get_usage) {
-        ci = &ci_memory_get_usage;
-        return true;
-      }
-      HASH_GUARD(0x4D63F2C9AAB79218LL, fb_renamed_functions) {
-        ci = &ci_fb_renamed_functions;
-        return true;
-      }
-      break;
-    case 538:
-      HASH_GUARD(0x72C0C89D897E721ALL, magicksetimagetype) {
-        ci = &ci_magicksetimagetype;
         return true;
       }
       break;
@@ -84070,28 +86692,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 550:
-      HASH_GUARD(0x007B6BD94D767226LL, hphp_splfileobject_fpassthru) {
-        ci = &ci_hphp_splfileobject_fpassthru;
-        return true;
-      }
-      break;
-    case 551:
-      HASH_GUARD(0x5A26F00A81BA5227LL, xmlwriter_start_attribute_ns) {
-        ci = &ci_xmlwriter_start_attribute_ns;
-        return true;
-      }
-      break;
-    case 552:
-      HASH_GUARD(0x44911AEE34D63228LL, time_sleep_until) {
-        ci = &ci_time_sleep_until;
-        return true;
-      }
-      HASH_GUARD(0x7CD3C6F6495D3228LL, memcache_get_stats) {
-        ci = &ci_memcache_get_stats;
-        return true;
-      }
-      break;
     case 556:
       HASH_GUARD(0x4129FFBF3548E22CLL, mb_strpos) {
         ci = &ci_mb_strpos;
@@ -84101,12 +86701,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 557:
       HASH_GUARD(0x3B0FE36F9A7AE22DLL, bzflush) {
         ci = &ci_bzflush;
-        return true;
-      }
-      break;
-    case 558:
-      HASH_GUARD(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler) {
-        ci = &ci_fb_stubout_intercept_handler;
         return true;
       }
       break;
@@ -84121,24 +86715,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_magickconvolveimage;
         return true;
       }
-      HASH_GUARD(0x7C07D66F70E43231LL, mailparse_determine_best_xfer_encoding) {
-        ci = &ci_mailparse_determine_best_xfer_encoding;
-        return true;
-      }
       break;
     case 564:
-      HASH_GUARD(0x23C478B2D95F3234LL, dom_element_has_attribute_ns) {
-        ci = &ci_dom_element_has_attribute_ns;
-        return true;
-      }
       HASH_GUARD(0x422C51C95928A234LL, str_replace) {
         ci = &ci_str_replace;
-        return true;
-      }
-      break;
-    case 566:
-      HASH_GUARD(0x5542AABF33A2F236LL, stream_filter_remove) {
-        ci = &ci_stream_filter_remove;
         return true;
       }
       break;
@@ -84149,12 +86729,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x695AC59F79E2A238LL, mb_encode_mimeheader) {
         ci = &ci_mb_encode_mimeheader;
-        return true;
-      }
-      break;
-    case 570:
-      HASH_GUARD(0x679ABBE5A08C523ALL, xml_parse_into_struct) {
-        ci = &ci_xml_parse_into_struct;
         return true;
       }
       break;
@@ -84176,12 +86750,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 579:
-      HASH_GUARD(0x78183A24F2ACB243LL, strtotime) {
-        ci = &ci_strtotime;
-        return true;
-      }
-      break;
     case 584:
       HASH_GUARD(0x7071BB6F0591E248LL, serialize) {
         ci = &ci_serialize;
@@ -84200,27 +86768,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 592:
-      HASH_GUARD(0x30747B708DA1D250LL, pushdrawingwand) {
-        ci = &ci_pushdrawingwand;
-        return true;
-      }
-      break;
-    case 598:
-      HASH_GUARD(0x0384346A8857D256LL, clonemagickwand) {
-        ci = &ci_clonemagickwand;
-        return true;
-      }
-      break;
     case 600:
       HASH_GUARD(0x32C51FFF185F4258LL, memcache_set) {
         ci = &ci_memcache_set;
-        return true;
-      }
-      break;
-    case 603:
-      HASH_GUARD(0x2F8F40E95EDF925BLL, sizeof) {
-        ci = &ci_sizeof;
         return true;
       }
       break;
@@ -84248,12 +86798,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 612:
-      HASH_GUARD(0x261F403C4174D264LL, posix_getsid) {
-        ci = &ci_posix_getsid;
-        return true;
-      }
-      break;
     case 613:
       HASH_GUARD(0x561DB8F1DC0BC265LL, magickseparateimagechannel) {
         ci = &ci_magickseparateimagechannel;
@@ -84263,22 +86807,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 615:
       HASH_GUARD(0x50C5488E19492267LL, mb_list_encodings_alias_names) {
         ci = &ci_mb_list_encodings_alias_names;
-        return true;
-      }
-      HASH_GUARD(0x38B376B9D9091267LL, xmlwriter_write_attribute) {
-        ci = &ci_xmlwriter_write_attribute;
-        return true;
-      }
-      break;
-    case 620:
-      HASH_GUARD(0x188DF1EB5FD1B26CLL, mailparse_msg_parse_file) {
-        ci = &ci_mailparse_msg_parse_file;
-        return true;
-      }
-      break;
-    case 622:
-      HASH_GUARD(0x5672949384A4F26ELL, stream_filter_register) {
-        ci = &ci_stream_filter_register;
         return true;
       }
       break;
@@ -84291,28 +86819,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 626:
       HASH_GUARD(0x1C65F32FF28BC272LL, pathinfo) {
         ci = &ci_pathinfo;
-        return true;
-      }
-      break;
-    case 627:
-      HASH_GUARD(0x61C991F216E85273LL, inet_ntop) {
-        ci = &ci_inet_ntop;
-        return true;
-      }
-      HASH_GUARD(0x08CC1E49661DB273LL, dom_element_get_attribute_ns) {
-        ci = &ci_dom_element_get_attribute_ns;
-        return true;
-      }
-      break;
-    case 634:
-      HASH_GUARD(0x39E05F957C7DD27ALL, magickgetimagedepth) {
-        ci = &ci_magickgetimagedepth;
-        return true;
-      }
-      break;
-    case 636:
-      HASH_GUARD(0x0F7E33D551E0727CLL, posix_getpid) {
-        ci = &ci_posix_getpid;
         return true;
       }
       break;
@@ -84333,10 +86839,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_magickechoimagesblob;
         return true;
       }
-      HASH_GUARD(0x57E8781CF111727FLL, fileowner) {
-        ci = &ci_fileowner;
-        return true;
-      }
       break;
     case 640:
       HASH_GUARD(0x2E54EF1891172280LL, hphp_splfileinfo_isexecutable) {
@@ -84347,10 +86849,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 641:
       HASH_GUARD(0x1765A2E5186DE281LL, socket_write) {
         ci = &ci_socket_write;
-        return true;
-      }
-      HASH_GUARD(0x0881440DCF5D3281LL, magickflattenimages) {
-        ci = &ci_magickflattenimages;
         return true;
       }
       break;
@@ -84419,18 +86917,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 666:
-      HASH_GUARD(0x68272A37CC9E729ALL, mb_strtolower) {
-        ci = &ci_mb_strtolower;
-        return true;
-      }
       HASH_GUARD(0x24BD9EBDC721E29ALL, hphp_debug_caller_info) {
         ci = &ci_hphp_debug_caller_info;
-        return true;
-      }
-      break;
-    case 667:
-      HASH_GUARD(0x4A09634AE6DFF29BLL, fileperms) {
-        ci = &ci_fileperms;
         return true;
       }
       break;
@@ -84446,28 +86934,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 675:
-      HASH_GUARD(0x10E7B5A0E29CF2A3LL, bcscale) {
-        ci = &ci_bcscale;
-        return true;
-      }
-      HASH_GUARD(0x743EA4BF2CC8F2A3LL, mysql_field_type) {
-        ci = &ci_mysql_field_type;
-        return true;
-      }
-      break;
-    case 678:
-      HASH_GUARD(0x73EF3A19F76872A6LL, iconv_strrpos) {
-        ci = &ci_iconv_strrpos;
-        return true;
-      }
-      break;
-    case 680:
-      HASH_GUARD(0x5409127FEDE332A8LL, exif_imagetype) {
-        ci = &ci_exif_imagetype;
-        return true;
-      }
-      break;
     case 685:
       HASH_GUARD(0x35D259398CDDA2ADLL, pixelgetredquantum) {
         ci = &ci_pixelgetredquantum;
@@ -84475,12 +86941,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x00AB6FC4E9EE62ADLL, imagefilledrectangle) {
         ci = &ci_imagefilledrectangle;
-        return true;
-      }
-      break;
-    case 686:
-      HASH_GUARD(0x36AB9E6AA687F2AELL, xmlwriter_start_dtd_element) {
-        ci = &ci_xmlwriter_start_dtd_element;
         return true;
       }
       break;
@@ -84499,20 +86959,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_apd_echo;
         return true;
       }
-      HASH_GUARD(0x0E9C9B409F94B2B6LL, setcookie) {
-        ci = &ci_setcookie;
-        return true;
-      }
       break;
     case 696:
       HASH_GUARD(0x3C6D50F3BB8102B8LL, next) {
         ci = &ci_next;
-        return true;
-      }
-      break;
-    case 698:
-      HASH_GUARD(0x4A3D2113D3DFD2BALL, newpixelwandarray) {
-        ci = &ci_newpixelwandarray;
         return true;
       }
       break;
@@ -84521,50 +86971,14 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_ldap_get_values;
         return true;
       }
-      HASH_GUARD(0x41F7E2214DDE12BCLL, mcrypt_enc_self_test) {
-        ci = &ci_mcrypt_enc_self_test;
-        return true;
-      }
-      break;
-    case 701:
-      HASH_GUARD(0x327C865E52FD12BDLL, ldap_get_values_len) {
-        ci = &ci_ldap_get_values_len;
-        return true;
-      }
-      break;
-    case 702:
-      HASH_GUARD(0x72D6F9B3661AB2BELL, magickgetimage) {
-        ci = &ci_magickgetimage;
-        return true;
-      }
-      break;
-    case 704:
-      HASH_GUARD(0x5B7C1B74BA3452C0LL, newpixelregioniterator) {
-        ci = &ci_newpixelregioniterator;
-        return true;
-      }
-      break;
-    case 707:
-      HASH_GUARD(0x446D76A95365D2C3LL, pixelgetyellow) {
-        ci = &ci_pixelgetyellow;
-        return true;
-      }
       break;
     case 708:
       HASH_GUARD(0x6018C9F7DF40C2C4LL, xml_get_current_column_number) {
         ci = &ci_xml_get_current_column_number;
         return true;
       }
-      HASH_GUARD(0x1C7B8161F3C412C4LL, dom_document_create_document_fragment) {
-        ci = &ci_dom_document_create_document_fragment;
-        return true;
-      }
       break;
     case 716:
-      HASH_GUARD(0x407EF03C23BF92CCLL, drawpathellipticarcabsolute) {
-        ci = &ci_drawpathellipticarcabsolute;
-        return true;
-      }
       HASH_GUARD(0x44273F8BA3F542CCLL, imagesx) {
         ci = &ci_imagesx;
         return true;
@@ -84576,51 +86990,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 719:
-      HASH_GUARD(0x4ACE27EC476632CFLL, apc_bin_dumpfile) {
-        ci = &ci_apc_bin_dumpfile;
-        return true;
-      }
-      break;
     case 722:
       HASH_GUARD(0x4D9A87BD0CF742D2LL, imagepsextendfont) {
         ci = &ci_imagepsextendfont;
         return true;
       }
       break;
-    case 725:
-      HASH_GUARD(0x4D04C580CF9212D5LL, posix_getgroups) {
-        ci = &ci_posix_getgroups;
-        return true;
-      }
-      break;
-    case 726:
-      HASH_GUARD(0x06E9C984B5F0B2D6LL, furchash_hphp_ext) {
-        ci = &ci_furchash_hphp_ext;
-        return true;
-      }
-      break;
-    case 728:
-      HASH_GUARD(0x56C4896BA2FF52D8LL, drawsetstrokeopacity) {
-        ci = &ci_drawsetstrokeopacity;
-        return true;
-      }
-      break;
-    case 730:
-      HASH_GUARD(0x5C6A85B448C352DALL, posix_uname) {
-        ci = &ci_posix_uname;
-        return true;
-      }
-      break;
     case 733:
       HASH_GUARD(0x5F585DF7CB82E2DDLL, hphp_splfileinfo_iswritable) {
         ci = &ci_hphp_splfileinfo_iswritable;
-        return true;
-      }
-      break;
-    case 738:
-      HASH_GUARD(0x4AEC19D75BF652E2LL, magickremoveimage) {
-        ci = &ci_magickremoveimage;
         return true;
       }
       break;
@@ -84631,10 +87009,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 749:
-      HASH_GUARD(0x1B9FC9E27B8AB2EDLL, memcache_flush) {
-        ci = &ci_memcache_flush;
-        return true;
-      }
       HASH_GUARD(0x215E0E2EFA7422EDLL, drawgetstrokeantialias) {
         ci = &ci_drawgetstrokeantialias;
         return true;
@@ -84656,31 +87030,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 754:
-      HASH_GUARD(0x2EE56D216BB832F2LL, time_nanosleep) {
-        ci = &ci_time_nanosleep;
-        return true;
-      }
-      break;
-    case 756:
-      HASH_GUARD(0x418EC805C5FD32F4LL, mcrypt_get_key_size) {
-        ci = &ci_mcrypt_get_key_size;
-        return true;
-      }
-      break;
     case 761:
       HASH_GUARD(0x00CFD56391DF82F9LL, mysql_data_seek) {
         ci = &ci_mysql_data_seek;
-        return true;
-      }
-      HASH_GUARD(0x319EF52B36AAB2F9LL, posix_isatty) {
-        ci = &ci_posix_isatty;
-        return true;
-      }
-      break;
-    case 763:
-      HASH_GUARD(0x4D393D30CE1112FBLL, drawpathmovetoabsolute) {
-        ci = &ci_drawpathmovetoabsolute;
         return true;
       }
       break;
@@ -84690,37 +87042,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 766:
-      HASH_GUARD(0x208B66A8731F72FELL, sem_get) {
-        ci = &ci_sem_get;
-        return true;
-      }
-      HASH_GUARD(0x755A9950B65472FELL, drawgetgravity) {
-        ci = &ci_drawgetgravity;
-        return true;
-      }
-      break;
-    case 770:
-      HASH_GUARD(0x0103FE1E2C307302LL, socket_recvfrom) {
-        ci = &ci_socket_recvfrom;
-        return true;
-      }
-      break;
     case 772:
       HASH_GUARD(0x33A532FDB8EAC304LL, memcache_delete) {
         ci = &ci_memcache_delete;
-        return true;
-      }
-      break;
-    case 773:
-      HASH_GUARD(0x65D40C6B4842F305LL, clearpixelwand) {
-        ci = &ci_clearpixelwand;
-        return true;
-      }
-      break;
-    case 774:
-      HASH_GUARD(0x689D60184DD81306LL, htmlspecialchars_decode) {
-        ci = &ci_htmlspecialchars_decode;
         return true;
       }
       break;
@@ -84743,66 +87067,16 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_magickresizeimage;
         return true;
       }
-      HASH_GUARD(0x2D2BC1125ECA930BLL, dom_document_relaxng_validate_file) {
-        ci = &ci_dom_document_relaxng_validate_file;
-        return true;
-      }
       break;
-    case 780:
-      HASH_GUARD(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen) {
-        ci = &ci_hphp_splfileobject_getmaxlinelen;
-        return true;
-      }
-      break;
-    case 785:
-      HASH_GUARD(0x141EDCAE1D155311LL, xbox_get_thread_time) {
-        ci = &ci_xbox_get_thread_time;
-        return true;
-      }
-      break;
-    case 789:
-      HASH_GUARD(0x4F1E663AE18FD315LL, msg_remove_queue) {
-        ci = &ci_msg_remove_queue;
-        return true;
-      }
-      break;
-    case 798:
-      HASH_GUARD(0x27FF9DB54420531ELL, xml_error_string) {
-        ci = &ci_xml_error_string;
-        return true;
-      }
-      break;
-    case 804:
-      HASH_GUARD(0x5E5E4F998C8E7324LL, pcntl_wifexited) {
-        ci = &ci_pcntl_wifexited;
-        return true;
-      }
-      break;
-    case 808:
-      HASH_GUARD(0x73FEB3BF75FFB328LL, ctype_space) {
-        ci = &ci_ctype_space;
-        return true;
-      }
-      break;
-    case 811:
-      HASH_GUARD(0x2BDB1EE3869E132BLL, restore_error_handler) {
-        ci = &ci_restore_error_handler;
-        return true;
-      }
-      break;
-    case 815:
-      HASH_GUARD(0x7DD6461A6290B32FLL, mysql_real_escape_string) {
-        ci = &ci_mysql_real_escape_string;
+    case 814:
+      HASH_GUARD(0x7D1DCB9F4168032ELL, imap_getsubscribed) {
+        ci = &ci_imap_getsubscribed;
         return true;
       }
       break;
     case 816:
       HASH_GUARD(0x300F758BB0E16330LL, mysql_num_rows) {
         ci = &ci_mysql_num_rows;
-        return true;
-      }
-      HASH_GUARD(0x1601C1826E90B330LL, strptime) {
-        ci = &ci_strptime;
         return true;
       }
       break;
@@ -84848,21 +87122,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 835:
-      HASH_GUARD(0x6794CFB89DEEF343LL, curl_exec) {
-        ci = &ci_curl_exec;
-        return true;
-      }
-      break;
     case 836:
       HASH_GUARD(0x1A9DC76AB74F6344LL, openssl_verify) {
         ci = &ci_openssl_verify;
-        return true;
-      }
-      break;
-    case 837:
-      HASH_GUARD(0x45FAE3D08E96B345LL, curl_errno) {
-        ci = &ci_curl_errno;
         return true;
       }
       break;
@@ -84872,57 +87134,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 842:
-      HASH_GUARD(0x208BB4C3C0BA534ALL, xmlwriter_write_dtd_element) {
-        ci = &ci_xmlwriter_write_dtd_element;
-        return true;
-      }
-      break;
     case 843:
       HASH_GUARD(0x3880550F6AD8034BLL, session_destroy) {
         ci = &ci_session_destroy;
-        return true;
-      }
-      HASH_GUARD(0x57A9E8878872D34BLL, parse_ini_file) {
-        ci = &ci_parse_ini_file;
-        return true;
-      }
-      break;
-    case 844:
-      HASH_GUARD(0x0644E5FB91C8134CLL, array_udiff) {
-        ci = &ci_array_udiff;
         return true;
       }
       break;
     case 845:
       HASH_GUARD(0x5998E61D600D634DLL, drawaffine) {
         ci = &ci_drawaffine;
-        return true;
-      }
-      break;
-    case 847:
-      HASH_GUARD(0x4F2D0EFF0D4B534FLL, fb_get_taint) {
-        ci = &ci_fb_get_taint;
-        return true;
-      }
-      HASH_GUARD(0x5C8B3B9FA833934FLL, ldap_first_attribute) {
-        ci = &ci_ldap_first_attribute;
-        return true;
-      }
-      break;
-    case 849:
-      HASH_GUARD(0x2B422699C3A57351LL, sha1) {
-        ci = &ci_sha1;
-        return true;
-      }
-      break;
-    case 852:
-      HASH_GUARD(0x501F4DF5C8997354LL, hphp_get_property) {
-        ci = &ci_hphp_get_property;
-        return true;
-      }
-      HASH_GUARD(0x77EB4D2F5BDDB354LL, magickgetimageresolution) {
-        ci = &ci_magickgetimageresolution;
         return true;
       }
       break;
@@ -84933,12 +87153,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x0E0C79E42812235ALL, imagepng) {
         ci = &ci_imagepng;
-        return true;
-      }
-      break;
-    case 859:
-      HASH_GUARD(0x1AC48909BEEF935BLL, func_get_arg) {
-        ci = &ci_func_get_arg;
         return true;
       }
       break;
@@ -84972,33 +87186,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 872:
-      HASH_GUARD(0x5D406167C673D368LL, magickcompareimages) {
-        ci = &ci_magickcompareimages;
-        return true;
-      }
-      break;
     case 873:
       HASH_GUARD(0x6C715D7DD63DA369LL, is_integer) {
         ci = &ci_is_integer;
-        return true;
-      }
-      break;
-    case 878:
-      HASH_GUARD(0x7CE90898E882F36ELL, pixelsetyellow) {
-        ci = &ci_pixelsetyellow;
-        return true;
-      }
-      break;
-    case 882:
-      HASH_GUARD(0x7107AE03689F5372LL, hphp_invoke) {
-        ci = &ci_hphp_invoke;
-        return true;
-      }
-      break;
-    case 888:
-      HASH_GUARD(0x34BAEFD8AE59D378LL, hphp_set_error_page) {
-        ci = &ci_hphp_set_error_page;
         return true;
       }
       break;
@@ -85020,32 +87210,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 900:
-      HASH_GUARD(0x44C1BC500D175384LL, wandgetexception) {
-        ci = &ci_wandgetexception;
-        return true;
-      }
-      break;
-    case 901:
-      HASH_GUARD(0x7C5CA3E2E3C8F385LL, magickflipimage) {
-        ci = &ci_magickflipimage;
-        return true;
-      }
-      HASH_GUARD(0x57554E082E0ED385LL, pcntl_exec) {
-        ci = &ci_pcntl_exec;
-        return true;
-      }
-      HASH_GUARD(0x0B0B8765A4CDD385LL, hphp_splfileobject_fgets) {
-        ci = &ci_hphp_splfileobject_fgets;
-        return true;
-      }
-      break;
-    case 902:
-      HASH_GUARD(0x589E24C7664D5386LL, doubleval) {
-        ci = &ci_doubleval;
-        return true;
-      }
-      break;
     case 904:
       HASH_GUARD(0x791E946E04F50388LL, magicksetresourcelimit) {
         ci = &ci_magicksetresourcelimit;
@@ -85053,18 +87217,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 907:
-      HASH_GUARD(0x32354CC291ECF38BLL, fb_intercept) {
-        ci = &ci_fb_intercept;
+      HASH_GUARD(0x7CC683891D5F038BLL, imap_qprint) {
+        ci = &ci_imap_qprint;
         return true;
       }
       HASH_GUARD(0x73A3F87C0A56238BLL, stat) {
         ci = &ci_stat;
-        return true;
-      }
-      break;
-    case 908:
-      HASH_GUARD(0x7F18BA1FBD95B38CLL, hphp_directoryiterator_next) {
-        ci = &ci_hphp_directoryiterator_next;
         return true;
       }
       break;
@@ -85074,17 +87232,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 913:
-      HASH_GUARD(0x25FA64929C619391LL, asin) {
-        ci = &ci_asin;
-        return true;
-      }
-      break;
     case 914:
-      HASH_GUARD(0x2052D8D4822EF392LL, is_subclass_of) {
-        ci = &ci_is_subclass_of;
-        return true;
-      }
       HASH_GUARD(0x2395B0A85E292392LL, hphp_splfileobject_flock) {
         ci = &ci_hphp_splfileobject_flock;
         return true;
@@ -85101,10 +87249,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 917:
-      HASH_GUARD(0x7B0552A224E27395LL, bcsqrt) {
-        ci = &ci_bcsqrt;
-        return true;
-      }
       HASH_GUARD(0x422599B9E8AC0395LL, stream_bucket_make_writeable) {
         ci = &ci_stream_bucket_make_writeable;
         return true;
@@ -85128,19 +87272,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 921:
-      HASH_GUARD(0x66DA89629BA5D399LL, posix_getgrgid) {
-        ci = &ci_posix_getgrgid;
-        return true;
-      }
-      break;
     case 922:
       HASH_GUARD(0x0CC562CBD773639ALL, i18n_loc_get_default) {
         ci = &ci_i18n_loc_get_default;
-        return true;
-      }
-      HASH_GUARD(0x4C24BC37D807D39ALL, collator_get_strength) {
-        ci = &ci_collator_get_strength;
         return true;
       }
       break;
@@ -85149,20 +87283,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_idate;
         return true;
       }
-      HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
-        ci = &ci_fpassthru;
-        return true;
-      }
       break;
     case 924:
       HASH_GUARD(0x0136F8F03932E39CLL, session_unset) {
         ci = &ci_session_unset;
-        return true;
-      }
-      break;
-    case 926:
-      HASH_GUARD(0x27AD0D17AA7FB39ELL, ldap_set_rebind_proc) {
-        ci = &ci_ldap_set_rebind_proc;
         return true;
       }
       break;
@@ -85173,10 +87297,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x0368F1779E3AE39FLL, mysql_field_table) {
         ci = &ci_mysql_field_table;
-        return true;
-      }
-      HASH_GUARD(0x4019A6916456339FLL, dom_node_remove_child) {
-        ci = &ci_dom_node_remove_child;
         return true;
       }
       break;
@@ -85191,30 +87311,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mailparse_msg_get_structure;
         return true;
       }
-      HASH_GUARD(0x0A2A4AA078D433A2LL, hexdec) {
-        ci = &ci_hexdec;
-        return true;
-      }
-      break;
-    case 932:
-      HASH_GUARD(0x1676FB393F8493A4LL, constant) {
-        ci = &ci_constant;
-        return true;
-      }
-      break;
-    case 934:
-      HASH_GUARD(0x40E0D496EE29B3A6LL, call_user_func_array) {
-        ci = &ci_call_user_func_array;
-        return true;
-      }
       break;
     case 936:
       HASH_GUARD(0x0121CD6CDCE1C3A8LL, mysql_pconnect_with_db) {
         ci = &ci_mysql_pconnect_with_db;
-        return true;
-      }
-      HASH_GUARD(0x4120B8157ED413A8LL, i18n_loc_set_strength) {
-        ci = &ci_i18n_loc_set_strength;
         return true;
       }
       break;
@@ -85241,30 +87341,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_posix_getpwnam;
         return true;
       }
-      HASH_GUARD(0x6077CFE09EE4D3B3LL, session_save_path) {
-        ci = &ci_session_save_path;
-        return true;
-      }
-      break;
-    case 950:
-      HASH_GUARD(0x6E6C0E9A715073B6LL, dom_xpath_register_php_functions) {
-        ci = &ci_dom_xpath_register_php_functions;
-        return true;
-      }
-      HASH_GUARD(0x6C07640F7C5BD3B6LL, imagettfbbox) {
-        ci = &ci_imagettfbbox;
-        return true;
-      }
       break;
     case 955:
       HASH_GUARD(0x5A3F5AAD1B13A3BBLL, is_executable) {
         ci = &ci_is_executable;
-        return true;
-      }
-      break;
-    case 956:
-      HASH_GUARD(0x0629158C42C893BCLL, compact) {
-        ci = &ci_compact;
         return true;
       }
       break;
@@ -85274,33 +87354,13 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 958:
-      HASH_GUARD(0x49A34964289453BELL, eregi) {
-        ci = &ci_eregi;
-        return true;
-      }
-      break;
-    case 959:
-      HASH_GUARD(0x0E38CDC93E5893BFLL, magicksetimagemattecolor) {
-        ci = &ci_magicksetimagemattecolor;
-        return true;
-      }
-      break;
     case 968:
-      HASH_GUARD(0x4D100C70E86593C8LL, stream_set_write_buffer) {
-        ci = &ci_stream_set_write_buffer;
-        return true;
-      }
       HASH_GUARD(0x3101CE70BA49A3C8LL, error_reporting) {
         ci = &ci_error_reporting;
         return true;
       }
       break;
     case 971:
-      HASH_GUARD(0x0173CC6FACAB93CBLL, quotemeta) {
-        ci = &ci_quotemeta;
-        return true;
-      }
       HASH_GUARD(0x4C3B6BE9112E63CBLL, str_split) {
         ci = &ci_str_split;
         return true;
@@ -85317,36 +87377,16 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_drawgetfillrule;
         return true;
       }
-      HASH_GUARD(0x02BEFBEE8287D3CELL, get_magic_quotes_runtime) {
-        ci = &ci_get_magic_quotes_runtime;
-        return true;
-      }
-      break;
-    case 978:
-      HASH_GUARD(0x67C155632E5373D2LL, mailparse_msg_create) {
-        ci = &ci_mailparse_msg_create;
-        return true;
-      }
       break;
     case 979:
       HASH_GUARD(0x734FD402E190E3D3LL, evhttp_async_get) {
         ci = &ci_evhttp_async_get;
         return true;
       }
-      HASH_GUARD(0x0A8D4FAF266973D3LL, bcpow) {
-        ci = &ci_bcpow;
-        return true;
-      }
       break;
     case 980:
       HASH_GUARD(0x0FF21F9BE4CCC3D4LL, call_user_func_rpc) {
         ci = &ci_call_user_func_rpc;
-        return true;
-      }
-      break;
-    case 983:
-      HASH_GUARD(0x382B5B1EF00153D7LL, imagecreatefrompng) {
-        ci = &ci_imagecreatefrompng;
         return true;
       }
       break;
@@ -85367,10 +87407,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1002:
-      HASH_GUARD(0x0D3C8F00B0C633EALL, inet_pton) {
-        ci = &ci_inet_pton;
-        return true;
-      }
       HASH_GUARD(0x6DA49696220FE3EALL, mailparse_rfc822_parse_addresses) {
         ci = &ci_mailparse_rfc822_parse_addresses;
         return true;
@@ -85388,23 +87424,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1009:
-      HASH_GUARD(0x5EFE291585A713F1LL, method_exists) {
-        ci = &ci_method_exists;
-        return true;
-      }
-      break;
-    case 1010:
-      HASH_GUARD(0x0FE12E46BC9853F2LL, stream_filter_append) {
-        ci = &ci_stream_filter_append;
-        return true;
-      }
-      HASH_GUARD(0x41A19AE18BC8B3F2LL, curl_error) {
-        ci = &ci_curl_error;
-        return true;
-      }
-      HASH_GUARD(0x696241660648B3F2LL, magickwhitethresholdimage) {
-        ci = &ci_magickwhitethresholdimage;
+    case 1008:
+      HASH_GUARD(0x69C07B1F19CE83F0LL, imap_rfc822_parse_headers) {
+        ci = &ci_imap_rfc822_parse_headers;
         return true;
       }
       break;
@@ -85413,38 +87435,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_spl_classes;
         return true;
       }
-      HASH_GUARD(0x26D53A77483EF3F4LL, drawbezier) {
-        ci = &ci_drawbezier;
-        return true;
-      }
-      break;
-    case 1015:
-      HASH_GUARD(0x43F22CB4E3E8F3F7LL, apache_note) {
-        ci = &ci_apache_note;
-        return true;
-      }
-      break;
-    case 1016:
-      HASH_GUARD(0x4C024573FCD5B3F8LL, var_dump) {
-        ci = &ci_var_dump;
-        return true;
-      }
-      HASH_GUARD(0x514EA9C8FF5B33F8LL, posix_getrlimit) {
-        ci = &ci_posix_getrlimit;
-        return true;
-      }
-      break;
-    case 1018:
-      HASH_GUARD(0x1B217E78CBC713FALL, zend_thread_id) {
-        ci = &ci_zend_thread_id;
-        return true;
-      }
       break;
     case 1025:
-      HASH_GUARD(0x36B9C440B1881401LL, fmod) {
-        ci = &ci_fmod;
-        return true;
-      }
       HASH_GUARD(0x3DCB1C92B5864401LL, gzrewind) {
         ci = &ci_gzrewind;
         return true;
@@ -85462,18 +87454,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1034:
-      HASH_GUARD(0x6DC61C51FA1D340ALL, show_source) {
-        ci = &ci_show_source;
-        return true;
-      }
-      break;
-    case 1035:
-      HASH_GUARD(0x6C2CE092B900D40BLL, hphp_splfileinfo___construct) {
-        ci = &ci_hphp_splfileinfo___construct;
-        return true;
-      }
-      break;
     case 1037:
       HASH_GUARD(0x2939C5BAE0C4A40DLL, nl2br) {
         ci = &ci_nl2br;
@@ -85483,46 +87463,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_ob_flush;
         return true;
       }
-      HASH_GUARD(0x152C7161567F940DLL, func_num_args) {
-        ci = &ci_func_num_args;
-        return true;
-      }
       HASH_GUARD(0x002CCCD877D9640DLL, drawpathclose) {
         ci = &ci_drawpathclose;
-        return true;
-      }
-      break;
-    case 1043:
-      HASH_GUARD(0x56EC1A6732D07413LL, drawgetfontsize) {
-        ci = &ci_drawgetfontsize;
-        return true;
-      }
-      HASH_GUARD(0x20C24D873DC65413LL, openssl_csr_get_subject) {
-        ci = &ci_openssl_csr_get_subject;
-        return true;
-      }
-      break;
-    case 1051:
-      HASH_GUARD(0x47279C717370B41BLL, acos) {
-        ci = &ci_acos;
-        return true;
-      }
-      break;
-    case 1054:
-      HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
-        ci = &ci_fgetss;
-        return true;
-      }
-      break;
-    case 1055:
-      HASH_GUARD(0x301963016A91741FLL, hphp_stats) {
-        ci = &ci_hphp_stats;
-        return true;
-      }
-      break;
-    case 1059:
-      HASH_GUARD(0x4C9108B5A5807423LL, drawsetfillcolor) {
-        ci = &ci_drawsetfillcolor;
         return true;
       }
       break;
@@ -85531,22 +87473,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_magicksetpassphrase;
         return true;
       }
-      HASH_GUARD(0x161D8EA3339AB426LL, apc_cas) {
-        ci = &ci_apc_cas;
-        return true;
-      }
-      break;
-    case 1068:
-      HASH_GUARD(0x12D324CC744BF42CLL, pixelgetcolorasstring) {
-        ci = &ci_pixelgetcolorasstring;
-        return true;
-      }
       break;
     case 1069:
-      HASH_GUARD(0x333D1E2E28B0942DLL, imagejpeg) {
-        ci = &ci_imagejpeg;
-        return true;
-      }
       HASH_GUARD(0x2A5A519E4BFE442DLL, mb_eregi) {
         ci = &ci_mb_eregi;
         return true;
@@ -85570,34 +87498,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1075:
-      HASH_GUARD(0x6829094421CDB433LL, touch) {
-        ci = &ci_touch;
-        return true;
-      }
-      break;
-    case 1077:
-      HASH_GUARD(0x75DAFEF5BFEF1435LL, imagesetstyle) {
-        ci = &ci_imagesetstyle;
-        return true;
-      }
-      HASH_GUARD(0x044386A0E8B25435LL, drawgetclipunits) {
-        ci = &ci_drawgetclipunits;
-        return true;
-      }
-      break;
-    case 1079:
-      HASH_GUARD(0x1AAF02CF6DEBB437LL, magickdeconstructimages) {
-        ci = &ci_magickdeconstructimages;
-        return true;
-      }
-      break;
-    case 1081:
-      HASH_GUARD(0x34C52EF423EFD439LL, proc_open) {
-        ci = &ci_proc_open;
-        return true;
-      }
-      break;
     case 1082:
       HASH_GUARD(0x5019A1FBF377C43ALL, imagepsbbox) {
         ci = &ci_imagepsbbox;
@@ -85610,19 +87510,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1088:
-      HASH_GUARD(0x5247425ED698B440LL, hphp_thread_is_warmup_enabled) {
-        ci = &ci_hphp_thread_is_warmup_enabled;
-        return true;
-      }
-      break;
     case 1089:
       HASH_GUARD(0x158E2271E381C441LL, hash_file) {
         ci = &ci_hash_file;
-        return true;
-      }
-      HASH_GUARD(0x05892E3C5B9EB441LL, closedir) {
-        ci = &ci_closedir;
         return true;
       }
       break;
@@ -85632,33 +87522,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1105:
-      HASH_GUARD(0x7539134E1CC61451LL, xmlwriter_start_cdata) {
-        ci = &ci_xmlwriter_start_cdata;
-        return true;
-      }
-      break;
     case 1106:
       HASH_GUARD(0x1056EF1C14D2A452LL, socket_connect) {
         ci = &ci_socket_connect;
         return true;
       }
       break;
-    case 1116:
-      HASH_GUARD(0x436AB52B2099145CLL, ldap_close) {
-        ci = &ci_ldap_close;
-        return true;
-      }
-      break;
     case 1117:
       HASH_GUARD(0x0246AF48CD31245DLL, count_chars) {
         ci = &ci_count_chars;
-        return true;
-      }
-      break;
-    case 1118:
-      HASH_GUARD(0x0ED191E71A60545ELL, magicksetfirstiterator) {
-        ci = &ci_magicksetfirstiterator;
         return true;
       }
       break;
@@ -85669,38 +87541,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x406A1404F48E4465LL, posix_getuid) {
         ci = &ci_posix_getuid;
-        return true;
-      }
-      break;
-    case 1130:
-      HASH_GUARD(0x32643AE461D3F46ALL, mailparse_stream_encode) {
-        ci = &ci_mailparse_stream_encode;
-        return true;
-      }
-      break;
-    case 1132:
-      HASH_GUARD(0x07D959A8C0CF546CLL, stream_wrapper_unregister) {
-        ci = &ci_stream_wrapper_unregister;
-        return true;
-      }
-      HASH_GUARD(0x4F39BD300305746CLL, hphp_splfileobject_key) {
-        ci = &ci_hphp_splfileobject_key;
-        return true;
-      }
-      break;
-    case 1133:
-      HASH_GUARD(0x738D381800CE946DLL, ldap_parse_result) {
-        ci = &ci_ldap_parse_result;
-        return true;
-      }
-      HASH_GUARD(0x5229C0069FD7D46DLL, vfprintf) {
-        ci = &ci_vfprintf;
-        return true;
-      }
-      break;
-    case 1135:
-      HASH_GUARD(0x5B8F2ABBB480346FLL, bzwrite) {
-        ci = &ci_bzwrite;
         return true;
       }
       break;
@@ -85722,103 +87562,31 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1143:
-      HASH_GUARD(0x18666906A8001477LL, array_diff_assoc) {
-        ci = &ci_array_diff_assoc;
-        return true;
-      }
-      break;
-    case 1144:
-      HASH_GUARD(0x080594ABE715B478LL, hphp_splfileobject_current) {
-        ci = &ci_hphp_splfileobject_current;
-        return true;
-      }
-      HASH_GUARD(0x6497CC8295DDB478LL, fb_thrift_unserialize) {
-        ci = &ci_fb_thrift_unserialize;
-        return true;
-      }
-      break;
-    case 1145:
-      HASH_GUARD(0x4859AF715D5A3479LL, magickmagnifyimage) {
-        ci = &ci_magickmagnifyimage;
-        return true;
-      }
-      break;
     case 1148:
       HASH_GUARD(0x1A08C578AD3BC47CLL, apache_response_headers) {
         ci = &ci_apache_response_headers;
         return true;
       }
-      HASH_GUARD(0x2FA7269AB0E1147CLL, mysql_field_seek) {
-        ci = &ci_mysql_field_seek;
-        return true;
-      }
       break;
     case 1150:
-      HASH_GUARD(0x1D583AA4F7F6547ELL, drawpathlinetorelative) {
-        ci = &ci_drawpathlinetorelative;
-        return true;
-      }
       HASH_GUARD(0x0AC36D9F961B247ELL, newpixeliterator) {
         ci = &ci_newpixeliterator;
         return true;
       }
       break;
-    case 1151:
-      HASH_GUARD(0x68AE04B02253B47FLL, mb_parse_str) {
-        ci = &ci_mb_parse_str;
-        return true;
-      }
-      break;
-    case 1153:
-      HASH_GUARD(0x1876287F59CEB481LL, bzerror) {
-        ci = &ci_bzerror;
-        return true;
-      }
-      break;
-    case 1154:
-      HASH_GUARD(0x4590C853C2027482LL, magickembossimage) {
-        ci = &ci_magickembossimage;
-        return true;
-      }
-      break;
     case 1157:
-      HASH_GUARD(0x250DD3D58EA37485LL, gmstrftime) {
-        ci = &ci_gmstrftime;
-        return true;
-      }
       HASH_GUARD(0x61499C92F4FBA485LL, hphp_splfileobject_fgetc) {
         ci = &ci_hphp_splfileobject_fgetc;
         return true;
       }
       break;
     case 1161:
-      HASH_GUARD(0x4F7EAF5B37663489LL, magickgetimageredprimary) {
-        ci = &ci_magickgetimageredprimary;
-        return true;
-      }
       HASH_GUARD(0x7505924F05854489LL, dom_element_set_attribute_ns) {
         ci = &ci_dom_element_set_attribute_ns;
         return true;
       }
       break;
-    case 1162:
-      HASH_GUARD(0x7E88764A1DE8548ALL, drawgetstrokewidth) {
-        ci = &ci_drawgetstrokewidth;
-        return true;
-      }
-      break;
-    case 1163:
-      HASH_GUARD(0x5860ACF621DD948BLL, is_file) {
-        ci = &ci_is_file;
-        return true;
-      }
-      break;
     case 1165:
-      HASH_GUARD(0x23511F83C2BC548DLL, header) {
-        ci = &ci_header;
-        return true;
-      }
       HASH_GUARD(0x275D127C87EF048DLL, mysql_db_query) {
         ci = &ci_mysql_db_query;
         return true;
@@ -85827,22 +87595,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1167:
       HASH_GUARD(0x43672229728A648FLL, drawpushpattern) {
         ci = &ci_drawpushpattern;
-        return true;
-      }
-      break;
-    case 1171:
-      HASH_GUARD(0x56377FCC2447D493LL, magicksetimagepixels) {
-        ci = &ci_magicksetimagepixels;
-        return true;
-      }
-      break;
-    case 1175:
-      HASH_GUARD(0x353E2A635A47F497LL, evhttp_get) {
-        ci = &ci_evhttp_get;
-        return true;
-      }
-      HASH_GUARD(0x5388045C2D13D497LL, mysql_num_fields) {
-        ci = &ci_mysql_num_fields;
         return true;
       }
       break;
@@ -85864,21 +87616,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1189:
-      HASH_GUARD(0x18BE9B1C2DE6D4A5LL, imagexbm) {
-        ci = &ci_imagexbm;
-        return true;
-      }
-      break;
     case 1192:
       HASH_GUARD(0x6F4497457F1584A8LL, dom_element_set_id_attribute_node) {
         ci = &ci_dom_element_set_id_attribute_node;
-        return true;
-      }
-      break;
-    case 1193:
-      HASH_GUARD(0x386378F2BA3234A9LL, magickevaluateimage) {
-        ci = &ci_magickevaluateimage;
         return true;
       }
       break;
@@ -85898,35 +87638,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1199:
-      HASH_GUARD(0x42463E7E5C3434AFLL, mb_strrichr) {
-        ci = &ci_mb_strrichr;
-        return true;
-      }
-      HASH_GUARD(0x6AC751181531F4AFLL, simplexml_load_string) {
-        ci = &ci_simplexml_load_string;
-        return true;
-      }
-      break;
     case 1200:
-      HASH_GUARD(0x0E11D317044974B0LL, magickgetnumberimages) {
-        ci = &ci_magickgetnumberimages;
-        return true;
-      }
       HASH_GUARD(0x3AF65A9F3653E4B0LL, addslashes) {
         ci = &ci_addslashes;
-        return true;
-      }
-      break;
-    case 1201:
-      HASH_GUARD(0x060619D7A1B5F4B1LL, checkdate) {
-        ci = &ci_checkdate;
-        return true;
-      }
-      break;
-    case 1203:
-      HASH_GUARD(0x57034CAD772AF4B3LL, magickgetimagechannelmean) {
-        ci = &ci_magickgetimagechannelmean;
         return true;
       }
       break;
@@ -85936,41 +87650,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1206:
-      HASH_GUARD(0x3DE291DCBA5134B6LL, dom_document_create_element) {
-        ci = &ci_dom_document_create_element;
-        return true;
-      }
-      HASH_GUARD(0x12A9166E68DCF4B6LL, pixelgetgreen) {
-        ci = &ci_pixelgetgreen;
-        return true;
-      }
-      break;
-    case 1207:
-      HASH_GUARD(0x7EEBC81AF9BC54B7LL, xml_parser_free) {
-        ci = &ci_xml_parser_free;
-        return true;
-      }
-      break;
     case 1209:
       HASH_GUARD(0x5351290CD139A4B9LL, mb_strrpos) {
         ci = &ci_mb_strrpos;
         return true;
       }
       break;
-    case 1210:
-      HASH_GUARD(0x6B49D11E633274BALL, fopen) {
-        ci = &ci_fopen;
-        return true;
-      }
-      break;
     case 1213:
       HASH_GUARD(0x35BE8F6E7726C4BDLL, dechex) {
         ci = &ci_dechex;
-        return true;
-      }
-      HASH_GUARD(0x5BA371A93F60F4BDLL, use_soap_error_handler) {
-        ci = &ci_use_soap_error_handler;
         return true;
       }
       break;
@@ -85997,16 +87685,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mb_ereg;
         return true;
       }
-      HASH_GUARD(0x4A24DB9D6B0334C4LL, hphp_recursivedirectoryiterator_next) {
-        ci = &ci_hphp_recursivedirectoryiterator_next;
-        return true;
-      }
-      break;
-    case 1221:
-      HASH_GUARD(0x34A38DDF2CD914C5LL, long2ip) {
-        ci = &ci_long2ip;
-        return true;
-      }
       break;
     case 1222:
       HASH_GUARD(0x651F7FBBA90604C6LL, magickgetimageindex) {
@@ -86015,12 +87693,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x4F7AA8120E33E4C6LL, collator_get_attribute) {
         ci = &ci_collator_get_attribute;
-        return true;
-      }
-      break;
-    case 1224:
-      HASH_GUARD(0x1B8BBFC882FDB4C8LL, magicktintimage) {
-        ci = &ci_magicktintimage;
         return true;
       }
       break;
@@ -86036,18 +87708,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1233:
-      HASH_GUARD(0x29EE24C41FD3D4D1LL, mysql_field_name) {
-        ci = &ci_mysql_field_name;
-        return true;
-      }
-      break;
-    case 1238:
-      HASH_GUARD(0x19ECDD5A937DD4D6LL, mailparse_msg_get_part_data) {
-        ci = &ci_mailparse_msg_get_part_data;
-        return true;
-      }
-      break;
     case 1239:
       HASH_GUARD(0x215403F1E335C4D7LL, magicksolarizeimage) {
         ci = &ci_magicksolarizeimage;
@@ -86059,28 +87719,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_unregister_tick_function;
         return true;
       }
-      HASH_GUARD(0x14BF763DDDC014D8LL, imagepsencodefont) {
-        ci = &ci_imagepsencodefont;
-        return true;
-      }
-      HASH_GUARD(0x56B908FC91C834D8LL, magickflopimage) {
-        ci = &ci_magickflopimage;
-        return true;
-      }
-      HASH_GUARD(0x1301F911ED6D54D8LL, is_nan) {
-        ci = &ci_is_nan;
-        return true;
-      }
-      HASH_GUARD(0x575C5AE3D2A694D8LL, ob_end_clean) {
-        ci = &ci_ob_end_clean;
-        return true;
-      }
       break;
     case 1247:
-      HASH_GUARD(0x747A7F585CD694DFLL, zend_version) {
-        ci = &ci_zend_version;
-        return true;
-      }
       HASH_GUARD(0x2E5E5A0FC3B5C4DFLL, xml_set_character_data_handler) {
         ci = &ci_xml_set_character_data_handler;
         return true;
@@ -86092,15 +87732,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1251:
-      HASH_GUARD(0x7D57A0D72D6254E3LL, ob_implicit_flush) {
-        ci = &ci_ob_implicit_flush;
-        return true;
-      }
-      break;
-    case 1262:
-      HASH_GUARD(0x5895ADDD91F354EELL, hphp_thread_set_warmup_enabled) {
-        ci = &ci_hphp_thread_set_warmup_enabled;
+    case 1260:
+      HASH_GUARD(0x784F675D436004ECLL, imap_close) {
+        ci = &ci_imap_close;
         return true;
       }
       break;
@@ -86110,25 +87744,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1266:
-      HASH_GUARD(0x41276F8DE35354F2LL, dom_document_get_elements_by_tag_name) {
-        ci = &ci_dom_document_get_elements_by_tag_name;
-        return true;
-      }
-      break;
-    case 1268:
-      HASH_GUARD(0x436B36C5EB8DB4F4LL, mcrypt_generic) {
-        ci = &ci_mcrypt_generic;
-        return true;
-      }
-      break;
     case 1269:
       HASH_GUARD(0x528AC8D252D224F5LL, log10) {
         ci = &ci_log10;
-        return true;
-      }
-      HASH_GUARD(0x112A0ACDD8B9D4F5LL, mb_list_mime_names) {
-        ci = &ci_mb_list_mime_names;
         return true;
       }
       break;
@@ -86155,18 +87773,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1287:
-      HASH_GUARD(0x4FC9FE38A748B507LL, intl_get_error_message) {
-        ci = &ci_intl_get_error_message;
-        return true;
-      }
       HASH_GUARD(0x197A5D237BD4C507LL, mb_ereg_search_getpos) {
         ci = &ci_mb_ereg_search_getpos;
-        return true;
-      }
-      break;
-    case 1288:
-      HASH_GUARD(0x63A08D6AD1209508LL, magickgetexception) {
-        ci = &ci_magickgetexception;
         return true;
       }
       break;
@@ -86187,22 +87795,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mb_internal_encoding;
         return true;
       }
-      HASH_GUARD(0x3C0304A55503D511LL, magickgetimageiterations) {
-        ci = &ci_magickgetimageiterations;
-        return true;
-      }
-      break;
-    case 1299:
-      HASH_GUARD(0x772E8BF114FEF513LL, eregi_replace) {
-        ci = &ci_eregi_replace;
-        return true;
-      }
-      break;
-    case 1300:
-      HASH_GUARD(0x100385A0988FD514LL, magickgetfilename) {
-        ci = &ci_magickgetfilename;
-        return true;
-      }
       break;
     case 1305:
       HASH_GUARD(0x54EDBB6BAF318519LL, memcache_add) {
@@ -86210,21 +87802,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1314:
-      HASH_GUARD(0x7DA98E0379D33522LL, chdir) {
-        ci = &ci_chdir;
-        return true;
-      }
-      break;
     case 1316:
       HASH_GUARD(0x28E724EDE0BB6524LL, mb_strcut) {
         ci = &ci_mb_strcut;
-        return true;
-      }
-      break;
-    case 1317:
-      HASH_GUARD(0x230FE1D6EC599525LL, link) {
-        ci = &ci_link;
         return true;
       }
       break;
@@ -86240,87 +87820,27 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1324:
-      HASH_GUARD(0x1AB55BBA0967952CLL, mb_convert_variables) {
-        ci = &ci_mb_convert_variables;
-        return true;
-      }
-      break;
-    case 1327:
-      HASH_GUARD(0x6770E2559C9A152FLL, openssl_private_decrypt) {
-        ci = &ci_openssl_private_decrypt;
-        return true;
-      }
-      break;
-    case 1329:
-      HASH_GUARD(0x6776C27C6123D531LL, dl) {
-        ci = &ci_dl;
-        return true;
-      }
-      break;
-    case 1330:
-      HASH_GUARD(0x6193A26936F4D532LL, disk_total_space) {
-        ci = &ci_disk_total_space;
-        return true;
-      }
-      break;
     case 1331:
       HASH_GUARD(0x313D2A505076A533LL, dir) {
         ci = &ci_dir;
         return true;
       }
       break;
-    case 1333:
-      HASH_GUARD(0x6C87406DDC0AB535LL, mcrypt_ecb) {
-        ci = &ci_mcrypt_ecb;
-        return true;
-      }
-      break;
     case 1334:
-      HASH_GUARD(0x0E80D04691227536LL, eval) {
-        ci = &ci_eval;
-        return true;
-      }
       HASH_GUARD(0x746DC7AD953EA536LL, memcache_set_compress_threshold) {
         ci = &ci_memcache_set_compress_threshold;
         return true;
       }
       break;
     case 1335:
-      HASH_GUARD(0x0830FF7C379D7537LL, dom_text_split_text) {
-        ci = &ci_dom_text_split_text;
-        return true;
-      }
-      HASH_GUARD(0x557C72DE98679537LL, hash_update_stream) {
-        ci = &ci_hash_update_stream;
-        return true;
-      }
       HASH_GUARD(0x175B86BCB3124537LL, magickgetexceptionstring) {
         ci = &ci_magickgetexceptionstring;
-        return true;
-      }
-      break;
-    case 1337:
-      HASH_GUARD(0x3C88F0FAC3EDD539LL, phpversion) {
-        ci = &ci_phpversion;
-        return true;
-      }
-      break;
-    case 1340:
-      HASH_GUARD(0x5CA55E62F2A5953CLL, drawgetstrokeopacity) {
-        ci = &ci_drawgetstrokeopacity;
         return true;
       }
       break;
     case 1341:
       HASH_GUARD(0x0F32841DBF7A053DLL, fb_crossall_query) {
         ci = &ci_fb_crossall_query;
-        return true;
-      }
-      break;
-    case 1342:
-      HASH_GUARD(0x36A80B48E08B753ELL, implode) {
-        ci = &ci_implode;
         return true;
       }
       break;
@@ -86333,16 +87853,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1347:
       HASH_GUARD(0x20E2B1D920122543LL, die) {
         ci = &ci_die;
-        return true;
-      }
-      HASH_GUARD(0x0962EACAE0F0B543LL, hphp_splfileinfo_getlinktarget) {
-        ci = &ci_hphp_splfileinfo_getlinktarget;
-        return true;
-      }
-      break;
-    case 1348:
-      HASH_GUARD(0x4D397FE5D0C0B544LL, magickmedianfilterimage) {
-        ci = &ci_magickmedianfilterimage;
         return true;
       }
       break;
@@ -86362,61 +87872,19 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1355:
-      HASH_GUARD(0x40CE61115E11154BLL, msg_stat_queue) {
-        ci = &ci_msg_stat_queue;
-        return true;
-      }
-      break;
-    case 1356:
-      HASH_GUARD(0x1D011CB0E810D54CLL, pdo_drivers) {
-        ci = &ci_pdo_drivers;
-        return true;
-      }
-      break;
     case 1357:
-      HASH_GUARD(0x0F0702D91EAFB54DLL, drawgettextantialias) {
-        ci = &ci_drawgettextantialias;
-        return true;
-      }
       HASH_GUARD(0x1B9E769FFEC3C54DLL, pcntl_wtermsig) {
         ci = &ci_pcntl_wtermsig;
         return true;
       }
       break;
     case 1359:
-      HASH_GUARD(0x30DE78E7131B954FLL, furchash_hphp_ext_supported) {
-        ci = &ci_furchash_hphp_ext_supported;
-        return true;
-      }
       HASH_GUARD(0x063200B5AAFEC54FLL, mysql_thread_id) {
         ci = &ci_mysql_thread_id;
         return true;
       }
       break;
-    case 1370:
-      HASH_GUARD(0x268EE73DB2EA555ALL, get_object_vars) {
-        ci = &ci_get_object_vars;
-        return true;
-      }
-      break;
-    case 1372:
-      HASH_GUARD(0x5749AD20CAFCD55CLL, pixelgetbluequantum) {
-        ci = &ci_pixelgetbluequantum;
-        return true;
-      }
-      break;
-    case 1379:
-      HASH_GUARD(0x1B1B2D70792D9563LL, mysql_get_client_info) {
-        ci = &ci_mysql_get_client_info;
-        return true;
-      }
-      break;
     case 1382:
-      HASH_GUARD(0x6E2FDBD28F895566LL, timezone_abbreviations_list) {
-        ci = &ci_timezone_abbreviations_list;
-        return true;
-      }
       HASH_GUARD(0x3DA2058E5C540566LL, spliti) {
         ci = &ci_spliti;
         return true;
@@ -86440,12 +87908,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1391:
-      HASH_GUARD(0x016722439BBA756FLL, filetype) {
-        ci = &ci_filetype;
-        return true;
-      }
-      break;
     case 1392:
       HASH_GUARD(0x13D0427F3BB3E570LL, get_declared_interfaces) {
         ci = &ci_get_declared_interfaces;
@@ -86456,29 +87918,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1393:
-      HASH_GUARD(0x2AD3361DE8B1D571LL, pcntl_signal_dispatch) {
-        ci = &ci_pcntl_signal_dispatch;
-        return true;
-      }
-      break;
-    case 1396:
-      HASH_GUARD(0x636C871213F37574LL, mcrypt_encrypt) {
-        ci = &ci_mcrypt_encrypt;
-        return true;
-      }
-      break;
     case 1399:
-      HASH_GUARD(0x412521E7ADB21577LL, iconv_mime_decode_headers) {
-        ci = &ci_iconv_mime_decode_headers;
-        return true;
-      }
       HASH_GUARD(0x72E1FD3DCD45C577LL, bzopen) {
         ci = &ci_bzopen;
-        return true;
-      }
-      HASH_GUARD(0x1E154D823451B577LL, magicksetresolution) {
-        ci = &ci_magicksetresolution;
         return true;
       }
       break;
@@ -86499,10 +87941,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1406:
-      HASH_GUARD(0x31529E9BCA1E157ELL, shm_remove) {
-        ci = &ci_shm_remove;
-        return true;
-      }
       HASH_GUARD(0x132776D93181E57ELL, ldap_set_option) {
         ci = &ci_ldap_set_option;
         return true;
@@ -86511,10 +87949,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1410:
       HASH_GUARD(0x02688986D5D76582LL, magickspreadimage) {
         ci = &ci_magickspreadimage;
-        return true;
-      }
-      HASH_GUARD(0x0B1F0EB755BDB582LL, ispixeliterator) {
-        ci = &ci_ispixeliterator;
         return true;
       }
       break;
@@ -86553,6 +87987,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mcrypt_get_block_size;
         return true;
       }
+      HASH_GUARD(0x66B19094ED494592LL, imap_uid) {
+        ci = &ci_imap_uid;
+        return true;
+      }
       break;
     case 1427:
       HASH_GUARD(0x0F5984B8A7FD8593LL, hphp_splfileinfo_getperms) {
@@ -86572,45 +88010,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1434:
-      HASH_GUARD(0x77F1EDE7D5EF759ALL, apc_cache_info) {
-        ci = &ci_apc_cache_info;
-        return true;
-      }
-      break;
-    case 1435:
-      HASH_GUARD(0x37D003B09D0C759BLL, stream_get_contents) {
-        ci = &ci_stream_get_contents;
-        return true;
-      }
-      break;
-    case 1440:
-      HASH_GUARD(0x20502FCACBB9F5A0LL, convert_uuencode) {
-        ci = &ci_convert_uuencode;
-        return true;
-      }
-      break;
-    case 1441:
-      HASH_GUARD(0x297690F3A63335A1LL, magickrotateimage) {
-        ci = &ci_magickrotateimage;
-        return true;
-      }
-      break;
-    case 1444:
-      HASH_GUARD(0x3C014439AE5D75A4LL, magickgetcharheight) {
-        ci = &ci_magickgetcharheight;
-        return true;
-      }
-      break;
     case 1448:
       HASH_GUARD(0x4FBB1F662399A5A8LL, is_soap_fault) {
         ci = &ci_is_soap_fault;
-        return true;
-      }
-      break;
-    case 1452:
-      HASH_GUARD(0x763BA2B1C60A55ACLL, pixelgetalphaquantum) {
-        ci = &ci_pixelgetalphaquantum;
         return true;
       }
       break;
@@ -86620,35 +88022,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1455:
-      HASH_GUARD(0x1636FBA5043CF5AFLL, ldap_error) {
-        ci = &ci_ldap_error;
-        return true;
-      }
-      break;
-    case 1459:
-      HASH_GUARD(0x001DBE44BC0B55B3LL, magicksetimagecolormapcolor) {
-        ci = &ci_magicksetimagecolormapcolor;
-        return true;
-      }
-      HASH_GUARD(0x7AFA32F70E8195B3LL, xbox_set_thread_timeout) {
-        ci = &ci_xbox_set_thread_timeout;
-        return true;
-      }
-      break;
     case 1461:
-      HASH_GUARD(0x3F9C5B4708FC55B5LL, timezone_name_get) {
-        ci = &ci_timezone_name_get;
-        return true;
-      }
       HASH_GUARD(0x5EFE573046B565B5LL, mcrypt_module_close) {
         ci = &ci_mcrypt_module_close;
-        return true;
-      }
-      break;
-    case 1462:
-      HASH_GUARD(0x1A05907F563235B6LL, collator_set_attribute) {
-        ci = &ci_collator_set_attribute;
         return true;
       }
       break;
@@ -86664,12 +88040,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1473:
-      HASH_GUARD(0x7731B90FB7C975C1LL, magickremoveimageprofile) {
-        ci = &ci_magickremoveimageprofile;
-        return true;
-      }
-      break;
     case 1478:
       HASH_GUARD(0x3B3D5CE69B1565C6LL, mcrypt_module_is_block_mode) {
         ci = &ci_mcrypt_module_is_block_mode;
@@ -86679,16 +88049,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1480:
       HASH_GUARD(0x1CE8175A87C785C8LL, dom_document_validate) {
         ci = &ci_dom_document_validate;
-        return true;
-      }
-      break;
-    case 1481:
-      HASH_GUARD(0x75B299F5E35A95C9LL, mb_strwidth) {
-        ci = &ci_mb_strwidth;
-        return true;
-      }
-      HASH_GUARD(0x60F8818C0F38D5C9LL, hphp_directoryiterator___tostring) {
-        ci = &ci_hphp_directoryiterator___tostring;
         return true;
       }
       break;
@@ -86722,12 +88082,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1492:
-      HASH_GUARD(0x2FE56B4C457AB5D4LL, ctype_graph) {
-        ci = &ci_ctype_graph;
-        return true;
-      }
-      break;
     case 1493:
       HASH_GUARD(0x43901543EA8625D5LL, curl_multi_select) {
         ci = &ci_curl_multi_select;
@@ -86752,12 +88106,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1509:
-      HASH_GUARD(0x470F990B218315E5LL, fb_unset_taint) {
-        ci = &ci_fb_unset_taint;
-        return true;
-      }
-      break;
     case 1510:
       HASH_GUARD(0x6FE2E44FBC44E5E6LL, magickaddnoiseimage) {
         ci = &ci_magickaddnoiseimage;
@@ -86765,12 +88113,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x08069ECE0EA3C5E6LL, imagecopymergegray) {
         ci = &ci_imagecopymergegray;
-        return true;
-      }
-      break;
-    case 1514:
-      HASH_GUARD(0x0B7ACBAB402015EALL, mb_send_mail) {
-        ci = &ci_mb_send_mail;
         return true;
       }
       break;
@@ -86790,41 +88132,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1525:
-      HASH_GUARD(0x0D1BD0E5AF4175F5LL, drawsetfont) {
-        ci = &ci_drawsetfont;
-        return true;
-      }
-      HASH_GUARD(0x73A1F34DF95B35F5LL, get_defined_constants) {
-        ci = &ci_get_defined_constants;
-        return true;
-      }
-      break;
     case 1527:
       HASH_GUARD(0x18E4CC945005E5F7LL, drawpushclippath) {
         ci = &ci_drawpushclippath;
         return true;
       }
       break;
-    case 1528:
-      HASH_GUARD(0x7C48F6EA39B7B5F8LL, magickadaptivethresholdimage) {
-        ci = &ci_magickadaptivethresholdimage;
-        return true;
-      }
-      break;
     case 1531:
       HASH_GUARD(0x3535B6615F2B05FBLL, session_cache_limiter) {
         ci = &ci_session_cache_limiter;
-        return true;
-      }
-      HASH_GUARD(0x0FEC4ED541B7F5FBLL, magickgetimagevirtualpixelmethod) {
-        ci = &ci_magickgetimagevirtualpixelmethod;
-        return true;
-      }
-      break;
-    case 1532:
-      HASH_GUARD(0x39156C7CCE2D75FCLL, hash_update) {
-        ci = &ci_hash_update;
         return true;
       }
       break;
@@ -86835,24 +88151,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x46832743CAF5C5FDLL, dom_element_set_attribute_node) {
         ci = &ci_dom_element_set_attribute_node;
-        return true;
-      }
-      break;
-    case 1534:
-      HASH_GUARD(0x397D3C6576ED75FELL, set_include_path) {
-        ci = &ci_set_include_path;
-        return true;
-      }
-      break;
-    case 1535:
-      HASH_GUARD(0x40A557CBB9FC35FFLL, mysql_tablename) {
-        ci = &ci_mysql_tablename;
-        return true;
-      }
-      break;
-    case 1536:
-      HASH_GUARD(0x552D7CAD93755600LL, dom_document_create_comment) {
-        ci = &ci_dom_document_create_comment;
         return true;
       }
       break;
@@ -86878,12 +88176,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1557:
-      HASH_GUARD(0x6AD774816F8F7615LL, mb_strrchr) {
-        ci = &ci_mb_strrchr;
-        return true;
-      }
-      break;
     case 1558:
       HASH_GUARD(0x66C7616225F1C616LL, pixelsetgreen) {
         ci = &ci_pixelsetgreen;
@@ -86894,53 +88186,21 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1561:
-      HASH_GUARD(0x6DD51BF03F003619LL, mailparse_uudecode_all) {
-        ci = &ci_mailparse_uudecode_all;
-        return true;
-      }
-      HASH_GUARD(0x2F29627AF1A97619LL, shm_attach) {
-        ci = &ci_shm_attach;
-        return true;
-      }
-      break;
     case 1563:
       HASH_GUARD(0x40DDE277D934061BLL, gzputs) {
         ci = &ci_gzputs;
         return true;
       }
       break;
-    case 1564:
-      HASH_GUARD(0x70725954DC99F61CLL, mcrypt_create_iv) {
-        ci = &ci_mcrypt_create_iv;
-        return true;
-      }
-      break;
     case 1565:
-      HASH_GUARD(0x69E1368FD737F61DLL, dom_namednodemap_get_named_item) {
-        ci = &ci_dom_namednodemap_get_named_item;
-        return true;
-      }
       HASH_GUARD(0x7E98B97C1B5D861DLL, magickqueryconfigureoptions) {
         ci = &ci_magickqueryconfigureoptions;
-        return true;
-      }
-      break;
-    case 1569:
-      HASH_GUARD(0x0F71DDE51AA55621LL, hphp_output_global_state) {
-        ci = &ci_hphp_output_global_state;
         return true;
       }
       break;
     case 1570:
       HASH_GUARD(0x134550B9EB596622LL, drawgetfontstyle) {
         ci = &ci_drawgetfontstyle;
-        return true;
-      }
-      break;
-    case 1576:
-      HASH_GUARD(0x1E77B3BCF062D628LL, magickreadimage) {
-        ci = &ci_magickreadimage;
         return true;
       }
       break;
@@ -86956,31 +88216,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1580:
-      HASH_GUARD(0x5CEA60D9C54A162CLL, pcntl_wifstopped) {
-        ci = &ci_pcntl_wifstopped;
-        return true;
-      }
-      break;
-    case 1583:
-      HASH_GUARD(0x652C331CE138362FLL, is_string) {
-        ci = &ci_is_string;
-        return true;
-      }
-      break;
     case 1585:
       HASH_GUARD(0x5AD6595ACA656631LL, pixelresetiterator) {
         ci = &ci_pixelresetiterator;
-        return true;
-      }
-      break;
-    case 1591:
-      HASH_GUARD(0x60276BC7990F9637LL, mysql_list_dbs) {
-        ci = &ci_mysql_list_dbs;
-        return true;
-      }
-      HASH_GUARD(0x75AFA49220C9B637LL, collator_sort) {
-        ci = &ci_collator_sort;
         return true;
       }
       break;
@@ -86996,23 +88234,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1598:
-      HASH_GUARD(0x60302D15A677963ELL, ldap_free_result) {
-        ci = &ci_ldap_free_result;
-        return true;
-      }
-      break;
-    case 1599:
-      HASH_GUARD(0x17242BC6C9C9563FLL, crypt) {
-        ci = &ci_crypt;
-        return true;
-      }
-      break;
     case 1606:
-      HASH_GUARD(0x4901517CB796F646LL, msg_set_queue) {
-        ci = &ci_msg_set_queue;
-        return true;
-      }
       HASH_GUARD(0x234F6A0A486E8646LL, natcasesort) {
         ci = &ci_natcasesort;
         return true;
@@ -87023,10 +88245,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_fgetcsv;
         return true;
       }
-      HASH_GUARD(0x769E5C6A5369F64ELL, ob_list_handlers) {
-        ci = &ci_ob_list_handlers;
-        return true;
-      }
       break;
     case 1618:
       HASH_GUARD(0x03066277F647E652LL, hphp_splfileobject_ftell) {
@@ -87034,9 +88252,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1621:
-      HASH_GUARD(0x629EDDC1E74ED655LL, array_uintersect_assoc) {
-        ci = &ci_array_uintersect_assoc;
+    case 1623:
+      HASH_GUARD(0x33CBF1153473A657LL, imap_base64) {
+        ci = &ci_imap_base64;
         return true;
       }
       break;
@@ -87055,22 +88273,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1630:
       HASH_GUARD(0x1491ED033E39465ELL, dom_document_schema_validate_xml) {
         ci = &ci_dom_document_schema_validate_xml;
-        return true;
-      }
-      HASH_GUARD(0x205BB9CFF397B65ELL, ldap_mod_replace) {
-        ci = &ci_ldap_mod_replace;
-        return true;
-      }
-      break;
-    case 1631:
-      HASH_GUARD(0x1355AFB40AB1165FLL, drawsetfontstyle) {
-        ci = &ci_drawsetfontstyle;
-        return true;
-      }
-      break;
-    case 1634:
-      HASH_GUARD(0x5629E14D6B9FF662LL, dom_document_get_element_by_id) {
-        ci = &ci_dom_document_get_element_by_id;
         return true;
       }
       break;
@@ -87098,41 +88300,13 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1651:
-      HASH_GUARD(0x126FC82D358E9673LL, magicksetimagevirtualpixelmethod) {
-        ci = &ci_magicksetimagevirtualpixelmethod;
-        return true;
-      }
-      break;
-    case 1655:
-      HASH_GUARD(0x001F23CAC36E3677LL, magickgetimagescene) {
-        ci = &ci_magickgetimagescene;
-        return true;
-      }
-      break;
     case 1658:
       HASH_GUARD(0x583AA7498A40E67ALL, drawgetcliprule) {
         ci = &ci_drawgetcliprule;
         return true;
       }
       break;
-    case 1659:
-      HASH_GUARD(0x5BCED33A57D9B67BLL, intval) {
-        ci = &ci_intval;
-        return true;
-      }
-      break;
-    case 1660:
-      HASH_GUARD(0x43B1BAFFB27F367CLL, session_is_registered) {
-        ci = &ci_session_is_registered;
-        return true;
-      }
-      break;
     case 1661:
-      HASH_GUARD(0x69616E2817E1967DLL, fileinode) {
-        ci = &ci_fileinode;
-        return true;
-      }
       HASH_GUARD(0x111DACCF8628267DLL, array_replace_recursive) {
         ci = &ci_array_replace_recursive;
         return true;
@@ -87141,22 +88315,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1666:
       HASH_GUARD(0x665D2615E377A682LL, pagelet_server_task_start) {
         ci = &ci_pagelet_server_task_start;
-        return true;
-      }
-      HASH_GUARD(0x5F6750E1C7E5D682LL, imageinterlace) {
-        ci = &ci_imageinterlace;
-        return true;
-      }
-      break;
-    case 1677:
-      HASH_GUARD(0x07A946E3DD8E968DLL, ldap_connect) {
-        ci = &ci_ldap_connect;
-        return true;
-      }
-      break;
-    case 1679:
-      HASH_GUARD(0x2EFF4F69EB1DF68FLL, apache_get_config) {
-        ci = &ci_apache_get_config;
         return true;
       }
       break;
@@ -87184,18 +88342,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1685:
-      HASH_GUARD(0x7186EF5EF0581695LL, exp) {
-        ci = &ci_exp;
-        return true;
-      }
-      break;
-    case 1686:
-      HASH_GUARD(0x0DD7A2DB53093696LL, utf8_decode) {
-        ci = &ci_utf8_decode;
-        return true;
-      }
-      break;
     case 1690:
       HASH_GUARD(0x5CC40F6A365FE69ALL, session_register) {
         ci = &ci_session_register;
@@ -87220,12 +88366,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1703:
-      HASH_GUARD(0x38BBEE42F136D6A7LL, magickgetimageblueprimary) {
-        ci = &ci_magickgetimageblueprimary;
-        return true;
-      }
-      break;
     case 1704:
       HASH_GUARD(0x45AB8F419BA666A8LL, drawpathlinetohorizontalabsolute) {
         ci = &ci_drawpathlinetohorizontalabsolute;
@@ -87233,28 +88373,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1706:
-      HASH_GUARD(0x6E9D4D3A119D76AALL, wandgetexceptiontype) {
-        ci = &ci_wandgetexceptiontype;
-        return true;
-      }
-      HASH_GUARD(0x48C4DB333172F6AALL, parse_url) {
-        ci = &ci_parse_url;
-        return true;
-      }
       HASH_GUARD(0x541926FB6D6FC6AALL, magickgetimagecolors) {
         ci = &ci_magickgetimagecolors;
-        return true;
-      }
-      break;
-    case 1707:
-      HASH_GUARD(0x72B3F8E02D8B16ABLL, array_unshift) {
-        ci = &ci_array_unshift;
-        return true;
-      }
-      break;
-    case 1711:
-      HASH_GUARD(0x65497D63C0D716AFLL, getdate) {
-        ci = &ci_getdate;
         return true;
       }
       break;
@@ -87271,16 +88391,14 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1717:
-      HASH_GUARD(0x798B4197212456B5LL, bcpowmod) {
-        ci = &ci_bcpowmod;
-        return true;
-      }
       HASH_GUARD(0x623CE67C41A9E6B5LL, ldap_next_attribute) {
         ci = &ci_ldap_next_attribute;
         return true;
       }
-      HASH_GUARD(0x7E773A36449576B5LL, imagecharup) {
-        ci = &ci_imagecharup;
+      break;
+    case 1718:
+      HASH_GUARD(0x0553DE5D0C70C6B6LL, imap_headers) {
+        ci = &ci_imap_headers;
         return true;
       }
       break;
@@ -87301,16 +88419,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_dom_document_import_node;
         return true;
       }
-      HASH_GUARD(0x72B901C3605CB6BALL, pixelsetopacity) {
-        ci = &ci_pixelsetopacity;
-        return true;
-      }
-      break;
-    case 1726:
-      HASH_GUARD(0x081D5EA9920076BELL, drawgetfillalpha) {
-        ci = &ci_drawgetfillalpha;
-        return true;
-      }
       break;
     case 1732:
       HASH_GUARD(0x4842AF70A71BE6C4LL, uksort) {
@@ -87326,12 +88434,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1733:
-      HASH_GUARD(0x28526EF49FF516C5LL, pixelsetgreenquantum) {
-        ci = &ci_pixelsetgreenquantum;
-        return true;
-      }
-      break;
     case 1736:
       HASH_GUARD(0x29DD2C9F889246C8LL, passthru) {
         ci = &ci_passthru;
@@ -87344,65 +88446,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1738:
-      HASH_GUARD(0x41BCD0A72B1396CALL, xmlwriter_start_dtd_attlist) {
-        ci = &ci_xmlwriter_start_dtd_attlist;
-        return true;
-      }
-      break;
-    case 1745:
-      HASH_GUARD(0x2B3D5B9AF915D6D1LL, imagecopymerge) {
-        ci = &ci_imagecopymerge;
-        return true;
-      }
-      break;
-    case 1746:
-      HASH_GUARD(0x1FDF80EA9B8A96D2LL, collator_set_strength) {
-        ci = &ci_collator_set_strength;
-        return true;
-      }
-      break;
-    case 1748:
-      HASH_GUARD(0x04A0E6E8337E56D4LL, drawcolor) {
-        ci = &ci_drawcolor;
-        return true;
-      }
-      break;
-    case 1749:
-      HASH_GUARD(0x317FFA522A7D96D5LL, imagefilledpolygon) {
-        ci = &ci_imagefilledpolygon;
-        return true;
-      }
-      break;
     case 1750:
       HASH_GUARD(0x158348EB08F406D6LL, strtr) {
         ci = &ci_strtr;
         return true;
       }
       break;
-    case 1761:
-      HASH_GUARD(0x11DA0A0EB8E0D6E1LL, clock_getres) {
-        ci = &ci_clock_getres;
-        return true;
-      }
-      break;
     case 1764:
       HASH_GUARD(0x40D0E3AF799226E4LL, bin2hex) {
         ci = &ci_bin2hex;
-        return true;
-      }
-      HASH_GUARD(0x1CF3544CB5C9D6E4LL, xml_set_processing_instruction_handler) {
-        ci = &ci_xml_set_processing_instruction_handler;
-        return true;
-      }
-      HASH_GUARD(0x31FFFC333AA6D6E4LL, drawsetfillrule) {
-        ci = &ci_drawsetfillrule;
-        return true;
-      }
-      break;
-    case 1767:
-      HASH_GUARD(0x44201A16F3D876E7LL, trim) {
-        ci = &ci_trim;
         return true;
       }
       break;
@@ -87413,30 +88465,14 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1773:
-      HASH_GUARD(0x04BD4B43921956EDLL, ldap_search) {
-        ci = &ci_ldap_search;
-        return true;
-      }
       HASH_GUARD(0x2B661CD43C6006EDLL, hphpd_break) {
         ci = &ci_hphpd_break;
-        return true;
-      }
-      break;
-    case 1774:
-      HASH_GUARD(0x76382756EA00B6EELL, is_object) {
-        ci = &ci_is_object;
         return true;
       }
       break;
     case 1775:
       HASH_GUARD(0x0FA74D85885F86EFLL, output_add_rewrite_var) {
         ci = &ci_output_add_rewrite_var;
-        return true;
-      }
-      break;
-    case 1776:
-      HASH_GUARD(0x014BD9A6823256F0LL, extract) {
-        ci = &ci_extract;
         return true;
       }
       break;
@@ -87453,10 +88489,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1779:
-      HASH_GUARD(0x6F1968BE449FB6F3LL, stream_socket_pair) {
-        ci = &ci_stream_socket_pair;
-        return true;
-      }
       HASH_GUARD(0x5768A80BB0B926F3LL, apd_set_session_trace_socket) {
         ci = &ci_apd_set_session_trace_socket;
         return true;
@@ -87468,27 +88500,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1785:
-      HASH_GUARD(0x20740D956F0236F9LL, image2wbmp) {
-        ci = &ci_image2wbmp;
-        return true;
-      }
-      break;
     case 1791:
       HASH_GUARD(0x623C20A027A606FFLL, array_uintersect_uassoc) {
         ci = &ci_array_uintersect_uassoc;
-        return true;
-      }
-      break;
-    case 1793:
-      HASH_GUARD(0x1A80392751AA7701LL, magickgetformat) {
-        ci = &ci_magickgetformat;
-        return true;
-      }
-      break;
-    case 1796:
-      HASH_GUARD(0x5EFE15CE970A5704LL, drawpolyline) {
-        ci = &ci_drawpolyline;
         return true;
       }
       break;
@@ -87503,46 +88517,14 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1803:
-      HASH_GUARD(0x27AF8F6A5DF0B70BLL, dom_document_xinclude) {
-        ci = &ci_dom_document_xinclude;
-        return true;
-      }
       HASH_GUARD(0x5F7873F2DF5BE70BLL, ctype_cntrl) {
         ci = &ci_ctype_cntrl;
-        return true;
-      }
-      break;
-    case 1805:
-      HASH_GUARD(0x7CE752299E80B70DLL, unserialize) {
-        ci = &ci_unserialize;
-        return true;
-      }
-      HASH_GUARD(0x4F3C0DB2F6C8F70DLL, unlink) {
-        ci = &ci_unlink;
         return true;
       }
       break;
     case 1807:
       HASH_GUARD(0x2FB2FA1DD832C70FLL, xmlwriter_write_attribute_ns) {
         ci = &ci_xmlwriter_write_attribute_ns;
-        return true;
-      }
-      break;
-    case 1812:
-      HASH_GUARD(0x1778ED2AF035F714LL, rsort) {
-        ci = &ci_rsort;
-        return true;
-      }
-      break;
-    case 1813:
-      HASH_GUARD(0x25D578B4772C1715LL, define) {
-        ci = &ci_define;
-        return true;
-      }
-      break;
-    case 1816:
-      HASH_GUARD(0x7971A5647C957718LL, date_time_set) {
-        ci = &ci_date_time_set;
         return true;
       }
       break;
@@ -87555,12 +88537,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1820:
       HASH_GUARD(0x50AC61A28C5AC71CLL, imagecolorclosestalpha) {
         ci = &ci_imagecolorclosestalpha;
-        return true;
-      }
-      break;
-    case 1824:
-      HASH_GUARD(0x2D213FD80048F720LL, usleep) {
-        ci = &ci_usleep;
         return true;
       }
       break;
@@ -87582,24 +88558,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1830:
-      HASH_GUARD(0x523AB2EA95DAD726LL, get_included_files) {
-        ci = &ci_get_included_files;
-        return true;
-      }
-      break;
-    case 1831:
-      HASH_GUARD(0x11641BE0F11CD727LL, magickgammaimage) {
-        ci = &ci_magickgammaimage;
-        return true;
-      }
-      break;
-    case 1833:
-      HASH_GUARD(0x1D30F1E638D71729LL, readgzfile) {
-        ci = &ci_readgzfile;
-        return true;
-      }
-      break;
     case 1834:
       HASH_GUARD(0x17C0D9B1C10B872ALL, openssl_x509_export) {
         ci = &ci_openssl_x509_export;
@@ -87607,12 +88565,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x1F98B41362CDA72ALL, magickgetimagegreenprimary) {
         ci = &ci_magickgetimagegreenprimary;
-        return true;
-      }
-      break;
-    case 1837:
-      HASH_GUARD(0x14563723F798172DLL, magickpaintopaqueimage) {
-        ci = &ci_magickpaintopaqueimage;
         return true;
       }
       break;
@@ -87628,21 +88580,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1850:
-      HASH_GUARD(0x404236CC5ABD973ALL, xhprof_run_trace) {
-        ci = &ci_xhprof_run_trace;
-        return true;
-      }
-      break;
     case 1855:
       HASH_GUARD(0x650E641CC0E3873FLL, connection_aborted) {
         ci = &ci_connection_aborted;
-        return true;
-      }
-      break;
-    case 1857:
-      HASH_GUARD(0x5062777D2B947741LL, wordwrap) {
-        ci = &ci_wordwrap;
         return true;
       }
       break;
@@ -87662,30 +88602,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1865:
-      HASH_GUARD(0x73E4417BA7B49749LL, curl_multi_info_read) {
-        ci = &ci_curl_multi_info_read;
-        return true;
-      }
-      break;
-    case 1866:
-      HASH_GUARD(0x1FF03B7DE19DD74ALL, drawpathmovetorelative) {
-        ci = &ci_drawpathmovetorelative;
-        return true;
-      }
-      break;
-    case 1867:
-      HASH_GUARD(0x7DA9307A6149B74BLL, get_meta_tags) {
-        ci = &ci_get_meta_tags;
-        return true;
-      }
-      break;
-    case 1873:
-      HASH_GUARD(0x017FF216C00D9751LL, property_exists) {
-        ci = &ci_property_exists;
-        return true;
-      }
-      break;
     case 1875:
       HASH_GUARD(0x42795829DF700753LL, mysql_get_host_info) {
         ci = &ci_mysql_get_host_info;
@@ -87701,22 +88617,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1879:
       HASH_GUARD(0x7554E3E8674F2757LL, mb_list_encodings) {
         ci = &ci_mb_list_encodings;
-        return true;
-      }
-      break;
-    case 1883:
-      HASH_GUARD(0x05D293F45C15F75BLL, ldap_mod_del) {
-        ci = &ci_ldap_mod_del;
-        return true;
-      }
-      HASH_GUARD(0x0ED4D905630EB75BLL, openssl_random_pseudo_bytes) {
-        ci = &ci_openssl_random_pseudo_bytes;
-        return true;
-      }
-      break;
-    case 1884:
-      HASH_GUARD(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename) {
-        ci = &ci_hphp_splfileinfo_getbasename;
         return true;
       }
       break;
@@ -87748,22 +88648,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1893:
-      HASH_GUARD(0x1D803CE961921765LL, md5) {
-        ci = &ci_md5;
-        return true;
-      }
-      HASH_GUARD(0x45631C592AD6D765LL, str_ireplace) {
-        ci = &ci_str_ireplace;
-        return true;
-      }
-      break;
-    case 1894:
-      HASH_GUARD(0x1F4505BE6460D766LL, scandir) {
-        ci = &ci_scandir;
-        return true;
-      }
-      break;
     case 1895:
       HASH_GUARD(0x2FC27987B3F88767LL, dom_node_clone_node) {
         ci = &ci_dom_node_clone_node;
@@ -87780,41 +88664,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1901:
-      HASH_GUARD(0x3304663FBC6C976DLL, get_html_translation_table) {
-        ci = &ci_get_html_translation_table;
-        return true;
-      }
-      HASH_GUARD(0x553ADA5A41AE976DLL, mb_ereg_replace) {
-        ci = &ci_mb_ereg_replace;
-        return true;
-      }
-      break;
-    case 1902:
-      HASH_GUARD(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf) {
-        ci = &ci_hphp_splfileobject_fscanf;
-        return true;
-      }
-      break;
     case 1904:
       HASH_GUARD(0x6F6C5B9E3DC64770LL, drawgetstrokemiterlimit) {
         ci = &ci_drawgetstrokemiterlimit;
         return true;
       }
       break;
-    case 1909:
-      HASH_GUARD(0x04D9076808F79775LL, getenv) {
-        ci = &ci_getenv;
-        return true;
-      }
-      break;
     case 1910:
       HASH_GUARD(0x616DDB67073A0776LL, ord) {
         ci = &ci_ord;
-        return true;
-      }
-      HASH_GUARD(0x4102C410C5031776LL, magickcolorizeimage) {
-        ci = &ci_magickcolorizeimage;
         return true;
       }
       break;
@@ -87828,12 +88686,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1915:
-      HASH_GUARD(0x129E39AC523A977BLL, magickgethomeurl) {
-        ci = &ci_magickgethomeurl;
-        return true;
-      }
-      break;
     case 1920:
       HASH_GUARD(0x29824AAA934CE780LL, array_filter) {
         ci = &ci_array_filter;
@@ -87843,34 +88695,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1923:
       HASH_GUARD(0x53B4DBE58B356783LL, imagesetthickness) {
         ci = &ci_imagesetthickness;
-        return true;
-      }
-      HASH_GUARD(0x38704D99FEA9B783LL, mysql_fetch_array) {
-        ci = &ci_mysql_fetch_array;
-        return true;
-      }
-      break;
-    case 1924:
-      HASH_GUARD(0x784FD2E7191A3784LL, drawpathellipticarcrelative) {
-        ci = &ci_drawpathellipticarcrelative;
-        return true;
-      }
-      break;
-    case 1925:
-      HASH_GUARD(0x5BFC6198960A5785LL, in_array) {
-        ci = &ci_in_array;
-        return true;
-      }
-      break;
-    case 1927:
-      HASH_GUARD(0x4991643BD854D787LL, drawgetexceptionstring) {
-        ci = &ci_drawgetexceptionstring;
-        return true;
-      }
-      break;
-    case 1928:
-      HASH_GUARD(0x32D8CE5D0FA6D788LL, ldap_rename) {
-        ci = &ci_ldap_rename;
         return true;
       }
       break;
@@ -87892,39 +88716,21 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 1940:
+      HASH_GUARD(0x66ECE26DDCC12794LL, imap_fetchheader) {
+        ci = &ci_imap_fetchheader;
+        return true;
+      }
+      break;
     case 1941:
       HASH_GUARD(0x34BA3AAA6711C795LL, dom_document_create_entity_reference) {
         ci = &ci_dom_document_create_entity_reference;
         return true;
       }
       break;
-    case 1942:
-      HASH_GUARD(0x5B42B2AB1B57D796LL, array_replace) {
-        ci = &ci_array_replace;
-        return true;
-      }
-      break;
     case 1945:
       HASH_GUARD(0x26D226FD28566799LL, date_isodate_set) {
         ci = &ci_date_isodate_set;
-        return true;
-      }
-      break;
-    case 1947:
-      HASH_GUARD(0x1196D899ACCD379BLL, evhttp_recv) {
-        ci = &ci_evhttp_recv;
-        return true;
-      }
-      break;
-    case 1949:
-      HASH_GUARD(0x02ECD8C169DF579DLL, feof) {
-        ci = &ci_feof;
-        return true;
-      }
-      break;
-    case 1951:
-      HASH_GUARD(0x4B092931EFB7979FLL, mysql_create_db) {
-        ci = &ci_mysql_create_db;
         return true;
       }
       break;
@@ -87939,10 +88745,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mcrypt_list_algorithms;
         return true;
       }
-      HASH_GUARD(0x7707A7FEA07FB7A9LL, hphp_recursivedirectoryiterator___construct) {
-        ci = &ci_hphp_recursivedirectoryiterator___construct;
-        return true;
-      }
       break;
     case 1962:
       HASH_GUARD(0x45A53A884414A7AALL, pack) {
@@ -87954,29 +88756,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1965:
-      HASH_GUARD(0x7DA08D9D148837ADLL, posix_mkfifo) {
-        ci = &ci_posix_mkfifo;
-        return true;
-      }
-      break;
-    case 1966:
-      HASH_GUARD(0x00141B0E3E6F77AELL, xml_set_unparsed_entity_decl_handler) {
-        ci = &ci_xml_set_unparsed_entity_decl_handler;
-        return true;
-      }
-      break;
-    case 1967:
-      HASH_GUARD(0x16CB9891EF26D7AFLL, drawgetstrokedashoffset) {
-        ci = &ci_drawgetstrokedashoffset;
-        return true;
-      }
-      break;
     case 1977:
-      HASH_GUARD(0x1FC9406FD7FCD7B9LL, strrpos) {
-        ci = &ci_strrpos;
-        return true;
-      }
       HASH_GUARD(0x1B6467AD87E167B9LL, log1p) {
         ci = &ci_log1p;
         return true;
@@ -87998,12 +88778,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 1985:
-      HASH_GUARD(0x4E172EA6743697C1LL, ldap_first_entry) {
-        ci = &ci_ldap_first_entry;
-        return true;
-      }
-      break;
     case 1988:
       HASH_GUARD(0x3C696836396BE7C4LL, mb_language) {
         ci = &ci_mb_language;
@@ -88011,24 +88785,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 1990:
-      HASH_GUARD(0x0C8A7BE6ABC957C6LL, clearpixeliterator) {
-        ci = &ci_clearpixeliterator;
-        return true;
-      }
       HASH_GUARD(0x3D6D684AF537A7C6LL, ldap_explode_dn) {
         ci = &ci_ldap_explode_dn;
-        return true;
-      }
-      break;
-    case 1991:
-      HASH_GUARD(0x686C5142FD0337C7LL, lcg_value) {
-        ci = &ci_lcg_value;
-        return true;
-      }
-      break;
-    case 1993:
-      HASH_GUARD(0x6BF7D7B5FBFF77C9LL, hphp_get_thread_id) {
-        ci = &ci_hphp_get_thread_id;
         return true;
       }
       break;
@@ -88042,6 +88800,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
+    case 1997:
+      HASH_GUARD(0x4C19B770DFFFE7CDLL, imap_listmailbox) {
+        ci = &ci_imap_listmailbox;
+        return true;
+      }
+      break;
     case 1998:
       HASH_GUARD(0x3AE33FEA6830C7CELL, magickshearimage) {
         ci = &ci_magickshearimage;
@@ -88051,12 +88815,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 1999:
       HASH_GUARD(0x2FAB1F75659707CFLL, is_scalar) {
         ci = &ci_is_scalar;
-        return true;
-      }
-      break;
-    case 2001:
-      HASH_GUARD(0x35B661C87484D7D1LL, openssl_csr_sign) {
-        ci = &ci_openssl_csr_sign;
         return true;
       }
       break;
@@ -88090,18 +88848,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2020:
-      HASH_GUARD(0x2621680306BC97E4LL, magicksetimagescene) {
-        ci = &ci_magicksetimagescene;
-        return true;
-      }
-      break;
-    case 2023:
-      HASH_GUARD(0x4215DDB57604F7E7LL, xmlwriter_start_pi) {
-        ci = &ci_xmlwriter_start_pi;
-        return true;
-      }
-      break;
     case 2024:
       HASH_GUARD(0x53B7BF8991FA67E8LL, i18n_loc_get_error_code) {
         ci = &ci_i18n_loc_get_error_code;
@@ -88124,35 +88870,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2029:
-      HASH_GUARD(0x0DC2C2D372EC97EDLL, hphp_crash_log) {
-        ci = &ci_hphp_crash_log;
-        return true;
-      }
-      break;
-    case 2031:
-      HASH_GUARD(0x5367B0F3A4D2D7EFLL, ldap_list) {
-        ci = &ci_ldap_list;
-        return true;
-      }
-      break;
-    case 2032:
-      HASH_GUARD(0x14F700DD189DB7F0LL, drawsetclipunits) {
-        ci = &ci_drawsetclipunits;
-        return true;
-      }
-      break;
     case 2035:
-      HASH_GUARD(0x73877357478137F3LL, posix_ctermid) {
-        ci = &ci_posix_ctermid;
-        return true;
-      }
       HASH_GUARD(0x4B57E07A323FE7F3LL, drawpathlinetoverticalabsolute) {
         ci = &ci_drawpathlinetoverticalabsolute;
-        return true;
-      }
-      HASH_GUARD(0x7F436B50B7BBD7F3LL, getcwd) {
-        ci = &ci_getcwd;
         return true;
       }
       break;
@@ -88186,47 +88906,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2051:
-      HASH_GUARD(0x10F7244AA9CB5803LL, imagepstext) {
-        ci = &ci_imagepstext;
-        return true;
-      }
-      break;
     case 2052:
       HASH_GUARD(0x349A0DF6723B6804LL, pixelsetcolorcount) {
         ci = &ci_pixelsetcolorcount;
         return true;
       }
       break;
-    case 2054:
-      HASH_GUARD(0x4D832DD6A72AB806LL, dom_document_create_attribute) {
-        ci = &ci_dom_document_create_attribute;
-        return true;
-      }
-      break;
     case 2056:
       HASH_GUARD(0x19279D6DB4F70808LL, hash_hmac) {
         ci = &ci_hash_hmac;
-        return true;
-      }
-      HASH_GUARD(0x083B8F01AE15B808LL, assert) {
-        ci = &ci_assert;
-        return true;
-      }
-      break;
-    case 2057:
-      HASH_GUARD(0x52DCFB6F41D41809LL, dom_characterdata_append_data) {
-        ci = &ci_dom_characterdata_append_data;
-        return true;
-      }
-      HASH_GUARD(0x221F5A9D5E021809LL, magickwriteimages) {
-        ci = &ci_magickwriteimages;
-        return true;
-      }
-      break;
-    case 2058:
-      HASH_GUARD(0x5A0D1AE1D4C6F80ALL, array_slice) {
-        ci = &ci_array_slice;
         return true;
       }
       break;
@@ -88241,10 +88929,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_getmyinode;
         return true;
       }
-      HASH_GUARD(0x727F5A6D8E26B80DLL, extension_loaded) {
-        ci = &ci_extension_loaded;
-        return true;
-      }
       break;
     case 2064:
       HASH_GUARD(0x4297B1072CE76810LL, fb_call_user_func_array_safe) {
@@ -88257,42 +88941,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_pixelsetmagentaquantum;
         return true;
       }
-      HASH_GUARD(0x5F7940A713863813LL, floor) {
-        ci = &ci_floor;
-        return true;
-      }
-      break;
-    case 2068:
-      HASH_GUARD(0x3C0DFA15D3447814LL, rawurldecode) {
-        ci = &ci_rawurldecode;
-        return true;
-      }
-      break;
-    case 2071:
-      HASH_GUARD(0x0D8B1D0A8C381817LL, stream_bucket_new) {
-        ci = &ci_stream_bucket_new;
-        return true;
-      }
-      break;
-    case 2072:
-      HASH_GUARD(0x0FBDB0B22A59B818LL, mailparse_msg_parse) {
-        ci = &ci_mailparse_msg_parse;
-        return true;
-      }
-      break;
-    case 2077:
-      HASH_GUARD(0x4D624A655A9B581DLL, drawpoint) {
-        ci = &ci_drawpoint;
-        return true;
-      }
       break;
     case 2081:
       HASH_GUARD(0x2D52FB9B52EC2821LL, xml_set_notation_decl_handler) {
         ci = &ci_xml_set_notation_decl_handler;
-        return true;
-      }
-      HASH_GUARD(0x107DBCA79C15B821LL, addcslashes) {
-        ci = &ci_addcslashes;
         return true;
       }
       break;
@@ -88319,10 +88971,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_stream_context_get_options;
         return true;
       }
-      HASH_GUARD(0x57FFCEB7FA2D9829LL, usort) {
-        ci = &ci_usort;
-        return true;
-      }
       break;
     case 2092:
       HASH_GUARD(0x34F0E032AB05C82CLL, pixelsetblue) {
@@ -88336,37 +88984,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2094:
-      HASH_GUARD(0x3402C1E7544C382ELL, lstat) {
-        ci = &ci_lstat;
-        return true;
-      }
-      break;
     case 2095:
       HASH_GUARD(0x79A05154A7F5482FLL, magickgetimagedelay) {
         ci = &ci_magickgetimagedelay;
-        return true;
-      }
-      break;
-    case 2096:
-      HASH_GUARD(0x5BBFA7EAEBD25830LL, pixelgetcyanquantum) {
-        ci = &ci_pixelgetcyanquantum;
-        return true;
-      }
-      break;
-    case 2100:
-      HASH_GUARD(0x605132E71CE7D834LL, array_push) {
-        ci = &ci_array_push;
-        return true;
-      }
-      break;
-    case 2101:
-      HASH_GUARD(0x1C4A162E6635B835LL, imageftbbox) {
-        ci = &ci_imageftbbox;
-        return true;
-      }
-      HASH_GUARD(0x43A96BA7F58EB835LL, hphp_splfileobject_valid) {
-        ci = &ci_hphp_splfileobject_valid;
         return true;
       }
       break;
@@ -88375,28 +88995,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mysql_unbuffered_query;
         return true;
       }
-      HASH_GUARD(0x03098F16B0AD5838LL, mcrypt_module_get_supported_key_sizes) {
-        ci = &ci_mcrypt_module_get_supported_key_sizes;
-        return true;
-      }
       HASH_GUARD(0x0890F9052322E838LL, fstat) {
         ci = &ci_fstat;
-        return true;
-      }
-      break;
-    case 2107:
-      HASH_GUARD(0x63E2EA180786B83BLL, pixelsetblack) {
-        ci = &ci_pixelsetblack;
-        return true;
-      }
-      break;
-    case 2108:
-      HASH_GUARD(0x7C8969C75CA1783CLL, get_declared_classes) {
-        ci = &ci_get_declared_classes;
-        return true;
-      }
-      HASH_GUARD(0x034EDEBD109FD83CLL, filesize) {
-        ci = &ci_filesize;
         return true;
       }
       break;
@@ -88430,12 +89030,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2124:
-      HASH_GUARD(0x26A2BBC465A2B84CLL, strcoll) {
-        ci = &ci_strcoll;
-        return true;
-      }
-      break;
     case 2126:
       HASH_GUARD(0x488C2F267BF2884ELL, array_intersect) {
         ci = &ci_array_intersect;
@@ -88454,18 +89048,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2129:
-      HASH_GUARD(0x488BFCC942C73851LL, gzopen) {
-        ci = &ci_gzopen;
-        return true;
-      }
-      break;
-    case 2134:
-      HASH_GUARD(0x51FD8C9B5109F856LL, dom_characterdata_replace_data) {
-        ci = &ci_dom_characterdata_replace_data;
-        return true;
-      }
-      break;
     case 2140:
       HASH_GUARD(0x5A017A4C6A41E85CLL, curl_multi_add_handle) {
         ci = &ci_curl_multi_add_handle;
@@ -88473,24 +89055,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2142:
-      HASH_GUARD(0x3D8327794429585ELL, hphpd_install_user_command) {
-        ci = &ci_hphpd_install_user_command;
-        return true;
-      }
       HASH_GUARD(0x6B4DE6865142285ELL, destroypixeliterator) {
         ci = &ci_destroypixeliterator;
-        return true;
-      }
-      break;
-    case 2145:
-      HASH_GUARD(0x2AD6B0E3B9F3B861LL, array_search) {
-        ci = &ci_array_search;
-        return true;
-      }
-      break;
-    case 2147:
-      HASH_GUARD(0x21B30164F5D49863LL, is_resource) {
-        ci = &ci_is_resource;
         return true;
       }
       break;
@@ -88500,21 +89066,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2151:
-      HASH_GUARD(0x65A68A31B96E7867LL, hash) {
-        ci = &ci_hash;
-        return true;
-      }
-      break;
     case 2152:
       HASH_GUARD(0x785C812E6292E868LL, i18n_loc_set_default) {
         ci = &ci_i18n_loc_set_default;
-        return true;
-      }
-      break;
-    case 2153:
-      HASH_GUARD(0x246EC2B1844DB869LL, pixelgetexception) {
-        ci = &ci_pixelgetexception;
         return true;
       }
       break;
@@ -88558,28 +89112,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2167:
-      HASH_GUARD(0x6AA3788C9B737877LL, magickdespeckleimage) {
-        ci = &ci_magickdespeckleimage;
-        return true;
-      }
-      break;
-    case 2168:
-      HASH_GUARD(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute) {
-        ci = &ci_drawpathcurvetoquadraticbezierabsolute;
-        return true;
-      }
-      break;
-    case 2172:
-      HASH_GUARD(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate) {
-        ci = &ci_hphp_splfileobject_ftruncate;
-        return true;
-      }
-      HASH_GUARD(0x6451BCB825D1787CLL, chroot) {
-        ci = &ci_chroot;
-        return true;
-      }
-      break;
     case 2173:
       HASH_GUARD(0x54F84DC9A334287DLL, gzencode) {
         ci = &ci_gzencode;
@@ -88587,12 +89119,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x2B36081E0828487DLL, debug_print_backtrace) {
         ci = &ci_debug_print_backtrace;
-        return true;
-      }
-      break;
-    case 2176:
-      HASH_GUARD(0x7549612A72BA5880LL, hphp_splfileinfo_getrealpath) {
-        ci = &ci_hphp_splfileinfo_getrealpath;
         return true;
       }
       break;
@@ -88608,17 +89134,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2184:
-      HASH_GUARD(0x1062CF2DA5443888LL, imagedashedline) {
-        ci = &ci_imagedashedline;
-        return true;
-      }
-      break;
     case 2191:
-      HASH_GUARD(0x5DDC2A079AB7988FLL, dom_document_schema_validate_file) {
-        ci = &ci_dom_document_schema_validate_file;
-        return true;
-      }
       HASH_GUARD(0x539868C56806688FLL, imagecopyresampled) {
         ci = &ci_imagecopyresampled;
         return true;
@@ -88630,61 +89146,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2205:
-      HASH_GUARD(0x1FC855F0E4F1189DLL, magickminifyimage) {
-        ci = &ci_magickminifyimage;
-        return true;
-      }
-      break;
     case 2208:
       HASH_GUARD(0x6B1A3BCE67BAC8A0LL, openssl_csr_new) {
         ci = &ci_openssl_csr_new;
         return true;
       }
       break;
-    case 2209:
-      HASH_GUARD(0x1756D4437A4098A1LL, date_modify) {
-        ci = &ci_date_modify;
-        return true;
-      }
-      break;
-    case 2215:
-      HASH_GUARD(0x57105D4E43B078A7LL, magicksetformat) {
-        ci = &ci_magicksetformat;
-        return true;
-      }
-      HASH_GUARD(0x6C6B4B739AE1B8A7LL, curl_close) {
-        ci = &ci_curl_close;
-        return true;
-      }
-      break;
-    case 2217:
-      HASH_GUARD(0x346B2DB3BA2378A9LL, imagecolormatch) {
-        ci = &ci_imagecolormatch;
-        return true;
-      }
-      break;
-    case 2218:
-      HASH_GUARD(0x44BC069A75EE98AALL, xhprof_disable) {
-        ci = &ci_xhprof_disable;
-        return true;
-      }
-      break;
-    case 2219:
-      HASH_GUARD(0x39F11BA6A4D778ABLL, strnatcmp) {
-        ci = &ci_strnatcmp;
-        return true;
-      }
-      break;
     case 2220:
-      HASH_GUARD(0x5B1F4C6424DDD8ACLL, openlog) {
-        ci = &ci_openlog;
-        return true;
-      }
-      break;
-    case 2224:
-      HASH_GUARD(0x2CEF8DDC092698B0LL, drawgetvectorgraphics) {
-        ci = &ci_drawgetvectorgraphics;
+      HASH_GUARD(0x1EFFE951E79348ACLL, imap_expunge) {
+        ci = &ci_imap_expunge;
         return true;
       }
       break;
@@ -88694,9 +89164,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2230:
-      HASH_GUARD(0x5866C5DF3A1AD8B6LL, dom_element_get_attribute_node) {
-        ci = &ci_dom_element_get_attribute_node;
+    case 2234:
+      HASH_GUARD(0x28D343EC901608BALL, imap_listsubscribed) {
+        ci = &ci_imap_listsubscribed;
         return true;
       }
       break;
@@ -88734,12 +89204,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2257:
-      HASH_GUARD(0x1015EB3F52B098D1LL, print) {
-        ci = &ci_print;
-        return true;
-      }
-      break;
     case 2258:
       HASH_GUARD(0x74EB6C564ABC68D2LL, dom_document_create_text_node) {
         ci = &ci_dom_document_create_text_node;
@@ -88763,6 +89227,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2264:
+      HASH_GUARD(0x69FB5DBA88A308D8LL, imap_8bit) {
+        ci = &ci_imap_8bit;
+        return true;
+      }
       HASH_GUARD(0x3A65182A3E8908D8LL, openssl_open) {
         ci = &ci_openssl_open;
         return true;
@@ -88771,12 +89239,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2265:
       HASH_GUARD(0x18B64D6BFE4208D9LL, stream_get_transports) {
         ci = &ci_stream_get_transports;
-        return true;
-      }
-      break;
-    case 2267:
-      HASH_GUARD(0x4052842EC87038DBLL, magickcropimage) {
-        ci = &ci_magickcropimage;
         return true;
       }
       break;
@@ -88804,18 +89266,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2280:
-      HASH_GUARD(0x4F7ED8C3156AD8E8LL, magicksetimagedispose) {
-        ci = &ci_magicksetimagedispose;
-        return true;
-      }
-      break;
-    case 2293:
-      HASH_GUARD(0x45DA105C5B48F8F5LL, apd_set_pprof_trace) {
-        ci = &ci_apd_set_pprof_trace;
-        return true;
-      }
-      break;
     case 2295:
       HASH_GUARD(0x17582BEA497D48F7LL, ctype_alpha) {
         ci = &ci_ctype_alpha;
@@ -88834,12 +89284,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2300:
-      HASH_GUARD(0x4C2AFB2EFDB1B8FCLL, stripslashes) {
-        ci = &ci_stripslashes;
-        return true;
-      }
-      break;
     case 2302:
       HASH_GUARD(0x047BF4D3D0ED08FELL, strchr) {
         ci = &ci_strchr;
@@ -88847,24 +89291,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2315:
-      HASH_GUARD(0x67B879A1120C190BLL, headers_sent) {
-        ci = &ci_headers_sent;
-        return true;
-      }
       HASH_GUARD(0x2987B15E11FE890BLL, clock_settime) {
         ci = &ci_clock_settime;
         return true;
       }
       break;
     case 2321:
-      HASH_GUARD(0x04F822B7817E5911LL, bindec) {
-        ci = &ci_bindec;
-        return true;
-      }
-      HASH_GUARD(0x0AFD4F231D6CB911LL, magickaddimage) {
-        ci = &ci_magickaddimage;
-        return true;
-      }
       HASH_GUARD(0x5B9B2C3B32906911LL, drawsetfillpatternurl) {
         ci = &ci_drawsetfillpatternurl;
         return true;
@@ -88882,12 +89314,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2329:
-      HASH_GUARD(0x022B16C0D64D7919LL, file_put_contents) {
-        ci = &ci_file_put_contents;
-        return true;
-      }
-      break;
     case 2331:
       HASH_GUARD(0x37A3DF6E0795091BLL, memcache_increment) {
         ci = &ci_memcache_increment;
@@ -88900,41 +89326,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2335:
-      HASH_GUARD(0x277D7E2D1F5C191FLL, drawpathcurvetoquadraticbezierrelative) {
-        ci = &ci_drawpathcurvetoquadraticbezierrelative;
-        return true;
-      }
-      HASH_GUARD(0x4E2C55C92D71F91FLL, magickcolorfloodfillimage) {
-        ci = &ci_magickcolorfloodfillimage;
-        return true;
-      }
-      break;
     case 2337:
       HASH_GUARD(0x0F5917FFCDD6C921LL, mb_substr) {
         ci = &ci_mb_substr;
         return true;
       }
       break;
-    case 2339:
-      HASH_GUARD(0x044B276686B77923LL, fscanf) {
-        ci = &ci_fscanf;
-        return true;
-      }
-      break;
     case 2346:
       HASH_GUARD(0x174C510386E6492ALL, hphp_directoryiterator_key) {
         ci = &ci_hphp_directoryiterator_key;
-        return true;
-      }
-      break;
-    case 2349:
-      HASH_GUARD(0x27363CE6CBFC392DLL, pcntl_wexitstatus) {
-        ci = &ci_pcntl_wexitstatus;
-        return true;
-      }
-      HASH_GUARD(0x2337F8C3EE17192DLL, sprintf) {
-        ci = &ci_sprintf;
         return true;
       }
       break;
@@ -88949,16 +89349,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mail;
         return true;
       }
-      HASH_GUARD(0x30972530BD557930LL, shell_exec) {
-        ci = &ci_shell_exec;
-        return true;
-      }
-      break;
-    case 2354:
-      HASH_GUARD(0x72C01E1D90BE5932LL, mcrypt_enc_get_block_size) {
-        ci = &ci_mcrypt_enc_get_block_size;
-        return true;
-      }
       break;
     case 2356:
       HASH_GUARD(0x4FB95164A5F84934LL, mcrypt_generic_end) {
@@ -88971,14 +89361,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mysql_escape_string;
         return true;
       }
-      HASH_GUARD(0x06486B6912479935LL, zlib_get_coding_type) {
-        ci = &ci_zlib_get_coding_type;
-        return true;
-      }
-      HASH_GUARD(0x48D3CA6CA0B29935LL, mb_regex_set_options) {
-        ci = &ci_mb_regex_set_options;
-        return true;
-      }
       break;
     case 2361:
       HASH_GUARD(0x5B60C8396C624939LL, mb_substitute_character) {
@@ -88987,10 +89369,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2366:
-      HASH_GUARD(0x3946D67A0D16D93ELL, hphp_splfileinfo_isreadable) {
-        ci = &ci_hphp_splfileinfo_isreadable;
-        return true;
-      }
       HASH_GUARD(0x0CADFE289C92893ELL, socket_getpeername) {
         ci = &ci_socket_getpeername;
         return true;
@@ -89014,33 +89392,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2376:
-      HASH_GUARD(0x6A3412DE82715948LL, openssl_x509_checkpurpose) {
-        ci = &ci_openssl_x509_checkpurpose;
-        return true;
-      }
-      break;
-    case 2377:
-      HASH_GUARD(0x243BB8B284895949LL, apache_get_rewrite_rules) {
-        ci = &ci_apache_get_rewrite_rules;
-        return true;
-      }
-      break;
-    case 2379:
-      HASH_GUARD(0x37F356F578FA394BLL, substr) {
-        ci = &ci_substr;
-        return true;
-      }
-      break;
     case 2381:
       HASH_GUARD(0x3D3AD12E52FF294DLL, imagecreatefromwbmp) {
         ci = &ci_imagecreatefromwbmp;
-        return true;
-      }
-      break;
-    case 2387:
-      HASH_GUARD(0x068438AFD33A9953LL, imagecolorclosesthwb) {
-        ci = &ci_imagecolorclosesthwb;
         return true;
       }
       break;
@@ -89078,22 +89432,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2415:
-      HASH_GUARD(0x134EF88685C0396FLL, magickgetexceptiontype) {
-        ci = &ci_magickgetexceptiontype;
-        return true;
-      }
-      break;
-    case 2417:
-      HASH_GUARD(0x442A28FB6F6C3971LL, xmlwriter_start_attribute) {
-        ci = &ci_xmlwriter_start_attribute;
-        return true;
-      }
-      HASH_GUARD(0x72C73F5DA7D6F971LL, magickgetimagecolormapcolor) {
-        ci = &ci_magickgetimagecolormapcolor;
-        return true;
-      }
-      break;
     case 2418:
       HASH_GUARD(0x758263CEBF2E8972LL, assert_options) {
         ci = &ci_assert_options;
@@ -89122,24 +89460,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2432:
-      HASH_GUARD(0x3D3445105C335980LL, filectime) {
-        ci = &ci_filectime;
-        return true;
-      }
-      break;
-    case 2434:
-      HASH_GUARD(0x214EA70BDD8FB982LL, magickmorphimages) {
-        ci = &ci_magickmorphimages;
-        return true;
-      }
-      break;
-    case 2435:
-      HASH_GUARD(0x3DA64BF893DBF983LL, strncmp) {
-        ci = &ci_strncmp;
-        return true;
-      }
-      break;
     case 2438:
       HASH_GUARD(0x6ECE4BDB8842E986LL, posix_strerror) {
         ci = &ci_posix_strerror;
@@ -89157,10 +89477,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_drawsettextencoding;
         return true;
       }
-      HASH_GUARD(0x55BE7AE8DEF3F988LL, magickgetstringheight) {
-        ci = &ci_magickgetstringheight;
-        return true;
-      }
       break;
     case 2441:
       HASH_GUARD(0x60BF7CDD733A2989LL, bzerrstr) {
@@ -89168,35 +89484,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2443:
-      HASH_GUARD(0x0E863EF8C11A598BLL, is_writable) {
-        ci = &ci_is_writable;
-        return true;
-      }
-      break;
-    case 2445:
-      HASH_GUARD(0x69003892F71C798DLL, apache_get_scoreboard) {
-        ci = &ci_apache_get_scoreboard;
-        return true;
-      }
-      HASH_GUARD(0x651A8CBB8D2A398DLL, mysql_stat) {
-        ci = &ci_mysql_stat;
-        return true;
-      }
-      break;
     case 2446:
-      HASH_GUARD(0x45CFDEE19995398ELL, hphp_recursiveiteratoriterator_next) {
-        ci = &ci_hphp_recursiveiteratoriterator_next;
-        return true;
-      }
       HASH_GUARD(0x333D4DFD4927898ELL, magickgetimagewhitepoint) {
         ci = &ci_magickgetimagewhitepoint;
         return true;
       }
       break;
-    case 2448:
-      HASH_GUARD(0x342D957A86A03990LL, hphp_splfileobject_seek) {
-        ci = &ci_hphp_splfileobject_seek;
+    case 2451:
+      HASH_GUARD(0x79AD7C6D77A3A993LL, imap_reopen) {
+        ci = &ci_imap_reopen;
         return true;
       }
       break;
@@ -89209,12 +89505,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2459:
       HASH_GUARD(0x564D8D3DA1E8E99BLL, xml_get_current_line_number) {
         ci = &ci_xml_get_current_line_number;
-        return true;
-      }
-      break;
-    case 2462:
-      HASH_GUARD(0x59D2DFF08F4DB99ELL, imagecreate) {
-        ci = &ci_imagecreate;
         return true;
       }
       break;
@@ -89240,12 +89530,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2468:
-      HASH_GUARD(0x6F8676B049C919A4LL, array_intersect_uassoc) {
-        ci = &ci_array_intersect_uassoc;
-        return true;
-      }
-      break;
     case 2469:
       HASH_GUARD(0x76988956F35329A5LL, xmlwriter_end_cdata) {
         ci = &ci_xmlwriter_end_cdata;
@@ -89258,24 +89542,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2476:
-      HASH_GUARD(0x522256BAA78159ACLL, popen) {
-        ci = &ci_popen;
-        return true;
-      }
-      break;
-    case 2477:
-      HASH_GUARD(0x05C5AD90751159ADLL, drawpathcurvetoquadraticbeziersmoothabsolute) {
-        ci = &ci_drawpathcurvetoquadraticbeziersmoothabsolute;
-        return true;
-      }
-      break;
-    case 2479:
-      HASH_GUARD(0x25268012A48A99AFLL, magickclipimage) {
-        ci = &ci_magickclipimage;
-        return true;
-      }
-      break;
     case 2481:
       HASH_GUARD(0x7C1CE38F14E529B1LL, date_default_timezone_set) {
         ci = &ci_date_default_timezone_set;
@@ -89285,40 +89551,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2482:
       HASH_GUARD(0x65D7CBE8681CE9B2LL, gzgetss) {
         ci = &ci_gzgetss;
-        return true;
-      }
-      break;
-    case 2486:
-      HASH_GUARD(0x5FC1B94446EA59B6LL, magickremoveimageprofiles) {
-        ci = &ci_magickremoveimageprofiles;
-        return true;
-      }
-      break;
-    case 2487:
-      HASH_GUARD(0x18F2C246FACAD9B7LL, each) {
-        ci = &ci_each;
-        return true;
-      }
-      break;
-    case 2488:
-      HASH_GUARD(0x3741447B159359B8LL, mcrypt_get_cipher_name) {
-        ci = &ci_mcrypt_get_cipher_name;
-        return true;
-      }
-      HASH_GUARD(0x4EFD7A9C90E559B8LL, posix_ttyname) {
-        ci = &ci_posix_ttyname;
-        return true;
-      }
-      break;
-    case 2489:
-      HASH_GUARD(0x145702974C97F9B9LL, ltrim) {
-        ci = &ci_ltrim;
-        return true;
-      }
-      break;
-    case 2490:
-      HASH_GUARD(0x13B3172E092D99BALL, is_dir) {
-        ci = &ci_is_dir;
         return true;
       }
       break;
@@ -89340,12 +89572,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2500:
-      HASH_GUARD(0x47B7D3745D80B9C4LL, socket_get_option) {
-        ci = &ci_socket_get_option;
-        return true;
-      }
-      break;
     case 2502:
       HASH_GUARD(0x080F661DB8BFC9C6LL, hphp_splfileinfo_getmtime) {
         ci = &ci_hphp_splfileinfo_getmtime;
@@ -89355,18 +89581,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2503:
       HASH_GUARD(0x6ECDF24B29D789C7LL, strtolower) {
         ci = &ci_strtolower;
-        return true;
-      }
-      break;
-    case 2506:
-      HASH_GUARD(0x5C5B0CC85133B9CALL, mkdir) {
-        ci = &ci_mkdir;
-        return true;
-      }
-      break;
-    case 2507:
-      HASH_GUARD(0x032DFAC5B24679CBLL, header_remove) {
-        ci = &ci_header_remove;
         return true;
       }
       break;
@@ -89388,12 +89602,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2514:
-      HASH_GUARD(0x3DCCD1FEAD8759D2LL, array_sum) {
-        ci = &ci_array_sum;
-        return true;
-      }
-      break;
     case 2515:
       HASH_GUARD(0x1C31A9E1207209D3LL, mb_split) {
         ci = &ci_mb_split;
@@ -89405,12 +89613,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x25CA0299103F49D3LL, magickgetsize) {
         ci = &ci_magickgetsize;
-        return true;
-      }
-      break;
-    case 2517:
-      HASH_GUARD(0x245860A2FE4CB9D5LL, socket_set_blocking) {
-        ci = &ci_socket_set_blocking;
         return true;
       }
       break;
@@ -89432,12 +89634,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2527:
-      HASH_GUARD(0x349E2E0F2CD7B9DFLL, magickgetversion) {
-        ci = &ci_magickgetversion;
-        return true;
-      }
-      break;
     case 2534:
       HASH_GUARD(0x1B44CF284E9B09E6LL, interface_exists) {
         ci = &ci_interface_exists;
@@ -89445,40 +89641,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2537:
-      HASH_GUARD(0x4ADFA265F07AB9E9LL, drawgettextalignment) {
-        ci = &ci_drawgettextalignment;
-        return true;
-      }
       HASH_GUARD(0x6A45EB471332A9E9LL, imagecolorexactalpha) {
         ci = &ci_imagecolorexactalpha;
         return true;
       }
       HASH_GUARD(0x330EE2729DB7C9E9LL, drawgetfontstretch) {
         ci = &ci_drawgetfontstretch;
-        return true;
-      }
-      break;
-    case 2538:
-      HASH_GUARD(0x25DDD924EFE979EALL, hash_update_file) {
-        ci = &ci_hash_update_file;
-        return true;
-      }
-      break;
-    case 2539:
-      HASH_GUARD(0x71B0FF80B88459EBLL, diskfreespace) {
-        ci = &ci_diskfreespace;
-        return true;
-      }
-      break;
-    case 2543:
-      HASH_GUARD(0x7EA6200B688459EFLL, ldap_modify) {
-        ci = &ci_ldap_modify;
-        return true;
-      }
-      break;
-    case 2544:
-      HASH_GUARD(0x1FC307200E8959F0LL, stream_bucket_append) {
-        ci = &ci_stream_bucket_append;
         return true;
       }
       break;
@@ -89499,10 +89667,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_drawgetfontweight;
         return true;
       }
-      HASH_GUARD(0x35BABFBC091759F5LL, socket_server) {
-        ci = &ci_socket_server;
-        return true;
-      }
       break;
     case 2557:
       HASH_GUARD(0x2394D4E030AB69FDLL, getmypid) {
@@ -89515,36 +89679,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_memcache_get_extended_stats;
         return true;
       }
-      HASH_GUARD(0x17B83C425BD09A04LL, atanh) {
-        ci = &ci_atanh;
-        return true;
-      }
       break;
-    case 2567:
-      HASH_GUARD(0x391E0A4CF1EC9A07LL, stream_socket_recvfrom) {
-        ci = &ci_stream_socket_recvfrom;
-        return true;
-      }
-      break;
-    case 2568:
-      HASH_GUARD(0x0436CA4DFB315A08LL, soundex) {
-        ci = &ci_soundex;
-        return true;
-      }
-      break;
-    case 2571:
-      HASH_GUARD(0x70075DC878825A0BLL, ctype_lower) {
-        ci = &ci_ctype_lower;
-        return true;
-      }
-      break;
-    case 2573:
-      HASH_GUARD(0x736C133EFF8E5A0DLL, mysql_list_fields) {
-        ci = &ci_mysql_list_fields;
-        return true;
-      }
-      HASH_GUARD(0x50A7146A79877A0DLL, pcntl_alarm) {
-        ci = &ci_pcntl_alarm;
+    case 2572:
+      HASH_GUARD(0x13E0C91488484A0CLL, imap_unsubscribe) {
+        ci = &ci_imap_unsubscribe;
         return true;
       }
       break;
@@ -89600,12 +89738,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2601:
-      HASH_GUARD(0x618D2A98986B1A29LL, ldap_unbind) {
-        ci = &ci_ldap_unbind;
-        return true;
-      }
-      break;
     case 2602:
       HASH_GUARD(0x3CAEA6B8D1C92A2ALL, stream_bucket_prepend) {
         ci = &ci_stream_bucket_prepend;
@@ -89624,47 +89756,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2612:
-      HASH_GUARD(0x2D948E4099975A34LL, restore_include_path) {
-        ci = &ci_restore_include_path;
-        return true;
-      }
-      HASH_GUARD(0x5AB266C6E7075A34LL, mysql_error) {
-        ci = &ci_mysql_error;
-        return true;
-      }
-      break;
-    case 2616:
-      HASH_GUARD(0x3E65EF9761BE5A38LL, pixelgetiteratorexceptiontype) {
-        ci = &ci_pixelgetiteratorexceptiontype;
-        return true;
-      }
-      break;
     case 2619:
       HASH_GUARD(0x545A7BE199EC4A3BLL, pcntl_getpriority) {
         ci = &ci_pcntl_getpriority;
-        return true;
-      }
-      HASH_GUARD(0x785ECCF53D98BA3BLL, curl_multi_exec) {
-        ci = &ci_curl_multi_exec;
         return true;
       }
       break;
     case 2620:
       HASH_GUARD(0x21DF7BAEEFABCA3CLL, umask) {
         ci = &ci_umask;
-        return true;
-      }
-      break;
-    case 2622:
-      HASH_GUARD(0x31C3A072D092FA3ELL, socket_create_listen) {
-        ci = &ci_socket_create_listen;
-        return true;
-      }
-      break;
-    case 2623:
-      HASH_GUARD(0x4C0E2C6882051A3FLL, magickgetresourcelimit) {
-        ci = &ci_magickgetresourcelimit;
         return true;
       }
       break;
@@ -89678,31 +89778,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2626:
-      HASH_GUARD(0x128914E131AFFA42LL, microtime) {
-        ci = &ci_microtime;
-        return true;
-      }
-      HASH_GUARD(0x5FF7C3A6BDDCFA42LL, mb_convert_kana) {
-        ci = &ci_mb_convert_kana;
-        return true;
-      }
-      break;
     case 2628:
       HASH_GUARD(0x7F6A6306BBE8AA44LL, imagelayereffect) {
         ci = &ci_imagelayereffect;
-        return true;
-      }
-      break;
-    case 2629:
-      HASH_GUARD(0x7CDF1FB642529A45LL, dom_characterdata_insert_data) {
-        ci = &ci_dom_characterdata_insert_data;
-        return true;
-      }
-      break;
-    case 2631:
-      HASH_GUARD(0x1B45CFF586F85A47LL, utf8_encode) {
-        ci = &ci_utf8_encode;
         return true;
       }
       break;
@@ -89713,12 +89791,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x7039B1C3356B8A4CLL, hphp_splfileobject_rewind) {
         ci = &ci_hphp_splfileobject_rewind;
-        return true;
-      }
-      break;
-    case 2638:
-      HASH_GUARD(0x1635DCC4882CBA4ELL, dom_node_has_attributes) {
-        ci = &ci_dom_node_has_attributes;
         return true;
       }
       break;
@@ -89741,12 +89813,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2648:
       HASH_GUARD(0x6E823A722DE1EA58LL, stream_socket_client) {
         ci = &ci_stream_socket_client;
-        return true;
-      }
-      break;
-    case 2651:
-      HASH_GUARD(0x2B18DFF183C0BA5BLL, mb_get_info) {
-        ci = &ci_mb_get_info;
         return true;
       }
       break;
@@ -89778,65 +89844,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2662:
-      HASH_GUARD(0x60C4B9EEDBD5FA66LL, pos) {
-        ci = &ci_pos;
-        return true;
-      }
-      break;
-    case 2664:
-      HASH_GUARD(0x01DD2057FD9B1A68LL, xmlwriter_write_cdata) {
-        ci = &ci_xmlwriter_write_cdata;
-        return true;
-      }
-      HASH_GUARD(0x32AD0455A7689A68LL, magickoilpaintimage) {
-        ci = &ci_magickoilpaintimage;
-        return true;
-      }
-      break;
     case 2665:
       HASH_GUARD(0x1DD37E722E11AA69LL, session_regenerate_id) {
         ci = &ci_session_regenerate_id;
-        return true;
-      }
-      HASH_GUARD(0x10CDCF2BB4057A69LL, debug_zval_dump) {
-        ci = &ci_debug_zval_dump;
-        return true;
-      }
-      break;
-    case 2667:
-      HASH_GUARD(0x0912965F4440FA6BLL, str_repeat) {
-        ci = &ci_str_repeat;
-        return true;
-      }
-      break;
-    case 2673:
-      HASH_GUARD(0x5B5DA6AD0AD63A71LL, drawannotation) {
-        ci = &ci_drawannotation;
-        return true;
-      }
-      break;
-    case 2674:
-      HASH_GUARD(0x71AFF1D58D103A72LL, imagefontheight) {
-        ci = &ci_imagefontheight;
-        return true;
-      }
-      break;
-    case 2677:
-      HASH_GUARD(0x7A957BEC6CA57A75LL, preg_replace_callback) {
-        ci = &ci_preg_replace_callback;
         return true;
       }
       break;
     case 2681:
       HASH_GUARD(0x28AC28C54C4E6A79LL, openssl_error_string) {
         ci = &ci_openssl_error_string;
-        return true;
-      }
-      break;
-    case 2685:
-      HASH_GUARD(0x414C2E31304E9A7DLL, stream_get_filters) {
-        ci = &ci_stream_get_filters;
         return true;
       }
       break;
@@ -89851,16 +89867,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_newpixelwands;
         return true;
       }
-      HASH_GUARD(0x79786FABC5551A82LL, jpeg2wbmp) {
-        ci = &ci_jpeg2wbmp;
-        return true;
-      }
-      break;
-    case 2691:
-      HASH_GUARD(0x11149278DB0A9A83LL, levenshtein) {
-        ci = &ci_levenshtein;
-        return true;
-      }
       break;
     case 2692:
       HASH_GUARD(0x08C1A5A05B6A0A84LL, ob_get_length) {
@@ -89869,10 +89875,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2693:
-      HASH_GUARD(0x755DEFDEDF35DA85LL, ctype_print) {
-        ci = &ci_ctype_print;
-        return true;
-      }
       HASH_GUARD(0x2180916F8D4F6A85LL, drawcomment) {
         ci = &ci_drawcomment;
         return true;
@@ -89884,37 +89886,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2696:
-      HASH_GUARD(0x1818A3CFBA357A88LL, magicksetwandsize) {
-        ci = &ci_magicksetwandsize;
-        return true;
-      }
-      break;
     case 2699:
-      HASH_GUARD(0x7588BD0546C8BA8BLL, hphp_recursivedirectoryiterator_valid) {
-        ci = &ci_hphp_recursivedirectoryiterator_valid;
-        return true;
-      }
       HASH_GUARD(0x7ACBCD9CF335AA8BLL, xmlwriter_start_document) {
         ci = &ci_xmlwriter_start_document;
-        return true;
-      }
-      break;
-    case 2700:
-      HASH_GUARD(0x6A2EEE463F969A8CLL, getservbyname) {
-        ci = &ci_getservbyname;
-        return true;
-      }
-      break;
-    case 2706:
-      HASH_GUARD(0x1257DB9F159E9A92LL, magickmontageimage) {
-        ci = &ci_magickmontageimage;
-        return true;
-      }
-      break;
-    case 2707:
-      HASH_GUARD(0x4A32653C8E719A93LL, pixelgetcyan) {
-        ci = &ci_pixelgetcyan;
         return true;
       }
       break;
@@ -89927,42 +89901,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_magickstripimage;
         return true;
       }
-      HASH_GUARD(0x4B1501C4C22FFA94LL, quoted_printable_encode) {
-        ci = &ci_quoted_printable_encode;
-        return true;
-      }
       HASH_GUARD(0x0AC7CBCE30442A94LL, imagepalettecopy) {
         ci = &ci_imagepalettecopy;
-        return true;
-      }
-      break;
-    case 2709:
-      HASH_GUARD(0x34B8A4E5AE0EFA95LL, pixelgetopacity) {
-        ci = &ci_pixelgetopacity;
-        return true;
-      }
-      break;
-    case 2711:
-      HASH_GUARD(0x0089115038C03A97LL, array_diff_ukey) {
-        ci = &ci_array_diff_ukey;
-        return true;
-      }
-      break;
-    case 2714:
-      HASH_GUARD(0x19AFF8596E19DA9ALL, xhprof_enable) {
-        ci = &ci_xhprof_enable;
-        return true;
-      }
-      break;
-    case 2717:
-      HASH_GUARD(0x1234AB687C515A9DLL, mb_encode_numericentity) {
-        ci = &ci_mb_encode_numericentity;
-        return true;
-      }
-      break;
-    case 2719:
-      HASH_GUARD(0x2E5E23ECA0525A9FLL, bcadd) {
-        ci = &ci_bcadd;
         return true;
       }
       break;
@@ -89978,21 +89918,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2725:
-      HASH_GUARD(0x2418528164415AA5LL, magickscaleimage) {
-        ci = &ci_magickscaleimage;
-        return true;
-      }
-      break;
     case 2726:
       HASH_GUARD(0x4BBA1E164DF9CAA6LL, localeconv) {
         ci = &ci_localeconv;
-        return true;
-      }
-      break;
-    case 2727:
-      HASH_GUARD(0x797CEC173CBB7AA7LL, ob_get_flush) {
-        ci = &ci_ob_get_flush;
         return true;
       }
       break;
@@ -90025,20 +89953,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_drawgettextundercolor;
         return true;
       }
-      HASH_GUARD(0x62519270CC9F1AB2LL, stream_get_meta_data) {
-        ci = &ci_stream_get_meta_data;
-        return true;
-      }
       break;
     case 2740:
       HASH_GUARD(0x1BAFB965204D0AB4LL, openssl_x509_check_private_key) {
         ci = &ci_openssl_x509_check_private_key;
-        return true;
-      }
-      break;
-    case 2751:
-      HASH_GUARD(0x030DFC3D3C88BABFLL, filegroup) {
-        ci = &ci_filegroup;
         return true;
       }
       break;
@@ -90049,14 +89967,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2759:
-      HASH_GUARD(0x5D2F899A270D9AC7LL, xmlwriter_end_dtd_element) {
-        ci = &ci_xmlwriter_end_dtd_element;
-        return true;
-      }
-      HASH_GUARD(0x79215854355CBAC7LL, proc_get_status) {
-        ci = &ci_proc_get_status;
-        return true;
-      }
       HASH_GUARD(0x3886D2664F874AC7LL, openssl_pkcs7_verify) {
         ci = &ci_openssl_pkcs7_verify;
         return true;
@@ -90085,32 +89995,14 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_imagecolorexact;
         return true;
       }
-      HASH_GUARD(0x2BD6476D2C467ACCLL, pagelet_server_task_status) {
-        ci = &ci_pagelet_server_task_status;
-        return true;
-      }
       break;
     case 2765:
-      HASH_GUARD(0x173EDC165B673ACDLL, magicktransformimage) {
-        ci = &ci_magicktransformimage;
-        return true;
-      }
-      break;
-    case 2769:
-      HASH_GUARD(0x47E2B4F7B8DE5AD1LL, xmlwriter_write_dtd_attlist) {
-        ci = &ci_xmlwriter_write_dtd_attlist;
-        return true;
-      }
-      HASH_GUARD(0x314317450857FAD1LL, ctype_punct) {
-        ci = &ci_ctype_punct;
+      HASH_GUARD(0x604572CB0314EACDLL, imap_listscan) {
+        ci = &ci_imap_listscan;
         return true;
       }
       break;
     case 2773:
-      HASH_GUARD(0x0D5DAF8034B41AD5LL, get_include_path) {
-        ci = &ci_get_include_path;
-        return true;
-      }
       HASH_GUARD(0x5338F971C6DCEAD5LL, hphp_splfileinfo_islink) {
         ci = &ci_hphp_splfileinfo_islink;
         return true;
@@ -90133,26 +90025,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_echo;
         return true;
       }
-      HASH_GUARD(0x56E867A1F7507ADBLL, dom_document_create_processing_instruction) {
-        ci = &ci_dom_document_create_processing_instruction;
-        return true;
-      }
       break;
     case 2780:
       HASH_GUARD(0x547E7EE64761AADCLL, imagecreatefromxbm) {
         ci = &ci_imagecreatefromxbm;
-        return true;
-      }
-      break;
-    case 2781:
-      HASH_GUARD(0x3E319E451A32FADDLL, magicksharpenimage) {
-        ci = &ci_magicksharpenimage;
-        return true;
-      }
-      break;
-    case 2782:
-      HASH_GUARD(0x31D1C58F7BD89ADELL, hphp_directoryiterator_seek) {
-        ci = &ci_hphp_directoryiterator_seek;
         return true;
       }
       break;
@@ -90173,60 +90049,20 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2795:
-      HASH_GUARD(0x225F05071947BAEBLL, drawpathlinetoabsolute) {
-        ci = &ci_drawpathlinetoabsolute;
-        return true;
-      }
-      break;
-    case 2797:
-      HASH_GUARD(0x46C33B4739C2FAEDLL, shm_remove_var) {
-        ci = &ci_shm_remove_var;
-        return true;
-      }
-      break;
-    case 2798:
-      HASH_GUARD(0x160A82E3E2CBBAEELL, is_finite) {
-        ci = &ci_is_finite;
-        return true;
-      }
-      break;
-    case 2800:
-      HASH_GUARD(0x6B259D5D9D681AF0LL, register_postsend_function) {
-        ci = &ci_register_postsend_function;
-        return true;
-      }
-      break;
-    case 2804:
-      HASH_GUARD(0x2EC0ABF9A979FAF4LL, ob_get_level) {
-        ci = &ci_ob_get_level;
-        return true;
-      }
-      break;
-    case 2806:
-      HASH_GUARD(0x2C7C9772AE983AF6LL, drawsetgravity) {
-        ci = &ci_drawsetgravity;
+      HASH_GUARD(0x528D41A17B8FCAEBLL, imap_set_quota) {
+        ci = &ci_imap_set_quota;
         return true;
       }
       break;
     case 2808:
-      HASH_GUARD(0x12859AD75BAF3AF8LL, magickreadimageblob) {
-        ci = &ci_magickreadimageblob;
-        return true;
-      }
       HASH_GUARD(0x757229A894864AF8LL, session_set_cookie_params) {
         ci = &ci_session_set_cookie_params;
         return true;
       }
       break;
-    case 2813:
-      HASH_GUARD(0x16BA422EB6C51AFDLL, gzwrite) {
-        ci = &ci_gzwrite;
-        return true;
-      }
-      break;
-    case 2814:
-      HASH_GUARD(0x04E86BA79B6CBAFELL, stream_socket_shutdown) {
-        ci = &ci_stream_socket_shutdown;
+    case 2810:
+      HASH_GUARD(0x3C32181DDB860AFALL, imap_getacl) {
+        ci = &ci_imap_getacl;
         return true;
       }
       break;
@@ -90236,17 +90072,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2817:
-      HASH_GUARD(0x6F3503C7FB12DB01LL, lchgrp) {
-        ci = &ci_lchgrp;
-        return true;
-      }
-      break;
     case 2819:
-      HASH_GUARD(0x673A96C50F00FB03LL, str_word_count) {
-        ci = &ci_str_word_count;
-        return true;
-      }
       HASH_GUARD(0x32458C11C6E74B03LL, pixelsetblackquantum) {
         ci = &ci_pixelsetblackquantum;
         return true;
@@ -90255,10 +90081,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2826:
       HASH_GUARD(0x14B366EF64A66B0ALL, get_loaded_extensions) {
         ci = &ci_get_loaded_extensions;
-        return true;
-      }
-      HASH_GUARD(0x14AF32A23B507B0ALL, metaphone) {
-        ci = &ci_metaphone;
         return true;
       }
       break;
@@ -90284,18 +90106,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2839:
-      HASH_GUARD(0x66F9A476DAB47B17LL, pixelsetcolor) {
-        ci = &ci_pixelsetcolor;
-        return true;
-      }
-      break;
-    case 2840:
-      HASH_GUARD(0x70448A629A74FB18LL, ksort) {
-        ci = &ci_ksort;
-        return true;
-      }
-      break;
     case 2841:
       HASH_GUARD(0x0551EACBE8278B19LL, decoct) {
         ci = &ci_decoct;
@@ -90314,51 +90124,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2844:
-      HASH_GUARD(0x249399CEC35B7B1CLL, png2wbmp) {
-        ci = &ci_png2wbmp;
-        return true;
-      }
-      break;
-    case 2846:
-      HASH_GUARD(0x7160AA24D4251B1ELL, mb_strripos) {
-        ci = &ci_mb_strripos;
-        return true;
-      }
-      break;
-    case 2848:
-      HASH_GUARD(0x1112712715D75B20LL, pixelgetblackquantum) {
-        ci = &ci_pixelgetblackquantum;
-        return true;
-      }
-      break;
     case 2853:
       HASH_GUARD(0x798F2776FECAEB25LL, get_required_files) {
         ci = &ci_get_required_files;
         return true;
       }
       break;
-    case 2854:
-      HASH_GUARD(0x24CE95457EACBB26LL, get_parent_class) {
-        ci = &ci_get_parent_class;
-        return true;
-      }
-      break;
     case 2857:
       HASH_GUARD(0x17C38BE3A6EE8B29LL, mysql_field_flags) {
         ci = &ci_mysql_field_flags;
-        return true;
-      }
-      break;
-    case 2858:
-      HASH_GUARD(0x1F4984938E1DBB2ALL, sort) {
-        ci = &ci_sort;
-        return true;
-      }
-      break;
-    case 2860:
-      HASH_GUARD(0x70742211FA3EFB2CLL, imagettftext) {
-        ci = &ci_imagettftext;
         return true;
       }
       break;
@@ -90373,50 +90147,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_set_exception_handler;
         return true;
       }
-      HASH_GUARD(0x4D5D45D1F1EB3B33LL, posix_access) {
-        ci = &ci_posix_access;
-        return true;
-      }
-      break;
-    case 2868:
-      HASH_GUARD(0x0B7D52E2540ABB34LL, tan) {
-        ci = &ci_tan;
-        return true;
-      }
       break;
     case 2869:
       HASH_GUARD(0x78842C1950B38B35LL, drawpathfinish) {
         ci = &ci_drawpathfinish;
-        return true;
-      }
-      break;
-    case 2871:
-      HASH_GUARD(0x053B14F52350FB37LL, socket_shutdown) {
-        ci = &ci_socket_shutdown;
-        return true;
-      }
-      break;
-    case 2872:
-      HASH_GUARD(0x68C09D6CB8E79B38LL, class_exists) {
-        ci = &ci_class_exists;
-        return true;
-      }
-      break;
-    case 2873:
-      HASH_GUARD(0x02A2C373E54FFB39LL, hash_init) {
-        ci = &ci_hash_init;
-        return true;
-      }
-      break;
-    case 2874:
-      HASH_GUARD(0x49A45F75B2B25B3ALL, apd_breakpoint) {
-        ci = &ci_apd_breakpoint;
-        return true;
-      }
-      break;
-    case 2876:
-      HASH_GUARD(0x35F4A0789F367B3CLL, drawpathlinetohorizontalrelative) {
-        ci = &ci_drawpathlinetohorizontalrelative;
         return true;
       }
       break;
@@ -90426,31 +90160,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2879:
-      HASH_GUARD(0x0B07AD87DF1B5B3FLL, urldecode) {
-        ci = &ci_urldecode;
-        return true;
-      }
-      break;
-    case 2880:
-      HASH_GUARD(0x24CBCBA5C4407B40LL, evhttp_set_cache) {
-        ci = &ci_evhttp_set_cache;
-        return true;
-      }
-      break;
-    case 2884:
-      HASH_GUARD(0x4E4449EBAADD7B44LL, magickpingimage) {
-        ci = &ci_magickpingimage;
-        return true;
-      }
-      break;
     case 2885:
       HASH_GUARD(0x684881C79ED1AB45LL, func_get_args) {
         ci = &ci_func_get_args;
-        return true;
-      }
-      HASH_GUARD(0x72E3AE55A0B33B45LL, ispixelwand) {
-        ci = &ci_ispixelwand;
         return true;
       }
       break;
@@ -90478,12 +90190,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2901:
-      HASH_GUARD(0x333FB673518A1B55LL, ldap_get_entries) {
-        ci = &ci_ldap_get_entries;
-        return true;
-      }
-      break;
     case 2904:
       HASH_GUARD(0x6158E2E0A5ACCB58LL, idn_to_ascii) {
         ci = &ci_idn_to_ascii;
@@ -90500,24 +90206,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2909:
-      HASH_GUARD(0x4888951358F53B5DLL, dom_document_get_elements_by_tag_name_ns) {
-        ci = &ci_dom_document_get_elements_by_tag_name_ns;
-        return true;
-      }
-      break;
-    case 2913:
-      HASH_GUARD(0x7636825871399B61LL, highlight_file) {
-        ci = &ci_highlight_file;
-        return true;
-      }
-      break;
-    case 2920:
-      HASH_GUARD(0x674F1DA24EDE7B68LL, xmlwriter_end_attribute) {
-        ci = &ci_xmlwriter_end_attribute;
-        return true;
-      }
-      break;
     case 2922:
       HASH_GUARD(0x4BD4E9D9D4A56B6ALL, exif_tagname) {
         ci = &ci_exif_tagname;
@@ -90525,10 +90213,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 2923:
-      HASH_GUARD(0x5543A0CACD153B6BLL, substr_replace) {
-        ci = &ci_substr_replace;
-        return true;
-      }
       HASH_GUARD(0x1D4136B4CEAE4B6BLL, stripcslashes) {
         ci = &ci_stripcslashes;
         return true;
@@ -90546,49 +90230,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2929:
-      HASH_GUARD(0x5E5C875DB04CFB71LL, drawrectangle) {
-        ci = &ci_drawrectangle;
-        return true;
-      }
-      break;
-    case 2933:
-      HASH_GUARD(0x42F0AED7599C1B75LL, magickechoimageblob) {
-        ci = &ci_magickechoimageblob;
-        return true;
-      }
-      break;
-    case 2934:
-      HASH_GUARD(0x2A63A0BF9B7E3B76LL, ini_alter) {
-        ci = &ci_ini_alter;
-        return true;
-      }
-      break;
-    case 2935:
-      HASH_GUARD(0x7F5F29D8E63ABB77LL, mcrypt_module_self_test) {
-        ci = &ci_mcrypt_module_self_test;
-        return true;
-      }
-      HASH_GUARD(0x5025B43B46679B77LL, openssl_x509_free) {
-        ci = &ci_openssl_x509_free;
-        return true;
-      }
-      break;
     case 2937:
       HASH_GUARD(0x31242F51AA828B79LL, drawpoppattern) {
         ci = &ci_drawpoppattern;
-        return true;
-      }
-      break;
-    case 2940:
-      HASH_GUARD(0x3A096F905FBF7B7CLL, magickcommentimage) {
-        ci = &ci_magickcommentimage;
-        return true;
-      }
-      break;
-    case 2941:
-      HASH_GUARD(0x28DE19828167FB7DLL, magickmapimage) {
-        ci = &ci_magickmapimage;
         return true;
       }
       break;
@@ -90610,45 +90254,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2955:
-      HASH_GUARD(0x3B72159A4B04FB8BLL, set_time_limit) {
-        ci = &ci_set_time_limit;
-        return true;
-      }
-      break;
-    case 2957:
-      HASH_GUARD(0x3B831DB1A615FB8DLL, xhprof_sample_enable) {
-        ci = &ci_xhprof_sample_enable;
-        return true;
-      }
-      break;
-    case 2958:
-      HASH_GUARD(0x62A4D7A03F7C3B8ELL, ceil) {
-        ci = &ci_ceil;
-        return true;
-      }
-      break;
     case 2967:
       HASH_GUARD(0x09837A82A928AB97LL, is_null) {
         ci = &ci_is_null;
-        return true;
-      }
-      break;
-    case 2969:
-      HASH_GUARD(0x076E66D4089A3B99LL, mb_stripos) {
-        ci = &ci_mb_stripos;
-        return true;
-      }
-      break;
-    case 2970:
-      HASH_GUARD(0x023133732CB51B9ALL, exif_thumbnail) {
-        ci = &ci_exif_thumbnail;
-        return true;
-      }
-      break;
-    case 2975:
-      HASH_GUARD(0x390A267EC6B51B9FLL, socket_sendto) {
-        ci = &ci_socket_sendto;
         return true;
       }
       break;
@@ -90664,18 +90272,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 2980:
-      HASH_GUARD(0x0D95DD13A2D3BBA4LL, drawtranslate) {
-        ci = &ci_drawtranslate;
-        return true;
-      }
-      break;
-    case 2986:
-      HASH_GUARD(0x7C833A303C7CFBAALL, getrandmax) {
-        ci = &ci_getrandmax;
-        return true;
-      }
-      break;
     case 2987:
       HASH_GUARD(0x006481EAF2A70BABLL, ldap_errno) {
         ci = &ci_ldap_errno;
@@ -90685,16 +90281,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 2991:
       HASH_GUARD(0x6A2236CDDFF12BAFLL, magickhaspreviousimage) {
         ci = &ci_magickhaspreviousimage;
-        return true;
-      }
-      break;
-    case 2992:
-      HASH_GUARD(0x1F3E4C6660247BB0LL, imagecolorresolve) {
-        ci = &ci_imagecolorresolve;
-        return true;
-      }
-      HASH_GUARD(0x7D9BF61D6CDE3BB0LL, fb_parallel_query) {
-        ci = &ci_fb_parallel_query;
         return true;
       }
       break;
@@ -90721,22 +90307,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_get_class_vars;
         return true;
       }
-      HASH_GUARD(0x3F56AF1511AEDBBELL, magicklabelimage) {
-        ci = &ci_magicklabelimage;
-        return true;
-      }
       HASH_GUARD(0x5ECB0B145B88EBBELL, imagefilledarc) {
         ci = &ci_imagefilledarc;
         return true;
       }
       HASH_GUARD(0x42684202E2E62BBELL, mcrypt_get_iv_size) {
         ci = &ci_mcrypt_get_iv_size;
-        return true;
-      }
-      break;
-    case 3015:
-      HASH_GUARD(0x10C5CF7B55173BC7LL, settype) {
-        ci = &ci_settype;
         return true;
       }
       break;
@@ -90755,26 +90331,14 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_hphp_throw_fatal_error;
         return true;
       }
-      HASH_GUARD(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner) {
-        ci = &ci_hphp_splfileinfo_getowner;
-        return true;
-      }
       break;
     case 3021:
       HASH_GUARD(0x22251ECF8CD58BCDLL, array_product) {
         ci = &ci_array_product;
         return true;
       }
-      HASH_GUARD(0x53A88C8F973CFBCDLL, apc_clear_cache) {
-        ci = &ci_apc_clear_cache;
-        return true;
-      }
       break;
     case 3022:
-      HASH_GUARD(0x45D6BA980AFFDBCELL, msg_get_queue) {
-        ci = &ci_msg_get_queue;
-        return true;
-      }
       HASH_GUARD(0x600AFF0A6378ABCELL, is_writeable) {
         ci = &ci_is_writeable;
         return true;
@@ -90785,52 +90349,22 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_ctype_digit;
         return true;
       }
-      HASH_GUARD(0x6846CA07A5E21BD0LL, hphp_directoryiterator___construct) {
-        ci = &ci_hphp_directoryiterator___construct;
-        return true;
-      }
-      break;
-    case 3026:
-      HASH_GUARD(0x6FE3C5FF5E883BD2LL, round) {
-        ci = &ci_round;
-        return true;
-      }
       break;
     case 3028:
       HASH_GUARD(0x5B2F2A23D8368BD4LL, magickraiseimage) {
         ci = &ci_magickraiseimage;
         return true;
       }
-      HASH_GUARD(0x4E4EB301A994DBD4LL, drawpolygon) {
-        ci = &ci_drawpolygon;
-        return true;
-      }
       break;
     case 3032:
-      HASH_GUARD(0x21E44C7C7A911BD8LL, phpinfo) {
-        ci = &ci_phpinfo;
-        return true;
-      }
       HASH_GUARD(0x06D5979AB150EBD8LL, dom_node_lookup_namespace_uri) {
         ci = &ci_dom_node_lookup_namespace_uri;
         return true;
       }
       break;
-    case 3038:
-      HASH_GUARD(0x58D0D9B66F045BDELL, strpos) {
-        ci = &ci_strpos;
-        return true;
-      }
-      break;
-    case 3040:
-      HASH_GUARD(0x2E10B74DC6067BE0LL, strip_tags) {
-        ci = &ci_strip_tags;
-        return true;
-      }
-      break;
-    case 3041:
-      HASH_GUARD(0x25FBB61480091BE1LL, mysql_client_encoding) {
-        ci = &ci_mysql_client_encoding;
+    case 3045:
+      HASH_GUARD(0x0E804FCE5C14CBE5LL, imap_sort) {
+        ci = &ci_imap_sort;
         return true;
       }
       break;
@@ -90846,26 +90380,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3051:
-      HASH_GUARD(0x505B44DDF2383BEBLL, drawgetfillcolor) {
-        ci = &ci_drawgetfillcolor;
-        return true;
-      }
-      HASH_GUARD(0x0C1904372E8EDBEBLL, stream_copy_to_stream) {
-        ci = &ci_stream_copy_to_stream;
-        return true;
-      }
-      break;
-    case 3052:
-      HASH_GUARD(0x44279BB3E2191BECLL, socket_accept) {
-        ci = &ci_socket_accept;
-        return true;
-      }
-      HASH_GUARD(0x5A22BA9B012A9BECLL, dom_document_save_html) {
-        ci = &ci_dom_document_save_html;
-        return true;
-      }
-      break;
     case 3054:
       HASH_GUARD(0x03F50E435DE20BEELL, magickclippathimage) {
         ci = &ci_magickclippathimage;
@@ -90876,25 +90390,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3056:
-      HASH_GUARD(0x187C049E785A1BF0LL, iconv_get_encoding) {
-        ci = &ci_iconv_get_encoding;
-        return true;
-      }
-      HASH_GUARD(0x04C0582DB1AD7BF0LL, mt_srand) {
-        ci = &ci_mt_srand;
-        return true;
-      }
-      break;
-    case 3057:
-      HASH_GUARD(0x0CA96856E5BEFBF1LL, iptcparse) {
-        ci = &ci_iptcparse;
-        return true;
-      }
-      break;
     case 3060:
-      HASH_GUARD(0x1444DB037B4D5BF4LL, imagegammacorrect) {
-        ci = &ci_imagegammacorrect;
+      HASH_GUARD(0x46EC26486531ABF4LL, imap_deletemailbox) {
+        ci = &ci_imap_deletemailbox;
         return true;
       }
       break;
@@ -90904,45 +90402,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3063:
-      HASH_GUARD(0x74ABB4A1E10BBBF7LL, time) {
-        ci = &ci_time;
-        return true;
-      }
-      break;
-    case 3065:
-      HASH_GUARD(0x5B7F6E0A642BBBF9LL, sleep) {
-        ci = &ci_sleep;
-        return true;
-      }
-      break;
-    case 3068:
-      HASH_GUARD(0x64F52E1DB5E95BFCLL, curl_multi_remove_handle) {
-        ci = &ci_curl_multi_remove_handle;
-        return true;
-      }
-      break;
-    case 3074:
-      HASH_GUARD(0x249340DF734D9C02LL, magickgetimageheight) {
-        ci = &ci_magickgetimageheight;
-        return true;
-      }
-      break;
     case 3077:
       HASH_GUARD(0x2EC378A759F9EC05LL, xbox_task_status) {
         ci = &ci_xbox_task_status;
         return true;
       }
       break;
-    case 3080:
-      HASH_GUARD(0x48E1616EE837FC08LL, is_uploaded_file) {
-        ci = &ci_is_uploaded_file;
-        return true;
-      }
-      break;
-    case 3082:
-      HASH_GUARD(0x1E47C281193ABC0ALL, collator_compare) {
-        ci = &ci_collator_compare;
+    case 3079:
+      HASH_GUARD(0x66EF68EF3C144C07LL, imap_gc) {
+        ci = &ci_imap_gc;
         return true;
       }
       break;
@@ -90957,18 +90425,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3090:
-      HASH_GUARD(0x062C0FFA8E29DC12LL, intl_error_name) {
-        ci = &ci_intl_error_name;
-        return true;
-      }
       HASH_GUARD(0x510B683F2E764C12LL, fb_load_local_databases) {
         ci = &ci_fb_load_local_databases;
-        return true;
-      }
-      break;
-    case 3095:
-      HASH_GUARD(0x3A702EF906B37C17LL, collator_get_locale) {
-        ci = &ci_collator_get_locale;
         return true;
       }
       break;
@@ -90982,33 +90440,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3100:
-      HASH_GUARD(0x758A62BD65E6FC1CLL, imagegd2) {
-        ci = &ci_imagegd2;
-        return true;
-      }
-      break;
     case 3102:
-      HASH_GUARD(0x7039C5EBB1D6BC1ELL, array_walk) {
-        ci = &ci_array_walk;
-        return true;
-      }
-      break;
-    case 3103:
-      HASH_GUARD(0x3A5D921797669C1FLL, hphp_log) {
-        ci = &ci_hphp_log;
+      HASH_GUARD(0x32D5F30455C90C1ELL, imap_subscribe) {
+        ci = &ci_imap_subscribe;
         return true;
       }
       break;
     case 3104:
       HASH_GUARD(0x7BD43EB167198C20LL, xmlwriter_write_pi) {
         ci = &ci_xmlwriter_write_pi;
-        return true;
-      }
-      break;
-    case 3105:
-      HASH_GUARD(0x0179CBA2C5F4DC21LL, magickgetimageformat) {
-        ci = &ci_magickgetimageformat;
         return true;
       }
       break;
@@ -91036,51 +90476,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3122:
-      HASH_GUARD(0x0B9B362534621C32LL, isdrawingwand) {
-        ci = &ci_isdrawingwand;
-        return true;
-      }
-      break;
-    case 3123:
-      HASH_GUARD(0x49965C44E9EE3C33LL, set_file_buffer) {
-        ci = &ci_set_file_buffer;
-        return true;
-      }
-      break;
     case 3125:
       HASH_GUARD(0x2B9A380A29D0EC35LL, session_write_close) {
         ci = &ci_session_write_close;
         return true;
       }
       break;
-    case 3128:
-      HASH_GUARD(0x21564F9315F3FC38LL, drawsettextdecoration) {
-        ci = &ci_drawsettextdecoration;
-        return true;
-      }
-      break;
-    case 3132:
-      HASH_GUARD(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator) {
-        ci = &ci_hphp_recursiveiteratoriterator_getinneriterator;
-        return true;
-      }
-      break;
-    case 3134:
-      HASH_GUARD(0x15EC581662651C3ELL, date_parse) {
-        ci = &ci_date_parse;
-        return true;
-      }
-      break;
     case 3141:
       HASH_GUARD(0x6EF89BCAD607CC45LL, strncasecmp) {
         ci = &ci_strncasecmp;
-        return true;
-      }
-      break;
-    case 3142:
-      HASH_GUARD(0x7D992445F5E37C46LL, magicktextureimage) {
-        ci = &ci_magicktextureimage;
         return true;
       }
       break;
@@ -91106,21 +90510,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3147:
-      HASH_GUARD(0x120E7B01366DFC4BLL, call_user_func_serialized) {
-        ci = &ci_call_user_func_serialized;
-        return true;
-      }
-      break;
     case 3150:
       HASH_GUARD(0x5DAC1C64D8F08C4ELL, openssl_pkey_get_private) {
         ci = &ci_openssl_pkey_get_private;
-        return true;
-      }
-      break;
-    case 3152:
-      HASH_GUARD(0x04534F26B8D05C50LL, drawgetstrokecolor) {
-        ci = &ci_drawgetstrokecolor;
         return true;
       }
       break;
@@ -91141,38 +90533,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_memcache_decrement;
         return true;
       }
-      HASH_GUARD(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass) {
-        ci = &ci_hphp_splfileinfo_setinfoclass;
-        return true;
-      }
-      break;
-    case 3160:
-      HASH_GUARD(0x1B8C3DA27170DC58LL, dirname) {
-        ci = &ci_dirname;
-        return true;
-      }
-      break;
-    case 3161:
-      HASH_GUARD(0x57633BDF8DB3FC59LL, i18n_loc_set_attribute) {
-        ci = &ci_i18n_loc_set_attribute;
-        return true;
-      }
-      break;
-    case 3166:
-      HASH_GUARD(0x47B38F1E4FA29C5ELL, fb_get_code_coverage) {
-        ci = &ci_fb_get_code_coverage;
-        return true;
-      }
-      break;
-    case 3169:
-      HASH_GUARD(0x6E54EEDA1D887C61LL, magicksetimageinterlacescheme) {
-        ci = &ci_magicksetimageinterlacescheme;
-        return true;
-      }
-      HASH_GUARD(0x5176725DA884DC61LL, curl_setopt) {
-        ci = &ci_curl_setopt;
-        return true;
-      }
       break;
     case 3171:
       HASH_GUARD(0x43C0E9827D502C63LL, array_intersect_assoc) {
@@ -91183,18 +90543,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3172:
       HASH_GUARD(0x3409D717D9246C64LL, libxml_use_internal_errors) {
         ci = &ci_libxml_use_internal_errors;
-        return true;
-      }
-      break;
-    case 3175:
-      HASH_GUARD(0x07DC355325165C67LL, magickwriteimage) {
-        ci = &ci_magickwriteimage;
-        return true;
-      }
-      break;
-    case 3176:
-      HASH_GUARD(0x10D6AE9D688D1C68LL, copy) {
-        ci = &ci_copy;
         return true;
       }
       break;
@@ -91213,16 +90561,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3185:
       HASH_GUARD(0x1E074215FE5FCC71LL, set_error_handler) {
         ci = &ci_set_error_handler;
-        return true;
-      }
-      HASH_GUARD(0x18D9ED67E8E0FC71LL, dom_attr_is_id) {
-        ci = &ci_dom_attr_is_id;
-        return true;
-      }
-      break;
-    case 3188:
-      HASH_GUARD(0x20F0AAA486F39C74LL, dom_element_get_elements_by_tag_name_ns) {
-        ci = &ci_dom_element_get_elements_by_tag_name_ns;
         return true;
       }
       break;
@@ -91270,21 +90608,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3201:
-      HASH_GUARD(0x767806D6F1053C81LL, sin) {
-        ci = &ci_sin;
-        return true;
-      }
-      break;
     case 3204:
       HASH_GUARD(0x5D49AF7004696C84LL, shm_detach) {
         ci = &ci_shm_detach;
-        return true;
-      }
-      break;
-    case 3205:
-      HASH_GUARD(0x56DA17241B793C85LL, mysql_set_timeout) {
-        ci = &ci_mysql_set_timeout;
         return true;
       }
       break;
@@ -91316,18 +90642,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3217:
-      HASH_GUARD(0x4E04B71729485C91LL, clonedrawingwand) {
-        ci = &ci_clonedrawingwand;
-        return true;
-      }
-      break;
-    case 3219:
-      HASH_GUARD(0x0F8242C6327B5C93LL, dns_check_record) {
-        ci = &ci_dns_check_record;
-        return true;
-      }
-      break;
     case 3222:
       HASH_GUARD(0x47C5BC101A512C96LL, magickquantizeimage) {
         ci = &ci_magickquantizeimage;
@@ -91337,18 +90651,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3225:
       HASH_GUARD(0x2EA6E1D600786C99LL, mb_strtoupper) {
         ci = &ci_mb_strtoupper;
-        return true;
-      }
-      break;
-    case 3226:
-      HASH_GUARD(0x374F20BDAF709C9ALL, mb_preferred_mime_name) {
-        ci = &ci_mb_preferred_mime_name;
-        return true;
-      }
-      break;
-    case 3227:
-      HASH_GUARD(0x36F7F9FD7766DC9BLL, xmlwriter_end_comment) {
-        ci = &ci_xmlwriter_end_comment;
         return true;
       }
       break;
@@ -91377,26 +90679,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3246:
-      HASH_GUARD(0x12580A083B0D7CAELL, iterator_apply) {
-        ci = &ci_iterator_apply;
-        return true;
-      }
       HASH_GUARD(0x3ACD2F1EA5282CAELL, magickmattefloodfillimage) {
         ci = &ci_magickmattefloodfillimage;
         return true;
       }
       break;
-    case 3248:
-      HASH_GUARD(0x373B3FADEACB7CB0LL, openssl_private_encrypt) {
-        ci = &ci_openssl_private_encrypt;
-        return true;
-      }
-      break;
     case 3249:
-      HASH_GUARD(0x40D8DC24FA917CB1LL, hphp_splfileobject_fgetss) {
-        ci = &ci_hphp_splfileobject_fgetss;
-        return true;
-      }
       HASH_GUARD(0x735555B148E58CB1LL, ldap_read) {
         ci = &ci_ldap_read;
         return true;
@@ -91421,16 +90709,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3254:
       HASH_GUARD(0x560637BE51C36CB6LL, ezmlm_hash) {
         ci = &ci_ezmlm_hash;
-        return true;
-      }
-      break;
-    case 3255:
-      HASH_GUARD(0x3DFD5CA79919DCB7LL, imageantialias) {
-        ci = &ci_imageantialias;
-        return true;
-      }
-      HASH_GUARD(0x39E03AAC188D3CB7LL, magickgetimagecompressionquality) {
-        ci = &ci_magickgetimagecompressionquality;
         return true;
       }
       break;
@@ -91462,19 +90740,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3264:
-      HASH_GUARD(0x3033FE14E114FCC0LL, magicksetimageblueprimary) {
-        ci = &ci_magicksetimageblueprimary;
-        return true;
-      }
-      break;
     case 3266:
       HASH_GUARD(0x42BCEFCF899D0CC2LL, magickgetimagecolorspace) {
         ci = &ci_magickgetimagecolorspace;
-        return true;
-      }
-      HASH_GUARD(0x34B6388D7730BCC2LL, drawline) {
-        ci = &ci_drawline;
         return true;
       }
       break;
@@ -91484,25 +90752,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3278:
-      HASH_GUARD(0x0183A548B759BCCELL, posix_getpgid) {
-        ci = &ci_posix_getpgid;
-        return true;
-      }
-      HASH_GUARD(0x66273C5932B1FCCELL, clock_gettime) {
-        ci = &ci_clock_gettime;
-        return true;
-      }
-      break;
-    case 3279:
-      HASH_GUARD(0x407B1F3AFEC43CCFLL, pixelgetblue) {
-        ci = &ci_pixelgetblue;
-        return true;
-      }
-      break;
-    case 3281:
-      HASH_GUARD(0x576C5DC462663CD1LL, explode) {
-        ci = &ci_explode;
+    case 3272:
+      HASH_GUARD(0x4CF625DF902F8CC8LL, imap_get_quotaroot) {
+        ci = &ci_imap_get_quotaroot;
         return true;
       }
       break;
@@ -91513,24 +90765,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3283:
-      HASH_GUARD(0x544302E2FAD3FCD3LL, magicknextimage) {
-        ci = &ci_magicknextimage;
-        return true;
-      }
       HASH_GUARD(0x6406BC03A5D84CD3LL, dom_element_remove_attribute) {
         ci = &ci_dom_element_remove_attribute;
-        return true;
-      }
-      break;
-    case 3284:
-      HASH_GUARD(0x323FE1D92C9B3CD4LL, gzdecode) {
-        ci = &ci_gzdecode;
-        return true;
-      }
-      break;
-    case 3285:
-      HASH_GUARD(0x757BC444FDF79CD5LL, posix_get_last_error) {
-        ci = &ci_posix_get_last_error;
         return true;
       }
       break;
@@ -91551,20 +90787,14 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_imageloadfont;
         return true;
       }
-      HASH_GUARD(0x09C6455B4BC6FCDALL, drawsetviewbox) {
-        ci = &ci_drawsetviewbox;
-        return true;
-      }
       break;
     case 3298:
       HASH_GUARD(0x6B92530A9ABA0CE2LL, session_commit) {
         ci = &ci_session_commit;
         return true;
       }
-      break;
-    case 3300:
-      HASH_GUARD(0x7CDDF96AFEA2DCE4LL, chunk_split) {
-        ci = &ci_chunk_split;
+      HASH_GUARD(0x2D5A5580B9FD2CE2LL, imap_setacl) {
+        ci = &ci_imap_setacl;
         return true;
       }
       break;
@@ -91584,27 +90814,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3311:
-      HASH_GUARD(0x6AA89C314C647CEFLL, magickgetimagehistogram) {
-        ci = &ci_magickgetimagehistogram;
-        return true;
-      }
-      break;
     case 3313:
       HASH_GUARD(0x21C8FC9A94404CF1LL, php_ini_scanned_files) {
         ci = &ci_php_ini_scanned_files;
-        return true;
-      }
-      break;
-    case 3314:
-      HASH_GUARD(0x26C49BBC67475CF2LL, magicksetimagewhitepoint) {
-        ci = &ci_magicksetimagewhitepoint;
-        return true;
-      }
-      break;
-    case 3315:
-      HASH_GUARD(0x5C1F75D51C077CF3LL, pixelgetindex) {
-        ci = &ci_pixelgetindex;
         return true;
       }
       break;
@@ -91626,23 +90838,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3323:
-      HASH_GUARD(0x09B4EE276DCCFCFBLL, mysql_fetch_row) {
-        ci = &ci_mysql_fetch_row;
-        return true;
-      }
-      break;
-    case 3326:
-      HASH_GUARD(0x768F3E6D1CBA5CFELL, socket_recv) {
-        ci = &ci_socket_recv;
-        return true;
-      }
-      break;
     case 3327:
-      HASH_GUARD(0x748D3DFF0EB57CFFLL, uniqid) {
-        ci = &ci_uniqid;
-        return true;
-      }
       HASH_GUARD(0x48A2F2A7A4620CFFLL, pixelsetyellowquantum) {
         ci = &ci_pixelsetyellowquantum;
         return true;
@@ -91664,21 +90860,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3334:
-      HASH_GUARD(0x2BA9FB0F8B76DD06LL, number_format) {
-        ci = &ci_number_format;
-        return true;
-      }
-      break;
     case 3335:
       HASH_GUARD(0x19B643D858DC6D07LL, magickgetimagerenderingintent) {
         ci = &ci_magickgetimagerenderingintent;
-        return true;
-      }
-      break;
-    case 3337:
-      HASH_GUARD(0x153F7DBFC9047D09LL, pixelsetred) {
-        ci = &ci_pixelsetred;
         return true;
       }
       break;
@@ -91688,27 +90872,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3340:
-      HASH_GUARD(0x30A8326034801D0CLL, mysql_pconnect) {
-        ci = &ci_mysql_pconnect;
-        return true;
-      }
-      break;
-    case 3341:
-      HASH_GUARD(0x3ACE8A8BC9ACDD0DLL, iconv_mime_decode) {
-        ci = &ci_iconv_mime_decode;
-        return true;
-      }
-      break;
     case 3344:
-      HASH_GUARD(0x42BEEC88EE81FD10LL, imagechar) {
-        ci = &ci_imagechar;
-        return true;
-      }
-      HASH_GUARD(0x08F41A00D5D57D10LL, mb_decode_mimeheader) {
-        ci = &ci_mb_decode_mimeheader;
-        return true;
-      }
       HASH_GUARD(0x5CEFA5A265104D10LL, count) {
         ci = &ci_count;
         return true;
@@ -91717,18 +90881,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3345:
       HASH_GUARD(0x2D484921B5400D11LL, magickradialblurimage) {
         ci = &ci_magickradialblurimage;
-        return true;
-      }
-      break;
-    case 3346:
-      HASH_GUARD(0x5F165B40AEEE5D12LL, hphp_splfileinfo_getfilename) {
-        ci = &ci_hphp_splfileinfo_getfilename;
-        return true;
-      }
-      break;
-    case 3348:
-      HASH_GUARD(0x63837ECAF6235D14LL, preg_replace) {
-        ci = &ci_preg_replace;
         return true;
       }
       break;
@@ -91743,20 +90895,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_xml_parser_get_option;
         return true;
       }
-      HASH_GUARD(0x39994614C6315D1ALL, hphp_recursivedirectoryiterator_key) {
-        ci = &ci_hphp_recursivedirectoryiterator_key;
-        return true;
-      }
       break;
     case 3355:
       HASH_GUARD(0x70C22A7EEF54CD1BLL, ldap_compare) {
         ci = &ci_ldap_compare;
-        return true;
-      }
-      break;
-    case 3358:
-      HASH_GUARD(0x25DADFF238A15D1ELL, collator_create) {
-        ci = &ci_collator_create;
         return true;
       }
       break;
@@ -91766,21 +90908,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3365:
-      HASH_GUARD(0x71DF0C17F47EDD25LL, getprotobynumber) {
-        ci = &ci_getprotobynumber;
-        return true;
-      }
-      break;
     case 3366:
       HASH_GUARD(0x429D088E9779CD26LL, dom_document_normalize_document) {
         ci = &ci_dom_document_normalize_document;
-        return true;
-      }
-      break;
-    case 3368:
-      HASH_GUARD(0x7C12261259F87D28LL, mcrypt_enc_is_block_algorithm_mode) {
-        ci = &ci_mcrypt_enc_is_block_algorithm_mode;
         return true;
       }
       break;
@@ -91790,33 +90920,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3370:
-      HASH_GUARD(0x7A9C06B9CF853D2ALL, substr_count) {
-        ci = &ci_substr_count;
-        return true;
-      }
-      break;
-    case 3378:
-      HASH_GUARD(0x4DAC43060BA57D32LL, stream_wrapper_restore) {
-        ci = &ci_stream_wrapper_restore;
-        return true;
-      }
-      break;
     case 3382:
       HASH_GUARD(0x515841235FADCD36LL, class_implements) {
         ci = &ci_class_implements;
-        return true;
-      }
-      break;
-    case 3383:
-      HASH_GUARD(0x3ACF745D381E9D37LL, rtrim) {
-        ci = &ci_rtrim;
-        return true;
-      }
-      break;
-    case 3384:
-      HASH_GUARD(0x0BA3AD85EB597D38LL, pagelet_server_task_result) {
-        ci = &ci_pagelet_server_task_result;
         return true;
       }
       break;
@@ -91836,55 +90942,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3393:
-      HASH_GUARD(0x6B6DA1EE18673D41LL, xmlwriter_end_dtd_entity) {
-        ci = &ci_xmlwriter_end_dtd_entity;
-        return true;
-      }
-      break;
-    case 3394:
-      HASH_GUARD(0x40497FCA4EC4DD42LL, posix_seteuid) {
-        ci = &ci_posix_seteuid;
-        return true;
-      }
-      HASH_GUARD(0x298BA735FA3ABD42LL, nl_langinfo) {
-        ci = &ci_nl_langinfo;
-        return true;
-      }
-      break;
-    case 3397:
-      HASH_GUARD(0x400A44045A999D45LL, rawurlencode) {
-        ci = &ci_rawurlencode;
-        return true;
-      }
-      break;
-    case 3398:
-      HASH_GUARD(0x502CF4EB0A747D46LL, magicksetimagebias) {
-        ci = &ci_magicksetimagebias;
-        return true;
-      }
-      HASH_GUARD(0x455DB7F86BCEDD46LL, pixelsetopacityquantum) {
-        ci = &ci_pixelsetopacityquantum;
-        return true;
-      }
-      HASH_GUARD(0x59AD2C922FF75D46LL, mdecrypt_generic) {
-        ci = &ci_mdecrypt_generic;
-        return true;
-      }
-      break;
     case 3401:
-      HASH_GUARD(0x113ED435AEFDDD49LL, imagecolorallocatealpha) {
-        ci = &ci_imagecolorallocatealpha;
-        return true;
-      }
       HASH_GUARD(0x41785512C45FCD49LL, mysql_ping) {
         ci = &ci_mysql_ping;
-        return true;
-      }
-      break;
-    case 3407:
-      HASH_GUARD(0x0FBCF35ADD209D4FLL, drawarc) {
-        ci = &ci_drawarc;
         return true;
       }
       break;
@@ -91895,18 +90955,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x337D2252CDA22D50LL, is_real) {
         ci = &ci_is_real;
-        return true;
-      }
-      break;
-    case 3413:
-      HASH_GUARD(0x36D672EF4FBEFD55LL, json_encode) {
-        ci = &ci_json_encode;
-        return true;
-      }
-      break;
-    case 3416:
-      HASH_GUARD(0x146109BDD2F97D58LL, hphp_splfileobject_setmaxlinelen) {
-        ci = &ci_hphp_splfileobject_setmaxlinelen;
         return true;
       }
       break;
@@ -91929,10 +90977,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3424:
-      HASH_GUARD(0x6FACBD7F02B6FD60LL, uasort) {
-        ci = &ci_uasort;
-        return true;
-      }
       HASH_GUARD(0x567276D68FE12D60LL, preg_quote) {
         ci = &ci_preg_quote;
         return true;
@@ -91941,10 +90985,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3425:
       HASH_GUARD(0x34F150F3D94E6D61LL, gzpassthru) {
         ci = &ci_gzpassthru;
-        return true;
-      }
-      HASH_GUARD(0x357BAB6E700EBD61LL, destroypixelwandarray) {
-        ci = &ci_destroypixelwandarray;
         return true;
       }
       break;
@@ -91968,21 +91008,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3438:
-      HASH_GUARD(0x0B1348D1540E7D6ELL, magicksetimageformat) {
-        ci = &ci_magicksetimageformat;
-        return true;
-      }
-      break;
     case 3441:
       HASH_GUARD(0x74FDC4596C654D71LL, dom_node_is_default_namespace) {
         ci = &ci_dom_node_is_default_namespace;
-        return true;
-      }
-      break;
-    case 3443:
-      HASH_GUARD(0x7D8DCC72522CBD73LL, mb_detect_encoding) {
-        ci = &ci_mb_detect_encoding;
         return true;
       }
       break;
@@ -91995,22 +91023,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3447:
       HASH_GUARD(0x3ED49C2BBDDFAD77LL, ldap_next_reference) {
         ci = &ci_ldap_next_reference;
-        return true;
-      }
-      HASH_GUARD(0x7FCAAAB932C57D77LL, iterator_count) {
-        ci = &ci_iterator_count;
-        return true;
-      }
-      break;
-    case 3448:
-      HASH_GUARD(0x6352349F97557D78LL, stream_socket_get_name) {
-        ci = &ci_stream_socket_get_name;
-        return true;
-      }
-      break;
-    case 3451:
-      HASH_GUARD(0x680A7EB3DA1F5D7BLL, prev) {
-        ci = &ci_prev;
         return true;
       }
       break;
@@ -92033,14 +91045,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3458:
-      HASH_GUARD(0x2D15262403ADDD82LL, drawcomposite) {
-        ci = &ci_drawcomposite;
-        return true;
-      }
-      break;
-    case 3459:
-      HASH_GUARD(0x1B0FF5C02F571D83LL, fb_rename_function) {
-        ci = &ci_fb_rename_function;
+      HASH_GUARD(0x363D0D4E6D8ACD82LL, imap_alerts) {
+        ci = &ci_imap_alerts;
         return true;
       }
       break;
@@ -92057,12 +91063,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x1F22C82816F9AD88LL, hphp_splfileinfo_getpath) {
         ci = &ci_hphp_splfileinfo_getpath;
-        return true;
-      }
-      break;
-    case 3465:
-      HASH_GUARD(0x230E7AD147721D89LL, end) {
-        ci = &ci_end;
         return true;
       }
       break;
@@ -92093,22 +91093,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_strftime;
         return true;
       }
-      HASH_GUARD(0x7C2B3FE61FBDFD91LL, openssl_pkey_get_details) {
-        ci = &ci_openssl_pkey_get_details;
-        return true;
-      }
-      break;
-    case 3480:
-      HASH_GUARD(0x06A796D329C21D98LL, call_user_func) {
-        ci = &ci_call_user_func;
-        return true;
-      }
-      break;
-    case 3485:
-      HASH_GUARD(0x74BE8836F3B13D9DLL, session_name) {
-        ci = &ci_session_name;
-        return true;
-      }
       break;
     case 3486:
       HASH_GUARD(0x30C1AE2B06990D9ELL, gzseek) {
@@ -92117,38 +91101,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3488:
-      HASH_GUARD(0x73B43ABDD5C61DA0LL, shuffle) {
-        ci = &ci_shuffle;
-        return true;
-      }
-      HASH_GUARD(0x5E8606470A09BDA0LL, magickposterizeimage) {
-        ci = &ci_magickposterizeimage;
-        return true;
-      }
       HASH_GUARD(0x7084C6294240CDA0LL, octdec) {
         ci = &ci_octdec;
-        return true;
-      }
-      HASH_GUARD(0x167A11C41EB71DA0LL, pixelgetexceptiontype) {
-        ci = &ci_pixelgetexceptiontype;
-        return true;
-      }
-      break;
-    case 3490:
-      HASH_GUARD(0x71583A8FEF5C7DA2LL, sys_get_temp_dir) {
-        ci = &ci_sys_get_temp_dir;
-        return true;
-      }
-      break;
-    case 3493:
-      HASH_GUARD(0x46B2F287D2FC7DA5LL, memcache_get) {
-        ci = &ci_memcache_get;
-        return true;
-      }
-      break;
-    case 3494:
-      HASH_GUARD(0x28DC1AD6DA9E7DA6LL, gethostbyname) {
-        ci = &ci_gethostbyname;
         return true;
       }
       break;
@@ -92157,34 +91111,18 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_dom_element_has_attribute;
         return true;
       }
-      HASH_GUARD(0x572AE270D9E4FDA8LL, socket_set_option) {
-        ci = &ci_socket_set_option;
-        return true;
-      }
       HASH_GUARD(0x474A096265502DA8LL, glob) {
         ci = &ci_glob;
         return true;
       }
-      break;
-    case 3498:
-      HASH_GUARD(0x6326C14D0FFA7DAALL, fb_thrift_serialize) {
-        ci = &ci_fb_thrift_serialize;
+      HASH_GUARD(0x7FB39C41E339ADA8LL, imap_setflag_full) {
+        ci = &ci_imap_setflag_full;
         return true;
       }
       break;
     case 3499:
-      HASH_GUARD(0x188720048AB37DABLL, magickquantizeimages) {
-        ci = &ci_magickquantizeimages;
-        return true;
-      }
       HASH_GUARD(0x66764CAABFF4CDABLL, array_keys) {
         ci = &ci_array_keys;
-        return true;
-      }
-      break;
-    case 3505:
-      HASH_GUARD(0x67EAC6D7332F3DB1LL, hphp_splfileobject_fgetcsv) {
-        ci = &ci_hphp_splfileobject_fgetcsv;
         return true;
       }
       break;
@@ -92195,10 +91133,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3507:
-      HASH_GUARD(0x628069E483F35DB3LL, hphp_splfileobject_fstat) {
-        ci = &ci_hphp_splfileobject_fstat;
-        return true;
-      }
       HASH_GUARD(0x53F2C6F5AE244DB3LL, drawpushdefs) {
         ci = &ci_drawpushdefs;
         return true;
@@ -92210,16 +91144,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3514:
-      HASH_GUARD(0x5E0C6E797607DDBALL, mysql_result) {
-        ci = &ci_mysql_result;
-        return true;
-      }
-      HASH_GUARD(0x7964DE73DCA17DBALL, magickhasnextimage) {
-        ci = &ci_magickhasnextimage;
-        return true;
-      }
-      break;
     case 3516:
       HASH_GUARD(0x770DEDCB168B0DBCLL, mb_ereg_search_setpos) {
         ci = &ci_mb_ereg_search_setpos;
@@ -92227,18 +91151,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3517:
-      HASH_GUARD(0x48AA091B1E493DBDLL, setlocale) {
-        ci = &ci_setlocale;
-        return true;
-      }
       HASH_GUARD(0x01E6FF7D9746CDBDLL, stream_socket_accept) {
         ci = &ci_stream_socket_accept;
-        return true;
-      }
-      break;
-    case 3521:
-      HASH_GUARD(0x683E88F441F9BDC1LL, chgrp) {
-        ci = &ci_chgrp;
         return true;
       }
       break;
@@ -92247,26 +91161,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_array_reverse;
         return true;
       }
-      HASH_GUARD(0x0433140BB339DDC3LL, log) {
-        ci = &ci_log;
-        return true;
-      }
-      break;
-    case 3524:
-      HASH_GUARD(0x2A38BA8B4A0F9DC4LL, apc_fetch) {
-        ci = &ci_apc_fetch;
-        return true;
-      }
       break;
     case 3526:
       HASH_GUARD(0x73210FEAA2EACDC6LL, imagecolorsforindex) {
         ci = &ci_imagecolorsforindex;
-        return true;
-      }
-      break;
-    case 3528:
-      HASH_GUARD(0x66C3E73210067DC8LL, magickgetimageunits) {
-        ci = &ci_magickgetimageunits;
         return true;
       }
       break;
@@ -92281,10 +91179,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_array_combine;
         return true;
       }
-      HASH_GUARD(0x4AD5B65BCE665DCELL, array_key_exists) {
-        ci = &ci_array_key_exists;
-        return true;
-      }
       HASH_GUARD(0x40C3C7DE46D62DCELL, ob_start) {
         ci = &ci_ob_start;
         return true;
@@ -92296,17 +91190,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3541:
-      HASH_GUARD(0x7E1801C8E70D1DD5LL, imagefontwidth) {
-        ci = &ci_imagefontwidth;
-        return true;
-      }
-      break;
     case 3543:
-      HASH_GUARD(0x638690DF6D06FDD7LL, imageconvolution) {
-        ci = &ci_imageconvolution;
-        return true;
-      }
       HASH_GUARD(0x1AE08377A1630DD7LL, mysql_insert_id) {
         ci = &ci_mysql_insert_id;
         return true;
@@ -92334,73 +91218,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3564:
-      HASH_GUARD(0x5B51DD18C3E13DECLL, openssl_x509_parse) {
-        ci = &ci_openssl_x509_parse;
-        return true;
-      }
-      HASH_GUARD(0x5ABB7486CE861DECLL, array_merge_recursive) {
-        ci = &ci_array_merge_recursive;
-        return true;
-      }
-      break;
-    case 3567:
-      HASH_GUARD(0x0BB22147ADADDDEFLL, pfsockopen) {
-        ci = &ci_pfsockopen;
-        return true;
-      }
-      HASH_GUARD(0x72293DCE8CC4BDEFLL, htmlspecialchars) {
-        ci = &ci_htmlspecialchars;
-        return true;
-      }
-      break;
-    case 3571:
-      HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
-        ci = &ci_fgets;
-        return true;
-      }
-      break;
     case 3572:
       HASH_GUARD(0x73B30E65808A6DF4LL, ctype_xdigit) {
         ci = &ci_ctype_xdigit;
-        return true;
-      }
-      HASH_GUARD(0x5046A0D9DFDB5DF4LL, strcspn) {
-        ci = &ci_strcspn;
-        return true;
-      }
-      break;
-    case 3575:
-      HASH_GUARD(0x23E563F1EC919DF7LL, hphp_splfileinfo_getpathname) {
-        ci = &ci_hphp_splfileinfo_getpathname;
-        return true;
-      }
-      break;
-    case 3576:
-      HASH_GUARD(0x5E43280BC8DD1DF8LL, magicktrimimage) {
-        ci = &ci_magicktrimimage;
-        return true;
-      }
-      break;
-    case 3579:
-      HASH_GUARD(0x47C62D58B0B65DFBLL, thrift_protocol_write_binary) {
-        ci = &ci_thrift_protocol_write_binary;
-        return true;
-      }
-      break;
-    case 3582:
-      HASH_GUARD(0x21F24104004CFDFELL, evhttp_post) {
-        ci = &ci_evhttp_post;
-        return true;
-      }
-      HASH_GUARD(0x072690BF719D7DFELL, hphp_recursivedirectoryiterator_rewind) {
-        ci = &ci_hphp_recursivedirectoryiterator_rewind;
-        return true;
-      }
-      break;
-    case 3586:
-      HASH_GUARD(0x7829D2171DFBFE02LL, magickgetimagegamma) {
-        ci = &ci_magickgetimagegamma;
         return true;
       }
       break;
@@ -92415,10 +91235,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_array_diff_key;
         return true;
       }
-      HASH_GUARD(0x756B92411E7FBE0DLL, stream_get_wrappers) {
-        ci = &ci_stream_get_wrappers;
-        return true;
-      }
       break;
     case 3598:
       HASH_GUARD(0x5230E4C9D8D64E0ELL, highlight_string) {
@@ -92427,50 +91243,20 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3602:
-      HASH_GUARD(0x05FAA2085D94FE12LL, urlencode) {
-        ci = &ci_urlencode;
-        return true;
-      }
       HASH_GUARD(0x76636D0F0C090E12LL, curl_copy_handle) {
         ci = &ci_curl_copy_handle;
         return true;
       }
       break;
     case 3604:
-      HASH_GUARD(0x41E394B12170BE14LL, socket_send) {
-        ci = &ci_socket_send;
-        return true;
-      }
-      HASH_GUARD(0x3192209D50C1FE14LL, pixelsetalpha) {
-        ci = &ci_pixelsetalpha;
-        return true;
-      }
-      break;
-    case 3605:
-      HASH_GUARD(0x525F197D74423E15LL, get_resource_type) {
-        ci = &ci_get_resource_type;
+      HASH_GUARD(0x58F426377837AE14LL, imap_body) {
+        ci = &ci_imap_body;
         return true;
       }
       break;
     case 3607:
-      HASH_GUARD(0x0F5759A501FAFE17LL, imagecreatefromgd2part) {
-        ci = &ci_imagecreatefromgd2part;
-        return true;
-      }
       HASH_GUARD(0x3D13FD5FE3AF6E17LL, imagestringup) {
         ci = &ci_imagestringup;
-        return true;
-      }
-      break;
-    case 3609:
-      HASH_GUARD(0x4A694B42B21A9E19LL, destroymagickwand) {
-        ci = &ci_destroymagickwand;
-        return true;
-      }
-      break;
-    case 3611:
-      HASH_GUARD(0x7FA0B63054221E1BLL, magickrollimage) {
-        ci = &ci_magickrollimage;
         return true;
       }
       break;
@@ -92486,27 +91272,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3621:
-      HASH_GUARD(0x1C6246FA51EBDE25LL, hphp_get_static_property) {
-        ci = &ci_hphp_get_static_property;
-        return true;
-      }
-      break;
-    case 3624:
-      HASH_GUARD(0x3456885FF0679E28LL, lchown) {
-        ci = &ci_lchown;
-        return true;
-      }
-      break;
     case 3625:
       HASH_GUARD(0x73FE5C79E14A0E29LL, pixelsetbluequantum) {
         ci = &ci_pixelsetbluequantum;
         return true;
       }
       break;
-    case 3629:
-      HASH_GUARD(0x7817FA38BAAEFE2DLL, fsockopen) {
-        ci = &ci_fsockopen;
+    case 3628:
+      HASH_GUARD(0x19AB40AB4CC50E2CLL, imap_fetch_overview) {
+        ci = &ci_imap_fetch_overview;
         return true;
       }
       break;
@@ -92528,17 +91302,7 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3638:
-      HASH_GUARD(0x2E42ED1E15CCFE36LL, mysql_affected_rows) {
-        ci = &ci_mysql_affected_rows;
-        return true;
-      }
-      break;
     case 3642:
-      HASH_GUARD(0x6E2CF6ECA0987E3ALL, get_headers) {
-        ci = &ci_get_headers;
-        return true;
-      }
       HASH_GUARD(0x13048F0A79F7CE3ALL, magicksetsamplingfactors) {
         ci = &ci_magicksetsamplingfactors;
         return true;
@@ -92553,12 +91317,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3650:
       HASH_GUARD(0x160B01F095B20E42LL, mb_output_handler) {
         ci = &ci_mb_output_handler;
-        return true;
-      }
-      break;
-    case 3652:
-      HASH_GUARD(0x71B7756BD1B43E44LL, dom_document_savexml) {
-        ci = &ci_dom_document_savexml;
         return true;
       }
       break;
@@ -92597,18 +91355,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3671:
-      HASH_GUARD(0x21B07F1F212BDE57LL, hphp_get_original_class_name) {
-        ci = &ci_hphp_get_original_class_name;
-        return true;
-      }
       HASH_GUARD(0x2DEF52641933CE57LL, magickgetimagemattecolor) {
         ci = &ci_magickgetimagemattecolor;
-        return true;
-      }
-      break;
-    case 3675:
-      HASH_GUARD(0x299F1A5895461E5BLL, curl_multi_close) {
-        ci = &ci_curl_multi_close;
         return true;
       }
       break;
@@ -92641,10 +91389,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_imagesy;
         return true;
       }
-      HASH_GUARD(0x5697E5F6AAF47E63LL, mb_http_input) {
-        ci = &ci_mb_http_input;
-        return true;
-      }
       break;
     case 3684:
       HASH_GUARD(0x4F0DF8BBC4340E64LL, stream_socket_server) {
@@ -92655,12 +91399,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3685:
       HASH_GUARD(0x21D5A3208639EE65LL, dom_element_get_attribute_node_ns) {
         ci = &ci_dom_element_get_attribute_node_ns;
-        return true;
-      }
-      break;
-    case 3686:
-      HASH_GUARD(0x6CB3DEB458A2DE66LL, apc_bin_load) {
-        ci = &ci_apc_bin_load;
         return true;
       }
       break;
@@ -92681,10 +91419,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_mysql_set_charset;
         return true;
       }
-      HASH_GUARD(0x25C0C5E961AFDE6ALL, xmlwriter_full_end_element) {
-        ci = &ci_xmlwriter_full_end_element;
-        return true;
-      }
       break;
     case 3693:
       HASH_GUARD(0x714001ABB0D76E6DLL, magickgetinterlacescheme) {
@@ -92698,33 +91432,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3697:
-      HASH_GUARD(0x6AC126DCE941FE71LL, memory_get_peak_usage) {
-        ci = &ci_memory_get_peak_usage;
-        return true;
-      }
-      break;
-    case 3699:
-      HASH_GUARD(0x3B28CA1BE1D0DE73LL, xbox_get_thread_timeout) {
-        ci = &ci_xbox_get_thread_timeout;
-        return true;
-      }
-      break;
-    case 3700:
-      HASH_GUARD(0x47D0510206B89E74LL, ini_restore) {
-        ci = &ci_ini_restore;
-        return true;
-      }
-      break;
     case 3701:
       HASH_GUARD(0x4EC7C66593DDEE75LL, sql_regcase) {
         ci = &ci_sql_regcase;
-        return true;
-      }
-      break;
-    case 3702:
-      HASH_GUARD(0x36E9EC047FC73E76LL, mb_convert_encoding) {
-        ci = &ci_mb_convert_encoding;
         return true;
       }
       break;
@@ -92734,37 +91444,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3706:
-      HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
-        ci = &ci_flush;
-        return true;
-      }
-      break;
     case 3708:
       HASH_GUARD(0x4D9C5B9A944CCE7CLL, convert_uudecode) {
         ci = &ci_convert_uudecode;
         return true;
       }
       break;
-    case 3710:
-      HASH_GUARD(0x51060D186C703E7ELL, headers_list) {
-        ci = &ci_headers_list;
-        return true;
-      }
-      break;
     case 3713:
-      HASH_GUARD(0x0ECFC3676B4FDE81LL, chr) {
-        ci = &ci_chr;
-        return true;
-      }
       HASH_GUARD(0x3B426B13FA584E81LL, fb_unserialize) {
         ci = &ci_fb_unserialize;
-        return true;
-      }
-      break;
-    case 3714:
-      HASH_GUARD(0x379F7BF525FF1E82LL, magicksetimagecolorspace) {
-        ci = &ci_magicksetimagecolorspace;
         return true;
       }
       break;
@@ -92798,12 +91486,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3726:
-      HASH_GUARD(0x29A2FBD427647E8ELL, mysql_connect) {
-        ci = &ci_mysql_connect;
-        return true;
-      }
-      break;
     case 3728:
       HASH_GUARD(0x33D6CC3959D3CE90LL, clearmagickwand) {
         ci = &ci_clearmagickwand;
@@ -92811,24 +91493,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3731:
-      HASH_GUARD(0x5E968924197F5E93LL, mcrypt_ofb) {
-        ci = &ci_mcrypt_ofb;
-        return true;
-      }
       HASH_GUARD(0x37A9E8F91C33EE93LL, magickborderimage) {
         ci = &ci_magickborderimage;
-        return true;
-      }
-      break;
-    case 3735:
-      HASH_GUARD(0x6254E9BDC11F3E97LL, imagecreatefromgd2) {
-        ci = &ci_imagecreatefromgd2;
-        return true;
-      }
-      break;
-    case 3739:
-      HASH_GUARD(0x2A019CAA1188BE9BLL, preg_grep) {
-        ci = &ci_preg_grep;
         return true;
       }
       break;
@@ -92848,18 +91514,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3744:
-      HASH_GUARD(0x37C5AF6E7E8B5EA0LL, fputs) {
-        ci = &ci_fputs;
-        return true;
-      }
-      break;
-    case 3747:
-      HASH_GUARD(0x6467FFB910B8BEA3LL, magickspliceimage) {
-        ci = &ci_magickspliceimage;
-        return true;
-      }
-      break;
     case 3750:
       HASH_GUARD(0x1D7B8E395613AEA6LL, dom_element_remove_attribute_ns) {
         ci = &ci_dom_element_remove_attribute_ns;
@@ -92869,12 +91523,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3753:
       HASH_GUARD(0x308D76DB12424EA9LL, magicksetimageindex) {
         ci = &ci_magicksetimageindex;
-        return true;
-      }
-      break;
-    case 3755:
-      HASH_GUARD(0x632D4FC346797EABLL, pixelgetexceptionstring) {
-        ci = &ci_pixelgetexceptionstring;
         return true;
       }
       break;
@@ -92897,42 +91545,12 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3763:
-      HASH_GUARD(0x7DB9D839ACE0DEB3LL, natsort) {
-        ci = &ci_natsort;
+      HASH_GUARD(0x732DAA2292946EB3LL, imap_header) {
+        ci = &ci_imap_header;
         return true;
       }
       HASH_GUARD(0x7379B5B97EC2EEB3LL, hypot) {
         ci = &ci_hypot;
-        return true;
-      }
-      break;
-    case 3764:
-      HASH_GUARD(0x1F936B3C5406DEB4LL, fb_set_taint) {
-        ci = &ci_fb_set_taint;
-        return true;
-      }
-      break;
-    case 3767:
-      HASH_GUARD(0x58B9EFA0FB35FEB7LL, stream_filter_prepend) {
-        ci = &ci_stream_filter_prepend;
-        return true;
-      }
-      break;
-    case 3769:
-      HASH_GUARD(0x2A483AD7A3D07EB9LL, magickgetwandsize) {
-        ci = &ci_magickgetwandsize;
-        return true;
-      }
-      break;
-    case 3770:
-      HASH_GUARD(0x1F5B2728DE875EBALL, magicksetimage) {
-        ci = &ci_magicksetimage;
-        return true;
-      }
-      break;
-    case 3773:
-      HASH_GUARD(0x31A30B274AD2DEBDLL, call_user_func_array_rpc) {
-        ci = &ci_call_user_func_array_rpc;
         return true;
       }
       break;
@@ -92941,32 +91559,10 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_magicksetimagecompression;
         return true;
       }
-      HASH_GUARD(0x495316E596537EC0LL, imagefttext) {
-        ci = &ci_imagefttext;
-        return true;
-      }
-      break;
-    case 3778:
-      HASH_GUARD(0x4CDD0B7BF826FEC2LL, rewinddir) {
-        ci = &ci_rewinddir;
-        return true;
-      }
       break;
     case 3780:
       HASH_GUARD(0x7052903F1B17AEC4LL, parse_str) {
         ci = &ci_parse_str;
-        return true;
-      }
-      break;
-    case 3781:
-      HASH_GUARD(0x7D69B3537C353EC5LL, hphp_splfileinfo_isfile) {
-        ci = &ci_hphp_splfileinfo_isfile;
-        return true;
-      }
-      break;
-    case 3783:
-      HASH_GUARD(0x4FC99DC20A955EC7LL, session_module_name) {
-        ci = &ci_session_module_name;
         return true;
       }
       break;
@@ -92992,37 +91588,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3798:
-      HASH_GUARD(0x134B37520683DED6LL, imagesetbrush) {
-        ci = &ci_imagesetbrush;
-        return true;
-      }
-      break;
-    case 3800:
-      HASH_GUARD(0x338D9D95095D1ED8LL, magicksetimagedelay) {
-        ci = &ci_magicksetimagedelay;
-        return true;
-      }
-      break;
-    case 3801:
-      HASH_GUARD(0x7F802A06996BBED9LL, apd_set_browser_trace) {
-        ci = &ci_apd_set_browser_trace;
-        return true;
-      }
-      break;
-    case 3802:
-      HASH_GUARD(0x29E2771785CCBEDALL, magickgettextdescent) {
-        ci = &ci_magickgettextdescent;
-        return true;
-      }
-      break;
     case 3803:
       HASH_GUARD(0x16331E18B5CD8EDBLL, timezone_open) {
         ci = &ci_timezone_open;
-        return true;
-      }
-      HASH_GUARD(0x1340509769275EDBLL, magickgetimagecompression) {
-        ci = &ci_magickgetimagecompression;
         return true;
       }
       break;
@@ -93032,19 +91600,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3809:
-      HASH_GUARD(0x528BA9796BD0FEE1LL, fb_rpc_intercept_handler) {
-        ci = &ci_fb_rpc_intercept_handler;
-        return true;
-      }
-      break;
     case 3811:
       HASH_GUARD(0x1F4AACF075E9CEE3LL, memcache_get_server_status) {
         ci = &ci_memcache_get_server_status;
-        return true;
-      }
-      HASH_GUARD(0x28A98134BD97BEE3LL, mb_regex_encoding) {
-        ci = &ci_mb_regex_encoding;
         return true;
       }
       HASH_GUARD(0x0E1368A3BDFE6EE3LL, hphp_recursiveiteratoriterator_rewind) {
@@ -93053,8 +91611,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3812:
-      HASH_GUARD(0x5B6FF42ACB2FBEE4LL, getmyuid) {
-        ci = &ci_getmyuid;
+      HASH_GUARD(0x6C4B9D0271790EE4LL, imap_rfc822_parse_adrlist) {
+        ci = &ci_imap_rfc822_parse_adrlist;
         return true;
       }
       break;
@@ -93069,10 +91627,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_magicksetimagebordercolor;
         return true;
       }
-      HASH_GUARD(0x32B3951DFD2B9EE8LL, hphp_directoryiterator_isdot) {
-        ci = &ci_hphp_directoryiterator_isdot;
-        return true;
-      }
       break;
     case 3819:
       HASH_GUARD(0x72882DBF2D49CEEBLL, set_magic_quotes_runtime) {
@@ -93080,33 +91634,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3820:
-      HASH_GUARD(0x115CC08BC872FEECLL, fb_output_compression) {
-        ci = &ci_fb_output_compression;
-        return true;
-      }
-      break;
-    case 3824:
-      HASH_GUARD(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request) {
-        ci = &ci_dangling_server_proxy_old_request;
-        return true;
-      }
-      break;
     case 3832:
       HASH_GUARD(0x33FD10AC81146EF8LL, thrift_protocol_read_binary) {
         ci = &ci_thrift_protocol_read_binary;
-        return true;
-      }
-      break;
-    case 3833:
-      HASH_GUARD(0x200FC256EB093EF9LL, gettimeofday) {
-        ci = &ci_gettimeofday;
-        return true;
-      }
-      break;
-    case 3835:
-      HASH_GUARD(0x6D450F078F02BEFBLL, apd_continue) {
-        ci = &ci_apd_continue;
         return true;
       }
       break;
@@ -93120,25 +91650,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3840:
-      HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
-        ci = &ci_fgetc;
-        return true;
-      }
-      break;
     case 3841:
-      HASH_GUARD(0x66137942508EBF01LL, date_create) {
-        ci = &ci_date_create;
-        return true;
-      }
       HASH_GUARD(0x7B6A0D7510184F01LL, mysql_fetch_assoc) {
         ci = &ci_mysql_fetch_assoc;
-        return true;
-      }
-      break;
-    case 3842:
-      HASH_GUARD(0x78A02A603FA6FF02LL, magickreducenoiseimage) {
-        ci = &ci_magickreducenoiseimage;
         return true;
       }
       break;
@@ -93158,19 +91672,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3851:
-      HASH_GUARD(0x7756593AAC1F6F0BLL, imagecreatefromstring) {
-        ci = &ci_imagecreatefromstring;
+    case 3850:
+      HASH_GUARD(0x36EA41EEA02D4F0ALL, imap_mail_copy) {
+        ci = &ci_imap_mail_copy;
         return true;
       }
       break;
-    case 3855:
-      HASH_GUARD(0x61E7A36CA7FF5F0FLL, drawsetcliprule) {
-        ci = &ci_drawsetcliprule;
-        return true;
-      }
-      HASH_GUARD(0x4BD54A631F665F0FLL, drawpathcurvetosmoothabsolute) {
-        ci = &ci_drawpathcurvetosmoothabsolute;
+    case 3851:
+      HASH_GUARD(0x7756593AAC1F6F0BLL, imagecreatefromstring) {
+        ci = &ci_imagecreatefromstring;
         return true;
       }
       break;
@@ -93183,12 +91693,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3858:
       HASH_GUARD(0x042492DDA48C4F12LL, gzdeflate) {
         ci = &ci_gzdeflate;
-        return true;
-      }
-      break;
-    case 3859:
-      HASH_GUARD(0x3B197C0731233F13LL, dom_characterdata_substring_data) {
-        ci = &ci_dom_characterdata_substring_data;
         return true;
       }
       break;
@@ -93218,18 +91722,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3867:
-      HASH_GUARD(0x27A4633381195F1BLL, chown) {
-        ci = &ci_chown;
-        return true;
-      }
-      break;
-    case 3871:
-      HASH_GUARD(0x7C0C145EFE0EBF1FLL, defined) {
-        ci = &ci_defined;
-        return true;
-      }
-      break;
     case 3872:
       HASH_GUARD(0x2C4206A0BD904F20LL, hphp_splfileobject_fseek) {
         ci = &ci_hphp_splfileobject_fseek;
@@ -93243,10 +91735,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x77EC28645855AF21LL, magicksetcompressionquality) {
         ci = &ci_magicksetcompressionquality;
-        return true;
-      }
-      HASH_GUARD(0x1FF5B9A4FC78BF21LL, drawsettextantialias) {
-        ci = &ci_drawsettextantialias;
         return true;
       }
       break;
@@ -93266,29 +91754,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3884:
-      HASH_GUARD(0x035EFF9E1757DF2CLL, http_build_query) {
-        ci = &ci_http_build_query;
-        return true;
-      }
-      break;
-    case 3890:
-      HASH_GUARD(0x78257F34467BDF32LL, drawsetstrokedasharray) {
-        ci = &ci_drawsetstrokedasharray;
-        return true;
-      }
-      HASH_GUARD(0x2B66EACB77AE9F32LL, print_r) {
-        ci = &ci_print_r;
-        return true;
-      }
-      break;
     case 3897:
       HASH_GUARD(0x0D4446B2DBC8EF39LL, hphp_splfileinfo_getinode) {
         ci = &ci_hphp_splfileinfo_getinode;
-        return true;
-      }
-      HASH_GUARD(0x3E9146C06AAEFF39LL, magicksetimagecompressionquality) {
-        ci = &ci_magicksetimagecompressionquality;
         return true;
       }
       HASH_GUARD(0x496CF4113CEA8F39LL, magicksetimagefilename) {
@@ -93346,21 +91814,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3925:
-      HASH_GUARD(0x49D986274B1C5F55LL, collator_asort) {
-        ci = &ci_collator_asort;
-        return true;
-      }
-      break;
     case 3926:
       HASH_GUARD(0x621590803EC88F56LL, imageline) {
         ci = &ci_imageline;
-        return true;
-      }
-      break;
-    case 3928:
-      HASH_GUARD(0x0551AAE8F1A6FF58LL, magicklevelimage) {
-        ci = &ci_magicklevelimage;
         return true;
       }
       break;
@@ -93373,16 +91829,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3931:
       HASH_GUARD(0x24F698A8A4B5AF5BLL, imagecolordeallocate) {
         ci = &ci_imagecolordeallocate;
-        return true;
-      }
-      HASH_GUARD(0x76418F884500DF5BLL, stream_socket_enable_crypto) {
-        ci = &ci_stream_socket_enable_crypto;
-        return true;
-      }
-      break;
-    case 3933:
-      HASH_GUARD(0x07FF92CF46DDFF5DLL, imagepsfreefont) {
-        ci = &ci_imagepsfreefont;
         return true;
       }
       break;
@@ -93404,16 +91850,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3940:
-      HASH_GUARD(0x41EF51E62AD3DF64LL, pagelet_server_is_enabled) {
-        ci = &ci_pagelet_server_is_enabled;
-        return true;
-      }
-      HASH_GUARD(0x280051555A21DF64LL, rename) {
-        ci = &ci_rename;
-        return true;
-      }
-      break;
     case 3942:
       HASH_GUARD(0x6FFF1304EA444F66LL, drawsetstrokemiterlimit) {
         ci = &ci_drawsetstrokemiterlimit;
@@ -93429,18 +91865,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 3946:
       HASH_GUARD(0x1670096FDE27AF6ALL, rewind) {
         ci = &ci_rewind;
-        return true;
-      }
-      break;
-    case 3947:
-      HASH_GUARD(0x56EF59D6CB0A5F6BLL, dom_document_save_html_file) {
-        ci = &ci_dom_document_save_html_file;
-        return true;
-      }
-      break;
-    case 3948:
-      HASH_GUARD(0x23D5E9E53D11BF6CLL, gmdate) {
-        ci = &ci_gmdate;
         return true;
       }
       break;
@@ -93466,12 +91890,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3954:
-      HASH_GUARD(0x4B22EF06BAA83F72LL, version_compare) {
-        ci = &ci_version_compare;
-        return true;
-      }
-      break;
     case 3956:
       HASH_GUARD(0x18BC9BF6D1E3CF74LL, magickpreviewimages) {
         ci = &ci_magickpreviewimages;
@@ -93490,33 +91908,15 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3966:
-      HASH_GUARD(0x7064BEBF508F3F7ELL, socket_read) {
-        ci = &ci_socket_read;
-        return true;
-      }
-      break;
-    case 3968:
-      HASH_GUARD(0x63F18DE0DB807F80LL, magickqueryfonts) {
-        ci = &ci_magickqueryfonts;
-        return true;
-      }
-      break;
-    case 3972:
-      HASH_GUARD(0x14402B01D00E9F84LL, magicksteganoimage) {
-        ci = &ci_magicksteganoimage;
+    case 3967:
+      HASH_GUARD(0x5E3767128C04CF7FLL, imap_open) {
+        ci = &ci_imap_open;
         return true;
       }
       break;
     case 3973:
       HASH_GUARD(0x7EF68B9A55222F85LL, wandgetexceptionstring) {
         ci = &ci_wandgetexceptionstring;
-        return true;
-      }
-      break;
-    case 3974:
-      HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
-        ci = &ci_flock;
         return true;
       }
       break;
@@ -93527,30 +91927,8 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       break;
     case 3979:
-      HASH_GUARD(0x2755DD4112AA5F8BLL, magicksampleimage) {
-        ci = &ci_magicksampleimage;
-        return true;
-      }
       HASH_GUARD(0x3703D22147C24F8BLL, pixelsetcyan) {
         ci = &ci_pixelsetcyan;
-        return true;
-      }
-      break;
-    case 3982:
-      HASH_GUARD(0x7A8F1104B0CCDF8ELL, phpcredits) {
-        ci = &ci_phpcredits;
-        return true;
-      }
-      break;
-    case 3983:
-      HASH_GUARD(0x4A6C46DC7FE29F8FLL, hphp_recursivedirectoryiterator_getchildren) {
-        ci = &ci_hphp_recursivedirectoryiterator_getchildren;
-        return true;
-      }
-      break;
-    case 3985:
-      HASH_GUARD(0x78463112BE739F91LL, connection_timeout) {
-        ci = &ci_connection_timeout;
         return true;
       }
       break;
@@ -93566,65 +91944,21 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 3989:
-      HASH_GUARD(0x40D620CBA0D41F95LL, opendir) {
-        ci = &ci_opendir;
-        return true;
-      }
-      break;
     case 3991:
-      HASH_GUARD(0x35117886C885DF97LL, hphp_recursivedirectoryiterator_getsubpathname) {
-        ci = &ci_hphp_recursivedirectoryiterator_getsubpathname;
-        return true;
-      }
       HASH_GUARD(0x6F9651265C096F97LL, magickreadimages) {
         ci = &ci_magickreadimages;
         return true;
       }
       break;
     case 3992:
-      HASH_GUARD(0x0293F60B46511F98LL, drawsetfontstretch) {
-        ci = &ci_drawsetfontstretch;
-        return true;
-      }
       HASH_GUARD(0x66F1F0DB16C82F98LL, imagesavealpha) {
         ci = &ci_imagesavealpha;
-        return true;
-      }
-      break;
-    case 3994:
-      HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
-        ci = &ci_fflush;
         return true;
       }
       break;
     case 3995:
       HASH_GUARD(0x44244ECFB9F76F9BLL, dom_document_create_element_ns) {
         ci = &ci_dom_document_create_element_ns;
-        return true;
-      }
-      break;
-    case 3997:
-      HASH_GUARD(0x0AD6DE8829773F9DLL, apc_compile_file) {
-        ci = &ci_apc_compile_file;
-        return true;
-      }
-      break;
-    case 4004:
-      HASH_GUARD(0x0E7E9AA21AE99FA4LL, hphp_recursiveiteratoriterator_current) {
-        ci = &ci_hphp_recursiveiteratoriterator_current;
-        return true;
-      }
-      break;
-    case 4006:
-      HASH_GUARD(0x0DEEA8C3E3A47FA6LL, read_exif_data) {
-        ci = &ci_read_exif_data;
-        return true;
-      }
-      break;
-    case 4014:
-      HASH_GUARD(0x64D269A505D51FAELL, array_map) {
-        ci = &ci_array_map;
         return true;
       }
       break;
@@ -93637,12 +91971,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
     case 4016:
       HASH_GUARD(0x4A0B5F4676578FB0LL, imagecolorresolvealpha) {
         ci = &ci_imagecolorresolvealpha;
-        return true;
-      }
-      break;
-    case 4017:
-      HASH_GUARD(0x0F78ECF42C30DFB1LL, array_chunk) {
-        ci = &ci_array_chunk;
         return true;
       }
       break;
@@ -93659,18 +91987,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
       }
       HASH_GUARD(0x2B451EF5D52C4FB6LL, array_diff) {
         ci = &ci_array_diff;
-        return true;
-      }
-      break;
-    case 4023:
-      HASH_GUARD(0x6465CD999F4C5FB7LL, hphp_invoke_method) {
-        ci = &ci_hphp_invoke_method;
-        return true;
-      }
-      break;
-    case 4024:
-      HASH_GUARD(0x6DB2DB341ECF3FB8LL, file_exists) {
-        ci = &ci_file_exists;
         return true;
       }
       break;
@@ -93692,19 +92008,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 4033:
-      HASH_GUARD(0x3FF9AAFF85DDDFC1LL, class_parents) {
-        ci = &ci_class_parents;
-        return true;
-      }
-      break;
     case 4034:
       HASH_GUARD(0x6CA22E62D4762FC2LL, magickpainttransparentimage) {
         ci = &ci_magickpainttransparentimage;
-        return true;
-      }
-      HASH_GUARD(0x460470C490FAFFC2LL, dom_node_normalize) {
-        ci = &ci_dom_node_normalize;
         return true;
       }
       break;
@@ -93726,12 +92032,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 4046:
-      HASH_GUARD(0x042193C97C65FFCELL, magickwaveimage) {
-        ci = &ci_magickwaveimage;
-        return true;
-      }
-      break;
     case 4047:
       HASH_GUARD(0x3A3CFC1F001A6FCFLL, magickreadimagefile) {
         ci = &ci_magickreadimagefile;
@@ -93747,10 +92047,6 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         ci = &ci_drawgetstrokealpha;
         return true;
       }
-      HASH_GUARD(0x53DB5D0490C51FD0LL, xhprof_sample_disable) {
-        ci = &ci_xhprof_sample_disable;
-        return true;
-      }
       break;
     case 4052:
       HASH_GUARD(0x4970B72A182E4FD4LL, readdir) {
@@ -93764,55 +92060,9 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 4054:
-      HASH_GUARD(0x7FC00035D14B9FD6LL, apc_delete_file) {
-        ci = &ci_apc_delete_file;
-        return true;
-      }
-      break;
-    case 4056:
-      HASH_GUARD(0x4234F2B59531FFD8LL, posix_getlogin) {
-        ci = &ci_posix_getlogin;
-        return true;
-      }
-      break;
-    case 4061:
-      HASH_GUARD(0x4EDEDA4278CD3FDDLL, magickchopimage) {
-        ci = &ci_magickchopimage;
-        return true;
-      }
-      break;
-    case 4062:
-      HASH_GUARD(0x7F5FC3CAF8CE9FDELL, gzcompress) {
-        ci = &ci_gzcompress;
-        return true;
-      }
-      HASH_GUARD(0x72925D2DF7E61FDELL, drawpathcurvetoquadraticbeziersmoothrelative) {
-        ci = &ci_drawpathcurvetoquadraticbeziersmoothrelative;
-        return true;
-      }
-      break;
     case 4071:
       HASH_GUARD(0x217067889854CFE7LL, xmlwriter_start_dtd) {
         ci = &ci_xmlwriter_start_dtd;
-        return true;
-      }
-      break;
-    case 4072:
-      HASH_GUARD(0x4D7AEC41CFD73FE8LL, hphp_recursivedirectoryiterator_getsubpath) {
-        ci = &ci_hphp_recursivedirectoryiterator_getsubpath;
-        return true;
-      }
-      break;
-    case 4075:
-      HASH_GUARD(0x67D1EE05DFE71FEBLL, hphp_splfileobject_getcvscontrol) {
-        ci = &ci_hphp_splfileobject_getcvscontrol;
-        return true;
-      }
-      break;
-    case 4079:
-      HASH_GUARD(0x00EEEE9C6CEA5FEFLL, xmlwriter_write_element_ns) {
-        ci = &ci_xmlwriter_write_element_ns;
         return true;
       }
       break;
@@ -93828,33 +92078,5907 @@ bool get_call_info_builtin(const CallInfo *&ci, void *&extra, const char *s, int
         return true;
       }
       break;
-    case 4086:
-      HASH_GUARD(0x25FCE64E12505FF6LL, magicksetimagerenderingintent) {
-        ci = &ci_magicksetimagerenderingintent;
-        return true;
-      }
-      break;
     case 4087:
       HASH_GUARD(0x7883232CD1A7CFF7LL, dom_node_is_same_node) {
         ci = &ci_dom_node_is_same_node;
         return true;
       }
       break;
-    case 4090:
-      HASH_GUARD(0x13EE24AF67113FFALL, ob_end_flush) {
-        ci = &ci_ob_end_flush;
-        return true;
-      }
-      break;
-    case 4091:
-      HASH_GUARD(0x63BE4CEF1FC47FFBLL, imagefill) {
-        ci = &ci_imagefill;
+    case 4092:
+      HASH_GUARD(0x51647BC5C0A14FFCLL, imap_clearflag_full) {
+        ci = &ci_imap_clearflag_full;
         return true;
       }
       break;
     case 4094:
       HASH_GUARD(0x32F8747E480CCFFELL, connection_status) {
         ci = &ci_connection_status;
+        return true;
+      }
+      break;
+    case 4097:
+      HASH_GUARD(0x7585739E84DBF001LL, imap_delete) {
+        ci = &ci_imap_delete;
+        return true;
+      }
+      break;
+    case 4101:
+      HASH_GUARD(0x20D579E7E4131005LL, imagecolorclosest) {
+        ci = &ci_imagecolorclosest;
+        return true;
+      }
+      HASH_GUARD(0x18A0F1EE8E249005LL, msg_send) {
+        ci = &ci_msg_send;
+        return true;
+      }
+      break;
+    case 4106:
+      HASH_GUARD(0x555D7A3FB939300ALL, apache_setenv) {
+        ci = &ci_apache_setenv;
+        return true;
+      }
+      break;
+    case 4109:
+      HASH_GUARD(0x40FA17130FA7100DLL, openssl_seal) {
+        ci = &ci_openssl_seal;
+        return true;
+      }
+      break;
+    case 4118:
+      HASH_GUARD(0x5623A698A728F016LL, getlastmod) {
+        ci = &ci_getlastmod;
+        return true;
+      }
+      break;
+    case 4122:
+      HASH_GUARD(0x03834225EBBC101ALL, drawsettextundercolor) {
+        ci = &ci_drawsettextundercolor;
+        return true;
+      }
+      break;
+    case 4130:
+      HASH_GUARD(0x145D42B2AB55D022LL, drawmatte) {
+        ci = &ci_drawmatte;
+        return true;
+      }
+      break;
+    case 4131:
+      HASH_GUARD(0x35C74650867B7023LL, imagesetpixel) {
+        ci = &ci_imagesetpixel;
+        return true;
+      }
+      break;
+    case 4147:
+      HASH_GUARD(0x48F35DFD653D7033LL, pclose) {
+        ci = &ci_pclose;
+        return true;
+      }
+      break;
+    case 4149:
+      HASH_GUARD(0x280EC96FB50A9035LL, imap_ping) {
+        ci = &ci_imap_ping;
+        return true;
+      }
+      break;
+    case 4155:
+      HASH_GUARD(0x40329F2A6B84D03BLL, dom_node_lookup_prefix) {
+        ci = &ci_dom_node_lookup_prefix;
+        return true;
+      }
+      break;
+    case 4158:
+      HASH_GUARD(0x32E6E5D3CCE3703ELL, magickgetimagewidth) {
+        ci = &ci_magickgetimagewidth;
+        return true;
+      }
+      HASH_GUARD(0x43461C4D9130103ELL, exit) {
+        ci = &ci_exit;
+        return true;
+      }
+      HASH_GUARD(0x67C1ED9B816E503ELL, md5_file) {
+        ci = &ci_md5_file;
+        return true;
+      }
+      break;
+    case 4163:
+      HASH_GUARD(0x5ACCF9166CD9D043LL, ftruncate) {
+        ci = &ci_ftruncate;
+        return true;
+      }
+      break;
+    case 4169:
+      HASH_GUARD(0x047A8BF04DB51049LL, range) {
+        ci = &ci_range;
+        return true;
+      }
+      break;
+    case 4179:
+      HASH_GUARD(0x15A9EB33DA6E9053LL, getimagesize) {
+        ci = &ci_getimagesize;
+        return true;
+      }
+      HASH_GUARD(0x07EB5C3A3BEA3053LL, acosh) {
+        ci = &ci_acosh;
+        return true;
+      }
+      break;
+    case 4186:
+      HASH_GUARD(0x271AB768D202F05ALL, mcrypt_module_is_block_algorithm) {
+        ci = &ci_mcrypt_module_is_block_algorithm;
+        return true;
+      }
+      break;
+    case 4187:
+      HASH_GUARD(0x7BDA06BD1F8AD05BLL, imap_scanmailbox) {
+        ci = &ci_imap_scanmailbox;
+        return true;
+      }
+      break;
+    case 4191:
+      HASH_GUARD(0x4B70746F965E705FLL, preg_last_error) {
+        ci = &ci_preg_last_error;
+        return true;
+      }
+      break;
+    case 4199:
+      HASH_GUARD(0x0CE1918B30DF5067LL, sys_getloadavg) {
+        ci = &ci_sys_getloadavg;
+        return true;
+      }
+      break;
+    case 4207:
+      HASH_GUARD(0x04D1CF7E4592106FLL, imap_mail_move) {
+        ci = &ci_imap_mail_move;
+        return true;
+      }
+      HASH_GUARD(0x4C6FD8808A62506FLL, session_set_save_handler) {
+        ci = &ci_session_set_save_handler;
+        return true;
+      }
+      break;
+    case 4208:
+      HASH_GUARD(0x3C466098FF7B5070LL, mb_check_encoding) {
+        ci = &ci_mb_check_encoding;
+        return true;
+      }
+      break;
+    case 4216:
+      HASH_GUARD(0x6B268C26E21C1078LL, arsort) {
+        ci = &ci_arsort;
+        return true;
+      }
+      break;
+    case 4217:
+      HASH_GUARD(0x08AA4EA901C9B079LL, session_encode) {
+        ci = &ci_session_encode;
+        return true;
+      }
+      break;
+    case 4228:
+      HASH_GUARD(0x53FD8C9AC3F4D084LL, dangling_server_proxy_new_request) {
+        ci = &ci_dangling_server_proxy_new_request;
+        return true;
+      }
+      break;
+    case 4231:
+      HASH_GUARD(0x255D919D501C5087LL, dom_characterdata_delete_data) {
+        ci = &ci_dom_characterdata_delete_data;
+        return true;
+      }
+      break;
+    case 4238:
+      HASH_GUARD(0x3E4AE974AFA9708ELL, pixelsetquantumcolor) {
+        ci = &ci_pixelsetquantumcolor;
+        return true;
+      }
+      break;
+    case 4241:
+      HASH_GUARD(0x673B36244DC87091LL, closelog) {
+        ci = &ci_closelog;
+        return true;
+      }
+      break;
+    case 4254:
+      HASH_GUARD(0x4AF87BA91163D09ELL, mysql_db_name) {
+        ci = &ci_mysql_db_name;
+        return true;
+      }
+      HASH_GUARD(0x74F0D6D8F1F2709ELL, drawsetstrokedashoffset) {
+        ci = &ci_drawsetstrokedashoffset;
+        return true;
+      }
+      break;
+    case 4255:
+      HASH_GUARD(0x2B130322DEC4B09FLL, pixelgetopacityquantum) {
+        ci = &ci_pixelgetopacityquantum;
+        return true;
+      }
+      break;
+    case 4257:
+      HASH_GUARD(0x0DF945F12533F0A1LL, abs) {
+        ci = &ci_abs;
+        return true;
+      }
+      break;
+    case 4263:
+      HASH_GUARD(0x74C787060F7290A7LL, icu_transliterate) {
+        ci = &ci_icu_transliterate;
+        return true;
+      }
+      break;
+    case 4267:
+      HASH_GUARD(0x439DF153FC32D0ABLL, printf) {
+        ci = &ci_printf;
+        return true;
+      }
+      break;
+    case 4268:
+      HASH_GUARD(0x6E27DC1E74C5B0ACLL, drawpathstart) {
+        ci = &ci_drawpathstart;
+        return true;
+      }
+      break;
+    case 4270:
+      HASH_GUARD(0x47AB4A08446BD0AELL, bcmod) {
+        ci = &ci_bcmod;
+        return true;
+      }
+      HASH_GUARD(0x4BBD5D8A6E0110AELL, error_log) {
+        ci = &ci_error_log;
+        return true;
+      }
+      break;
+    case 4271:
+      HASH_GUARD(0x3954FFED1E0650AFLL, stream_register_wrapper) {
+        ci = &ci_stream_register_wrapper;
+        return true;
+      }
+      break;
+    case 4272:
+      HASH_GUARD(0x5B9F8B3E1D8330B0LL, stream_socket_sendto) {
+        ci = &ci_stream_socket_sendto;
+        return true;
+      }
+      break;
+    case 4274:
+      HASH_GUARD(0x48BBFB59FB7F90B2LL, iconv_strlen) {
+        ci = &ci_iconv_strlen;
+        return true;
+      }
+      break;
+    case 4280:
+      HASH_GUARD(0x05A4C165810A30B8LL, gzread) {
+        ci = &ci_gzread;
+        return true;
+      }
+      break;
+    case 4284:
+      HASH_GUARD(0x3900350CD9D990BCLL, imagecreatefromjpeg) {
+        ci = &ci_imagecreatefromjpeg;
+        return true;
+      }
+      break;
+    case 4288:
+      HASH_GUARD(0x6EDC1E7A8D5710C0LL, memcache_add_server) {
+        ci = &ci_memcache_add_server;
+        return true;
+      }
+      break;
+    case 4293:
+      HASH_GUARD(0x6B477F3B9CDB10C5LL, base64_decode) {
+        ci = &ci_base64_decode;
+        return true;
+      }
+      break;
+    case 4309:
+      HASH_GUARD(0x3BF44C6DECD790D5LL, xmlwriter_start_dtd_entity) {
+        ci = &ci_xmlwriter_start_dtd_entity;
+        return true;
+      }
+      break;
+    case 4312:
+      HASH_GUARD(0x79F2E516A3B070D8LL, libxml_disable_entity_loader) {
+        ci = &ci_libxml_disable_entity_loader;
+        return true;
+      }
+      break;
+    case 4313:
+      HASH_GUARD(0x08F6B727D60670D9LL, magicksetimagedepth) {
+        ci = &ci_magicksetimagedepth;
+        return true;
+      }
+      break;
+    case 4314:
+      HASH_GUARD(0x6F242340B2E930DALL, hphp_splfileinfo_setfileclass) {
+        ci = &ci_hphp_splfileinfo_setfileclass;
+        return true;
+      }
+      break;
+    case 4315:
+      HASH_GUARD(0x3801923AD84670DBLL, apc_inc) {
+        ci = &ci_apc_inc;
+        return true;
+      }
+      break;
+    case 4320:
+      HASH_GUARD(0x2E4612DF112010E0LL, imagecopyresized) {
+        ci = &ci_imagecopyresized;
+        return true;
+      }
+      break;
+    case 4324:
+      HASH_GUARD(0x2B9425038D4230E4LL, imagecreatefromxpm) {
+        ci = &ci_imagecreatefromxpm;
+        return true;
+      }
+      break;
+    case 4327:
+      HASH_GUARD(0x79E6FD78989B10E7LL, tmpfile) {
+        ci = &ci_tmpfile;
+        return true;
+      }
+      HASH_GUARD(0x59DE3A26AFF570E7LL, magickshaveimage) {
+        ci = &ci_magickshaveimage;
+        return true;
+      }
+      break;
+    case 4328:
+      HASH_GUARD(0x17CB328F55FDF0E8LL, drawsetstrokeantialias) {
+        ci = &ci_drawsetstrokeantialias;
+        return true;
+      }
+      break;
+    case 4339:
+      HASH_GUARD(0x315CCBC8C5C7D0F3LL, xmlwriter_write_raw) {
+        ci = &ci_xmlwriter_write_raw;
+        return true;
+      }
+      break;
+    case 4355:
+      HASH_GUARD(0x1FFCBCF1927D7103LL, posix_setpgid) {
+        ci = &ci_posix_setpgid;
+        return true;
+      }
+      break;
+    case 4357:
+      HASH_GUARD(0x509B763CDAD9D105LL, gethostbyaddr) {
+        ci = &ci_gethostbyaddr;
+        return true;
+      }
+      break;
+    case 4360:
+      HASH_GUARD(0x60B8B61133F59108LL, quoted_printable_decode) {
+        ci = &ci_quoted_printable_decode;
+        return true;
+      }
+      break;
+    case 4370:
+      HASH_GUARD(0x0B1BA48B0CFB1112LL, strval) {
+        ci = &ci_strval;
+        return true;
+      }
+      HASH_GUARD(0x28C44527BD59D112LL, is_link) {
+        ci = &ci_is_link;
+        return true;
+      }
+      break;
+    case 4372:
+      HASH_GUARD(0x02A4724E6A881114LL, mb_decode_numericentity) {
+        ci = &ci_mb_decode_numericentity;
+        return true;
+      }
+      break;
+    case 4377:
+      HASH_GUARD(0x3AB82455A70F5119LL, imagecolortransparent) {
+        ci = &ci_imagecolortransparent;
+        return true;
+      }
+      HASH_GUARD(0x2B31A877824A1119LL, stristr) {
+        ci = &ci_stristr;
+        return true;
+      }
+      break;
+    case 4380:
+      HASH_GUARD(0x070A63F6A0B8711CLL, array_walk_recursive) {
+        ci = &ci_array_walk_recursive;
+        return true;
+      }
+      break;
+    case 4381:
+      HASH_GUARD(0x291088666B8BF11DLL, drawsetfontfamily) {
+        ci = &ci_drawsetfontfamily;
+        return true;
+      }
+      break;
+    case 4383:
+      HASH_GUARD(0x4C70C24C84F5511FLL, magicksetimagegamma) {
+        ci = &ci_magicksetimagegamma;
+        return true;
+      }
+      break;
+    case 4389:
+      HASH_GUARD(0x7A8B3EC0235EF125LL, magickprofileimage) {
+        ci = &ci_magickprofileimage;
+        return true;
+      }
+      break;
+    case 4403:
+      HASH_GUARD(0x6A7E0B15FF689133LL, mb_ereg_search_init) {
+        ci = &ci_mb_ereg_search_init;
+        return true;
+      }
+      break;
+    case 4407:
+      HASH_GUARD(0x5666016FA3C0F137LL, socket_clear_error) {
+        ci = &ci_socket_clear_error;
+        return true;
+      }
+      break;
+    case 4408:
+      HASH_GUARD(0x2676902697E37138LL, xmlwriter_start_comment) {
+        ci = &ci_xmlwriter_start_comment;
+        return true;
+      }
+      break;
+    case 4410:
+      HASH_GUARD(0x2A57E5D29D73D13ALL, register_tick_function) {
+        ci = &ci_register_tick_function;
+        return true;
+      }
+      break;
+    case 4411:
+      HASH_GUARD(0x3E0C793B95A9713BLL, imap_bodystruct) {
+        ci = &ci_imap_bodystruct;
+        return true;
+      }
+      break;
+    case 4415:
+      HASH_GUARD(0x5BFDE63106CE713FLL, dom_element_get_attribute) {
+        ci = &ci_dom_element_get_attribute;
+        return true;
+      }
+      break;
+    case 4431:
+      HASH_GUARD(0x61A61E91C477514FLL, chop) {
+        ci = &ci_chop;
+        return true;
+      }
+      HASH_GUARD(0x7863294A8F33D14FLL, file) {
+        ci = &ci_file;
+        return true;
+      }
+      break;
+    case 4434:
+      HASH_GUARD(0x26DD46D8C1F47152LL, ldap_bind) {
+        ci = &ci_ldap_bind;
+        return true;
+      }
+      break;
+    case 4451:
+      HASH_GUARD(0x36D6B73D289DD163LL, date_sunset) {
+        ci = &ci_date_sunset;
+        return true;
+      }
+      break;
+    case 4456:
+      HASH_GUARD(0x14E46EA3CBCFB168LL, magickgetsamplingfactors) {
+        ci = &ci_magickgetsamplingfactors;
+        return true;
+      }
+      break;
+    case 4462:
+      HASH_GUARD(0x15B61E061268B16ELL, magickenhanceimage) {
+        ci = &ci_magickenhanceimage;
+        return true;
+      }
+      break;
+    case 4466:
+      HASH_GUARD(0x59FE6A862E1CB172LL, get_browser) {
+        ci = &ci_get_browser;
+        return true;
+      }
+      break;
+    case 4468:
+      HASH_GUARD(0x345E070844E3F174LL, create_function) {
+        ci = &ci_create_function;
+        return true;
+      }
+      break;
+    case 4471:
+      HASH_GUARD(0x174DB93CAF0D1177LL, hphp_splfileinfo___tostring) {
+        ci = &ci_hphp_splfileinfo___tostring;
+        return true;
+      }
+      break;
+    case 4473:
+      HASH_GUARD(0x6884FAF0D1EF3179LL, posix_mknod) {
+        ci = &ci_posix_mknod;
+        return true;
+      }
+      break;
+    case 4476:
+      HASH_GUARD(0x3E1343B4A3AD717CLL, magickgettextascent) {
+        ci = &ci_magickgettextascent;
+        return true;
+      }
+      break;
+    case 4479:
+      HASH_GUARD(0x4EF9496D16F9D17FLL, xmlwriter_start_element_ns) {
+        ci = &ci_xmlwriter_start_element_ns;
+        return true;
+      }
+      break;
+    case 4481:
+      HASH_GUARD(0x2227E30BAB23B181LL, dom_xpath_query) {
+        ci = &ci_dom_xpath_query;
+        return true;
+      }
+      break;
+    case 4482:
+      HASH_GUARD(0x130B62A8C77F3182LL, mb_ereg_search_getregs) {
+        ci = &ci_mb_ereg_search_getregs;
+        return true;
+      }
+      break;
+    case 4485:
+      HASH_GUARD(0x13E90F8874839185LL, ob_get_status) {
+        ci = &ci_ob_get_status;
+        return true;
+      }
+      break;
+    case 4486:
+      HASH_GUARD(0x5DB5E45860801186LL, openssl_csr_export) {
+        ci = &ci_openssl_csr_export;
+        return true;
+      }
+      break;
+    case 4489:
+      HASH_GUARD(0x0CC53B2F0D38D189LL, timezone_offset_get) {
+        ci = &ci_timezone_offset_get;
+        return true;
+      }
+      break;
+    case 4503:
+      HASH_GUARD(0x15AD9CE061C75197LL, timezone_transitions_get) {
+        ci = &ci_timezone_transitions_get;
+        return true;
+      }
+      break;
+    case 4507:
+      HASH_GUARD(0x7FF6C2A693CE119BLL, magickcyclecolormapimage) {
+        ci = &ci_magickcyclecolormapimage;
+        return true;
+      }
+      break;
+    case 4512:
+      HASH_GUARD(0x6FB5104FC97A31A0LL, drawpathcurvetorelative) {
+        ci = &ci_drawpathcurvetorelative;
+        return true;
+      }
+      break;
+    case 4514:
+      HASH_GUARD(0x2A9015499A2EB1A2LL, fnmatch) {
+        ci = &ci_fnmatch;
+        return true;
+      }
+      break;
+    case 4515:
+      HASH_GUARD(0x735B81C45C2971A3LL, drawgetfillopacity) {
+        ci = &ci_drawgetfillopacity;
+        return true;
+      }
+      break;
+    case 4518:
+      HASH_GUARD(0x37B4612178EF91A6LL, memcache_get_version) {
+        ci = &ci_memcache_get_version;
+        return true;
+      }
+      break;
+    case 4521:
+      HASH_GUARD(0x740DC7FFAD8BB1A9LL, imagecolorat) {
+        ci = &ci_imagecolorat;
+        return true;
+      }
+      break;
+    case 4522:
+      HASH_GUARD(0x11A5C66A3D0711AALL, apc_sma_info) {
+        ci = &ci_apc_sma_info;
+        return true;
+      }
+      break;
+    case 4525:
+      HASH_GUARD(0x5A6EFF8C71A431ADLL, socket_get_status) {
+        ci = &ci_socket_get_status;
+        return true;
+      }
+      HASH_GUARD(0x50538F37398AF1ADLL, ldap_get_option) {
+        ci = &ci_ldap_get_option;
+        return true;
+      }
+      break;
+    case 4527:
+      HASH_GUARD(0x5B1F9C2E9FE111AFLL, fb_utf8ize) {
+        ci = &ci_fb_utf8ize;
+        return true;
+      }
+      break;
+    case 4541:
+      HASH_GUARD(0x4B3F35310DEA31BDLL, socket_create_pair) {
+        ci = &ci_socket_create_pair;
+        return true;
+      }
+      break;
+    case 4543:
+      HASH_GUARD(0x681CD0E7D9DB71BFLL, pow) {
+        ci = &ci_pow;
+        return true;
+      }
+      break;
+    case 4546:
+      HASH_GUARD(0x02103322F88C71C2LL, pixelgetcolorcount) {
+        ci = &ci_pixelgetcolorcount;
+        return true;
+      }
+      break;
+    case 4548:
+      HASH_GUARD(0x3617DAE43A23D1C4LL, xml_parser_set_option) {
+        ci = &ci_xml_parser_set_option;
+        return true;
+      }
+      break;
+    case 4550:
+      HASH_GUARD(0x188D37410B6051C6LL, session_unregister) {
+        ci = &ci_session_unregister;
+        return true;
+      }
+      break;
+    case 4552:
+      HASH_GUARD(0x11C0B5DA066891C8LL, preg_match_all) {
+        ci = &ci_preg_match_all;
+        return true;
+      }
+      break;
+    case 4556:
+      HASH_GUARD(0x3DF488365DAAF1CCLL, drawgettextencoding) {
+        ci = &ci_drawgettextencoding;
+        return true;
+      }
+      break;
+    case 4557:
+      HASH_GUARD(0x37340B707E7CD1CDLL, magickgetimagebordercolor) {
+        ci = &ci_magickgetimagebordercolor;
+        return true;
+      }
+      break;
+    case 4558:
+      HASH_GUARD(0x2E7741B5440FB1CELL, magicksetlastiterator) {
+        ci = &ci_magicksetlastiterator;
+        return true;
+      }
+      break;
+    case 4560:
+      HASH_GUARD(0x03012F3DDD7AB1D0LL, getservbyport) {
+        ci = &ci_getservbyport;
+        return true;
+      }
+      break;
+    case 4564:
+      HASH_GUARD(0x219F3257BA3371D4LL, decbin) {
+        ci = &ci_decbin;
+        return true;
+      }
+      break;
+    case 4569:
+      HASH_GUARD(0x7A69D0078F4F31D9LL, ldap_start_tls) {
+        ci = &ci_ldap_start_tls;
+        return true;
+      }
+      break;
+    case 4570:
+      HASH_GUARD(0x0482E069503A91DALL, posix_setgid) {
+        ci = &ci_posix_setgid;
+        return true;
+      }
+      break;
+    case 4571:
+      HASH_GUARD(0x3FEBBC0DA79F31DBLL, fb_call_user_func_safe) {
+        ci = &ci_fb_call_user_func_safe;
+        return true;
+      }
+      break;
+    case 4572:
+      HASH_GUARD(0x1D626FADDFCA11DCLL, imap_num_msg) {
+        ci = &ci_imap_num_msg;
+        return true;
+      }
+      HASH_GUARD(0x14FB46333D6D11DCLL, xml_set_default_handler) {
+        ci = &ci_xml_set_default_handler;
+        return true;
+      }
+      break;
+    case 4573:
+      HASH_GUARD(0x03A183D73942B1DDLL, apc_filehits) {
+        ci = &ci_apc_filehits;
+        return true;
+      }
+      break;
+    case 4574:
+      HASH_GUARD(0x44563CC8FA9B11DELL, memcache_set_server_params) {
+        ci = &ci_memcache_set_server_params;
+        return true;
+      }
+      break;
+    case 4575:
+      HASH_GUARD(0x7403251412E931DFLL, syslog) {
+        ci = &ci_syslog;
+        return true;
+      }
+      break;
+    case 4576:
+      HASH_GUARD(0x5932D2750A8A91E0LL, magickgetpackagename) {
+        ci = &ci_magickgetpackagename;
+        return true;
+      }
+      break;
+    case 4577:
+      HASH_GUARD(0x2771C632A60371E1LL, ftok) {
+        ci = &ci_ftok;
+        return true;
+      }
+      HASH_GUARD(0x0ED729A444C611E1LL, openssl_x509_read) {
+        ci = &ci_openssl_x509_read;
+        return true;
+      }
+      break;
+    case 4580:
+      HASH_GUARD(0x08F7A6C37FC7B1E4LL, shm_get_var) {
+        ci = &ci_shm_get_var;
+        return true;
+      }
+      break;
+    case 4584:
+      HASH_GUARD(0x7F843353646391E8LL, rad2deg) {
+        ci = &ci_rad2deg;
+        return true;
+      }
+      break;
+    case 4594:
+      HASH_GUARD(0x46AFE55982B371F2LL, posix_geteuid) {
+        ci = &ci_posix_geteuid;
+        return true;
+      }
+      break;
+    case 4595:
+      HASH_GUARD(0x11BB3CDC5E4971F3LL, xmlwriter_end_pi) {
+        ci = &ci_xmlwriter_end_pi;
+        return true;
+      }
+      break;
+    case 4597:
+      HASH_GUARD(0x542FBDCF960031F5LL, fprintf) {
+        ci = &ci_fprintf;
+        return true;
+      }
+      HASH_GUARD(0x02ABC00C046291F5LL, imageellipse) {
+        ci = &ci_imageellipse;
+        return true;
+      }
+      break;
+    case 4602:
+      HASH_GUARD(0x135D5CBF936B11FALL, msg_receive) {
+        ci = &ci_msg_receive;
+        return true;
+      }
+      break;
+    case 4605:
+      HASH_GUARD(0x5304E6B47ED0B1FDLL, srand) {
+        ci = &ci_srand;
+        return true;
+      }
+      break;
+    case 4620:
+      HASH_GUARD(0x41B15671649A320CLL, curl_multi_getcontent) {
+        ci = &ci_curl_multi_getcontent;
+        return true;
+      }
+      HASH_GUARD(0x257BEA4D6DC9920CLL, ctype_alnum) {
+        ci = &ci_ctype_alnum;
+        return true;
+      }
+      break;
+    case 4622:
+      HASH_GUARD(0x533642044A00520ELL, pixelgetmagentaquantum) {
+        ci = &ci_pixelgetmagentaquantum;
+        return true;
+      }
+      break;
+    case 4623:
+      HASH_GUARD(0x08DC8BF3ADAE520FLL, getallheaders) {
+        ci = &ci_getallheaders;
+        return true;
+      }
+      HASH_GUARD(0x53631CF3A937320FLL, get_class_methods) {
+        ci = &ci_get_class_methods;
+        return true;
+      }
+      break;
+    case 4624:
+      HASH_GUARD(0x15EF510022CAF210LL, xml_parser_create_ns) {
+        ci = &ci_xml_parser_create_ns;
+        return true;
+      }
+      HASH_GUARD(0x2D41D7F8F4113210LL, sinh) {
+        ci = &ci_sinh;
+        return true;
+      }
+      break;
+    case 4628:
+      HASH_GUARD(0x7D85E9FACB92D214LL, magickgetimageblob) {
+        ci = &ci_magickgetimageblob;
+        return true;
+      }
+      break;
+    case 4632:
+      HASH_GUARD(0x56C95225813A5218LL, memory_get_usage) {
+        ci = &ci_memory_get_usage;
+        return true;
+      }
+      HASH_GUARD(0x4D63F2C9AAB79218LL, fb_renamed_functions) {
+        ci = &ci_fb_renamed_functions;
+        return true;
+      }
+      break;
+    case 4634:
+      HASH_GUARD(0x72C0C89D897E721ALL, magicksetimagetype) {
+        ci = &ci_magicksetimagetype;
+        return true;
+      }
+      break;
+    case 4636:
+      HASH_GUARD(0x482D58D8EE3A521CLL, imap_lsub) {
+        ci = &ci_imap_lsub;
+        return true;
+      }
+      break;
+    case 4646:
+      HASH_GUARD(0x007B6BD94D767226LL, hphp_splfileobject_fpassthru) {
+        ci = &ci_hphp_splfileobject_fpassthru;
+        return true;
+      }
+      break;
+    case 4647:
+      HASH_GUARD(0x5A26F00A81BA5227LL, xmlwriter_start_attribute_ns) {
+        ci = &ci_xmlwriter_start_attribute_ns;
+        return true;
+      }
+      break;
+    case 4648:
+      HASH_GUARD(0x44911AEE34D63228LL, time_sleep_until) {
+        ci = &ci_time_sleep_until;
+        return true;
+      }
+      HASH_GUARD(0x7CD3C6F6495D3228LL, memcache_get_stats) {
+        ci = &ci_memcache_get_stats;
+        return true;
+      }
+      break;
+    case 4654:
+      HASH_GUARD(0x0B7559F53F31D22ELL, fb_stubout_intercept_handler) {
+        ci = &ci_fb_stubout_intercept_handler;
+        return true;
+      }
+      break;
+    case 4657:
+      HASH_GUARD(0x7C07D66F70E43231LL, mailparse_determine_best_xfer_encoding) {
+        ci = &ci_mailparse_determine_best_xfer_encoding;
+        return true;
+      }
+      break;
+    case 4660:
+      HASH_GUARD(0x23C478B2D95F3234LL, dom_element_has_attribute_ns) {
+        ci = &ci_dom_element_has_attribute_ns;
+        return true;
+      }
+      break;
+    case 4662:
+      HASH_GUARD(0x5542AABF33A2F236LL, stream_filter_remove) {
+        ci = &ci_stream_filter_remove;
+        return true;
+      }
+      break;
+    case 4666:
+      HASH_GUARD(0x679ABBE5A08C523ALL, xml_parse_into_struct) {
+        ci = &ci_xml_parse_into_struct;
+        return true;
+      }
+      break;
+    case 4675:
+      HASH_GUARD(0x78183A24F2ACB243LL, strtotime) {
+        ci = &ci_strtotime;
+        return true;
+      }
+      break;
+    case 4688:
+      HASH_GUARD(0x30747B708DA1D250LL, pushdrawingwand) {
+        ci = &ci_pushdrawingwand;
+        return true;
+      }
+      break;
+    case 4694:
+      HASH_GUARD(0x0384346A8857D256LL, clonemagickwand) {
+        ci = &ci_clonemagickwand;
+        return true;
+      }
+      break;
+    case 4699:
+      HASH_GUARD(0x2F8F40E95EDF925BLL, sizeof) {
+        ci = &ci_sizeof;
+        return true;
+      }
+      break;
+    case 4708:
+      HASH_GUARD(0x261F403C4174D264LL, posix_getsid) {
+        ci = &ci_posix_getsid;
+        return true;
+      }
+      break;
+    case 4711:
+      HASH_GUARD(0x38B376B9D9091267LL, xmlwriter_write_attribute) {
+        ci = &ci_xmlwriter_write_attribute;
+        return true;
+      }
+      break;
+    case 4716:
+      HASH_GUARD(0x188DF1EB5FD1B26CLL, mailparse_msg_parse_file) {
+        ci = &ci_mailparse_msg_parse_file;
+        return true;
+      }
+      break;
+    case 4718:
+      HASH_GUARD(0x5672949384A4F26ELL, stream_filter_register) {
+        ci = &ci_stream_filter_register;
+        return true;
+      }
+      break;
+    case 4723:
+      HASH_GUARD(0x61C991F216E85273LL, inet_ntop) {
+        ci = &ci_inet_ntop;
+        return true;
+      }
+      HASH_GUARD(0x08CC1E49661DB273LL, dom_element_get_attribute_ns) {
+        ci = &ci_dom_element_get_attribute_ns;
+        return true;
+      }
+      break;
+    case 4730:
+      HASH_GUARD(0x39E05F957C7DD27ALL, magickgetimagedepth) {
+        ci = &ci_magickgetimagedepth;
+        return true;
+      }
+      break;
+    case 4732:
+      HASH_GUARD(0x0F7E33D551E0727CLL, posix_getpid) {
+        ci = &ci_posix_getpid;
+        return true;
+      }
+      break;
+    case 4735:
+      HASH_GUARD(0x57E8781CF111727FLL, fileowner) {
+        ci = &ci_fileowner;
+        return true;
+      }
+      break;
+    case 4736:
+      HASH_GUARD(0x0C61AE35699F1280LL, imap_thread) {
+        ci = &ci_imap_thread;
+        return true;
+      }
+      break;
+    case 4737:
+      HASH_GUARD(0x0881440DCF5D3281LL, magickflattenimages) {
+        ci = &ci_magickflattenimages;
+        return true;
+      }
+      break;
+    case 4762:
+      HASH_GUARD(0x68272A37CC9E729ALL, mb_strtolower) {
+        ci = &ci_mb_strtolower;
+        return true;
+      }
+      break;
+    case 4763:
+      HASH_GUARD(0x4A09634AE6DFF29BLL, fileperms) {
+        ci = &ci_fileperms;
+        return true;
+      }
+      break;
+    case 4771:
+      HASH_GUARD(0x10E7B5A0E29CF2A3LL, bcscale) {
+        ci = &ci_bcscale;
+        return true;
+      }
+      HASH_GUARD(0x743EA4BF2CC8F2A3LL, mysql_field_type) {
+        ci = &ci_mysql_field_type;
+        return true;
+      }
+      break;
+    case 4774:
+      HASH_GUARD(0x73EF3A19F76872A6LL, iconv_strrpos) {
+        ci = &ci_iconv_strrpos;
+        return true;
+      }
+      break;
+    case 4776:
+      HASH_GUARD(0x5409127FEDE332A8LL, exif_imagetype) {
+        ci = &ci_exif_imagetype;
+        return true;
+      }
+      break;
+    case 4782:
+      HASH_GUARD(0x36AB9E6AA687F2AELL, xmlwriter_start_dtd_element) {
+        ci = &ci_xmlwriter_start_dtd_element;
+        return true;
+      }
+      break;
+    case 4790:
+      HASH_GUARD(0x0E9C9B409F94B2B6LL, setcookie) {
+        ci = &ci_setcookie;
+        return true;
+      }
+      break;
+    case 4794:
+      HASH_GUARD(0x4A3D2113D3DFD2BALL, newpixelwandarray) {
+        ci = &ci_newpixelwandarray;
+        return true;
+      }
+      break;
+    case 4796:
+      HASH_GUARD(0x41F7E2214DDE12BCLL, mcrypt_enc_self_test) {
+        ci = &ci_mcrypt_enc_self_test;
+        return true;
+      }
+      break;
+    case 4797:
+      HASH_GUARD(0x327C865E52FD12BDLL, ldap_get_values_len) {
+        ci = &ci_ldap_get_values_len;
+        return true;
+      }
+      break;
+    case 4798:
+      HASH_GUARD(0x72D6F9B3661AB2BELL, magickgetimage) {
+        ci = &ci_magickgetimage;
+        return true;
+      }
+      break;
+    case 4800:
+      HASH_GUARD(0x5B7C1B74BA3452C0LL, newpixelregioniterator) {
+        ci = &ci_newpixelregioniterator;
+        return true;
+      }
+      break;
+    case 4803:
+      HASH_GUARD(0x446D76A95365D2C3LL, pixelgetyellow) {
+        ci = &ci_pixelgetyellow;
+        return true;
+      }
+      break;
+    case 4804:
+      HASH_GUARD(0x1C7B8161F3C412C4LL, dom_document_create_document_fragment) {
+        ci = &ci_dom_document_create_document_fragment;
+        return true;
+      }
+      break;
+    case 4812:
+      HASH_GUARD(0x407EF03C23BF92CCLL, drawpathellipticarcabsolute) {
+        ci = &ci_drawpathellipticarcabsolute;
+        return true;
+      }
+      break;
+    case 4815:
+      HASH_GUARD(0x4ACE27EC476632CFLL, apc_bin_dumpfile) {
+        ci = &ci_apc_bin_dumpfile;
+        return true;
+      }
+      break;
+    case 4821:
+      HASH_GUARD(0x4D04C580CF9212D5LL, posix_getgroups) {
+        ci = &ci_posix_getgroups;
+        return true;
+      }
+      break;
+    case 4822:
+      HASH_GUARD(0x06E9C984B5F0B2D6LL, furchash_hphp_ext) {
+        ci = &ci_furchash_hphp_ext;
+        return true;
+      }
+      break;
+    case 4824:
+      HASH_GUARD(0x56C4896BA2FF52D8LL, drawsetstrokeopacity) {
+        ci = &ci_drawsetstrokeopacity;
+        return true;
+      }
+      break;
+    case 4826:
+      HASH_GUARD(0x5C6A85B448C352DALL, posix_uname) {
+        ci = &ci_posix_uname;
+        return true;
+      }
+      break;
+    case 4834:
+      HASH_GUARD(0x4AEC19D75BF652E2LL, magickremoveimage) {
+        ci = &ci_magickremoveimage;
+        return true;
+      }
+      break;
+    case 4845:
+      HASH_GUARD(0x1B9FC9E27B8AB2EDLL, memcache_flush) {
+        ci = &ci_memcache_flush;
+        return true;
+      }
+      break;
+    case 4850:
+      HASH_GUARD(0x2EE56D216BB832F2LL, time_nanosleep) {
+        ci = &ci_time_nanosleep;
+        return true;
+      }
+      break;
+    case 4852:
+      HASH_GUARD(0x418EC805C5FD32F4LL, mcrypt_get_key_size) {
+        ci = &ci_mcrypt_get_key_size;
+        return true;
+      }
+      break;
+    case 4857:
+      HASH_GUARD(0x319EF52B36AAB2F9LL, posix_isatty) {
+        ci = &ci_posix_isatty;
+        return true;
+      }
+      break;
+    case 4859:
+      HASH_GUARD(0x4D393D30CE1112FBLL, drawpathmovetoabsolute) {
+        ci = &ci_drawpathmovetoabsolute;
+        return true;
+      }
+      break;
+    case 4862:
+      HASH_GUARD(0x208B66A8731F72FELL, sem_get) {
+        ci = &ci_sem_get;
+        return true;
+      }
+      HASH_GUARD(0x755A9950B65472FELL, drawgetgravity) {
+        ci = &ci_drawgetgravity;
+        return true;
+      }
+      break;
+    case 4866:
+      HASH_GUARD(0x0103FE1E2C307302LL, socket_recvfrom) {
+        ci = &ci_socket_recvfrom;
+        return true;
+      }
+      break;
+    case 4869:
+      HASH_GUARD(0x65D40C6B4842F305LL, clearpixelwand) {
+        ci = &ci_clearpixelwand;
+        return true;
+      }
+      break;
+    case 4870:
+      HASH_GUARD(0x689D60184DD81306LL, htmlspecialchars_decode) {
+        ci = &ci_htmlspecialchars_decode;
+        return true;
+      }
+      break;
+    case 4875:
+      HASH_GUARD(0x2D2BC1125ECA930BLL, dom_document_relaxng_validate_file) {
+        ci = &ci_dom_document_relaxng_validate_file;
+        return true;
+      }
+      break;
+    case 4876:
+      HASH_GUARD(0x553940FCE453330CLL, hphp_splfileobject_getmaxlinelen) {
+        ci = &ci_hphp_splfileobject_getmaxlinelen;
+        return true;
+      }
+      break;
+    case 4881:
+      HASH_GUARD(0x141EDCAE1D155311LL, xbox_get_thread_time) {
+        ci = &ci_xbox_get_thread_time;
+        return true;
+      }
+      break;
+    case 4885:
+      HASH_GUARD(0x4F1E663AE18FD315LL, msg_remove_queue) {
+        ci = &ci_msg_remove_queue;
+        return true;
+      }
+      break;
+    case 4894:
+      HASH_GUARD(0x27FF9DB54420531ELL, xml_error_string) {
+        ci = &ci_xml_error_string;
+        return true;
+      }
+      break;
+    case 4900:
+      HASH_GUARD(0x5E5E4F998C8E7324LL, pcntl_wifexited) {
+        ci = &ci_pcntl_wifexited;
+        return true;
+      }
+      break;
+    case 4904:
+      HASH_GUARD(0x73FEB3BF75FFB328LL, ctype_space) {
+        ci = &ci_ctype_space;
+        return true;
+      }
+      break;
+    case 4907:
+      HASH_GUARD(0x2BDB1EE3869E132BLL, restore_error_handler) {
+        ci = &ci_restore_error_handler;
+        return true;
+      }
+      break;
+    case 4911:
+      HASH_GUARD(0x7DD6461A6290B32FLL, mysql_real_escape_string) {
+        ci = &ci_mysql_real_escape_string;
+        return true;
+      }
+      break;
+    case 4912:
+      HASH_GUARD(0x1601C1826E90B330LL, strptime) {
+        ci = &ci_strptime;
+        return true;
+      }
+      break;
+    case 4931:
+      HASH_GUARD(0x6794CFB89DEEF343LL, curl_exec) {
+        ci = &ci_curl_exec;
+        return true;
+      }
+      break;
+    case 4933:
+      HASH_GUARD(0x45FAE3D08E96B345LL, curl_errno) {
+        ci = &ci_curl_errno;
+        return true;
+      }
+      break;
+    case 4938:
+      HASH_GUARD(0x208BB4C3C0BA534ALL, xmlwriter_write_dtd_element) {
+        ci = &ci_xmlwriter_write_dtd_element;
+        return true;
+      }
+      break;
+    case 4939:
+      HASH_GUARD(0x57A9E8878872D34BLL, parse_ini_file) {
+        ci = &ci_parse_ini_file;
+        return true;
+      }
+      break;
+    case 4940:
+      HASH_GUARD(0x0644E5FB91C8134CLL, array_udiff) {
+        ci = &ci_array_udiff;
+        return true;
+      }
+      break;
+    case 4943:
+      HASH_GUARD(0x4F2D0EFF0D4B534FLL, fb_get_taint) {
+        ci = &ci_fb_get_taint;
+        return true;
+      }
+      HASH_GUARD(0x5C8B3B9FA833934FLL, ldap_first_attribute) {
+        ci = &ci_ldap_first_attribute;
+        return true;
+      }
+      break;
+    case 4945:
+      HASH_GUARD(0x2B422699C3A57351LL, sha1) {
+        ci = &ci_sha1;
+        return true;
+      }
+      break;
+    case 4948:
+      HASH_GUARD(0x501F4DF5C8997354LL, hphp_get_property) {
+        ci = &ci_hphp_get_property;
+        return true;
+      }
+      HASH_GUARD(0x77EB4D2F5BDDB354LL, magickgetimageresolution) {
+        ci = &ci_magickgetimageresolution;
+        return true;
+      }
+      break;
+    case 4955:
+      HASH_GUARD(0x1AC48909BEEF935BLL, func_get_arg) {
+        ci = &ci_func_get_arg;
+        return true;
+      }
+      break;
+    case 4968:
+      HASH_GUARD(0x5D406167C673D368LL, magickcompareimages) {
+        ci = &ci_magickcompareimages;
+        return true;
+      }
+      break;
+    case 4974:
+      HASH_GUARD(0x7CE90898E882F36ELL, pixelsetyellow) {
+        ci = &ci_pixelsetyellow;
+        return true;
+      }
+      break;
+    case 4978:
+      HASH_GUARD(0x7107AE03689F5372LL, hphp_invoke) {
+        ci = &ci_hphp_invoke;
+        return true;
+      }
+      break;
+    case 4984:
+      HASH_GUARD(0x34BAEFD8AE59D378LL, hphp_set_error_page) {
+        ci = &ci_hphp_set_error_page;
+        return true;
+      }
+      break;
+    case 4996:
+      HASH_GUARD(0x44C1BC500D175384LL, wandgetexception) {
+        ci = &ci_wandgetexception;
+        return true;
+      }
+      break;
+    case 4997:
+      HASH_GUARD(0x7C5CA3E2E3C8F385LL, magickflipimage) {
+        ci = &ci_magickflipimage;
+        return true;
+      }
+      HASH_GUARD(0x57554E082E0ED385LL, pcntl_exec) {
+        ci = &ci_pcntl_exec;
+        return true;
+      }
+      HASH_GUARD(0x0B0B8765A4CDD385LL, hphp_splfileobject_fgets) {
+        ci = &ci_hphp_splfileobject_fgets;
+        return true;
+      }
+      break;
+    case 4998:
+      HASH_GUARD(0x589E24C7664D5386LL, doubleval) {
+        ci = &ci_doubleval;
+        return true;
+      }
+      break;
+    case 5003:
+      HASH_GUARD(0x32354CC291ECF38BLL, fb_intercept) {
+        ci = &ci_fb_intercept;
+        return true;
+      }
+      break;
+    case 5004:
+      HASH_GUARD(0x7F18BA1FBD95B38CLL, hphp_directoryiterator_next) {
+        ci = &ci_hphp_directoryiterator_next;
+        return true;
+      }
+      break;
+    case 5009:
+      HASH_GUARD(0x25FA64929C619391LL, asin) {
+        ci = &ci_asin;
+        return true;
+      }
+      break;
+    case 5010:
+      HASH_GUARD(0x2052D8D4822EF392LL, is_subclass_of) {
+        ci = &ci_is_subclass_of;
+        return true;
+      }
+      break;
+    case 5013:
+      HASH_GUARD(0x7B0552A224E27395LL, bcsqrt) {
+        ci = &ci_bcsqrt;
+        return true;
+      }
+      break;
+    case 5017:
+      HASH_GUARD(0x66DA89629BA5D399LL, posix_getgrgid) {
+        ci = &ci_posix_getgrgid;
+        return true;
+      }
+      break;
+    case 5018:
+      HASH_GUARD(0x4C24BC37D807D39ALL, collator_get_strength) {
+        ci = &ci_collator_get_strength;
+        return true;
+      }
+      break;
+    case 5019:
+      HASH_GUARD(0x5B33B55D4B7E339BLL, fpassthru) {
+        ci = &ci_fpassthru;
+        return true;
+      }
+      break;
+    case 5022:
+      HASH_GUARD(0x27AD0D17AA7FB39ELL, ldap_set_rebind_proc) {
+        ci = &ci_ldap_set_rebind_proc;
+        return true;
+      }
+      break;
+    case 5023:
+      HASH_GUARD(0x4019A6916456339FLL, dom_node_remove_child) {
+        ci = &ci_dom_node_remove_child;
+        return true;
+      }
+      break;
+    case 5026:
+      HASH_GUARD(0x0A2A4AA078D433A2LL, hexdec) {
+        ci = &ci_hexdec;
+        return true;
+      }
+      break;
+    case 5028:
+      HASH_GUARD(0x1676FB393F8493A4LL, constant) {
+        ci = &ci_constant;
+        return true;
+      }
+      break;
+    case 5030:
+      HASH_GUARD(0x40E0D496EE29B3A6LL, call_user_func_array) {
+        ci = &ci_call_user_func_array;
+        return true;
+      }
+      break;
+    case 5032:
+      HASH_GUARD(0x4120B8157ED413A8LL, i18n_loc_set_strength) {
+        ci = &ci_i18n_loc_set_strength;
+        return true;
+      }
+      break;
+    case 5043:
+      HASH_GUARD(0x6077CFE09EE4D3B3LL, session_save_path) {
+        ci = &ci_session_save_path;
+        return true;
+      }
+      break;
+    case 5046:
+      HASH_GUARD(0x6E6C0E9A715073B6LL, dom_xpath_register_php_functions) {
+        ci = &ci_dom_xpath_register_php_functions;
+        return true;
+      }
+      HASH_GUARD(0x6C07640F7C5BD3B6LL, imagettfbbox) {
+        ci = &ci_imagettfbbox;
+        return true;
+      }
+      break;
+    case 5052:
+      HASH_GUARD(0x0629158C42C893BCLL, compact) {
+        ci = &ci_compact;
+        return true;
+      }
+      break;
+    case 5054:
+      HASH_GUARD(0x49A34964289453BELL, eregi) {
+        ci = &ci_eregi;
+        return true;
+      }
+      break;
+    case 5055:
+      HASH_GUARD(0x0E38CDC93E5893BFLL, magicksetimagemattecolor) {
+        ci = &ci_magicksetimagemattecolor;
+        return true;
+      }
+      break;
+    case 5064:
+      HASH_GUARD(0x4D100C70E86593C8LL, stream_set_write_buffer) {
+        ci = &ci_stream_set_write_buffer;
+        return true;
+      }
+      break;
+    case 5067:
+      HASH_GUARD(0x0173CC6FACAB93CBLL, quotemeta) {
+        ci = &ci_quotemeta;
+        return true;
+      }
+      break;
+    case 5070:
+      HASH_GUARD(0x02BEFBEE8287D3CELL, get_magic_quotes_runtime) {
+        ci = &ci_get_magic_quotes_runtime;
+        return true;
+      }
+      break;
+    case 5074:
+      HASH_GUARD(0x67C155632E5373D2LL, mailparse_msg_create) {
+        ci = &ci_mailparse_msg_create;
+        return true;
+      }
+      HASH_GUARD(0x4363FF80EEC953D2LL, imap_undelete) {
+        ci = &ci_imap_undelete;
+        return true;
+      }
+      break;
+    case 5075:
+      HASH_GUARD(0x0A8D4FAF266973D3LL, bcpow) {
+        ci = &ci_bcpow;
+        return true;
+      }
+      break;
+    case 5079:
+      HASH_GUARD(0x382B5B1EF00153D7LL, imagecreatefrompng) {
+        ci = &ci_imagecreatefrompng;
+        return true;
+      }
+      break;
+    case 5084:
+      HASH_GUARD(0x7BCD0D27FFD953DCLL, imap_num_recent) {
+        ci = &ci_imap_num_recent;
+        return true;
+      }
+      break;
+    case 5098:
+      HASH_GUARD(0x0D3C8F00B0C633EALL, inet_pton) {
+        ci = &ci_inet_pton;
+        return true;
+      }
+      break;
+    case 5105:
+      HASH_GUARD(0x5EFE291585A713F1LL, method_exists) {
+        ci = &ci_method_exists;
+        return true;
+      }
+      break;
+    case 5106:
+      HASH_GUARD(0x0FE12E46BC9853F2LL, stream_filter_append) {
+        ci = &ci_stream_filter_append;
+        return true;
+      }
+      HASH_GUARD(0x41A19AE18BC8B3F2LL, curl_error) {
+        ci = &ci_curl_error;
+        return true;
+      }
+      HASH_GUARD(0x696241660648B3F2LL, magickwhitethresholdimage) {
+        ci = &ci_magickwhitethresholdimage;
+        return true;
+      }
+      break;
+    case 5108:
+      HASH_GUARD(0x26D53A77483EF3F4LL, drawbezier) {
+        ci = &ci_drawbezier;
+        return true;
+      }
+      break;
+    case 5111:
+      HASH_GUARD(0x43F22CB4E3E8F3F7LL, apache_note) {
+        ci = &ci_apache_note;
+        return true;
+      }
+      break;
+    case 5112:
+      HASH_GUARD(0x4C024573FCD5B3F8LL, var_dump) {
+        ci = &ci_var_dump;
+        return true;
+      }
+      HASH_GUARD(0x514EA9C8FF5B33F8LL, posix_getrlimit) {
+        ci = &ci_posix_getrlimit;
+        return true;
+      }
+      break;
+    case 5114:
+      HASH_GUARD(0x1B217E78CBC713FALL, zend_thread_id) {
+        ci = &ci_zend_thread_id;
+        return true;
+      }
+      break;
+    case 5121:
+      HASH_GUARD(0x36B9C440B1881401LL, fmod) {
+        ci = &ci_fmod;
+        return true;
+      }
+      break;
+    case 5130:
+      HASH_GUARD(0x6DC61C51FA1D340ALL, show_source) {
+        ci = &ci_show_source;
+        return true;
+      }
+      break;
+    case 5131:
+      HASH_GUARD(0x6C2CE092B900D40BLL, hphp_splfileinfo___construct) {
+        ci = &ci_hphp_splfileinfo___construct;
+        return true;
+      }
+      break;
+    case 5133:
+      HASH_GUARD(0x152C7161567F940DLL, func_num_args) {
+        ci = &ci_func_num_args;
+        return true;
+      }
+      break;
+    case 5139:
+      HASH_GUARD(0x56EC1A6732D07413LL, drawgetfontsize) {
+        ci = &ci_drawgetfontsize;
+        return true;
+      }
+      HASH_GUARD(0x20C24D873DC65413LL, openssl_csr_get_subject) {
+        ci = &ci_openssl_csr_get_subject;
+        return true;
+      }
+      break;
+    case 5147:
+      HASH_GUARD(0x47279C717370B41BLL, acos) {
+        ci = &ci_acos;
+        return true;
+      }
+      break;
+    case 5150:
+      HASH_GUARD(0x3E4E7C561D3A541ELL, fgetss) {
+        ci = &ci_fgetss;
+        return true;
+      }
+      break;
+    case 5151:
+      HASH_GUARD(0x301963016A91741FLL, hphp_stats) {
+        ci = &ci_hphp_stats;
+        return true;
+      }
+      break;
+    case 5155:
+      HASH_GUARD(0x4C9108B5A5807423LL, drawsetfillcolor) {
+        ci = &ci_drawsetfillcolor;
+        return true;
+      }
+      break;
+    case 5158:
+      HASH_GUARD(0x161D8EA3339AB426LL, apc_cas) {
+        ci = &ci_apc_cas;
+        return true;
+      }
+      break;
+    case 5164:
+      HASH_GUARD(0x12D324CC744BF42CLL, pixelgetcolorasstring) {
+        ci = &ci_pixelgetcolorasstring;
+        return true;
+      }
+      break;
+    case 5165:
+      HASH_GUARD(0x333D1E2E28B0942DLL, imagejpeg) {
+        ci = &ci_imagejpeg;
+        return true;
+      }
+      break;
+    case 5171:
+      HASH_GUARD(0x6829094421CDB433LL, touch) {
+        ci = &ci_touch;
+        return true;
+      }
+      break;
+    case 5173:
+      HASH_GUARD(0x75DAFEF5BFEF1435LL, imagesetstyle) {
+        ci = &ci_imagesetstyle;
+        return true;
+      }
+      HASH_GUARD(0x044386A0E8B25435LL, drawgetclipunits) {
+        ci = &ci_drawgetclipunits;
+        return true;
+      }
+      break;
+    case 5175:
+      HASH_GUARD(0x1AAF02CF6DEBB437LL, magickdeconstructimages) {
+        ci = &ci_magickdeconstructimages;
+        return true;
+      }
+      break;
+    case 5177:
+      HASH_GUARD(0x34C52EF423EFD439LL, proc_open) {
+        ci = &ci_proc_open;
+        return true;
+      }
+      break;
+    case 5184:
+      HASH_GUARD(0x5247425ED698B440LL, hphp_thread_is_warmup_enabled) {
+        ci = &ci_hphp_thread_is_warmup_enabled;
+        return true;
+      }
+      break;
+    case 5185:
+      HASH_GUARD(0x05892E3C5B9EB441LL, closedir) {
+        ci = &ci_closedir;
+        return true;
+      }
+      break;
+    case 5201:
+      HASH_GUARD(0x7539134E1CC61451LL, xmlwriter_start_cdata) {
+        ci = &ci_xmlwriter_start_cdata;
+        return true;
+      }
+      break;
+    case 5212:
+      HASH_GUARD(0x436AB52B2099145CLL, ldap_close) {
+        ci = &ci_ldap_close;
+        return true;
+      }
+      break;
+    case 5214:
+      HASH_GUARD(0x0ED191E71A60545ELL, magicksetfirstiterator) {
+        ci = &ci_magicksetfirstiterator;
+        return true;
+      }
+      break;
+    case 5226:
+      HASH_GUARD(0x32643AE461D3F46ALL, mailparse_stream_encode) {
+        ci = &ci_mailparse_stream_encode;
+        return true;
+      }
+      break;
+    case 5228:
+      HASH_GUARD(0x07D959A8C0CF546CLL, stream_wrapper_unregister) {
+        ci = &ci_stream_wrapper_unregister;
+        return true;
+      }
+      HASH_GUARD(0x4F39BD300305746CLL, hphp_splfileobject_key) {
+        ci = &ci_hphp_splfileobject_key;
+        return true;
+      }
+      break;
+    case 5229:
+      HASH_GUARD(0x738D381800CE946DLL, ldap_parse_result) {
+        ci = &ci_ldap_parse_result;
+        return true;
+      }
+      HASH_GUARD(0x5229C0069FD7D46DLL, vfprintf) {
+        ci = &ci_vfprintf;
+        return true;
+      }
+      break;
+    case 5231:
+      HASH_GUARD(0x5B8F2ABBB480346FLL, bzwrite) {
+        ci = &ci_bzwrite;
+        return true;
+      }
+      break;
+    case 5239:
+      HASH_GUARD(0x18666906A8001477LL, array_diff_assoc) {
+        ci = &ci_array_diff_assoc;
+        return true;
+      }
+      break;
+    case 5240:
+      HASH_GUARD(0x080594ABE715B478LL, hphp_splfileobject_current) {
+        ci = &ci_hphp_splfileobject_current;
+        return true;
+      }
+      HASH_GUARD(0x6497CC8295DDB478LL, fb_thrift_unserialize) {
+        ci = &ci_fb_thrift_unserialize;
+        return true;
+      }
+      break;
+    case 5241:
+      HASH_GUARD(0x4859AF715D5A3479LL, magickmagnifyimage) {
+        ci = &ci_magickmagnifyimage;
+        return true;
+      }
+      break;
+    case 5244:
+      HASH_GUARD(0x2FA7269AB0E1147CLL, mysql_field_seek) {
+        ci = &ci_mysql_field_seek;
+        return true;
+      }
+      break;
+    case 5246:
+      HASH_GUARD(0x1D583AA4F7F6547ELL, drawpathlinetorelative) {
+        ci = &ci_drawpathlinetorelative;
+        return true;
+      }
+      break;
+    case 5247:
+      HASH_GUARD(0x68AE04B02253B47FLL, mb_parse_str) {
+        ci = &ci_mb_parse_str;
+        return true;
+      }
+      break;
+    case 5249:
+      HASH_GUARD(0x1876287F59CEB481LL, bzerror) {
+        ci = &ci_bzerror;
+        return true;
+      }
+      break;
+    case 5250:
+      HASH_GUARD(0x4590C853C2027482LL, magickembossimage) {
+        ci = &ci_magickembossimage;
+        return true;
+      }
+      break;
+    case 5253:
+      HASH_GUARD(0x250DD3D58EA37485LL, gmstrftime) {
+        ci = &ci_gmstrftime;
+        return true;
+      }
+      break;
+    case 5257:
+      HASH_GUARD(0x4F7EAF5B37663489LL, magickgetimageredprimary) {
+        ci = &ci_magickgetimageredprimary;
+        return true;
+      }
+      break;
+    case 5258:
+      HASH_GUARD(0x7E88764A1DE8548ALL, drawgetstrokewidth) {
+        ci = &ci_drawgetstrokewidth;
+        return true;
+      }
+      break;
+    case 5259:
+      HASH_GUARD(0x5860ACF621DD948BLL, is_file) {
+        ci = &ci_is_file;
+        return true;
+      }
+      break;
+    case 5261:
+      HASH_GUARD(0x23511F83C2BC548DLL, header) {
+        ci = &ci_header;
+        return true;
+      }
+      break;
+    case 5267:
+      HASH_GUARD(0x56377FCC2447D493LL, magicksetimagepixels) {
+        ci = &ci_magicksetimagepixels;
+        return true;
+      }
+      break;
+    case 5271:
+      HASH_GUARD(0x353E2A635A47F497LL, evhttp_get) {
+        ci = &ci_evhttp_get;
+        return true;
+      }
+      HASH_GUARD(0x5388045C2D13D497LL, mysql_num_fields) {
+        ci = &ci_mysql_num_fields;
+        return true;
+      }
+      break;
+    case 5285:
+      HASH_GUARD(0x18BE9B1C2DE6D4A5LL, imagexbm) {
+        ci = &ci_imagexbm;
+        return true;
+      }
+      break;
+    case 5289:
+      HASH_GUARD(0x386378F2BA3234A9LL, magickevaluateimage) {
+        ci = &ci_magickevaluateimage;
+        return true;
+      }
+      break;
+    case 5295:
+      HASH_GUARD(0x42463E7E5C3434AFLL, mb_strrichr) {
+        ci = &ci_mb_strrichr;
+        return true;
+      }
+      HASH_GUARD(0x6AC751181531F4AFLL, simplexml_load_string) {
+        ci = &ci_simplexml_load_string;
+        return true;
+      }
+      break;
+    case 5296:
+      HASH_GUARD(0x0E11D317044974B0LL, magickgetnumberimages) {
+        ci = &ci_magickgetnumberimages;
+        return true;
+      }
+      break;
+    case 5297:
+      HASH_GUARD(0x060619D7A1B5F4B1LL, checkdate) {
+        ci = &ci_checkdate;
+        return true;
+      }
+      break;
+    case 5299:
+      HASH_GUARD(0x57034CAD772AF4B3LL, magickgetimagechannelmean) {
+        ci = &ci_magickgetimagechannelmean;
+        return true;
+      }
+      break;
+    case 5302:
+      HASH_GUARD(0x3DE291DCBA5134B6LL, dom_document_create_element) {
+        ci = &ci_dom_document_create_element;
+        return true;
+      }
+      HASH_GUARD(0x12A9166E68DCF4B6LL, pixelgetgreen) {
+        ci = &ci_pixelgetgreen;
+        return true;
+      }
+      break;
+    case 5303:
+      HASH_GUARD(0x7EEBC81AF9BC54B7LL, xml_parser_free) {
+        ci = &ci_xml_parser_free;
+        return true;
+      }
+      break;
+    case 5306:
+      HASH_GUARD(0x6B49D11E633274BALL, fopen) {
+        ci = &ci_fopen;
+        return true;
+      }
+      break;
+    case 5309:
+      HASH_GUARD(0x5BA371A93F60F4BDLL, use_soap_error_handler) {
+        ci = &ci_use_soap_error_handler;
+        return true;
+      }
+      break;
+    case 5316:
+      HASH_GUARD(0x4A24DB9D6B0334C4LL, hphp_recursivedirectoryiterator_next) {
+        ci = &ci_hphp_recursivedirectoryiterator_next;
+        return true;
+      }
+      break;
+    case 5317:
+      HASH_GUARD(0x34A38DDF2CD914C5LL, long2ip) {
+        ci = &ci_long2ip;
+        return true;
+      }
+      break;
+    case 5320:
+      HASH_GUARD(0x1B8BBFC882FDB4C8LL, magicktintimage) {
+        ci = &ci_magicktintimage;
+        return true;
+      }
+      break;
+    case 5325:
+      HASH_GUARD(0x02B0E99C1E68F4CDLL, imap_createmailbox) {
+        ci = &ci_imap_createmailbox;
+        return true;
+      }
+      break;
+    case 5329:
+      HASH_GUARD(0x29EE24C41FD3D4D1LL, mysql_field_name) {
+        ci = &ci_mysql_field_name;
+        return true;
+      }
+      break;
+    case 5334:
+      HASH_GUARD(0x19ECDD5A937DD4D6LL, mailparse_msg_get_part_data) {
+        ci = &ci_mailparse_msg_get_part_data;
+        return true;
+      }
+      break;
+    case 5336:
+      HASH_GUARD(0x14BF763DDDC014D8LL, imagepsencodefont) {
+        ci = &ci_imagepsencodefont;
+        return true;
+      }
+      HASH_GUARD(0x56B908FC91C834D8LL, magickflopimage) {
+        ci = &ci_magickflopimage;
+        return true;
+      }
+      HASH_GUARD(0x1301F911ED6D54D8LL, is_nan) {
+        ci = &ci_is_nan;
+        return true;
+      }
+      HASH_GUARD(0x575C5AE3D2A694D8LL, ob_end_clean) {
+        ci = &ci_ob_end_clean;
+        return true;
+      }
+      break;
+    case 5343:
+      HASH_GUARD(0x747A7F585CD694DFLL, zend_version) {
+        ci = &ci_zend_version;
+        return true;
+      }
+      break;
+    case 5347:
+      HASH_GUARD(0x7D57A0D72D6254E3LL, ob_implicit_flush) {
+        ci = &ci_ob_implicit_flush;
+        return true;
+      }
+      break;
+    case 5358:
+      HASH_GUARD(0x5895ADDD91F354EELL, hphp_thread_set_warmup_enabled) {
+        ci = &ci_hphp_thread_set_warmup_enabled;
+        return true;
+      }
+      break;
+    case 5362:
+      HASH_GUARD(0x41276F8DE35354F2LL, dom_document_get_elements_by_tag_name) {
+        ci = &ci_dom_document_get_elements_by_tag_name;
+        return true;
+      }
+      break;
+    case 5364:
+      HASH_GUARD(0x436B36C5EB8DB4F4LL, mcrypt_generic) {
+        ci = &ci_mcrypt_generic;
+        return true;
+      }
+      break;
+    case 5365:
+      HASH_GUARD(0x112A0ACDD8B9D4F5LL, mb_list_mime_names) {
+        ci = &ci_mb_list_mime_names;
+        return true;
+      }
+      break;
+    case 5383:
+      HASH_GUARD(0x4FC9FE38A748B507LL, intl_get_error_message) {
+        ci = &ci_intl_get_error_message;
+        return true;
+      }
+      break;
+    case 5384:
+      HASH_GUARD(0x63A08D6AD1209508LL, magickgetexception) {
+        ci = &ci_magickgetexception;
+        return true;
+      }
+      break;
+    case 5393:
+      HASH_GUARD(0x3C0304A55503D511LL, magickgetimageiterations) {
+        ci = &ci_magickgetimageiterations;
+        return true;
+      }
+      break;
+    case 5395:
+      HASH_GUARD(0x772E8BF114FEF513LL, eregi_replace) {
+        ci = &ci_eregi_replace;
+        return true;
+      }
+      break;
+    case 5396:
+      HASH_GUARD(0x100385A0988FD514LL, magickgetfilename) {
+        ci = &ci_magickgetfilename;
+        return true;
+      }
+      break;
+    case 5410:
+      HASH_GUARD(0x7DA98E0379D33522LL, chdir) {
+        ci = &ci_chdir;
+        return true;
+      }
+      break;
+    case 5413:
+      HASH_GUARD(0x230FE1D6EC599525LL, link) {
+        ci = &ci_link;
+        return true;
+      }
+      break;
+    case 5420:
+      HASH_GUARD(0x1AB55BBA0967952CLL, mb_convert_variables) {
+        ci = &ci_mb_convert_variables;
+        return true;
+      }
+      break;
+    case 5423:
+      HASH_GUARD(0x6770E2559C9A152FLL, openssl_private_decrypt) {
+        ci = &ci_openssl_private_decrypt;
+        return true;
+      }
+      break;
+    case 5425:
+      HASH_GUARD(0x6776C27C6123D531LL, dl) {
+        ci = &ci_dl;
+        return true;
+      }
+      break;
+    case 5426:
+      HASH_GUARD(0x6193A26936F4D532LL, disk_total_space) {
+        ci = &ci_disk_total_space;
+        return true;
+      }
+      break;
+    case 5429:
+      HASH_GUARD(0x6C87406DDC0AB535LL, mcrypt_ecb) {
+        ci = &ci_mcrypt_ecb;
+        return true;
+      }
+      break;
+    case 5430:
+      HASH_GUARD(0x0E80D04691227536LL, eval) {
+        ci = &ci_eval;
+        return true;
+      }
+      break;
+    case 5431:
+      HASH_GUARD(0x0830FF7C379D7537LL, dom_text_split_text) {
+        ci = &ci_dom_text_split_text;
+        return true;
+      }
+      HASH_GUARD(0x557C72DE98679537LL, hash_update_stream) {
+        ci = &ci_hash_update_stream;
+        return true;
+      }
+      break;
+    case 5433:
+      HASH_GUARD(0x3C88F0FAC3EDD539LL, phpversion) {
+        ci = &ci_phpversion;
+        return true;
+      }
+      break;
+    case 5436:
+      HASH_GUARD(0x5CA55E62F2A5953CLL, drawgetstrokeopacity) {
+        ci = &ci_drawgetstrokeopacity;
+        return true;
+      }
+      break;
+    case 5438:
+      HASH_GUARD(0x36A80B48E08B753ELL, implode) {
+        ci = &ci_implode;
+        return true;
+      }
+      break;
+    case 5443:
+      HASH_GUARD(0x0962EACAE0F0B543LL, hphp_splfileinfo_getlinktarget) {
+        ci = &ci_hphp_splfileinfo_getlinktarget;
+        return true;
+      }
+      break;
+    case 5444:
+      HASH_GUARD(0x4D397FE5D0C0B544LL, magickmedianfilterimage) {
+        ci = &ci_magickmedianfilterimage;
+        return true;
+      }
+      break;
+    case 5451:
+      HASH_GUARD(0x40CE61115E11154BLL, msg_stat_queue) {
+        ci = &ci_msg_stat_queue;
+        return true;
+      }
+      break;
+    case 5452:
+      HASH_GUARD(0x1D011CB0E810D54CLL, pdo_drivers) {
+        ci = &ci_pdo_drivers;
+        return true;
+      }
+      break;
+    case 5453:
+      HASH_GUARD(0x0F0702D91EAFB54DLL, drawgettextantialias) {
+        ci = &ci_drawgettextantialias;
+        return true;
+      }
+      break;
+    case 5455:
+      HASH_GUARD(0x30DE78E7131B954FLL, furchash_hphp_ext_supported) {
+        ci = &ci_furchash_hphp_ext_supported;
+        return true;
+      }
+      break;
+    case 5466:
+      HASH_GUARD(0x268EE73DB2EA555ALL, get_object_vars) {
+        ci = &ci_get_object_vars;
+        return true;
+      }
+      break;
+    case 5468:
+      HASH_GUARD(0x5749AD20CAFCD55CLL, pixelgetbluequantum) {
+        ci = &ci_pixelgetbluequantum;
+        return true;
+      }
+      break;
+    case 5475:
+      HASH_GUARD(0x1B1B2D70792D9563LL, mysql_get_client_info) {
+        ci = &ci_mysql_get_client_info;
+        return true;
+      }
+      break;
+    case 5478:
+      HASH_GUARD(0x6E2FDBD28F895566LL, timezone_abbreviations_list) {
+        ci = &ci_timezone_abbreviations_list;
+        return true;
+      }
+      break;
+    case 5487:
+      HASH_GUARD(0x016722439BBA756FLL, filetype) {
+        ci = &ci_filetype;
+        return true;
+      }
+      break;
+    case 5489:
+      HASH_GUARD(0x2AD3361DE8B1D571LL, pcntl_signal_dispatch) {
+        ci = &ci_pcntl_signal_dispatch;
+        return true;
+      }
+      break;
+    case 5492:
+      HASH_GUARD(0x636C871213F37574LL, mcrypt_encrypt) {
+        ci = &ci_mcrypt_encrypt;
+        return true;
+      }
+      break;
+    case 5495:
+      HASH_GUARD(0x412521E7ADB21577LL, iconv_mime_decode_headers) {
+        ci = &ci_iconv_mime_decode_headers;
+        return true;
+      }
+      HASH_GUARD(0x1E154D823451B577LL, magicksetresolution) {
+        ci = &ci_magicksetresolution;
+        return true;
+      }
+      break;
+    case 5502:
+      HASH_GUARD(0x31529E9BCA1E157ELL, shm_remove) {
+        ci = &ci_shm_remove;
+        return true;
+      }
+      break;
+    case 5506:
+      HASH_GUARD(0x0B1F0EB755BDB582LL, ispixeliterator) {
+        ci = &ci_ispixeliterator;
+        return true;
+      }
+      break;
+    case 5530:
+      HASH_GUARD(0x77F1EDE7D5EF759ALL, apc_cache_info) {
+        ci = &ci_apc_cache_info;
+        return true;
+      }
+      break;
+    case 5531:
+      HASH_GUARD(0x37D003B09D0C759BLL, stream_get_contents) {
+        ci = &ci_stream_get_contents;
+        return true;
+      }
+      break;
+    case 5536:
+      HASH_GUARD(0x20502FCACBB9F5A0LL, convert_uuencode) {
+        ci = &ci_convert_uuencode;
+        return true;
+      }
+      break;
+    case 5537:
+      HASH_GUARD(0x297690F3A63335A1LL, magickrotateimage) {
+        ci = &ci_magickrotateimage;
+        return true;
+      }
+      break;
+    case 5540:
+      HASH_GUARD(0x3C014439AE5D75A4LL, magickgetcharheight) {
+        ci = &ci_magickgetcharheight;
+        return true;
+      }
+      break;
+    case 5548:
+      HASH_GUARD(0x763BA2B1C60A55ACLL, pixelgetalphaquantum) {
+        ci = &ci_pixelgetalphaquantum;
+        return true;
+      }
+      break;
+    case 5551:
+      HASH_GUARD(0x1636FBA5043CF5AFLL, ldap_error) {
+        ci = &ci_ldap_error;
+        return true;
+      }
+      break;
+    case 5554:
+      HASH_GUARD(0x1887622B9AAE75B2LL, imap_mime_header_decode) {
+        ci = &ci_imap_mime_header_decode;
+        return true;
+      }
+      break;
+    case 5555:
+      HASH_GUARD(0x001DBE44BC0B55B3LL, magicksetimagecolormapcolor) {
+        ci = &ci_magicksetimagecolormapcolor;
+        return true;
+      }
+      HASH_GUARD(0x7AFA32F70E8195B3LL, xbox_set_thread_timeout) {
+        ci = &ci_xbox_set_thread_timeout;
+        return true;
+      }
+      break;
+    case 5557:
+      HASH_GUARD(0x3F9C5B4708FC55B5LL, timezone_name_get) {
+        ci = &ci_timezone_name_get;
+        return true;
+      }
+      break;
+    case 5558:
+      HASH_GUARD(0x1A05907F563235B6LL, collator_set_attribute) {
+        ci = &ci_collator_set_attribute;
+        return true;
+      }
+      break;
+    case 5569:
+      HASH_GUARD(0x7731B90FB7C975C1LL, magickremoveimageprofile) {
+        ci = &ci_magickremoveimageprofile;
+        return true;
+      }
+      break;
+    case 5577:
+      HASH_GUARD(0x75B299F5E35A95C9LL, mb_strwidth) {
+        ci = &ci_mb_strwidth;
+        return true;
+      }
+      HASH_GUARD(0x60F8818C0F38D5C9LL, hphp_directoryiterator___tostring) {
+        ci = &ci_hphp_directoryiterator___tostring;
+        return true;
+      }
+      break;
+    case 5588:
+      HASH_GUARD(0x2FE56B4C457AB5D4LL, ctype_graph) {
+        ci = &ci_ctype_graph;
+        return true;
+      }
+      break;
+    case 5605:
+      HASH_GUARD(0x470F990B218315E5LL, fb_unset_taint) {
+        ci = &ci_fb_unset_taint;
+        return true;
+      }
+      break;
+    case 5610:
+      HASH_GUARD(0x0B7ACBAB402015EALL, mb_send_mail) {
+        ci = &ci_mb_send_mail;
+        return true;
+      }
+      break;
+    case 5621:
+      HASH_GUARD(0x0D1BD0E5AF4175F5LL, drawsetfont) {
+        ci = &ci_drawsetfont;
+        return true;
+      }
+      HASH_GUARD(0x73A1F34DF95B35F5LL, get_defined_constants) {
+        ci = &ci_get_defined_constants;
+        return true;
+      }
+      break;
+    case 5624:
+      HASH_GUARD(0x7C48F6EA39B7B5F8LL, magickadaptivethresholdimage) {
+        ci = &ci_magickadaptivethresholdimage;
+        return true;
+      }
+      break;
+    case 5627:
+      HASH_GUARD(0x0FEC4ED541B7F5FBLL, magickgetimagevirtualpixelmethod) {
+        ci = &ci_magickgetimagevirtualpixelmethod;
+        return true;
+      }
+      break;
+    case 5628:
+      HASH_GUARD(0x39156C7CCE2D75FCLL, hash_update) {
+        ci = &ci_hash_update;
+        return true;
+      }
+      break;
+    case 5630:
+      HASH_GUARD(0x397D3C6576ED75FELL, set_include_path) {
+        ci = &ci_set_include_path;
+        return true;
+      }
+      break;
+    case 5631:
+      HASH_GUARD(0x40A557CBB9FC35FFLL, mysql_tablename) {
+        ci = &ci_mysql_tablename;
+        return true;
+      }
+      break;
+    case 5632:
+      HASH_GUARD(0x552D7CAD93755600LL, dom_document_create_comment) {
+        ci = &ci_dom_document_create_comment;
+        return true;
+      }
+      break;
+    case 5653:
+      HASH_GUARD(0x6AD774816F8F7615LL, mb_strrchr) {
+        ci = &ci_mb_strrchr;
+        return true;
+      }
+      break;
+    case 5657:
+      HASH_GUARD(0x6DD51BF03F003619LL, mailparse_uudecode_all) {
+        ci = &ci_mailparse_uudecode_all;
+        return true;
+      }
+      HASH_GUARD(0x2F29627AF1A97619LL, shm_attach) {
+        ci = &ci_shm_attach;
+        return true;
+      }
+      break;
+    case 5660:
+      HASH_GUARD(0x70725954DC99F61CLL, mcrypt_create_iv) {
+        ci = &ci_mcrypt_create_iv;
+        return true;
+      }
+      break;
+    case 5661:
+      HASH_GUARD(0x69E1368FD737F61DLL, dom_namednodemap_get_named_item) {
+        ci = &ci_dom_namednodemap_get_named_item;
+        return true;
+      }
+      break;
+    case 5665:
+      HASH_GUARD(0x0F71DDE51AA55621LL, hphp_output_global_state) {
+        ci = &ci_hphp_output_global_state;
+        return true;
+      }
+      break;
+    case 5672:
+      HASH_GUARD(0x1E77B3BCF062D628LL, magickreadimage) {
+        ci = &ci_magickreadimage;
+        return true;
+      }
+      break;
+    case 5676:
+      HASH_GUARD(0x5CEA60D9C54A162CLL, pcntl_wifstopped) {
+        ci = &ci_pcntl_wifstopped;
+        return true;
+      }
+      break;
+    case 5679:
+      HASH_GUARD(0x652C331CE138362FLL, is_string) {
+        ci = &ci_is_string;
+        return true;
+      }
+      break;
+    case 5684:
+      HASH_GUARD(0x5E6328F2E6C61634LL, imap_binary) {
+        ci = &ci_imap_binary;
+        return true;
+      }
+      break;
+    case 5687:
+      HASH_GUARD(0x60276BC7990F9637LL, mysql_list_dbs) {
+        ci = &ci_mysql_list_dbs;
+        return true;
+      }
+      HASH_GUARD(0x75AFA49220C9B637LL, collator_sort) {
+        ci = &ci_collator_sort;
+        return true;
+      }
+      break;
+    case 5694:
+      HASH_GUARD(0x60302D15A677963ELL, ldap_free_result) {
+        ci = &ci_ldap_free_result;
+        return true;
+      }
+      break;
+    case 5695:
+      HASH_GUARD(0x17242BC6C9C9563FLL, crypt) {
+        ci = &ci_crypt;
+        return true;
+      }
+      break;
+    case 5702:
+      HASH_GUARD(0x4901517CB796F646LL, msg_set_queue) {
+        ci = &ci_msg_set_queue;
+        return true;
+      }
+      break;
+    case 5710:
+      HASH_GUARD(0x769E5C6A5369F64ELL, ob_list_handlers) {
+        ci = &ci_ob_list_handlers;
+        return true;
+      }
+      break;
+    case 5711:
+      HASH_GUARD(0x1F3F16CED6BDD64FLL, imap_utf8) {
+        ci = &ci_imap_utf8;
+        return true;
+      }
+      break;
+    case 5717:
+      HASH_GUARD(0x629EDDC1E74ED655LL, array_uintersect_assoc) {
+        ci = &ci_array_uintersect_assoc;
+        return true;
+      }
+      break;
+    case 5726:
+      HASH_GUARD(0x205BB9CFF397B65ELL, ldap_mod_replace) {
+        ci = &ci_ldap_mod_replace;
+        return true;
+      }
+      break;
+    case 5727:
+      HASH_GUARD(0x1355AFB40AB1165FLL, drawsetfontstyle) {
+        ci = &ci_drawsetfontstyle;
+        return true;
+      }
+      break;
+    case 5730:
+      HASH_GUARD(0x5629E14D6B9FF662LL, dom_document_get_element_by_id) {
+        ci = &ci_dom_document_get_element_by_id;
+        return true;
+      }
+      break;
+    case 5747:
+      HASH_GUARD(0x126FC82D358E9673LL, magicksetimagevirtualpixelmethod) {
+        ci = &ci_magicksetimagevirtualpixelmethod;
+        return true;
+      }
+      break;
+    case 5751:
+      HASH_GUARD(0x001F23CAC36E3677LL, magickgetimagescene) {
+        ci = &ci_magickgetimagescene;
+        return true;
+      }
+      break;
+    case 5755:
+      HASH_GUARD(0x5BCED33A57D9B67BLL, intval) {
+        ci = &ci_intval;
+        return true;
+      }
+      break;
+    case 5756:
+      HASH_GUARD(0x43B1BAFFB27F367CLL, session_is_registered) {
+        ci = &ci_session_is_registered;
+        return true;
+      }
+      break;
+    case 5757:
+      HASH_GUARD(0x69616E2817E1967DLL, fileinode) {
+        ci = &ci_fileinode;
+        return true;
+      }
+      break;
+    case 5762:
+      HASH_GUARD(0x5F6750E1C7E5D682LL, imageinterlace) {
+        ci = &ci_imageinterlace;
+        return true;
+      }
+      break;
+    case 5773:
+      HASH_GUARD(0x07A946E3DD8E968DLL, ldap_connect) {
+        ci = &ci_ldap_connect;
+        return true;
+      }
+      break;
+    case 5775:
+      HASH_GUARD(0x2EFF4F69EB1DF68FLL, apache_get_config) {
+        ci = &ci_apache_get_config;
+        return true;
+      }
+      break;
+    case 5779:
+      HASH_GUARD(0x7CA1300231493693LL, imap_get_quota) {
+        ci = &ci_imap_get_quota;
+        return true;
+      }
+      break;
+    case 5781:
+      HASH_GUARD(0x7186EF5EF0581695LL, exp) {
+        ci = &ci_exp;
+        return true;
+      }
+      break;
+    case 5782:
+      HASH_GUARD(0x0DD7A2DB53093696LL, utf8_decode) {
+        ci = &ci_utf8_decode;
+        return true;
+      }
+      break;
+    case 5799:
+      HASH_GUARD(0x38BBEE42F136D6A7LL, magickgetimageblueprimary) {
+        ci = &ci_magickgetimageblueprimary;
+        return true;
+      }
+      break;
+    case 5802:
+      HASH_GUARD(0x6E9D4D3A119D76AALL, wandgetexceptiontype) {
+        ci = &ci_wandgetexceptiontype;
+        return true;
+      }
+      HASH_GUARD(0x48C4DB333172F6AALL, parse_url) {
+        ci = &ci_parse_url;
+        return true;
+      }
+      break;
+    case 5803:
+      HASH_GUARD(0x72B3F8E02D8B16ABLL, array_unshift) {
+        ci = &ci_array_unshift;
+        return true;
+      }
+      break;
+    case 5807:
+      HASH_GUARD(0x65497D63C0D716AFLL, getdate) {
+        ci = &ci_getdate;
+        return true;
+      }
+      break;
+    case 5813:
+      HASH_GUARD(0x798B4197212456B5LL, bcpowmod) {
+        ci = &ci_bcpowmod;
+        return true;
+      }
+      HASH_GUARD(0x7E773A36449576B5LL, imagecharup) {
+        ci = &ci_imagecharup;
+        return true;
+      }
+      break;
+    case 5818:
+      HASH_GUARD(0x72B901C3605CB6BALL, pixelsetopacity) {
+        ci = &ci_pixelsetopacity;
+        return true;
+      }
+      break;
+    case 5822:
+      HASH_GUARD(0x081D5EA9920076BELL, drawgetfillalpha) {
+        ci = &ci_drawgetfillalpha;
+        return true;
+      }
+      break;
+    case 5829:
+      HASH_GUARD(0x28526EF49FF516C5LL, pixelsetgreenquantum) {
+        ci = &ci_pixelsetgreenquantum;
+        return true;
+      }
+      break;
+    case 5834:
+      HASH_GUARD(0x41BCD0A72B1396CALL, xmlwriter_start_dtd_attlist) {
+        ci = &ci_xmlwriter_start_dtd_attlist;
+        return true;
+      }
+      break;
+    case 5841:
+      HASH_GUARD(0x2B3D5B9AF915D6D1LL, imagecopymerge) {
+        ci = &ci_imagecopymerge;
+        return true;
+      }
+      break;
+    case 5842:
+      HASH_GUARD(0x1FDF80EA9B8A96D2LL, collator_set_strength) {
+        ci = &ci_collator_set_strength;
+        return true;
+      }
+      break;
+    case 5844:
+      HASH_GUARD(0x04A0E6E8337E56D4LL, drawcolor) {
+        ci = &ci_drawcolor;
+        return true;
+      }
+      break;
+    case 5845:
+      HASH_GUARD(0x317FFA522A7D96D5LL, imagefilledpolygon) {
+        ci = &ci_imagefilledpolygon;
+        return true;
+      }
+      break;
+    case 5857:
+      HASH_GUARD(0x11DA0A0EB8E0D6E1LL, clock_getres) {
+        ci = &ci_clock_getres;
+        return true;
+      }
+      break;
+    case 5860:
+      HASH_GUARD(0x1CF3544CB5C9D6E4LL, xml_set_processing_instruction_handler) {
+        ci = &ci_xml_set_processing_instruction_handler;
+        return true;
+      }
+      HASH_GUARD(0x31FFFC333AA6D6E4LL, drawsetfillrule) {
+        ci = &ci_drawsetfillrule;
+        return true;
+      }
+      break;
+    case 5863:
+      HASH_GUARD(0x44201A16F3D876E7LL, trim) {
+        ci = &ci_trim;
+        return true;
+      }
+      break;
+    case 5869:
+      HASH_GUARD(0x04BD4B43921956EDLL, ldap_search) {
+        ci = &ci_ldap_search;
+        return true;
+      }
+      break;
+    case 5870:
+      HASH_GUARD(0x76382756EA00B6EELL, is_object) {
+        ci = &ci_is_object;
+        return true;
+      }
+      break;
+    case 5872:
+      HASH_GUARD(0x014BD9A6823256F0LL, extract) {
+        ci = &ci_extract;
+        return true;
+      }
+      break;
+    case 5875:
+      HASH_GUARD(0x6F1968BE449FB6F3LL, stream_socket_pair) {
+        ci = &ci_stream_socket_pair;
+        return true;
+      }
+      break;
+    case 5881:
+      HASH_GUARD(0x20740D956F0236F9LL, image2wbmp) {
+        ci = &ci_image2wbmp;
+        return true;
+      }
+      break;
+    case 5889:
+      HASH_GUARD(0x1A80392751AA7701LL, magickgetformat) {
+        ci = &ci_magickgetformat;
+        return true;
+      }
+      break;
+    case 5892:
+      HASH_GUARD(0x5EFE15CE970A5704LL, drawpolyline) {
+        ci = &ci_drawpolyline;
+        return true;
+      }
+      break;
+    case 5899:
+      HASH_GUARD(0x27AF8F6A5DF0B70BLL, dom_document_xinclude) {
+        ci = &ci_dom_document_xinclude;
+        return true;
+      }
+      break;
+    case 5901:
+      HASH_GUARD(0x7CE752299E80B70DLL, unserialize) {
+        ci = &ci_unserialize;
+        return true;
+      }
+      HASH_GUARD(0x4F3C0DB2F6C8F70DLL, unlink) {
+        ci = &ci_unlink;
+        return true;
+      }
+      break;
+    case 5908:
+      HASH_GUARD(0x1778ED2AF035F714LL, rsort) {
+        ci = &ci_rsort;
+        return true;
+      }
+      break;
+    case 5909:
+      HASH_GUARD(0x25D578B4772C1715LL, define) {
+        ci = &ci_define;
+        return true;
+      }
+      break;
+    case 5912:
+      HASH_GUARD(0x7971A5647C957718LL, date_time_set) {
+        ci = &ci_date_time_set;
+        return true;
+      }
+      break;
+    case 5920:
+      HASH_GUARD(0x2D213FD80048F720LL, usleep) {
+        ci = &ci_usleep;
+        return true;
+      }
+      break;
+    case 5926:
+      HASH_GUARD(0x523AB2EA95DAD726LL, get_included_files) {
+        ci = &ci_get_included_files;
+        return true;
+      }
+      break;
+    case 5927:
+      HASH_GUARD(0x11641BE0F11CD727LL, magickgammaimage) {
+        ci = &ci_magickgammaimage;
+        return true;
+      }
+      break;
+    case 5929:
+      HASH_GUARD(0x1D30F1E638D71729LL, readgzfile) {
+        ci = &ci_readgzfile;
+        return true;
+      }
+      break;
+    case 5933:
+      HASH_GUARD(0x14563723F798172DLL, magickpaintopaqueimage) {
+        ci = &ci_magickpaintopaqueimage;
+        return true;
+      }
+      break;
+    case 5946:
+      HASH_GUARD(0x404236CC5ABD973ALL, xhprof_run_trace) {
+        ci = &ci_xhprof_run_trace;
+        return true;
+      }
+      break;
+    case 5953:
+      HASH_GUARD(0x5062777D2B947741LL, wordwrap) {
+        ci = &ci_wordwrap;
+        return true;
+      }
+      break;
+    case 5961:
+      HASH_GUARD(0x73E4417BA7B49749LL, curl_multi_info_read) {
+        ci = &ci_curl_multi_info_read;
+        return true;
+      }
+      break;
+    case 5962:
+      HASH_GUARD(0x1FF03B7DE19DD74ALL, drawpathmovetorelative) {
+        ci = &ci_drawpathmovetorelative;
+        return true;
+      }
+      break;
+    case 5963:
+      HASH_GUARD(0x7DA9307A6149B74BLL, get_meta_tags) {
+        ci = &ci_get_meta_tags;
+        return true;
+      }
+      break;
+    case 5969:
+      HASH_GUARD(0x017FF216C00D9751LL, property_exists) {
+        ci = &ci_property_exists;
+        return true;
+      }
+      break;
+    case 5979:
+      HASH_GUARD(0x05D293F45C15F75BLL, ldap_mod_del) {
+        ci = &ci_ldap_mod_del;
+        return true;
+      }
+      HASH_GUARD(0x0ED4D905630EB75BLL, openssl_random_pseudo_bytes) {
+        ci = &ci_openssl_random_pseudo_bytes;
+        return true;
+      }
+      break;
+    case 5980:
+      HASH_GUARD(0x6D5B592E524AF75CLL, hphp_splfileinfo_getbasename) {
+        ci = &ci_hphp_splfileinfo_getbasename;
+        return true;
+      }
+      break;
+    case 5989:
+      HASH_GUARD(0x1D803CE961921765LL, md5) {
+        ci = &ci_md5;
+        return true;
+      }
+      HASH_GUARD(0x45631C592AD6D765LL, str_ireplace) {
+        ci = &ci_str_ireplace;
+        return true;
+      }
+      break;
+    case 5990:
+      HASH_GUARD(0x1F4505BE6460D766LL, scandir) {
+        ci = &ci_scandir;
+        return true;
+      }
+      break;
+    case 5997:
+      HASH_GUARD(0x3304663FBC6C976DLL, get_html_translation_table) {
+        ci = &ci_get_html_translation_table;
+        return true;
+      }
+      HASH_GUARD(0x553ADA5A41AE976DLL, mb_ereg_replace) {
+        ci = &ci_mb_ereg_replace;
+        return true;
+      }
+      break;
+    case 5998:
+      HASH_GUARD(0x6DB71D850799D76ELL, hphp_splfileobject_fscanf) {
+        ci = &ci_hphp_splfileobject_fscanf;
+        return true;
+      }
+      break;
+    case 6005:
+      HASH_GUARD(0x04D9076808F79775LL, getenv) {
+        ci = &ci_getenv;
+        return true;
+      }
+      break;
+    case 6006:
+      HASH_GUARD(0x4102C410C5031776LL, magickcolorizeimage) {
+        ci = &ci_magickcolorizeimage;
+        return true;
+      }
+      break;
+    case 6011:
+      HASH_GUARD(0x129E39AC523A977BLL, magickgethomeurl) {
+        ci = &ci_magickgethomeurl;
+        return true;
+      }
+      break;
+    case 6019:
+      HASH_GUARD(0x38704D99FEA9B783LL, mysql_fetch_array) {
+        ci = &ci_mysql_fetch_array;
+        return true;
+      }
+      break;
+    case 6020:
+      HASH_GUARD(0x784FD2E7191A3784LL, drawpathellipticarcrelative) {
+        ci = &ci_drawpathellipticarcrelative;
+        return true;
+      }
+      break;
+    case 6021:
+      HASH_GUARD(0x5BFC6198960A5785LL, in_array) {
+        ci = &ci_in_array;
+        return true;
+      }
+      break;
+    case 6023:
+      HASH_GUARD(0x4991643BD854D787LL, drawgetexceptionstring) {
+        ci = &ci_drawgetexceptionstring;
+        return true;
+      }
+      break;
+    case 6024:
+      HASH_GUARD(0x32D8CE5D0FA6D788LL, ldap_rename) {
+        ci = &ci_ldap_rename;
+        return true;
+      }
+      break;
+    case 6038:
+      HASH_GUARD(0x5B42B2AB1B57D796LL, array_replace) {
+        ci = &ci_array_replace;
+        return true;
+      }
+      break;
+    case 6043:
+      HASH_GUARD(0x1196D899ACCD379BLL, evhttp_recv) {
+        ci = &ci_evhttp_recv;
+        return true;
+      }
+      break;
+    case 6045:
+      HASH_GUARD(0x02ECD8C169DF579DLL, feof) {
+        ci = &ci_feof;
+        return true;
+      }
+      break;
+    case 6047:
+      HASH_GUARD(0x4B092931EFB7979FLL, mysql_create_db) {
+        ci = &ci_mysql_create_db;
+        return true;
+      }
+      break;
+    case 6057:
+      HASH_GUARD(0x7707A7FEA07FB7A9LL, hphp_recursivedirectoryiterator___construct) {
+        ci = &ci_hphp_recursivedirectoryiterator___construct;
+        return true;
+      }
+      break;
+    case 6061:
+      HASH_GUARD(0x7DA08D9D148837ADLL, posix_mkfifo) {
+        ci = &ci_posix_mkfifo;
+        return true;
+      }
+      break;
+    case 6062:
+      HASH_GUARD(0x00141B0E3E6F77AELL, xml_set_unparsed_entity_decl_handler) {
+        ci = &ci_xml_set_unparsed_entity_decl_handler;
+        return true;
+      }
+      break;
+    case 6063:
+      HASH_GUARD(0x16CB9891EF26D7AFLL, drawgetstrokedashoffset) {
+        ci = &ci_drawgetstrokedashoffset;
+        return true;
+      }
+      break;
+    case 6073:
+      HASH_GUARD(0x1FC9406FD7FCD7B9LL, strrpos) {
+        ci = &ci_strrpos;
+        return true;
+      }
+      break;
+    case 6081:
+      HASH_GUARD(0x4E172EA6743697C1LL, ldap_first_entry) {
+        ci = &ci_ldap_first_entry;
+        return true;
+      }
+      break;
+    case 6086:
+      HASH_GUARD(0x0C8A7BE6ABC957C6LL, clearpixeliterator) {
+        ci = &ci_clearpixeliterator;
+        return true;
+      }
+      break;
+    case 6087:
+      HASH_GUARD(0x686C5142FD0337C7LL, lcg_value) {
+        ci = &ci_lcg_value;
+        return true;
+      }
+      break;
+    case 6089:
+      HASH_GUARD(0x6BF7D7B5FBFF77C9LL, hphp_get_thread_id) {
+        ci = &ci_hphp_get_thread_id;
+        return true;
+      }
+      break;
+    case 6097:
+      HASH_GUARD(0x35B661C87484D7D1LL, openssl_csr_sign) {
+        ci = &ci_openssl_csr_sign;
+        return true;
+      }
+      break;
+    case 6116:
+      HASH_GUARD(0x2621680306BC97E4LL, magicksetimagescene) {
+        ci = &ci_magicksetimagescene;
+        return true;
+      }
+      break;
+    case 6119:
+      HASH_GUARD(0x4215DDB57604F7E7LL, xmlwriter_start_pi) {
+        ci = &ci_xmlwriter_start_pi;
+        return true;
+      }
+      break;
+    case 6125:
+      HASH_GUARD(0x0DC2C2D372EC97EDLL, hphp_crash_log) {
+        ci = &ci_hphp_crash_log;
+        return true;
+      }
+      break;
+    case 6127:
+      HASH_GUARD(0x5367B0F3A4D2D7EFLL, ldap_list) {
+        ci = &ci_ldap_list;
+        return true;
+      }
+      break;
+    case 6128:
+      HASH_GUARD(0x14F700DD189DB7F0LL, drawsetclipunits) {
+        ci = &ci_drawsetclipunits;
+        return true;
+      }
+      break;
+    case 6131:
+      HASH_GUARD(0x73877357478137F3LL, posix_ctermid) {
+        ci = &ci_posix_ctermid;
+        return true;
+      }
+      HASH_GUARD(0x7F436B50B7BBD7F3LL, getcwd) {
+        ci = &ci_getcwd;
+        return true;
+      }
+      break;
+    case 6146:
+      HASH_GUARD(0x2BA2A6480C563802LL, imap_errors) {
+        ci = &ci_imap_errors;
+        return true;
+      }
+      break;
+    case 6147:
+      HASH_GUARD(0x10F7244AA9CB5803LL, imagepstext) {
+        ci = &ci_imagepstext;
+        return true;
+      }
+      break;
+    case 6150:
+      HASH_GUARD(0x4D832DD6A72AB806LL, dom_document_create_attribute) {
+        ci = &ci_dom_document_create_attribute;
+        return true;
+      }
+      break;
+    case 6152:
+      HASH_GUARD(0x083B8F01AE15B808LL, assert) {
+        ci = &ci_assert;
+        return true;
+      }
+      break;
+    case 6153:
+      HASH_GUARD(0x52DCFB6F41D41809LL, dom_characterdata_append_data) {
+        ci = &ci_dom_characterdata_append_data;
+        return true;
+      }
+      HASH_GUARD(0x221F5A9D5E021809LL, magickwriteimages) {
+        ci = &ci_magickwriteimages;
+        return true;
+      }
+      break;
+    case 6154:
+      HASH_GUARD(0x5A0D1AE1D4C6F80ALL, array_slice) {
+        ci = &ci_array_slice;
+        return true;
+      }
+      break;
+    case 6157:
+      HASH_GUARD(0x727F5A6D8E26B80DLL, extension_loaded) {
+        ci = &ci_extension_loaded;
+        return true;
+      }
+      break;
+    case 6163:
+      HASH_GUARD(0x5F7940A713863813LL, floor) {
+        ci = &ci_floor;
+        return true;
+      }
+      break;
+    case 6164:
+      HASH_GUARD(0x3C0DFA15D3447814LL, rawurldecode) {
+        ci = &ci_rawurldecode;
+        return true;
+      }
+      break;
+    case 6167:
+      HASH_GUARD(0x0D8B1D0A8C381817LL, stream_bucket_new) {
+        ci = &ci_stream_bucket_new;
+        return true;
+      }
+      break;
+    case 6168:
+      HASH_GUARD(0x0FBDB0B22A59B818LL, mailparse_msg_parse) {
+        ci = &ci_mailparse_msg_parse;
+        return true;
+      }
+      break;
+    case 6173:
+      HASH_GUARD(0x4D624A655A9B581DLL, drawpoint) {
+        ci = &ci_drawpoint;
+        return true;
+      }
+      break;
+    case 6177:
+      HASH_GUARD(0x107DBCA79C15B821LL, addcslashes) {
+        ci = &ci_addcslashes;
+        return true;
+      }
+      break;
+    case 6185:
+      HASH_GUARD(0x57FFCEB7FA2D9829LL, usort) {
+        ci = &ci_usort;
+        return true;
+      }
+      break;
+    case 6190:
+      HASH_GUARD(0x3402C1E7544C382ELL, lstat) {
+        ci = &ci_lstat;
+        return true;
+      }
+      break;
+    case 6192:
+      HASH_GUARD(0x5BBFA7EAEBD25830LL, pixelgetcyanquantum) {
+        ci = &ci_pixelgetcyanquantum;
+        return true;
+      }
+      break;
+    case 6196:
+      HASH_GUARD(0x605132E71CE7D834LL, array_push) {
+        ci = &ci_array_push;
+        return true;
+      }
+      break;
+    case 6197:
+      HASH_GUARD(0x1C4A162E6635B835LL, imageftbbox) {
+        ci = &ci_imageftbbox;
+        return true;
+      }
+      HASH_GUARD(0x43A96BA7F58EB835LL, hphp_splfileobject_valid) {
+        ci = &ci_hphp_splfileobject_valid;
+        return true;
+      }
+      break;
+    case 6200:
+      HASH_GUARD(0x03098F16B0AD5838LL, mcrypt_module_get_supported_key_sizes) {
+        ci = &ci_mcrypt_module_get_supported_key_sizes;
+        return true;
+      }
+      break;
+    case 6203:
+      HASH_GUARD(0x63E2EA180786B83BLL, pixelsetblack) {
+        ci = &ci_pixelsetblack;
+        return true;
+      }
+      break;
+    case 6204:
+      HASH_GUARD(0x7C8969C75CA1783CLL, get_declared_classes) {
+        ci = &ci_get_declared_classes;
+        return true;
+      }
+      HASH_GUARD(0x034EDEBD109FD83CLL, filesize) {
+        ci = &ci_filesize;
+        return true;
+      }
+      break;
+    case 6220:
+      HASH_GUARD(0x26A2BBC465A2B84CLL, strcoll) {
+        ci = &ci_strcoll;
+        return true;
+      }
+      break;
+    case 6225:
+      HASH_GUARD(0x488BFCC942C73851LL, gzopen) {
+        ci = &ci_gzopen;
+        return true;
+      }
+      break;
+    case 6230:
+      HASH_GUARD(0x51FD8C9B5109F856LL, dom_characterdata_replace_data) {
+        ci = &ci_dom_characterdata_replace_data;
+        return true;
+      }
+      break;
+    case 6233:
+      HASH_GUARD(0x41924CBA5B717859LL, imap_append) {
+        ci = &ci_imap_append;
+        return true;
+      }
+      break;
+    case 6238:
+      HASH_GUARD(0x3D8327794429585ELL, hphpd_install_user_command) {
+        ci = &ci_hphpd_install_user_command;
+        return true;
+      }
+      break;
+    case 6241:
+      HASH_GUARD(0x2AD6B0E3B9F3B861LL, array_search) {
+        ci = &ci_array_search;
+        return true;
+      }
+      break;
+    case 6243:
+      HASH_GUARD(0x21B30164F5D49863LL, is_resource) {
+        ci = &ci_is_resource;
+        return true;
+      }
+      break;
+    case 6247:
+      HASH_GUARD(0x65A68A31B96E7867LL, hash) {
+        ci = &ci_hash;
+        return true;
+      }
+      break;
+    case 6249:
+      HASH_GUARD(0x246EC2B1844DB869LL, pixelgetexception) {
+        ci = &ci_pixelgetexception;
+        return true;
+      }
+      break;
+    case 6263:
+      HASH_GUARD(0x6AA3788C9B737877LL, magickdespeckleimage) {
+        ci = &ci_magickdespeckleimage;
+        return true;
+      }
+      break;
+    case 6264:
+      HASH_GUARD(0x00F8C6758B50B878LL, drawpathcurvetoquadraticbezierabsolute) {
+        ci = &ci_drawpathcurvetoquadraticbezierabsolute;
+        return true;
+      }
+      break;
+    case 6268:
+      HASH_GUARD(0x11DFC3C9D916387CLL, hphp_splfileobject_ftruncate) {
+        ci = &ci_hphp_splfileobject_ftruncate;
+        return true;
+      }
+      HASH_GUARD(0x6451BCB825D1787CLL, chroot) {
+        ci = &ci_chroot;
+        return true;
+      }
+      break;
+    case 6272:
+      HASH_GUARD(0x7549612A72BA5880LL, hphp_splfileinfo_getrealpath) {
+        ci = &ci_hphp_splfileinfo_getrealpath;
+        return true;
+      }
+      break;
+    case 6280:
+      HASH_GUARD(0x1062CF2DA5443888LL, imagedashedline) {
+        ci = &ci_imagedashedline;
+        return true;
+      }
+      break;
+    case 6287:
+      HASH_GUARD(0x5DDC2A079AB7988FLL, dom_document_schema_validate_file) {
+        ci = &ci_dom_document_schema_validate_file;
+        return true;
+      }
+      break;
+    case 6301:
+      HASH_GUARD(0x1FC855F0E4F1189DLL, magickminifyimage) {
+        ci = &ci_magickminifyimage;
+        return true;
+      }
+      break;
+    case 6305:
+      HASH_GUARD(0x1756D4437A4098A1LL, date_modify) {
+        ci = &ci_date_modify;
+        return true;
+      }
+      break;
+    case 6311:
+      HASH_GUARD(0x57105D4E43B078A7LL, magicksetformat) {
+        ci = &ci_magicksetformat;
+        return true;
+      }
+      HASH_GUARD(0x6C6B4B739AE1B8A7LL, curl_close) {
+        ci = &ci_curl_close;
+        return true;
+      }
+      break;
+    case 6313:
+      HASH_GUARD(0x346B2DB3BA2378A9LL, imagecolormatch) {
+        ci = &ci_imagecolormatch;
+        return true;
+      }
+      break;
+    case 6314:
+      HASH_GUARD(0x44BC069A75EE98AALL, xhprof_disable) {
+        ci = &ci_xhprof_disable;
+        return true;
+      }
+      break;
+    case 6315:
+      HASH_GUARD(0x39F11BA6A4D778ABLL, strnatcmp) {
+        ci = &ci_strnatcmp;
+        return true;
+      }
+      break;
+    case 6316:
+      HASH_GUARD(0x5B1F4C6424DDD8ACLL, openlog) {
+        ci = &ci_openlog;
+        return true;
+      }
+      break;
+    case 6320:
+      HASH_GUARD(0x2CEF8DDC092698B0LL, drawgetvectorgraphics) {
+        ci = &ci_drawgetvectorgraphics;
+        return true;
+      }
+      break;
+    case 6326:
+      HASH_GUARD(0x5866C5DF3A1AD8B6LL, dom_element_get_attribute_node) {
+        ci = &ci_dom_element_get_attribute_node;
+        return true;
+      }
+      break;
+    case 6353:
+      HASH_GUARD(0x1015EB3F52B098D1LL, print) {
+        ci = &ci_print;
+        return true;
+      }
+      break;
+    case 6363:
+      HASH_GUARD(0x4052842EC87038DBLL, magickcropimage) {
+        ci = &ci_magickcropimage;
+        return true;
+      }
+      break;
+    case 6376:
+      HASH_GUARD(0x4F7ED8C3156AD8E8LL, magicksetimagedispose) {
+        ci = &ci_magicksetimagedispose;
+        return true;
+      }
+      break;
+    case 6389:
+      HASH_GUARD(0x45DA105C5B48F8F5LL, apd_set_pprof_trace) {
+        ci = &ci_apd_set_pprof_trace;
+        return true;
+      }
+      break;
+    case 6396:
+      HASH_GUARD(0x4C2AFB2EFDB1B8FCLL, stripslashes) {
+        ci = &ci_stripslashes;
+        return true;
+      }
+      break;
+    case 6411:
+      HASH_GUARD(0x67B879A1120C190BLL, headers_sent) {
+        ci = &ci_headers_sent;
+        return true;
+      }
+      break;
+    case 6417:
+      HASH_GUARD(0x04F822B7817E5911LL, bindec) {
+        ci = &ci_bindec;
+        return true;
+      }
+      HASH_GUARD(0x0AFD4F231D6CB911LL, magickaddimage) {
+        ci = &ci_magickaddimage;
+        return true;
+      }
+      break;
+    case 6425:
+      HASH_GUARD(0x022B16C0D64D7919LL, file_put_contents) {
+        ci = &ci_file_put_contents;
+        return true;
+      }
+      break;
+    case 6431:
+      HASH_GUARD(0x277D7E2D1F5C191FLL, drawpathcurvetoquadraticbezierrelative) {
+        ci = &ci_drawpathcurvetoquadraticbezierrelative;
+        return true;
+      }
+      HASH_GUARD(0x4E2C55C92D71F91FLL, magickcolorfloodfillimage) {
+        ci = &ci_magickcolorfloodfillimage;
+        return true;
+      }
+      break;
+    case 6435:
+      HASH_GUARD(0x044B276686B77923LL, fscanf) {
+        ci = &ci_fscanf;
+        return true;
+      }
+      break;
+    case 6445:
+      HASH_GUARD(0x27363CE6CBFC392DLL, pcntl_wexitstatus) {
+        ci = &ci_pcntl_wexitstatus;
+        return true;
+      }
+      HASH_GUARD(0x2337F8C3EE17192DLL, sprintf) {
+        ci = &ci_sprintf;
+        return true;
+      }
+      break;
+    case 6447:
+      HASH_GUARD(0x13A6C6CAF50EB92FLL, imap_search) {
+        ci = &ci_imap_search;
+        return true;
+      }
+      break;
+    case 6448:
+      HASH_GUARD(0x30972530BD557930LL, shell_exec) {
+        ci = &ci_shell_exec;
+        return true;
+      }
+      break;
+    case 6450:
+      HASH_GUARD(0x72C01E1D90BE5932LL, mcrypt_enc_get_block_size) {
+        ci = &ci_mcrypt_enc_get_block_size;
+        return true;
+      }
+      break;
+    case 6453:
+      HASH_GUARD(0x06486B6912479935LL, zlib_get_coding_type) {
+        ci = &ci_zlib_get_coding_type;
+        return true;
+      }
+      HASH_GUARD(0x48D3CA6CA0B29935LL, mb_regex_set_options) {
+        ci = &ci_mb_regex_set_options;
+        return true;
+      }
+      break;
+    case 6462:
+      HASH_GUARD(0x3946D67A0D16D93ELL, hphp_splfileinfo_isreadable) {
+        ci = &ci_hphp_splfileinfo_isreadable;
+        return true;
+      }
+      break;
+    case 6471:
+      HASH_GUARD(0x1E694036FEBA3947LL, imap_fetchstructure) {
+        ci = &ci_imap_fetchstructure;
+        return true;
+      }
+      break;
+    case 6472:
+      HASH_GUARD(0x6A3412DE82715948LL, openssl_x509_checkpurpose) {
+        ci = &ci_openssl_x509_checkpurpose;
+        return true;
+      }
+      break;
+    case 6473:
+      HASH_GUARD(0x243BB8B284895949LL, apache_get_rewrite_rules) {
+        ci = &ci_apache_get_rewrite_rules;
+        return true;
+      }
+      break;
+    case 6475:
+      HASH_GUARD(0x37F356F578FA394BLL, substr) {
+        ci = &ci_substr;
+        return true;
+      }
+      break;
+    case 6476:
+      HASH_GUARD(0x10DB229871AB794CLL, imap_msgno) {
+        ci = &ci_imap_msgno;
+        return true;
+      }
+      break;
+    case 6483:
+      HASH_GUARD(0x068438AFD33A9953LL, imagecolorclosesthwb) {
+        ci = &ci_imagecolorclosesthwb;
+        return true;
+      }
+      break;
+    case 6511:
+      HASH_GUARD(0x134EF88685C0396FLL, magickgetexceptiontype) {
+        ci = &ci_magickgetexceptiontype;
+        return true;
+      }
+      break;
+    case 6513:
+      HASH_GUARD(0x442A28FB6F6C3971LL, xmlwriter_start_attribute) {
+        ci = &ci_xmlwriter_start_attribute;
+        return true;
+      }
+      HASH_GUARD(0x72C73F5DA7D6F971LL, magickgetimagecolormapcolor) {
+        ci = &ci_magickgetimagecolormapcolor;
+        return true;
+      }
+      break;
+    case 6528:
+      HASH_GUARD(0x3D3445105C335980LL, filectime) {
+        ci = &ci_filectime;
+        return true;
+      }
+      break;
+    case 6530:
+      HASH_GUARD(0x214EA70BDD8FB982LL, magickmorphimages) {
+        ci = &ci_magickmorphimages;
+        return true;
+      }
+      break;
+    case 6531:
+      HASH_GUARD(0x3DA64BF893DBF983LL, strncmp) {
+        ci = &ci_strncmp;
+        return true;
+      }
+      break;
+    case 6536:
+      HASH_GUARD(0x55BE7AE8DEF3F988LL, magickgetstringheight) {
+        ci = &ci_magickgetstringheight;
+        return true;
+      }
+      break;
+    case 6539:
+      HASH_GUARD(0x0E863EF8C11A598BLL, is_writable) {
+        ci = &ci_is_writable;
+        return true;
+      }
+      break;
+    case 6541:
+      HASH_GUARD(0x69003892F71C798DLL, apache_get_scoreboard) {
+        ci = &ci_apache_get_scoreboard;
+        return true;
+      }
+      HASH_GUARD(0x651A8CBB8D2A398DLL, mysql_stat) {
+        ci = &ci_mysql_stat;
+        return true;
+      }
+      break;
+    case 6542:
+      HASH_GUARD(0x45CFDEE19995398ELL, hphp_recursiveiteratoriterator_next) {
+        ci = &ci_hphp_recursiveiteratoriterator_next;
+        return true;
+      }
+      break;
+    case 6544:
+      HASH_GUARD(0x342D957A86A03990LL, hphp_splfileobject_seek) {
+        ci = &ci_hphp_splfileobject_seek;
+        return true;
+      }
+      break;
+    case 6558:
+      HASH_GUARD(0x59D2DFF08F4DB99ELL, imagecreate) {
+        ci = &ci_imagecreate;
+        return true;
+      }
+      break;
+    case 6564:
+      HASH_GUARD(0x6F8676B049C919A4LL, array_intersect_uassoc) {
+        ci = &ci_array_intersect_uassoc;
+        return true;
+      }
+      break;
+    case 6572:
+      HASH_GUARD(0x522256BAA78159ACLL, popen) {
+        ci = &ci_popen;
+        return true;
+      }
+      break;
+    case 6573:
+      HASH_GUARD(0x05C5AD90751159ADLL, drawpathcurvetoquadraticbeziersmoothabsolute) {
+        ci = &ci_drawpathcurvetoquadraticbeziersmoothabsolute;
+        return true;
+      }
+      break;
+    case 6575:
+      HASH_GUARD(0x25268012A48A99AFLL, magickclipimage) {
+        ci = &ci_magickclipimage;
+        return true;
+      }
+      break;
+    case 6582:
+      HASH_GUARD(0x5FC1B94446EA59B6LL, magickremoveimageprofiles) {
+        ci = &ci_magickremoveimageprofiles;
+        return true;
+      }
+      break;
+    case 6583:
+      HASH_GUARD(0x18F2C246FACAD9B7LL, each) {
+        ci = &ci_each;
+        return true;
+      }
+      break;
+    case 6584:
+      HASH_GUARD(0x3741447B159359B8LL, mcrypt_get_cipher_name) {
+        ci = &ci_mcrypt_get_cipher_name;
+        return true;
+      }
+      HASH_GUARD(0x4EFD7A9C90E559B8LL, posix_ttyname) {
+        ci = &ci_posix_ttyname;
+        return true;
+      }
+      break;
+    case 6585:
+      HASH_GUARD(0x145702974C97F9B9LL, ltrim) {
+        ci = &ci_ltrim;
+        return true;
+      }
+      break;
+    case 6586:
+      HASH_GUARD(0x13B3172E092D99BALL, is_dir) {
+        ci = &ci_is_dir;
+        return true;
+      }
+      break;
+    case 6596:
+      HASH_GUARD(0x47B7D3745D80B9C4LL, socket_get_option) {
+        ci = &ci_socket_get_option;
+        return true;
+      }
+      break;
+    case 6602:
+      HASH_GUARD(0x5C5B0CC85133B9CALL, mkdir) {
+        ci = &ci_mkdir;
+        return true;
+      }
+      break;
+    case 6603:
+      HASH_GUARD(0x032DFAC5B24679CBLL, header_remove) {
+        ci = &ci_header_remove;
+        return true;
+      }
+      break;
+    case 6610:
+      HASH_GUARD(0x3DCCD1FEAD8759D2LL, array_sum) {
+        ci = &ci_array_sum;
+        return true;
+      }
+      break;
+    case 6613:
+      HASH_GUARD(0x245860A2FE4CB9D5LL, socket_set_blocking) {
+        ci = &ci_socket_set_blocking;
+        return true;
+      }
+      break;
+    case 6623:
+      HASH_GUARD(0x349E2E0F2CD7B9DFLL, magickgetversion) {
+        ci = &ci_magickgetversion;
+        return true;
+      }
+      break;
+    case 6633:
+      HASH_GUARD(0x4ADFA265F07AB9E9LL, drawgettextalignment) {
+        ci = &ci_drawgettextalignment;
+        return true;
+      }
+      break;
+    case 6634:
+      HASH_GUARD(0x25DDD924EFE979EALL, hash_update_file) {
+        ci = &ci_hash_update_file;
+        return true;
+      }
+      break;
+    case 6635:
+      HASH_GUARD(0x71B0FF80B88459EBLL, diskfreespace) {
+        ci = &ci_diskfreespace;
+        return true;
+      }
+      break;
+    case 6639:
+      HASH_GUARD(0x7EA6200B688459EFLL, ldap_modify) {
+        ci = &ci_ldap_modify;
+        return true;
+      }
+      break;
+    case 6640:
+      HASH_GUARD(0x1FC307200E8959F0LL, stream_bucket_append) {
+        ci = &ci_stream_bucket_append;
+        return true;
+      }
+      break;
+    case 6645:
+      HASH_GUARD(0x35BABFBC091759F5LL, socket_server) {
+        ci = &ci_socket_server;
+        return true;
+      }
+      break;
+    case 6652:
+      HASH_GUARD(0x55814D0EC267B9FCLL, imap_status) {
+        ci = &ci_imap_status;
+        return true;
+      }
+      break;
+    case 6660:
+      HASH_GUARD(0x17B83C425BD09A04LL, atanh) {
+        ci = &ci_atanh;
+        return true;
+      }
+      break;
+    case 6663:
+      HASH_GUARD(0x391E0A4CF1EC9A07LL, stream_socket_recvfrom) {
+        ci = &ci_stream_socket_recvfrom;
+        return true;
+      }
+      break;
+    case 6664:
+      HASH_GUARD(0x0436CA4DFB315A08LL, soundex) {
+        ci = &ci_soundex;
+        return true;
+      }
+      break;
+    case 6667:
+      HASH_GUARD(0x70075DC878825A0BLL, ctype_lower) {
+        ci = &ci_ctype_lower;
+        return true;
+      }
+      break;
+    case 6669:
+      HASH_GUARD(0x736C133EFF8E5A0DLL, mysql_list_fields) {
+        ci = &ci_mysql_list_fields;
+        return true;
+      }
+      HASH_GUARD(0x50A7146A79877A0DLL, pcntl_alarm) {
+        ci = &ci_pcntl_alarm;
+        return true;
+      }
+      break;
+    case 6697:
+      HASH_GUARD(0x618D2A98986B1A29LL, ldap_unbind) {
+        ci = &ci_ldap_unbind;
+        return true;
+      }
+      break;
+    case 6708:
+      HASH_GUARD(0x2D948E4099975A34LL, restore_include_path) {
+        ci = &ci_restore_include_path;
+        return true;
+      }
+      HASH_GUARD(0x5AB266C6E7075A34LL, mysql_error) {
+        ci = &ci_mysql_error;
+        return true;
+      }
+      break;
+    case 6712:
+      HASH_GUARD(0x3E65EF9761BE5A38LL, pixelgetiteratorexceptiontype) {
+        ci = &ci_pixelgetiteratorexceptiontype;
+        return true;
+      }
+      break;
+    case 6715:
+      HASH_GUARD(0x785ECCF53D98BA3BLL, curl_multi_exec) {
+        ci = &ci_curl_multi_exec;
+        return true;
+      }
+      break;
+    case 6718:
+      HASH_GUARD(0x31C3A072D092FA3ELL, socket_create_listen) {
+        ci = &ci_socket_create_listen;
+        return true;
+      }
+      break;
+    case 6719:
+      HASH_GUARD(0x4C0E2C6882051A3FLL, magickgetresourcelimit) {
+        ci = &ci_magickgetresourcelimit;
+        return true;
+      }
+      break;
+    case 6722:
+      HASH_GUARD(0x128914E131AFFA42LL, microtime) {
+        ci = &ci_microtime;
+        return true;
+      }
+      HASH_GUARD(0x5FF7C3A6BDDCFA42LL, mb_convert_kana) {
+        ci = &ci_mb_convert_kana;
+        return true;
+      }
+      break;
+    case 6725:
+      HASH_GUARD(0x7CDF1FB642529A45LL, dom_characterdata_insert_data) {
+        ci = &ci_dom_characterdata_insert_data;
+        return true;
+      }
+      break;
+    case 6727:
+      HASH_GUARD(0x1B45CFF586F85A47LL, utf8_encode) {
+        ci = &ci_utf8_encode;
+        return true;
+      }
+      break;
+    case 6734:
+      HASH_GUARD(0x1635DCC4882CBA4ELL, dom_node_has_attributes) {
+        ci = &ci_dom_node_has_attributes;
+        return true;
+      }
+      break;
+    case 6747:
+      HASH_GUARD(0x2B18DFF183C0BA5BLL, mb_get_info) {
+        ci = &ci_mb_get_info;
+        return true;
+      }
+      break;
+    case 6758:
+      HASH_GUARD(0x60C4B9EEDBD5FA66LL, pos) {
+        ci = &ci_pos;
+        return true;
+      }
+      break;
+    case 6760:
+      HASH_GUARD(0x01DD2057FD9B1A68LL, xmlwriter_write_cdata) {
+        ci = &ci_xmlwriter_write_cdata;
+        return true;
+      }
+      HASH_GUARD(0x32AD0455A7689A68LL, magickoilpaintimage) {
+        ci = &ci_magickoilpaintimage;
+        return true;
+      }
+      break;
+    case 6761:
+      HASH_GUARD(0x10CDCF2BB4057A69LL, debug_zval_dump) {
+        ci = &ci_debug_zval_dump;
+        return true;
+      }
+      break;
+    case 6763:
+      HASH_GUARD(0x0912965F4440FA6BLL, str_repeat) {
+        ci = &ci_str_repeat;
+        return true;
+      }
+      break;
+    case 6769:
+      HASH_GUARD(0x5B5DA6AD0AD63A71LL, drawannotation) {
+        ci = &ci_drawannotation;
+        return true;
+      }
+      break;
+    case 6770:
+      HASH_GUARD(0x71AFF1D58D103A72LL, imagefontheight) {
+        ci = &ci_imagefontheight;
+        return true;
+      }
+      break;
+    case 6773:
+      HASH_GUARD(0x7A957BEC6CA57A75LL, preg_replace_callback) {
+        ci = &ci_preg_replace_callback;
+        return true;
+      }
+      break;
+    case 6781:
+      HASH_GUARD(0x414C2E31304E9A7DLL, stream_get_filters) {
+        ci = &ci_stream_get_filters;
+        return true;
+      }
+      break;
+    case 6786:
+      HASH_GUARD(0x79786FABC5551A82LL, jpeg2wbmp) {
+        ci = &ci_jpeg2wbmp;
+        return true;
+      }
+      break;
+    case 6787:
+      HASH_GUARD(0x11149278DB0A9A83LL, levenshtein) {
+        ci = &ci_levenshtein;
+        return true;
+      }
+      break;
+    case 6789:
+      HASH_GUARD(0x755DEFDEDF35DA85LL, ctype_print) {
+        ci = &ci_ctype_print;
+        return true;
+      }
+      break;
+    case 6792:
+      HASH_GUARD(0x1818A3CFBA357A88LL, magicksetwandsize) {
+        ci = &ci_magicksetwandsize;
+        return true;
+      }
+      break;
+    case 6795:
+      HASH_GUARD(0x7588BD0546C8BA8BLL, hphp_recursivedirectoryiterator_valid) {
+        ci = &ci_hphp_recursivedirectoryiterator_valid;
+        return true;
+      }
+      break;
+    case 6796:
+      HASH_GUARD(0x6A2EEE463F969A8CLL, getservbyname) {
+        ci = &ci_getservbyname;
+        return true;
+      }
+      break;
+    case 6802:
+      HASH_GUARD(0x1257DB9F159E9A92LL, magickmontageimage) {
+        ci = &ci_magickmontageimage;
+        return true;
+      }
+      break;
+    case 6803:
+      HASH_GUARD(0x4A32653C8E719A93LL, pixelgetcyan) {
+        ci = &ci_pixelgetcyan;
+        return true;
+      }
+      break;
+    case 6804:
+      HASH_GUARD(0x4B1501C4C22FFA94LL, quoted_printable_encode) {
+        ci = &ci_quoted_printable_encode;
+        return true;
+      }
+      break;
+    case 6805:
+      HASH_GUARD(0x34B8A4E5AE0EFA95LL, pixelgetopacity) {
+        ci = &ci_pixelgetopacity;
+        return true;
+      }
+      break;
+    case 6807:
+      HASH_GUARD(0x0089115038C03A97LL, array_diff_ukey) {
+        ci = &ci_array_diff_ukey;
+        return true;
+      }
+      break;
+    case 6809:
+      HASH_GUARD(0x1382CEA1527CFA99LL, imap_utf7_encode) {
+        ci = &ci_imap_utf7_encode;
+        return true;
+      }
+      break;
+    case 6810:
+      HASH_GUARD(0x19AFF8596E19DA9ALL, xhprof_enable) {
+        ci = &ci_xhprof_enable;
+        return true;
+      }
+      break;
+    case 6813:
+      HASH_GUARD(0x1234AB687C515A9DLL, mb_encode_numericentity) {
+        ci = &ci_mb_encode_numericentity;
+        return true;
+      }
+      break;
+    case 6815:
+      HASH_GUARD(0x2E5E23ECA0525A9FLL, bcadd) {
+        ci = &ci_bcadd;
+        return true;
+      }
+      break;
+    case 6821:
+      HASH_GUARD(0x2418528164415AA5LL, magickscaleimage) {
+        ci = &ci_magickscaleimage;
+        return true;
+      }
+      break;
+    case 6823:
+      HASH_GUARD(0x797CEC173CBB7AA7LL, ob_get_flush) {
+        ci = &ci_ob_get_flush;
+        return true;
+      }
+      break;
+    case 6834:
+      HASH_GUARD(0x62519270CC9F1AB2LL, stream_get_meta_data) {
+        ci = &ci_stream_get_meta_data;
+        return true;
+      }
+      break;
+    case 6847:
+      HASH_GUARD(0x030DFC3D3C88BABFLL, filegroup) {
+        ci = &ci_filegroup;
+        return true;
+      }
+      break;
+    case 6855:
+      HASH_GUARD(0x5D2F899A270D9AC7LL, xmlwriter_end_dtd_element) {
+        ci = &ci_xmlwriter_end_dtd_element;
+        return true;
+      }
+      HASH_GUARD(0x79215854355CBAC7LL, proc_get_status) {
+        ci = &ci_proc_get_status;
+        return true;
+      }
+      break;
+    case 6860:
+      HASH_GUARD(0x2BD6476D2C467ACCLL, pagelet_server_task_status) {
+        ci = &ci_pagelet_server_task_status;
+        return true;
+      }
+      break;
+    case 6861:
+      HASH_GUARD(0x173EDC165B673ACDLL, magicktransformimage) {
+        ci = &ci_magicktransformimage;
+        return true;
+      }
+      break;
+    case 6865:
+      HASH_GUARD(0x47E2B4F7B8DE5AD1LL, xmlwriter_write_dtd_attlist) {
+        ci = &ci_xmlwriter_write_dtd_attlist;
+        return true;
+      }
+      HASH_GUARD(0x314317450857FAD1LL, ctype_punct) {
+        ci = &ci_ctype_punct;
+        return true;
+      }
+      break;
+    case 6869:
+      HASH_GUARD(0x0D5DAF8034B41AD5LL, get_include_path) {
+        ci = &ci_get_include_path;
+        return true;
+      }
+      break;
+    case 6875:
+      HASH_GUARD(0x56E867A1F7507ADBLL, dom_document_create_processing_instruction) {
+        ci = &ci_dom_document_create_processing_instruction;
+        return true;
+      }
+      break;
+    case 6877:
+      HASH_GUARD(0x3E319E451A32FADDLL, magicksharpenimage) {
+        ci = &ci_magicksharpenimage;
+        return true;
+      }
+      break;
+    case 6878:
+      HASH_GUARD(0x31D1C58F7BD89ADELL, hphp_directoryiterator_seek) {
+        ci = &ci_hphp_directoryiterator_seek;
+        return true;
+      }
+      break;
+    case 6891:
+      HASH_GUARD(0x225F05071947BAEBLL, drawpathlinetoabsolute) {
+        ci = &ci_drawpathlinetoabsolute;
+        return true;
+      }
+      break;
+    case 6893:
+      HASH_GUARD(0x46C33B4739C2FAEDLL, shm_remove_var) {
+        ci = &ci_shm_remove_var;
+        return true;
+      }
+      break;
+    case 6894:
+      HASH_GUARD(0x160A82E3E2CBBAEELL, is_finite) {
+        ci = &ci_is_finite;
+        return true;
+      }
+      break;
+    case 6896:
+      HASH_GUARD(0x6B259D5D9D681AF0LL, register_postsend_function) {
+        ci = &ci_register_postsend_function;
+        return true;
+      }
+      break;
+    case 6900:
+      HASH_GUARD(0x2EC0ABF9A979FAF4LL, ob_get_level) {
+        ci = &ci_ob_get_level;
+        return true;
+      }
+      break;
+    case 6902:
+      HASH_GUARD(0x2C7C9772AE983AF6LL, drawsetgravity) {
+        ci = &ci_drawsetgravity;
+        return true;
+      }
+      break;
+    case 6904:
+      HASH_GUARD(0x12859AD75BAF3AF8LL, magickreadimageblob) {
+        ci = &ci_magickreadimageblob;
+        return true;
+      }
+      break;
+    case 6909:
+      HASH_GUARD(0x16BA422EB6C51AFDLL, gzwrite) {
+        ci = &ci_gzwrite;
+        return true;
+      }
+      break;
+    case 6910:
+      HASH_GUARD(0x04E86BA79B6CBAFELL, stream_socket_shutdown) {
+        ci = &ci_stream_socket_shutdown;
+        return true;
+      }
+      break;
+    case 6913:
+      HASH_GUARD(0x6F3503C7FB12DB01LL, lchgrp) {
+        ci = &ci_lchgrp;
+        return true;
+      }
+      break;
+    case 6915:
+      HASH_GUARD(0x673A96C50F00FB03LL, str_word_count) {
+        ci = &ci_str_word_count;
+        return true;
+      }
+      break;
+    case 6922:
+      HASH_GUARD(0x14AF32A23B507B0ALL, metaphone) {
+        ci = &ci_metaphone;
+        return true;
+      }
+      break;
+    case 6924:
+      HASH_GUARD(0x000A2D80D67ADB0CLL, imap_mail) {
+        ci = &ci_imap_mail;
+        return true;
+      }
+      break;
+    case 6935:
+      HASH_GUARD(0x66F9A476DAB47B17LL, pixelsetcolor) {
+        ci = &ci_pixelsetcolor;
+        return true;
+      }
+      break;
+    case 6936:
+      HASH_GUARD(0x70448A629A74FB18LL, ksort) {
+        ci = &ci_ksort;
+        return true;
+      }
+      break;
+    case 6940:
+      HASH_GUARD(0x249399CEC35B7B1CLL, png2wbmp) {
+        ci = &ci_png2wbmp;
+        return true;
+      }
+      break;
+    case 6942:
+      HASH_GUARD(0x7160AA24D4251B1ELL, mb_strripos) {
+        ci = &ci_mb_strripos;
+        return true;
+      }
+      break;
+    case 6944:
+      HASH_GUARD(0x1112712715D75B20LL, pixelgetblackquantum) {
+        ci = &ci_pixelgetblackquantum;
+        return true;
+      }
+      break;
+    case 6950:
+      HASH_GUARD(0x24CE95457EACBB26LL, get_parent_class) {
+        ci = &ci_get_parent_class;
+        return true;
+      }
+      break;
+    case 6954:
+      HASH_GUARD(0x1F4984938E1DBB2ALL, sort) {
+        ci = &ci_sort;
+        return true;
+      }
+      break;
+    case 6956:
+      HASH_GUARD(0x70742211FA3EFB2CLL, imagettftext) {
+        ci = &ci_imagettftext;
+        return true;
+      }
+      break;
+    case 6963:
+      HASH_GUARD(0x4D5D45D1F1EB3B33LL, posix_access) {
+        ci = &ci_posix_access;
+        return true;
+      }
+      break;
+    case 6964:
+      HASH_GUARD(0x0B7D52E2540ABB34LL, tan) {
+        ci = &ci_tan;
+        return true;
+      }
+      break;
+    case 6967:
+      HASH_GUARD(0x053B14F52350FB37LL, socket_shutdown) {
+        ci = &ci_socket_shutdown;
+        return true;
+      }
+      break;
+    case 6968:
+      HASH_GUARD(0x68C09D6CB8E79B38LL, class_exists) {
+        ci = &ci_class_exists;
+        return true;
+      }
+      break;
+    case 6969:
+      HASH_GUARD(0x02A2C373E54FFB39LL, hash_init) {
+        ci = &ci_hash_init;
+        return true;
+      }
+      break;
+    case 6970:
+      HASH_GUARD(0x49A45F75B2B25B3ALL, apd_breakpoint) {
+        ci = &ci_apd_breakpoint;
+        return true;
+      }
+      break;
+    case 6972:
+      HASH_GUARD(0x35F4A0789F367B3CLL, drawpathlinetohorizontalrelative) {
+        ci = &ci_drawpathlinetohorizontalrelative;
+        return true;
+      }
+      break;
+    case 6975:
+      HASH_GUARD(0x0B07AD87DF1B5B3FLL, urldecode) {
+        ci = &ci_urldecode;
+        return true;
+      }
+      break;
+    case 6976:
+      HASH_GUARD(0x24CBCBA5C4407B40LL, evhttp_set_cache) {
+        ci = &ci_evhttp_set_cache;
+        return true;
+      }
+      break;
+    case 6980:
+      HASH_GUARD(0x4E4449EBAADD7B44LL, magickpingimage) {
+        ci = &ci_magickpingimage;
+        return true;
+      }
+      break;
+    case 6981:
+      HASH_GUARD(0x72E3AE55A0B33B45LL, ispixelwand) {
+        ci = &ci_ispixelwand;
+        return true;
+      }
+      break;
+    case 6997:
+      HASH_GUARD(0x333FB673518A1B55LL, ldap_get_entries) {
+        ci = &ci_ldap_get_entries;
+        return true;
+      }
+      break;
+    case 7005:
+      HASH_GUARD(0x4888951358F53B5DLL, dom_document_get_elements_by_tag_name_ns) {
+        ci = &ci_dom_document_get_elements_by_tag_name_ns;
+        return true;
+      }
+      break;
+    case 7009:
+      HASH_GUARD(0x7636825871399B61LL, highlight_file) {
+        ci = &ci_highlight_file;
+        return true;
+      }
+      break;
+    case 7016:
+      HASH_GUARD(0x674F1DA24EDE7B68LL, xmlwriter_end_attribute) {
+        ci = &ci_xmlwriter_end_attribute;
+        return true;
+      }
+      break;
+    case 7019:
+      HASH_GUARD(0x5543A0CACD153B6BLL, substr_replace) {
+        ci = &ci_substr_replace;
+        return true;
+      }
+      break;
+    case 7025:
+      HASH_GUARD(0x5E5C875DB04CFB71LL, drawrectangle) {
+        ci = &ci_drawrectangle;
+        return true;
+      }
+      break;
+    case 7029:
+      HASH_GUARD(0x42F0AED7599C1B75LL, magickechoimageblob) {
+        ci = &ci_magickechoimageblob;
+        return true;
+      }
+      break;
+    case 7030:
+      HASH_GUARD(0x2A63A0BF9B7E3B76LL, ini_alter) {
+        ci = &ci_ini_alter;
+        return true;
+      }
+      break;
+    case 7031:
+      HASH_GUARD(0x7F5F29D8E63ABB77LL, mcrypt_module_self_test) {
+        ci = &ci_mcrypt_module_self_test;
+        return true;
+      }
+      HASH_GUARD(0x5025B43B46679B77LL, openssl_x509_free) {
+        ci = &ci_openssl_x509_free;
+        return true;
+      }
+      break;
+    case 7033:
+      HASH_GUARD(0x1AD83CBEA1E87B79LL, imap_getmailboxes) {
+        ci = &ci_imap_getmailboxes;
+        return true;
+      }
+      break;
+    case 7036:
+      HASH_GUARD(0x3A096F905FBF7B7CLL, magickcommentimage) {
+        ci = &ci_magickcommentimage;
+        return true;
+      }
+      break;
+    case 7037:
+      HASH_GUARD(0x28DE19828167FB7DLL, magickmapimage) {
+        ci = &ci_magickmapimage;
+        return true;
+      }
+      break;
+    case 7051:
+      HASH_GUARD(0x3B72159A4B04FB8BLL, set_time_limit) {
+        ci = &ci_set_time_limit;
+        return true;
+      }
+      break;
+    case 7053:
+      HASH_GUARD(0x3B831DB1A615FB8DLL, xhprof_sample_enable) {
+        ci = &ci_xhprof_sample_enable;
+        return true;
+      }
+      break;
+    case 7054:
+      HASH_GUARD(0x62A4D7A03F7C3B8ELL, ceil) {
+        ci = &ci_ceil;
+        return true;
+      }
+      break;
+    case 7065:
+      HASH_GUARD(0x076E66D4089A3B99LL, mb_stripos) {
+        ci = &ci_mb_stripos;
+        return true;
+      }
+      break;
+    case 7066:
+      HASH_GUARD(0x023133732CB51B9ALL, exif_thumbnail) {
+        ci = &ci_exif_thumbnail;
+        return true;
+      }
+      break;
+    case 7071:
+      HASH_GUARD(0x390A267EC6B51B9FLL, socket_sendto) {
+        ci = &ci_socket_sendto;
+        return true;
+      }
+      break;
+    case 7076:
+      HASH_GUARD(0x0D95DD13A2D3BBA4LL, drawtranslate) {
+        ci = &ci_drawtranslate;
+        return true;
+      }
+      break;
+    case 7082:
+      HASH_GUARD(0x7C833A303C7CFBAALL, getrandmax) {
+        ci = &ci_getrandmax;
+        return true;
+      }
+      break;
+    case 7086:
+      HASH_GUARD(0x66F099E732977BAELL, imap_renamemailbox) {
+        ci = &ci_imap_renamemailbox;
+        return true;
+      }
+      break;
+    case 7088:
+      HASH_GUARD(0x1F3E4C6660247BB0LL, imagecolorresolve) {
+        ci = &ci_imagecolorresolve;
+        return true;
+      }
+      HASH_GUARD(0x7D9BF61D6CDE3BB0LL, fb_parallel_query) {
+        ci = &ci_fb_parallel_query;
+        return true;
+      }
+      break;
+    case 7102:
+      HASH_GUARD(0x3F56AF1511AEDBBELL, magicklabelimage) {
+        ci = &ci_magicklabelimage;
+        return true;
+      }
+      break;
+    case 7111:
+      HASH_GUARD(0x10C5CF7B55173BC7LL, settype) {
+        ci = &ci_settype;
+        return true;
+      }
+      break;
+    case 7114:
+      HASH_GUARD(0x4122DFAC25BDFBCALL, hphp_splfileinfo_getowner) {
+        ci = &ci_hphp_splfileinfo_getowner;
+        return true;
+      }
+      break;
+    case 7117:
+      HASH_GUARD(0x53A88C8F973CFBCDLL, apc_clear_cache) {
+        ci = &ci_apc_clear_cache;
+        return true;
+      }
+      break;
+    case 7118:
+      HASH_GUARD(0x45D6BA980AFFDBCELL, msg_get_queue) {
+        ci = &ci_msg_get_queue;
+        return true;
+      }
+      break;
+    case 7120:
+      HASH_GUARD(0x02A0F9CE4022BBD0LL, imap_fetchbody) {
+        ci = &ci_imap_fetchbody;
+        return true;
+      }
+      HASH_GUARD(0x6846CA07A5E21BD0LL, hphp_directoryiterator___construct) {
+        ci = &ci_hphp_directoryiterator___construct;
+        return true;
+      }
+      break;
+    case 7122:
+      HASH_GUARD(0x6FE3C5FF5E883BD2LL, round) {
+        ci = &ci_round;
+        return true;
+      }
+      break;
+    case 7124:
+      HASH_GUARD(0x4E4EB301A994DBD4LL, drawpolygon) {
+        ci = &ci_drawpolygon;
+        return true;
+      }
+      break;
+    case 7128:
+      HASH_GUARD(0x21E44C7C7A911BD8LL, phpinfo) {
+        ci = &ci_phpinfo;
+        return true;
+      }
+      break;
+    case 7134:
+      HASH_GUARD(0x58D0D9B66F045BDELL, strpos) {
+        ci = &ci_strpos;
+        return true;
+      }
+      break;
+    case 7136:
+      HASH_GUARD(0x2E10B74DC6067BE0LL, strip_tags) {
+        ci = &ci_strip_tags;
+        return true;
+      }
+      break;
+    case 7137:
+      HASH_GUARD(0x25FBB61480091BE1LL, mysql_client_encoding) {
+        ci = &ci_mysql_client_encoding;
+        return true;
+      }
+      break;
+    case 7147:
+      HASH_GUARD(0x505B44DDF2383BEBLL, drawgetfillcolor) {
+        ci = &ci_drawgetfillcolor;
+        return true;
+      }
+      HASH_GUARD(0x0C1904372E8EDBEBLL, stream_copy_to_stream) {
+        ci = &ci_stream_copy_to_stream;
+        return true;
+      }
+      break;
+    case 7148:
+      HASH_GUARD(0x44279BB3E2191BECLL, socket_accept) {
+        ci = &ci_socket_accept;
+        return true;
+      }
+      HASH_GUARD(0x5A22BA9B012A9BECLL, dom_document_save_html) {
+        ci = &ci_dom_document_save_html;
+        return true;
+      }
+      break;
+    case 7152:
+      HASH_GUARD(0x187C049E785A1BF0LL, iconv_get_encoding) {
+        ci = &ci_iconv_get_encoding;
+        return true;
+      }
+      HASH_GUARD(0x04C0582DB1AD7BF0LL, mt_srand) {
+        ci = &ci_mt_srand;
+        return true;
+      }
+      break;
+    case 7153:
+      HASH_GUARD(0x0CA96856E5BEFBF1LL, iptcparse) {
+        ci = &ci_iptcparse;
+        return true;
+      }
+      break;
+    case 7156:
+      HASH_GUARD(0x1444DB037B4D5BF4LL, imagegammacorrect) {
+        ci = &ci_imagegammacorrect;
+        return true;
+      }
+      break;
+    case 7159:
+      HASH_GUARD(0x74ABB4A1E10BBBF7LL, time) {
+        ci = &ci_time;
+        return true;
+      }
+      break;
+    case 7161:
+      HASH_GUARD(0x5B7F6E0A642BBBF9LL, sleep) {
+        ci = &ci_sleep;
+        return true;
+      }
+      break;
+    case 7164:
+      HASH_GUARD(0x64F52E1DB5E95BFCLL, curl_multi_remove_handle) {
+        ci = &ci_curl_multi_remove_handle;
+        return true;
+      }
+      break;
+    case 7170:
+      HASH_GUARD(0x249340DF734D9C02LL, magickgetimageheight) {
+        ci = &ci_magickgetimageheight;
+        return true;
+      }
+      break;
+    case 7176:
+      HASH_GUARD(0x48E1616EE837FC08LL, is_uploaded_file) {
+        ci = &ci_is_uploaded_file;
+        return true;
+      }
+      break;
+    case 7178:
+      HASH_GUARD(0x1E47C281193ABC0ALL, collator_compare) {
+        ci = &ci_collator_compare;
+        return true;
+      }
+      break;
+    case 7186:
+      HASH_GUARD(0x062C0FFA8E29DC12LL, intl_error_name) {
+        ci = &ci_intl_error_name;
+        return true;
+      }
+      break;
+    case 7191:
+      HASH_GUARD(0x3A702EF906B37C17LL, collator_get_locale) {
+        ci = &ci_collator_get_locale;
+        return true;
+      }
+      break;
+    case 7196:
+      HASH_GUARD(0x758A62BD65E6FC1CLL, imagegd2) {
+        ci = &ci_imagegd2;
+        return true;
+      }
+      break;
+    case 7198:
+      HASH_GUARD(0x7039C5EBB1D6BC1ELL, array_walk) {
+        ci = &ci_array_walk;
+        return true;
+      }
+      break;
+    case 7199:
+      HASH_GUARD(0x3A5D921797669C1FLL, hphp_log) {
+        ci = &ci_hphp_log;
+        return true;
+      }
+      break;
+    case 7201:
+      HASH_GUARD(0x0179CBA2C5F4DC21LL, magickgetimageformat) {
+        ci = &ci_magickgetimageformat;
+        return true;
+      }
+      break;
+    case 7218:
+      HASH_GUARD(0x0B9B362534621C32LL, isdrawingwand) {
+        ci = &ci_isdrawingwand;
+        return true;
+      }
+      break;
+    case 7219:
+      HASH_GUARD(0x49965C44E9EE3C33LL, set_file_buffer) {
+        ci = &ci_set_file_buffer;
+        return true;
+      }
+      break;
+    case 7224:
+      HASH_GUARD(0x21564F9315F3FC38LL, drawsettextdecoration) {
+        ci = &ci_drawsettextdecoration;
+        return true;
+      }
+      break;
+    case 7228:
+      HASH_GUARD(0x69488CC69B897C3CLL, hphp_recursiveiteratoriterator_getinneriterator) {
+        ci = &ci_hphp_recursiveiteratoriterator_getinneriterator;
+        return true;
+      }
+      break;
+    case 7230:
+      HASH_GUARD(0x15EC581662651C3ELL, date_parse) {
+        ci = &ci_date_parse;
+        return true;
+      }
+      break;
+    case 7238:
+      HASH_GUARD(0x7D992445F5E37C46LL, magicktextureimage) {
+        ci = &ci_magicktextureimage;
+        return true;
+      }
+      break;
+    case 7243:
+      HASH_GUARD(0x120E7B01366DFC4BLL, call_user_func_serialized) {
+        ci = &ci_call_user_func_serialized;
+        return true;
+      }
+      break;
+    case 7248:
+      HASH_GUARD(0x04534F26B8D05C50LL, drawgetstrokecolor) {
+        ci = &ci_drawgetstrokecolor;
+        return true;
+      }
+      break;
+    case 7255:
+      HASH_GUARD(0x313E8EB28A111C57LL, hphp_splfileinfo_setinfoclass) {
+        ci = &ci_hphp_splfileinfo_setinfoclass;
+        return true;
+      }
+      break;
+    case 7256:
+      HASH_GUARD(0x1B8C3DA27170DC58LL, dirname) {
+        ci = &ci_dirname;
+        return true;
+      }
+      break;
+    case 7257:
+      HASH_GUARD(0x57633BDF8DB3FC59LL, i18n_loc_set_attribute) {
+        ci = &ci_i18n_loc_set_attribute;
+        return true;
+      }
+      break;
+    case 7262:
+      HASH_GUARD(0x47B38F1E4FA29C5ELL, fb_get_code_coverage) {
+        ci = &ci_fb_get_code_coverage;
+        return true;
+      }
+      break;
+    case 7265:
+      HASH_GUARD(0x6E54EEDA1D887C61LL, magicksetimageinterlacescheme) {
+        ci = &ci_magicksetimageinterlacescheme;
+        return true;
+      }
+      HASH_GUARD(0x5176725DA884DC61LL, curl_setopt) {
+        ci = &ci_curl_setopt;
+        return true;
+      }
+      break;
+    case 7271:
+      HASH_GUARD(0x07DC355325165C67LL, magickwriteimage) {
+        ci = &ci_magickwriteimage;
+        return true;
+      }
+      break;
+    case 7272:
+      HASH_GUARD(0x10D6AE9D688D1C68LL, copy) {
+        ci = &ci_copy;
+        return true;
+      }
+      break;
+    case 7281:
+      HASH_GUARD(0x18D9ED67E8E0FC71LL, dom_attr_is_id) {
+        ci = &ci_dom_attr_is_id;
+        return true;
+      }
+      break;
+    case 7284:
+      HASH_GUARD(0x20F0AAA486F39C74LL, dom_element_get_elements_by_tag_name_ns) {
+        ci = &ci_dom_element_get_elements_by_tag_name_ns;
+        return true;
+      }
+      break;
+    case 7297:
+      HASH_GUARD(0x767806D6F1053C81LL, sin) {
+        ci = &ci_sin;
+        return true;
+      }
+      break;
+    case 7301:
+      HASH_GUARD(0x56DA17241B793C85LL, mysql_set_timeout) {
+        ci = &ci_mysql_set_timeout;
+        return true;
+      }
+      break;
+    case 7313:
+      HASH_GUARD(0x4E04B71729485C91LL, clonedrawingwand) {
+        ci = &ci_clonedrawingwand;
+        return true;
+      }
+      break;
+    case 7315:
+      HASH_GUARD(0x0F8242C6327B5C93LL, dns_check_record) {
+        ci = &ci_dns_check_record;
+        return true;
+      }
+      break;
+    case 7322:
+      HASH_GUARD(0x374F20BDAF709C9ALL, mb_preferred_mime_name) {
+        ci = &ci_mb_preferred_mime_name;
+        return true;
+      }
+      break;
+    case 7323:
+      HASH_GUARD(0x36F7F9FD7766DC9BLL, xmlwriter_end_comment) {
+        ci = &ci_xmlwriter_end_comment;
+        return true;
+      }
+      break;
+    case 7342:
+      HASH_GUARD(0x12580A083B0D7CAELL, iterator_apply) {
+        ci = &ci_iterator_apply;
+        return true;
+      }
+      break;
+    case 7344:
+      HASH_GUARD(0x373B3FADEACB7CB0LL, openssl_private_encrypt) {
+        ci = &ci_openssl_private_encrypt;
+        return true;
+      }
+      break;
+    case 7345:
+      HASH_GUARD(0x40D8DC24FA917CB1LL, hphp_splfileobject_fgetss) {
+        ci = &ci_hphp_splfileobject_fgetss;
+        return true;
+      }
+      break;
+    case 7351:
+      HASH_GUARD(0x3DFD5CA79919DCB7LL, imageantialias) {
+        ci = &ci_imageantialias;
+        return true;
+      }
+      HASH_GUARD(0x39E03AAC188D3CB7LL, magickgetimagecompressionquality) {
+        ci = &ci_magickgetimagecompressionquality;
+        return true;
+      }
+      break;
+    case 7360:
+      HASH_GUARD(0x3033FE14E114FCC0LL, magicksetimageblueprimary) {
+        ci = &ci_magicksetimageblueprimary;
+        return true;
+      }
+      break;
+    case 7362:
+      HASH_GUARD(0x34B6388D7730BCC2LL, drawline) {
+        ci = &ci_drawline;
+        return true;
+      }
+      break;
+    case 7374:
+      HASH_GUARD(0x0183A548B759BCCELL, posix_getpgid) {
+        ci = &ci_posix_getpgid;
+        return true;
+      }
+      HASH_GUARD(0x66273C5932B1FCCELL, clock_gettime) {
+        ci = &ci_clock_gettime;
+        return true;
+      }
+      break;
+    case 7375:
+      HASH_GUARD(0x407B1F3AFEC43CCFLL, pixelgetblue) {
+        ci = &ci_pixelgetblue;
+        return true;
+      }
+      break;
+    case 7377:
+      HASH_GUARD(0x576C5DC462663CD1LL, explode) {
+        ci = &ci_explode;
+        return true;
+      }
+      break;
+    case 7379:
+      HASH_GUARD(0x544302E2FAD3FCD3LL, magicknextimage) {
+        ci = &ci_magicknextimage;
+        return true;
+      }
+      break;
+    case 7380:
+      HASH_GUARD(0x323FE1D92C9B3CD4LL, gzdecode) {
+        ci = &ci_gzdecode;
+        return true;
+      }
+      break;
+    case 7381:
+      HASH_GUARD(0x757BC444FDF79CD5LL, posix_get_last_error) {
+        ci = &ci_posix_get_last_error;
+        return true;
+      }
+      break;
+    case 7386:
+      HASH_GUARD(0x09C6455B4BC6FCDALL, drawsetviewbox) {
+        ci = &ci_drawsetviewbox;
+        return true;
+      }
+      break;
+    case 7396:
+      HASH_GUARD(0x7CDDF96AFEA2DCE4LL, chunk_split) {
+        ci = &ci_chunk_split;
+        return true;
+      }
+      break;
+    case 7407:
+      HASH_GUARD(0x6AA89C314C647CEFLL, magickgetimagehistogram) {
+        ci = &ci_magickgetimagehistogram;
+        return true;
+      }
+      break;
+    case 7410:
+      HASH_GUARD(0x26C49BBC67475CF2LL, magicksetimagewhitepoint) {
+        ci = &ci_magicksetimagewhitepoint;
+        return true;
+      }
+      break;
+    case 7411:
+      HASH_GUARD(0x6CA8CF41D27D1CF3LL, imap_headerinfo) {
+        ci = &ci_imap_headerinfo;
+        return true;
+      }
+      HASH_GUARD(0x5C1F75D51C077CF3LL, pixelgetindex) {
+        ci = &ci_pixelgetindex;
+        return true;
+      }
+      break;
+    case 7419:
+      HASH_GUARD(0x09B4EE276DCCFCFBLL, mysql_fetch_row) {
+        ci = &ci_mysql_fetch_row;
+        return true;
+      }
+      break;
+    case 7422:
+      HASH_GUARD(0x768F3E6D1CBA5CFELL, socket_recv) {
+        ci = &ci_socket_recv;
+        return true;
+      }
+      break;
+    case 7423:
+      HASH_GUARD(0x748D3DFF0EB57CFFLL, uniqid) {
+        ci = &ci_uniqid;
+        return true;
+      }
+      break;
+    case 7430:
+      HASH_GUARD(0x2BA9FB0F8B76DD06LL, number_format) {
+        ci = &ci_number_format;
+        return true;
+      }
+      break;
+    case 7433:
+      HASH_GUARD(0x153F7DBFC9047D09LL, pixelsetred) {
+        ci = &ci_pixelsetred;
+        return true;
+      }
+      break;
+    case 7436:
+      HASH_GUARD(0x30A8326034801D0CLL, mysql_pconnect) {
+        ci = &ci_mysql_pconnect;
+        return true;
+      }
+      break;
+    case 7437:
+      HASH_GUARD(0x3ACE8A8BC9ACDD0DLL, iconv_mime_decode) {
+        ci = &ci_iconv_mime_decode;
+        return true;
+      }
+      break;
+    case 7440:
+      HASH_GUARD(0x42BEEC88EE81FD10LL, imagechar) {
+        ci = &ci_imagechar;
+        return true;
+      }
+      HASH_GUARD(0x08F41A00D5D57D10LL, mb_decode_mimeheader) {
+        ci = &ci_mb_decode_mimeheader;
+        return true;
+      }
+      break;
+    case 7442:
+      HASH_GUARD(0x5F165B40AEEE5D12LL, hphp_splfileinfo_getfilename) {
+        ci = &ci_hphp_splfileinfo_getfilename;
+        return true;
+      }
+      break;
+    case 7444:
+      HASH_GUARD(0x63837ECAF6235D14LL, preg_replace) {
+        ci = &ci_preg_replace;
+        return true;
+      }
+      break;
+    case 7450:
+      HASH_GUARD(0x39994614C6315D1ALL, hphp_recursivedirectoryiterator_key) {
+        ci = &ci_hphp_recursivedirectoryiterator_key;
+        return true;
+      }
+      break;
+    case 7454:
+      HASH_GUARD(0x25DADFF238A15D1ELL, collator_create) {
+        ci = &ci_collator_create;
+        return true;
+      }
+      break;
+    case 7461:
+      HASH_GUARD(0x71DF0C17F47EDD25LL, getprotobynumber) {
+        ci = &ci_getprotobynumber;
+        return true;
+      }
+      break;
+    case 7464:
+      HASH_GUARD(0x7C12261259F87D28LL, mcrypt_enc_is_block_algorithm_mode) {
+        ci = &ci_mcrypt_enc_is_block_algorithm_mode;
+        return true;
+      }
+      break;
+    case 7466:
+      HASH_GUARD(0x7A9C06B9CF853D2ALL, substr_count) {
+        ci = &ci_substr_count;
+        return true;
+      }
+      break;
+    case 7474:
+      HASH_GUARD(0x4DAC43060BA57D32LL, stream_wrapper_restore) {
+        ci = &ci_stream_wrapper_restore;
+        return true;
+      }
+      break;
+    case 7479:
+      HASH_GUARD(0x6F2182E089377D37LL, imap_list) {
+        ci = &ci_imap_list;
+        return true;
+      }
+      HASH_GUARD(0x3ACF745D381E9D37LL, rtrim) {
+        ci = &ci_rtrim;
+        return true;
+      }
+      break;
+    case 7480:
+      HASH_GUARD(0x0BA3AD85EB597D38LL, pagelet_server_task_result) {
+        ci = &ci_pagelet_server_task_result;
+        return true;
+      }
+      break;
+    case 7489:
+      HASH_GUARD(0x6B6DA1EE18673D41LL, xmlwriter_end_dtd_entity) {
+        ci = &ci_xmlwriter_end_dtd_entity;
+        return true;
+      }
+      break;
+    case 7490:
+      HASH_GUARD(0x40497FCA4EC4DD42LL, posix_seteuid) {
+        ci = &ci_posix_seteuid;
+        return true;
+      }
+      HASH_GUARD(0x298BA735FA3ABD42LL, nl_langinfo) {
+        ci = &ci_nl_langinfo;
+        return true;
+      }
+      break;
+    case 7493:
+      HASH_GUARD(0x400A44045A999D45LL, rawurlencode) {
+        ci = &ci_rawurlencode;
+        return true;
+      }
+      break;
+    case 7494:
+      HASH_GUARD(0x502CF4EB0A747D46LL, magicksetimagebias) {
+        ci = &ci_magicksetimagebias;
+        return true;
+      }
+      HASH_GUARD(0x455DB7F86BCEDD46LL, pixelsetopacityquantum) {
+        ci = &ci_pixelsetopacityquantum;
+        return true;
+      }
+      HASH_GUARD(0x59AD2C922FF75D46LL, mdecrypt_generic) {
+        ci = &ci_mdecrypt_generic;
+        return true;
+      }
+      break;
+    case 7497:
+      HASH_GUARD(0x113ED435AEFDDD49LL, imagecolorallocatealpha) {
+        ci = &ci_imagecolorallocatealpha;
+        return true;
+      }
+      break;
+    case 7503:
+      HASH_GUARD(0x0FBCF35ADD209D4FLL, drawarc) {
+        ci = &ci_drawarc;
+        return true;
+      }
+      break;
+    case 7509:
+      HASH_GUARD(0x36D672EF4FBEFD55LL, json_encode) {
+        ci = &ci_json_encode;
+        return true;
+      }
+      break;
+    case 7512:
+      HASH_GUARD(0x146109BDD2F97D58LL, hphp_splfileobject_setmaxlinelen) {
+        ci = &ci_hphp_splfileobject_setmaxlinelen;
+        return true;
+      }
+      break;
+    case 7520:
+      HASH_GUARD(0x6FACBD7F02B6FD60LL, uasort) {
+        ci = &ci_uasort;
+        return true;
+      }
+      break;
+    case 7521:
+      HASH_GUARD(0x357BAB6E700EBD61LL, destroypixelwandarray) {
+        ci = &ci_destroypixelwandarray;
+        return true;
+      }
+      break;
+    case 7534:
+      HASH_GUARD(0x0B1348D1540E7D6ELL, magicksetimageformat) {
+        ci = &ci_magicksetimageformat;
+        return true;
+      }
+      break;
+    case 7539:
+      HASH_GUARD(0x7D8DCC72522CBD73LL, mb_detect_encoding) {
+        ci = &ci_mb_detect_encoding;
+        return true;
+      }
+      break;
+    case 7540:
+      HASH_GUARD(0x51E8B5B728E33D74LL, imap_last_error) {
+        ci = &ci_imap_last_error;
+        return true;
+      }
+      break;
+    case 7543:
+      HASH_GUARD(0x7FCAAAB932C57D77LL, iterator_count) {
+        ci = &ci_iterator_count;
+        return true;
+      }
+      break;
+    case 7544:
+      HASH_GUARD(0x6352349F97557D78LL, stream_socket_get_name) {
+        ci = &ci_stream_socket_get_name;
+        return true;
+      }
+      break;
+    case 7547:
+      HASH_GUARD(0x680A7EB3DA1F5D7BLL, prev) {
+        ci = &ci_prev;
+        return true;
+      }
+      break;
+    case 7554:
+      HASH_GUARD(0x2D15262403ADDD82LL, drawcomposite) {
+        ci = &ci_drawcomposite;
+        return true;
+      }
+      break;
+    case 7555:
+      HASH_GUARD(0x1B0FF5C02F571D83LL, fb_rename_function) {
+        ci = &ci_fb_rename_function;
+        return true;
+      }
+      break;
+    case 7561:
+      HASH_GUARD(0x230E7AD147721D89LL, end) {
+        ci = &ci_end;
+        return true;
+      }
+      break;
+    case 7569:
+      HASH_GUARD(0x7C2B3FE61FBDFD91LL, openssl_pkey_get_details) {
+        ci = &ci_openssl_pkey_get_details;
+        return true;
+      }
+      break;
+    case 7576:
+      HASH_GUARD(0x06A796D329C21D98LL, call_user_func) {
+        ci = &ci_call_user_func;
+        return true;
+      }
+      break;
+    case 7581:
+      HASH_GUARD(0x74BE8836F3B13D9DLL, session_name) {
+        ci = &ci_session_name;
+        return true;
+      }
+      break;
+    case 7584:
+      HASH_GUARD(0x73B43ABDD5C61DA0LL, shuffle) {
+        ci = &ci_shuffle;
+        return true;
+      }
+      HASH_GUARD(0x5E8606470A09BDA0LL, magickposterizeimage) {
+        ci = &ci_magickposterizeimage;
+        return true;
+      }
+      HASH_GUARD(0x167A11C41EB71DA0LL, pixelgetexceptiontype) {
+        ci = &ci_pixelgetexceptiontype;
+        return true;
+      }
+      break;
+    case 7586:
+      HASH_GUARD(0x71583A8FEF5C7DA2LL, sys_get_temp_dir) {
+        ci = &ci_sys_get_temp_dir;
+        return true;
+      }
+      break;
+    case 7589:
+      HASH_GUARD(0x46B2F287D2FC7DA5LL, memcache_get) {
+        ci = &ci_memcache_get;
+        return true;
+      }
+      break;
+    case 7590:
+      HASH_GUARD(0x28DC1AD6DA9E7DA6LL, gethostbyname) {
+        ci = &ci_gethostbyname;
+        return true;
+      }
+      break;
+    case 7592:
+      HASH_GUARD(0x572AE270D9E4FDA8LL, socket_set_option) {
+        ci = &ci_socket_set_option;
+        return true;
+      }
+      break;
+    case 7594:
+      HASH_GUARD(0x6326C14D0FFA7DAALL, fb_thrift_serialize) {
+        ci = &ci_fb_thrift_serialize;
+        return true;
+      }
+      break;
+    case 7595:
+      HASH_GUARD(0x188720048AB37DABLL, magickquantizeimages) {
+        ci = &ci_magickquantizeimages;
+        return true;
+      }
+      break;
+    case 7601:
+      HASH_GUARD(0x67EAC6D7332F3DB1LL, hphp_splfileobject_fgetcsv) {
+        ci = &ci_hphp_splfileobject_fgetcsv;
+        return true;
+      }
+      break;
+    case 7603:
+      HASH_GUARD(0x628069E483F35DB3LL, hphp_splfileobject_fstat) {
+        ci = &ci_hphp_splfileobject_fstat;
+        return true;
+      }
+      break;
+    case 7610:
+      HASH_GUARD(0x5E0C6E797607DDBALL, mysql_result) {
+        ci = &ci_mysql_result;
+        return true;
+      }
+      HASH_GUARD(0x7964DE73DCA17DBALL, magickhasnextimage) {
+        ci = &ci_magickhasnextimage;
+        return true;
+      }
+      break;
+    case 7613:
+      HASH_GUARD(0x48AA091B1E493DBDLL, setlocale) {
+        ci = &ci_setlocale;
+        return true;
+      }
+      break;
+    case 7617:
+      HASH_GUARD(0x683E88F441F9BDC1LL, chgrp) {
+        ci = &ci_chgrp;
+        return true;
+      }
+      break;
+    case 7619:
+      HASH_GUARD(0x0433140BB339DDC3LL, log) {
+        ci = &ci_log;
+        return true;
+      }
+      break;
+    case 7620:
+      HASH_GUARD(0x2A38BA8B4A0F9DC4LL, apc_fetch) {
+        ci = &ci_apc_fetch;
+        return true;
+      }
+      break;
+    case 7624:
+      HASH_GUARD(0x66C3E73210067DC8LL, magickgetimageunits) {
+        ci = &ci_magickgetimageunits;
+        return true;
+      }
+      break;
+    case 7630:
+      HASH_GUARD(0x4AD5B65BCE665DCELL, array_key_exists) {
+        ci = &ci_array_key_exists;
+        return true;
+      }
+      break;
+    case 7637:
+      HASH_GUARD(0x7E1801C8E70D1DD5LL, imagefontwidth) {
+        ci = &ci_imagefontwidth;
+        return true;
+      }
+      break;
+    case 7639:
+      HASH_GUARD(0x638690DF6D06FDD7LL, imageconvolution) {
+        ci = &ci_imageconvolution;
+        return true;
+      }
+      break;
+    case 7660:
+      HASH_GUARD(0x5B51DD18C3E13DECLL, openssl_x509_parse) {
+        ci = &ci_openssl_x509_parse;
+        return true;
+      }
+      HASH_GUARD(0x5ABB7486CE861DECLL, array_merge_recursive) {
+        ci = &ci_array_merge_recursive;
+        return true;
+      }
+      break;
+    case 7663:
+      HASH_GUARD(0x0BB22147ADADDDEFLL, pfsockopen) {
+        ci = &ci_pfsockopen;
+        return true;
+      }
+      HASH_GUARD(0x72293DCE8CC4BDEFLL, htmlspecialchars) {
+        ci = &ci_htmlspecialchars;
+        return true;
+      }
+      break;
+    case 7667:
+      HASH_GUARD(0x7AE1BE187F18FDF3LL, fgets) {
+        ci = &ci_fgets;
+        return true;
+      }
+      break;
+    case 7668:
+      HASH_GUARD(0x5046A0D9DFDB5DF4LL, strcspn) {
+        ci = &ci_strcspn;
+        return true;
+      }
+      break;
+    case 7671:
+      HASH_GUARD(0x23E563F1EC919DF7LL, hphp_splfileinfo_getpathname) {
+        ci = &ci_hphp_splfileinfo_getpathname;
+        return true;
+      }
+      break;
+    case 7672:
+      HASH_GUARD(0x5E43280BC8DD1DF8LL, magicktrimimage) {
+        ci = &ci_magicktrimimage;
+        return true;
+      }
+      break;
+    case 7675:
+      HASH_GUARD(0x47C62D58B0B65DFBLL, thrift_protocol_write_binary) {
+        ci = &ci_thrift_protocol_write_binary;
+        return true;
+      }
+      break;
+    case 7678:
+      HASH_GUARD(0x21F24104004CFDFELL, evhttp_post) {
+        ci = &ci_evhttp_post;
+        return true;
+      }
+      HASH_GUARD(0x072690BF719D7DFELL, hphp_recursivedirectoryiterator_rewind) {
+        ci = &ci_hphp_recursivedirectoryiterator_rewind;
+        return true;
+      }
+      break;
+    case 7682:
+      HASH_GUARD(0x7829D2171DFBFE02LL, magickgetimagegamma) {
+        ci = &ci_magickgetimagegamma;
+        return true;
+      }
+      break;
+    case 7693:
+      HASH_GUARD(0x756B92411E7FBE0DLL, stream_get_wrappers) {
+        ci = &ci_stream_get_wrappers;
+        return true;
+      }
+      break;
+    case 7698:
+      HASH_GUARD(0x05FAA2085D94FE12LL, urlencode) {
+        ci = &ci_urlencode;
+        return true;
+      }
+      break;
+    case 7700:
+      HASH_GUARD(0x41E394B12170BE14LL, socket_send) {
+        ci = &ci_socket_send;
+        return true;
+      }
+      HASH_GUARD(0x3192209D50C1FE14LL, pixelsetalpha) {
+        ci = &ci_pixelsetalpha;
+        return true;
+      }
+      break;
+    case 7701:
+      HASH_GUARD(0x525F197D74423E15LL, get_resource_type) {
+        ci = &ci_get_resource_type;
+        return true;
+      }
+      break;
+    case 7703:
+      HASH_GUARD(0x0F5759A501FAFE17LL, imagecreatefromgd2part) {
+        ci = &ci_imagecreatefromgd2part;
+        return true;
+      }
+      break;
+    case 7705:
+      HASH_GUARD(0x4A694B42B21A9E19LL, destroymagickwand) {
+        ci = &ci_destroymagickwand;
+        return true;
+      }
+      break;
+    case 7707:
+      HASH_GUARD(0x7FA0B63054221E1BLL, magickrollimage) {
+        ci = &ci_magickrollimage;
+        return true;
+      }
+      break;
+    case 7717:
+      HASH_GUARD(0x1C6246FA51EBDE25LL, hphp_get_static_property) {
+        ci = &ci_hphp_get_static_property;
+        return true;
+      }
+      break;
+    case 7720:
+      HASH_GUARD(0x3456885FF0679E28LL, lchown) {
+        ci = &ci_lchown;
+        return true;
+      }
+      break;
+    case 7725:
+      HASH_GUARD(0x7817FA38BAAEFE2DLL, fsockopen) {
+        ci = &ci_fsockopen;
+        return true;
+      }
+      break;
+    case 7734:
+      HASH_GUARD(0x2E42ED1E15CCFE36LL, mysql_affected_rows) {
+        ci = &ci_mysql_affected_rows;
+        return true;
+      }
+      break;
+    case 7738:
+      HASH_GUARD(0x6E2CF6ECA0987E3ALL, get_headers) {
+        ci = &ci_get_headers;
+        return true;
+      }
+      break;
+    case 7748:
+      HASH_GUARD(0x71B7756BD1B43E44LL, dom_document_savexml) {
+        ci = &ci_dom_document_savexml;
+        return true;
+      }
+      break;
+    case 7767:
+      HASH_GUARD(0x21B07F1F212BDE57LL, hphp_get_original_class_name) {
+        ci = &ci_hphp_get_original_class_name;
+        return true;
+      }
+      break;
+    case 7771:
+      HASH_GUARD(0x299F1A5895461E5BLL, curl_multi_close) {
+        ci = &ci_curl_multi_close;
+        return true;
+      }
+      break;
+    case 7779:
+      HASH_GUARD(0x5697E5F6AAF47E63LL, mb_http_input) {
+        ci = &ci_mb_http_input;
+        return true;
+      }
+      break;
+    case 7782:
+      HASH_GUARD(0x6CB3DEB458A2DE66LL, apc_bin_load) {
+        ci = &ci_apc_bin_load;
+        return true;
+      }
+      break;
+    case 7786:
+      HASH_GUARD(0x25C0C5E961AFDE6ALL, xmlwriter_full_end_element) {
+        ci = &ci_xmlwriter_full_end_element;
+        return true;
+      }
+      break;
+    case 7793:
+      HASH_GUARD(0x6AC126DCE941FE71LL, memory_get_peak_usage) {
+        ci = &ci_memory_get_peak_usage;
+        return true;
+      }
+      break;
+    case 7795:
+      HASH_GUARD(0x3B28CA1BE1D0DE73LL, xbox_get_thread_timeout) {
+        ci = &ci_xbox_get_thread_timeout;
+        return true;
+      }
+      break;
+    case 7796:
+      HASH_GUARD(0x47D0510206B89E74LL, ini_restore) {
+        ci = &ci_ini_restore;
+        return true;
+      }
+      break;
+    case 7798:
+      HASH_GUARD(0x36E9EC047FC73E76LL, mb_convert_encoding) {
+        ci = &ci_mb_convert_encoding;
+        return true;
+      }
+      break;
+    case 7802:
+      HASH_GUARD(0x6A3D9F8EDB005E7ALL, flush) {
+        ci = &ci_flush;
+        return true;
+      }
+      break;
+    case 7806:
+      HASH_GUARD(0x51060D186C703E7ELL, headers_list) {
+        ci = &ci_headers_list;
+        return true;
+      }
+      break;
+    case 7809:
+      HASH_GUARD(0x0ECFC3676B4FDE81LL, chr) {
+        ci = &ci_chr;
+        return true;
+      }
+      break;
+    case 7810:
+      HASH_GUARD(0x379F7BF525FF1E82LL, magicksetimagecolorspace) {
+        ci = &ci_magicksetimagecolorspace;
+        return true;
+      }
+      break;
+    case 7822:
+      HASH_GUARD(0x29A2FBD427647E8ELL, mysql_connect) {
+        ci = &ci_mysql_connect;
+        return true;
+      }
+      break;
+    case 7827:
+      HASH_GUARD(0x5E968924197F5E93LL, mcrypt_ofb) {
+        ci = &ci_mcrypt_ofb;
+        return true;
+      }
+      break;
+    case 7831:
+      HASH_GUARD(0x6254E9BDC11F3E97LL, imagecreatefromgd2) {
+        ci = &ci_imagecreatefromgd2;
+        return true;
+      }
+      break;
+    case 7835:
+      HASH_GUARD(0x2A019CAA1188BE9BLL, preg_grep) {
+        ci = &ci_preg_grep;
+        return true;
+      }
+      break;
+    case 7840:
+      HASH_GUARD(0x37C5AF6E7E8B5EA0LL, fputs) {
+        ci = &ci_fputs;
+        return true;
+      }
+      break;
+    case 7843:
+      HASH_GUARD(0x6467FFB910B8BEA3LL, magickspliceimage) {
+        ci = &ci_magickspliceimage;
+        return true;
+      }
+      break;
+    case 7851:
+      HASH_GUARD(0x632D4FC346797EABLL, pixelgetexceptionstring) {
+        ci = &ci_pixelgetexceptionstring;
+        return true;
+      }
+      break;
+    case 7859:
+      HASH_GUARD(0x7DB9D839ACE0DEB3LL, natsort) {
+        ci = &ci_natsort;
+        return true;
+      }
+      break;
+    case 7860:
+      HASH_GUARD(0x1F936B3C5406DEB4LL, fb_set_taint) {
+        ci = &ci_fb_set_taint;
+        return true;
+      }
+      break;
+    case 7863:
+      HASH_GUARD(0x58B9EFA0FB35FEB7LL, stream_filter_prepend) {
+        ci = &ci_stream_filter_prepend;
+        return true;
+      }
+      break;
+    case 7865:
+      HASH_GUARD(0x2A483AD7A3D07EB9LL, magickgetwandsize) {
+        ci = &ci_magickgetwandsize;
+        return true;
+      }
+      break;
+    case 7866:
+      HASH_GUARD(0x1F5B2728DE875EBALL, magicksetimage) {
+        ci = &ci_magicksetimage;
+        return true;
+      }
+      break;
+    case 7869:
+      HASH_GUARD(0x31A30B274AD2DEBDLL, call_user_func_array_rpc) {
+        ci = &ci_call_user_func_array_rpc;
+        return true;
+      }
+      break;
+    case 7872:
+      HASH_GUARD(0x495316E596537EC0LL, imagefttext) {
+        ci = &ci_imagefttext;
+        return true;
+      }
+      break;
+    case 7874:
+      HASH_GUARD(0x4CDD0B7BF826FEC2LL, rewinddir) {
+        ci = &ci_rewinddir;
+        return true;
+      }
+      break;
+    case 7877:
+      HASH_GUARD(0x7D69B3537C353EC5LL, hphp_splfileinfo_isfile) {
+        ci = &ci_hphp_splfileinfo_isfile;
+        return true;
+      }
+      break;
+    case 7879:
+      HASH_GUARD(0x4FC99DC20A955EC7LL, session_module_name) {
+        ci = &ci_session_module_name;
+        return true;
+      }
+      break;
+    case 7894:
+      HASH_GUARD(0x134B37520683DED6LL, imagesetbrush) {
+        ci = &ci_imagesetbrush;
+        return true;
+      }
+      break;
+    case 7896:
+      HASH_GUARD(0x338D9D95095D1ED8LL, magicksetimagedelay) {
+        ci = &ci_magicksetimagedelay;
+        return true;
+      }
+      break;
+    case 7897:
+      HASH_GUARD(0x7F802A06996BBED9LL, apd_set_browser_trace) {
+        ci = &ci_apd_set_browser_trace;
+        return true;
+      }
+      break;
+    case 7898:
+      HASH_GUARD(0x29E2771785CCBEDALL, magickgettextdescent) {
+        ci = &ci_magickgettextdescent;
+        return true;
+      }
+      break;
+    case 7899:
+      HASH_GUARD(0x1340509769275EDBLL, magickgetimagecompression) {
+        ci = &ci_magickgetimagecompression;
+        return true;
+      }
+      break;
+    case 7905:
+      HASH_GUARD(0x528BA9796BD0FEE1LL, fb_rpc_intercept_handler) {
+        ci = &ci_fb_rpc_intercept_handler;
+        return true;
+      }
+      break;
+    case 7907:
+      HASH_GUARD(0x28A98134BD97BEE3LL, mb_regex_encoding) {
+        ci = &ci_mb_regex_encoding;
+        return true;
+      }
+      HASH_GUARD(0x0D76FFBE30B13EE3LL, imap_mailboxmsginfo) {
+        ci = &ci_imap_mailboxmsginfo;
+        return true;
+      }
+      break;
+    case 7908:
+      HASH_GUARD(0x5B6FF42ACB2FBEE4LL, getmyuid) {
+        ci = &ci_getmyuid;
+        return true;
+      }
+      break;
+    case 7912:
+      HASH_GUARD(0x32B3951DFD2B9EE8LL, hphp_directoryiterator_isdot) {
+        ci = &ci_hphp_directoryiterator_isdot;
+        return true;
+      }
+      break;
+    case 7916:
+      HASH_GUARD(0x115CC08BC872FEECLL, fb_output_compression) {
+        ci = &ci_fb_output_compression;
+        return true;
+      }
+      break;
+    case 7920:
+      HASH_GUARD(0x7DFF9707F1CD9EF0LL, dangling_server_proxy_old_request) {
+        ci = &ci_dangling_server_proxy_old_request;
+        return true;
+      }
+      break;
+    case 7929:
+      HASH_GUARD(0x200FC256EB093EF9LL, gettimeofday) {
+        ci = &ci_gettimeofday;
+        return true;
+      }
+      break;
+    case 7931:
+      HASH_GUARD(0x6D450F078F02BEFBLL, apd_continue) {
+        ci = &ci_apd_continue;
+        return true;
+      }
+      break;
+    case 7936:
+      HASH_GUARD(0x09637D7CA2E33F00LL, fgetc) {
+        ci = &ci_fgetc;
+        return true;
+      }
+      break;
+    case 7937:
+      HASH_GUARD(0x66137942508EBF01LL, date_create) {
+        ci = &ci_date_create;
+        return true;
+      }
+      break;
+    case 7938:
+      HASH_GUARD(0x78A02A603FA6FF02LL, magickreducenoiseimage) {
+        ci = &ci_magickreducenoiseimage;
+        return true;
+      }
+      break;
+    case 7951:
+      HASH_GUARD(0x61E7A36CA7FF5F0FLL, drawsetcliprule) {
+        ci = &ci_drawsetcliprule;
+        return true;
+      }
+      HASH_GUARD(0x4BD54A631F665F0FLL, drawpathcurvetosmoothabsolute) {
+        ci = &ci_drawpathcurvetosmoothabsolute;
+        return true;
+      }
+      break;
+    case 7955:
+      HASH_GUARD(0x3B197C0731233F13LL, dom_characterdata_substring_data) {
+        ci = &ci_dom_characterdata_substring_data;
+        return true;
+      }
+      break;
+    case 7963:
+      HASH_GUARD(0x27A4633381195F1BLL, chown) {
+        ci = &ci_chown;
+        return true;
+      }
+      break;
+    case 7967:
+      HASH_GUARD(0x7C0C145EFE0EBF1FLL, defined) {
+        ci = &ci_defined;
+        return true;
+      }
+      break;
+    case 7969:
+      HASH_GUARD(0x1FF5B9A4FC78BF21LL, drawsettextantialias) {
+        ci = &ci_drawsettextantialias;
+        return true;
+      }
+      HASH_GUARD(0x20DD4631AD975F21LL, imap_rfc822_write_address) {
+        ci = &ci_imap_rfc822_write_address;
+        return true;
+      }
+      break;
+    case 7980:
+      HASH_GUARD(0x035EFF9E1757DF2CLL, http_build_query) {
+        ci = &ci_http_build_query;
+        return true;
+      }
+      HASH_GUARD(0x22607B4EE253DF2CLL, imap_savebody) {
+        ci = &ci_imap_savebody;
+        return true;
+      }
+      break;
+    case 7986:
+      HASH_GUARD(0x78257F34467BDF32LL, drawsetstrokedasharray) {
+        ci = &ci_drawsetstrokedasharray;
+        return true;
+      }
+      HASH_GUARD(0x2B66EACB77AE9F32LL, print_r) {
+        ci = &ci_print_r;
+        return true;
+      }
+      break;
+    case 7993:
+      HASH_GUARD(0x3E9146C06AAEFF39LL, magicksetimagecompressionquality) {
+        ci = &ci_magicksetimagecompressionquality;
+        return true;
+      }
+      break;
+    case 8004:
+      HASH_GUARD(0x65353A823EB91F44LL, imap_mail_compose) {
+        ci = &ci_imap_mail_compose;
+        return true;
+      }
+      break;
+    case 8021:
+      HASH_GUARD(0x49D986274B1C5F55LL, collator_asort) {
+        ci = &ci_collator_asort;
+        return true;
+      }
+      break;
+    case 8024:
+      HASH_GUARD(0x0551AAE8F1A6FF58LL, magicklevelimage) {
+        ci = &ci_magicklevelimage;
+        return true;
+      }
+      break;
+    case 8027:
+      HASH_GUARD(0x76418F884500DF5BLL, stream_socket_enable_crypto) {
+        ci = &ci_stream_socket_enable_crypto;
+        return true;
+      }
+      break;
+    case 8029:
+      HASH_GUARD(0x07FF92CF46DDFF5DLL, imagepsfreefont) {
+        ci = &ci_imagepsfreefont;
+        return true;
+      }
+      break;
+    case 8036:
+      HASH_GUARD(0x41EF51E62AD3DF64LL, pagelet_server_is_enabled) {
+        ci = &ci_pagelet_server_is_enabled;
+        return true;
+      }
+      HASH_GUARD(0x280051555A21DF64LL, rename) {
+        ci = &ci_rename;
+        return true;
+      }
+      break;
+    case 8043:
+      HASH_GUARD(0x56EF59D6CB0A5F6BLL, dom_document_save_html_file) {
+        ci = &ci_dom_document_save_html_file;
+        return true;
+      }
+      break;
+    case 8044:
+      HASH_GUARD(0x23D5E9E53D11BF6CLL, gmdate) {
+        ci = &ci_gmdate;
+        return true;
+      }
+      break;
+    case 8050:
+      HASH_GUARD(0x4B22EF06BAA83F72LL, version_compare) {
+        ci = &ci_version_compare;
+        return true;
+      }
+      break;
+    case 8062:
+      HASH_GUARD(0x7064BEBF508F3F7ELL, socket_read) {
+        ci = &ci_socket_read;
+        return true;
+      }
+      break;
+    case 8064:
+      HASH_GUARD(0x63F18DE0DB807F80LL, magickqueryfonts) {
+        ci = &ci_magickqueryfonts;
+        return true;
+      }
+      break;
+    case 8068:
+      HASH_GUARD(0x14402B01D00E9F84LL, magicksteganoimage) {
+        ci = &ci_magicksteganoimage;
+        return true;
+      }
+      break;
+    case 8070:
+      HASH_GUARD(0x44CE4DB1CE7E9F86LL, flock) {
+        ci = &ci_flock;
+        return true;
+      }
+      break;
+    case 8075:
+      HASH_GUARD(0x2755DD4112AA5F8BLL, magicksampleimage) {
+        ci = &ci_magicksampleimage;
+        return true;
+      }
+      break;
+    case 8078:
+      HASH_GUARD(0x7A8F1104B0CCDF8ELL, phpcredits) {
+        ci = &ci_phpcredits;
+        return true;
+      }
+      break;
+    case 8079:
+      HASH_GUARD(0x4A6C46DC7FE29F8FLL, hphp_recursivedirectoryiterator_getchildren) {
+        ci = &ci_hphp_recursivedirectoryiterator_getchildren;
+        return true;
+      }
+      break;
+    case 8081:
+      HASH_GUARD(0x78463112BE739F91LL, connection_timeout) {
+        ci = &ci_connection_timeout;
+        return true;
+      }
+      break;
+    case 8085:
+      HASH_GUARD(0x40D620CBA0D41F95LL, opendir) {
+        ci = &ci_opendir;
+        return true;
+      }
+      break;
+    case 8087:
+      HASH_GUARD(0x35117886C885DF97LL, hphp_recursivedirectoryiterator_getsubpathname) {
+        ci = &ci_hphp_recursivedirectoryiterator_getsubpathname;
+        return true;
+      }
+      break;
+    case 8088:
+      HASH_GUARD(0x0293F60B46511F98LL, drawsetfontstretch) {
+        ci = &ci_drawsetfontstretch;
+        return true;
+      }
+      break;
+    case 8090:
+      HASH_GUARD(0x2B7CAC006AF27F9ALL, fflush) {
+        ci = &ci_fflush;
+        return true;
+      }
+      break;
+    case 8093:
+      HASH_GUARD(0x0AD6DE8829773F9DLL, apc_compile_file) {
+        ci = &ci_apc_compile_file;
+        return true;
+      }
+      break;
+    case 8100:
+      HASH_GUARD(0x0E7E9AA21AE99FA4LL, hphp_recursiveiteratoriterator_current) {
+        ci = &ci_hphp_recursiveiteratoriterator_current;
+        return true;
+      }
+      break;
+    case 8102:
+      HASH_GUARD(0x0DEEA8C3E3A47FA6LL, read_exif_data) {
+        ci = &ci_read_exif_data;
+        return true;
+      }
+      break;
+    case 8110:
+      HASH_GUARD(0x64D269A505D51FAELL, array_map) {
+        ci = &ci_array_map;
+        return true;
+      }
+      break;
+    case 8113:
+      HASH_GUARD(0x0F78ECF42C30DFB1LL, array_chunk) {
+        ci = &ci_array_chunk;
+        return true;
+      }
+      break;
+    case 8119:
+      HASH_GUARD(0x6465CD999F4C5FB7LL, hphp_invoke_method) {
+        ci = &ci_hphp_invoke_method;
+        return true;
+      }
+      break;
+    case 8120:
+      HASH_GUARD(0x6DB2DB341ECF3FB8LL, file_exists) {
+        ci = &ci_file_exists;
+        return true;
+      }
+      break;
+    case 8129:
+      HASH_GUARD(0x3FF9AAFF85DDDFC1LL, class_parents) {
+        ci = &ci_class_parents;
+        return true;
+      }
+      break;
+    case 8130:
+      HASH_GUARD(0x460470C490FAFFC2LL, dom_node_normalize) {
+        ci = &ci_dom_node_normalize;
+        return true;
+      }
+      break;
+    case 8142:
+      HASH_GUARD(0x042193C97C65FFCELL, magickwaveimage) {
+        ci = &ci_magickwaveimage;
+        return true;
+      }
+      break;
+    case 8144:
+      HASH_GUARD(0x53DB5D0490C51FD0LL, xhprof_sample_disable) {
+        ci = &ci_xhprof_sample_disable;
+        return true;
+      }
+      break;
+    case 8150:
+      HASH_GUARD(0x7FC00035D14B9FD6LL, apc_delete_file) {
+        ci = &ci_apc_delete_file;
+        return true;
+      }
+      break;
+    case 8152:
+      HASH_GUARD(0x4234F2B59531FFD8LL, posix_getlogin) {
+        ci = &ci_posix_getlogin;
+        return true;
+      }
+      break;
+    case 8157:
+      HASH_GUARD(0x4EDEDA4278CD3FDDLL, magickchopimage) {
+        ci = &ci_magickchopimage;
+        return true;
+      }
+      break;
+    case 8158:
+      HASH_GUARD(0x7F5FC3CAF8CE9FDELL, gzcompress) {
+        ci = &ci_gzcompress;
+        return true;
+      }
+      HASH_GUARD(0x72925D2DF7E61FDELL, drawpathcurvetoquadraticbeziersmoothrelative) {
+        ci = &ci_drawpathcurvetoquadraticbeziersmoothrelative;
+        return true;
+      }
+      break;
+    case 8168:
+      HASH_GUARD(0x4D7AEC41CFD73FE8LL, hphp_recursivedirectoryiterator_getsubpath) {
+        ci = &ci_hphp_recursivedirectoryiterator_getsubpath;
+        return true;
+      }
+      break;
+    case 8171:
+      HASH_GUARD(0x67D1EE05DFE71FEBLL, hphp_splfileobject_getcvscontrol) {
+        ci = &ci_hphp_splfileobject_getcvscontrol;
+        return true;
+      }
+      break;
+    case 8175:
+      HASH_GUARD(0x00EEEE9C6CEA5FEFLL, xmlwriter_write_element_ns) {
+        ci = &ci_xmlwriter_write_element_ns;
+        return true;
+      }
+      break;
+    case 8182:
+      HASH_GUARD(0x25FCE64E12505FF6LL, magicksetimagerenderingintent) {
+        ci = &ci_magicksetimagerenderingintent;
+        return true;
+      }
+      break;
+    case 8186:
+      HASH_GUARD(0x13EE24AF67113FFALL, ob_end_flush) {
+        ci = &ci_ob_end_flush;
+        return true;
+      }
+      break;
+    case 8187:
+      HASH_GUARD(0x63BE4CEF1FC47FFBLL, imagefill) {
+        ci = &ci_imagefill;
         return true;
       }
       break;

@@ -1065,6 +1065,11 @@ function phpnet_get_function_info($name, $clsname = 'function') {
   if (preg_match('#<div class="refsect1 parameters">(.*?)'.
                  '<div class="refsect1 #s', $doc, $m)) {
     $desc = $m[1];
+    if (preg_match_all('#<tt class="parameter">(.*?)</tt>#s', $desc, $m)) {
+      foreach ($m[1] as $param) {
+        $ret['param_names'][] = phpnet_clean($param);
+      }
+    }
     if (preg_match_all('#<dd>(.*?)</dd>#s', $desc, $m)) {
       foreach ($m[1] as $param) {
         $ret['params'][] = phpnet_clean($param);
@@ -1097,4 +1102,15 @@ function phpnet_get_class_desc($name) {
     return phpnet_clean($m[1]);
   }
   return false;
+}
+
+function phpnet_get_extension_functions($name) {
+  $doc = @file_get_contents("http://www.php.net/manual/en/ref.$name.php");
+  if ($doc === false) {
+    return false;
+  }
+  
+  preg_match_all('#<li><a href="function\..*?\.php">(.*?)</a>.*?</li>#',
+                 $doc, $m);
+  return $m[1];
 }

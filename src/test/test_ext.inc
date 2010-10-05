@@ -22,6 +22,7 @@ RUN_TESTSUITE(TestExtIconv);
 RUN_TESTSUITE(TestExtIcu);
 RUN_TESTSUITE(TestExtImage);
 RUN_TESTSUITE(TestExtImagesprite);
+RUN_TESTSUITE(TestExtImap);
 RUN_TESTSUITE(TestExtIntl);
 RUN_TESTSUITE(TestExtIpc);
 RUN_TESTSUITE(TestExtIterator);

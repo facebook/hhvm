@@ -39,6 +39,7 @@
 #include <runtime/ext/profile/extprofile_icu.h>
 #include <runtime/ext/profile/extprofile_image.h>
 #include <runtime/ext/profile/extprofile_imagesprite.h>
+#include <runtime/ext/profile/extprofile_imap.h>
 #include <runtime/ext/profile/extprofile_intl.h>
 #include <runtime/ext/profile/extprofile_ipc.h>
 #include <runtime/ext/profile/extprofile_iterator.h>

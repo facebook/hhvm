@@ -158,7 +158,6 @@ public:
    */
   static bool SeparateCompilation;
   static bool SeparateCompLib;
-  static bool UseNamedLiteralString;
   static bool UseNamedScalarArray;
 
   /**
@@ -330,7 +329,6 @@ public:
    * Optimizations
    */
   static int InvokeFewArgsCount;
-  static bool PrecomputeLiteralStrings;
   static bool FlattenInvoke;
   static int InlineFunctionThreshold;
   static bool ControlEvalOrder;

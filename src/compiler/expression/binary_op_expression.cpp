@@ -774,18 +774,18 @@ static std::string stringBufferName(const char *temp, const char *prefix,
 }
 
 int BinaryOpExpression::getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
-                                      bool &hasVoid, bool &hasLitStr) {
+                                      bool &hasVoid) {
   if (!exp->hasCPPTemp()) {
     if (exp->is(Expression::KindOfUnaryOpExpression)) {
       UnaryOpExpressionPtr u = static_pointer_cast<UnaryOpExpression>(exp);
       if (u->getOp() == '(') {
-        return getConcatList(ev, u->getExpression(), hasVoid, hasLitStr);
+        return getConcatList(ev, u->getExpression(), hasVoid);
       }
     } else if (exp->is(Expression::KindOfBinaryOpExpression)) {
       BinaryOpExpressionPtr b = static_pointer_cast<BinaryOpExpression>(exp);
       if (b->getOp() == '.') {
-        return getConcatList(ev, b->getExp1(), hasVoid, hasLitStr) +
-          getConcatList(ev, b->getExp2(), hasVoid, hasLitStr);
+        return getConcatList(ev, b->getExp1(), hasVoid) +
+          getConcatList(ev, b->getExp2(), hasVoid);
       }
     } else if (exp->is(Expression::KindOfEncapsListExpression)) {
       EncapsListExpressionPtr e =
@@ -795,7 +795,7 @@ int BinaryOpExpression::getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
         int num = 0;
         for (int i = 0, s = el->getCount(); i < s; i++) {
           ExpressionPtr exp = (*el)[i];
-          num += getConcatList(ev, exp, hasVoid, hasLitStr);
+          num += getConcatList(ev, exp, hasVoid);
         }
         return num;
       }
@@ -805,7 +805,6 @@ int BinaryOpExpression::getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
   ev.push_back(exp);
   bool isVoid = !exp->getActualType();
   hasVoid |= isVoid;
-  hasLitStr |= exp->isLiteralString();
   return isVoid ? 0 : 1;
 }
 
@@ -851,13 +850,12 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   if (effect2 || m_exp1->hasEffect()) {
     ExpressionPtr self = static_pointer_cast<Expression>(shared_from_this());
     ExpressionPtrVec ev;
-    bool hasVoid = false, hasLitStr = false;
+    bool hasVoid = false;
     int numConcat = 0;
     bool ok = false;
     if (m_op == '.') {
-      numConcat = getConcatList(ev, self, hasVoid, hasLitStr);
+      numConcat = getConcatList(ev, self, hasVoid);
       ok = hasVoid ||
-           (hasLitStr && !Option::PrecomputeLiteralStrings) ||
            (numConcat > MAX_CONCAT_ARGS &&
             (!Option::GenConcat ||
              cg.getOutput() == CodeGenerator::SystemCPP));
@@ -871,7 +869,7 @@ bool BinaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
           numConcat++;
         }
       }
-      numConcat += getConcatList(ev, m_exp2, hasVoid, hasLitStr);
+      numConcat += getConcatList(ev, m_exp2, hasVoid);
     }
     if (ok) {
       if (!ar->inExpression()) return true;
@@ -1045,8 +1043,8 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     if (const char *prefix = stringBufferPrefix(ar, m_exp1)) {
       SimpleVariablePtr sv = static_pointer_cast<SimpleVariable>(m_exp1);
       ExpressionPtrVec ev;
-      bool hasVoid = false, hasLitStr = false;
-      getConcatList(ev, m_exp2, hasVoid, hasLitStr);
+      bool hasVoid = false;
+      getConcatList(ev, m_exp2, hasVoid);
       cg_printf("%s", stringBufferName(Option::TempPrefix, prefix,
                                        sv->getName().c_str()).c_str());
       outputStringBufExprs(ev, cg, ar);
@@ -1058,12 +1056,12 @@ void BinaryOpExpression::outputCPPImpl(CodeGenerator &cg,
     {
       ExpressionPtr self = static_pointer_cast<Expression>(shared_from_this());
       ExpressionPtrVec ev;
-      bool hasVoid = false, hasLitStr = false;
-      int num = getConcatList(ev, self, hasVoid, hasLitStr);
+      bool hasVoid = false;
+      int num = getConcatList(ev, self, hasVoid);
       assert(!hasVoid);
       if ((num <= MAX_CONCAT_ARGS ||
-           (Option::GenConcat && cg.getOutput() != CodeGenerator::SystemCPP))
-          && (!hasLitStr || Option::PrecomputeLiteralStrings)) {
+           (Option::GenConcat &&
+            cg.getOutput() != CodeGenerator::SystemCPP))) {
         assert(num >= 2);
         if (num == 2) {
           cg_printf("concat(");

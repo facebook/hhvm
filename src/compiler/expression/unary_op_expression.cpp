@@ -576,9 +576,9 @@ bool UnaryOpExpression::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
     return doit;
   } else if (m_op == T_PRINT && m_exp && !m_exp->hasEffect()) {
     ExpressionPtrVec ev;
-    bool hasVoid = false, hasLit = false;
-    if (BinaryOpExpression::getConcatList(ev, m_exp, hasVoid, hasLit) > 1 ||
-        hasVoid || hasLit) {
+    bool hasVoid = false;
+    if (BinaryOpExpression::getConcatList(ev, m_exp, hasVoid) > 1 ||
+        hasVoid ) {
 
       if (!ar->inExpression()) return true;
       ar->wrapExpressionBegin(cg);

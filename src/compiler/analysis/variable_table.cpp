@@ -1048,9 +1048,6 @@ void VariableTable::outputCPPGlobalVariablesImpl(CodeGenerator &cg,
   if (!system) {
     cg_printf("\n");
     cg_indentBegin("void init_static_variables() {\n");
-    if (Option::PrecomputeLiteralStrings && !Option::UseNamedLiteralString) {
-      cg_printf("LiteralStringInitializer::initialize();\n");
-    }
     cg_printf("ScalarArrays::initialize();\n");
     cg_printf("StaticString::FinishInit();\n");
     cg_indentEnd("}\n");

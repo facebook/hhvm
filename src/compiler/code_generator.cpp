@@ -400,18 +400,13 @@ bool CodeGenerator::findLabelId(const char *name, int labelId) {
 
 int CodeGenerator::checkLiteralString(const std::string &str, int &index,
                                       AnalysisResultPtr ar) {
-  if (Option::PrecomputeLiteralStrings &&
-      (getOutput() != CodeGenerator::SystemCPP ||
-       Option::UseNamedLiteralString) &&
-      getContext() != CodeGenerator::CppConstantsDecl &&
+  if (getContext() != CodeGenerator::CppConstantsDecl &&
       getContext() != CodeGenerator::CppClassConstantsImpl) {
     int stringId = ar->getLiteralStringId(str, index);
-    if (Option::UseNamedLiteralString) {
-      ar->getFileScope()->addUsedLiteralString(str);
-      if (m_context == CppParameterDefaultValueDecl ||
-          m_context == CppStaticMethodWrapper) {
-        ar->getFileScope()->addUsedLiteralStringHeader(str);
-      }
+    ar->getFileScope()->addUsedLiteralString(str);
+    if (m_context == CppParameterDefaultValueDecl ||
+        m_context == CppStaticMethodWrapper) {
+      ar->getFileScope()->addUsedLiteralStringHeader(str);
     }
     if (stringId >= 0) return stringId;
   }

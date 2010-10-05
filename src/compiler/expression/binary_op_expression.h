@@ -55,7 +55,7 @@ public:
   bool outputCPPImplOpEqual(CodeGenerator &cg, AnalysisResultPtr ar);
 
   static int getConcatList(ExpressionPtrVec &ev, ExpressionPtr exp,
-                           bool &hasVoid, bool &hasLitStr);
+                           bool &hasVoid);
 
 private:
   ExpressionPtr simplifyLogical(AnalysisResultPtr ar);

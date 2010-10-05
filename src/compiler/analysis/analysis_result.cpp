@@ -1368,11 +1368,9 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     // this calls outputCPPScalarArrays, so must happen
     // after function bodies have been output
     outputCPPSystem();
-    if (Option::UseNamedLiteralString) {
-      string file = m_outputPath + "/" + Option::SystemFilePrefix +
-        "literal_strings";
-      outputCPPNamedLiteralStrings(false, file);
-    }
+    string file = m_outputPath + "/" + Option::SystemFilePrefix +
+      "literal_strings";
+    outputCPPNamedLiteralStrings(false, file);
     if (Option::UseNamedScalarArray) {
       string file = m_outputPath + "/" + Option::SystemFilePrefix +
         "scalar_arrays";
@@ -1386,13 +1384,9 @@ void AnalysisResult::outputAllCPP(CodeGenerator::Output output,
     outputCPPGlobalVariablesMethods(2);
     outputCPPGlobalVariablesMethods(3);
     outputCPPGlobalVariablesMethods(4);
-    if (Option::UseNamedLiteralString) {
-      string file = m_outputPath + "/" + Option::SystemFilePrefix +
-        "literal_strings";
-      outputCPPNamedLiteralStrings(false, file);
-    } else if (Option::PrecomputeLiteralStrings) {
-      outputCPPLiteralStringPrecomputation();
-    }
+    string file = m_outputPath + "/" + Option::SystemFilePrefix +
+      "literal_strings";
+    outputCPPNamedLiteralStrings(false, file);
     if (Option::UseNamedScalarArray) {
       string file = m_outputPath + "/" + Option::SystemFilePrefix +
         "scalar_arrays";
@@ -2935,8 +2929,7 @@ void AnalysisResult::outputCPPGlobalVariablesMethods(int part) {
   cg_printInclude("<runtime/base/hphp.h>");
   cg_printInclude(string(Option::SystemFilePrefix) + "global_variables.h");
   cg_printInclude(string(Option::SystemFilePrefix) + "cpputil.h");
-  if ((Option::PrecomputeLiteralStrings || Option::UseNamedLiteralString) &&
-      (part == 1 || part == 2)) {
+  if (part == 1 || part == 2) {
     cg_printInclude(string(Option::SystemFilePrefix) + "literal_strings.h");
   }
   if (part == 1) {
@@ -3686,17 +3679,6 @@ string AnalysisResult::getLiteralStringName(int hash, int index) {
 }
 
 int AnalysisResult::getLiteralStringId(const std::string &s, int &index) {
-  if (!Option::UseNamedLiteralString) {
-    index = -1;
-    map<string, int>::const_iterator it =
-      m_stringLiterals.find(s);
-    if (it != m_stringLiterals.end()) {
-      return it->second;
-    }
-    int ct = m_stringLiterals.size();
-    m_stringLiterals[s] = ct;
-    return ct;
-  }
   int hash = hash_string(s.data(), s.size());
   if (hash < 0) hash = -hash;
   vector<string> &strings = m_namedStringLiterals[hash];
@@ -3791,104 +3773,6 @@ int AnalysisResult::callInfoTop() {
   if (m_callInfos.empty()) return -1;
   return m_callInfos.back();
 }
-
-void AnalysisResult::outputCPPLiteralStringPrecomputation() {
-
-  AnalysisResultPtr self = shared_from_this();
-  int bucketSize = m_stringLiterals.size() / Option::LiteralStringFileCount;
-  if (bucketSize < 500) bucketSize = 500;
-  uint bucketCount = m_stringLiterals.size() / bucketSize;
-  if (bucketCount * bucketSize != m_stringLiterals.size()) {
-    bucketCount++;
-  }
-  if (Option::LiteralStringCompression || m_stringLiterals.size() == 0) {
-    bucketCount = 1;
-  }
-
-  {
-    string filename = m_outputPath + "/" + Option::SystemFilePrefix +
-      "literal_strings.h";
-    Util::mkdir(filename);
-    ofstream f(filename.c_str());
-    CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
-
-    cg_printf("\n");
-    cg_printf("#ifndef __GENERATED_sys_literal_strings_h__\n");
-    cg_printf("#define __GENERATED_sys_literal_strings_h__\n");
-    cg_printInclude("<runtime/base/hphp.h>");
-    cg_printf("\n");
-    cg.namespaceBegin();
-    cg_indentBegin("class LiteralStringInitializer {\n");
-    cg_printf("public:\n");
-    cg_indentBegin("static void initialize() {\n");
-    for (uint i = 0; i < bucketCount; i++) {
-      cg_printf("init_%d();\n", i);
-    }
-    if (Option::ScalarArrayCompression && m_stringLiterals.size() > 0) {
-      cg_printf("StringDataSet &set = StaticString::TheStaticStringSet();\n");
-      cg_indentBegin("for (int i = 0; i < %d; i++) {\n",
-                     m_stringLiterals.size());
-      cg_printf("set.insert(literalStrings[i].get());\n");
-      cg_indentEnd("}\n");
-    }
-    cg_indentEnd("}\n");
-    for (uint i = 0; i < bucketCount; i++) {
-      cg_printf("static void init_%d();\n", i);
-    }
-    cg_indentEnd("};\n");
-    cg.namespaceEnd();
-    cg_printf("#endif // __GENERATED_sys_literal_strings_h__\n");
-    f.close();
-  }
-  map<string, int>::const_iterator it = m_stringLiterals.begin();
-  const char *lsname = "literalStrings";
-  for (uint i = 0; i < bucketCount; i++) {
-    stringstream filenames;
-    filenames << m_outputPath << "/" << Option::SystemFilePrefix <<
-      "literal_strings_" << i << ".cpp";
-    string filename = filenames.str();
-    Util::mkdir(filename);
-    ofstream f(filename.c_str());
-    CodeGenerator cg(&f, CodeGenerator::ClusterCPP);
-    cg_printf("\n");
-    cg_printInclude("\"literal_strings.h\"");
-    cg.namespaceBegin();
-    int sdataLen = 0;
-    int ldataLen = 0;
-    if (i == 0) {
-      if (Option::LiteralStringCompression && m_stringLiterals.size() > 0) {
-        string zsdata;
-        string zldata;
-        getLiteralStringCompressed(zsdata, zldata);
-        const char *sdata = zsdata.data();
-        sdataLen = zsdata.size();
-        const char *ldata = zldata.data();
-        ldataLen = zldata.size();
-        ASSERT(sdataLen > 0 && ldataLen > 0);
-        outputHexBuffer(cg, "ls_csdata", sdata, sdataLen);
-        outputHexBuffer(cg, "ls_cldata", ldata, ldataLen);
-      }
-      cg_printf("StaticString %s[%d];\n", lsname, m_stringLiterals.size());
-    }
-
-    cg_indentBegin("void LiteralStringInitializer::init_%d() {\n", i);
-    if (Option::LiteralStringCompression && m_stringLiterals.size() > 0) {
-      cg_printf("StringUtil::InitLiteralStrings"
-                "(%s, %d, ls_csdata, %d, ls_cldata, %d);\n",
-                lsname, m_stringLiterals.size(), sdataLen, ldataLen);
-    } else {
-      for (int j = 0; j < bucketSize &&
-           it != m_stringLiterals.end(); ++it, ++j) {
-        cg_printf("%s[%d].init(LITSTR_INIT(\"%s\"));",
-                  lsname, it->second, cg.escapeLabel(it->first).c_str());
-      }
-    }
-    cg_indentEnd("}\n");
-    cg.namespaceEnd();
-    f.close();
-  }
-}
-
 
 void AnalysisResult::outputCPPNamedLiteralStrings(bool genStatic,
                                                   const string &file) {

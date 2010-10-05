@@ -146,7 +146,6 @@ int Option::ScalarArrayFileCount = 1;
 int Option::ScalarArrayOverflowLimit = 2000;
 bool Option::SeparateCompilation = false;
 bool Option::SeparateCompLib = false;
-bool Option::UseNamedLiteralString = true;
 bool Option::UseNamedScalarArray = true;
 int Option::LiteralStringFileCount = 50;
 bool Option::AnalyzePerfectVirtuals = true;
@@ -185,7 +184,6 @@ bool Option::EnableXHP = false;
 int Option::ScannerType = Scanner::AllowShortTags;
 
 int Option::InvokeFewArgsCount = 6;
-bool Option::PrecomputeLiteralStrings = true;
 bool Option::FlattenInvoke = true;
 int Option::InlineFunctionThreshold = -1;
 bool Option::ControlEvalOrder = true;

@@ -48,6 +48,7 @@ bool TestCppBase::RunTests(const std::string &which) {
   RUN_TEST(TestMemoryManager);
 #endif
   RUN_TEST(TestIpBlockMap);
+  RUN_TEST(TestEqualAsStr);
   return ret;
 }
 
@@ -988,5 +989,37 @@ bool TestCppBase::TestIpBlockMap() {
   VERIFY(!ibm.isBlocking("test/blah.php", "127.0.0.1"));
   VERIFY(ibm.isBlocking("test/blah.php", "8.32.0.104"));
 
+  return Count(true);
+}
+
+bool TestCppBase::TestEqualAsStr() {
+
+  int arr_len = 16;
+  Variant var_array[arr_len];
+  var_array[0] = false;
+  var_array[1] = true;
+  var_array[2] = 0;
+  var_array[3] = 1;
+  var_array[4] = 42;
+  var_array[5] = 0.0;
+  var_array[6] = 1.0;
+  var_array[7] = 42.2;
+  var_array[8] = "0";
+  var_array[9] = "1";
+  var_array[10] = "42";
+  var_array[11] = "x";
+  var_array[12] = Array::Create();
+  Variant v1("original");
+  var_array[13] = v1;
+  Variant v2("changed");
+  var_array[14] = v2;
+  var_array[15] = "";
+  for (int i = 0; i < arr_len; i++) {
+    for (int j = 0; j < arr_len; j++) {
+      bool eqAsStr = equalAsStr(var_array[i], var_array[j]);
+      bool sm = same(toString(var_array[i]), toString(var_array[j]));
+      VERIFY(eqAsStr == sm);
+    }
+  }
   return Count(true);
 }

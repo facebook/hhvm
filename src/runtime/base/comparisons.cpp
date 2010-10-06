@@ -65,6 +65,63 @@ bool equal(int64 v1, const StringData *v2) {
   }
 }
 
+bool equalAsStr(bool v1, const StringData *v2) {
+  return same(toString(v1), v2);
+}
+
+
+bool equalAsStr(char v1, const StringData *v2) {
+  return equalAsStr((int)v1, v2);
+}
+
+bool equalAsStr(short v1, const StringData *v2) {
+  return equalAsStr((int)v1, v2);
+}
+
+bool equalAsStr(int v1, const StringData *v2) {
+  char tmpbuf[12];
+  char *p;
+  int is_negative;
+  int len;
+  tmpbuf[11] = '\0';
+  p = conv_10(v1, &is_negative, &tmpbuf[11], &len);
+  if (len != v2->size()) {
+    return false;
+  }
+  return memcmp(p, v2->data(), len) == 0;
+}
+
+bool equalAsStr(int64 v1, const StringData *v2) {
+  char tmpbuf[21];
+  char *p;
+  int is_negative;
+  int len;
+  tmpbuf[20] = '\0';
+  p = conv_10(v1, &is_negative, &tmpbuf[20], &len);
+  if (len != v2->size()) {
+    return false;
+  }
+  return memcmp(p, v2->data(), len) == 0;
+}
+
+bool equalAsStr(int64 v1, litstr  v2) {
+  char tmpbuf[21];
+  char *p;
+  int is_negative;
+  int len;
+  tmpbuf[20] = '\0';
+  p = conv_10(v1, &is_negative, &tmpbuf[20], &len);
+  return strcmp(p, v2) == 0;
+}
+
+bool equalAsStr(double v1, const StringData *v2) {
+  return equalAsStr(v2, String(v1));
+}
+
+bool equalAsStr(double v1, litstr  v2) {
+  return same(String(v1), v2);
+}
+
 bool less(char v1, const StringData *v2) {
   return less((int64)v1, v2);
 }

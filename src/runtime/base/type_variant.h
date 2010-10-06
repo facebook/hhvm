@@ -455,6 +455,19 @@ class Variant {
   bool equal(CObjRef v2) const;
   bool equal(CVarRef v2) const;
 
+  bool equalAsStr(bool    v2) const;
+  bool equalAsStr(char    v2) const;
+  bool equalAsStr(short   v2) const;
+  bool equalAsStr(int     v2) const;
+  bool equalAsStr(int64   v2) const;
+  bool equalAsStr(double  v2) const;
+  bool equalAsStr(litstr v2) const;
+  bool equalAsStr(const StringData *v2) const;
+  bool equalAsStr(CStrRef v2) const;
+  bool equalAsStr(CArrRef v2) const;
+  bool equalAsStr(CObjRef v2) const;
+  bool equalAsStr(CVarRef v2) const;
+
   bool less(bool    v2) const;
   bool less(char    v2) const;
   bool less(short   v2) const;

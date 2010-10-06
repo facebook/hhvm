@@ -1744,6 +1744,28 @@ bool Variant::same(CVarRef v2) const {
   }                                                             \
   return false;                                                 \
 
+// Array needs to convert to "ARRAY" and Object to String
+#define UNWRAP_STRING(reverse)                                  \
+  switch (getType()) {                                          \
+  case KindOfNull:    return HPHP::reverse(v2, "");             \
+  case KindOfBoolean: return HPHP::reverse(v2, toBoolean());    \
+  case KindOfByte:                                              \
+  case KindOfInt16:                                             \
+  case KindOfInt32:                                             \
+  case KindOfInt64:   return HPHP::reverse(v2, toInt64());      \
+  case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
+  case KindOfStaticString:                                      \
+  case KindOfString:  return HPHP::reverse(v2, getStringData());\
+  case KindOfArray:   return HPHP::reverse(v2, "ARRAY");        \
+  case KindOfObject:                                            \
+    return HPHP::reverse(v2, toObject().toString());            \
+  default:                                                      \
+    ASSERT(false);                                              \
+    break;                                                      \
+  }                                                             \
+  return false;                                                 \
+
+
 // "null" needs to convert to "" before comparing with a string
 #define UNWRAP_VAR(forward, reverse)                            \
   switch (getType()) {                                          \
@@ -1804,6 +1826,21 @@ bool Variant::equal(CStrRef v2) const { UNWRAP_STR(equal);}
 bool Variant::equal(CArrRef v2) const { UNWRAP(equal);}
 bool Variant::equal(CObjRef v2) const { UNWRAP(equal);}
 bool Variant::equal(CVarRef v2) const { UNWRAP_VAR(equal,equal);}
+
+bool Variant::equalAsStr(bool    v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(char    v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(short   v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(int     v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(int64   v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(double  v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(litstr  v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(const StringData *v2) const {
+  UNWRAP_STRING(equalAsStr);
+}
+bool Variant::equalAsStr(CStrRef  v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(CArrRef  v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(CObjRef  v2) const { UNWRAP_STRING(equalAsStr);}
+bool Variant::equalAsStr(CVarRef  v2) const { UNWRAP_STRING(equalAsStr);}
 
 bool Variant::less(bool    v2) const { UNWRAP(more);}
 bool Variant::less(char    v2) const { UNWRAP(more);}

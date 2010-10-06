@@ -1108,4 +1108,18 @@ String apc_reserialize(CStrRef str) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// debugging support
+
+bool apc_dump(const char *filename) {
+  const int CACHE_ID = 0; /* 0 is used as default for apc */
+  std::ofstream out(filename);
+  if (out.fail()) {
+    return false;
+  }
+  s_apc_store[CACHE_ID].dump(out);
+  out.close();
+  return true;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

@@ -904,5 +904,15 @@ void const_load() {
   const_data.setStatic();
 }
 
+bool const_dump(const char *filename) {
+  std::ofstream out(filename);
+  if (out.fail()) {
+    return false;
+  }
+  const_data.dump(out);
+  out.close();
+  return true;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 }

@@ -423,6 +423,22 @@ void ArrayData::dump(std::string &out) {
   out += ret.toString().data();
 }
 
+void ArrayData::dump(std::ostream &out) {
+  unsigned int i = 0;
+  for (ArrayIter iter(this); iter; ++iter, i++) {
+    VariableSerializer vs(VariableSerializer::Serialize);
+    Variant key(iter.first());
+    out << i << " #### " << key.toString()->toCPPString() << " #### ";
+    Variant val(iter.second());
+    try {
+      Variant valS(vs.serialize(val, true));
+      out << valS.toString()->toCPPString();
+    } catch (const Exception &e) {
+      out << "Exception: " << e.what();
+    }
+    out << endl;
+  }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }

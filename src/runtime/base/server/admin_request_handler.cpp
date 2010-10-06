@@ -31,6 +31,8 @@
 #include <runtime/ext/mysql_stats.h>
 #include <runtime/base/shared/shared_store_stats.h>
 #include <util/alloc.h>
+#include <runtime/ext/ext_fb.h>
+#include <runtime/ext/ext_apc.h>
 
 #ifdef GOOGLE_CPU_PROFILER
 #include <google/profiler.h>
@@ -127,6 +129,9 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
         "                  only valid when EnableAPCSizeDetail is true\n"
         "    keysample     optional, only dump keys that belongs to the same\n"
         "                  group as <keysample>\n"
+        "/dump-apc:        dump all current value in APC to /tmp/apc_dump\n"
+        "/dump-const:      dump all constant value in constant map to\n"
+        "                  /tmp/const_map_dump\n"
 
 #ifdef GOOGLE_CPU_PROFILER
         "/prof-cpu-on:     turn on CPU profiler\n"
@@ -228,6 +233,10 @@ void AdminRequestHandler::handleRequest(Transport *transport) {
     }
     if (strncmp(cmd.c_str(), "apc-ss", 6) == 0 &&
         handleAPCSizeRequest(cmd, transport)) {
+      break;
+    }
+    if (strncmp(cmd.c_str(), "dump", 4) == 0 &&
+        handleDumpCacheRequest(cmd, transport)) {
       break;
     }
 
@@ -742,6 +751,34 @@ bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
     } else {
       transport->sendString("Failed\n");
     }
+    return true;
+  }
+  return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// Dump cache content
+
+bool AdminRequestHandler::handleDumpCacheRequest(const std::string &cmd,
+                                                 Transport *transport) {
+  if (cmd == "dump-const") {
+    if (!RuntimeOption::EnableApc ||
+        !RuntimeOption::EnableConstLoad ||
+        RuntimeOption::ApcPrimeLibrary.empty()) {
+      transport->sendString("No Constant Cache\n");
+      return true;
+    }
+    const_dump("/tmp/const_map_dump");
+    transport->sendString("Done");
+    return true;
+  }
+  if (cmd == "dump-apc") {
+    if (!RuntimeOption::EnableApc) {
+      transport->sendString("No APC\n");
+      return true;
+    }
+    apc_dump("/tmp/apc_dump");
+    transport->sendString("Done");
     return true;
   }
   return false;

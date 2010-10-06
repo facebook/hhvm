@@ -27,6 +27,7 @@
 #include <tbb/concurrent_hash_map.h>
 #include <queue>
 #include <runtime/base/shared/shared_store_stats.h>
+#include <runtime/base/variable_serializer.h>
 
 using namespace std;
 using namespace boost;
@@ -624,6 +625,10 @@ public:
   virtual SharedVariant* construct(litstr str, int len, CVarRef v) {
     return create(str, len, v);
   }
+
+  // debug support
+  virtual void dump(std::ostream & out);
+
 protected:
   virtual SharedVariant* construct(CStrRef key, CVarRef v) {
     return create(key, v);
@@ -1406,6 +1411,32 @@ void SharedStores::Create() {
 
 std::string SharedStores::ReportStats(int indent) {
   return s_apc_store.reportStats(indent);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// debugging support
+
+void ConcurrentTableSharedStore::dump(std::ostream & out) {
+  int i = 0;
+  ReadLock l(m_lock);
+  out << "Total " << m_vars.size() << endl;
+  for (Map::iterator iter = m_vars.begin(); iter != m_vars.end();
+       ++iter, ++i) {
+    const char *key = iter->first;
+    const StoreValue &val = iter->second;
+    if (!val.expired()) {
+      VariableSerializer vs(VariableSerializer::Serialize);
+      out << i << " #### " << key << " #### ";
+      Variant value = val.var->toLocal();
+      try {
+        Variant valS(vs.serialize(value, true));
+        out << valS.toString()->toCPPString();
+      } catch (const Exception &e) {
+        out << "Exception: " << e.what();
+      }
+      out << endl;
+    }
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

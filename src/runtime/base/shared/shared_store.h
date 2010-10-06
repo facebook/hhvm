@@ -70,6 +70,10 @@ public:
   virtual bool check() { return true; }
   static size_t s_lockCount;
   static std::string GetSkeleton(CStrRef key);
+
+  // debug support
+  virtual void dump(std::ostream & out) { /* Default does nothing*/ }
+
 protected:
   int m_id;
 

@@ -39,6 +39,7 @@ private:
   bool handleProfileRequest(const std::string &cmd, Transport *transport);
   bool handleLeakRequest   (const std::string &cmd, Transport *transport);
   bool handleAPCSizeRequest (const std::string &cmd, Transport *transport);
+  bool handleDumpCacheRequest (const std::string &cmd, Transport *transport);
 
 #ifdef GOOGLE_CPU_PROFILER
   bool handleCPUProfilerRequest (const std::string &cmd, Transport *transport);

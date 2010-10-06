@@ -271,6 +271,7 @@ class ArrayData : public Countable {
 
   virtual void dump();
   virtual void dump(std::string &out);
+  virtual void dump(std::ostream &os);
 
   /**
    * Comparisons. Similar to serialize(), we implemented it here generically.
@@ -287,12 +288,6 @@ class ArrayData : public Countable {
  protected:
   ssize_t m_pos;
   PointerList<FullPos> m_strongIterators;
-
-  /**
-   * Helpers.
-   */
-  static void dumpKey(std::ostream &out, int indent, unsigned int index);
-  static void dumpKey(std::ostream &out, int indent, CStrRef key);
 
   void freeStrongIterators();
 

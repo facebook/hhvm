@@ -211,6 +211,7 @@ class StringData {
   void restore(const char *&data);
   void sweep();
   void dump() const;
+  std::string toCPPString() const;
 
   /**
    * The order of the data members is significant. The _count field must

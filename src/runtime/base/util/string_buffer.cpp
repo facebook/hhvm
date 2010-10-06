@@ -32,7 +32,7 @@ namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 StringBuffer::StringBuffer(int initialSize /* = 1024 */)
-    : m_initialSize(initialSize), m_size(initialSize), m_pos(0) {
+  : m_initialSize(initialSize), m_maxBytes(0), m_size(initialSize), m_pos(0) {
   ASSERT(initialSize > 0);
   m_buffer = (char *)Util::safe_malloc(initialSize + 1);
   #ifdef TAINTED
@@ -42,7 +42,7 @@ StringBuffer::StringBuffer(int initialSize /* = 1024 */)
 }
 
 StringBuffer::StringBuffer(const char *filename)
-    : m_buffer(NULL), m_initialSize(1024), m_size(0), m_pos(0) {
+  : m_buffer(NULL), m_initialSize(1024), m_maxBytes(0), m_size(0), m_pos(0) {
   struct stat sb;
   if (stat(filename, &sb) == 0) {
     m_size = sb.st_size;
@@ -67,7 +67,8 @@ StringBuffer::StringBuffer(const char *filename)
 }
 
 StringBuffer::StringBuffer(char *data, int len)
-  : m_buffer(data), m_size(len), m_pos(len) {
+  : m_buffer(data), m_initialSize(1024), m_maxBytes(0), m_size(len),
+    m_pos(len) {
   #ifdef TAINTED
   m_tainting = default_tainting;
   m_tainted_metadata = NULL;
@@ -334,6 +335,10 @@ void StringBuffer::grow(int minSize) {
   new_size <<= 1;
   if (new_size < minSize) {
     new_size = minSize;
+  }
+
+  if (m_maxBytes > 0 && new_size > m_maxBytes) {
+    throw StringBufferLimitException(m_maxBytes);
   }
 
   char *new_buffer;

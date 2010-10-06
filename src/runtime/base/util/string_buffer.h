@@ -26,6 +26,13 @@ namespace HPHP {
 class File;
 class TaintedMetadata;
 
+class StringBufferLimitException : public Exception {
+public:
+  StringBufferLimitException(int size)
+      : Exception("StringBuffer exceeded %d bytes of memory", size) {}
+  virtual ~StringBufferLimitException() throw() {}
+};
+
 /**
  * Efficient string concatenation.
  */
@@ -40,6 +47,8 @@ public:
   StringBuffer(const char *filename);
   StringBuffer(char *data, int len); // attaching
   ~StringBuffer();
+
+  void setOutputLimit(int maxBytes) { m_maxBytes = maxBytes;}
 
   bool valid() const { return m_buffer != NULL;}
   bool empty() const { return m_pos == 0;}
@@ -121,6 +130,7 @@ private:
 
   char *m_buffer;
   int m_initialSize;
+  int m_maxBytes;
   int m_size;
   int m_pos;
   #ifdef TAINTED

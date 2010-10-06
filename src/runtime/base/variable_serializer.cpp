@@ -33,8 +33,7 @@ namespace HPHP {
 VariableSerializer::VariableSerializer(Type type, int option /* = 0 */,
                                        int maxRecur /* = 3 */)
   : m_type(type), m_option(option), m_buf(NULL), m_indent(0),
-    m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur),
-    m_outputLimit(0) {
+    m_valueCount(0), m_referenced(false), m_refCount(1), m_maxCount(maxRecur) {
 }
 
 void VariableSerializer::setObjectInfo(const char *objClass, int objId) {
@@ -56,7 +55,7 @@ Variant VariableSerializer::serialize(CVarRef v, bool ret) {
   StringBuffer buf;
   m_buf = &buf;
   if (ret) {
-    m_outputLimit = RuntimeOption::SerializationSizeLimit;
+    buf.setOutputLimit(RuntimeOption::SerializationSizeLimit);
   }
   m_valueCount = 1;
   if (m_type == VarDump && v.isContagious()) m_buf->append('&');
@@ -97,7 +96,6 @@ void VariableSerializer::write(bool v) {
     ASSERT(false);
     break;
   }
-  checkOutputSize();
 }
 
 void VariableSerializer::write(int64 v) {
@@ -132,7 +130,6 @@ void VariableSerializer::write(int64 v) {
     ASSERT(false);
     break;
   }
-  checkOutputSize();
 }
 
 void VariableSerializer::write(double v) {
@@ -195,7 +192,6 @@ void VariableSerializer::write(double v) {
     ASSERT(false);
     break;
   }
-  checkOutputSize();
 }
 
 void VariableSerializer::write(const char *v, int len /* = -1 */,
@@ -265,7 +261,6 @@ void VariableSerializer::write(const char *v, int len /* = -1 */,
     ASSERT(false);
     break;
   }
-  checkOutputSize();
 }
 
 void VariableSerializer::write(CStrRef v) {
@@ -808,12 +803,6 @@ bool VariableSerializer::incNestedLevel(void *ptr,
 
 void VariableSerializer::decNestedLevel(void *ptr) {
   --m_counts[ptr];
-}
-
-void VariableSerializer::checkOutputSize() {
-  if (m_outputLimit > 0 && m_buf->length() > m_outputLimit) {
-    raise_error("Value too large for serialization");
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

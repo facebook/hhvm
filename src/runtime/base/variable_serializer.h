@@ -124,7 +124,6 @@ private:
 
   void writePropertyPrivacy(const char *prop, const ClassInfo *cls);
   void writeSerializedProperty(CStrRef prop, const ClassInfo *cls);
-  void checkOutputSize();
 };
 
 ///////////////////////////////////////////////////////////////////////////////

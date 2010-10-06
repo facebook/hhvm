@@ -901,6 +901,7 @@ void const_load_set(Variant key, Variant value) {
 void const_load() {
   // after all loading
   const_load_set("zend_array_size", const_data.size());
+  const_data.setStatic();
 }
 
 ///////////////////////////////////////////////////////////////////////////////

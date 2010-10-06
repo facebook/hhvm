@@ -626,9 +626,6 @@ static int execute_program_impl(int argc, char **argv) {
     Logger::Error("Possible bad config node: %s", badnodes[i].c_str());
   }
 
-  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
-                           RuntimeOption::LightProcessCount);
-
   RuntimeOption::BuildId = po.buildId;
   if (po.port != -1) {
     RuntimeOption::ServerPort = po.port;
@@ -651,6 +648,11 @@ static int execute_program_impl(int argc, char **argv) {
   if (po.mode == "d") po.mode = "debug";
   if (po.mode == "s") po.mode = "server";
   if (po.mode == "t") po.mode = "translate";
+
+  // Defer the initialization of light processes until the log file handle
+  // is created, so that light processes can log to the right place.
+  LightProcess::Initialize(RuntimeOption::LightProcessFilePrefix,
+                           RuntimeOption::LightProcessCount);
 
   MethodIndexHMap::initialize(false);
   if (argc <= 1 || po.mode == "run" || po.mode == "debug") {

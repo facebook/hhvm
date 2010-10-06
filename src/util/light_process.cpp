@@ -99,9 +99,9 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
   read_buf(fin, cwd);
   if (old_cwd != cwd) {
     if (chdir(cwd)) {
-      fprintf(fout, "error\n");
-      fflush(fout);
-      return;
+      // Ignore chdir failures, because the compiled version might not have the
+      // directory any more.
+      Logger::Warning("Light Process failed chdir to %s.", cwd);
     }
   }
 
@@ -112,7 +112,8 @@ static void do_popen(FILE *fin, FILE *fout, int afdt_fd) {
   }
 
   if (f == NULL) {
-    // no need to send the errno back, as the main process will try ::popen
+    Logger::Error("Light process failed popen: %d (%s).", errno,
+                  strerror(errno));
     fprintf(fout, "error\n");
     fflush(fout);
   } else {
@@ -444,7 +445,7 @@ FILE *LightProcess::HeavyPopenImpl(const char *cmd, const char *type,
     if (old_cwd != cwd) {
       Lock lock(s_mutex);
       if (chdir(cwd)) {
-        return NULL;
+        Logger::Warning("Failed to chdir to %s.", cwd);
       }
       FILE *f = ::popen(cmd, type);
       if (chdir(old_cwd.c_str())) {
@@ -474,11 +475,13 @@ FILE *LightProcess::LightPopenImpl(const char *cmd, const char *type,
   read_buf(g_procs[id].m_fin, buf);
   sscanf(buf, "%lld", &fptr);
   if (!fptr) {
+    Logger::Error("Light process failed to return the file pointer.");
     return NULL;
   }
 
   int fd = recv_fd(g_procs[id].m_afdt_fd);
   if (fd < 0) {
+    Logger::Error("Light process failed to send the file descriptor.");
     return NULL;
   }
   FILE *f = fdopen(fd, type);

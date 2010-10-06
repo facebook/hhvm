@@ -334,6 +334,7 @@ private:
 String f_shell_exec(CStrRef cmd) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(cmd);
+  if (!fp) return "";
   StringBuffer sbuf;
   sbuf.read(fp);
   return sbuf.detach();
@@ -370,6 +371,7 @@ String f_exec(CStrRef command, Variant output /* = null */,
 void f_passthru(CStrRef command, Variant return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
+  if (!fp) return;
 
   char buffer[1024];
   while (true) {
@@ -385,6 +387,7 @@ void f_passthru(CStrRef command, Variant return_var /* = null */) {
 String f_system(CStrRef command, Variant return_var /* = null */) {
   ShellExecContext ctx;
   FILE *fp = ctx.exec(command);
+  if (!fp) return "";
   StringBuffer sbuf;
   if (fp) {
     sbuf.read(fp);

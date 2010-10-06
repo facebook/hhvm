@@ -147,12 +147,6 @@ void FunctionStatement::outputCPPImpl(CodeGenerator &cg,
   if (context == CodeGenerator::NoContext) {
     string rname = cg.formatLabel(m_name);
     if (funcScope->isRedeclaring()) {
-      cg_printf("g->%s%s = %s%s;\n",
-                Option::InvokePrefix, rname.c_str(),
-                Option::InvokePrefix, fname.c_str());
-      cg_printf("g->%s%s = %s%s;\n",
-                Option::InvokeFewArgsPrefix, rname.c_str(),
-                Option::InvokeFewArgsPrefix, fname.c_str());
       cg.printf("g->%s%s = &%s%s;\n", Option::CallInfoPrefix, m_name.c_str(),
           Option::CallInfoPrefix, fname.c_str());
     }

@@ -149,17 +149,7 @@ void FunctionContainer::outputCPPJumpTableSupport
         true);
     cg_indentEnd("}\n");
 
-    if (func->isRedeclaring()) {
-      hasRedeclared = true;
-      if (func->getRedeclaringId() == 0) {
-        cg_indentBegin("Variant %s%s(void *extra, CArrRef params) {\n",
-            Option::InvokePrefix, func->getOriginalName().c_str());
-        cg_printf("DECLARE_GLOBAL_VARIABLES(g);\n");
-        cg_printf("return g->%s%s(extra, params);\n",
-            Option::InvokePrefix, func->getName().c_str());
-        cg_indentEnd("}\n");
-      }
-    }
+    if (func->isRedeclaring()) hasRedeclared = true;
   }
 }
 

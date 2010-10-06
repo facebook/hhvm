@@ -2431,16 +2431,7 @@ void AnalysisResult::outputCPPRedeclaredFunctionDecl(CodeGenerator &cg,
       std::string fname = cg.formatLabel(iter->first);
       const char *name = fname.c_str();
       if (!constructor && iter->second[0]->isRedeclaring()) {
-        cg_printf("Variant (*%s%s)(void *extra, CArrRef params);\n",
-            Option::InvokePrefix, name);
-        cg_printf("Variant (*%s%s)(void *extra, int count",
-            Option::InvokeFewArgsPrefix, name);
-        for (int i = 0; i < Option::InvokeFewArgsCount; i++) {
-          cg_printf(", CVarRef a%d", i);
-        }
-        cg_printf(");\n");
-        cg_printf("CallInfo *%s%s;\n",
-            Option::CallInfoPrefix, name);
+        cg_printf("CallInfo *%s%s;\n", Option::CallInfoPrefix, name);
       }
       if (strcmp(name, "__autoload")) {
         cg_printf(fmt, FVF_PREFIX, name);
@@ -2455,8 +2446,6 @@ void AnalysisResult::outputCPPRedeclaredFunctionImpl(CodeGenerator &cg) {
     if (iter->second[0]->isRedeclaring()) {
       std::string fname = cg.formatLabel(iter->first);
       const char *name = fname.c_str();
-      cg_printf("%s%s = invoke_failed_%s;\n", Option::InvokePrefix,
-                name, name);
       cg_printf("%s%s = NULL;\n", Option::CallInfoPrefix, name);
     }
   }
@@ -2761,14 +2750,6 @@ void AnalysisResult::outputCPPGlobalDeclarations() {
     cg_printf("RVariableTable *get_variable_table();\n");
   }
 
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
-         m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    const char *name = iter->first.c_str();
-    if (iter->second[0]->isRedeclaring()) {
-      cg_printf("extern Variant invoke_failed_%s(void *extra, "
-          "CArrRef params);\n", name);
-    }
-  }
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
     if (!iter->second.size() || iter->second[0]->isRedeclaring()) {
@@ -2788,18 +2769,6 @@ void AnalysisResult::outputCPPGlobalImplementations(CodeGenerator &cg) {
   getVariables()->setAttribute(VariableTable::ForceGlobal);
   getVariables()->outputCPP(cg, ar);
   getVariables()->clearAttribute(VariableTable::ForceGlobal);
-
-  // Function pointers for redeclared funcs
-  for (StringToFunctionScopePtrVecMap::const_iterator iter =
-         m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
-    if (iter->second[0]->isRedeclaring()) {
-      const char *name = iter->first.c_str();
-      cg_indentBegin("Variant invoke_failed_%s(void *extra, "
-          "CArrRef params) {\n", name);
-      cg_printf("return invoke_failed(\"%s\", params, -1);\n", name);
-      cg_indentEnd("}\n");
-    }
-  }
 
   for (StringToClassScopePtrVecMap::const_iterator iter =
          m_classDecs.begin(); iter != m_classDecs.end(); ++iter) {
@@ -3124,7 +3093,7 @@ void AnalysisResult::collectCPPGlobalSymbols(StringPairVecVec &symbols,
          m_functionDecs.begin(); iter != m_functionDecs.end(); ++iter) {
     const char *name = iter->first.c_str();
     if (iter->second[0]->isRedeclaring()) {
-      string varname = string(Option::InvokePrefix) + name;
+      string varname = string(Option::CallInfoPrefix) + name;
       names->push_back(pair<string, string>(varname, varname));
     }
   }

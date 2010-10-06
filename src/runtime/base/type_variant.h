@@ -543,7 +543,6 @@ class Variant {
   Variant rvalAt(CStrRef offset, bool error = false,
       bool isString = false) const;
   Variant rvalAt(CVarRef offset, bool error = false) const;
-
   const Variant operator[](bool    key) const { return rvalAt(key);}
   const Variant operator[](char    key) const { return rvalAt(key);}
   const Variant operator[](short   key) const { return rvalAt(key);}
@@ -551,8 +550,11 @@ class Variant {
   const Variant operator[](int64   key) const { return rvalAt(key);}
   const Variant operator[](double  key) const { return rvalAt(key);}
   const Variant operator[](litstr  key) const { return rvalAt(key);}
-  const Variant operator[](const StringData *key) const { assert(false);}
   const Variant operator[](CStrRef key) const { return rvalAt(key);}
+  const Variant operator[](StringData *key) const {
+    assert(false);
+    return rvalAt(String(key));
+  }
   const Variant operator[](CArrRef key) const { return rvalAt(key);}
   const Variant operator[](CObjRef key) const { return rvalAt(key);}
   const Variant operator[](CVarRef key) const { return rvalAt(key);}
@@ -1175,7 +1177,6 @@ inline const Variant Array::operator[](litstr  key) const {
 }
 
 inline const Variant Array::operator[](const StringData *key) const {
-  assert(false);
   return rvalAt(key);
 }
 

@@ -234,7 +234,10 @@ public:
   String rvalAt(int64   key) const { return rvalAtImpl(key);}
   String rvalAt(double  key) const { return rvalAtImpl((int64)key);}
   String rvalAt(litstr  key) const { return rvalAtImpl(String(key).toInt32());}
-  String rvalAt(const StringData *key) const { assert(false);}
+  String rvalAt(const StringData *key) const {
+    assert(false);
+    return rvalAtImpl(key ? key->toInt32() : 0);
+  }
   String rvalAt(CStrRef key) const { return rvalAtImpl(key.toInt32());}
   String rvalAt(CArrRef key) const;
   String rvalAt(CObjRef key) const;
@@ -247,7 +250,10 @@ public:
   StringOffset lvalAt(int64   key) { return lvalAtImpl(key);}
   StringOffset lvalAt(double  key) { return lvalAtImpl((int64)key);}
   StringOffset lvalAt(litstr  key) { return lvalAtImpl(String(key).toInt32());}
-  StringOffset lvalAt(const StringData *key) { assert(false);}
+  StringOffset lvalAt(const StringData *key) {
+    assert(false);
+    return lvalAtImpl(key ? key->toInt32() : 0);
+  }
   StringOffset lvalAt(CStrRef key) { return lvalAtImpl(key.toInt32());}
   StringOffset lvalAt(CArrRef key);
   StringOffset lvalAt(CObjRef key);

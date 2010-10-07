@@ -405,6 +405,7 @@ Variant FunctionStatement::Invoker(void *extra, CArrRef params) {
 }
 Variant FunctionStatement::InvokerFewArgs(void*, int count,
     INVOKE_FEW_ARGS_IMPL_ARGS) {
+  ASSERT(false);
   return Variant();
 }
 

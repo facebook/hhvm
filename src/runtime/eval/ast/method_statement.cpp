@@ -234,6 +234,7 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
 }
 Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
     int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  ASSERT(false);
   return Variant();
 }
 

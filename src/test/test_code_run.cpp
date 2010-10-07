@@ -2908,6 +2908,10 @@ bool TestCodeRun::TestArrayAssignment() {
 }
 
 bool TestCodeRun::TestArrayFunctions() {
+  MVCR("<?php "
+       "class A implements Countable { public function count() { return 1;}} "
+       "$obj = new A(); var_dump(count($obj));");
+
   MVCR("<?php\n"
        "$a = array(\n"
        "  array('a' => 'a'),\n"

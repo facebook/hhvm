@@ -331,7 +331,8 @@ void throw_request_timeout_exception() {
     // right before a new requets resets "started". In this case, we flag
     // "timedout" back to "false".
     if (time(0) - data.started >= data.timeoutSeconds) {
-      throw FatalErrorException("request has timed-out");
+      throw FatalErrorException(0, "entire web request took longer than %d "
+                                "seconds and timed out", data.timeoutSeconds);
     }
   }
 }

@@ -225,6 +225,11 @@ public:
   static int StatsMaxSlot;
 
   static bool EnableAPCSizeStats;
+  static bool EnableAPCSizeGroup;
+  static std::vector<std::string> APCSizeSpecialPrefix;
+  static std::vector<std::string> APCSizePrefixReplace;
+  static std::vector<std::string> APCSizeSpecialMiddle;
+  static std::vector<std::string> APCSizeMiddleReplace;
   static bool EnableAPCSizeDetail;
   static bool EnableAPCFetchStats;
   static bool APCSizeCountPrime;

@@ -43,50 +43,6 @@ static void writeEntryInt(ostream& out, const char *name, int64 value,
 //////////////////////////////////////////////////////////////////////////////
 // Helpers to aggregate keys
 
-static const char *prefix[] = {
-  "srhash:/",
-  "haste:",
-  "sv:/",
-  "m:wurfl:cp:",
-  "m:wurfl:ua:",
-  "gk.projects:",
-  "iso:",
-  "icss:",
-  "rsrc:",
-  "smc:3:f:",
-  "smc:3:t:",
-  "smc:3:pv:",
-  "smc:3:v:",
-};
-
-static const char *prefix_replace[] = {
-  "srhash:/{A}",
-  "haste:{A}",
-  "sv:/{A}",
-  "m:wurfl:cp:{A}",
-  "m:wurfl:ua:{A}",
-  "gk.projects:{A}",
-  "iso:{A}",
-  "icss:{A}",
-  "rsrc:{A}",
-  "smc:3:f:{A}",
-  "smc:3:t:{A}",
-  "smc:3:pv:{A}",
-  "smc:3:v:{A}",
-};
-static const int prefix_count = 13;
-
-static const char *mid[] = {
-  ":haste:",
-  ":sv:/"
-};
-static const char *mid_replace[] = {
-  "{A}:haste:{A}",
-  "{A}:sv:/{A}"
-};
-static const int mid_count = 2;
-
-
 static bool regex_match(const pcre *pattern, const char *subject) {
   int ovector[3];
   return pcre_exec(pattern, NULL, subject, strlen(subject), 0, 0, ovector,
@@ -142,15 +98,21 @@ static void normalizeKey(const char *key, char *normalizedKey, size_t outlen) {
   // normalizedKey, with no longer than outlen, may not null terminated
   // if outlen is too small
 
-  for (int i = 0; i < prefix_count; i++) {
-    if (strncmp(key, prefix[i], strlen(prefix[i])) == 0) {
-      strncpy(normalizedKey, prefix_replace[i], outlen);
+  vector<std::string> &specialPrefix = RuntimeOption::APCSizeSpecialPrefix;
+  vector<std::string> &prefixReplace = RuntimeOption::APCSizePrefixReplace;
+  for (unsigned int i = 0; i < specialPrefix.size(); i++) {
+    const char *prefix = specialPrefix[i].c_str();
+    if (strncmp(key, prefix, specialPrefix[i].length()) == 0) {
+      strncpy(normalizedKey, prefixReplace[i].c_str(), outlen);
       return;
     }
   }
-  for (int i = 0; i < mid_count; i++) {
-    if (strstr(key, mid[i]) != NULL) {
-      strncpy(normalizedKey, mid_replace[i], outlen);
+  vector<std::string> &specialMiddle = RuntimeOption::APCSizeSpecialMiddle;
+  vector<std::string> &middleReplace = RuntimeOption::APCSizeMiddleReplace;
+  for (unsigned int i = 0; i < specialMiddle.size(); i++) {
+    const char *middle = specialMiddle[i].c_str();
+    if (strstr(key, middle) != NULL) {
+      strncpy(normalizedKey, middleReplace[i].c_str(), outlen);
       return;
     }
   }
@@ -409,14 +371,21 @@ void SharedStoreStats::onClear() {
 void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
                                 bool replace) {
   char normalizedKey[MAX_KEY_LEN + 1];
-  normalizeKey(key->data(), normalizedKey, MAX_KEY_LEN);
-  normalizedKey[MAX_KEY_LEN] = '\0';
 
-  SharedValueProfile svpLocal;
-  SharedValueProfile *svp = &svpLocal;
+  if (RuntimeOption::EnableAPCSizeGroup) {
+    normalizeKey(key->data(), normalizedKey, MAX_KEY_LEN);
+    normalizedKey[MAX_KEY_LEN] = '\0';
+  }
+
+  SharedValueProfile svpTemp;
+  // Calculate size of the variant
+  svpTemp.calcInd(key, var);
 
   lock();
+  remove(&svpTemp, replace);
+
   if (RuntimeOption::EnableAPCSizeDetail) {
+    SharedValueProfile *svp;
     StatsMap::iterator iter = s_detailMap.find((char*)key->data());
     if (iter != s_detailMap.end()) {
       svp = iter->second;
@@ -431,20 +400,15 @@ void SharedStoreStats::onDelete(StringData *key, SharedVariant *var,
     }
   }
 
-  StatsMap::iterator iter = s_statsMap.find(normalizedKey);
-  if (iter != s_statsMap.end()) {
-    SharedValueProfile *group = iter->second;
-    if (svp == &svpLocal) { // no detail remembered, calc again
-      svp->calcInd(key, var);
+  if (RuntimeOption::EnableAPCSizeGroup) {
+    StatsMap::iterator iter = s_statsMap.find(normalizedKey);
+    if (iter != s_statsMap.end()) {
+      SharedValueProfile *group = iter->second;
+      group->removeFromGroup(&svpTemp);
+    } else {
+      ASSERT(false);
     }
-    group->removeFromGroup(svp);
-  } else {
-    ASSERT(false);
   }
-
-  // svp is either pulled or calculated, remove from global here
-  remove(svp, replace);
-
   unlock();
 }
 
@@ -464,33 +428,39 @@ void SharedStoreStats::onGet(StringData *key, SharedVariant *var) {
 void SharedStoreStats::onStore(StringData *key, SharedVariant *var,
                                int64 ttl, bool prime) {
   char normalizedKey[MAX_KEY_LEN + 1];
-  normalizeKey(key->data(), normalizedKey, MAX_KEY_LEN);
-  normalizedKey[MAX_KEY_LEN] = '\0';
 
-  SharedValueProfile *group;
   SharedValueProfile *svpInd;
 
   svpInd = new SharedValueProfile(key->data());
   svpInd->calcInd(key, var);
   svpInd->ttl = ttl > 0 && ttl < 48*3600 ? ttl : 48*3600;
 
+  if (RuntimeOption::EnableAPCSizeGroup) {
+    // Here so that it is out of critical section
+    normalizeKey(key->data(), normalizedKey, MAX_KEY_LEN);
+    normalizedKey[MAX_KEY_LEN] = '\0';
+  }
+
   lock();
 
   add(svpInd);
 
-  StatsMap::iterator iter = s_statsMap.find(normalizedKey);
-  if (iter == s_statsMap.end()) {
-    group = new SharedValueProfile(normalizedKey);
-    group->isGroup = true;
-    group->keyCount = 0;
-    s_statsMap[group->key] = group;
-  } else {
-    group = iter->second;
+  if (RuntimeOption::EnableAPCSizeGroup) {
+    SharedValueProfile *group;
+    StatsMap::iterator iter = s_statsMap.find(normalizedKey);
+    if (iter == s_statsMap.end()) {
+      group = new SharedValueProfile(normalizedKey);
+      group->isGroup = true;
+      group->keyCount = 0;
+      s_statsMap[group->key] = group;
+    } else {
+      group = iter->second;
+    }
+    group->addToGroup(svpInd);
   }
-  group->addToGroup(svpInd);
 
   if (RuntimeOption::EnableAPCSizeDetail) {
-    iter = s_detailMap.find(svpInd->key);
+    StatsMap::iterator iter = s_detailMap.find(svpInd->key);
     if (iter == s_detailMap.end()) {
       s_detailMap[svpInd->key] = svpInd;
     } else {

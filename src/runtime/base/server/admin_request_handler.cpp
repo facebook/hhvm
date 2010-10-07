@@ -723,6 +723,10 @@ bool AdminRequestHandler::handleAPCSizeRequest (const std::string &cmd,
     return true;
   }
   if (cmd == "apc-ss-keys") {
+    if (!RuntimeOption::EnableAPCSizeGroup) {
+      transport->sendString("Not Enabled\n");
+      return true;
+    }
     std::string result = SharedStoreStats::report_keys();
     transport->sendString(result);
     return true;

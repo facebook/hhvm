@@ -229,6 +229,11 @@ int RuntimeOption::StatsSlotDuration = 10 * 60; // 10 minutes
 int RuntimeOption::StatsMaxSlot = 12 * 6; // 12 hours
 
 bool RuntimeOption::EnableAPCSizeStats = false;
+bool RuntimeOption::EnableAPCSizeGroup = false;
+std::vector<std::string> RuntimeOption::APCSizeSpecialPrefix;
+std::vector<std::string> RuntimeOption::APCSizePrefixReplace;
+std::vector<std::string> RuntimeOption::APCSizeSpecialMiddle;
+std::vector<std::string> RuntimeOption::APCSizeMiddleReplace;
 bool RuntimeOption::EnableAPCSizeDetail = false;
 bool RuntimeOption::EnableAPCFetchStats = false;
 bool RuntimeOption::APCSizeCountPrime = false;
@@ -864,9 +869,29 @@ void RuntimeOption::Load(Hdf &config) {
     StatsSlotDuration = stats["SlotDuration"].getInt32(10 * 60); // 10 minutes
     StatsMaxSlot = stats["MaxSlot"].getInt32(12 * 6); // 12 hours
 
+    {
+      Hdf apcSize = stats["APCSize"];
+      EnableAPCSizeStats = apcSize["Enable"].getBool();
+      EnableAPCSizeGroup = apcSize["Group"].getBool();
+      apcSize["SpecialPrefix"].get(APCSizeSpecialPrefix);
+      for (unsigned int i = 0; i < APCSizeSpecialPrefix.size(); i++) {
+        string &prefix = APCSizeSpecialPrefix[i];
+        string prefixReplace = prefix + "{A}";
+        APCSizePrefixReplace.push_back(prefixReplace);
+      }
+      apcSize["SpecialMiddle"].get(APCSizeSpecialMiddle);
+      for (unsigned int i = 0; i < APCSizeSpecialMiddle.size(); i++) {
+        string &middle = APCSizeSpecialMiddle[i];
+        string middleReplace = "{A}" + middle + "{A}";
+        APCSizeMiddleReplace.push_back(middleReplace);
+      }
+      EnableAPCSizeDetail = apcSize["Individual"].getBool();
+      EnableAPCFetchStats = apcSize["FetchStats"].getBool();
+      APCSizeCountPrime = apcSize["CountPrime"].getBool();
+    }
+    // Following two lines are added for compatibility, will be removed
+    // when new config format is pushed.
     EnableAPCSizeStats = stats["EnableAPCSizeStats"].getBool();
-    EnableAPCSizeDetail = stats["EnableAPCSizeDetail"].getBool();
-    EnableAPCFetchStats = stats["EnableAPCFetchStats"].getBool();
     APCSizeCountPrime = stats["APCSizeCountPrime"].getBool();
   }
   {

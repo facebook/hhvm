@@ -33,6 +33,9 @@ RUNTIME_DIRS = \
 	$(HPHP_HOME)/src/util
 ADDITIONAL_OBJS += $(shell find $(RUNTIME_DIRS) -name "*.o")
 TARGETS = $(STATIC_LIB) $(SHARED_LIB)
+ifndef HPHP_BUILD_FFI
+EXTERNAL += $(HPHP_LIB)/libhphp_runtime.so
+endif
 else
 TARGETS = $(APP_TARGET)
 endif

@@ -75,7 +75,7 @@ static inline HphpArray::Elm* data2Elms(void* data) {
   HphpArray::Elm* elms = (HphpArray::Elm*)((uintptr_t(data)
                                            + HphpArray::ElmAlignmentMask)
                                            & ~HphpArray::ElmAlignmentMask);
-  ASSERT((uintptr_t(elms) & (__BIGGEST_ALIGNMENT__-1)) == 0);
+  ASSERT((uintptr_t(elms) & HphpArray::ElmAlignmentMask) == 0);
   return elms;
 }
 
@@ -84,7 +84,7 @@ static inline HphpArray::ElmInd* elms2Hash(HphpArray::Elm* elms,
   HphpArray::ElmInd* hash = (HphpArray::ElmInd*)(uintptr_t(elms)
                                                  + (maxElms
                                                     * sizeof(HphpArray::Elm)));
-  ASSERT((uintptr_t(hash) & (__BIGGEST_ALIGNMENT__-1)) == 0);
+  ASSERT((uintptr_t(hash) & HphpArray::ElmAlignmentMask) == 0);
   return hash;
 }
 
@@ -93,7 +93,7 @@ static inline HphpArray::Elm* hash2Elms(HphpArray::ElmInd* hash,
   HphpArray::Elm* elms = (HphpArray::Elm*)(uintptr_t(hash)
                                            - (maxElms
                                               * sizeof(HphpArray::Elm)));
-  ASSERT((uintptr_t(elms) & (__BIGGEST_ALIGNMENT__-1)) == 0);
+  ASSERT((uintptr_t(elms) & HphpArray::ElmAlignmentMask) == 0);
   return elms;
 }
 
@@ -119,7 +119,7 @@ HphpArray::HphpArray(uint nSize /* = 0 */)
   size_t maxElms = computeMaxElms(m_lgTableSize);
   size_t tableSize = computeTableSize(m_lgTableSize);
   reallocData(maxElms, tableSize);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   m_hash = elms2Hash(elms, maxElms);
   initHash(m_hash, tableSize);
   m_pos = ArrayData::invalid_index;
@@ -130,7 +130,7 @@ HphpArray::HphpArray(int,int) {
 }
 
 HphpArray::~HphpArray() {
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
     Elm* e = &elms[pos];
     if (e->data.m_type != KindOfTombstone) {
@@ -154,7 +154,7 @@ HphpArray::~HphpArray() {
 void HphpArray::dumpDebugInfo() const {
   size_t maxElms = computeMaxElms(m_lgTableSize);
   size_t tableSize = computeTableSize(m_lgTableSize);
-  ElmAlignedPtr elms = hash2Elms(m_hash, maxElms);
+  Elm* elms = hash2Elms(m_hash, maxElms);
 
   fprintf(stderr,
           "--- dumpDebugInfo(this=0x%08zx) ----------------------------\n",
@@ -218,12 +218,12 @@ inline HphpArray::ElmInd HphpArray::nextElm(Elm* elms, ElmInd ei) const {
 }
 
 ssize_t HphpArray::iter_begin() const {
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   return ssize_t(nextElm(elms, ElmIndEmpty));
 }
 
 ssize_t HphpArray::iter_end() const {
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   for (ElmInd pos = m_lastE; pos >= 0; --pos) {
     if (elms[pos].data.m_type != KindOfTombstone) {
       return ssize_t(pos);
@@ -236,7 +236,7 @@ ssize_t HphpArray::iter_advance(ssize_t pos) const {
   if (pos == ArrayData::invalid_index) {
     return ArrayData::invalid_index;
   }
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   return ssize_t(nextElm(elms, (ElmInd)pos));
 }
 
@@ -246,7 +246,7 @@ ssize_t HphpArray::iter_rewind(ssize_t pos) const {
   }
   ElmInd ipos = pos;
   ASSERT(ssize_t(ipos) == pos);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   for (--ipos; ipos >= 0; --ipos) {
     if (elms[ipos].data.m_type != KindOfTombstone) {
       return ssize_t(ipos);
@@ -257,7 +257,7 @@ ssize_t HphpArray::iter_rewind(ssize_t pos) const {
 
 Variant HphpArray::getKey(ssize_t pos) const {
   ASSERT(pos != ArrayData::invalid_index);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   Elm* e = &elms[(ElmInd)pos];
   ASSERT(e->data.m_type != KindOfTombstone);
   if (e->key != NULL) {
@@ -268,21 +268,21 @@ Variant HphpArray::getKey(ssize_t pos) const {
 
 Variant HphpArray::getValue(ssize_t pos) const {
   ASSERT(pos != ArrayData::invalid_index);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   Elm* e = &elms[(ElmInd)pos];
   return *(const Variant*)&(e->data);
 }
 
 void HphpArray::fetchValue(ssize_t pos, Variant& v) const {
   ASSERT(pos != ArrayData::invalid_index);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   Elm* e = &elms[(ElmInd)pos];
   v = tvAsCVarRef(&e->data);
 }
 
 CVarRef HphpArray::getValueRef(ssize_t pos) const {
   ASSERT(pos != ArrayData::invalid_index);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   Elm* e = &elms[(ElmInd)pos];
   return tvAsCVarRef(&e->data);
 }
@@ -291,7 +291,7 @@ bool HphpArray::isVectorData() const {
   if (m_nElms == 0) {
     return true;
   }
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   int64 i = 0;
   for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
     Elm* e = &elms[pos];
@@ -308,7 +308,7 @@ bool HphpArray::isVectorData() const {
 
 Variant HphpArray::reset() {
   if (m_nElms > 0) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     m_pos = ssize_t(nextElm(elms, ElmIndEmpty));
     ASSERT(m_pos != ArrayData::invalid_index);
     Elm* e = &elms[(ElmInd)m_pos];
@@ -321,7 +321,7 @@ Variant HphpArray::reset() {
 Variant HphpArray::prev() {
   if (m_pos != ArrayData::invalid_index) {
     ASSERT(m_nElms > 0);
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
 
     --m_pos;
     while (m_pos >= 0) {
@@ -339,7 +339,7 @@ Variant HphpArray::prev() {
 Variant HphpArray::next() {
   if (m_pos != ArrayData::invalid_index) {
     ASSERT(m_nElms > 0);
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     m_pos = ssize_t(nextElm(elms, (ElmInd)m_pos));
     if (m_pos != ArrayData::invalid_index) {
       Elm* e = &elms[(ElmInd)m_pos];
@@ -351,7 +351,7 @@ Variant HphpArray::next() {
 
 Variant HphpArray::end() {
   if (m_lastE != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     ASSERT(elms[m_lastE].data.m_type != KindOfTombstone);
     m_pos = ssize_t(m_lastE);
     return tvAsCVarRef(&elms[(ElmInd)m_pos].data);
@@ -363,7 +363,7 @@ Variant HphpArray::end() {
 Variant HphpArray::key() const {
   if (m_pos != ArrayData::invalid_index) {
     ASSERT((ElmInd)m_pos <= m_lastE);
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[(ElmInd)m_pos];
     ASSERT(e->data.m_type != KindOfTombstone);
     if (e->key) {
@@ -376,7 +376,7 @@ Variant HphpArray::key() const {
 
 Variant HphpArray::value(ssize_t& pos) const {
   if (pos != ArrayData::invalid_index) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[(ElmInd)pos];
     ASSERT(e->data.m_type != KindOfTombstone);
     return tvAsCVarRef(&e->data);
@@ -386,7 +386,7 @@ Variant HphpArray::value(ssize_t& pos) const {
 
 Variant HphpArray::current() const {
   if (m_pos != ArrayData::invalid_index) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[(ElmInd)m_pos];
     ASSERT(e->data.m_type != KindOfTombstone);
     return tvAsCVarRef(&e->data);
@@ -406,7 +406,7 @@ Variant HphpArray::each() {
     init.set(s_value, value, true);
     init.set(int64(0), key);
     init.set(s_key, key, true);
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     m_pos = ssize_t(nextElm(elms, (ElmInd)m_pos));
     return Array(init.create());
   }
@@ -447,7 +447,7 @@ static inline size_t qProbe(size_t k, size_t i, size_t tableMask) {
   size_t maxElms = computeMaxElms(m_lgTableSize);                             \
   size_t tableMask = computeTableMask(m_lgTableSize);                         \
   size_t h = size_t(h0) & tableMask;                                          \
-  ElmAlignedPtr elms = hash2Elms(m_hash, maxElms);                            \
+  Elm* elms = hash2Elms(m_hash, maxElms);                                     \
   /* Primary probe (unrolled to avoid multiplication for (i == 0)). */        \
   ElmInd pos = m_hash[h];                                                     \
   if (validElmInd(pos)) {                                                     \
@@ -488,7 +488,7 @@ HphpArray::ElmInd HphpArray::find(const char* k, int len, int64 prehash) const {
   size_t maxElms = computeMaxElms(m_lgTableSize);                             \
   size_t tableMask = computeTableMask(m_lgTableSize);                         \
   size_t h = size_t(h0) & tableMask;                                          \
-  ElmAlignedPtr elms = hash2Elms(m_hash, maxElms);                            \
+  Elm* elms = hash2Elms(m_hash, maxElms);                                     \
   /* Primary probe (unrolled to avoid multiplication for (i == 0)). */        \
   ElmInd* ei = &m_hash[h];                                                    \
   ElmInd pos = *ei;                                                           \
@@ -573,7 +573,7 @@ bool HphpArray::idxExists(ssize_t idx) const {
 Variant HphpArray::get(int64 k, bool error /* = false */) const {
   ElmInd pos = find(k);
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     return tvAsCVarRef(&e->data);
   }
@@ -587,7 +587,7 @@ Variant HphpArray::get(litstr k, bool error /* = false */) const {
   int len = strlen(k);
   ElmInd pos = find(k, len, hash_string(k, len));
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     return tvAsCVarRef(&e->data);
   }
@@ -602,7 +602,7 @@ Variant HphpArray::get(CStrRef k, bool error /* = false */) const {
   int64 prehash = key->hash();
   ElmInd pos = find(key->data(), key->size(), prehash);
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     return tvAsCVarRef(&e->data);
   }
@@ -623,7 +623,7 @@ Variant HphpArray::get(CVarRef k, bool error /* = false */) const {
     pos = find(strkey->data(), strkey->size(), prehash);
   }
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     return tvAsCVarRef(&e->data);
   }
@@ -638,7 +638,7 @@ Variant HphpArray::fetch(CStrRef k) const {
   int64 prehash = key->hash();
   ElmInd pos = find(key->data(), key->size(), prehash);
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     return tvAsCVarRef(&e->data);
   }
@@ -656,7 +656,7 @@ void HphpArray::load(CVarRef k, Variant& v) const {
     pos = find(strkey->data(), strkey->size(), prehash);
   }
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     if (tvAsCVarRef(&e->data).isReferenced()) {
       v = ref(tvAsCVarRef(&e->data));
@@ -712,7 +712,7 @@ HphpArray::Elm* HphpArray::allocElm(ElmInd* ei) {
 #endif
   ++m_lastE;
   (*ei) = m_lastE;
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   Elm* e = &elms[m_lastE];
   if (m_pos == ArrayData::invalid_index) {
     m_pos = ssize_t(m_lastE);
@@ -750,7 +750,6 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize) {
   // reallocate if alignment was inadquate.  However, this would not save very
   // much memory in practice, and recovering from the OOM failure case for the
   // reallocation would be messy to handle correctly.
-  ASSERT(ElmAlignment >= __BIGGEST_ALIGNMENT__);
   void* data = realloc(m_linear ? NULL : m_data,
                        (maxElms * sizeof(Elm))
                        + (tableSize * sizeof(ElmInd))
@@ -764,13 +763,13 @@ void HphpArray::reallocData(size_t maxElms, size_t tableSize) {
     if (pad != oldPad) {
       // The alignment padding changed due to realloc(), so move the element
       // array to its proper offset.
-      ElmAlignedPtr misalignedElms = (Elm*)(uintptr_t(data) + oldPad);
-      ElmAlignedPtr elms = data2Elms(data);
+      Elm* misalignedElms = (Elm*)(uintptr_t(data) + oldPad);
+      Elm* elms = data2Elms(data);
       memmove((void*)elms, (void*)misalignedElms, (m_lastE+1) * sizeof(Elm));
     }
   } else {
-    ElmAlignedPtr oldElms = data2Elms(m_data);
-    ElmAlignedPtr elms = data2Elms(data);
+    Elm* oldElms = data2Elms(m_data);
+    Elm* elms = data2Elms(data);
     memcpy((void*)elms, (void*)oldElms, (m_lastE+1) * sizeof(Elm));
     m_linear = false;
   }
@@ -781,7 +780,7 @@ void HphpArray::delinearize() {
   size_t maxElms = computeMaxElms(m_lgTableSize);
   size_t tableSize = computeTableSize(m_lgTableSize);
   reallocData(maxElms, tableSize);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   ElmInd* oldHash = m_hash;
   m_hash = elms2Hash(elms, maxElms);
   memcpy((void*)m_hash, (void*)oldHash, tableSize * sizeof(ElmInd));
@@ -812,7 +811,7 @@ void HphpArray::grow() {
   size_t maxElms = computeMaxElms(m_lgTableSize);
   size_t tableSize = computeTableSize(m_lgTableSize);
   reallocData(maxElms, tableSize);
-  ElmAlignedPtr elms = data2Elms(m_data); // m_hash is currently invalid.
+  Elm* elms = data2Elms(m_data); // m_hash is currently invalid.
   m_hash = elms2Hash(elms, maxElms);
 
   // All the elements have been copied and their offsets from the base are
@@ -828,7 +827,7 @@ void HphpArray::grow() {
 
   if (m_nElms > 0) {
     size_t tableMask = computeTableMask(m_lgTableSize);
-    ElmAlignedPtr elms = hash2Elms(m_hash, maxElms);
+    Elm* elms = hash2Elms(m_hash, maxElms);
     for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
       Elm* e = &elms[pos];
       if (e->data.m_type == KindOfTombstone) {
@@ -861,7 +860,7 @@ void HphpArray::compact(bool renumber /* = false */) {
     // Cache key for element associated with m_pos in order to update m_pos
     // below.
     ASSERT(m_pos <= ssize_t(m_lastE));
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     mPos.h = elms[(ElmInd)m_pos].h;
     mPos.key = elms[(ElmInd)m_pos].key;
   } else {
@@ -872,7 +871,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   int nsi = m_strongIterators.size();
   ElmKey* siKeys = NULL;
   if (nsi > 0) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     siKeys = (ElmKey*)malloc(nsi * sizeof(ElmKey));
     for (int i = 0; i < nsi; ++i) {
       ElmInd ei = (ElmInd)m_strongIterators[i]->primary;
@@ -886,7 +885,7 @@ void HphpArray::compact(bool renumber /* = false */) {
   }
   size_t maxElms = computeMaxElms(m_lgTableSize);
   size_t tableSize = computeTableSize(m_lgTableSize);
-  ElmAlignedPtr elms = hash2Elms(m_hash, maxElms);
+  Elm* elms = hash2Elms(m_hash, maxElms);
   initHash(m_hash, tableSize);
 #ifdef DEBUG
   // Wait to set m_hLoad to m_nElms until after rebuilding is complete, in
@@ -982,7 +981,7 @@ bool HphpArray::addLvalImpl(int64 ki, Variant** pDest,
   resize();
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
     *pDest = (Variant*)&(e->data);
     return false;
@@ -1013,7 +1012,7 @@ bool HphpArray::addLvalImpl(StringData* key, int64 h, Variant** pDest,
   resize();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
   if (validElmInd(*ei)) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
     *pDest = &(tvAsVariant(&e->data));
     return false;
@@ -1099,7 +1098,7 @@ bool HphpArray::update(int64 ki, CVarRef data) {
   resize();
   ElmInd* ei = findForInsert(ki);
   if (validElmInd(*ei)) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
     tvAsVariant(&e->data) = data;
     return true;
@@ -1131,7 +1130,7 @@ bool HphpArray::update(litstr key, CVarRef data) {
   int64 h = hash_string(key, len);
   ElmInd* ei = findForInsert(key, len, h);
   if (validElmInd(*ei)) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
     tvAsVariant(&e->data) = data;
     return true;
@@ -1159,7 +1158,7 @@ bool HphpArray::update(StringData* key, CVarRef data) {
   int64 h = key->hash();
   ElmInd* ei = findForInsert(key->data(), key->size(), h);
   if (validElmInd(*ei)) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[*ei];
     tvAsVariant(&e->data) = data;
     return true;
@@ -1183,12 +1182,12 @@ ArrayData* HphpArray::lval(Variant*& ret, bool copy) {
   if (copy) {
     HphpArray* a = copyImpl();
     ASSERT(a->m_lastE != ElmIndEmpty);
-    ElmAlignedPtr aElms = data2Elms(a->m_data);
+    Elm* aElms = data2Elms(a->m_data);
     ret = &tvAsVariant(&aElms[m_lastE].data);
     return a;
   }
   ASSERT(m_lastE != ElmIndEmpty);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   ret = &(tvAsVariant(&elms[m_lastE].data));
   return NULL;
 }
@@ -1206,7 +1205,7 @@ ArrayData* HphpArray::lval(int64 k, Variant*& ret, bool copy,
   }
   ElmInd pos = find(k);
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     ret = &(tvAsVariant(&e->data));
     return NULL;
@@ -1237,7 +1236,7 @@ ArrayData* HphpArray::lval(CStrRef k, Variant*& ret, bool copy,
   }
   ElmInd pos = find(key->data(), key->size(), prehash);
   if (pos != ElmIndEmpty) {
-    ElmAlignedPtr elms = data2Elms(m_data);
+    Elm* elms = data2Elms(m_data);
     Elm* e = &elms[pos];
     ret = &(tvAsVariant(&e->data));
     return NULL;
@@ -1270,7 +1269,7 @@ ArrayData *HphpArray::lvalPtr(CStrRef k, Variant*& ret, bool copy,
   } else {
     ElmInd pos = t->find(key->data(), key->size(), prehash);
     if (pos != ElmIndEmpty) {
-      ElmAlignedPtr elms = data2Elms(m_data);
+      Elm* elms = data2Elms(m_data);
       Elm* e = &elms[pos];
       ret = &(tvAsVariant(&e->data));
     } else {
@@ -1401,7 +1400,7 @@ void HphpArray::erase(ElmInd* ei) {
     return;
   }
 
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
 
   bool nextElementUnsetInsideForeachByReference = false;
   int nsi = m_strongIterators.size();
@@ -1559,13 +1558,13 @@ HphpArray* HphpArray::copyImpl() const {
   size_t maxElms = computeMaxElms(m_lgTableSize);
   size_t tableSize = computeTableSize(m_lgTableSize);
   target->reallocData(maxElms, tableSize);
-  ElmAlignedPtr targetElms = data2Elms(target->m_data);
+  Elm* targetElms = data2Elms(target->m_data);
   target->m_hash = elms2Hash(targetElms, maxElms);
   // Copy the hash.
   memcpy(target->m_hash, m_hash, tableSize * sizeof(ElmInd));
   // Copy the elements and bump up refcounts as needed.
   if (m_nElms > 0) {
-    ElmAlignedPtr elms = hash2Elms(m_hash, maxElms);
+    Elm* elms = hash2Elms(m_hash, maxElms);
     for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
       Elm* e = &elms[pos];
       Elm* te = &targetElms[pos];
@@ -1675,7 +1674,7 @@ ArrayData* HphpArray::pop(Variant& value) {
     a->pop(value);
     return a;
   }
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   if (m_nElms > 0) {
     if (m_linear) {
       delinearize();
@@ -1711,7 +1710,7 @@ ArrayData* HphpArray::dequeue(Variant& value) {
   if (!m_strongIterators.empty()) {
     freeStrongIterators();
   }
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   if (m_nElms > 0) {
     if (m_linear) {
       delinearize();
@@ -1748,7 +1747,7 @@ ArrayData* HphpArray::prepend(CVarRef v, bool copy) {
     delinearize();
   }
 
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   if (elms[0].data.m_type != KindOfTombstone) {
     // Make sure there is room to insert an element.
     resize();
@@ -1784,7 +1783,7 @@ void HphpArray::renumber() {
 }
 
 void HphpArray::onSetStatic() {
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   for (ElmInd pos = 0; pos <= m_lastE; ++pos) {
     Elm* e = &elms[pos];
     if (e->data.m_type != KindOfTombstone) {
@@ -1816,7 +1815,7 @@ bool HphpArray::setFullPos(const FullPos& pos) {
 
 CVarRef HphpArray::currentRef() {
   ASSERT(m_pos != ArrayData::invalid_index);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   Elm* e = &elms[(ElmInd)m_pos];
   ASSERT(e->data.m_type != KindOfTombstone);
   return tvAsCVarRef(&e->data);
@@ -1824,7 +1823,7 @@ CVarRef HphpArray::currentRef() {
 
 CVarRef HphpArray::endRef() {
   ASSERT(m_lastE != ElmIndEmpty);
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   ElmInd pos = m_lastE;
   Elm* e = &elms[pos];
   return tvAsCVarRef(&e->data);
@@ -1842,7 +1841,7 @@ bool HphpArray::calculate(int& size) {
 }
 
 void HphpArray::backup(LinearAllocator& allocator) {
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   void* alignedData = NULL;
   allocator.backup((const char*)&alignedData, sizeof(void*));
   allocator.backup((const char*)elms,
@@ -1874,7 +1873,7 @@ void HphpArray::restore(const char*& data) {
     m_data = (void*)data2Elms(*alignedData);
   }
 
-  ElmAlignedPtr elms = data2Elms(m_data);
+  Elm* elms = data2Elms(m_data);
   m_hash = elms2Hash(elms, maxElms);
 
   data += maxElms * sizeof(Elm);

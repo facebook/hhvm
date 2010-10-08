@@ -22,10 +22,6 @@
 #include <runtime/base/memory/smart_allocator.h>
 #include <runtime/base/complex_types.h>
 
-#ifndef __BIGGEST_ALIGNMENT__
-#define __BIGGEST_ALIGNMENT__ 16
-#endif
-
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -139,9 +135,6 @@ public:
     TypedValue  data; // (data.m_type != KindOfTombstone) ? <value> : <invalid>
   };
 
-  // Convenience type for declaring pointers to the element array within m_data.
-  typedef Elm* __attribute__((aligned(__BIGGEST_ALIGNMENT__))) ElmAlignedPtr;
-
   // Element index, with special values < 0 used for hash tables.
   typedef int32 ElmInd;
   static const ElmInd ElmIndEmpty      = -1; // == ArrayData::invalid_index
@@ -174,8 +167,7 @@ private:
   //            | alignment padding? |
   //            +--------------------+
   void*   m_data;        // Contains elements and hash table.
-  ElmInd* __attribute__((aligned(__BIGGEST_ALIGNMENT__)))
-          m_hash;        // Hash table.
+  ElmInd* m_hash;        // Hash table.
   int64   m_nextKI;      // Next integer key to use for append.
   uint32  m_lgTableSize; // Hash table has 2^m_lgTableSize slots.
   ElmInd  m_nElms;       // Total number of elements in array.

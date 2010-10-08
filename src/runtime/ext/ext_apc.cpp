@@ -803,6 +803,7 @@ int apc_rfc1867_progress(apc_rfc1867_data *rfc1867ApcData,
     rfc1867ApcData->temp_filename = NULL;
     rfc1867ApcData->start_time = my_time();
     rfc1867ApcData->bytes_processed = 0;
+    rfc1867ApcData->prev_bytes_processed = 0;
     rfc1867ApcData->rate = 0;
     rfc1867ApcData->update_freq = RuntimeOption::Rfc1867Freq;
 

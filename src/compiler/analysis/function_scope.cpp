@@ -170,7 +170,7 @@ void FunctionScope::setParamCounts(AnalysisResultPtr ar, int minParam,
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*params)[i]);
         m_paramNames[i] = param->getName();
-        m_paramTypeSpecs[i] = param->getTypeSpec(ar);
+        m_paramTypeSpecs[i] = param->getTypeSpec(ar, false);
         ExpressionPtr exp = param->defaultValue();
         if (exp) {
           m_paramDefaults[i] = exp->getText(false, false, ar);

@@ -111,7 +111,7 @@ ExpressionPtr ParameterExpression::postOptimize(AnalysisResultPtr ar) {
   return ExpressionPtr();
 }
 
-TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar) {
+TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar, bool error) {
   TypePtr ret;
   if (m_type.empty() || m_defaultValue) {
     ret = Type::Some;
@@ -120,7 +120,7 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar) {
   } else {
     ClassScopePtr cls = ar->findClass(m_type);
     if (!cls || cls->isRedeclaring()) {
-      if (!cls && ar->isFirstPass()) {
+      if (error && !cls && ar->isFirstPass()) {
         ConstructPtr self = shared_from_this();
         ar->getCodeError()->record(self, CodeError::UnknownClass, self);
       }
@@ -140,7 +140,7 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar) {
 TypePtr ParameterExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                         bool coerce) {
   ASSERT(type->is(Type::KindOfSome) || type->is(Type::KindOfAny));
-  TypePtr ret = getTypeSpec(ar);
+  TypePtr ret = getTypeSpec(ar, true);
 
   if (m_defaultValue && !m_ref) {
     ret = m_defaultValue->inferAndCheck(ar, ret, false);

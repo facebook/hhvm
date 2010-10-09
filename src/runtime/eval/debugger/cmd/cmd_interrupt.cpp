@@ -50,7 +50,7 @@ void CmdInterrupt::sendImpl(DebuggerThriftBuffer &thrift) {
       String ex(BreakPointInfo::ErrorClassName);
       thrift.write(ex);
     }
-    thrift.write(DebuggerClient::FormatVariable(e));
+    thrift.write(DebuggerClient::FormatVariable(e, -1));
   } else {
     thrift.write(false);
   }

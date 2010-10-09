@@ -1005,7 +1005,7 @@ int64 c_ReflectionFunctionAbstract::t_getnumberofrequiredparameters() {
   }
   return v_count;
 } /* function */
-/* SRC: classes/reflection.php line 1270 */
+/* SRC: classes/reflection.php line 1274 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionObject
 Variant c_ReflectionObject::os_getInit(CStrRef s) {
   return c_ReflectionClass::os_getInit(s);
@@ -1214,7 +1214,7 @@ struct ObjectStaticCallbacks cw_ReflectionObject = {
 void c_ReflectionObject::init() {
   c_ReflectionClass::init();
 }
-/* SRC: classes/reflection.php line 1287 */
+/* SRC: classes/reflection.php line 1291 */
 Variant c_ReflectionObject::ti_export(CStrRef cls, Variant v_obj, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionObject, ReflectionObject::export);
   String v_str;
@@ -4880,6 +4880,7 @@ Variant c_ReflectionClass::t_isiterateable() {
 /* SRC: classes/reflection.php line 1219 */
 bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::implementsInterface);
+  p_ReflectionClass v_clsObj;
   Primitive v_name = 0;
   Variant v__;
 
@@ -4895,20 +4896,40 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
     }
   }
   {
-    LOOP_COUNTER(2);
-    Variant map3 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
-    for (ArrayIterPtr iter4 = map3.begin(s_class_name); !iter4->end(); iter4->next()) {
-      LOOP_COUNTER_CHECK(2);
-      iter4->second(v__);
-      v_name = iter4->first();
+    p_ReflectionClass tmp2 = NEWOBJ(c_ReflectionClass)();
+    (tmp2->create(v_cls));
+    v_clsObj = tmp2;
+  }
+  {
+    bool tmp3;
+    {
+      bool tmp4((toBoolean(v_clsObj->t_isinterface())));
+      tmp3 = (!(tmp4));
+    }
+    if (tmp3) {
       {
         {
-          bool tmp5;
+          p_ReflectionException tmp5 = NEWOBJ(c_ReflectionException)();
+          throw_exception((tmp5->create(concat3(NAMSTR(s_sys_ss1558c380_1, "Interface "), toString(v_cls), NAMSTR(s_sys_ss5615a9b2, " is a Class"))), tmp5));
+        }
+      }
+    }
+  }
+  {
+    LOOP_COUNTER(6);
+    Variant map7 = t_fetch(NAMSTR(s_sys_ss56221a08, "interfaces"));
+    for (ArrayIterPtr iter8 = map7.begin(s_class_name); !iter8->end(); iter8->next()) {
+      LOOP_COUNTER_CHECK(6);
+      iter8->second(v__);
+      v_name = iter8->first();
+      {
+        {
+          bool tmp9;
           {
-            int tmp6((x_strcasecmp(toString(v_cls), toString(v_name))));
-            tmp5 = (equal(tmp6, 0LL));
+            int tmp10((x_strcasecmp(toString(v_cls), toString(v_name))));
+            tmp9 = (equal(tmp10, 0LL));
           }
-          if (tmp5) {
+          if (tmp9) {
             {
               return true;
             }
@@ -4919,12 +4940,12 @@ bool c_ReflectionClass::t_implementsinterface(Variant v_cls) {
   }
   return false;
 } /* function */
-/* SRC: classes/reflection.php line 1241 */
+/* SRC: classes/reflection.php line 1245 */
 Variant c_ReflectionClass::t_getextension() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtension);
   return t_fetch(NAMSTR(s_sys_ss02406793, "extension"));
 } /* function */
-/* SRC: classes/reflection.php line 1255 */
+/* SRC: classes/reflection.php line 1259 */
 Variant c_ReflectionClass::t_getextensionname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionClass, ReflectionClass::getExtensionName);
   {
@@ -4934,7 +4955,7 @@ Variant c_ReflectionClass::t_getextensionname() {
     return wrap_variant((mcp7.bindClass(info)->getMethFewArgs())(mcp7, 0, null_variant, null_variant, null_variant, null_variant, null_variant, null_variant));
   }
 } /* function */
-/* SRC: classes/reflection.php line 1796 */
+/* SRC: classes/reflection.php line 1800 */
 #ifndef OMIT_JUMP_TABLE_CLASS_STATIC_GETINIT_ReflectionExtension
 Variant c_ReflectionExtension::os_getInit(CStrRef s) {
   DECLARE_SYSTEM_GLOBALS(g);
@@ -5792,7 +5813,7 @@ void c_ReflectionExtension::init() {
   m_name = null;
   m_info = null;
 }
-/* SRC: classes/reflection.php line 1800 */
+/* SRC: classes/reflection.php line 1804 */
 void c_ReflectionExtension::t___construct(Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -5802,12 +5823,12 @@ void c_ReflectionExtension::t___construct(Variant v_name) {
   }
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/reflection.php line 1804 */
+/* SRC: classes/reflection.php line 1808 */
 String c_ReflectionExtension::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::__toString);
   return toString(null);
 } /* function */
-/* SRC: classes/reflection.php line 1823 */
+/* SRC: classes/reflection.php line 1827 */
 Variant c_ReflectionExtension::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::export);
   p_ReflectionExtension v_obj;
@@ -5827,37 +5848,37 @@ Variant c_ReflectionExtension::ti_export(CStrRef cls, CVarRef v_name, CVarRef v_
   print(v_str);
   return null;
 } /* function */
-/* SRC: classes/reflection.php line 1841 */
+/* SRC: classes/reflection.php line 1845 */
 Variant c_ReflectionExtension::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getName);
   return m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1854 */
+/* SRC: classes/reflection.php line 1858 */
 Variant c_ReflectionExtension::t_getversion() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getVersion);
   return m_info.rvalAt(NAMSTR(s_sys_ss009c2796, "version"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1870 */
+/* SRC: classes/reflection.php line 1874 */
 Variant c_ReflectionExtension::t_getfunctions() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getFunctions);
   return m_info.rvalAt(NAMSTR(s_sys_ss18fea5e1, "functions"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1883 */
+/* SRC: classes/reflection.php line 1887 */
 Variant c_ReflectionExtension::t_getconstants() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getConstants);
   return m_info.rvalAt(NAMSTR(s_sys_ss1d07a592, "constants"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1897 */
+/* SRC: classes/reflection.php line 1901 */
 Variant c_ReflectionExtension::t_getinientries() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getINIEntries);
   return m_info.rvalAt(NAMSTR(s_sys_ss3a6b8527, "ini"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1912 */
+/* SRC: classes/reflection.php line 1916 */
 Variant c_ReflectionExtension::t_getclasses() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClasses);
   return m_info.rvalAt(NAMSTR(s_sys_ss251b7f2b, "classes"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1927 */
+/* SRC: classes/reflection.php line 1931 */
 Array c_ReflectionExtension::t_getclassnames() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::getClassNames);
   Array v_ret;
@@ -5884,12 +5905,12 @@ Array c_ReflectionExtension::t_getclassnames() {
   }
   return v_ret;
 } /* function */
-/* SRC: classes/reflection.php line 1943 */
+/* SRC: classes/reflection.php line 1947 */
 Variant c_ReflectionExtension::t_info() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionExtension, ReflectionExtension::info);
   return m_info.rvalAt(NAMSTR(s_sys_ss157d479f, "info"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1549 */
+/* SRC: classes/reflection.php line 1553 */
 const int64 q_ReflectionMethod_IS_STATIC = 1LL;
 const int64 q_ReflectionMethod_IS_PUBLIC = 256LL;
 const int64 q_ReflectionMethod_IS_PROTECTED = 512LL;
@@ -7111,7 +7132,7 @@ void c_ReflectionMethod::init() {
   m_name = null;
   m_class = null;
 }
-/* SRC: classes/reflection.php line 1561 */
+/* SRC: classes/reflection.php line 1565 */
 void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -7153,12 +7174,12 @@ void c_ReflectionMethod::t___construct(Variant v_cls, Variant v_name) {
   }
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/reflection.php line 1573 */
+/* SRC: classes/reflection.php line 1577 */
 String c_ReflectionMethod::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::__toString);
   return toString(null);
 } /* function */
-/* SRC: classes/reflection.php line 1594 */
+/* SRC: classes/reflection.php line 1598 */
 Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::export);
   Variant v_obj;
@@ -7187,7 +7208,7 @@ Variant c_ReflectionMethod::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name
   print(v_str);
   return null;
 } /* function */
-/* SRC: classes/reflection.php line 1615 */
+/* SRC: classes/reflection.php line 1619 */
 Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invoke);
   Variant v_args;
@@ -7204,7 +7225,7 @@ Variant c_ReflectionMethod::t_invoke(int num_args, CVarRef v_obj, Array args /* 
     return x_hphp_invoke_method(tmp2, tmp3, tmp4, toArray(v_args));
   }
 } /* function */
-/* SRC: classes/reflection.php line 1636 */
+/* SRC: classes/reflection.php line 1640 */
 Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::invokeArgs);
   {
@@ -7215,42 +7236,42 @@ Variant c_ReflectionMethod::t_invokeargs(CVarRef v_obj, CVarRef v_args) {
     return x_hphp_invoke_method(tmp1, tmp2, tmp3, tmp4);
   }
 } /* function */
-/* SRC: classes/reflection.php line 1649 */
+/* SRC: classes/reflection.php line 1653 */
 Variant c_ReflectionMethod::t_isfinal() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isFinal);
   return m_info.rvalAt(NAMSTR(s_sys_ss2f433c87, "final"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1662 */
+/* SRC: classes/reflection.php line 1666 */
 Variant c_ReflectionMethod::t_isabstract() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isAbstract);
   return m_info.rvalAt(NAMSTR(s_sys_ss01d79b38, "abstract"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1674 */
+/* SRC: classes/reflection.php line 1678 */
 bool c_ReflectionMethod::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPublic);
   return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss13766fad, "public"));
 } /* function */
-/* SRC: classes/reflection.php line 1687 */
+/* SRC: classes/reflection.php line 1691 */
 bool c_ReflectionMethod::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isPrivate);
   return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss52349fb9, "private"));
 } /* function */
-/* SRC: classes/reflection.php line 1700 */
+/* SRC: classes/reflection.php line 1704 */
 bool c_ReflectionMethod::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isProtected);
   return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss649ab5a0, "protected"));
 } /* function */
-/* SRC: classes/reflection.php line 1712 */
+/* SRC: classes/reflection.php line 1716 */
 Variant c_ReflectionMethod::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isStatic);
   return m_info.rvalAt(NAMSTR(s_sys_ss796d376e, "static"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1725 */
+/* SRC: classes/reflection.php line 1729 */
 bool c_ReflectionMethod::t_isconstructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isConstructor);
   return isset(m_info, NAMSTR(s_sys_ss3a464145, "constructor"), true);
 } /* function */
-/* SRC: classes/reflection.php line 1738 */
+/* SRC: classes/reflection.php line 1742 */
 bool c_ReflectionMethod::t_isdestructor() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::isDestructor);
   {
@@ -7258,17 +7279,17 @@ bool c_ReflectionMethod::t_isdestructor() {
     return equal(tmp1, NAMSTR(s_sys_ss5533e10d, "__destruct"));
   }
 } /* function */
-/* SRC: classes/reflection.php line 1760 */
+/* SRC: classes/reflection.php line 1764 */
 Variant c_ReflectionMethod::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getModifiers);
   return m_info.rvalAt(NAMSTR(s_sys_ss6d6e147d, "modifiers"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1764 */
+/* SRC: classes/reflection.php line 1768 */
 Variant c_ReflectionMethod::t_getclosure() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getClosure);
   return m_info.rvalAt(NAMSTR(s_sys_ss6d16d594, "closure"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1778 */
+/* SRC: classes/reflection.php line 1782 */
 Variant c_ReflectionMethod::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionMethod, ReflectionMethod::getDeclaringClass);
   if (empty(m_info, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
@@ -7281,7 +7302,7 @@ Variant c_ReflectionMethod::t_getdeclaringclass() {
     return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), tmp1);
   }
 } /* function */
-/* SRC: classes/reflection.php line 1308 */
+/* SRC: classes/reflection.php line 1312 */
 const int64 q_ReflectionProperty_IS_STATIC = 1LL;
 const int64 q_ReflectionProperty_IS_PUBLIC = 256LL;
 const int64 q_ReflectionProperty_IS_PROTECTED = 512LL;
@@ -8433,7 +8454,7 @@ void c_ReflectionProperty::init() {
   m_name = null;
   m_class = null;
 }
-/* SRC: classes/reflection.php line 1318 */
+/* SRC: classes/reflection.php line 1322 */
 void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::__construct);
   bool oldInCtor = gasInCtor(true);
@@ -8475,12 +8496,12 @@ void c_ReflectionProperty::t___construct(Variant v_cls, Variant v_name) {
   }
   gasInCtor(oldInCtor);
 } /* function */
-/* SRC: classes/reflection.php line 1330 */
+/* SRC: classes/reflection.php line 1334 */
 String c_ReflectionProperty::t___tostring() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::__toString);
   return toString(null);
 } /* function */
-/* SRC: classes/reflection.php line 1346 */
+/* SRC: classes/reflection.php line 1350 */
 Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_name, CVarRef v_ret) {
   STATIC_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::export);
   Variant v_obj;
@@ -8509,45 +8530,45 @@ Variant c_ReflectionProperty::ti_export(CStrRef cls, Variant v_cls, CVarRef v_na
   print(v_str);
   return null;
 } /* function */
-/* SRC: classes/reflection.php line 1365 */
+/* SRC: classes/reflection.php line 1369 */
 Variant c_ReflectionProperty::t_getname() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getName);
   return m_info.rvalAt(NAMSTR(s_sys_ss77e35232, "name"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1378 */
+/* SRC: classes/reflection.php line 1382 */
 bool c_ReflectionProperty::t_ispublic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPublic);
   return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss13766fad, "public"));
 } /* function */
-/* SRC: classes/reflection.php line 1391 */
+/* SRC: classes/reflection.php line 1395 */
 bool c_ReflectionProperty::t_isprivate() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isPrivate);
   return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss52349fb9, "private"));
 } /* function */
-/* SRC: classes/reflection.php line 1404 */
+/* SRC: classes/reflection.php line 1408 */
 bool c_ReflectionProperty::t_isprotected() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isProtected);
   return equal(m_info.rvalAt(NAMSTR(s_sys_ss7b513d57, "access"), true, true), NAMSTR(s_sys_ss649ab5a0, "protected"));
 } /* function */
-/* SRC: classes/reflection.php line 1417 */
+/* SRC: classes/reflection.php line 1421 */
 Variant c_ReflectionProperty::t_isstatic() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isStatic);
   return m_info.rvalAt(NAMSTR(s_sys_ss796d376e, "static"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1431 */
+/* SRC: classes/reflection.php line 1435 */
 Variant c_ReflectionProperty::t_isdefault() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::isDefault);
   return m_info.rvalAt(NAMSTR(s_sys_ss6463ffdf, "default"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1445 */
+/* SRC: classes/reflection.php line 1449 */
 void c_ReflectionProperty::t_setaccessible() {
 } /* function */
-/* SRC: classes/reflection.php line 1458 */
+/* SRC: classes/reflection.php line 1462 */
 Variant c_ReflectionProperty::t_getmodifiers() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getModifiers);
   return m_info.rvalAt(NAMSTR(s_sys_ss6d6e147d, "modifiers"), true, true);
 } /* function */
-/* SRC: classes/reflection.php line 1474 */
+/* SRC: classes/reflection.php line 1478 */
 Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getValue);
@@ -8572,7 +8593,7 @@ Variant c_ReflectionProperty::t_getvalue(CVarRef v_obj //  = null_variant
   }
   return null;
 } /* function */
-/* SRC: classes/reflection.php line 1499 */
+/* SRC: classes/reflection.php line 1503 */
 Variant c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::setValue);
   if (toBoolean(t_isstatic())) {
@@ -8592,7 +8613,7 @@ Variant c_ReflectionProperty::t_setvalue(CVarRef v_obj, CVarRef v_value) {
   }
   return null;
 } /* function */
-/* SRC: classes/reflection.php line 1517 */
+/* SRC: classes/reflection.php line 1521 */
 Variant c_ReflectionProperty::t_getdeclaringclass() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDeclaringClass);
   if (empty(m_info, NAMSTR(s_sys_ss1f74c210, "class"), true)) {
@@ -8605,7 +8626,7 @@ Variant c_ReflectionProperty::t_getdeclaringclass() {
     return (tmp1->create(m_info.rvalAt(NAMSTR(s_sys_ss1f74c210, "class"), true, true)), tmp1);
   }
 } /* function */
-/* SRC: classes/reflection.php line 1534 */
+/* SRC: classes/reflection.php line 1538 */
 Variant c_ReflectionProperty::t_getdoccomment() {
   INSTANCE_METHOD_INJECTION_BUILTIN(ReflectionProperty, ReflectionProperty::getDocComment);
   return m_info.rvalAt(NAMSTR(s_sys_ss70714913, "doc"), true, true);

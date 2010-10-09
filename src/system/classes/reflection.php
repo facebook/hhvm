@@ -1220,6 +1220,10 @@ class ReflectionClass implements Reflector {
     if ($cls instanceof ReflectionClass) {
       $cls = $cls->fetch('name');
     }
+    $clsObj = new ReflectionClass($cls);
+    if (!$clsObj->isInterface()) {
+      throw new ReflectionException("Interface $cls is a Class");
+    }
     foreach ($this->fetch('interfaces') as $name => $_) {
       if (strcasecmp($cls, $name) == 0) {
         return true;

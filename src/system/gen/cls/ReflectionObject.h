@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/reflection.php line 1270 */
+/* SRC: classes/reflection.php line 1274 */
 class c_ReflectionObject : public c_ReflectionClass {
   public:
 

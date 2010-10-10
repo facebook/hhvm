@@ -170,10 +170,12 @@ ClassEvalState &RequestEvalState::declareClass(const ClassStatement *cls) {
 void RequestEvalState::declareFunction(const FunctionStatement *fn) {
   RequestEvalState *self = s_res.get();
   const string &name = fn->name();
-  if (self->m_functions.find(name.c_str()) != self->m_functions.end()) {
-    raise_error("Cannot redeclare %s()", fn->name().c_str());
+  const char *func = name.c_str();
+  if (self->m_functions.find(func) != self->m_functions.end() ||
+      get_renamed_function(func) != func) {
+    raise_error("Cannot redeclare %s()", func);
   }
-  self->m_functions[name.c_str()] = fn;
+  self->m_functions[func] = fn;
 }
 
 bool RequestEvalState::declareConstant(CStrRef name, CVarRef val) {

@@ -289,30 +289,31 @@ static bool verify_result(const char *input, const char *output, bool perfMode,
       return true;
     }
 
-    if (err.find("symbol lookup error:") != string::npos &&
-        err.find("undefined symbol: _ZN4HPHP14Synchronizable4waitEv") !=
-        string::npos) {
-      printf("%s: Ignoring loader error: %s\n", fullPath.c_str(), err.c_str());
-      err = "";
-    }
-
-    if (actual != expected || !err.empty()) {
-      printf("======================================\n"
-             "%s:\n"
-             "======================================\n"
-             "%s:%d\nParsing: [%s]\nBet %d:\n"
-             "--------------------------------------\n"
-             "%s"
-             "--------------------------------------\n"
-             "Got %d:\n"
-             "--------------------------------------\n"
-             "%s"
-             "--------------------------------------\n"
-             "Err: [%s]\n", fullPath.c_str(), file, line, input,
-             (int)expected.length(), escape(expected).c_str(),
-             (int)actual.length(), escape(actual).c_str(),
-             err.c_str());
-      return false;
+    bool out_ok = actual == expected;
+    if (!out_ok || !err.empty()) {
+      if (out_ok &&
+          err.find("symbol lookup error:") != string::npos &&
+          err.find("undefined symbol: ") != string::npos) {
+        printf("%s: Ignoring loader error: %s\n",
+               fullPath.c_str(), err.c_str());
+      } else {
+        printf("======================================\n"
+               "%s:\n"
+               "======================================\n"
+               "%s:%d\nParsing: [%s]\nBet %d:\n"
+               "--------------------------------------\n"
+               "%s"
+               "--------------------------------------\n"
+               "Got %d:\n"
+               "--------------------------------------\n"
+               "%s"
+               "--------------------------------------\n"
+               "Err: [%s]\n", fullPath.c_str(), file, line, input,
+               (int)expected.length(), escape(expected).c_str(),
+               (int)actual.length(), escape(actual).c_str(),
+               err.c_str());
+        return false;
+      }
     }
   }
 

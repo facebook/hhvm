@@ -47,7 +47,8 @@ ClassScope::ClassScope(KindOf kindOf, const std::string &name,
   : BlockScope(name, docComment, stmt, BlockScope::ClassScope), m_file(file),
     m_kindOf(kindOf), m_parent(parent), m_bases(bases), m_attribute(0),
     m_redeclaring(-1), m_volatile(false), m_needStaticInitializer(false),
-    m_derivesFromRedeclaring(FromNormal), m_sep(false) {
+    m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
+    m_sep(false) {
 
   m_dynamic = Option::IsDynamicClass(m_name);
 
@@ -67,7 +68,8 @@ ClassScope::ClassScope(AnalysisResultPtr ar,
     m_kindOf(KindOfObjectClass), m_parent(parent), m_bases(bases),
     m_attribute(0), m_dynamic(false), m_redeclaring(-1), m_volatile(false),
     m_needStaticInitializer(false),
-    m_derivesFromRedeclaring(FromNormal), m_sep(false) {
+    m_derivesFromRedeclaring(FromNormal), m_derivedByDynamic(false),
+    m_sep(false) {
   BOOST_FOREACH(FunctionScopePtr f, methods) {
     if (f->getName() == "__construct") setAttribute(HasConstructor);
     else if (f->getName() == "__destruct") setAttribute(HasDestructor);
@@ -242,12 +244,16 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
     }
     ClassScopePtr super = ar->findClass(base);
     if (super) {
+      if (derivedByDynamic()) {
+        super->m_derivedByDynamic = true;
+      }
       if (super->isRedeclaring()) {
         if (base == m_parent) {
           if (forInvoke) continue;
           const ClassScopePtrVec &classes = ar->findRedeclaredClasses(m_parent);
           StringToFunctionScopePtrMap pristine(funcs);
           BOOST_FOREACH(ClassScopePtr cls, classes) {
+            cls->m_derivedByDynamic = true;
             StringToFunctionScopePtrMap cur(pristine);
             cls->collectMethods(ar, cur, false, forInvoke);
             funcs.insert(cur.begin(), cur.end());
@@ -1174,7 +1180,7 @@ void ClassScope::outputCPPSupportMethodsImpl(CodeGenerator &cg,
     cg_indentEnd("}\n");
   }
 
-  if (isRedeclaring() && !derivesFromRedeclaring()) {
+  if (isRedeclaring() && !derivesFromRedeclaring() && derivedByDynamic()) {
     cg_indentBegin("Variant %s%s::doRootCall(Variant v_name, Variant "
                    "v_arguments, bool fatal) {\n",
                    Option::ClassPrefix, clsName);

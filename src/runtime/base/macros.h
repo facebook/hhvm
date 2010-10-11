@@ -428,7 +428,12 @@ do { \
 // Stack frame injection is also for correctness, and cannot be disabled.
 #define FRAME_INJECTION(c, n) FrameInjection fi(info, c, #n);
 #define FRAME_INJECTION_FLAGS(c, n, f) FrameInjection fi(info, c, #n, NULL, f);
-#define FRAME_INJECTION_WITH_THIS(c, n) FrameInjection fi(info, c, #n, this);
+// For classes that might have redeclaring subclasses
+#define FRAME_INJECTION_WITH_THIS(c, n) \
+  FrameInjection fi(info, c, #n, this->getRoot());
+// For classes that do not have redeclaring subclasses
+#define FRAME_INJECTION_WITH_ONLY_THIS(c, n) \
+  FrameInjection fi(info, c, #n, this);
 
 #ifdef ENABLE_FULL_SETLINE
 #define LINE(n, e) (set_line(n), e)
@@ -476,6 +481,14 @@ do { \
   HOTPROFILER_INJECTION(n)                      \
   FRAME_INJECTION_WITH_THIS(s_class_name, n)    \
   DECLARE_GLOBAL_VARIABLES_INJECTION(g)         \
+
+#define INSTANCE_METHOD_INJECTION_ROOTLESS(c, n)  \
+  DECLARE_THREAD_INFO                             \
+  RECURSION_INJECTION                             \
+  REQUEST_TIMEOUT_INJECTION                       \
+  HOTPROFILER_INJECTION(n)                        \
+  FRAME_INJECTION_WITH_ONLY_THIS(s_class_name, n) \
+  DECLARE_GLOBAL_VARIABLES_INJECTION(g)           \
 
 #define PSEUDOMAIN_INJECTION(n, esc)               \
   GlobalVariables *g = (GlobalVariables *)globals; \

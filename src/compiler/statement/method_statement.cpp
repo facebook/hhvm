@@ -554,13 +554,16 @@ void MethodStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
         if (m_modifiers->isStatic()) {
           cg_printf("STATIC_METHOD_INJECTION%s(%s, %s);\n", sys,
                     scope->getOriginalName().c_str(), origFuncName.c_str());
+        } else if (cg.getOutput() != CodeGenerator::SystemCPP &&
+                   !scope->isRedeclaring() && !scope->derivedByDynamic()) {
+          cg_printf("INSTANCE_METHOD_INJECTION_ROOTLESS(%s, %s);\n",
+                    scope->getOriginalName().c_str(), origFuncName.c_str());
         } else {
           cg_printf("INSTANCE_METHOD_INJECTION%s(%s, %s);\n", sys,
                     scope->getOriginalName().c_str(), origFuncName.c_str());
         }
       }
-      outputCPPArgInjections(cg, ar, origFuncName.c_str(), ar->getClassScope(),
-                             funcScope);
+      outputCPPArgInjections(cg, ar, origFuncName.c_str(), scope, funcScope);
       if (m_name == "__offsetget_lval") {
         ParameterExpressionPtr param =
           dynamic_pointer_cast<ParameterExpression>((*m_params)[0]);

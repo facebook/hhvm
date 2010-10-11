@@ -52,11 +52,11 @@ public:
   static FrameInjection *GetStackFrame(int level);
 
 public:
+  // NOTE: obj has to be the root object
   FrameInjection(ThreadInfo *info, CStrRef cls, const char *name,
                  ObjectData *obj = NULL, int fs = 0)
       : m_info(info), m_class(cls), m_name(name),
-        m_object(obj ? obj->getRoot() : NULL),
-        m_line(0), m_flags(fs) {
+        m_object(obj), m_line(0), m_flags(fs) {
     ASSERT(m_class.get());
     ASSERT(m_name);
     m_prev = m_info->m_top;

@@ -148,6 +148,10 @@ public:
     return m_derivesFromRedeclaring;
   }
 
+  bool derivedByDynamic() const {
+    return m_derivedByDynamic;
+  }
+
   /* Whether this class is brought in by a separable extension */
   void setSepExtension() { m_sep = true;}
   bool isSepExtension() const { return m_sep;}
@@ -389,6 +393,7 @@ private:
   bool m_volatile; // for class_exists
   bool m_needStaticInitializer; // for os_static_initializer
   Derivation m_derivesFromRedeclaring;
+  bool m_derivedByDynamic;
   std::set<std::string> m_missingMethods;
   bool m_sep;
 

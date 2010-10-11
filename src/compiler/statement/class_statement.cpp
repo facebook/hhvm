@@ -508,7 +508,7 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           ClassScope::HasUnknownPropSetter);
 
         if (dyn || idyn || redec || hasGet || hasSet) {
-          if (redec) {
+          if (redec && classScope->derivedByDynamic()) {
             cg_printf("DECLARE_ROOT;\n");
              if (!dyn && !idyn) {
                cg_printf("private: ObjectData* root;\n");
@@ -518,18 +518,24 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
           }
 
           string conInit = "";
+          bool hasParam = false;
           if (dyn) {
-            conInit = ":DynamicObjectData(\"" + m_parent + "\", r)";
+            conInit = " : DynamicObjectData(\"" + m_parent + "\", r)";
+            hasParam = true;
           } else if (idyn) {
-            conInit = ":" + string(Option::ClassPrefix) + parCls->getId(cg) +
-              "(r?r:this)";
-          } else if (redec) {
-            conInit = ":root(r?r:this)";
+            conInit = " : " + string(Option::ClassPrefix) + parCls->getId(cg) +
+              "(r ? r : this)";
+            hasParam = true;
+          } else {
+            if (redec && classScope->derivedByDynamic()) {
+              conInit = " : root(r ? r : this)";
+            }
+            hasParam = true;
           }
 
           cg_indentBegin("%s%s(%s)%s {%s",
                          Option::ClassPrefix, clsName,
-                         conInit.empty() ? "" : "ObjectData* r = NULL",
+                         hasParam ? "ObjectData* r = NULL" : "",
                          conInit.c_str(),
                          hasGet || hasSet ? "\n" : "");
           if (hasGet) cg_printf("setAttribute(UseGet);\n");
@@ -565,7 +571,8 @@ void ClassStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
       }
 
       if (classScope->isRedeclaring() &&
-          !classScope->derivesFromRedeclaring()) {
+          !classScope->derivesFromRedeclaring() &&
+          classScope->derivedByDynamic()) {
         cg_printf("Variant doRootCall(Variant v_name, Variant v_arguments, "
                   "bool fatal);\n");
       }

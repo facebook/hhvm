@@ -294,7 +294,6 @@ class ObjectData : public Countable {
   virtual ObjectData* cloneImpl() = 0;
   void cloneSet(ObjectData *clone);
   virtual bool php_sleep(Variant &ret);
-  static Array collectArgs(int count, INVOKE_FEW_ARGS_IMPL_ARGS);
 
  private:
   ObjectData(const ObjectData &) { ASSERT(false);}

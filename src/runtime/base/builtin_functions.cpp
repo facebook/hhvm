@@ -199,6 +199,63 @@ Variant o_invoke_failed(const char *cls, const char *meth,
   }
 }
 
+Array collect_few_args(int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
+  switch (count) {
+  case 0: {
+    return Array();
+  }
+  case 1: {
+    return Array(ArrayInit(1, true).setRef(a0).create());
+  }
+  case 2: {
+    return Array(ArrayInit(2, true).setRef(a0).setRef(a1).create());
+  }
+  case 3: {
+    return Array(ArrayInit(3, true).setRef(a0).setRef(a1).setRef(a2).create());
+  }
+#if INVOKE_FEW_ARGS_COUNT > 3
+  case 4: {
+    return Array(ArrayInit(4, true).setRef(a0).setRef(a1).setRef(a2).
+                                    setRef(a3).create());
+  }
+  case 5: {
+    return Array(ArrayInit(5, true).setRef(a0).setRef(a1).setRef(a2).
+                                    setRef(a3).setRef(a4).create());
+  }
+  case 6: {
+    return Array(ArrayInit(6, true).setRef(a0).setRef(a1).setRef(a2).
+                                    setRef(a3).setRef(a4).setRef(a5).create());
+  }
+#endif
+#if INVOKE_FEW_ARGS_COUNT > 6
+  case 7: {
+    return Array(ArrayInit(7, true).setRef(a0).setRef(a1).setRef(a2).
+                                    setRef(a3).setRef(a4).setRef(a5).
+                                    setRef(a6).create());
+  }
+  case 8: {
+    return Array(ArrayInit(8, true).setRef(a0).setRef(a1).setRef(a2).
+                                    setRef(a3).setRef(a4).setRef(a5).
+                                    setRef(a6).setRef(a7).create());
+  }
+  case 9: {
+    return Array(ArrayInit(9, true).setRef(a0).setRef(a1).setRef(a2).
+                                    setRef(a3).setRef(a4).setRef(a5).
+                                    setRef(a6).setRef(a7).setRef(a8).create());
+  }
+  case 10: {
+    return Array(ArrayInit(10, true).setRef(a0).setRef(a1).setRef(a2).
+                                     setRef(a3).setRef(a4).setRef(a5).
+                                     setRef(a6).setRef(a7).setRef(a8).
+                                     setRef(a9).create());
+  }
+#endif
+  default:
+    ASSERT(false);
+  }
+  return null;
+}
+
 void throw_instance_method_fatal(const char *name) {
   if (!strstr(name, "::__destruct")) {
     raise_error("Non-static method %s() cannot be called statically", name);

@@ -403,10 +403,10 @@ Variant FunctionStatement::Invoker(void *extra, CArrRef params) {
   }
   return ms->invoke(params);
 }
-Variant FunctionStatement::InvokerFewArgs(void*, int count,
+
+Variant FunctionStatement::InvokerFewArgs(void *extra, int count,
     INVOKE_FEW_ARGS_IMPL_ARGS) {
-  ASSERT(false);
-  return Variant();
+  return Invoker(extra, collect_few_args(count, INVOKE_FEW_ARGS_PASS_ARGS));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

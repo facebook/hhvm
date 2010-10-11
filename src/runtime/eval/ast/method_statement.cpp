@@ -215,6 +215,7 @@ bool MethodStatement::isAbstract() const {
   return getModifiers() & ClassStatement::Abstract ||
     m_class->getModifiers() & ClassStatement::Interface;
 }
+
 Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
   const MethodStatement *ms = (const MethodStatement*)mcp.extra;
   if (ms->getModifiers() & ClassStatement::Static || !mcp.obj) {
@@ -232,10 +233,10 @@ Variant MethodStatement::MethInvoker(MethodCallPackage &mcp, CArrRef params) {
     }
   }
 }
+
 Variant MethodStatement::MethInvokerFewArgs(MethodCallPackage &mcp,
     int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
-  ASSERT(false);
-  return Variant();
+  return MethInvoker(mcp, collect_few_args(count, INVOKE_FEW_ARGS_PASS_ARGS));
 }
 
 void MethodStatement::dump(std::ostream &out) const {

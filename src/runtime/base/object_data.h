@@ -182,6 +182,7 @@ class ObjectData : public Countable {
   Variant o_getUnchecked(CStrRef s, CStrRef context = null_string);
   Variant o_set(CStrRef s, CVarRef v, bool forInit = false,
                 CStrRef context = null_string);
+  Variant o_setPublic(CStrRef s, CVarRef v, bool forInit = false);
   Variant &o_lval(CStrRef s, CVarRef tmpForGet, CStrRef context = null_string);
   Variant *o_weakLval(CStrRef s, CStrRef context = null_string);
 

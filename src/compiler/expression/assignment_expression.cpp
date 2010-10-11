@@ -304,8 +304,13 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
     ObjectPropertyExpressionPtr var(
       dynamic_pointer_cast<ObjectPropertyExpression>(lval));
     if (!var->isValid()) {
+      bool nonPrivate = var->isNonPrivate(ar);
       var->outputCPPObject(cg, ar);
-      cg_printf("o_set(");
+      if (nonPrivate) {
+        cg_printf("o_setPublic(");
+      } else {
+        cg_printf("o_set(");
+      }
       var->outputCPPProperty(cg, ar);
       cg_printf(", %s", ref ? "ref(" : "");
       if (rval) {
@@ -313,9 +318,14 @@ bool AssignmentExpression::SpecialAssignment(CodeGenerator &cg,
       } else {
         cg_printf(ref ? "ref(%s)" : "%s", rvalStr);
       }
-      cg_printf("%s, %s)",
-                ref ? ")" : "",
-                ar->getClassScope() ? "s_class_name" : "empty_string");
+      if (nonPrivate) {
+        cg_printf("%s)", ref ? ")" : "");
+      }
+      else {
+        cg_printf("%s, %s)",
+                  ref ? ")" : "",
+                  ar->getClassScope() ? "s_class_name" : "empty_string");
+      }
       return true;
     }
   }

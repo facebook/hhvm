@@ -66,6 +66,21 @@ bool ObjectPropertyExpression::isTemporary() const {
   return !m_valid && !(m_context & (LValue | RefValue | UnsetContext));
 }
 
+bool ObjectPropertyExpression::isNonPrivate(AnalysisResultPtr ar) const {
+  // To tell whether a property is declared as private in the context
+  ClassScopePtr cls = ar->getClassScope();
+  if (!cls || !cls->getVariables()->hasNonStaticPrivate()) return true;
+  if (m_property->getKindOf() != Expression::KindOfScalarExpression) {
+    return false;
+  }
+  ScalarExpressionPtr name =
+    dynamic_pointer_cast<ScalarExpression>(m_property);
+  string propName = name->getString();
+  Symbol *sym = cls->getVariables()->getSymbol(propName);
+  if (!sym || sym->isStatic() || !sym->isPrivate()) return true;
+  return false;
+}
+
 void ObjectPropertyExpression::setContext(Context context) {
   m_context |= context;
   switch (context) {
@@ -406,7 +421,7 @@ void ObjectPropertyExpression::outputCPPObjProperty(CodeGenerator &cg,
       context = ", " + (m_lvalTmp.empty() ? "Variant()" : m_lvalTmp) + context;
     } else {
       func += "get";
-      if (!cls || !cls->getVariables()->hasPrivate()) {
+      if (isNonPrivate(ar)) {
         func += "Public";
         context = "";
       }

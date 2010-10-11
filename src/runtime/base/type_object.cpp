@@ -76,6 +76,13 @@ Variant Object::o_set(CStrRef propName, CVarRef val,
   return m_px->o_set(propName, val, false, context);
 }
 
+Variant Object::o_setPublic(CStrRef propName, CVarRef val) {
+  if (!m_px) {
+    operator=(NEW(c_stdClass)());
+  }
+  return m_px->o_setPublic(propName, val, false);
+}
+
 Variant &Object::o_lval(CStrRef propName, CVarRef tmpForGet,
                         CStrRef context /* = null_string */) {
   if (!m_px) {

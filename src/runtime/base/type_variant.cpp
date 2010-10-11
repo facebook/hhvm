@@ -2351,6 +2351,24 @@ Variant Variant::o_set(CStrRef propName, CVarRef val,
   return m_data.pobj->o_set(propName, val, false, context);
 }
 
+Variant Variant::o_setPublic(CStrRef propName, CVarRef val) {
+  if (propName.empty()) {
+    throw EmptyObjectPropertyException();
+  }
+
+  if (m_type == KindOfObject) {
+  } else if (m_type == KindOfVariant) {
+    return m_data.pvar->o_setPublic(propName, val);
+  } else if (isObjectConvertable()) {
+    set(Object(NEW(c_stdClass)()));
+  } else {
+    // Raise a warning
+    raise_warning("Attempt to assign property of non-object");
+    return val;
+  }
+  return m_data.pobj->o_setPublic(propName, val, false);
+}
+
 Variant Variant::o_invoke(const char *s, CArrRef params,
                           int64 hash /* = -1 */) {
   if (m_type == KindOfObject) {

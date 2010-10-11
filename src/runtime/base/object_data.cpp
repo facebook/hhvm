@@ -297,6 +297,33 @@ Variant ObjectData::o_set(CStrRef propName, CVarRef v,
   return v;
 }
 
+Variant ObjectData::o_setPublic(CStrRef propName, CVarRef v,
+                                bool forInit /* = false */) {
+  if (propName.size() == 0) {
+    throw EmptyObjectPropertyException();
+  }
+
+  bool useSet = !forInit && getAttribute(UseSet);
+  int flags = useSet ? RealPropWrite : RealPropCreate | RealPropWrite;
+  if (forInit) flags |= RealPropUnchecked;
+
+  if (Variant *t = o_realPropPublic(propName, flags)) {
+    if (!useSet || t->isInitialized()) {
+      *t = v;
+      return v;
+    }
+  }
+
+  if (useSet) {
+    AttributeClearer a(UseSet, this);
+    t___set(propName, v);
+    return v;
+  }
+
+  o_setError(propName, null_string);
+  return v;
+}
+
 void ObjectData::o_setArray(CArrRef properties) {
   bool valueRef = properties->supportValueRef();
   CStrRef context = o_getClassName();

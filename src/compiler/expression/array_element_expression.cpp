@@ -246,8 +246,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
             if (decl) {
               ar->getDependencyGraph()->
                 add(DependencyGraph::KindOfGlobalVariable,
-                    ar->getName(),
-                    m_globalName, self, m_globalName, decl);
+                    ar->getName(), m_globalName, self, m_globalName, decl);
             }
             if (coerce) {
               ret = vars->add(m_globalName, type, true, ar, self,
@@ -266,18 +265,9 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
       }
 
       if (hasContext(LValue) || hasContext(RefValue)) {
-        if (ar->isFirstPass()) {
-          ar->getCodeError()->record(self, CodeError::UseLDynamicVariable,
-                                     self);
-        }
         ar->getVariables()->forceVariants(ar, VariableTable::AnyVars);
         ar->getVariables()->
           setAttribute(VariableTable::ContainsLDynamicVariable);
-      } else {
-        if (ar->isFirstPass()) {
-          ar->getCodeError()->record(self, CodeError::UseRDynamicVariable,
-                                     self);
-        }
       }
       if (m_offset) {
         m_offset->inferAndCheck(ar, Type::Primitive, false);
@@ -298,8 +288,7 @@ TypePtr ArrayElementExpression::inferTypes(AnalysisResultPtr ar,
   } else {
     if (hasContext(ExistContext) || hasContext(UnsetContext)) {
       if (ar->isFirstPass()) {
-        ar->getCodeError()->record(self, CodeError::InvalidArrayElement,
-                                   self);
+        Compiler::Error(Compiler::InvalidArrayElement, self);
       }
     }
     m_variable->inferAndCheck(ar, Type::Array, true);

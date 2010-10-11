@@ -342,27 +342,6 @@ bool Type::IsLegalCast(AnalysisResultPtr ar, TypePtr from, TypePtr to) {
   return overlap;
 }
 
-bool Type::IsBadTypeConversion(AnalysisResultPtr ar, TypePtr from,
-                               TypePtr to, bool coercing) {
-  if (!coercing) {
-    return !Type::IsLegalCast(ar, from, to);
-  }
-  if (Type::SameType(from, to)) {
-    return false;
-  }
-  if (from->m_kindOf == KindOfSome ||
-      from->m_kindOf == KindOfAny ||
-      from->m_kindOf == KindOfVariant) {
-    return false;
-  }
-  if (to->m_kindOf == KindOfSome ||
-      to->m_kindOf == KindOfAny ||
-      to->m_kindOf == KindOfVariant) {
-    return false;
-  }
-  return true;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 Type::Type(KindOf kindOf) : m_kindOf(kindOf) {

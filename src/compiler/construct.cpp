@@ -35,7 +35,7 @@ using namespace std;
 int Construct::s_effectsTag = 1;
 
 Construct::Construct(LocationPtr loc)
- : m_extra(NULL), m_loc(loc), m_fileLevel(false), m_topLevel(false),
+ : m_loc(loc), m_fileLevel(false), m_topLevel(false),
    m_containedEffects(0), m_effectsTag(0)  {
 }
 
@@ -88,9 +88,6 @@ void Construct::addUserFunction(AnalysisResultPtr ar,
   if (!name.empty()) {
     FunctionScopePtr func = ar->findFunction(name);
     if (func && func->isUserFunction()) {
-      ar->getDependencyGraph()->add
-        (DependencyGraph::KindOfProgramUserFunction,
-         ar->getName(), func->getName(), func->getStmt());
       ar->addCallee(func->getStmt());
     }
     if (strong && ar->getPhase() == AnalysisResult::AnalyzeAll) {
@@ -107,35 +104,11 @@ void Construct::addUserClass(AnalysisResultPtr ar,
   if (!name.empty()) {
     ClassScopePtr cls = ar->findClass(name);
     if (cls && cls->isUserClass()) {
-      ar->getDependencyGraph()->add(DependencyGraph::KindOfProgramUserClass,
-                                    ar->getName(),
-                                    cls->getName(), cls->getStmt());
       ar->addCallee(cls->getStmt());
     }
     if (strong && !ar->isFirstPass()) {
       ar->getFileScope()->addClassDependency(ar, name);
     }
-  }
-}
-
-bool Construct::isErrorSuppressed(CodeError::ErrorType e) const {
-  std::vector<CodeError::ErrorType> &suppressedErrors =
-    getExtra()->suppressedErrors;
-  for (unsigned int i = 0; i < suppressedErrors.size(); i++) {
-    if (suppressedErrors[i] == e) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void Construct::addHphpNote(const std::string &s) {
-  ExtraData *extra = getExtra();
-  if (s.find("C++") == 0) {
-    extra->embedded += s.substr(3);
-    extra->hphpNotes.insert("C++");
-  } else {
-    extra->hphpNotes.insert(s);
   }
 }
 

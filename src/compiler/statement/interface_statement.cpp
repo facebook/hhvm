@@ -72,13 +72,11 @@ void InterfaceStatement::onParse(AnalysisResultPtr ar) {
   if (m_base) m_base->getStrings(bases);
 
   StatementPtr stmt = dynamic_pointer_cast<Statement>(shared_from_this());
-  ClassScopePtr classScope(new ClassScope(ClassScope::KindOfInterface,
-                                          m_name, "", bases, m_docComment, stmt,
-                                          ar->getFileScope()));
+  ClassScopePtr classScope
+    (new ClassScope(ClassScope::KindOfInterface, m_name, "", bases,
+                    m_docComment, stmt, ar->getFileScope()));
   m_classScope = classScope;
   ar->getFileScope()->addClass(ar, classScope);
-  ar->getDependencyGraph()->addParent(DependencyGraph::KindOfProgramUserClass,
-                                      "", m_originalName, stmt);
 
   if (m_stmt) {
     ar->pushScope(classScope);
@@ -126,7 +124,6 @@ void InterfaceStatement::checkVolatile(AnalysisResultPtr ar) {
 
 void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   ClassScopePtr classScope = m_classScope.lock();
-  if (hasHphpNote("Volatile")) classScope->setVolatile();
   if (m_stmt) {
     classScope->setIncludeLevel(ar->getIncludeLevel());
     ar->pushScope(classScope);
@@ -145,17 +142,15 @@ void InterfaceStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     ClassScopePtr cls = ar->findClass(bases[i]);
     if (cls) {
       if (!cls->isInterface()) {
-        ar->getCodeError()->record(CodeError::InvalidDerivation,
-                                   shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName().c_str());
+        Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
+                        cls->getOriginalName());
       }
       if (dependencies->checkCircle(DependencyGraph::KindOfClassDerivation,
                                     m_originalName,
                                     cls->getOriginalName().c_str())) {
         ClassScopePtr classScope = m_classScope.lock();
-        ar->getCodeError()->record(CodeError::InvalidDerivation,
-                                   shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName().c_str());
+        Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
+                        cls->getOriginalName());
         m_base = ExpressionListPtr();
         classScope->clearBases();
       } else if (cls->isUserClass()) {

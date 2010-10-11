@@ -614,7 +614,6 @@ int process(const ProgramOptions &po) {
         int runId = package.saveStatsToDB(server, seconds, po.branch,
                                           po.revision);
         if (runId) {
-          ar->getCodeError()->saveToDB(server, runId);
           ar->getDependencyGraph()->saveToDB(server, runId);
         }
         package.commitStats(server, runId);
@@ -622,18 +621,14 @@ int process(const ProgramOptions &po) {
         Logger::Error("%s", e.what());
       }
     } else {
-      ar->getCodeError()->saveToFile((po.outputDir + "/CodeError.js").c_str(),
-                                     !fatalErrorOnly);
+      Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
       package.saveStatsToFile((po.outputDir + "/Stats.js").c_str(), seconds);
       mkdir((po.outputDir + "/dep").c_str(), 0777);
       ar->getDependencyGraph()->saveToFiles((po.outputDir + "/dep").c_str());
     }
-  } else {
-    if (ar->getCodeError()->exists(false)) {
-      Logger::Info("saving code errors...");
-      ar->getCodeError()->saveToFile((po.outputDir + "/CodeError.js").c_str(),
-                                     !fatalErrorOnly);
-    }
+  } else if (Compiler::HasError()) {
+    Logger::Info("saving code errors...");
+    Compiler::SaveErrors((po.outputDir + "/CodeError.js").c_str());
   }
 
   return ret;
@@ -865,8 +860,8 @@ int runTargetCheck(const ProgramOptions &po, AnalysisResultPtr ar) {
   }
 
   // check error
-  if (ar->getCodeError()->exists(false) && !po.force) {
-    ar->getCodeError()->dump(false);
+  if (Compiler::HasError() && !po.force) {
+    Compiler::DumpErrors();
     return 1;
   }
 

@@ -130,15 +130,6 @@ bool FileScope::hasImpl(AnalysisResultPtr ar) const {
   return m_tree && m_tree->hasImpl();
 }
 
-bool FileScope::isErrorSuppressed(CodeError::ErrorType e) {
-  for (unsigned int i = 0; i < m_suppressedErrors.size(); i++) {
-    if (m_suppressedErrors[i] == e) {
-      return true;
-    }
-  }
-  return false;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 void FileScope::declareConstant(AnalysisResultPtr ar, const string &name) {

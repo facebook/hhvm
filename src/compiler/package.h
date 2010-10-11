@@ -21,7 +21,6 @@
 #include <util/string_bag.h>
 #include <compiler/analysis/dependency_graph.h>
 #include <util/file_cache.h>
-#include <compiler/hphp_unique.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -37,7 +36,6 @@ DECLARE_BOOST_TYPES(AnalysisResult);
  * Therefore, a package is really toppest entry point for parsing.
  */
 class Package {
-  friend class PackageHook;
 public:
   Package(const char *root, bool bShortTags = true, bool bAspTags = false);
 
@@ -68,12 +66,6 @@ public:
   const std::string& getRoot() const { return m_root;}
   FileCachePtr getFileCache();
 
-  static void setHookHandler(void (*hookHandler)(Package *package,
-                                                 const char *path,
-                                                 HphpHookUniqueId id)) {
-    m_hookHandler = hookHandler;
-  }
-
 private:
   std::string m_root;
   bool m_bShortTags;
@@ -97,10 +89,6 @@ private:
                             DependencyGraph::KindOf kindOf);
 
   bool parseImpl(const char *fileName);
-
-  // hook
-  static void (*m_hookHandler)(Package *package, const char *path,
-                               HphpHookUniqueId id);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

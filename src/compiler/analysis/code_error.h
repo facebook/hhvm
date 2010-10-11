@@ -14,113 +14,65 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __CODE_ERROR_H__
-#define __CODE_ERROR_H__
+#ifndef __COMPILER_ERROR_H__
+#define __COMPILER_ERROR_H__
 
-#include <compiler/hphp.h>
-#include <util/json.h>
 #include <compiler/analysis/type.h>
+#include <util/json.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_BOOST_TYPES(ServerData);
 DECLARE_BOOST_TYPES(Construct);
-DECLARE_BOOST_TYPES(ErrorInfo);
-DECLARE_BOOST_TYPES(CodeError);
 
-class CodeError : public JSON::ISerializable {
-public:
-  enum ErrorType {
+namespace Compiler {
+///////////////////////////////////////////////////////////////////////////////
+
+enum ErrorType {
 #define CODE_ERROR_ENTRY(x) x,
 #include "compiler/analysis/code_error.inc"
 #undef CODE_ERROR_ENTRY
-    ErrorCount
-  };
-
-public:
-  CodeError(AnalysisResultPtr ar);
-
-  /**
-   * Record a coding error within the AST
-   */
-  void record(ConstructPtr self, ErrorType error, ConstructPtr construct1,
-              ConstructPtr construct2 = ConstructPtr(),
-              const char *data = NULL);
-  /**
-   * Record a coding error outside the AST
-   */
-  void record(ErrorType error, ConstructPtr construct1,
-              ConstructPtr construct2 = ConstructPtr(),
-              const char *data = NULL,
-              bool suppressed = false);
-
-  /**
-   * Record a BadTypeConversion error.
-   */
-  void record(ConstructPtr construct, Type::KindOf expected,
-              Type::KindOf actual);
-
-  /**
-   * Implements JSON::ISerializable.
-   */
-  virtual void serialize(JSON::OutputStream &out) const;
-
-  /**
-   * Dump JavaScript output to stderr.
-   */
-  void dump(bool verbose) const;
-
-  /**
-   * Save JavaScript output to specified file.
-   */
-  void saveToFile(const char *filename, bool verbose,
-                  bool varWrapper = false) const;
-
-  /**
-   * Save code error to a database.
-   */
-  void saveToDB(ServerDataPtr server, int runId) const;
-
-  /**
-   * Whether specified type of error is present. Written for unit test.
-   */
-  bool exists(ErrorType type) const;
-  bool exists(bool verbose) const; // any error
-
-  static bool lookupErrorType(std::string error, ErrorType &result);
-
-private:
-  boost::weak_ptr<AnalysisResult> m_ar;
-  static std::vector<const char *> ErrorTexts;
-  static std::vector<const char *> &getErrorTexts();
-
-  typedef std::map<ConstructPtr, ErrorInfoPtr> ErrorInfoMap;
-  std::vector<ErrorInfoMap> m_errors;
-  mutable bool m_verbose;
-
-  void record(ErrorInfoPtr errorInfo);
-  bool filtered(int error) const;
+  ErrorCount
 };
 
-class ErrorInfo : public JSON::ISerializable {
-public:
-  ErrorInfo();
+/**
+ * Call this before analysis.
+ */
+void ClearErrors();
 
-  CodeError::ErrorType m_error;
-  ConstructPtr m_construct1;
-  ConstructPtr m_construct2;
-  Type::KindOf m_expected;
-  Type::KindOf m_actual;
-  std::string m_data;
-  bool m_suppressed;
+/**
+ * Record a coding error.
+ */
+void Error(ErrorType error, ConstructPtr construct);
 
-  /**
-   * Implements JSON::ISerializable.
-   */
-  virtual void serialize(JSON::OutputStream &out) const;
-};
+/**
+ * Record a coding error with an extra construct information.
+ */
+void Error(ErrorType error, ConstructPtr construct1, ConstructPtr construct2);
+
+/**
+ * Record a coding error with an extra string.
+ */
+void Error(ErrorType error, ConstructPtr construct, const std::string &data);
+
+/**
+ * Save JavaScript output to specified file.
+ */
+void SaveErrors(JSON::OutputStream &out);
+void SaveErrors(const char *filename, bool varWrapper = false);
+
+/**
+ * Write errors to stderr.
+ */
+void DumpErrors(); // stderr
+
+/**
+ * Whether specified type of error is present. Written for unit test.
+ */
+bool HasError(ErrorType type);
+bool HasError(); // any error
+
 ///////////////////////////////////////////////////////////////////////////////
-}
+}}
 
-#endif // __CODE_ERROR_H__
+#endif // __COMPILER_ERROR_H__

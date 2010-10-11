@@ -133,10 +133,6 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   }
 
   ClassScopePtr classScope = m_classScope.lock();
-  if (hasHphpNote("Volatile")) {
-    classScope->setVolatile();
-  }
-
   checkVolatile(ar);
 
   if (m_stmt) {
@@ -151,16 +147,14 @@ void ClassStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     if (cls) {
       if ((!cls->isInterface() && (m_parent.empty() || i > 0 )) ||
           (cls->isInterface() && (!m_parent.empty() && i == 0 ))) {
-        ar->getCodeError()->record(CodeError::InvalidDerivation,
-                                   shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName().c_str());
+        Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
+                        cls->getOriginalName());
       }
       if (dependencies->checkCircle(DependencyGraph::KindOfClassDerivation,
                                     m_originalName,
                                     cls->getOriginalName())) {
-        ar->getCodeError()->record(CodeError::InvalidDerivation,
-                                   shared_from_this(), ConstructPtr(),
-                                   cls->getOriginalName().c_str());
+        Compiler::Error(Compiler::InvalidDerivation, shared_from_this(),
+                        cls->getOriginalName());
         m_parent = "";
         m_base = ExpressionListPtr();
         classScope->clearBases();

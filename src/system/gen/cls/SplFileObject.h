@@ -78,7 +78,7 @@ class c_SplFileObject : public c_SplFileInfo {
   public: String t_fgetss(CVarRef v_allowable_tags);
   public: bool t_flock(CVarRef v_operation, Variant v_wouldblock);
   public: int64 t_fpassthru();
-  public: Variant t_fscanf(CVarRef v_format);
+  public: Variant t_fscanf(int num_args, CVarRef v_format, Array args = Array());
   public: int64 t_fseek(CVarRef v_offset, CVarRef v_whence);
   public: Variant t_fstat();
   public: int64 t_ftell();
@@ -90,12 +90,12 @@ class c_SplFileObject : public c_SplFileInfo {
   public: int64 t_getmaxlinelen();
   public: bool t_haschildren();
   public: int64 t_key();
-  public: Variant t_next();
-  public: Variant t_rewind();
-  public: Variant t_seek(CVarRef v_line_pos);
-  public: Variant t_setcsvcontrol(CVarRef v_delimiter = NAMSTR(s_sys_ss2d8b6f3b, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss228ee909, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
-  public: Variant t_setflags(CVarRef v_flags);
-  public: Variant t_setmaxlinelen(CVarRef v_max_len);
+  public: void t_next();
+  public: void t_rewind();
+  public: void t_seek(CVarRef v_line_pos);
+  public: void t_setcsvcontrol(CVarRef v_delimiter = NAMSTR(s_sys_ss2d8b6f3b, ","), CVarRef v_enclosure = NAMSTR(s_sys_ss228ee909, "\""), CVarRef v_escape = NAMSTR(s_sys_ss2a618761, "\\"));
+  public: void t_setflags(CVarRef v_flags);
+  public: void t_setmaxlinelen(CVarRef v_max_len);
   public: bool t_valid();
   DECLARE_METHOD_INVOKE_HELPERS(fscanf);
   DECLARE_METHOD_INVOKE_HELPERS(next);

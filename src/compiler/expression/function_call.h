@@ -51,6 +51,7 @@ public:
   void deepCopy(FunctionCallPtr exp);
 
   FunctionScopePtr getFuncScope() const { return m_funcScope; }
+
 protected:
   ExpressionPtr m_nameExp;
   std::string m_name;

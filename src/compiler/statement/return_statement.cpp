@@ -114,8 +114,6 @@ void ReturnStatement::inferTypes(AnalysisResultPtr ar) {
         } else {
           ConstructPtr self = shared_from_this();
           ret = m_exp->inferAndCheck(ar, Type::Some, false);
-          ar->getCodeError()->record(self, CodeError::BadReturnStatement,
-                                     self);
         }
       } else {
         TypePtr expected = Type::Some;
@@ -175,10 +173,6 @@ static bool checkCopyElision(FunctionScopePtr func, ExpressionPtr exp) {
 }
 
 void ReturnStatement::outputCPPImpl(CodeGenerator &cg, AnalysisResultPtr ar) {
-  if (hasHphpNote("C++")) {
-    cg_printf("%s", getEmbedded().c_str());
-  }
-
   bool braced = false;
   FunctionScopePtr func = dynamic_pointer_cast<FunctionScope>(ar->getScope());
   ClassScopePtr cls = ar->getClassScope();

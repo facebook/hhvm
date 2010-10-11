@@ -210,10 +210,6 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
   TypePtr objectType = m_object->inferAndCheck(ar, Type::Object, false);
 
   if (!m_property->is(Expression::KindOfScalarExpression)) {
-    // if dynamic property or method, we have nothing to find out
-    if (ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::UseDynamicProperty, self);
-    }
     m_property->inferAndCheck(ar, Type::String, false);
 
     // we also lost track of which class variable an expression is about, hence
@@ -276,8 +272,7 @@ TypePtr ObjectPropertyExpression::inferTypes(AnalysisResultPtr ar,
     FunctionScopePtr func = ar->getFunctionScope();
     if (func->isStatic()) {
       if (ar->isFirstPass()) {
-        ar->getCodeError()->record(self, CodeError::MissingObjectContext,
-                                   self);
+        Compiler::Error(Compiler::MissingObjectContext, self);
       }
       m_actualType = Type::Variant;
       return m_actualType;

@@ -34,17 +34,10 @@
 #include <runtime/base/builtin_functions.h>
 #include <runtime/base/zend/zend_printf.h>
 #include <runtime/base/zend/zend_printf.h>
-#include <compiler/hphp_unique.h>
 
 using namespace HPHP;
 using namespace std;
 using namespace boost;
-
-///////////////////////////////////////////////////////////////////////////////
-// statics
-
-void (*ScalarExpression::m_hookHandler)
-  (AnalysisResultPtr ar, ScalarExpressionPtr sc, HphpHookUniqueId id);
 
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
@@ -99,17 +92,6 @@ void ScalarExpression::appendEncapString(const std::string &value) {
 void ScalarExpression::toLower(bool funcCall /* = false */) {
   ASSERT(funcCall || !m_quoted);
   m_value = Util::toLower(m_value);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-// parser functions
-
-void ScalarExpression::onParse(AnalysisResultPtr ar) {
-  if (m_hookHandler) {
-    ScalarExpressionPtr self =
-      dynamic_pointer_cast<ScalarExpression>(shared_from_this());
-    m_hookHandler(ar, self, onScalarExpressionParse);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -243,13 +225,7 @@ TypePtr ScalarExpression::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     break;
   }
 
-  TypePtr ret = checkTypesImpl(ar, type, actualType, coerce);
-  if (coerce && m_expectedType &&
-      !Type::IsLegalCast(ar, actualType, m_expectedType)) {
-    ar->getCodeError()->record(shared_from_this(), m_expectedType->getKindOf(),
-                               actualType->getKindOf());
-  }
-  return ret;
+  return checkTypesImpl(ar, type, actualType, coerce);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

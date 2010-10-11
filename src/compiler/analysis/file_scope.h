@@ -98,10 +98,6 @@ public:
   bool addClass(AnalysisResultPtr ar, ClassScopePtr classScope);
 
   void addDeclare(std::string d) { m_declares.push_back(d); }
-  void addSuppressError(CodeError::ErrorType e) {
-    m_suppressedErrors.push_back(e);
-  }
-  bool isErrorSuppressed(CodeError::ErrorType e);
 
   void addUsedLiteralString(std::string s) {
     m_usedLiteralStrings.insert(s);
@@ -206,7 +202,6 @@ private:
   ClassScopePtrVec m_ignoredClasses;
 
   std::vector<std::string> m_declares;
-  std::vector<CodeError::ErrorType> m_suppressedErrors;
 
   vertex_descriptor m_vertex;
 

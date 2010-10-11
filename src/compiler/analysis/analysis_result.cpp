@@ -414,9 +414,6 @@ bool AnalysisResult::declareFunction(FunctionScopePtr funcScope) {
   FunctionScopePtrVec &funcs = m_functionDecs[fname];
   if (funcs.size() == 1) {
     funcs[0]->setRedeclaring(0);
-    getCodeError()->record(CodeError::DeclaredFunctionTwice,
-                           funcs[0]->getStmt(),
-                           funcScope->getStmt());
   }
   if (funcs.size() > 0 ||
       Option::DynamicInvokeFunctions.find(fname) !=
@@ -437,10 +434,6 @@ bool AnalysisResult::declareClass(ClassScopePtr classScope) {
   ClassScopePtrVec &classes = m_classDecs[cname];
   if (classes.size() == 1) {
     classes[0]->setRedeclaring(ar, 0);
-    getCodeError()->record(CodeError::DeclaredClassTwice,
-                           classScope->getStmt(),
-                           classes[0]->getStmt(),
-                           classScope->getName().c_str());
   }
   if (classes.size() > 0) {
     classScope->setRedeclaring(ar, classes.size());
@@ -659,8 +652,8 @@ void AnalysisResult::analyzeProgram(bool system /* = false */) {
           FunctionScopePtr tmpFunc =
             cls->findFunction(ar, func->getName(), true, true);
           if (!tmpFunc || !tmpFunc->hasImpl()) {
-              getCodeError()->record(CodeError::MissingAbstractMethodImpl,
-                                     cls->getStmt(), func->getStmt());
+            Compiler::Error(Compiler::MissingAbstractMethodImpl,
+                            cls->getStmt(), func->getStmt());
           }
         }
         m_methodToClassDecs[iterMethod->first].push_back(cls);
@@ -1102,23 +1095,6 @@ bool AnalysisResult::outputAllPHP(CodeGenerator::Output output) {
     return true; // we are done
   default:
     ASSERT(false);
-  }
-
-  CodeErrorPtr codeError = getCodeError();
-  if (codeError->exists(CodeError::DeclaredFunctionTwice)) {
-    Logger::Error("Same function was declared twice."
-                  "\nCheck CodeError.js under DeclaredFunctionTwice.");
-    return false;
-  }
-  if (codeError->exists(CodeError::DeclaredClassTwice)) {
-    Logger::Error("Same class was declared twice."
-                  "\nCheck CodeError.js under DeclaredClassTwice.");
-    return false;
-  }
-  if (codeError->exists(CodeError::BadPHPIncludeFile)) {
-    Logger::Error("There are some bad include_once or require_once statements."
-                  "\nCheck CodeError.js under BadPHPIncludeFile.");
-    return false;
   }
 
   return true;
@@ -3984,16 +3960,15 @@ AnalysisResult::getMethodSlot(const std::string & mname) const {
 // Used for a user-provided method name that might not exist,
 // MethodSlot::runObj will return a call that creates this at runtime.
 const MethodSlot*
-AnalysisResult::getOrAddMethodSlot(const std::string & mname) {
+AnalysisResult::getOrAddMethodSlot(const std::string &mname,
+                                   ConstructPtr self) {
   if (!Option::UseMethodIndex) {
     return NULL;
   }
   StringToMethodSlotMap::const_iterator method =
     stringToMethodSlotMap.find(mname);
   if (method == stringToMethodSlotMap.end()) {
-    //Logger::Warning ("Method %s referenced but not defined.", mname.c_str());
-    getCodeError()->record(CodeError::UndefinedMethod, ConstructPtr(),
-                           ConstructPtr(), mname.c_str());
+    Compiler::Error(Compiler::UnknownObjectMethod, self, mname);
     // too late to add to stringToMethodSlotMap, getMethodSlot already done
     return errorMethodSlot;
   };

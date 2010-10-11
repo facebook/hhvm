@@ -19,7 +19,6 @@
 
 #include <compiler/analysis/symbol_table.h>
 #include <compiler/statement/statement.h>
-#include <compiler/hphp_unique.h>
 #include <compiler/analysis/class_scope.h>
 
 namespace HPHP {
@@ -43,7 +42,6 @@ DECLARE_BOOST_TYPES(FunctionScope);
  *   extract(name_value_pair)
  */
 class VariableTable : public SymbolTable {
-  friend class VariableTableHook;
   friend class AssignmentExpression;
 public:
   enum Attribute {
@@ -117,7 +115,6 @@ public:
 
 public:
   VariableTable(BlockScope &blockScope);
-  ~VariableTable();
 
   /**
    * Get/set attributes.
@@ -282,14 +279,6 @@ public:
   void collectCPPGlobalSymbols(StringPairVecVec &symbols, CodeGenerator &cg,
                                AnalysisResultPtr ar);
 
-  void *getHookData() { return m_hookData;}
-  static void setHookHandler(void (*hookHandler)(AnalysisResultPtr ar,
-                                                 VariableTable *variables,
-                                                 ExpressionPtr variable,
-                                                 HphpHookUniqueId id)) {
-    m_hookHandler = hookHandler;
-  }
-
   /**
    * Whether or not the specified jump table is empty.
    */
@@ -375,16 +364,9 @@ private:
 
   void outputCPPVariableInit(CodeGenerator &cg, AnalysisResultPtr ar,
                              bool inPseudoMain, const std::string &name);
-
-  // hook
-  static void (*m_hookHandler)(AnalysisResultPtr ar,
-                               VariableTable *variables,
-                               ExpressionPtr variable,
-                               HphpHookUniqueId id);
-  void *m_hookData;
 };
-}
 
 ///////////////////////////////////////////////////////////////////////////////
+}
 
 #endif // __VARIABLE_TABLE_H__

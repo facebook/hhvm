@@ -70,8 +70,8 @@ class c_RecursiveIteratorIterator : public ExtObjectData {
   public: Object t_getinneriterator();
   public: Variant t_current();
   public: Variant t_key();
-  public: Variant t_next();
-  public: Variant t_rewind();
+  public: void t_next();
+  public: void t_rewind();
   public: bool t_valid();
   public: Variant m_rsrc;
   DECLARE_METHOD_INVOKE_HELPERS(next);

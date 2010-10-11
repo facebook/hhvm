@@ -136,14 +136,6 @@ StatementPtr ForEachStatement::postOptimize(AnalysisResultPtr ar) {
 }
 
 void ForEachStatement::inferTypes(AnalysisResultPtr ar) {
-  if (ar->isFirstPass() &&
-      !m_array->is(Expression::KindOfSimpleVariable) &&
-      !m_array->is(Expression::KindOfArrayElementExpression) &&
-      !m_array->is(Expression::KindOfObjectPropertyExpression)) {
-    ConstructPtr self = shared_from_this();
-    ar->getCodeError()->record(self, CodeError::ComplexForEach, self);
-  }
-
   m_array->inferAndCheck(ar, m_ref ? Type::Variant : Type::Array, m_ref);
   if (m_name) {
     m_name->inferAndCheck(ar, Type::Primitive, true);

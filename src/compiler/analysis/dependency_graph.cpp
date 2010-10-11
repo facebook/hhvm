@@ -30,16 +30,6 @@ using namespace std;
 using namespace boost;
 
 ///////////////////////////////////////////////////////////////////////////////
-// statics
-
-bool (*DependencyGraph::m_hookHandler)
-  (DependencyGraph *depGraph, KindOf kindOf,
-   ConstructPtr childExp, ExpressionPtr parentExp,
-   CodeErrorPtr codeError, bool documentRoot,
-   std::string &child, std::string &parent,
-   HphpHookUniqueId id);
-
-///////////////////////////////////////////////////////////////////////////////
 // class Dependency
 
 Dependency::Dependency() : m_programCount(0) {
@@ -63,7 +53,7 @@ void DependencyGraph::clearCache(KindOf kindOf) {
 
 ///////////////////////////////////////////////////////////////////////////////
 
-string DependencyGraph::getIncludeFilePath(const string &source,
+string DependencyGraph::GetIncludeFilePath(const string &source,
                                            string expText, bool documentRoot) {
   if (expText.size() <= 2) return "";
 
@@ -73,7 +63,7 @@ string DependencyGraph::getIncludeFilePath(const string &source,
   // (exp)
   if (first == '(' && last == ')') {
     expText = expText.substr(1, expText.size() - 2);
-    return getIncludeFilePath(source, expText, documentRoot);
+    return GetIncludeFilePath(source, expText, documentRoot);
   }
 
   // 'string'
@@ -145,67 +135,38 @@ string DependencyGraph::getIncludeFilePath(const string &source,
       return expText;
     }
   }
+
   return "";
 }
 
-string DependencyGraph::parseInclude(const string &source,
-                                     ExpressionPtr parentExp,
-                                     bool documentRoot /* = false */) {
-  string included = parentExp->getText();
-  string parent = getIncludeFilePath(source, included, documentRoot);
-  return Util::canonicalize(parent);
-}
-
-bool DependencyGraph::checkInclude(ConstructPtr childExp,
-                                   ExpressionPtr parentExp,
-                                   CodeErrorPtr codeError,
-                                   bool documentRoot,
-                                   string &child,
-                                   string &parent) {
-  child = childExp->getLocation()->file;
-  parent = parseInclude(child, parentExp, documentRoot);
-  if ((parent.empty() || parent == child) &&
-      Option::AllowedBadPHPIncludes.find(parentExp->getText()) ==
-      Option::AllowedBadPHPIncludes.end()) {
-    if (codeError) {
-      codeError->record(CodeError::BadPHPIncludeFile, childExp);
+bool DependencyGraph::CheckInclude(std::string &included,
+                                   ConstructPtr includeExp,
+                                   ExpressionPtr fileExp, bool documentRoot) {
+  string container = includeExp->getLocation()->file;
+  included = GetIncludeFilePath(container, fileExp->getText(), documentRoot);
+  included = Util::canonicalize(included);
+  if (included.empty() || container == included) {
+    if (!included.empty()) {
+      Compiler::Error(Compiler::BadPHPIncludeFile, includeExp);
     }
     return false;
   }
-  if (parent.empty()) return false;
   return true;
 }
 
 string DependencyGraph::add(KindOf kindOf, ConstructPtr childExp,
-                            ExpressionPtr parentExp, CodeErrorPtr codeError,
+                            ExpressionPtr parentExp,
                             bool documentRoot /* = false */) {
   string child = childExp->getLocation()->file;
   string parent;
 
-  switch (kindOf) {
-  case KindOfPHPInclude:
-    if (!checkInclude(childExp, parentExp, codeError,
-                      documentRoot, child, parent)) {
-      return "";
-    }
-    break;
-  default:
-    if (!m_hookHandler ||
-        !m_hookHandler(this, kindOf, childExp, parentExp, codeError,
-                       documentRoot, child, parent,
-                       beforeDependencyGraphAdd)) {
-      return "";
-    }
-    break;
+  if (kindOf == KindOfPHPInclude &&
+      !CheckInclude(parent, childExp, parentExp, documentRoot)) {
+    return "";
   }
 
   string program; // no program is associated
-  add(kindOf, program, child, childExp, parent, ConstructPtr(), codeError);
-
-  if (m_hookHandler) {
-    m_hookHandler(this, kindOf, childExp, parentExp, codeError,
-                  documentRoot, child, parent, afterDependencyGraphAdd);
-  }
+  add(kindOf, program, child, childExp, parent, ConstructPtr());
   return parent;
 }
 
@@ -216,24 +177,9 @@ void DependencyGraph::add(KindOf kindOf, const string &childName,
   add(kindOf, program, childName, child, parentName, ConstructPtr());
 }
 
-void DependencyGraph::add(KindOf kindOf, const std::string &program,
-                          const std::string &parent, StatementPtr stmt) {
-  ASSERT(kindOf == KindOfProgramMaxInclude ||
-         kindOf == KindOfProgramMinInclude ||
-         kindOf == KindOfProgramUserFunction ||
-         kindOf == KindOfProgramUserClass);
-  add(kindOf, program, program, ConstructPtr(), parent, ConstructPtr());
-  if ((kindOf == KindOfProgramUserFunction ||
-       kindOf == KindOfProgramUserClass) && *stmt->getLocation()->file) {
-    add(KindOfProgramMinInclude, program, program, ConstructPtr(),
-        stmt->getLocation()->file, ConstructPtr());
-  }
-}
-
 void DependencyGraph::add(KindOf kindOf, const string &program,
                           const string &childName, ConstructPtr child,
-                          const string &parentName, ConstructPtr parent,
-                          CodeErrorPtr codeError /* = CodeErrorPtr() */) {
+                          const string &parentName, ConstructPtr parent) {
   ASSERT(kindOf >= 0 && kindOf < KindOfCount);
   ASSERT(!childName.empty());
   ASSERT(!parentName.empty());
@@ -244,10 +190,10 @@ void DependencyGraph::add(KindOf kindOf, const string &program,
   if (!dependencies) {
     dependencies.reset(new DependencyPtrMap());
     m_reverses[kindOf][childName][parentName] = dependencies;
-  } else if (codeError) {
+  } else if (kindOf == KindOfPHPInclude) {
     // two identical file includes
-    codeError->record(CodeError::RedundantInclude, child,
-                      dependencies->begin()->first);
+    Compiler::Error(Compiler::RedundantInclude, child,
+                    dependencies->begin()->first);
   }
 
   DependencyPtr &dep = (*dependencies)[child];
@@ -295,8 +241,6 @@ void DependencyGraph::addParent(KindOf kindOf, const std::string &program,
       dep->m_programs.push_back(program);
     }
     m_parents[kindOf][parentName] = dep;
-  } else if (parent && parent->hasHphpNote("MasterCopy")) {
-    dep->m_parent = parent;
   }
 }
 
@@ -499,11 +443,6 @@ void DependencyGraph::saveToDB(ServerDataPtr server, int runId) const {
     const char *depText = dependencyTexts[kindOf];
 
     int k = kindOf;
-    if (k == KindOfProgramMaxInclude) {
-      k = KindOfPHPInclude; // all three share the same list of parents
-    } else if (k == KindOfProgramUserFunction) {
-      k = KindOfFunctionCall; // both share the same list of parents
-    }
     const StringToDependencyPtrMap &parents = m_parents[k];
 
     // non-orphaned parents

@@ -63,7 +63,7 @@ void ClassVariable::onParse(AnalysisResultPtr ar) {
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(var)->getName();
       if (variables->isPresent(name)) {
-        ar->getCodeError()->record(CodeError::DeclaredVariableTwice, exp);
+        Compiler::Error(Compiler::DeclaredVariableTwice, exp);
         m_declaration->removeElement(i--);
       } else {
         IParseHandlerPtr ph = dynamic_pointer_cast<IParseHandler>(exp);
@@ -73,7 +73,7 @@ void ClassVariable::onParse(AnalysisResultPtr ar) {
       const std::string &name =
         dynamic_pointer_cast<SimpleVariable>(exp)->getName();
       if (variables->isPresent(name)) {
-        ar->getCodeError()->record(CodeError::DeclaredVariableTwice, exp);
+        Compiler::Error(Compiler::DeclaredVariableTwice, exp);
         m_declaration->removeElement(i--);
       } else {
         variables->add(name, Type::Variant, false, ar, exp, m_modifiers);

@@ -172,7 +172,6 @@ public:
                Token &stmt);
   void onThrow(Token &out, Token &expr);
 
-  void addHphpNote(ConstructPtr c, const std::string &note);
   void onHphpNoteExpr(Token &out, Token &note, Token &expr);
   void onHphpNoteStatement(Token &out, Token &note, Token &stmt);
 

@@ -139,8 +139,7 @@ void StatementList::analyzeProgramImpl(AnalysisResultPtr ar) {
     // effect testing
     if (ar->isFirstPass() && !stmt->hasEffect() &&
         !stmt->is(Statement::KindOfStatementList)) {
-      ar->getCodeError()->record(shared_from_this(),
-                                 CodeError::StatementHasNoEffect, stmt);
+      Compiler::Error(Compiler::StatementHasNoEffect, stmt);
     }
 
     // changing AUTOLOAD to includes

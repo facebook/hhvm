@@ -122,7 +122,7 @@ TypePtr ParameterExpression::getTypeSpec(AnalysisResultPtr ar, bool error) {
     if (!cls || cls->isRedeclaring()) {
       if (error && !cls && ar->isFirstPass()) {
         ConstructPtr self = shared_from_this();
-        ar->getCodeError()->record(self, CodeError::UnknownClass, self);
+        Compiler::Error(Compiler::UnknownClass, self);
       }
       ret = Type::Some;
     } else {

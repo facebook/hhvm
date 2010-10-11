@@ -258,10 +258,6 @@ TypePtr Expression::checkTypesImpl(AnalysisResultPtr ar, TypePtr expectedType,
     ret = Type::Coerce(ar, expectedType, actualType);
     setTypes(actualType, expectedType);
   } else {
-    if (!Type::IsLegalCast(ar, actualType, expectedType)) {
-      ar->getCodeError()->record(shared_from_this(), expectedType->getKindOf(),
-                                 actualType->getKindOf());
-    }
     ret = Type::Intersection(ar, actualType, expectedType);
     setTypes(actualType, ret);
   }
@@ -374,8 +370,7 @@ TypePtr Expression::inferAssignmentTypes(AnalysisResultPtr ar, TypePtr type,
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
     if (var->getName() == "this" && ar->getClassScope()) {
       if (ar->isFirstPass()) {
-        ar->getCodeError()->record(variable, CodeError::ReassignThis,
-                                   variable);
+        Compiler::Error(Compiler::ReassignThis, variable);
       }
     }
     if (ar->getPhase() == AnalysisResult::LastInference && value) {
@@ -431,7 +426,7 @@ void Expression::CheckPassByReference(AnalysisResultPtr ar,
   if (param->hasContext(Expression::RefValue) &&
       !param->isRefable(true)) {
     param->setError(Expression::BadPassByRef);
-    ar->getCodeError()->record(CodeError::BadPassByReference, param);
+    Compiler::Error(Compiler::BadPassByReference, param);
   }
 }
 

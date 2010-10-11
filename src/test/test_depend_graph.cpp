@@ -106,29 +106,6 @@ bool TestDependGraph::TestFunctionCall() {
       "function test() { $a = new C(); $a->test();}",
       "", "c::test", "$a->test()");
 
-#ifdef HPHP_NOTE
-  // making sure a "MasterCopy" marked function will always be used for
-  // dependency's parent
-  {
-    Option::IncludeRoots["$_SERVER['PHP_ROOT']"] = "";
-    AnalysisResultPtr ar(new AnalysisResult());
-    BuiltinSymbols::Load(ar);
-    Parser::ParseString("<?php function test() {}", ar, "f1");
-    Parser::ParseString("<?php /*|MasterCopy|*/ function test() {}", ar, "f2");
-    ar->analyzeProgram();
-    ar->inferTypes();
-    DependencyGraphPtr dg = ar->getDependencyGraph();
-    ConstructPtr parent = dg->getParent(DependencyGraph::KindOfFunctionCall,
-                                        "test");
-    if (!parent || strcmp(parent->getLocation()->file, "f2") != 0) {
-      printf("%s:%d: incorrect parent found at %s:%d\n", __FILE__, __LINE__,
-             parent ? parent->getLocation()->file : "",
-             parent ? parent->getLocation()->line0 : 0);
-      return false;
-    }
-  }
-#endif
-
   return true;
 }
 
@@ -163,25 +140,5 @@ bool TestDependGraph::TestConstant() {
   VD4(Constant,
       "<?php class A { const B = 1;} $a = A::B;", "", "a::B", "a::B");
 
-  return true;
-}
-
-bool TestDependGraph::TestProgramMaxInclude() {
-  // TODO
-  return true;
-}
-
-bool TestDependGraph::TestProgramMinInclude() {
-  // TODO
-  return true;
-}
-
-bool TestDependGraph::TestProgramUserFunction() {
-  // TODO
-  return true;
-}
-
-bool TestDependGraph::TestProgramUserClass() {
-  // TODO
   return true;
 }

@@ -79,10 +79,7 @@ void StaticStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
     }
     SimpleVariablePtr var = dynamic_pointer_cast<SimpleVariable>(variable);
     if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
-      if (scope->getVariables()->setStaticInitVal(var->getName(), value)) {
-        ar->getCodeError()->record(CodeError::DeclaredStaticVariableTwice,
-                                   exp);
-      }
+      scope->getVariables()->setStaticInitVal(var->getName(), value);
     } else if (ar->getPhase() == AnalysisResult::AnalyzeAll) {
       // update initial value
       const string &name = var->getName();

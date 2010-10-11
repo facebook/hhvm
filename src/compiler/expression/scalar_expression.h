@@ -25,8 +25,7 @@ namespace HPHP {
 
 DECLARE_BOOST_TYPES(ScalarExpression);
 
-class ScalarExpression : public Expression, public IParseHandler {
-  friend class ScalarExpressionHook;
+class ScalarExpression : public Expression {
 public:
   ScalarExpression(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                    int type, const std::string &value, bool quoted = false);
@@ -50,9 +49,6 @@ public:
   virtual bool canonCompare(ExpressionPtr e) const;
   bool isQuoted() const { return m_quoted; }
 
-  // implementing IParseHandler
-  virtual void onParse(AnalysisResultPtr ar);
-
   int getType() const { return m_type;}
   const std::string &getString() const { return m_value;}
   void appendEncapString(const std::string &value);
@@ -70,12 +66,6 @@ public:
 
   std::string getCPPLiteralString(CodeGenerator &cg, bool *binary = NULL);
 
-  static void setHookHandler(void (*hookHandler)(AnalysisResultPtr ar,
-                                                 ScalarExpressionPtr sc,
-                                                 HphpHookUniqueId id)) {
-    m_hookHandler = hookHandler;
-  }
-
 private:
   int m_type;
   std::string m_value;
@@ -84,11 +74,6 @@ private:
   bool m_quoted;
   Variant m_variant; // value created for compile time optimization
   std::string m_comment; // for inlined constant name
-
-  // hook
-  static void (*m_hookHandler)(AnalysisResultPtr ar,
-                               ScalarExpressionPtr sc,
-                               HphpHookUniqueId id);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

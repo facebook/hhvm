@@ -135,7 +135,7 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_close());
+        return (t_close(), null);
       }
       HASH_GUARD_LITSTR(0x1F479267E49EF301LL, NAMSTR(s_sys_ss1b610cff, "read")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -161,7 +161,7 @@ Variant c_Directory::o_invoke_from_eval(const char *s, Eval::VariableEnvironment
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_rewind());
+        return (t_rewind(), null);
       }
       break;
     case 7:
@@ -227,7 +227,7 @@ Variant c_Directory::i_close(MethodCallPackage &mcp, CArrRef params) {
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-  return (self->t_close());
+  return (self->t_close(), null);
 }
 Variant c_Directory::i_read(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -257,7 +257,7 @@ Variant c_Directory::i_rewind(MethodCallPackage &mcp, CArrRef params) {
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-  return (self->t_rewind());
+  return (self->t_rewind(), null);
 }
 Variant c_Directory::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Directory *self = NULL;
@@ -285,7 +285,7 @@ Variant c_Directory::ifa_close(MethodCallPackage &mcp, int count, INVOKE_FEW_ARG
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("Directory::close", 0, 1);
-  return (self->t_close());
+  return (self->t_close(), null);
 }
 Variant c_Directory::ifa_read(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_Directory *self = NULL;
@@ -313,7 +313,7 @@ Variant c_Directory::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FEW_AR
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("Directory::rewind", 0, 1);
-  return (self->t_rewind());
+  return (self->t_rewind(), null);
 }
 bool c_Directory::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
@@ -461,14 +461,14 @@ Variant c_Directory::t_read() {
   return x_readdir(toObject(m_handle));
 } /* function */
 /* SRC: classes/directory.php line 16 */
-Variant c_Directory::t_rewind() {
+void c_Directory::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::rewind);
-  return (x_rewinddir(toObject(m_handle)), null);
+  x_rewinddir(toObject(m_handle));
 } /* function */
 /* SRC: classes/directory.php line 20 */
-Variant c_Directory::t_close() {
+void c_Directory::t_close() {
   INSTANCE_METHOD_INJECTION_BUILTIN(Directory, Directory::close);
-  return (x_closedir(toObject(m_handle)), null);
+  x_closedir(toObject(m_handle));
 } /* function */
 Object co_Directory(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_Directory)())->dynCreate(params, init));

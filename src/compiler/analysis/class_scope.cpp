@@ -189,8 +189,7 @@ void ClassScope::checkDerivation(AnalysisResultPtr ar, hphp_string_set &seen) {
     const string &base = m_bases[i];
 
     if (seen.find(base) != seen.end() || bases.find(base) != bases.end()) {
-      ar->getCodeError()->record(CodeError::InvalidDerivation, m_stmt,
-                                 ConstructPtr(), base.c_str());
+      Compiler::Error(Compiler::InvalidDerivation, m_stmt, base);
       if (i == 0 && !m_parent.empty()) {
         ASSERT(base == m_parent);
         m_parent.clear();
@@ -278,8 +277,7 @@ void ClassScope::collectMethods(AnalysisResultPtr ar,
         }
       }
     } else {
-      ar->getCodeError()->record(CodeError::UnknownBaseClass, m_stmt,
-                                 ConstructPtr(), base.c_str());
+      Compiler::Error(Compiler::UnknownBaseClass, m_stmt, base);
       if (base == m_parent) {
         ar->declareUnknownClass(m_parent);
         m_derivesFromRedeclaring = DirectFromRedeclared;
@@ -1285,9 +1283,6 @@ bool ClassScope::addFunction(AnalysisResultPtr ar,
   FunctionScopePtrVec &funcs = m_functions[funcScope->getName()];
   if (funcs.size() == 1) {
     funcs[0]->setRedeclaring(0);
-    ar->getCodeError()->record(CodeError::DeclaredFunctionTwice,
-                               funcScope->getStmt(),
-                               funcs[0]->getStmt());
   }
   if (funcs.size() > 0) {
     funcScope->setRedeclaring(funcs.size());

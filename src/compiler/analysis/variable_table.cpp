@@ -30,15 +30,10 @@
 #include <runtime/base/class_info.h>
 #include <util/util.h>
 
-using namespace HPHP;
 using namespace std;
 using namespace boost;
 
-void (*VariableTable::m_hookHandler)(AnalysisResultPtr ar,
-                                     VariableTable *variables,
-                                     ExpressionPtr variable,
-                                     HphpHookUniqueId id);
-
+namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 // StaticGlobalInfo
 
@@ -89,14 +84,7 @@ VariableTable::VariableTable(BlockScope &blockScope)
     : SymbolTable(blockScope), m_attribute(0), m_nextParam(0),
       m_hasGlobal(false), m_hasStatic(false),
       m_hasPrivate(false), m_hasNonStaticPrivate(false),
-      m_forcedVariants(0), m_hookData(NULL) {
-}
-
-VariableTable::~VariableTable() {
-  if (m_hookData) {
-    ASSERT(m_hookHandler);
-    m_hookHandler(AnalysisResultPtr(), this, ExpressionPtr(), hphpUniqueDtor);
-  }
+      m_forcedVariants(0) {
 }
 
 void VariableTable::getNames(std::set<string> &names,
@@ -426,10 +414,6 @@ TypePtr VariableTable::add(const string &name, TypePtr type,
   if (!implicit && ar->isFirstPass()) {
     if (!sym->getValue()) {
       sym->setValue(construct);
-    } else if (construct != sym->getValue() && checkError &&
-               !isGlobalTable(ar)) {
-      ar->getCodeError()->record(CodeError::DeclaredVariableTwice, construct,
-                                 sym->getValue());
     }
   }
   return type;
@@ -457,10 +441,9 @@ TypePtr VariableTable::checkVariable(const string &name, TypePtr type,
     bool isLocal = !sym->isGlobal() && !sym->isSystem();
     if (isLocal && !getAttribute(ContainsLDynamicVariable) &&
         ar->isFirstPass()) {
-      CodeError::ErrorType error = (ar->getScope()->getLoopNestedLevel() == 0 ?
-                                    CodeError::UseUndeclaredVariable :
-                                    CodeError::PossibleUndeclaredVariable);
-      ar->getCodeError()->record(error, construct);
+      if (ar->getScope()->getLoopNestedLevel() == 0) {
+        Compiler::Error(Compiler::UseUndeclaredVariable, construct);
+      }
       type = Type::Variant;
       coerce = true;
     }
@@ -499,7 +482,7 @@ Symbol *VariableTable::findProperty(ClassScopePtr &cls,
 
     if (!cls) {
       sym = getSymbol(name, true);
-      ar->getCodeError()->record(CodeError::UseUndeclaredVariable, construct);
+      Compiler::Error(Compiler::UseUndeclaredVariable, construct);
     }
   }
 
@@ -1958,4 +1941,7 @@ void VariableTable::outputCPPStaticVariables(CodeGenerator &cg,
     }
   }
   cg_printf("NULL,\n");
+}
+
+///////////////////////////////////////////////////////////////////////////////
 }

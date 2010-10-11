@@ -202,21 +202,7 @@ ExpressionPtr AssignmentExpression::postOptimize(AnalysisResultPtr ar) {
 TypePtr AssignmentExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                          bool coerce) {
 
-  if (VariableTable::m_hookHandler) {
-    VariableTable::m_hookHandler(ar, ar->getScope()->getVariables().get(),
-                                 m_variable,
-                                 beforeAssignmentExpressionInferTypes);
-  }
-
-  TypePtr ret = inferAssignmentTypes(ar, type, coerce, m_variable, m_value);
-
-  if (VariableTable::m_hookHandler) {
-    VariableTable::m_hookHandler(ar, ar->getScope()->getVariables().get(),
-                                 m_variable,
-                                 afterAssignmentExpressionInferTypes);
-  }
-
-  return ret;
+  return inferAssignmentTypes(ar, type, coerce, m_variable, m_value);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

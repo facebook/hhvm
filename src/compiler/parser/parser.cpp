@@ -75,6 +75,13 @@
 
 #include <util/preprocess.h>
 
+#ifdef FACEBOOK
+#include <../facebook/src/compiler/fb_compiler_hooks.h>
+#define RealSimpleFunctionCall FBSimpleFunctionCall
+#else
+#define RealSimpleFunctionCall SimpleFunctionCall
+#endif
+
 using namespace std;
 using namespace boost;
 
@@ -255,9 +262,10 @@ void Parser::onCall(Token &out, bool dynamic, Token &name, Token &params,
                        dynamic_pointer_cast<ExpressionList>(params->exp),
                        clsExp);
   } else {
-    SimpleFunctionCallPtr call =
-      NEW_EXP(SimpleFunctionCall, name->text(),
-              dynamic_pointer_cast<ExpressionList>(params->exp), clsExp);
+    SimpleFunctionCallPtr call
+      (new RealSimpleFunctionCall
+       (getLocation(), Expression::KindOfSimpleFunctionCall, name->text(),
+        dynamic_pointer_cast<ExpressionList>(params->exp), clsExp));
     out->exp = call;
     call->onParse(m_ar);
   }
@@ -329,10 +337,8 @@ void Parser::addEncap(Token &out, Token &list, Token &expr, int type) {
   if (type == -1) {
     exp = expr->exp;
   } else {
-    ScalarExpressionPtr scalar =
-      NEW_EXP(ScalarExpression, T_ENCAPSED_AND_WHITESPACE, expr->text(), true);
-    scalar->onParse(m_ar);
-    exp = scalar;
+    exp = NEW_EXP(ScalarExpression, T_ENCAPSED_AND_WHITESPACE,
+                  expr->text(), true);
   }
   expList->addElement(exp);
   out->exp = expList;
@@ -400,7 +406,6 @@ void Parser::onScalar(Token &out, int type, Token &scalar) {
   default:
     ASSERT(false);
   }
-  exp->onParse(m_ar);
   out->exp = exp;
 }
 
@@ -882,37 +887,17 @@ void Parser::onThrow(Token &out, Token &expr) {
   out->stmt = NEW_STMT(ThrowStatement, expr->exp);
 }
 
-void Parser::addHphpNote(ConstructPtr c, const std::string &note) {
-  if (note[0] == '@') {
-    CodeError::ErrorType e;
-    if (CodeError::lookupErrorType(note.substr(1), e)) {
-      c->addSuppressError(e);
-    } else {
-      c->addHphpNote(note);
-    }
-  } else {
-    c->addHphpNote(note);
-  }
-}
-
 void Parser::onHphpNoteExpr(Token &out, Token &note, Token &expr) {
-  addHphpNote(expr->exp, note->text());
   out->exp = expr->exp;
 }
 void Parser::onHphpNoteStatement(Token &out, Token &note, Token &stmt) {
-  addHphpNote(stmt->stmt, note->text());
   out->stmt = stmt->stmt;
 }
 
 void Parser::addHphpDeclare(Token &declare) {
-  m_ar->getFileScope()->addDeclare(declare->text());
 }
 
 void Parser::addHphpSuppressError(Token &error) {
-  CodeError::ErrorType e;
-  if (CodeError::lookupErrorType(error->text(), e)) {
-    m_ar->getFileScope()->addSuppressError(e);
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

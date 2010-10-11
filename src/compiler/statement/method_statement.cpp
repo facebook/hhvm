@@ -110,8 +110,7 @@ FunctionScopePtr MethodStatement::onParseImpl(AnalysisResultPtr ar) {
         dynamic_pointer_cast<ParameterExpression>((*m_params)[i]);
       if (param->isRef()) hasRef = true;
       if (!param->isOptional()) {
-        ar->getCodeError()->record(self, CodeError::RequiredAfterOptionalParam,
-                                   param);
+        Compiler::Error(Compiler::RequiredAfterOptionalParam, param);
         param->defaultToNull(ar);
       }
     }
@@ -123,8 +122,7 @@ FunctionScopePtr MethodStatement::onParseImpl(AnalysisResultPtr ar) {
         if (names.find(param->getName()) == names.end()) {
           names.insert(param->getName());
         } else {
-          ar->getCodeError()->record(self,
-                                     CodeError::RedundantParameter, param);
+          Compiler::Error(Compiler::RedundantParameter, param);
           for (int j = 0; j < 1000; j++) {
             string name = param->getName() + lexical_cast<string>(j);
             if (names.find(name) == names.end()) {
@@ -188,14 +186,11 @@ FunctionScopePtr MethodStatement::onParseImpl(AnalysisResultPtr ar) {
       } else {
         paramCount = -1;
         if (m_name != "__construct") {
-          ar->getCodeError()->record(self, CodeError::UnknownMagicMethod,
-                                     self);
           magic = false;
         }
       }
       if (paramCount >= 0 && paramCount != maxParam) {
-        ar->getCodeError()->record(self, CodeError::InvalidMagicMethod,
-                                   self);
+        Compiler::Error(Compiler::InvalidMagicMethod, self);
         magic = false;
       }
       if (magic) funcScope->setMagicMethod();
@@ -280,13 +275,11 @@ void MethodStatement::analyzeProgramImpl(AnalysisResultPtr ar) {
   if (ar->isFirstPass()) {
     ar->getDependencyGraph()->addParent(DependencyGraph::KindOfFunctionCall,
                                         "", getFullName(), shared_from_this());
-    if (hasHphpNote("Dynamic") ||
-        funcScope->isSepExtension() ||
+    if (funcScope->isSepExtension() ||
         BuiltinSymbols::IsDeclaredDynamic(m_name) ||
         Option::IsDynamicFunction(m_method, m_name) || Option::AllDynamic) {
       funcScope->setDynamic();
     }
-    if (hasHphpNote("Volatile")) funcScope->setVolatile();
   }
 
   funcScope->setIncludeLevel(ar->getIncludeLevel());

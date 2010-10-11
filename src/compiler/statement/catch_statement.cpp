@@ -105,7 +105,7 @@ void CatchStatement::inferTypes(AnalysisResultPtr ar) {
   m_valid = cls;
   if (!m_valid && ar->isFirstPass()) {
     ConstructPtr self = shared_from_this();
-    ar->getCodeError()->record(self, CodeError::UnknownClass, self);
+    Compiler::Error(Compiler::UnknownClass, self);
   }
 
   // This can never be a specific exception type, because a future exception

@@ -160,7 +160,7 @@ bool UnaryOpExpression::getScalarValue(Variant &value) {
 void UnaryOpExpression::onParse(AnalysisResultPtr ar) {
   if (m_op == T_EVAL) {
     ConstructPtr self = shared_from_this();
-    ar->getCodeError()->record(self, CodeError::UseEvaluation, self);
+    Compiler::Error(Compiler::UseEvaluation, self);
     ar->getFileScope()->setAttribute(FileScope::ContainsLDynamicVariable);
   }
 }
@@ -177,12 +177,6 @@ void UnaryOpExpression::analyzeProgram(AnalysisResultPtr ar) {
     StatementPtr stmt = ar->getStatementForSilencer();
     ASSERT(stmt);
     m_silencer = stmt->requireSilencers(1);
-  }
-  if (ar->isFirstPass()) {
-    ConstructPtr self = shared_from_this();
-    if (m_op == T_INCLUDE || m_op == T_REQUIRE) {
-      ar->getCodeError()->record(self, CodeError::UseInclude, self);
-    }
   }
   if (m_exp) m_exp->analyzeProgram(ar);
   if (ar->getPhase() == AnalysisResult::AnalyzeFinal && m_op == '@') {

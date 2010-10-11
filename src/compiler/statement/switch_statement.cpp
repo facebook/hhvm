@@ -157,11 +157,11 @@ void SwitchStatement::inferTypes(AnalysisResultPtr ar) {
         defaultCount++;
       } else if (checking && cond && ar->isFirstPass()) {
         defaults.push_back(i);
-        ar->getCodeError()->record(self, CodeError::CaseAfterDefault, stmt);
+        Compiler::Error(Compiler::CaseAfterDefault, stmt);
       }
     }
     if (defaultCount > 1 && ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::MoreThanOneDefault, m_cases);
+      Compiler::Error(Compiler::MoreThanOneDefault, m_cases);
     }
   }
 }

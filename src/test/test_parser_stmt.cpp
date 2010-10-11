@@ -77,17 +77,6 @@ bool TestParserStmt::TestFunctionStatement() {
   V("<?php function test ( $param1 ,  $param2 ) {return 0;}",
     "function test($param1, $param2) {\nreturn 0;\n}\n");
 
-#ifdef HPHP_NOTE
-  {
-    const char *input = "<?php /*|MasterCopy|*/ //note\nfunction test() {}";
-    AnalysisResultPtr ar(new AnalysisResult());
-    StatementListPtr tree = Parser::parseString(input, ar);
-    if (!(*tree)[0]->hasHphpNote("MasterCopy")) {
-      return false;
-    }
-  }
-#endif
-
   return true;
 }
 

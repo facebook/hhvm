@@ -95,16 +95,6 @@ StatementPtr UnsetStatement::postOptimize(AnalysisResultPtr ar) {
 
 void UnsetStatement::inferTypes(AnalysisResultPtr ar) {
   m_exp->inferAndCheck(ar, Type::Variant, true);
-  ConstructPtr self = shared_from_this();
-  VariableTablePtr variables = ar->getScope()->getVariables();
-  for (int i = 0; i < m_exp->getCount(); i++) {
-    ExpressionPtr exp = (*m_exp)[i];
-    if (ar->isFirstPass() &&
-        !exp->is(Expression::KindOfSimpleVariable) &&
-        !exp->is(Expression::KindOfArrayElementExpression)) {
-      ar->getCodeError()->record(self, CodeError::UseNotSupportedUnset, exp);
-    }
-  }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

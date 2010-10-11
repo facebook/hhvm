@@ -248,7 +248,7 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_setflags(a0));
+        return (t_setflags(a0), null);
       }
       break;
     case 14:
@@ -317,10 +317,10 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        if (count <= 0) return (t_setcsvcontrol());
-        else if (count == 1) return (t_setcsvcontrol(a0));
-        else if (count == 2) return (t_setcsvcontrol(a0, a1));
-        else return (t_setcsvcontrol(a0, a1, a2));
+        if (count <= 0) return (t_setcsvcontrol(), null);
+        else if (count == 1) return (t_setcsvcontrol(a0), null);
+        else if (count == 2) return (t_setcsvcontrol(a0, a1), null);
+        else return (t_setcsvcontrol(a0, a1, a2), null);
       }
       break;
     case 17:
@@ -489,17 +489,19 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         Variant a0;
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
         int count __attribute__((__unused__)) = params.size();
-        if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
+        if (count < 1) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
         std::vector<Eval::ExpressionPtr>::const_iterator it = params.begin();
         do {
           if (it == params.end()) break;
           a0 = (*it)->eval(env);
           it++;
         } while(false);
+        Array vargs;
         for (; it != params.end(); ++it) {
-          (*it)->eval(env);
+          vargs.append((*it)->eval(env));
         }
-        return (t_fscanf(a0));
+        if (count <= 1) return (t_fscanf(count, a0));
+        return (t_fscanf(count, a0,vargs));
       }
       break;
     case 37:
@@ -539,7 +541,7 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_seek(a0));
+        return (t_seek(a0), null);
       }
       break;
     case 42:
@@ -553,7 +555,7 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_rewind());
+        return (t_rewind(), null);
       }
       break;
     case 45:
@@ -599,7 +601,7 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_setmaxlinelen(a0));
+        return (t_setmaxlinelen(a0), null);
       }
       break;
     case 56:
@@ -613,7 +615,7 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        return (t_next());
+        return (t_next(), null);
       }
       HASH_GUARD_LITSTR(0x0890F9052322E838LL, NAMSTR(s_sys_ss2322e838, "fstat")) {
         const std::vector<Eval::ExpressionPtr> &params = caller->params();
@@ -636,7 +638,7 @@ Variant c_SplFileObject::o_invoke_from_eval(const char *s, Eval::VariableEnviron
 Variant c_SplFileObject::os_invoke_from_eval(const char *c, const char *s, Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *caller, int64 hash, bool fatal) {
   return c_SplFileInfo::os_invoke_from_eval(c, s, env, caller, hash, fatal);
 }
-CallInfo c_SplFileObject::ci_fscanf((void*)&c_SplFileObject::i_fscanf, (void*)&c_SplFileObject::ifa_fscanf, 1, 0, 0x0000000000000000LL);
+CallInfo c_SplFileObject::ci_fscanf((void*)&c_SplFileObject::i_fscanf, (void*)&c_SplFileObject::ifa_fscanf, 1, 1, 0x0000000000000000LL);
 CallInfo c_SplFileObject::ci_next((void*)&c_SplFileObject::i_next, (void*)&c_SplFileObject::ifa_next, 0, 0, 0x0000000000000000LL);
 CallInfo c_SplFileObject::ci_fseek((void*)&c_SplFileObject::i_fseek, (void*)&c_SplFileObject::ifa_fseek, 2, 0, 0x0000000000000000LL);
 CallInfo c_SplFileObject::ci_key((void*)&c_SplFileObject::i_key, (void*)&c_SplFileObject::ifa_key, 0, 0, 0x0000000000000000LL);
@@ -677,12 +679,13 @@ Variant c_SplFileObject::i_fscanf(MethodCallPackage &mcp, CArrRef params) {
     pobj->setDummy();
     self = pobj.get();
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
+  if (count < 1) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_fscanf(arg0));
+    if (count <= 1) return (self->t_fscanf(count, arg0));
+    return (self->t_fscanf(count,arg0, params.slice(1, count - 1, false)));
   }
 }
 Variant c_SplFileObject::i_next(MethodCallPackage &mcp, CArrRef params) {
@@ -698,7 +701,7 @@ Variant c_SplFileObject::i_next(MethodCallPackage &mcp, CArrRef params) {
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
-  return (self->t_next());
+  return (self->t_next(), null);
 }
 Variant c_SplFileObject::i_fseek(MethodCallPackage &mcp, CArrRef params) {
   int count __attribute__((__unused__)) = params.size();
@@ -812,13 +815,13 @@ Variant c_SplFileObject::i_setcsvcontrol(MethodCallPackage &mcp, CArrRef params)
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (self->t_setcsvcontrol());
+    if (count <= 0) return (self->t_setcsvcontrol(), null);
     CVarRef arg0((ad->getValue(pos)));
-    if (count == 1) return (self->t_setcsvcontrol(arg0));
+    if (count == 1) return (self->t_setcsvcontrol(arg0), null);
     CVarRef arg1((ad->getValue(pos = ad->iter_advance(pos))));
-    if (count == 2) return (self->t_setcsvcontrol(arg0, arg1));
+    if (count == 2) return (self->t_setcsvcontrol(arg0, arg1), null);
     CVarRef arg2((ad->getValue(pos = ad->iter_advance(pos))));
-    return (self->t_setcsvcontrol(arg0, arg1, arg2));
+    return (self->t_setcsvcontrol(arg0, arg1, arg2), null);
   }
 }
 Variant c_SplFileObject::i_getcsvcontrol(MethodCallPackage &mcp, CArrRef params) {
@@ -853,7 +856,7 @@ Variant c_SplFileObject::i_setflags(MethodCallPackage &mcp, CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_setflags(arg0));
+    return (self->t_setflags(arg0), null);
   }
 }
 Variant c_SplFileObject::i___construct(MethodCallPackage &mcp, CArrRef params) {
@@ -899,7 +902,7 @@ Variant c_SplFileObject::i_setmaxlinelen(MethodCallPackage &mcp, CArrRef params)
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_setmaxlinelen(arg0));
+    return (self->t_setmaxlinelen(arg0), null);
   }
 }
 Variant c_SplFileObject::i_getmaxlinelen(MethodCallPackage &mcp, CArrRef params) {
@@ -1044,7 +1047,7 @@ Variant c_SplFileObject::i_seek(MethodCallPackage &mcp, CArrRef params) {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_seek(arg0));
+    return (self->t_seek(arg0), null);
   }
 }
 Variant c_SplFileObject::i_flock(MethodCallPackage &mcp, CArrRef params) {
@@ -1178,7 +1181,7 @@ Variant c_SplFileObject::i_rewind(MethodCallPackage &mcp, CArrRef params) {
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
-  return (self->t_rewind());
+  return (self->t_rewind(), null);
 }
 Variant c_SplFileObject::ifa_fscanf(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileObject *self = NULL;
@@ -1191,8 +1194,15 @@ Variant c_SplFileObject::ifa_fscanf(MethodCallPackage &mcp, int count, INVOKE_FE
     pobj->setDummy();
     self = pobj.get();
   }
-  if (count != 1) return throw_wrong_arguments("SplFileObject::fscanf", count, 1, 1, 1);
-  return (self->t_fscanf(a0));
+  if (count < 1) return throw_missing_arguments("SplFileObject::fscanf", count+1, 1);
+  if (count <= 1) return (self->t_fscanf(count, a0));
+  Array params;
+  if (count >= 2) params.append(a1);
+  if (count >= 3) params.append(a2);
+  if (count >= 4) params.append(a3);
+  if (count >= 5) params.append(a4);
+  if (count >= 6) params.append(a5);
+  return (self->t_fscanf(count,a0, params));
 }
 Variant c_SplFileObject::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileObject *self = NULL;
@@ -1206,7 +1216,7 @@ Variant c_SplFileObject::ifa_next(MethodCallPackage &mcp, int count, INVOKE_FEW_
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("SplFileObject::next", 0, 1);
-  return (self->t_next());
+  return (self->t_next(), null);
 }
 Variant c_SplFileObject::ifa_fseek(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileObject *self = NULL;
@@ -1293,10 +1303,10 @@ Variant c_SplFileObject::ifa_setcsvcontrol(MethodCallPackage &mcp, int count, IN
     self = pobj.get();
   }
   if (count > 3) return throw_toomany_arguments("SplFileObject::setCsvControl", 3, 1);
-  if (count <= 0) return (self->t_setcsvcontrol());
-  if (count == 1) return (self->t_setcsvcontrol(a0));
-  if (count == 2) return (self->t_setcsvcontrol(a0, a1));
-  return (self->t_setcsvcontrol(a0, a1, a2));
+  if (count <= 0) return (self->t_setcsvcontrol(), null);
+  if (count == 1) return (self->t_setcsvcontrol(a0), null);
+  if (count == 2) return (self->t_setcsvcontrol(a0, a1), null);
+  return (self->t_setcsvcontrol(a0, a1, a2), null);
 }
 Variant c_SplFileObject::ifa_getcsvcontrol(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileObject *self = NULL;
@@ -1324,7 +1334,7 @@ Variant c_SplFileObject::ifa_setflags(MethodCallPackage &mcp, int count, INVOKE_
     self = pobj.get();
   }
   if (count != 1) return throw_wrong_arguments("SplFileObject::setFlags", count, 1, 1, 1);
-  return (self->t_setflags(a0));
+  return (self->t_setflags(a0), null);
 }
 Variant c_SplFileObject::ifa___construct(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileObject *self = NULL;
@@ -1355,7 +1365,7 @@ Variant c_SplFileObject::ifa_setmaxlinelen(MethodCallPackage &mcp, int count, IN
     self = pobj.get();
   }
   if (count != 1) return throw_wrong_arguments("SplFileObject::setMaxLineLen", count, 1, 1, 1);
-  return (self->t_setmaxlinelen(a0));
+  return (self->t_setmaxlinelen(a0), null);
 }
 Variant c_SplFileObject::ifa_getmaxlinelen(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileObject *self = NULL;
@@ -1481,7 +1491,7 @@ Variant c_SplFileObject::ifa_seek(MethodCallPackage &mcp, int count, INVOKE_FEW_
     self = pobj.get();
   }
   if (count != 1) return throw_wrong_arguments("SplFileObject::seek", count, 1, 1, 1);
-  return (self->t_seek(a0));
+  return (self->t_seek(a0), null);
 }
 Variant c_SplFileObject::ifa_flock(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileObject *self = NULL;
@@ -1593,7 +1603,7 @@ Variant c_SplFileObject::ifa_rewind(MethodCallPackage &mcp, int count, INVOKE_FE
     self = pobj.get();
   }
   if (count > 0) return throw_toomany_arguments("SplFileObject::rewind", 0, 1);
-  return (self->t_rewind());
+  return (self->t_rewind(), null);
 }
 bool c_SplFileObject::os_get_call_info(MethodCallPackage &mcp, int64 hash) {
   CStrRef s __attribute__((__unused__)) (mcp.name);
@@ -2095,9 +2105,7 @@ void c_SplFileObject::t___construct(Variant v_filename, Variant v_open_mode //  
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::__construct);
   bool oldInCtor = gasInCtor(true);
-  Variant v_file_name;
-
-  x_hphp_splfileobject___construct(GET_THIS(), toString(v_file_name), toString(v_open_mode), toBoolean(v_use_include_path), v_context);
+  x_hphp_splfileobject___construct(GET_THIS(), toString(v_filename), toString(v_open_mode), toBoolean(v_use_include_path), v_context);
   gasInCtor(oldInCtor);
 } /* function */
 /* SRC: classes/splfile.php line 409 */
@@ -2149,104 +2157,110 @@ int64 c_SplFileObject::t_fpassthru() {
   return x_hphp_splfileobject_fpassthru(GET_THIS());
 } /* function */
 /* SRC: classes/splfile.php line 578 */
-Variant c_SplFileObject::t_fscanf(CVarRef v_format) {
+Variant c_SplFileObject::t_fscanf(int num_args, CVarRef v_format, Array args /* = Array() */) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fscanf);
+  int v_argc = 0;
+  Array v_argv;
+
   {
-    const CallInfo *cit1 = NULL;
-    void *vt1 = NULL;
-    get_call_info_or_fail(cit1, vt1, NAMSTR(s_sys_ss0799d76e, "hphp_splfileobject_fscanf"));
-    return (cit1->getFuncFewArgs())(vt1, 1, GET_THIS(), null, null, null, null, null);
+    int tmp1((num_args));
+    v_argc = tmp1;
   }
+  {
+    const Array &tmp2((func_get_args(num_args, Array(ArrayInit(1, true).set(v_format).create()),args)));
+    v_argv = tmp2;
+  }
+  return x_hphp_splfileobject_fscanf(toInt64(v_argc), GET_THIS(), toString(v_format), v_argv);
 } /* function */
-/* SRC: classes/splfile.php line 604 */
+/* SRC: classes/splfile.php line 606 */
 int64 c_SplFileObject::t_fseek(CVarRef v_offset, CVarRef v_whence) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fseek);
   return x_hphp_splfileobject_fseek(GET_THIS(), toInt64(v_offset), toInt64(v_whence));
 } /* function */
-/* SRC: classes/splfile.php line 618 */
+/* SRC: classes/splfile.php line 620 */
 Variant c_SplFileObject::t_fstat() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fstat);
   return x_hphp_splfileobject_fstat(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 632 */
+/* SRC: classes/splfile.php line 634 */
 int64 c_SplFileObject::t_ftell() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::ftell);
   return x_hphp_splfileobject_ftell(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 652 */
+/* SRC: classes/splfile.php line 654 */
 bool c_SplFileObject::t_ftruncate(CVarRef v_size) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::ftruncate);
   return x_hphp_splfileobject_ftruncate(GET_THIS(), toInt64(v_size));
 } /* function */
-/* SRC: classes/splfile.php line 670 */
+/* SRC: classes/splfile.php line 672 */
 int64 c_SplFileObject::t_fwrite(CVarRef v_str, CVarRef v_length) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::fwrite);
   return x_hphp_splfileobject_fwrite(GET_THIS(), toString(v_str), toInt64(v_length));
 } /* function */
-/* SRC: classes/splfile.php line 682 */
+/* SRC: classes/splfile.php line 684 */
 Variant c_SplFileObject::t_getchildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getChildren);
   return null;
 } /* function */
-/* SRC: classes/splfile.php line 696 */
+/* SRC: classes/splfile.php line 698 */
 Variant c_SplFileObject::t_getcsvcontrol() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getCsvControl);
   return x_hphp_splfileobject_getcvscontrol(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 708 */
+/* SRC: classes/splfile.php line 710 */
 int64 c_SplFileObject::t_getflags() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getFlags);
   return x_hphp_splfileobject_getflags(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 722 */
+/* SRC: classes/splfile.php line 724 */
 int64 c_SplFileObject::t_getmaxlinelen() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::getMaxLineLen);
   return x_hphp_splfileobject_getmaxlinelen(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 735 */
+/* SRC: classes/splfile.php line 737 */
 bool c_SplFileObject::t_haschildren() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::hasChildren);
   return false;
 } /* function */
-/* SRC: classes/splfile.php line 751 */
+/* SRC: classes/splfile.php line 753 */
 int64 c_SplFileObject::t_key() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::key);
   return x_hphp_splfileobject_key(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 763 */
-Variant c_SplFileObject::t_next() {
+/* SRC: classes/splfile.php line 765 */
+void c_SplFileObject::t_next() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::next);
-  return (x_hphp_splfileobject_next(GET_THIS()), null);
+  x_hphp_splfileobject_next(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 775 */
-Variant c_SplFileObject::t_rewind() {
+/* SRC: classes/splfile.php line 777 */
+void c_SplFileObject::t_rewind() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::rewind);
-  return (x_hphp_splfileobject_rewind(GET_THIS()), null);
+  x_hphp_splfileobject_rewind(GET_THIS());
 } /* function */
-/* SRC: classes/splfile.php line 789 */
-Variant c_SplFileObject::t_seek(CVarRef v_line_pos) {
+/* SRC: classes/splfile.php line 791 */
+void c_SplFileObject::t_seek(CVarRef v_line_pos) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::seek);
-  return (x_hphp_splfileobject_seek(GET_THIS(), toInt64(v_line_pos)), null);
+  x_hphp_splfileobject_seek(GET_THIS(), toInt64(v_line_pos));
 } /* function */
-/* SRC: classes/splfile.php line 806 */
-Variant c_SplFileObject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
+/* SRC: classes/splfile.php line 808 */
+void c_SplFileObject::t_setcsvcontrol(CVarRef v_delimiter //  = NAMSTR(s_sys_ss2d8b6f3b, ",")
 , CVarRef v_enclosure //  = NAMSTR(s_sys_ss228ee909, "\"")
 , CVarRef v_escape //  = NAMSTR(s_sys_ss2a618761, "\\")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setCsvControl);
-  return (x_hphp_splfileobject_setcsvcontrol(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape)), null);
+  x_hphp_splfileobject_setcsvcontrol(GET_THIS(), toString(v_delimiter), toString(v_enclosure), toString(v_escape));
 } /* function */
-/* SRC: classes/splfile.php line 823 */
-Variant c_SplFileObject::t_setflags(CVarRef v_flags) {
+/* SRC: classes/splfile.php line 824 */
+void c_SplFileObject::t_setflags(CVarRef v_flags) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setFlags);
-  return (x_hphp_splfileobject_setflags(GET_THIS(), toInt64(v_flags)), null);
+  x_hphp_splfileobject_setflags(GET_THIS(), toInt64(v_flags));
 } /* function */
-/* SRC: classes/splfile.php line 838 */
-Variant c_SplFileObject::t_setmaxlinelen(CVarRef v_max_len) {
+/* SRC: classes/splfile.php line 839 */
+void c_SplFileObject::t_setmaxlinelen(CVarRef v_max_len) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::setMaxLineLen);
-  return (x_hphp_splfileobject_setmaxlinelen(GET_THIS(), toInt64(v_max_len)), null);
+  x_hphp_splfileobject_setmaxlinelen(GET_THIS(), toInt64(v_max_len));
 } /* function */
-/* SRC: classes/splfile.php line 850 */
+/* SRC: classes/splfile.php line 851 */
 bool c_SplFileObject::t_valid() {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileObject, SplFileObject::valid);
   return x_hphp_splfileobject_valid(GET_THIS());
@@ -2335,8 +2349,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        if (count <= 0) return (t_setinfoclass());
-        else return (t_setinfoclass(a0));
+        if (count <= 0) return (t_setinfoclass(), null);
+        else return (t_setinfoclass(a0), null);
       }
       break;
     case 6:
@@ -2555,8 +2569,8 @@ Variant c_SplFileInfo::o_invoke_from_eval(const char *s, Eval::VariableEnvironme
         for (; it != params.end(); ++it) {
           (*it)->eval(env);
         }
-        if (count <= 0) return (t_setfileclass());
-        else return (t_setfileclass(a0));
+        if (count <= 0) return (t_setfileclass(), null);
+        else return (t_setfileclass(a0), null);
       }
       break;
     case 39:
@@ -2881,9 +2895,9 @@ Variant c_SplFileInfo::i_setfileclass(MethodCallPackage &mcp, CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (self->t_setfileclass());
+    if (count <= 0) return (self->t_setfileclass(), null);
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_setfileclass(arg0));
+    return (self->t_setfileclass(arg0), null);
   }
 }
 Variant c_SplFileInfo::i_setinfoclass(MethodCallPackage &mcp, CArrRef params) {
@@ -2902,9 +2916,9 @@ Variant c_SplFileInfo::i_setinfoclass(MethodCallPackage &mcp, CArrRef params) {
   {
     ArrayData *ad(params.get());
     ssize_t pos = ad ? ad->iter_begin() : ArrayData::invalid_index;
-    if (count <= 0) return (self->t_setinfoclass());
+    if (count <= 0) return (self->t_setinfoclass(), null);
     CVarRef arg0((ad->getValue(pos)));
-    return (self->t_setinfoclass(arg0));
+    return (self->t_setinfoclass(arg0), null);
   }
 }
 Variant c_SplFileInfo::i___tostring(MethodCallPackage &mcp, CArrRef params) {
@@ -3332,8 +3346,8 @@ Variant c_SplFileInfo::ifa_setfileclass(MethodCallPackage &mcp, int count, INVOK
     self = pobj.get();
   }
   if (count > 1) return throw_toomany_arguments("SplFileInfo::setFileClass", 1, 1);
-  if (count <= 0) return (self->t_setfileclass());
-  return (self->t_setfileclass(a0));
+  if (count <= 0) return (self->t_setfileclass(), null);
+  return (self->t_setfileclass(a0), null);
 }
 Variant c_SplFileInfo::ifa_setinfoclass(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileInfo *self = NULL;
@@ -3347,8 +3361,8 @@ Variant c_SplFileInfo::ifa_setinfoclass(MethodCallPackage &mcp, int count, INVOK
     self = pobj.get();
   }
   if (count > 1) return throw_toomany_arguments("SplFileInfo::setInfoClass", 1, 1);
-  if (count <= 0) return (self->t_setinfoclass());
-  return (self->t_setinfoclass(a0));
+  if (count <= 0) return (self->t_setinfoclass(), null);
+  return (self->t_setinfoclass(a0), null);
 }
 Variant c_SplFileInfo::ifa___tostring(MethodCallPackage &mcp, int count, INVOKE_FEW_ARGS_IMPL_ARGS) {
   c_SplFileInfo *self = NULL;
@@ -4215,16 +4229,16 @@ Object c_SplFileInfo::t_openfile(CVarRef v_mode //  = NAMSTR(s_sys_ss122506fb, "
   return x_hphp_splfileinfo_openfile(GET_THIS(), toString(v_mode), toBoolean(v_use_include_path), v_context);
 } /* function */
 /* SRC: classes/splfile.php line 355 */
-Variant c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5da6122e_1, "SplFileObject")
+void c_SplFileInfo::t_setfileclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss5da6122e_1, "SplFileObject")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setFileClass);
-  return (x_hphp_splfileinfo_setfileclass(GET_THIS(), toString(v_class_name)), null);
+  x_hphp_splfileinfo_setfileclass(GET_THIS(), toString(v_class_name));
 } /* function */
 /* SRC: classes/splfile.php line 371 */
-Variant c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss016dc059_1, "SplFileInfo")
+void c_SplFileInfo::t_setinfoclass(CVarRef v_class_name //  = NAMSTR(s_sys_ss016dc059_1, "SplFileInfo")
 ) {
   INSTANCE_METHOD_INJECTION_BUILTIN(SplFileInfo, SplFileInfo::setInfoClass);
-  return (x_hphp_splfileinfo_setinfoclass(GET_THIS(), toString(v_class_name)), null);
+  x_hphp_splfileinfo_setinfoclass(GET_THIS(), toString(v_class_name));
 } /* function */
 Object co_SplFileObject(CArrRef params, bool init /* = true */) {
   return Object((NEW(c_SplFileObject)())->dynCreate(params, init));

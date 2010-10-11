@@ -93,7 +93,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
           setAttribute(VariableTable::NeedGlobalPointer);
       }
       if (!cls && ar->isFirstPass()) {
-        ar->getCodeError()->record(self, CodeError::UnknownClass, self);
+        Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) m_params->inferAndCheck(ar, Type::Any, false);
       return Type::Object;
@@ -109,8 +109,7 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       if (m_params) {
         if (!m_dynamic && m_params->getCount()) {
           if (ar->isFirstPass()) {
-            ar->getCodeError()->record(self, CodeError::BadConstructorCall,
-                                       self);
+            Compiler::Error(Compiler::BadConstructorCall, self);
           }
           m_params->setOutputCount(0);
         }
@@ -129,10 +128,6 @@ TypePtr NewObjectExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
     return Type::CreateObjectType(m_name);
   } else {
     ar->containsDynamicClass();
-    if (ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::UseDynamicClass,
-                                 self);
-    }
     if (m_params) {
       m_params->markParams(false);
     }

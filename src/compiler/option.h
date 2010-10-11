@@ -67,11 +67,6 @@ public:
   static bool CachePHPFile;
 
   /**
-   * Allowed PHP includes that are otherwise found as bad.
-   */
-  static std::set<std::string> AllowedBadPHPIncludes;
-
-  /**
    * Legal root directory expressions in an include expression. For example,
    *
    *   include_once $PHP_ROOT . '/lib.php';

@@ -180,10 +180,6 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
   m_bindClass = true;
 
   if (m_name.empty()) {
-    // if dynamic property or method, we have nothing to find out
-    if (ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::UseDynamicMethod, self);
-    }
     m_nameExp->inferAndCheck(ar, Type::String, false);
     setInvokeParams(ar);
     // we have to use a variant to hold dynamic value
@@ -201,7 +197,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
       // but we cant do anything else with the result.
       resolveClass(ar, m_name);
       if (!ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
-        ar->getCodeError()->record(self, CodeError::UnknownObjectMethod, self);
+        Compiler::Error(Compiler::UnknownObjectMethod, self);
       }
     }
 
@@ -223,14 +219,9 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     if (!func) {
       if (!cls->hasAttribute(ClassScope::HasUnknownMethodHandler, ar)) {
         if (ar->classMemberExists(m_name, AnalysisResult::MethodName)) {
-          // TODO: we could try to find out class derivation is present...
-          ar->getCodeError()->record(self,
-                                     CodeError::DerivedObjectMethod, self);
-          // we have to make sure the method is in invoke list
           setDynamicByIdentifier(ar, m_name);
         } else {
-          ar->getCodeError()->record(self,
-                                     CodeError::UnknownObjectMethod, self);
+          Compiler::Error(Compiler::UnknownObjectMethod, self);
         }
       }
 
@@ -249,8 +240,7 @@ TypePtr ObjectMethodExpression::inferAndCheck(AnalysisResultPtr ar,
     FunctionScopePtr localfunc = ar->getFunctionScope();
     if (localfunc->isStatic()) {
       if (ar->isFirstPass()) {
-        ar->getCodeError()->record(self, CodeError::MissingObjectContext,
-                                   self);
+        Compiler::Error(Compiler::MissingObjectContext, self);
       }
       valid = false;
     }
@@ -391,7 +381,8 @@ bool ObjectMethodExpression::preOutputCPP(CodeGenerator &cg,
   }
   const MethodSlot *ms = NULL;
   if (!m_name.empty()) {
-    ms = ar->getOrAddMethodSlot(m_name);
+    ConstructPtr self = shared_from_this();
+    ms = ar->getOrAddMethodSlot(m_name, self);
   }
   cg_printf("MethodCallPackage mcp%d;\n", m_ciTemp);
   if (ms) {

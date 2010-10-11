@@ -21,7 +21,6 @@
 #include <util/json.h>
 #include <util/db_query.h>
 #include <util/db_conn.h>
-#include <compiler/hphp_unique.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
@@ -30,7 +29,6 @@ DECLARE_BOOST_TYPES(ServerData);
 DECLARE_BOOST_TYPES(Expression);
 DECLARE_BOOST_TYPES(Construct);
 DECLARE_BOOST_TYPES(Statement);
-DECLARE_BOOST_TYPES(CodeError);
 DECLARE_BOOST_TYPES(Dependency);
 DECLARE_BOOST_TYPES(DependencyGraph);
 
@@ -59,7 +57,6 @@ public:
  * ones.
  */
 class DependencyGraph : public JSON::ISerializable {
-  friend class DependencyGraphHook;
 public:
   enum KindOf {
 #define DEPENDENCY_ENTRY(x) KindOf ## x,
@@ -67,6 +64,10 @@ public:
 #undef DEPENDENCY_ENTRY
     KindOfCount
   };
+
+public:
+  static bool CheckInclude(std::string &included, ConstructPtr includeExp,
+                           ExpressionPtr fileExp, bool documentRoot);
 
 public:
   DependencyGraph();
@@ -77,8 +78,7 @@ public:
    * Returns the PHP file name it's being included, if any.
    */
   std::string add(KindOf kindOf, ConstructPtr childExp,
-                  ExpressionPtr parentExp, CodeErrorPtr codeError,
-                  bool documentRoot = false);
+                  ExpressionPtr parentExp, bool documentRoot = false);
 
   /**
    * Add unresolved KindOfClassDerivation or KindOfFunctionCall.
@@ -88,20 +88,12 @@ public:
            const std::string &parentName);
 
   /**
-   * Add Program dependencies: PrgramMaxInclude, ProgramMinInclude,
-   * ProgramUserFunction or ProgramUserClass
-   */
-  void add(KindOf kindOf, const std::string &program,
-           const std::string &parent, StatementPtr stmt);
-
-  /**
    * Add fully resolved dependencies. Returns true if newly added,
    * false if it's there already.
    */
   void add(KindOf kindOf, const std::string &program,
            const std::string &childName, ConstructPtr child,
-           const std::string &parentName, ConstructPtr parent,
-           CodeErrorPtr codeError = CodeErrorPtr());
+           const std::string &parentName, ConstructPtr parent);
 
   /**
    * These are all potential parents. With this list, we can then build
@@ -159,22 +151,6 @@ public:
                    const std::string &childName,
                    const std::string &parentName);
 
-  static std::string parseInclude(const std::string &source,
-                                  ExpressionPtr exp,
-                                  bool documentRoot = false);
-
-  static void setHookHandler(bool (*hookHandler)(DependencyGraph *depGraph,
-                                                 KindOf kindOf,
-                                                 ConstructPtr childExp,
-                                                 ExpressionPtr parentExp,
-                                                 CodeErrorPtr codeError,
-                                                 bool documentRoot,
-                                                 std::string &child,
-                                                 std::string &parent,
-                                                 HphpHookUniqueId id)) {
-    m_hookHandler = hookHandler;
-  }
-
 private:
   static std::vector<const char *> DependencyTexts;
   static std::vector<const char *> &getDependencyTexts();
@@ -198,7 +174,7 @@ private:
   mutable std::vector<StringConstructMapMap> m_allChildren;
   mutable std::vector<StringConstructMapMap> m_allParents;
 
-  static std::string getIncludeFilePath(const std::string &source,
+  static std::string GetIncludeFilePath(const std::string &source,
                                         std::string expText,
                                         bool documentRoot);
   static void dumpMapMap(std::string &out,
@@ -206,21 +182,10 @@ private:
 
   void clearCache(KindOf kindOf);
 
-  bool checkInclude(ConstructPtr childExp, ExpressionPtr parentExp,
-                    CodeErrorPtr codeError, bool documentRoot,
-                    std::string &child, std::string &parent);
-
   static void toJSON(JSON::OutputStream &out,
                      const std::vector<DependencyMapMap> &depMapMapList);
   static void toJSON(JSON::OutputStream &out,
                      const DependencyMapMap &depMapMap);
-
-  // hook
-  static bool (*m_hookHandler)(DependencyGraph *depGraph, KindOf kindOf,
-                               ConstructPtr childExp, ExpressionPtr parentExp,
-                               CodeErrorPtr codeError, bool documentRoot,
-                               std::string &child, std::string &parent,
-                               HphpHookUniqueId id);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

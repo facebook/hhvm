@@ -362,7 +362,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
   if (!params) {
     if (m_minParam > 0) {
       if (ar->isFirstPass()) {
-        ar->getCodeError()->record(CodeError::TooFewArgument, exp, m_stmt);
+        Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
       }
       valid = false;
       setDynamic();
@@ -373,7 +373,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
   int ret = 0;
   if (params->getCount() < m_minParam) {
     if (ar->isFirstPass()) {
-      ar->getCodeError()->record(CodeError::TooFewArgument, exp, m_stmt);
+      Compiler::Error(Compiler::TooFewArgument, exp, m_stmt);
     }
     valid = false;
     setDynamic();
@@ -383,7 +383,7 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       ret = params->getCount() - m_maxParam;
     } else {
       if (ar->isFirstPass()) {
-        ar->getCodeError()->record(CodeError::TooManyArgument, exp, m_stmt);
+        Compiler::Error(Compiler::TooManyArgument, exp, m_stmt);
       }
       valid = false;
       setDynamic();
@@ -419,12 +419,13 @@ int FunctionScope::inferParamTypes(AnalysisResultPtr ar, ConstructPtr exp,
       if (m_paramTypeSpecs[i] &&
           ar->getPhase() == AnalysisResult::LastInference) {
         if (!Type::Inferred(ar, expType, m_paramTypeSpecs[i])) {
+          string msg;
           const char *file = m_stmt->getLocation()->file;
-          Logger::Error("%s: parameter %d of %s requires %s, called with %s",
-                        file, i, m_name.c_str(),
-                        m_paramTypeSpecs[i]->toString().c_str(),
-                        expType->toString().c_str());
-          ar->getCodeError()->record(CodeError::BadArgumentType, m_stmt);
+          Util::string_printf
+            (msg, "%s: parameter %d of %s requires %s, called with %s",
+             file, i, m_name.c_str(), m_paramTypeSpecs[i]->toString().c_str(),
+             expType->toString().c_str());
+          Compiler::Error(Compiler::BadArgumentType, m_stmt, msg);
         }
       }
       TypePtr paramType = getParamType(i);
@@ -622,9 +623,7 @@ void FunctionScope::outputCPP(CodeGenerator &cg, AnalysisResultPtr ar) {
                 i, m_name.c_str(), specType->getName().c_str(),
                 Option::VariablePrefix, param->getName().c_str());
     } else {
-      Logger::Error("parameter %d of %s: improper type hint %s",
-                    i, m_name.c_str(), specType->toString().c_str());
-      return;
+      ASSERT(false);
     }
   }
 

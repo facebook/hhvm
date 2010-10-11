@@ -50,14 +50,7 @@ using namespace boost;
 ///////////////////////////////////////////////////////////////////////////////
 // statics
 
-std::map<std::string, int>SimpleFunctionCall::FunctionTypeMap;
-
-#define CHECK_HOOK(n)                                   \
-  (SimpleFunctionCall::m_hookHandler ?                  \
-   SimpleFunctionCall::m_hookHandler(ar, this, n) : 0)
-
-Expression *(*SimpleFunctionCall::m_hookHandler)
-  (AnalysisResultPtr ar, SimpleFunctionCall *call, HphpHookUniqueId id);
+std::map<std::string, int> SimpleFunctionCall::FunctionTypeMap;
 
 void SimpleFunctionCall::InitFunctionTypeMap() {
   if (FunctionTypeMap.empty()) {
@@ -89,6 +82,13 @@ void SimpleFunctionCall::InitFunctionTypeMap() {
   }
 }
 
+static class FunctionTypeMapInitializer {
+public:
+  FunctionTypeMapInitializer() {
+    SimpleFunctionCall::InitFunctionTypeMap();
+  }
+} s_function_type_map_initializer;
+
 ///////////////////////////////////////////////////////////////////////////////
 // constructors/destructors
 
@@ -100,14 +100,11 @@ SimpleFunctionCall::SimpleFunctionCall
     m_type(UnknownType), m_dynamicConstant(false),
     m_parentClass(false), m_builtinFunction(false), m_noPrefix(false),
     m_invokeFewArgsDecision(true),
-    m_dynamicInvoke(false), m_safe(0), m_arrayParams(false),
-    m_hookData(NULL) {
+    m_dynamicInvoke(false), m_safe(0), m_arrayParams(false) {
 
   if (!m_class && m_className.empty()) {
     m_dynamicInvoke = Option::DynamicInvokeFunctions.find(m_name) !=
       Option::DynamicInvokeFunctions.end();
-
-    if (FunctionTypeMap.empty()) InitFunctionTypeMap();
     map<string, int>::const_iterator iter =
       FunctionTypeMap.find(m_name);
     if (iter != FunctionTypeMap.end()) {
@@ -116,18 +113,10 @@ SimpleFunctionCall::SimpleFunctionCall
   }
 }
 
-SimpleFunctionCall::~SimpleFunctionCall() {
-  if (m_hookData) {
-    ASSERT(m_hookHandler);
-    m_hookHandler(AnalysisResultPtr(), this, hphpUniqueDtor);
-  }
-}
-
 ExpressionPtr SimpleFunctionCall::clone() {
   SimpleFunctionCallPtr exp(new SimpleFunctionCall(*this));
   FunctionCall::deepCopy(exp);
   exp->m_safeDef = Clone(m_safeDef);
-  exp->m_hookData = 0;
   return exp;
 }
 
@@ -140,7 +129,6 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
   FileScopePtr fs = ar->getFileScope();
   ConstructPtr self = shared_from_this();
   if (m_className.empty()) {
-    CodeErrorPtr codeError = ar->getCodeError();
     switch (m_type) {
     case CreateFunction:
       if (m_params->getCount() == 2 &&
@@ -169,7 +157,6 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
       ar->getFileScope()->setAttribute(FileScope::VariableArgument);
       break;
     case ExtractFunction:
-      ar->getCodeError()->record(self, CodeError::UseExtract, self);
       ar->getFileScope()->setAttribute(FileScope::ContainsLDynamicVariable);
       ar->getFileScope()->setAttribute(FileScope::ContainsExtract);
       break;
@@ -177,16 +164,12 @@ void SimpleFunctionCall::onParse(AnalysisResultPtr ar) {
       ar->getFileScope()->setAttribute(FileScope::ContainsDynamicVariable);
       ar->getFileScope()->setAttribute(FileScope::ContainsCompact);
       break;
-    case ShellExecFunction:
-      ar->getCodeError()->record(self, CodeError::UseShellExec, self);
-      break;
     case GetDefinedVarsFunction:
       ar->getFileScope()->setAttribute(FileScope::ContainsDynamicVariable);
       ar->getFileScope()->setAttribute(FileScope::ContainsGetDefinedVars);
       ar->getFileScope()->setAttribute(FileScope::ContainsCompact);
       break;
     default:
-      CHECK_HOOK(onSimpleFunctionCallFuncType);
       break;
     }
   }
@@ -247,8 +230,7 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
   if (m_params) m_params->analyzeProgram(ar);
 
   if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
-
-    CHECK_HOOK(onSimpleFunctionCallAnalyzeInclude);
+    onAnalyzeInclude(ar);
 
     ConstructPtr self = shared_from_this();
 
@@ -279,9 +261,6 @@ void SimpleFunctionCall::analyzeProgram(AnalysisResultPtr ar) {
           ConstantTablePtr constants = block->getConstants();
           if (constants != ar->getConstants()) {
             constants->add(varName, Type::Some, value, ar, self);
-            if (name->hasHphpNote("Dynamic")) {
-              constants->setDynamic(ar, varName);
-            }
           }
         }
       }
@@ -603,11 +582,12 @@ ExpressionPtr SimpleFunctionCall::preOptimize(AnalysisResultPtr ar) {
   ar->preOptimize(m_safeDef);
   ar->preOptimize(m_nameExp);
   ar->preOptimize(m_params);
+
   if (ar->getPhase() >= AnalysisResult::FirstPreOptimize) {
-    if (Expression *rep = CHECK_HOOK(onSimpleFunctionCallPreOptimize)) {
-      ExpressionPtr tmp(rep);
-      ar->preOptimize(tmp);
-      return tmp;
+    ExpressionPtr rep = onPreOptimize(ar);
+    if (rep) {
+      ar->preOptimize(rep);
+      return rep;
     }
   }
 
@@ -812,10 +792,11 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         }
       }
       if (varName.empty() && ar->isFirstPass()) {
-        ar->getCodeError()->record(self, CodeError::BadDefine, self);
+        Compiler::Error(Compiler::BadDefine, self);
       }
     } else if (m_type == ExtractFunction) {
-      ar->getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
+      ar->getScope()->getVariables()->
+        forceVariants(ar, VariableTable::AnyVars);
     }
   }
 
@@ -843,7 +824,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     }
     if (!cls) {
       if (ar->isFirstPass()) {
-        ar->getCodeError()->record(self, CodeError::UnknownClass, self);
+        Compiler::Error(Compiler::UnknownClass, self);
       }
       if (m_params) {
         m_params->inferAndCheck(ar, Type::Some, false);
@@ -871,8 +852,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
           funcThis->isStatic()) {
         func->setDynamic();
         if (ar->isFirstPass()) {
-          ar->getCodeError()->record(self, CodeError::MissingObjectContext,
-                                     self);
+          Compiler::Error(Compiler::MissingObjectContext, self);
           errorFlagged = true;
         }
         func.reset();
@@ -890,7 +870,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
         setAttribute(VariableTable::NeedGlobalPointer);
     }
     if (!func && !errorFlagged && ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::UnknownFunction, self);
+      Compiler::Error(Compiler::UnknownFunction, self);
     }
     if (m_params) {
       if (func) {
@@ -917,7 +897,7 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
 
   m_builtinFunction = (!func->isUserFunction() || func->isSepExtension());
 
-  CHECK_HOOK(beforeSimpleFunctionCallCheck);
+  beforeCheck(ar);
 
   m_valid = true;
   TypePtr rtype = checkParamsAndReturn(ar, type, coerce, func, m_arrayParams);
@@ -943,8 +923,6 @@ TypePtr SimpleFunctionCall::inferAndCheck(AnalysisResultPtr ar, TypePtr type,
     rtype = checkTypesImpl(ar, type, atype, coerce);
     m_voidReturn = m_voidWrapper = false;
   }
-
-  CHECK_HOOK(afterSimpleFunctionCallCheck);
 
   return rtype;
 }
@@ -1002,7 +980,7 @@ void SimpleFunctionCall::outputPHP(CodeGenerator &cg, AnalysisResultPtr ar) {
 }
 
 bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
-    int state) {
+                                      int state) {
   if (m_validClass && m_classScope && m_classScope->isRedeclaring() &&
       (!m_funcScope || !m_funcScope->isStatic())) {
     /*
@@ -1088,7 +1066,8 @@ bool SimpleFunctionCall::preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar,
   } else {
     const MethodSlot *ms = NULL;
     if (!m_name.empty()) {
-      ms = ar->getOrAddMethodSlot(m_name);
+      ConstructPtr self = shared_from_this();
+      ms = ar->getOrAddMethodSlot(m_name, self);
     }
     if (safeCheck) {
       cg_printf("mcp%d.noFatal();\n", m_ciTemp);

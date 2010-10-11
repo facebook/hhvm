@@ -125,10 +125,6 @@ void GlobalStatement::inferTypes(AnalysisResultPtr ar) {
       }
       variables->clearAttribute(VariableTable::InsideGlobalStatement);
     } else {
-      if (ar->isFirstPass()) {
-        ar->getCodeError()->record(shared_from_this(),
-                                   CodeError::UseDynamicGlobal, exp);
-      }
       variables->forceVariants(ar, VariableTable::AnyVars);
       variables->setAttribute(VariableTable::ContainsLDynamicVariable);
       if (exp->is(Expression::KindOfDynamicVariable)) {

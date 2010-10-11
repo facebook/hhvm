@@ -148,8 +148,6 @@ public:
   /**
    * Testing type conversion for constants.
    */
-  static bool IsBadTypeConversion(AnalysisResultPtr ar, TypePtr from,
-                                  TypePtr to, bool coercing);
   static bool IsExactType(KindOf kindOf);
 
 private:

@@ -58,7 +58,7 @@ void IncludeExpression::onParse(AnalysisResultPtr ar) {
   preOptimize(ar);
   m_include = ar->getDependencyGraph()->add
     (DependencyGraph::KindOfPHPInclude, shared_from_this(), m_exp,
-     ar->getCodeError(), m_documentRoot);
+     m_documentRoot);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -73,40 +73,16 @@ void IncludeExpression::analyzeInclude(AnalysisResultPtr ar,
   ConstructPtr self = shared_from_this();
   FileScopePtr file = ar->findFileScope(include, ar->getPhase() <=
                                         AnalysisResult::AnalyzeInclude);
-  if (!file) {
-    ar->getCodeError()->record(self, CodeError::PHPIncludeFileNotFound, self);
+  if (!file && !include.empty()) {
+    Compiler::Error(Compiler::PHPIncludeFileNotFound, self);
     return;
   }
-  if (include.find("compiler/") != 0 ||
-      include.find("/compiler/") == string::npos) {
-    ar->getCodeError()->record(self, CodeError::PHPIncludeFileNotInLib,
-                               self, ConstructPtr(),
-                               include.c_str());
-  }
-
-  if (!isFileLevel()) { // Not unsupported but potentially bad
-    ar->getCodeError()->record(self, CodeError::UseDynamicInclude, self);
-  }
-
-  ar->getDependencyGraph()->add
-    (DependencyGraph::KindOfProgramMaxInclude,
-     ar->getName(), file->getName(), StatementPtr());
-  ar->getDependencyGraph()->addParent
-    (DependencyGraph::KindOfProgramMinInclude,
-     ar->getName(), file->getName(), StatementPtr());
   FunctionScopePtr func = ar->getFunctionScope();
   ar->getFileScope()->addIncludeDependency(ar, m_include,
                                            func && func->isInlined());
 }
 
 void IncludeExpression::analyzeProgram(AnalysisResultPtr ar) {
-  if (ar->isFirstPass()) {
-    ConstructPtr self = shared_from_this();
-    if (m_op == T_INCLUDE || m_op == T_REQUIRE) {
-      ar->getCodeError()->record(self, CodeError::UseInclude, self);
-    }
-  }
-
   string include = getCurrentInclude(ar);
   if (!include.empty()) {
     if (ar->getPhase() == AnalysisResult::AnalyzeInclude) {
@@ -131,7 +107,7 @@ ExpressionPtr IncludeExpression::preOptimize(AnalysisResultPtr ar) {
     if (m_include.empty()) {
       m_include = ar->getDependencyGraph()->add
         (DependencyGraph::KindOfPHPInclude, shared_from_this(), m_exp,
-         ar->getCodeError(), m_documentRoot);
+         m_documentRoot);
       m_depsSet = false;
     }
     if (!m_depsSet && !m_include.empty()) {

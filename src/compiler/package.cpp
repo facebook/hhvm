@@ -37,12 +37,6 @@ using namespace HPHP;
 using namespace std;
 
 ///////////////////////////////////////////////////////////////////////////////
-// statics
-
-void (*Package::m_hookHandler)(Package *package, const char *path,
-                               HphpHookUniqueId id);
-
-///////////////////////////////////////////////////////////////////////////////
 
 Package::Package(const char *root, bool bShortTags /* = true */,
                  bool bAspTags /* = false */)
@@ -118,10 +112,6 @@ void Package::addDirectory(const char *path, bool force) {
   addDirectory(path, "*.phpt", force);
 #endif
   addDirectory(path, "", force); // look for PHP files without postfix
-
-  if (m_hookHandler) {
-    m_hookHandler(this, path, onPackageAddDirectory);
-  }
 }
 
 void Package::addDependencyParents(const char *path, const char *postfix,

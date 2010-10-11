@@ -65,8 +65,8 @@ class c_ArrayIterator : public ExtObjectData {
   public:
   DECLARE_INVOKES_FROM_EVAL
   void init();
-  public: void t___construct(Variant v_array, Variant v_flags = 0LL /* SORT_REGULAR */);
-  public: c_ArrayIterator *create(Variant v_array, Variant v_flags = 0LL /* SORT_REGULAR */);
+  public: void t___construct(Variant v_array, Variant v_flags = 0LL);
+  public: c_ArrayIterator *create(Variant v_array, Variant v_flags = 0LL);
   public: ObjectData *dynCreate(CArrRef params, bool init = true);
   public: void dynConstruct(CArrRef params);
   public: void getConstructor(MethodCallPackage &mcp);
@@ -91,7 +91,7 @@ class c_ArrayIterator : public ExtObjectData {
   public: void t_seek(CVarRef v_position);
   public: void t_setflags(CVarRef v_flags);
   public: bool t_uasort(CVarRef v_cmp_function);
-  public: bool t_uksort(Variant v_cmp_function);
+  public: bool t_uksort(CVarRef v_cmp_function);
   public: bool t_valid();
   DECLARE_METHOD_INVOKE_HELPERS(getarraycopy);
   DECLARE_METHOD_INVOKE_HELPERS(next);

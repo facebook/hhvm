@@ -19,20 +19,20 @@
 
 #include <compiler/expression/function_call.h>
 #include <compiler/analysis/variable_table.h>
-#include <compiler/hphp_unique.h>
 
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
 DECLARE_BOOST_TYPES(SimpleFunctionCall);
 class SimpleFunctionCall : public FunctionCall, public IParseHandler {
-  friend class SimpleFunctionCallHook;
+public:
+  static void InitFunctionTypeMap();
+
 public:
   SimpleFunctionCall(EXPRESSION_CONSTRUCTOR_PARAMETERS,
                      const std::string &name, ExpressionListPtr params,
                      ExpressionPtr cls);
 
-  ~SimpleFunctionCall();
   DECLARE_BASE_EXPRESSION_VIRTUAL_FUNCTIONS;
   bool isDefineWithoutImpl(AnalysisResultPtr ar);
   void setValid() { m_valid = true; }
@@ -47,13 +47,12 @@ public:
   // implementing IParseHandler
   virtual void onParse(AnalysisResultPtr ar);
 
-  void *getHookData() { return m_hookData;}
-  static void setHookHandler(
-    Expression *(*hookHandler)(AnalysisResultPtr ar,
-                               SimpleFunctionCall *call,
-                               HphpHookUniqueId id)) {
-    m_hookHandler = hookHandler;
+  // extensible analysis by defining a subclass to be RealSimpleFunctionCall
+  virtual void onAnalyzeInclude(AnalysisResultPtr ar) {}
+  virtual ExpressionPtr onPreOptimize(AnalysisResultPtr ar) {
+    return ExpressionPtr();
   }
+  virtual void beforeCheck(AnalysisResultPtr ar) {}
 
   void addDependencies(AnalysisResultPtr ar);
   void addLateDependencies(AnalysisResultPtr ar);
@@ -68,7 +67,7 @@ public:
     int firstParam, bool &error);
   bool preOutputCPP(CodeGenerator &cg, AnalysisResultPtr ar, int state);
 
-private:
+protected:
   enum FunctionType {
     UnknownType,
     DefineFunction,
@@ -89,7 +88,6 @@ private:
   };
 
   static std::map<std::string, int> FunctionTypeMap;
-  static void InitFunctionTypeMap();
   int m_type;
   bool m_programSpecific;
   bool m_dynamicConstant;
@@ -109,11 +107,6 @@ private:
   bool m_arrayParams;
 
   ExpressionPtr optimize(AnalysisResultPtr ar);
-  // hook
-  static Expression* (*m_hookHandler)(AnalysisResultPtr ar,
-                                      SimpleFunctionCall *call,
-                                      HphpHookUniqueId id);
-  void *m_hookData;
 };
 
 ///////////////////////////////////////////////////////////////////////////////

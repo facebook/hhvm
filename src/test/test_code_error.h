@@ -33,7 +33,7 @@ class TestCodeError : public TestBase {
 #undef CODE_ERROR_ENTRY
 
  private:
-  bool Verify(HPHP::CodeError::ErrorType type, const char *src,
+  bool Verify(HPHP::Compiler::ErrorType type, const char *src,
               const char *file, int line, bool exists);
 };
 
@@ -41,11 +41,11 @@ class TestCodeError : public TestBase {
 // macros
 
 #define VE(type, src)                                                   \
-  if (!Count(Verify(CodeError::type, src, __FILE__, __LINE__, true)))   \
+  if (!Count(Verify(Compiler::type, src, __FILE__, __LINE__, true)))    \
     return false;                                                       \
 
 #define VEN(type, src)                                                  \
-  if (!Count(Verify(CodeError::type, src, __FILE__, __LINE__, false)))  \
+  if (!Count(Verify(Compiler::type, src, __FILE__, __LINE__, false)))   \
     return false;                                                       \
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -179,7 +179,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
 
   if (!cls) {
     if (ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::UnknownClass, self);
+      Compiler::Error(Compiler::UnknownClass, self);
     }
     m_valid = false;
   }
@@ -217,7 +217,7 @@ TypePtr StaticMemberExpression::inferTypes(AnalysisResultPtr ar,
       tp = cls->checkStatic(name, type, coerce, ar, self, p);
     }
     if (ar->isFirstPass() && p && !(p & VariableTable::VariableStatic)) {
-      ar->getCodeError()->record(self, CodeError::MissingObjectContext, self);
+      Compiler::Error(Compiler::MissingObjectContext, self);
     }
 
     m_valid = (p & VariableTable::VariableStatic) ||

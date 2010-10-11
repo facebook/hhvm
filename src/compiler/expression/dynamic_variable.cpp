@@ -89,16 +89,9 @@ TypePtr DynamicVariable::inferTypes(AnalysisResultPtr ar, TypePtr type,
                                     bool coerce) {
   ConstructPtr self = shared_from_this();
   if (m_context & (LValue | RefValue)) {
-    if (ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::UseLDynamicVariable, self);
-    }
     ar->getScope()->getVariables()->forceVariants(ar, VariableTable::AnyVars);
     ar->getScope()->
       getVariables()->setAttribute(VariableTable::ContainsLDynamicVariable);
-  } else {
-    if (ar->isFirstPass()) {
-      ar->getCodeError()->record(self, CodeError::UseRDynamicVariable, self);
-    }
   }
 
   m_exp->inferAndCheck(ar, Type::String, false);

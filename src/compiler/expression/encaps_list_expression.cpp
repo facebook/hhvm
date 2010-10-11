@@ -117,20 +117,12 @@ TypePtr EncapsListExpression::inferTypes(AnalysisResultPtr ar, TypePtr type,
       (*m_exps)[i]->inferAndCheck(ar, Type::String, false);
     }
   }
-
-  if (ar->isFirstPass() && m_type == '`') {
-    ConstructPtr self = shared_from_this();
-    ar->getCodeError()->record(self, CodeError::UseShellExec, self);
-  }
-
   return Type::String;
 }
 
 bool EncapsListExpression::canonCompare(ExpressionPtr e) const {
   if (!Expression::canonCompare(e)) return false;
-  EncapsListExpressionPtr el =
-    static_pointer_cast<EncapsListExpression>(e);
-
+  EncapsListExpressionPtr el = static_pointer_cast<EncapsListExpression>(e);
   return m_type == el->m_type;
 }
 

@@ -80,7 +80,7 @@ class c_ReflectionProperty : public ExtObjectData {
   public: void t_setaccessible();
   public: Variant t_getmodifiers();
   public: Variant t_getvalue(CVarRef v_obj = null_variant);
-  public: Variant t_setvalue(CVarRef v_obj, CVarRef v_value);
+  public: void t_setvalue(CVarRef v_obj, CVarRef v_value);
   public: Variant t_getdeclaringclass();
   public: Variant t_getdoccomment();
   public: static Variant t_export(CVarRef v_cls, CVarRef v_name, CVarRef v_ret) { return ti_export(NAMSTR(s_sys_ss4249a61c_1, "ReflectionProperty"), v_cls, v_name, v_ret); }

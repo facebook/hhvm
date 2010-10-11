@@ -38,8 +38,10 @@ bool TestCodeError::RunTests(const std::string &which) {
   return ret;
 }
 
-bool TestCodeError::Verify(CodeError::ErrorType type, const char *src,
+bool TestCodeError::Verify(Compiler::ErrorType type, const char *src,
                            const char *file, int line, bool exists) {
+  Compiler::ClearErrors();
+
   AnalysisResultPtr ar(new AnalysisResult());
   // for TestPHPIncludeFileNotInLib
   Compiler::Parser::ParseString("<?php ", ar, "f2");
@@ -47,13 +49,13 @@ bool TestCodeError::Verify(CodeError::ErrorType type, const char *src,
   BuiltinSymbols::Load(ar);
   ar->analyzeProgram();
   ar->inferTypes();
-  CodeErrorPtr ce = ar->getCodeError();
-  if (ce->exists(type) != exists) {
+  if (Compiler::HasError(type) != exists) {
     ostringstream code;
     CodeGenerator cg(&code);
     ar->outputAllCPP(cg);
     ostringstream error;
-    JSON::OutputStream(error) << ar->getCodeError();
+    JSON::OutputStream out(error);
+    Compiler::SaveErrors(out);
     printf("%s:%d: parsing %s\ncode error missing\n%s\n", file, line, src,
            error.str().c_str());
     return false;
@@ -64,8 +66,7 @@ bool TestCodeError::Verify(CodeError::ErrorType type, const char *src,
 ///////////////////////////////////////////////////////////////////////////////
 
 bool TestCodeError::TestBadPHPIncludeFile() {
-  VE(BadPHPIncludeFile, "<?php include $BAD.'unknown.php';");
-  VE(BadPHPIncludeFile, "<?php include_once $template_path;");
+  VE(BadPHPIncludeFile, "<?php include 'f1';");
   return true;
 }
 
@@ -74,65 +75,9 @@ bool TestCodeError::TestRedundantInclude() {
   return true;
 }
 
-bool TestCodeError::TestUseInclude() {
-  VE(UseInclude, "<?php include $_SERVER['PHP_ROOT'].'f2';");
-  VE(UseInclude, "<?php include $template_path;");
-  VE(UseInclude, "<?php require $_SERVER['PHP_ROOT'].'f2';");
-  VE(UseInclude, "<?php require $template_path;");
-  return true;
-}
-
 bool TestCodeError::TestPHPIncludeFileNotFound() {
   VE(PHPIncludeFileNotFound,  "<?php include $_SERVER['PHP_ROOT'].'a.php';");
   VEN(PHPIncludeFileNotFound, "<?php include_once $template_path;");
-#ifdef HPHP_NOTE
-  VEN(PHPIncludeFileNotFound, "<?php /*|@PHPIncludeFileNotFound|*/ include $_SERVER['PHP_ROOT'].'a.php';");
-#endif
-  return true;
-}
-
-bool TestCodeError::TestPHPIncludeFileNotInLib() {
-  VE(PHPIncludeFileNotInLib, "<?php include $_SERVER['PHP_ROOT'].'f2';");
-  return true;
-}
-
-bool TestCodeError::TestUseDynamicInclude() {
-  VE(UseDynamicInclude, "<?php if (true) include $_SERVER['PHP_ROOT'].'f2';");
-  return true;
-}
-
-bool TestCodeError::TestUseLDynamicVariable() {
-  VE(UseLDynamicVariable, "<?php $$a = 1;");
-  return true;
-}
-
-bool TestCodeError::TestUseRDynamicVariable() {
-  VE(UseRDynamicVariable, "<?php print $$a;");
-  return true;
-}
-
-bool TestCodeError::TestUseDynamicFunction() {
-  VE(UseDynamicFunction, "<?php $$a();");
-  return true;
-}
-
-bool TestCodeError::TestUseDynamicClass() {
-  VE(UseDynamicClass, "<?php new $$a();");
-  return true;
-}
-
-bool TestCodeError::TestUseDynamicProperty() {
-  VE(UseDynamicProperty, "<?php $obj->$a = 1;");
-  return true;
-}
-
-bool TestCodeError::TestUseDynamicMethod() {
-  VE(UseDynamicMethod, "<?php $obj->$a();");
-  return true;
-}
-
-bool TestCodeError::TestUseDynamicGlobal() {
-  VE(UseDynamicGlobal, "<?php function t() { global $$a;}");
   return true;
 }
 
@@ -141,32 +86,12 @@ bool TestCodeError::TestUseEvaluation() {
   return true;
 }
 
-bool TestCodeError::TestUseExtract() {
-  VE(UseExtract, "<?php extract($a);");
-  return true;
-}
-
-bool TestCodeError::TestUseShellExec() {
-  VE(UseShellExec, "<?php shell_exec('test');");
-  VE(UseShellExec, "<?php `test`;");
-  return true;
-}
-
-bool TestCodeError::TestUseNotSupportedUnset() {
-  VE(UseNotSupportedUnset,  "<?php unset($$b);");
-  return true;
-}
-
 bool TestCodeError::TestUseUndeclaredVariable() {
   VE(UseUndeclaredVariable, "<?php print $a;");
   VE(UseUndeclaredVariable, "<?php $a = 1; function t() { print $a;}");
-  VE(UseUndeclaredVariable, "<?php class T {} function t() { $a = new T(); print $a->a; }");
-  //VE(UseUndeclaredVariable, "<?php print $GLOBALS['a'];");
-  return true;
-}
-
-bool TestCodeError::TestPossibleUndeclaredVariable() {
-  VE(PossibleUndeclaredVariable, "<?php while(true) { print $a; $a = 1;}");
+  VE(UseUndeclaredVariable,
+     "<?php class T {} function t() { $a = new T(); print $a->a; }");
+  VE(UseUndeclaredVariable, "<?php print $GLOBALS['a'];");
   return true;
 }
 
@@ -199,22 +124,8 @@ bool TestCodeError::TestUnknownObjectMethod() {
   return true;
 }
 
-bool TestCodeError::TestDerivedObjectMethod() {
-  VE(DerivedObjectMethod,
-     "<?php class T { function test() { $this->a();}} "
-     "class R extends T { function a() {}}");
-  return true;
-}
-
-bool TestCodeError::TestUnknownMagicMethod() {
-  VE(UnknownMagicMethod,
-     "<?php class T { function __a() {}}");
-  return true;
-}
-
 bool TestCodeError::TestInvalidMagicMethod() {
-  VE(InvalidMagicMethod,
-     "<?php class T { function __tostring($a) {}}");
+  VE(InvalidMagicMethod, "<?php class T { function __tostring($a) {}}");
   return true;
 }
 
@@ -234,16 +145,6 @@ bool TestCodeError::TestBadConstructorCall() {
   return true;
 }
 
-bool TestCodeError::TestDeclaredClassTwice() {
-  VE(DeclaredClassTwice, "<?php class T {} class T {}");
-  return true;
-}
-
-bool TestCodeError::TestDeclaredFunctionTwice() {
-  VE(DeclaredFunctionTwice, "<?php function t() {} function t() {}");
-  return true;
-}
-
 bool TestCodeError::TestDeclaredVariableTwice() {
   VE(DeclaredVariableTwice, "<?php class T { var $a; var $a;}");
   VE(DeclaredVariableTwice, "<?php class T { var $a = 1; var $a;}");
@@ -258,34 +159,12 @@ bool TestCodeError::TestDeclaredVariableTwice() {
   VE(DeclaredVariableTwice, "<?php class T { var $a = 1; static $a;}");
   VE(DeclaredVariableTwice, "<?php class T { var $a; static $a = 1;}");
   VE(DeclaredVariableTwice, "<?php class T { var $a = 1; static $a = 2;}");
-  VE(DeclaredVariableTwice, "<?php function t() { static $a, $a;}");
-  VE(DeclaredVariableTwice, "<?php function t() { global $a, $a;}");
-  VE(DeclaredVariableTwice, "<?php function t() { global $a; global $a;}");
-  VE(DeclaredVariableTwice, "<?php { global $a; global $a;}");
-  VE(DeclaredVariableTwice, "<?php { static $a; static $a;}");
-  VE(DeclaredVariableTwice, "<?php { global $a; static $a;}");
-  VE(DeclaredVariableTwice, "<?php { static $a; global $a;}");
-
-  // negative cases
-  VEN(DeclaredVariableTwice, "<?php function t() { $a = 1; $a = 2;}");
-  VEN(DeclaredVariableTwice,
-      "<?php "
-      "function s() { global $a; $a = 1;}"
-      "function t() { global $a; $a = 1;}");
   return true;
 }
 
 bool TestCodeError::TestDeclaredConstantTwice() {
   VE(DeclaredConstantTwice, "<?php define('t', 1); define('t', 2);");
   VE(DeclaredConstantTwice, "<?php class T { const A = 1; const A = 1;}");
-  return true;
-}
-
-bool TestCodeError::TestDeclaredStaticVariableTwice() {
-  VE(DeclaredStaticVariableTwice,
-     "<?php function a() { static $a; if ($b) { static $a = 1; } } ");
-  VE(DeclaredStaticVariableTwice,
-     "<?php function test() { static $a; if ($b) { static $a = 1; } } ");
   return true;
 }
 
@@ -332,32 +211,11 @@ bool TestCodeError::TestTooManyArgument() {
   return true;
 }
 
-bool TestCodeError::TestBadTypeConversion() {
-  // negative cases
-  VEN(BadTypeConversion,
-      "<?php function t() { return array(0);} while($a = t()) {print $a[1];}");
-  VEN(BadTypeConversion, "<?php while($a = test()) { print $a[1];}");
-  VEN(BadTypeConversion, "<?php function t($a = 1) { print $a;} t(true);");
-  VEN(BadTypeConversion, "<?php function t() {return array(); return false;}");
-
-  return true;
-}
-
-bool TestCodeError::TestComplexForEach() {
-  VE(ComplexForEach, "<?php function test() {} foreach(test() as $a) {}");
-  return true;
-}
-
 bool TestCodeError::TestStatementHasNoEffect() {
   VE(StatementHasNoEffect, "<?php $a;");
   VE(StatementHasNoEffect, "<?php $a + $b;");
   VE(StatementHasNoEffect, "<?php 'test';");
   VE(StatementHasNoEffect, "<?php -$a;");
-  return true;
-}
-
-bool TestCodeError::TestBadReturnStatement() {
-  // we don't have a case yet
   return true;
 }
 
@@ -606,19 +464,3 @@ bool TestCodeError::TestBadArgumentType() {
 
   return true;
 }
-
-bool TestCodeError::TestUndefinedMethod() {
-  return true;
-  // compiler only test, so can't use here
-#if 0
-  VE(UndefinedMethod,
-     "<?php "
-     "class Foo {"
-     "}"
-     "$f = new Foo();"
-     "$f->undefinedMethod();");
-
-  return true;
-#endif
-}
-

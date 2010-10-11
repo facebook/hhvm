@@ -34,7 +34,6 @@ DECLARE_BOOST_TYPES(ClassScope);
 DECLARE_BOOST_TYPES(FileScope);
 DECLARE_BOOST_TYPES(FunctionScope);
 DECLARE_BOOST_TYPES(DependencyGraph);
-DECLARE_BOOST_TYPES(CodeError);
 DECLARE_BOOST_TYPES(Location);
 DECLARE_BOOST_TYPES(AnalysisResult);
 DECLARE_BOOST_TYPES(ScalarExpression);
@@ -117,12 +116,6 @@ public:
 
   DependencyGraphPtr getDependencyGraph() {
     return m_dependencyGraph;
-  }
-  CodeErrorPtr getCodeError() {
-    if (!m_codeError) {
-      m_codeError = CodeErrorPtr(new CodeError(shared_from_this()));
-    }
-    return m_codeError;
   }
   int getFunctionCount() const;
   int getClassCount() const;
@@ -392,7 +385,6 @@ private:
   Phase m_phase;
   int m_newlyInferred;
   DependencyGraphPtr m_dependencyGraph;
-  CodeErrorPtr m_codeError;
   StringToFileScopePtrMap m_files;
   FileScopePtrVec m_fileScopes;
   FileScopePtr m_file;
@@ -595,11 +587,13 @@ private:
   StringToMethodSlotMap stringToMethodSlotMap;
   CallIndexVectSet callIndexVectSet; // set of methods at this callIndex
   friend class MethodSlot;
-  public:
-  const MethodSlot* getMethodSlot(const std::string & mname) const ;
-  const MethodSlot* getOrAddMethodSlot(const std::string & mname) ;
-  private:
-  MethodSlot* getMethodSlotUpdate(const std::string & mname) ;
+
+public:
+  const MethodSlot* getMethodSlot(const std::string & mname) const;
+  const MethodSlot* getOrAddMethodSlot(const std::string & mname,
+                                       ConstructPtr self);
+private:
+  MethodSlot* getMethodSlotUpdate(const std::string & mname);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

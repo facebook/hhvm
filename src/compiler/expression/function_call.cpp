@@ -182,7 +182,7 @@ TypePtr FunctionCall::checkParamsAndReturn(AnalysisResultPtr ar,
     setActualType(TypePtr());
     if (!type->is(Type::KindOfAny)) {
       if (!m_allowVoidReturn && ar->isSecondPass() && !func->isAbstract()) {
-        ar->getCodeError()->record(self, CodeError::UseVoidReturn, self);
+        Compiler::Error(Compiler::UseVoidReturn, self);
       }
       m_voidWrapper = true;
     }

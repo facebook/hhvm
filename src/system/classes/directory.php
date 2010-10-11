@@ -14,10 +14,10 @@ class Directory {
   }
 
   public function rewind() {
-    return rewinddir($this->handle);
+    rewinddir($this->handle);
   }
 
   public function close() {
-    return closedir($this->handle);
+    closedir($this->handle);
   }
 }

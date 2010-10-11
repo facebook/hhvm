@@ -69,9 +69,9 @@ class c_RecursiveDirectoryIterator : public c_DirectoryIterator {
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_current();
   public: Variant t_key();
-  public: Variant t_next();
-  public: Variant t_rewind();
-  public: Variant t_seek(CVarRef v_position);
+  public: void t_next();
+  public: void t_rewind();
+  public: void t_seek(CVarRef v_position);
   public: String t___tostring();
   public: bool t_valid();
   public: bool t_haschildren();

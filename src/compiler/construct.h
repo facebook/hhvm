@@ -132,18 +132,6 @@ public:
   std::string getText(bool useCache = false, bool translate = false,
                       AnalysisResultPtr ar = AnalysisResultPtr());
 
-  void addHphpNote(const std::string &s);
-  bool hasHphpNote(const std::string &s) const {
-    return m_extra && m_extra->hphpNotes.find(s) != m_extra->hphpNotes.end();
-  }
-  const std::string &getEmbedded() const {
-    return getExtra()->embedded;
-  }
-  void addSuppressError(CodeError::ErrorType e) {
-    getExtra()->suppressedErrors.push_back(e);
-  }
-  bool isErrorSuppressed(CodeError::ErrorType e) const;
-
   static void recomputeEffects() { s_effectsTag++; }
 
   /**
@@ -152,19 +140,7 @@ public:
   void printSource(CodeGenerator &cg);
 
 private:
-  struct ExtraData {
-    std::set<std::string> hphpNotes;
-    std::string embedded;
-    std::vector<CodeError::ErrorType> suppressedErrors;
-  };
-  mutable ExtraData *m_extra;
   std::string m_text;
-  ExtraData *getExtra() const {
-    if (m_extra == NULL) {
-      m_extra = new ExtraData();
-    }
-    return m_extra;
-  }
 
 protected:
   LocationPtr m_loc;

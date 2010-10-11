@@ -43,7 +43,6 @@ bool Option::CachePHPFile = false;
 
 vector<string> Option::ParseOnDemandDirs;
 
-set<string> Option::AllowedBadPHPIncludes;
 map<string, string> Option::IncludeRoots;
 map<string, string> Option::AutoloadRoots;
 vector<string> Option::IncludeSearchPaths;

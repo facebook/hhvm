@@ -57,8 +57,8 @@ TypePtr ConstantTable::add(const std::string &name, TypePtr type,
 
   if (ar->isFirstPass()) {
     if (exp != sym->getValue()) {
-      ar->getCodeError()->record(CodeError::DeclaredConstantTwice, construct,
-                                 sym->getDeclaration());
+      Compiler::Error(Compiler::DeclaredConstantTwice, construct,
+                      sym->getDeclaration());
       sym->setDynamic();
       m_hasDynamic = true;
       type = Type::Variant;
@@ -161,8 +161,7 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
         actualType = checkBases(name, type, coerce, ar, construct,
                                 bases, defScope);
         if (defScope) return actualType;
-        ar->getCodeError()->record(CodeError::UseUndeclaredConstant,
-                                   construct);
+        Compiler::Error(Compiler::UseUndeclaredConstant, construct);
         if (m_blockScope.is(BlockScope::ClassScope)) {
           actualType = Type::Variant;
         } else {
@@ -190,10 +189,6 @@ TypePtr ConstantTable::check(const std::string &name, TypePtr type,
     }
   }
 
-  if (Type::IsBadTypeConversion(ar, actualType, type, coerce)) {
-    ar->getCodeError()->record(construct, type->getKindOf(),
-                               actualType->getKindOf());
-  }
   return actualType;
 }
 

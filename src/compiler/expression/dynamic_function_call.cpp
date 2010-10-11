@@ -84,7 +84,7 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
           setAttribute(VariableTable::NeedGlobalPointer);
       }
       if (!cls && ar->isFirstPass()) {
-        ar->getCodeError()->record(self, CodeError::UnknownClass, self);
+        Compiler::Error(Compiler::UnknownClass, self);
       }
     } else {
       m_validClass = true;
@@ -96,9 +96,6 @@ TypePtr DynamicFunctionCall::inferTypes(AnalysisResultPtr ar, TypePtr type,
 
   ar->containsDynamicFunctionCall();
 
-  if (ar->isFirstPass()) {
-    ar->getCodeError()->record(self, CodeError::UseDynamicFunction, self);
-  }
   if (m_class) {
     m_class->inferAndCheck(ar, Type::Any, false);
   }

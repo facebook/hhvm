@@ -68,8 +68,8 @@ class c_Directory : public ExtObjectData {
   public: void getConstructor(MethodCallPackage &mcp);
   public: void dynConstructFromEval(Eval::VariableEnvironment &env, const Eval::FunctionCallExpression *call);
   public: Variant t_read();
-  public: Variant t_rewind();
-  public: Variant t_close();
+  public: void t_rewind();
+  public: void t_close();
   DECLARE_METHOD_INVOKE_HELPERS(__construct);
   DECLARE_METHOD_INVOKE_HELPERS(close);
   DECLARE_METHOD_INVOKE_HELPERS(read);

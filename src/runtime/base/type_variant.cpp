@@ -1744,7 +1744,7 @@ bool Variant::same(CVarRef v2) const {
   }                                                             \
   return false;                                                 \
 
-// Array needs to convert to "ARRAY" and Object to String
+// Array needs to convert to "Array" and Object to String
 #define UNWRAP_STRING(reverse)                                  \
   switch (getType()) {                                          \
   case KindOfNull:    return HPHP::reverse(v2, "");             \
@@ -1756,7 +1756,7 @@ bool Variant::same(CVarRef v2) const {
   case KindOfDouble:  return HPHP::reverse(v2, toDouble());     \
   case KindOfStaticString:                                      \
   case KindOfString:  return HPHP::reverse(v2, getStringData());\
-  case KindOfArray:   return HPHP::reverse(v2, "ARRAY");        \
+  case KindOfArray:   return HPHP::reverse(v2, "Array");        \
   case KindOfObject:                                            \
     return HPHP::reverse(v2, toObject().toString());            \
   default:                                                      \

@@ -994,7 +994,7 @@ bool TestCppBase::TestIpBlockMap() {
 
 bool TestCppBase::TestEqualAsStr() {
 
-  int arr_len = 16;
+  const int arr_len = 18;
   Variant var_array[arr_len];
   var_array[0] = false;
   var_array[1] = true;
@@ -1014,6 +1014,8 @@ bool TestCppBase::TestEqualAsStr() {
   Variant v2("changed");
   var_array[14] = v2;
   var_array[15] = "";
+  var_array[16] = "Array";
+  var_array[17] = "ARRAY";
   for (int i = 0; i < arr_len; i++) {
     for (int j = 0; j < arr_len; j++) {
       bool eqAsStr = equalAsStr(var_array[i], var_array[j]);

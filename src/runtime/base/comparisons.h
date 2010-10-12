@@ -628,7 +628,7 @@ inline bool equalAsStr(const StringData *v1, litstr  v2) {
   return same(v1, v2);
 }
 inline bool equalAsStr(const StringData *v1, CArrRef v2) {
-  return equalAsStr(v1, "ARRAY");
+  return equalAsStr(v1, "Array");
 }
 inline bool equalAsStr(const StringData *v1, CObjRef v2) {
   return equalAsStr(v1, v2.toString());
@@ -926,7 +926,7 @@ inline bool equalAsStr(CArrRef v1, CStrRef v2) { return equalAsStr(v2, v1);}
 inline bool equalAsStr(CArrRef v1, litstr  v2) { return equalAsStr(v2, v1);}
 inline bool equalAsStr(CArrRef v1, CArrRef v2) { return true;}
 inline bool equalAsStr(CArrRef v1, CObjRef v2) {
-  return equalAsStr("ARRAY", v2.toString());
+  return equalAsStr("Array", v2.toString());
 }
 inline bool equalAsStr(CArrRef v1, CVarRef v2) { return equalAsStr(v2, v1);}
 

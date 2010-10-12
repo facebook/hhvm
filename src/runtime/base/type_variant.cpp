@@ -34,6 +34,7 @@ namespace HPHP {
 
 static const int64 cvValues[] = {
   0x0000000000000000LL, 0x0000000000000000LL, // null_variant
+  0x0000000000000000LL, 0x0000000000000000LL, // not_given_variant
 };
 static const int64 cnValues[] = {
   0x0000000000000000LL, 0x0000000000000000LL, // null_varNR
@@ -44,6 +45,7 @@ static const int64 cnValues[] = {
   0x7ff8000000000000LL, 0x0000000520000000LL, // NAN_varNR
 };
 const Variant &null_variant = *(const Variant *)(cvValues);
+const Variant &not_given_variant = *(const Variant *)(cvValues + 2);
 const VarNR &null_varNR = *(const VarNR*)(cnValues);
 const VarNR &true_varNR = *(const VarNR*)(cnValues + 2);
 const VarNR &false_varNR = *(const VarNR*)(cnValues + 4);

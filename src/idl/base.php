@@ -397,7 +397,7 @@ function fprintType($f, $type) {
 function get_serialized_default($s) {
   // These values are special and cannot be returned by
   // ReflectionParameter::getDefaultValue().
-  if ($s == 'TimeStamp::Current()' ||
+  if ($s == 'TimeStamp::Current()' || $s == 'not_given_variant' ||
       preg_match('/^k_SQLITE3_/', $s)) {
     return "\x01";
   }

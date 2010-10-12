@@ -85,7 +85,7 @@ inline bool x_key_exists(CVarRef key, CVarRef search) {
   return f_key_exists(key, search);
 }
 
-inline Variant x_array_keys(CVarRef input, CVarRef search_value = null_variant, bool strict = false) {
+inline Variant x_array_keys(CVarRef input, CVarRef search_value = not_given_variant, bool strict = false) {
   FUNCTION_INJECTION_BUILTIN(array_keys);
   TAINT_OBSERVER(TAINT_BIT_NONE, TAINT_BIT_NONE);
   return f_array_keys(input, search_value, strict);

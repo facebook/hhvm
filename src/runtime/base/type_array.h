@@ -87,7 +87,7 @@ class Array : public SmartPtr<ArrayData> {
   }
   bool valueExists(CVarRef search_value, bool strict = false) const;
   Variant key(CVarRef search_value, bool strict = false) const;
-  Array keys(CVarRef search_value = null_variant, bool strict = false) const;
+  Array keys(CVarRef search_value = not_given_variant, bool strict = false) const;
   Array values() const;
 
   int64 hashForIntSwitch(int64 firstNonZero, int64 noMatch) const {

@@ -84,12 +84,35 @@ std::string Util::toUpper(const std::string &s) {
   return ret;
 }
 
-std::string Util::getIdentifier(const std::string &fileName) {
-  string ret = "hphp_" + fileName;
-  replaceAll(ret, "/", "__");
-  replaceAll(ret, ".", "__");
-  replaceAll(ret, "-", "__");
+std::string Util::escapeIdentifier(const std::string &s) {
+  string ret;
+  ret.reserve(s.size());
+  for (size_t i = 0; i < s.size(); i++) {
+    unsigned char ch = s[i];
+    if ((ch >= 'a' && ch <= 'z') ||
+        (ch >= 'A' && ch <= 'Z') ||
+        (ch >= '0' && ch <= '9') || ch == '_') {
+      ret += ch;
+    } else {
+      switch (ch) {
+        case '.': ret += "$_"; break;
+        case '/': ret += "$$"; break;
+        case '$': ret += "$L"; break;
+        case '-': ret += "$M"; break;
+        default: {
+          char buf[10];
+          snprintf(buf, sizeof(buf), "$%02X", (int)ch);
+          ret += buf;
+          break;
+        }
+      }
+    }
+  }
   return ret;
+}
+
+std::string Util::getIdentifier(const std::string &fileName) {
+  return "hphp_" + escapeIdentifier(fileName);
 }
 
 bool Util::mkdir(const std::string &path, int mode /* = 0777 */) {

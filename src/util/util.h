@@ -57,6 +57,15 @@ std::string toLower(const std::string &s);
 std::string toUpper(const std::string &s);
 
 /**
+ * Escape an arbitrary string so that it can be used as an identifier.
+ * NOTE: A digit as the first character is not escaped but is not accepted
+ *       as a valid identifier. In general it's expected that a string
+ *       will be prepended to the return value of this function, in which
+ *       case this is not an issue.
+ */
+std::string escapeIdentifier(const std::string &s);
+
+/**
  * Convert a full pathname of a file to an identifier.
  */
 std::string getIdentifier(const std::string &fileName);

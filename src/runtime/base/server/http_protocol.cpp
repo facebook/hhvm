@@ -271,7 +271,7 @@ void HttpProtocol::PrepareSystemVariables(Transport *transport,
   server.set("SERVER_NAME", hostName);
   server.set("SERVER_PORT", RuntimeOption::ServerPort);
   server.set("SERVER_SOFTWARE", "HPHP");
-  server.set("SERVER_PROTOCOL", "HTTP/1.1");
+  server.set("SERVER_PROTOCOL", "HTTP/" + transport->getHTTPVersion());
   server.set("SERVER_ADMIN", "");
   server.set("SERVER_SIGNATURE", "");
   switch (transport->getMethod()) {

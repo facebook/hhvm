@@ -64,7 +64,7 @@ inline bool f_key_exists(CVarRef key, CVarRef search) {
   return f_array_key_exists(key, search);
 }
 
-Variant f_array_keys(CVarRef input, CVarRef search_value = null_variant,
+Variant f_array_keys(CVarRef input, CVarRef search_value = not_given_variant,
                      bool strict = false);
 Variant f_array_map(int _argc, CVarRef callback, CVarRef arr1, CArrRef _argv = null_array);
 

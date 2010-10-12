@@ -53,6 +53,9 @@ typedef Variant Sequence;
  * and ArrayData.
  */
 extern const Variant &null_variant;
+// This can be used as default value for optional params, to distinguish
+// the not given case from the null case.
+extern const Variant &not_given_variant;
 extern const VarNR &null_varNR;
 extern const VarNR &true_varNR;
 extern const VarNR &false_varNR;

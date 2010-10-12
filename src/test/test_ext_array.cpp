@@ -322,6 +322,16 @@ bool TestExtArray::test_array_keys() {
        ")\n");
   }
 
+  {
+    Array array = CREATE_VECTOR4("foo", null, "bar", null);
+    VS(f_print_r(f_array_keys(array, null), true),
+       "Array\n"
+       "(\n"
+       "    [0] => 1\n"
+       "    [1] => 3\n"
+       ")\n");
+  }
+
   return Count(true);
 }
 

@@ -14,42 +14,31 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_EXPRESSION_H__
-#define __EVAL_EXPRESSION_H__
-
-#include <runtime/eval/ast/construct.h>
+#include <runtime/eval/ast/temp_expression.h>
+#include <runtime/eval/ast/temp_expression_list.h>
+#include <runtime/eval/ast/variable_expression.h>
+#include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_AST_PTR(Name);
-DECLARE_AST_PTR(Expression);
-DECLARE_AST_PTR(LvalExpression);
-class ByteCodeProgram;
+TempExpression::TempExpression(ExpressionPtr exp, int index /* = 0 */)
+    : Expression(exp->loc()), m_exp(exp), m_index(index) {
+}
 
-#define EXPRESSION_ARGS CONSTRUCT_ARGS
-#define EXPRESSION_PASS CONSTRUCT_PASS
+Variant TempExpression::eval(VariableEnvironment &env) const {
+  if (m_exp->is<VariableExpression>()) {
+    return m_exp->eval(env);
+  }
+  return env.getTempVariable(m_index);
+}
 
-class Expression : public Construct {
-public:
-  Expression(EXPRESSION_ARGS);
-  Expression(const Location *loc) : Construct(loc) {}
-  virtual ~Expression() {}
-  virtual Variant eval(VariableEnvironment &env) const = 0;
-  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
-  virtual bool exist(VariableEnvironment &env, int op) const;
-  virtual Variant evalExist(VariableEnvironment &env) const;
-  virtual const LvalExpression *toLval() const;
-  virtual bool isRefParam() const;
-
-  static Variant evalVector(const std::vector<ExpressionPtr> &v,
-                            VariableEnvironment &env);
-
-};
+void TempExpression::dump(std::ostream &out) const {
+  m_exp->dump(out);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
-#endif /* __EVAL_EXPRESSION_H__ */

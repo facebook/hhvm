@@ -55,13 +55,13 @@ Parameter::Parameter(CONSTRUCT_ARGS, const string &type,
       }
     }
     if (m_defVal) {
-      ScalarExpressionPtr s = m_defVal->cast<ScalarExpression>();
+      ScalarExpressionPtr s = m_defVal->unsafe_cast<ScalarExpression>();
       bool correct = false;
       if (s) {
         DataType dtype = s->getValue().getType();
         correct = m_nullDefault = dtype == KindOfNull;
       } else {
-        ArrayExpressionPtr a = m_defVal->cast<ArrayExpression>();
+        ArrayExpressionPtr a = m_defVal->unsafe_cast<ArrayExpression>();
         correct = a && m_kind == KindOfArray;
       }
       if (!correct) {

@@ -16,7 +16,7 @@
 
 #include <runtime/eval/ast/foreach_statement.h>
 #include <runtime/eval/ast/lval_expression.h>
-#include <runtime/eval/ast/variable_expression.h>
+#include <runtime/eval/ast/temp_expression_list.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -33,13 +33,17 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
   ENTER_STMT;
   Variant map(m_source->eval(env));
   if (m_key) {
-    if (m_key->cast<VariableExpression>()) {
+    TempExpressionList *texp = m_key->cast<TempExpressionList>();
+    if (texp) {
       for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
            iter->next()) {
-        const Variant &value = iter->second();
-        const Variant &key = iter->first();
-        m_value->set(env, value);
-        m_key->set(env, key);
+        {
+          const Variant &value = iter->second();
+          const Variant &key = iter->first();
+          TempExpressionHelper helper(texp, env);
+          m_value->set(env, value);
+          texp->setImpl(env, key);
+        }
         if (!m_body) continue;
         EVAL_STMT_HANDLE_BREAK(m_body, env);
       }
@@ -47,8 +51,9 @@ void ForEachStatement::eval(VariableEnvironment &env) const {
       for (ArrayIterPtr iter = map.begin(env.currentContext()); !iter->end();
            iter->next()) {
         const Variant &value = iter->second();
-        m_key->set(env, iter->first());
+        const Variant &key = iter->first();
         m_value->set(env, value);
+        m_key->set(env, key);
         if (!m_body) continue;
         EVAL_STMT_HANDLE_BREAK(m_body, env);
       }

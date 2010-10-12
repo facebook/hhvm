@@ -42,6 +42,8 @@
 #include <runtime/eval/ast/static_member_expression.h>
 #include <runtime/eval/ast/this_expression.h>
 #include <runtime/eval/ast/unary_op_expression.h>
+#include <runtime/eval/ast/temp_expression_list.h>
+#include <runtime/eval/ast/temp_expression.h>
 
 #include <runtime/eval/ast/break_statement.h>
 #include <runtime/eval/ast/class_statement.h>
@@ -241,6 +243,71 @@ void Parser::onName(Token &out, Token &name, Parser::NameKind kind) {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// eval order correction
+
+static LvalExpressionPtr get_lval_expr(ExpressionPtr var) {
+  TempExpressionListPtr texp = var->unsafe_cast<TempExpressionList>();
+  LvalExpressionPtr lv;
+  if (texp) {
+    lv = texp->getLast();
+  } else {
+    lv = var->unsafe_cast<LvalExpression>();
+  }
+  return lv;
+}
+
+static ExpressionPtr get_var_expr(ExpressionPtr var) {
+  TempExpressionListPtr texp = var->unsafe_cast<TempExpressionList>();
+  if (texp) {
+    return texp->getLastExp();
+  }
+  return var;
+}
+
+static void set_lval_expr(Token &out, Token &var) {
+  TempExpressionListPtr texp = var->getExp<TempExpressionList>();
+  if (texp) {
+    texp->setLast(out->exp());
+    out->exp() = texp;
+  }
+}
+
+ExpressionPtr Parser::createOffset(ExpressionPtr var, ExpressionPtr offset) {
+  if (offset) {
+    int index = 0;
+    if (var) {
+      TempExpressionListPtr texp = var->unsafe_cast<TempExpressionList>();
+      if (texp) {
+        index = texp->append(offset);
+      }
+    }
+    m_offset = TempExpressionPtr(new TempExpression(offset, index));
+    return m_offset;
+  }
+  return offset;
+}
+
+void Parser::setOffset(ExpressionPtr &out, ExpressionPtr var,
+                       ExpressionPtr offset) {
+  TempExpressionListPtr texp;
+  if (var) {
+    texp = var->unsafe_cast<TempExpressionList>();
+  }
+  if (texp) {
+    texp->setLast(out);
+  } else {
+    texp = TempExpressionListPtr(new TempExpressionList(out));
+    if (offset) {
+      texp->append(offset);
+    }
+  }
+  if (offset /* not m_offset */) {
+    texp->append(m_offset);
+  }
+  out = texp;
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // variables
 
 void Parser::onStaticVariable(Token &out, Token *exprs, Token &var,
@@ -286,7 +353,11 @@ void Parser::onIndirectRef(Token &out, Token &refCount, Token &var) {
 
 void Parser::onStaticMember(Token &out, Token &className, Token &name) {
   out.reset();
+  TempExpressionListPtr texp = name->getExp<TempExpressionList>();
   ArrayElementExpressionPtr arr = name->getExp<ArrayElementExpression>();
+  if (!arr && texp) {
+    arr = texp->getLast()->unsafe_cast<ArrayElementExpression>();
+  }
   NamePtr cn = procStaticClassName(className, false);
   if (arr) {
     arr->sinkStaticMember(this, cn);
@@ -296,38 +367,52 @@ void Parser::onStaticMember(Token &out, Token &className, Token &name) {
     VariableExpressionPtr var = name->getExp<VariableExpression>();
     if (var) {
       n = var->getName();
+      ASSERT(n);
+      out->exp() = NEW_EXP(StaticMember, cn, n);
+    } else {
+      ASSERT(texp);
+      var = texp->getLast()->unsafe_cast<VariableExpression>();
+      ASSERT(var);
+      n = var->getName();
+      ASSERT(n);
+      out->exp() = NEW_EXP(StaticMember, cn, n);
+      texp->setLast(out->exp());
+      out->exp() = texp;
     }
-    ASSERT(n);
-    out->exp() = NEW_EXP(StaticMember, cn, n);
   }
 }
 
 void Parser::onRefDim(Token &out, Token &var, Token &offset) {
+  ASSERT(var->exp());
+
   out.reset();
-  if (!var->exp()) {
-    ASSERT(false);
-    //var->exp() = NEW_EXP(ConstantExpression, var.text());
-  }
-  LvalExpressionPtr lv = var->getExp<LvalExpression>();
+  LvalExpressionPtr lv = get_lval_expr(var->exp());
   ASSERT(lv);
-  out->exp() = NEW_EXP(ArrayElement, lv, offset->exp());
+  out->exp() = NEW_EXP(ArrayElement, lv,
+                       createOffset(var->exp(), offset->exp()));
+  setOffset(out->exp(), var->exp(), offset->exp());
 }
 
 ExpressionPtr Parser::getDynamicVariable(ExpressionPtr exp, bool encap) {
-  NamePtr n;
   if (encap) {
-    ConstantExpressionPtr var = exp->cast<ConstantExpression>();
+    ConstantExpressionPtr var = exp->unsafe_cast<ConstantExpression>();
+    NamePtr n;
     if (var) {
       n = Name::fromString(this, var->getName());
     }
-  } else {
-    n = Name::fromExp(this, exp);
+    return NEW_EXP(Variable, n);
   }
-  return NEW_EXP(Variable, n);
+
+  return createDynamicVariable(exp);
 }
 
 ExpressionPtr Parser::createDynamicVariable(ExpressionPtr exp) {
-  return NEW_EXP(Variable, Name::fromExp(this, exp));
+  TempExpressionPtr temp(new TempExpression(exp, 0));
+  ExpressionPtr variable = NEW_EXP(Variable, Name::fromExp(this, temp));
+  TempExpressionListPtr ret(new TempExpressionList(variable));
+  ret->append(exp);
+  ret->append(temp);
+  return ret;
 }
 
 void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
@@ -338,7 +423,7 @@ void Parser::onCallParam(Token &out, Token *params, Token &expr, bool ref) {
   }
   ExpressionPtr param = expr->exp();
   if (ref) {
-    param = NEW_EXP(RefParam, param->cast<LvalExpression>());
+    param = NEW_EXP(RefParam, param->unsafe_cast<LvalExpression>());
   }
   out->exprs().push_back(param);
 }
@@ -381,35 +466,61 @@ void Parser::popObject(Token &out) {
 
 void Parser::appendMethodParams(Token &params) {
   if (params.num() == 1) {
-    ObjectPropertyExpressionPtr prop = (m_objects.back())->
-      cast<ObjectPropertyExpression>();
+    ExpressionPtr &out = m_objects.back();
+    ObjectPropertyExpressionPtr prop =
+      out->unsafe_cast<ObjectPropertyExpression>();
+    TempExpressionListPtr texp = out->unsafe_cast<TempExpressionList>();
+    if (!prop && texp) {
+      prop = texp->getLast()->unsafe_cast<ObjectPropertyExpression>();
+    }
     if (prop) {
-      ObjectMethodExpressionPtr method =
-        NEW_EXP(ObjectMethod,
-                prop->getObject(), prop->getProperty(), params->exprs());
-      m_objects.back() = method;
+      out = NEW_EXP(ObjectMethod,
+                    prop->getObject(), prop->getProperty(), params->exprs());
+      if (texp) {
+        texp->setLast(out);
+        out = texp;
+      }
     } else {
-      m_objects.back() = NEW_EXP(SimpleFunctionCall,
-                                 Name::fromExp(this, m_objects.back()),
-                                 params->exprs());
+      out = NEW_EXP(SimpleFunctionCall, Name::fromExp(this, out),
+                    params->exprs());
     }
   }
 }
 
 void Parser::appendProperty(Token &prop) {
-  // Gross
+  ExpressionPtr &out = m_objects.back();
+  ExpressionPtr var = out;
+  ExpressionPtr lvar = get_var_expr(var);
+
   if (prop->getMode() == Token::SingleName) {
-    m_objects.back() = NEW_EXP(ObjectProperty, m_objects.back(), prop->name());
+    NamePtr name = prop->name();
+    out = NEW_EXP(ObjectProperty, lvar, name);
+
+    Eval::ExprName *ename = dynamic_cast<Eval::ExprName*>(name.get());
+    if (ename) {
+      ExpressionPtr nameExp = ename->getExp();
+      TempExpressionPtr temp = createOffset(var, nameExp);
+      ename->setExp(temp);
+
+      setOffset(out, var, nameExp);
+    } else if (var->unsafe_cast<TempExpressionList>()) {
+      setOffset(out, var, ExpressionPtr());
+    }
+
   } else {
-    m_objects.back() = NEW_EXP(ObjectProperty, m_objects.back(),
-                               Name::fromExp(this, prop->exp()));
+    out = NEW_EXP(ObjectProperty, lvar,
+                  Name::fromExp(this, createOffset(var, prop->exp())));
+    setOffset(out, var, prop->exp());
   }
 }
 
 void Parser::appendRefDim(Token &offset) {
-  LvalExpressionPtr lv = m_objects.back()->cast<LvalExpression>();
+  ExpressionPtr &out = m_objects.back();
+  ExpressionPtr var = out;
+  LvalExpressionPtr lv = get_lval_expr(var);
   ASSERT(lv);
-  m_objects.back() = NEW_EXP(ArrayElement, lv, offset->exp());
+  out = NEW_EXP(ArrayElement, lv, createOffset(var, offset->exp()));
+  setOffset(out, var, offset->exp());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -451,7 +562,8 @@ void Parser::encapRefDim(Token &out, Token &var, Token &offset) {
 
   LvalExpressionPtr arr =
     NEW_EXP(Variable, Name::fromString(this, var.text()));
-  out->exp() = NEW_EXP(ArrayElement, arr, dim);
+  out->exp() = NEW_EXP(ArrayElement, arr, createOffset(ExpressionPtr(), dim));
+  setOffset(out->exp(), ExpressionPtr(), dim);
 }
 
 void Parser::encapObjProp(Token &out, Token &var, Token &name) {
@@ -470,7 +582,9 @@ void Parser::encapArray(Token &out, Token &var, Token &expr) {
   out.reset();
   LvalExpressionPtr arr =
     NEW_EXP(Variable, Name::fromString(this, var.text()));
-  out->exp() = NEW_EXP(ArrayElement, arr, expr->exp());
+  out->exp() = NEW_EXP(ArrayElement, arr,
+                       createOffset(ExpressionPtr(), expr->exp()));
+  setOffset(out->exp(), ExpressionPtr(), expr->exp());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -551,6 +665,9 @@ void Parser::onListAssignment(Token &out, Token &vars, Token *expr) {
   out.reset();
   ListElementPtr le(new SubListElement(this, vars->listElems()));
   out->exp() = NEW_EXP(ListAssignment, le, (*expr)->exp());
+  TempExpressionListPtr texp(new TempExpressionList(out->exp()));
+  le->collectOffsets(texp);
+  out->exp() = texp;
 }
 
 void Parser::onAListVar(Token &out, Token *list, Token *var) {
@@ -585,7 +702,7 @@ public:
 
 void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref) {
   out.reset();
-  LvalExpressionPtr lv = var->getExp<LvalExpression>();
+  LvalExpressionPtr lv = get_lval_expr(var->exp());
   if (!lv) {
     throw InvalidLvalException();
   }
@@ -594,17 +711,19 @@ void Parser::onAssign(Token &out, Token &var, Token &expr, bool ref) {
   } else {
     out->exp() = NEW_EXP(AssignmentOp, '=', lv, expr->exp());
   }
+  set_lval_expr(out, var);
 }
 
 void Parser::onAssignNew(Token &out, Token &var, Token &name, Token &args) {
   out.reset();
-  LvalExpressionPtr lv = var->getExp<LvalExpression>();
+  LvalExpressionPtr lv = get_lval_expr(var->exp());
   if (!lv) {
     throw InvalidLvalException();
   }
   ExpressionPtr exp;
   exp = NEW_EXP(NewObject, name->name(), args->exprs());
   out->exp() = NEW_EXP(AssignmentOp, '=', lv, exp);
+  set_lval_expr(out, var);
 }
 
 void Parser::onNewObject(Token &out, Token &name, Token &args) {
@@ -670,11 +789,12 @@ void Parser::onBinaryOpExp(Token &out, Token &operand1, Token &operand2,
   case T_SL_EQUAL:
   case T_SR_EQUAL:
     {
-      LvalExpressionPtr lv = operand1->getExp<LvalExpression>();
+      LvalExpressionPtr lv = get_lval_expr(operand1->exp());
       if (!lv) {
         throw InvalidLvalException();
       }
       out->exp() = NEW_EXP(AssignmentOp, op, lv, operand2->exp());
+      set_lval_expr(out, operand1);
       break;
     }
   case T_INSTANCEOF:
@@ -846,7 +966,7 @@ void Parser::onMethodStart(Token &name, Token &modifiers) {
 void Parser::onMethod(Token &out, Token &modifiers, Token &ref, Token &name,
                       Token &params, Token &stmt) {
   ClassStatementPtr cs = peekClass();
-  MethodStatementPtr ms = peekFunc()->cast<MethodStatement>();
+  MethodStatementPtr ms = peekFunc()->unsafe_cast<MethodStatement>();
   ASSERT(ms);
   popFunc();
   StatementListStatementPtr stmts = stmt->getStmtList();
@@ -911,8 +1031,8 @@ void Parser::saveParseTree(Token &tree) {
     const std::vector<StatementPtr> &svec = s->stmts();
     for (std::vector<StatementPtr>::const_iterator it = svec.begin();
          it != svec.end(); ++it) {
-      ClassStatementPtr cs = (*it)->cast<ClassStatement>();
-      if (cs || (*it)->cast<FunctionStatement>()) {
+      ClassStatementPtr cs = (*it)->unsafe_cast<ClassStatement>();
+      if (cs || (*it)->unsafe_cast<FunctionStatement>()) {
         scopes.push_back(*it);
       } else {
         rest.push_back(*it);
@@ -927,7 +1047,7 @@ void Parser::saveParseTree(Token &tree) {
     // the marker position. I don't know why.
     hphp_const_char_map<bool> seen;
     for (int i = svec.size() - 1; i >= 0; --i) {
-      ClassStatementPtr cs = svec[i]->cast<ClassStatement>();
+      ClassStatementPtr cs = svec[i]->unsafe_cast<ClassStatement>();
       if (cs) {
         seen[cs->name().c_str()] = true;
         if (!cs->parent().empty()) {

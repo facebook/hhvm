@@ -91,6 +91,14 @@ void ExprName::dump(std::ostream &out) const {
   }
 }
 
+ExpressionPtr ExprName::getExp() {
+  return m_name;
+}
+
+void ExprName::setExp(ExpressionPtr name) {
+  m_name = name;
+}
+
 StaticClassExprName::StaticClassExprName(CONSTRUCT_ARGS, ExpressionPtr name)
   : ExprName(CONSTRUCT_PASS, name) {}
 

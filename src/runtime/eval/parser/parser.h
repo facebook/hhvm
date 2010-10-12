@@ -25,6 +25,7 @@
 #include <runtime/eval/ast/static_statement.h>
 #include <runtime/eval/ast/class_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/temp_expression.h>
 #include <runtime/eval/ast/name.h>
 
 #ifdef HPHP_PARSER_NS
@@ -85,11 +86,11 @@ public:
 
   template<class T>
   AstPtr<T> getExp() const {
-    return m_exp ? m_exp->cast<T>() : AstPtr<T>();
+    return m_exp ? m_exp->unsafe_cast<T>() : AstPtr<T>();
   }
   template<class T>
   AstPtr<T> getStmt() const {
-    return m_stmt ? m_stmt->cast<T>() : AstPtr<T>();
+    return m_stmt ? m_stmt->unsafe_cast<T>() : AstPtr<T>();
   }
   StatementListStatementPtr getStmtList() const;
 
@@ -278,6 +279,15 @@ private:
   ExpressionPtr getDynamicVariable(ExpressionPtr exp, bool encap);
   ExpressionPtr createDynamicVariable(ExpressionPtr exp);
   NamePtr procStaticClassName(Token &className, bool text);
+
+  void assignImpl(Token &out, Token &var, ExpressionPtr exp, bool ref);
+
+  /**
+   * evaluation order correction
+   */
+  TempExpressionPtr m_offset; // created by createOffset()
+  ExpressionPtr createOffset(ExpressionPtr var, ExpressionPtr offset);
+  void setOffset(ExpressionPtr &out, ExpressionPtr var, ExpressionPtr offset);
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -28,6 +28,7 @@ DECLARE_AST_PTR(LvalExpression);
 class LvalExpression : public Expression {
 public:
   LvalExpression(EXPRESSION_ARGS);
+  LvalExpression(const Location *loc) : Expression(loc) {}
   virtual Variant eval(VariableEnvironment &env) const { return lval(env); }
   virtual Variant &lval(VariableEnvironment &env) const = 0;
   virtual bool weakLval(VariableEnvironment &env, Variant* &v) const;

@@ -23,6 +23,7 @@ namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
+DECLARE_AST_PTR(TempExpressionList);
 DECLARE_AST_PTR(ListElement);
 DECLARE_AST_PTR(ListAssignmentExpression);
 
@@ -30,11 +31,13 @@ class ListElement : public Construct {
 public:
   ListElement(CONSTRUCT_ARGS);
   virtual void set(VariableEnvironment &env, CVarRef val) const = 0;
+  virtual void collectOffsets(TempExpressionListPtr texp) = 0;
 };
 
 class LvalListElement : public ListElement {
 public:
   LvalListElement(CONSTRUCT_ARGS, LvalExpressionPtr lval);
+  virtual void collectOffsets(TempExpressionListPtr texp);
   virtual void set(VariableEnvironment &env, CVarRef val) const;
   virtual void dump(std::ostream &out) const;
 private:
@@ -44,6 +47,7 @@ private:
 class SubListElement : public ListElement {
 public:
   SubListElement(CONSTRUCT_ARGS, const std::vector<ListElementPtr> &elems);
+  virtual void collectOffsets(TempExpressionListPtr texp);
   virtual void set(VariableEnvironment &env, CVarRef val) const;
   virtual void dump(std::ostream &out) const;
 private:

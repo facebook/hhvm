@@ -30,7 +30,7 @@ ArrayElementExpression::ArrayElementExpression(EXPRESSION_ARGS,
                                                LvalExpressionPtr arr,
                                                ExpressionPtr idx)
   : LvalExpression(EXPRESSION_PASS), m_arr(arr), m_idx(idx) {
-  m_reverseOrder = m_idx && m_arr->cast<VariableExpression>();
+  m_reverseOrder = m_idx && m_arr->is<VariableExpression>();
 }
 
 Variant ArrayElementExpression::eval(VariableEnvironment &env) const {
@@ -162,13 +162,13 @@ void ArrayElementExpression::unset(VariableEnvironment &env) const {
 
 void ArrayElementExpression::sinkStaticMember(Parser *parser,
                                               const NamePtr &className) {
-  ArrayElementExpressionPtr arr = m_arr->cast<ArrayElementExpression>();
+  ArrayElementExpressionPtr arr = m_arr->unsafe_cast<ArrayElementExpression>();
   if (arr) {
     arr->sinkStaticMember(parser, className);
     return;
   }
 
-  VariableExpressionPtr var = m_arr->cast<VariableExpression>();
+  VariableExpressionPtr var = m_arr->unsafe_cast<VariableExpression>();
   if (var) {
     m_arr =
       StaticMemberExpressionPtr(new StaticMemberExpression(parser,

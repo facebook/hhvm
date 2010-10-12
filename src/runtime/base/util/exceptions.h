@@ -103,7 +103,8 @@ public:
   InvalidFunctionCallException(const char *func)
     : ExtendedException("(1) call the function without enough arguments OR "
                         "(2) Unable to find function \"%s\" OR "
-                        "(3) function was not in invoke table.",
+                        "(3) function was not in invoke table OR "
+                        "(4) function was renamed to something else.",
                         func) {}
   virtual ~InvalidFunctionCallException() throw() {}
 };

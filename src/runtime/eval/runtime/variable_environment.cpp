@@ -28,7 +28,7 @@ using namespace std;
 ///////////////////////////////////////////////////////////////////////////////
 
 VariableEnvironment::VariableEnvironment()
-  : m_currentClass(NULL), m_breakLevel(0), m_returning(false)
+    : m_currentClass(NULL), m_breakLevel(0), m_returning(false)
 {
 }
 
@@ -69,6 +69,24 @@ Variant &VariableEnvironment::getIdx(int idx) {
 Array VariableEnvironment::getDefinedVariables() const {
   return Array::Create();
 }
+
+std::vector<Variant> &VariableEnvironment::createTempVariables() {
+  m_tempStack.resize(m_tempStack.size() + 1);
+  return m_tempStack.back();
+}
+
+Variant VariableEnvironment::getTempVariable(int index) {
+  ASSERT(!m_tempStack.empty());
+  ASSERT(index >= 0 && index < (int)m_tempStack.back().size());
+  return m_tempStack.back()[index];
+}
+
+void VariableEnvironment::releaseTempVariables() {
+  ASSERT(!m_tempStack.empty());
+  m_tempStack.pop_back();
+}
+
+///////////////////////////////////////////////////////////////////////////////
 
 DummyVariableEnvironment::DummyVariableEnvironment()
 {}

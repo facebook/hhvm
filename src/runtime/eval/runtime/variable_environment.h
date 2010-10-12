@@ -75,12 +75,22 @@ public:
     return false;
   }
   bool isEscaping() const { return isBreaking() || m_returning; }
+
+  /**
+   * Storing temporary variables for TempExpressionList.
+   */
+  std::vector<Variant> &createTempVariables();
+  Variant getTempVariable(int index);
+  void releaseTempVariables();
+
 protected:
   Variant m_currentObject;
   const char* m_currentClass;
   int m_breakLevel;
   bool m_returning;
   Variant m_ret;
+
+  std::list<std::vector<Variant> > m_tempStack;
 };
 
 /**

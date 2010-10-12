@@ -17,6 +17,7 @@
 #include <runtime/eval/ast/list_assignment_expression.h>
 #include <runtime/ext/ext_variable.h>
 #include <runtime/eval/ast/variable_expression.h>
+#include <runtime/eval/ast/temp_expression_list.h>
 
 namespace HPHP {
 namespace Eval {
@@ -26,6 +27,15 @@ ListElement::ListElement(CONSTRUCT_ARGS) : Construct(CONSTRUCT_PASS) {}
 
 LvalListElement::LvalListElement(CONSTRUCT_ARGS, LvalExpressionPtr lval)
   : ListElement(CONSTRUCT_PASS), m_lval(lval) {}
+
+void LvalListElement::collectOffsets(TempExpressionListPtr texp) {
+  if (m_lval) {
+    TempExpressionListPtr exp = m_lval->unsafe_cast<TempExpressionList>();
+    if (exp) {
+      texp->takeOffsets(exp);
+    }
+  }
+}
 
 void LvalListElement::set(VariableEnvironment &env, CVarRef val) const {
   if (m_lval) m_lval->set(env, val);
@@ -38,6 +48,15 @@ void LvalListElement::dump(std::ostream &out) const {
 SubListElement::SubListElement(CONSTRUCT_ARGS,
                                const std::vector<ListElementPtr> &elems)
   : ListElement(CONSTRUCT_PASS), m_elems(elems) {}
+
+void SubListElement::collectOffsets(TempExpressionListPtr texp) {
+  for (unsigned int i = 0; i < m_elems.size(); i++) {
+    ListElementPtr &le = m_elems[i];
+    if (le) {
+      le->collectOffsets(texp);
+    }
+  }
+}
 
 void SubListElement::set(VariableEnvironment &env, CVarRef val) const {
   for (int i = m_elems.size() - 1; i >= 0; i--) {

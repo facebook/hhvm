@@ -64,6 +64,10 @@ public:
   ExprName(CONSTRUCT_ARGS, ExpressionPtr name);
   virtual String get(VariableEnvironment &env) const;
   virtual void dump(std::ostream &out) const;
+
+  ExpressionPtr getExp();
+  void setExp(ExpressionPtr name);
+
 protected:
   ExpressionPtr m_name;
 };

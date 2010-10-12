@@ -14,42 +14,44 @@
    +----------------------------------------------------------------------+
 */
 
-#ifndef __EVAL_EXPRESSION_H__
-#define __EVAL_EXPRESSION_H__
+#ifndef __EVAL_AST_TEMP_EXPRESSION_H__
+#define __EVAL_AST_TEMP_EXPRESSION_H__
 
-#include <runtime/eval/ast/construct.h>
+#include <runtime/eval/ast/expression.h>
 
 namespace HPHP {
 namespace Eval {
 ///////////////////////////////////////////////////////////////////////////////
 
-DECLARE_AST_PTR(Name);
-DECLARE_AST_PTR(Expression);
-DECLARE_AST_PTR(LvalExpression);
-class ByteCodeProgram;
+DECLARE_AST_PTR(TempExpression);
 
-#define EXPRESSION_ARGS CONSTRUCT_ARGS
-#define EXPRESSION_PASS CONSTRUCT_PASS
-
-class Expression : public Construct {
+class TempExpression : public Expression {
 public:
-  Expression(EXPRESSION_ARGS);
-  Expression(const Location *loc) : Construct(loc) {}
-  virtual ~Expression() {}
-  virtual Variant eval(VariableEnvironment &env) const = 0;
-  virtual Variant refval(VariableEnvironment &env, int strict = 2) const;
-  virtual bool exist(VariableEnvironment &env, int op) const;
-  virtual Variant evalExist(VariableEnvironment &env) const;
-  virtual const LvalExpression *toLval() const;
-  virtual bool isRefParam() const;
+  TempExpression(ExpressionPtr exp, int index = 0);
+  virtual Variant eval(VariableEnvironment &env) const;
+  virtual void dump(std::ostream &out) const;
 
-  static Variant evalVector(const std::vector<ExpressionPtr> &v,
-                            VariableEnvironment &env);
+  /**
+   * In ListAssigment, we may be pointed to a different vector of temp
+   * variables, after
+   *
+   *    list(TempExprList - [TempExpr1, TempExpr2],
+   *         TempExprList - [TempExpr1, TempExpr2])
+   *
+   * becomes
+   *
+   *    TempExprList list([TempExpr1, TempExpr2],
+   *                      [TempExpr3, TempExpr4]) <--- adjust to 3 and 4
+   */
+  void adjustIndex(int index0) { m_index += index0;}
 
+private:
+  ExpressionPtr m_exp;
+  int m_index;
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 }
 }
 
-#endif /* __EVAL_EXPRESSION_H__ */
+#endif /* __EVAL_AST_TEMP_EXPRESSION_H__ */

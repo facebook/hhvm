@@ -28,7 +28,7 @@ UnsetStatement::UnsetStatement(STATEMENT_ARGS,
   m_vals.reserve(vals.size());
   for (std::vector<ExpressionPtr>::const_iterator it = vals.begin();
          it != vals.end(); ++it) {
-    LvalExpressionPtr lv = (*it)->cast<LvalExpression>();
+    LvalExpressionPtr lv = (*it)->unsafe_cast<LvalExpression>();
     if (!lv) {
       throw FatalErrorException(0,
                                 "Cannot unset function return value at %s:%d",

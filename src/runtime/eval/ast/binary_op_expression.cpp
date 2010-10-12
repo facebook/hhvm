@@ -25,7 +25,7 @@ namespace Eval {
 BinaryOpExpression::BinaryOpExpression(EXPRESSION_ARGS, ExpressionPtr exp1,
                                        int op, ExpressionPtr exp2)
   : Expression(EXPRESSION_PASS), m_exp1(exp1), m_exp2(exp2), m_op(op) {
-  m_reverseOrder = m_exp1->cast<VariableExpression>();
+  m_reverseOrder = m_exp1->is<VariableExpression>();
 }
 
 Variant BinaryOpExpression::eval(VariableEnvironment &env) const {

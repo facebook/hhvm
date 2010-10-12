@@ -36,6 +36,7 @@ class Parser;
 class Construct {
 public:
   Construct(CONSTRUCT_ARGS);
+  Construct(const Location *loc);
   virtual ~Construct() {}
   void release();
   void incRefCount() {
@@ -50,9 +51,19 @@ public:
   }
 
   template <class T>
-  AstPtr<T> cast() {
+  bool is() {
+    return dynamic_cast<T*>(this);
+  }
+  template <class T>
+  T *cast() {
+    return dynamic_cast<T*>(this);
+  }
+
+  // only okay to call in parser phase
+  template <class T>
+  AstPtr<T> unsafe_cast() {
     T* p = dynamic_cast<T*>(this);
-    return AstPtr<T>(p);
+    return AstPtr<T>(p); // not thread-safe
   }
 
   virtual bool skipDump() const { return false;}

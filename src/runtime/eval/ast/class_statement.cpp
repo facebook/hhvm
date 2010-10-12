@@ -375,7 +375,7 @@ void ClassStatement::addMethod(MethodStatementPtr m) {
 }
 void ClassStatement::addConstant(const string &name, ExpressionPtr v) {
   // Array is the only one allowed by the grammer but disallowed semantically
-  if (v->cast<ArrayExpression>()) {
+  if (v->is<ArrayExpression>()) {
     raise_error("Arrays are not allowed in class constants on %s:%d",
                 v->loc()->file, v->loc()->line1);
   }

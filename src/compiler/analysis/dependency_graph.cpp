@@ -239,54 +239,43 @@ void DependencyGraph::add(KindOf kindOf, const string &program,
   ASSERT(!parentName.empty());
   clearCache(kindOf);
 
-  DependencyPtrVecPtr &dependencies =
+  DependencyPtrMapPtr &dependencies =
     m_forwards[kindOf][parentName][childName];
   if (!dependencies) {
-    dependencies = DependencyPtrVecPtr(new DependencyPtrVec());
-    m_forwards[kindOf][parentName][childName] = dependencies;
+    dependencies.reset(new DependencyPtrMap());
     m_reverses[kindOf][childName][parentName] = dependencies;
   } else if (codeError) {
     // two identical file includes
     codeError->record(CodeError::RedundantInclude, child,
-                      (*dependencies)[0]->m_child);
+                      dependencies->begin()->first);
   }
 
-  bool found = false;
-  for (unsigned int i = 0; i < dependencies->size(); i++) {
-    DependencyPtr dep = dependencies->at(i);
-    if (dep->m_child != child) continue;
-
+  DependencyPtr &dep = (*dependencies)[child];
+  if (dep) {
     // completing unresolved dependency
     if (!dep->m_parent && parent) {
       dep->m_parent = parent;
       if (Option::DependencyMaxProgram && !program.empty()) {
         dep->m_programs.push_back(program);
       }
-      found = true;
-      break;
     }
-
     // comparing fully resolved dependencies
-    if (dep->m_parent == parent) {
+    else if (dep->m_parent == parent) {
       dep->m_programCount++;
       if ((int)dep->m_programs.size() < Option::DependencyMaxProgram) {
         dep->m_programs.push_back(program);
       }
-      found = true;
-      break;
     }
   }
-
   // adding new dependency
-  if (!found) {
-    DependencyPtr dep = DependencyPtr(new Dependency());
+  else {
+    dep.reset(new Dependency());
     dep->m_parent = parent;
     dep->m_child = child;
     dep->m_programCount = 1;
     if (Option::DependencyMaxProgram && !program.empty()) {
       dep->m_programs.push_back(program);
     }
-    dependencies->push_back(dep);
     m_total++;
   }
 }
@@ -346,7 +335,7 @@ DependencyGraph::getAllChildren(KindOf kindOf, const string &parent) const {
     for (MapConstIter iterMap = iterMapMap->second.begin();
          iterMap != iterMapMap->second.end(); ++iterMap) {
       const string &child = iterMap->first;
-      children[child] = iterMap->second->at(0)->m_child;
+      children[child] = iterMap->second->begin()->first;
 
       // this is recursively done so children can have theirs cached as well
       const StringToConstructPtrMap &grandChildren =
@@ -372,7 +361,7 @@ DependencyGraph::getAllParents(KindOf kindOf, const std::string &child) const {
     for (MapConstIter iterMap = iterMapMap->second.begin();
          iterMap != iterMapMap->second.end(); ++iterMap) {
       const string &parent = iterMap->first;
-      parents[parent] = iterMap->second->at(0)->m_parent;
+      parents[parent] = iterMap->second->begin()->second->m_parent;
 
       // this is recursively done so parents can have theirs cached as well
       const StringToConstructPtrMap &grandParents =
@@ -390,8 +379,12 @@ void DependencyGraph::getChildren(KindOf kindOf, const std::string &parent,
   if (iterMapMap != m_forwards[kindOf].end()) {
     const DependencyMap &depMap = iterMapMap->second;
     for (MapConstIter iter = depMap.begin(); iter != depMap.end(); ++iter) {
-      children.insert(children.end(), iter->second->begin(),
-                      iter->second->end());
+      const DependencyPtrMap &dependencies = *iter->second;
+      children.reserve(children.size() + dependencies.size());
+      for (DepConstIter iterDeps = dependencies.begin();
+          iterDeps != dependencies.end(); ++iterDeps) {
+        children.push_back(iterDeps->second);
+      }
     }
   }
 }
@@ -424,10 +417,12 @@ void Dependency::serialize(JSON::OutputStream &out) const {
 
 void DependencyGraph::serialize(JSON::OutputStream &out) const {
   JSON::MapStream ms(out);
-  ms.add("Count", m_total)
-    .add("ParentToChildren", m_forwards)
-    .add("ChildToParents", m_reverses)
-    .done();
+  ms.add("Count", m_total);
+  ms.add("ParentToChildren");
+  toJSON(out, m_forwards);
+  ms.add("ChildToParents");
+  toJSON(out, m_reverses);
+  ms.done();
 }
 
 void DependencyGraph::saveToFiles(const char *dir) const {
@@ -442,12 +437,49 @@ void DependencyGraph::saveToFiles(const char *dir) const {
     if (f) {
       JSON::OutputStream o(f);
       JSON::MapStream ms(o);
-      ms.add("ParentToChildren", m_forwards[i])
-        .add("ChildToParents", m_reverses[i])
-        .done();
+      ms.add("ParentToChildren");
+      toJSON(o, m_forwards[i]);
+      ms.add("ParentToChildren");
+      toJSON(o, m_reverses[i]);
+      ms.done();
       f.close();
     }
   }
+}
+
+void DependencyGraph::toJSON(JSON::OutputStream &out,
+           const std::vector<DependencyMapMap> &depMapMapList) {
+  JSON::ListStream ms(out);
+  for (unsigned int i = 0; i < depMapMapList.size(); ++i) {
+    ms.next();
+    toJSON(out, depMapMapList[i]);
+  }
+  ms.done();
+}
+
+void DependencyGraph::toJSON(JSON::OutputStream &out,
+                             const DependencyMapMap &depMapMap) {
+  JSON::MapStream mapMapMS(out);
+  for (MapMapConstIter iterMapMap = depMapMap.begin();
+      iterMapMap != depMapMap.end(); ++iterMapMap) {
+    const DependencyMap& depMap = iterMapMap->second;
+    mapMapMS.add(iterMapMap->first);
+    JSON::MapStream mapMS(out);
+    for (MapConstIter iterMap = depMap.begin();
+        iterMap != depMap.end(); ++iterMap) {
+      const DependencyPtrMap& deps = *iterMap->second;
+      mapMS.add(iterMap->first);
+      JSON::ListStream depsMS(out);
+      for (DepConstIter iterDeps = deps.begin();
+           iterDeps != deps.end(); ++iterDeps) {
+        const Dependency &dep = *iterDeps->second;
+        depsMS << dep;
+      }
+      depsMS.done();
+    }
+    mapMS.done();
+  }
+  mapMapMS.done();
 }
 
 void DependencyGraph::saveToDB(ServerDataPtr server, int runId) const {
@@ -482,9 +514,10 @@ void DependencyGraph::saveToDB(ServerDataPtr server, int runId) const {
       for (MapConstIter iterChild = depMap.begin();
            iterChild != depMap.end(); ++iterChild) {
         const std::string &child = iterChild->first;
-        const DependencyPtrVec &deps = *iterChild->second;
-        for (unsigned int i = 0; i < deps.size(); i++) {
-          Dependency &dep = *deps[i];
+        const DependencyPtrMap &deps = *iterChild->second;
+        for (DepConstIter iterDeps = deps.begin();
+             iterDeps != deps.end(); ++iterDeps) {
+          Dependency &dep = *iterDeps->second;
 
           const char *parentFile = "";
           const char *childFile = "";

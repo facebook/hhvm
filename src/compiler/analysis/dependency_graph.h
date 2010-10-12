@@ -179,9 +179,11 @@ private:
   static std::vector<const char *> DependencyTexts;
   static std::vector<const char *> &getDependencyTexts();
 
-  typedef boost::shared_ptr<DependencyPtrVec> DependencyPtrVecPtr;
-  typedef std::map<std::string, DependencyPtrVecPtr, stdltstr> DependencyMap;
+  typedef std::map<ConstructPtr, DependencyPtr> DependencyPtrMap;
+  typedef boost::shared_ptr<DependencyPtrMap> DependencyPtrMapPtr;
+  typedef std::map<std::string, DependencyPtrMapPtr, stdltstr> DependencyMap;
   typedef std::map<std::string, DependencyMap, stdltstr> DependencyMapMap;
+  typedef DependencyPtrMap::const_iterator DepConstIter;
   typedef DependencyMap::const_iterator MapConstIter;
   typedef DependencyMapMap::const_iterator MapMapConstIter;
   typedef std::map<std::string, StringToConstructPtrMap, stdltstr>
@@ -208,6 +210,10 @@ private:
                     CodeErrorPtr codeError, bool documentRoot,
                     std::string &child, std::string &parent);
 
+  static void toJSON(JSON::OutputStream &out,
+                     const std::vector<DependencyMapMap> &depMapMapList);
+  static void toJSON(JSON::OutputStream &out,
+                     const DependencyMapMap &depMapMap);
 
   // hook
   static bool (*m_hookHandler)(DependencyGraph *depGraph, KindOf kindOf,

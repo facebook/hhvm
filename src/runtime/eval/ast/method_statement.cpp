@@ -201,6 +201,16 @@ void MethodStatement::attemptAccess(const char *context) const {
   } else {
     access = cs->hasAccess(context, level);
   }
+
+  // special case when handling parent's private constructors that are allowed
+  if (!access) {
+    if (level == ClassStatement::Private &&
+        (strcasecmp(m_name.c_str(), "__construct") == 0 ||
+         strcasecmp(m_name.c_str(), getClass()->name().c_str()) == 0)) {
+      access = cs->hasAccess(context, ClassStatement::Protected);
+    }
+  }
+
   if (!access) {
     const char *mod = "protected";
     if (level == ClassStatement::Private) mod = "private";

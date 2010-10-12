@@ -925,13 +925,15 @@ void Parser::saveParseTree(Token &tree) {
     m_tree = StatementPtr(new StatementListStatement(this, rest));
     // Classes that have a parent declared after them must be evaluated at
     // the marker position. I don't know why.
-    hphp_const_char_map<bool> seen;
-    for (int i = svec.size() - 1; i >= 0; --i) {
+    hphp_const_char_map<ClassStatementPtr> seen;
+    for (int i = 0; i < (int)svec.size(); ++i) {
       ClassStatementPtr cs = svec[i]->cast<ClassStatement>();
       if (cs) {
-        seen[cs->name().c_str()] = true;
+        seen[cs->name().c_str()] = cs;
         if (!cs->parent().empty()) {
-          if (seen.find(cs->parent().c_str()) != seen.end()) {
+          hphp_const_char_map<ClassStatementPtr>::iterator iter =
+            seen.find(cs->parent().c_str());
+          if (iter == seen.end() || iter->second->isDelayedDeclaration()) {
             cs->delayDeclaration();
           }
         }

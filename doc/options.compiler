@@ -264,7 +264,6 @@ Under "CodeGeneration", one can specify alternative name prefixes that are
 used in different places of code generation.
 
 - IdPrefix
-- LabelEscape
 - LambdaPrefix
 - FunctionPrefix
 - BuiltinFunctionPrefix

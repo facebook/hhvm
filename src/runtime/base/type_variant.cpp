@@ -43,6 +43,8 @@ static StaticString s_offsetSet("offsetSet");
 static StaticString s_offsetUnset("offsetUnset");
 static StaticString s_s("s");
 static StaticString s_scalar("scalar");
+static StaticString s_array("Array");
+static StaticString s_1("1");
 
 ///////////////////////////////////////////////////////////////////////////////
 // private implementations
@@ -1485,14 +1487,16 @@ double Variant::toDouble() const {
   return (double)toInt64();
 }
 
-String Variant::toString() const {
+String Variant::toStringHelper() const {
   switch (m_type) {
   case KindOfNull:    return empty_string;
-  case KindOfBoolean: return m_data.num ? "1" : "";
+  case KindOfBoolean: return m_data.num ? s_1 : empty_string;
   case KindOfDouble:  return m_data.dbl;
   case KindOfStaticString:
-  case KindOfString:  return m_data.pstr;
-  case KindOfArray:   return "Array";
+  case KindOfString:
+    ASSERT(false); // Should be done in caller
+    return m_data.pstr;
+  case KindOfArray:   return s_array;
   case KindOfObject:  return m_data.pobj->t___tostring();
   case KindOfVariant: return m_data.pvar->toString();
   default:

@@ -411,7 +411,12 @@ class Variant {
     return toInt64Helper(base);
   }
   double toDouble () const;
-  String toString () const;
+  String toString () const {
+    if (m_type == KindOfStaticString || m_type == KindOfString) {
+      return m_data.pstr;
+    }
+    return toStringHelper();
+  }
   Array  toArray  () const;
   Object toObject () const;
   Variant toKey   () const;
@@ -1035,6 +1040,7 @@ class Variant {
 
   bool   toBooleanHelper() const;
   int64  toInt64Helper(int base = 10) const;
+  String toStringHelper() const;
 
   void split();  // breaking weak binding by making a real copy
 

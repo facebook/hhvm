@@ -14429,6 +14429,20 @@ bool TestCodeRun::TestAPC() {
       "  int(10)\n"
       "}\n"
       );
+
+  // objects in an apc array can be changed without escalating the array
+  MVCRO("<?php\n"
+        "class A { var $i = 10; }\n"
+        "$a = array(new A);\n"
+        "apc_store('key1', $a);\n"
+        "$b = apc_fetch('key1');\n"
+        "$c = $b[0];\n"
+        "$c->i = 100;\n"
+        "apc_store('key2', $b);\n"
+        "$t = apc_fetch('key2');\n"
+        "var_dump($t[0]->i);\n",
+        "int(100)\n");
+
   return true;
 }
 

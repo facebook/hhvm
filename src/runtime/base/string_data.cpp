@@ -170,6 +170,14 @@ void StringData::append(const char *s, int len) {
     ((char*)m_data)[m_len] = '\0';
     m_hash = 0;
   }
+
+  if (m_len & IsMask) {
+    int len = m_len;
+    m_len &= ~IsMask;
+    releaseData();
+    m_data = NULL;
+    throw FatalErrorException(0, "String length exceeded 2^29 - 1: %d", len);
+  }
 }
 
 StringData *StringData::copy(bool sharedMemory /* = false */) const {

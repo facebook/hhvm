@@ -42,7 +42,7 @@ public:
     while (num >>= 1) pow_2++;
     int capacity = 1 << pow_2;
     m_capacity_mask = capacity - 1;
-    m_hash = (int*)malloc(sizeof(int) * capacity);
+    m_hash = (int*)malloc(sizeof(int) * capacity + 4);
     for (int i = 0; i < capacity; i++) m_hash[i] = -1;
     m_buckets = (Bucket*)malloc(sizeof(Bucket) * capacity);
   }

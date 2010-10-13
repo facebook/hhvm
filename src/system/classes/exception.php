@@ -141,7 +141,9 @@ class Exception {
   /* Overrideable */
   // formated string for display
   function __toString() {
-    return $this->getMessage();
+    return "exception '" . get_class($this) . "' with message '" .
+      $this->getMessage() . "' in " . $this->getFile() . ":" .
+      $this->getLine() . "\nStack trace:\n" . $this->getTraceAsString();
   }
 }
 

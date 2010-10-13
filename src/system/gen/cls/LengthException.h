@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 201 */
+/* SRC: classes/exception.php line 203 */
 class c_LengthException : public c_LogicException {
   public:
 

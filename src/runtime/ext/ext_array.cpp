@@ -475,11 +475,9 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
     dstep = step.toDouble();
     is_step_double = true;
   } else if (step.isString()) {
-    String sstep = step.toString();
     int64 sn;
     double sd;
-    DataType stype =
-      is_numeric_string(sstep.data(), sstep.size(), &sn, &sd, 0);
+    DataType stype = step.toString()->isNumericWithVal(sn, sd, 0);
     if (stype == KindOfDouble) {
       is_step_double = true;
       dstep = sd;
@@ -499,10 +497,8 @@ Variant f_range(CVarRef low, CVarRef high, CVarRef step /* = 1 */) {
     if (slow.size() >= 1 && shigh.size() >=1) {
       int64 n1, n2;
       double d1, d2;
-      DataType type1 =
-        is_numeric_string(slow.data(), slow.size(), &n1, &d1, 0);
-      DataType type2 =
-        is_numeric_string(shigh.data(), shigh.size(), &n2, &d2, 0);
+      DataType type1 = slow->isNumericWithVal(n1, d1, 0);
+      DataType type2 = shigh->isNumericWithVal(n2, d2, 0);
       if (type1 == KindOfDouble || type2 == KindOfDouble || is_step_double) {
         if (type1 != KindOfDouble) d1 = slow.toDouble();
         if (type2 != KindOfDouble) d2 = shigh.toDouble();

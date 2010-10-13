@@ -246,7 +246,6 @@ void StringData::dump() const {
   printf("]\n");
 }
 
-///////////////////////////////////////////////////////////////////////////////
 // mutations
 
 StringData *StringData::getChar(int offset) const {
@@ -348,39 +347,60 @@ void StringData::negate() {
   }
 }
 
+void StringData::setStatic() const {
+  _count = (1 << 30);
+  ASSERT(!isShared()); // because we are gonna reuse the space!
+  m_hash = hash_string(data(), size());
+  ASSERT(m_hash >= 0);
+  int64 lval; double dval;
+  if (isNumericWithVal(lval, dval, 1) == KindOfNull) {
+    m_hash |= (1ull << 63);
+  }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // type conversions
 
-bool StringData::isNumeric() const {
+DataType StringData::isNumericWithVal(int64 &lval, double &dval,
+                                      int allow_errors) const {
+  if (m_hash < 0) return KindOfNull;
+  DataType ret = KindOfNull;
   int len = size();
   if (len) {
-    int64 lval; double dval;
-    DataType ret = is_numeric_string(data(), len, &lval, &dval, 0);
-    switch (ret) {
-    case KindOfNull:   return false;
-    case KindOfInt64:
-    case KindOfDouble: return true;
-    default:
-      ASSERT(false);
-      break;
+    ret = is_numeric_string(data(), size(), &lval, &dval, allow_errors);
+    if (ret == KindOfNull && !isShared()) {
+      m_hash |= (1ull << 63);
     }
+  }
+  return ret;
+}
+
+bool StringData::isNumeric() const {
+  if (isStatic()) return (m_hash >= 0);
+  int64 lval; double dval;
+  DataType ret = isNumericWithVal(lval, dval, 0);
+  switch (ret) {
+  case KindOfNull:   return false;
+  case KindOfInt64:
+  case KindOfDouble: return true;
+  default:
+    ASSERT(false);
+    break;
   }
   return false;
 }
 
 bool StringData::isInteger() const {
-  int len = size();
-  if (len) {
-    int64 lval; double dval;
-    DataType ret = is_numeric_string(data(), len, &lval, &dval, 0);
-    switch (ret) {
-    case KindOfNull:   return false;
-    case KindOfInt64:  return true;
-    case KindOfDouble: return false;
-    default:
-      ASSERT(false);
-      break;
-    }
+  if (m_hash < 0) return false;
+  int64 lval; double dval;
+  DataType ret = isNumericWithVal(lval, dval, 0);
+  switch (ret) {
+  case KindOfNull:   return false;
+  case KindOfInt64:  return true;
+  case KindOfDouble: return false;
+  default:
+    ASSERT(false);
+    break;
   }
   return false;
 }
@@ -430,12 +450,10 @@ double StringData::toDouble() const {
   return 0;
 }
 
-DataType StringData::toNumeric(int64 &ival, double &dval) const {
-  int len = size();
-  if (len) {
-    DataType r = is_numeric_string(data(), len, &ival, &dval, 0);
-    if (r == KindOfInt64 || r == KindOfDouble) return r;
-  }
+DataType StringData::toNumeric(int64 &lval, double &dval) const {
+  if (m_hash < 0) return KindOfString;
+  DataType ret = isNumericWithVal(lval, dval, 0);
+  if (ret == KindOfInt64 || ret == KindOfDouble) return ret;
   return KindOfString;
 }
 
@@ -448,11 +466,9 @@ int StringData::numericCompare(const StringData *v2) const {
   int64 lval1, lval2;
   double dval1, dval2;
   DataType ret1, ret2;
-  if ((ret1 = is_numeric_string(data(), size(),
-                                &lval1, &dval1, 0)) == KindOfNull ||
+  if ((ret1 = isNumericWithVal(lval1, dval1, 0)) == KindOfNull ||
       (ret1 == KindOfDouble && !finite(dval1)) ||
-      (ret2 = is_numeric_string(v2->data(), v2->size(),
-                                &lval2, &dval2, 0)) == KindOfNull ||
+      (ret2 = v2->isNumericWithVal(lval2, dval2, 0)) == KindOfNull ||
       (ret2 == KindOfDouble && !finite(dval2))) {
     return -2;
   }

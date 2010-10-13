@@ -667,7 +667,7 @@ Variant Variant::array_iter_each() {
 inline DataType Variant::convertToNumeric(int64 *lval, double *dval) const {
   StringData *s = getStringData();
   ASSERT(s);
-  return is_numeric_string(s->data(), s->size(), lval, dval, 1);
+  return s->isNumericWithVal(*lval, *dval, 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

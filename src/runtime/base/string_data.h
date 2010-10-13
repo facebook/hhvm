@@ -63,16 +63,7 @@ class StringData {
   IMPLEMENT_COUNTABLE_METHODS_NO_STATIC
 
   /* Only call setStatic() in a thread-neutral context! */
-  void setStatic() const {
-    _count = (1 << 30);
-    ASSERT(!isShared()); // because we are gonna reuse the space!
-    m_hash = hash_string(data(), size());
-    ASSERT(m_hash >= 0);
-    int64 res;
-    if (is_strictly_integer(m_data, (m_len & LenMask), res)) {
-      m_hash |= (1ull << 63);
-    }
-  }
+  void setStatic() const;
   bool isStatic() const { return _count == (1 << 30); }
 
   /**
@@ -127,10 +118,11 @@ class StringData {
   bool isImmutable() const {
     return (m_len & (IsLiteral | IsShared | IsLinear)) || isStatic();
   }
+  DataType isNumericWithVal(int64 &lval, double &dval, int allow_errors) const;
   bool isNumeric() const;
   bool isInteger() const;
   bool isStrictlyInteger(int64 &res) {
-    if (isStatic() && m_hash >= 0) return false;
+    if (isStatic() && m_hash < 0) return false;
     return is_strictly_integer(m_data, (m_len & LenMask), res);
   }
   bool isZero() const { return size() == 1 && m_data[0] == '0'; }
@@ -165,7 +157,7 @@ class StringData {
   int    toInt32  (int base = 10) const { return toInt64(base);}
   int64  toInt64  (int base = 10) const;
   double toDouble () const;
-  DataType toNumeric(int64 &ival, double &dval) const;
+  DataType toNumeric(int64 &lval, double &dval) const;
 
   int64 getPrecomputedHash() const {
     ASSERT(!isShared());
@@ -175,10 +167,10 @@ class StringData {
   int64 hash() const {
     if (isStatic()) return getPrecomputedHash();
     if (isShared()) return getSharedStringHash();
-    if (m_hash == 0) {
-      m_hash = hash_string(data(), size());
+    if ((m_hash & 0x7fffffffffffffffull) == 0) {
+      m_hash |= hash_string(data(), size());
     }
-    return m_hash;
+    return m_hash & 0x7fffffffffffffffull;
   }
 
   bool same(const StringData *s) const {

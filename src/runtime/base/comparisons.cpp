@@ -52,10 +52,8 @@ bool equal(int v1, const StringData *v2) {
 }
 
 bool equal(int64 v1, const StringData *v2) {
-  DataType ret = KindOfNull;
   int64 lval; double dval;
-  ret = is_numeric_string((v2 ? v2->data() : NULL),
-                          (v2 ? v2->size() : 0), &lval, &dval, 1);
+  DataType ret = v2->isNumericWithVal(lval, dval, 1);
   if (ret == KindOfInt64) {
     return v1 == lval;
   } else if (ret == KindOfDouble) {
@@ -135,10 +133,8 @@ bool less(int v1, const StringData *v2) {
 }
 
 bool less(int64 v1, const StringData *v2) {
-  DataType ret = KindOfNull;
   int64 lval; double dval;
-  ret = is_numeric_string((v2 ? v2->data() : NULL),
-                          (v2 ? v2->size() : 0), &lval, &dval, 1);
+  DataType ret = v2->isNumericWithVal(lval, dval, 1);
   if (ret == KindOfInt64) {
     return v1 < lval;
   } else if (ret == KindOfDouble) {
@@ -161,10 +157,8 @@ bool more(int v1, const StringData *v2) {
 }
 
 bool more(int64 v1, const StringData *v2) {
-  DataType ret = KindOfNull;
   int64 lval; double dval;
-  ret = is_numeric_string((v2 ? v2->data() : NULL),
-                          (v2 ? v2->size() : 0), &lval, &dval, 1);
+  DataType ret = v2->isNumericWithVal(lval, dval, 1);
   if (ret == KindOfInt64) {
     return v1 > lval;
   } else if (ret == KindOfDouble) {

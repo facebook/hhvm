@@ -67,7 +67,7 @@ Variant f_json_decode(CStrRef json, bool assoc /* = false */,
 
   int64 p;
   double d;
-  DataType type = is_numeric_string(json.data(), json.size(), &p, &d, 0);
+  DataType type = json->isNumericWithVal(p, d, 0);
   if (type == KindOfInt64) {
     return p;
   } else if (type == KindOfDouble) {

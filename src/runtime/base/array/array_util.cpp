@@ -409,10 +409,10 @@ DataType ArrayUtil::Sum(CArrRef input, int64 *isum, double *dsum) {
     }
     case KindOfStaticString:
     case KindOfString: {
-      String s = entry.toString();
       int64 ti;
       double td;
-      if (is_numeric_string(s.data(), s.size(), &ti, &td, 1) == KindOfInt64) {
+      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+          KindOfInt64) {
         i += ti;
         break;
       } else {
@@ -455,10 +455,10 @@ DataType ArrayUtil::Product(CArrRef input, int64 *iprod, double *dprod) {
     }
     case KindOfStaticString:
     case KindOfString: {
-      String s = entry.toString();
       int64 ti;
       double td;
-      if (is_numeric_string(s.data(), s.size(), &ti, &td, 1) == KindOfInt64) {
+      if (entry.getStringData()->isNumericWithVal(ti, td, 1) ==
+          KindOfInt64) {
         i *= ti;
         break;
       } else {

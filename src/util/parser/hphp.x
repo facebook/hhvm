@@ -331,8 +331,7 @@ HEREDOC_CHARS       ("{"*([^$\n\r\\{]|("\\"[^\n\r]))|{HEREDOC_LITERAL_DOLLAR}|({
 <ST_IN_SCRIPTING>"__FILE__"             { SETTOKEN; return T_FILE;    }
 
 <INITIAL>"#"[^\n]*"\n" {
-        yyleng = 0;
-        STEPPOS;
+        _scanner->setHashBang(yytext, yyleng);
         BEGIN(ST_IN_HTML);
         return T_INLINE_HTML;
 }

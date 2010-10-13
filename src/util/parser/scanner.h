@@ -118,6 +118,7 @@ public:
     }
     incLoc(rawText, rawLeng);
   }
+  void setHashBang(const char *rawText, int rawLeng);
   void error(const char* fmt, ...); // also used for YY_FATAL_ERROR in hphp.x
   std::string escape(char *str, int len, char quote_type) const;
 

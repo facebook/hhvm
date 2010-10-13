@@ -84,6 +84,15 @@ Scanner::~Scanner() {
   }
 }
 
+void Scanner::setHashBang(const char *rawText, int rawLeng) {
+  if (m_type & ReturnAllTokens) {
+    setToken(rawText, rawLeng);
+  } else {
+    setToken("", 0);
+    incLoc(rawText, rawLeng);
+  }
+}
+
 int Scanner::getNextToken(ScannerToken &t, Location &l) {
   m_token = &t;
   m_loc = &l;

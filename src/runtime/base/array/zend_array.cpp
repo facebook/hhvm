@@ -985,7 +985,7 @@ void ZendArray::erase(Bucket ** prev) {
     DELETE(Bucket)(p);
   }
   if (nextElementUnsetInsideForeachByReference) {
-    if (RuntimeOption::FatalOnWeirdForEach) {
+    if (RuntimeOption::EnableHipHopErrors) {
       raise_error("Cannot unset the next element inside foreach by reference");
     }
   }

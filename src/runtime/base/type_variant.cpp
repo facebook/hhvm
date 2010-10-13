@@ -1916,6 +1916,12 @@ void Variant::callOffsetUnset(CVarRef key) {
   getArrayAccess()->o_invoke(s_offsetUnset, Array::Create(key));
 }
 
+static void raise_bad_offset_notice() {
+  if (RuntimeOption::EnableHipHopErrors) {
+    raise_notice("taking offset [] on bool or number");
+  }
+}
+
 #define IMPLEMENT_RVAL_INTEGRAL                                         \
   if (m_type == KindOfArray) {                                          \
     return m_data.parr->get((int64)offset, error);                      \
@@ -1933,7 +1939,7 @@ void Variant::callOffsetUnset(CVarRef key) {
       break;                                                            \
     default:                                                            \
       if (error) {                                                      \
-        raise_notice("taking offset [] on bool or number");             \
+        raise_bad_offset_notice();                                      \
       }                                                                 \
       break;                                                            \
   }                                                                     \
@@ -1959,7 +1965,7 @@ Variant Variant::rvalAtHelper(int64 offset, bool error /* = false */) const {
     break;
   default:
     if (error) {
-      raise_notice("taking offset [] on bool or number");
+      raise_bad_offset_notice();
     }
     break;
   }
@@ -1990,7 +1996,7 @@ Variant Variant::rvalAt(litstr offset, bool error /* = false */,
     break;
   default:
     if (error) {
-      raise_notice("taking offset [] on bool or number");
+      raise_bad_offset_notice();
     }
     break;
   }
@@ -2021,7 +2027,7 @@ Variant Variant::rvalAt(CStrRef offset, bool error /* = false */,
     break;
   default:
     if (error) {
-      raise_notice("taking offset [] on bool or number");
+      raise_bad_offset_notice();
     }
     break;
   }
@@ -2080,7 +2086,7 @@ Variant Variant::rvalAt(CVarRef offset, bool error /* = false */) const {
     break;
   default:
     if (error) {
-      raise_notice("taking offset [] on bool or number");
+      raise_bad_offset_notice();
     }
     break;
   }

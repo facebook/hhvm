@@ -16,6 +16,9 @@
 
 #include <runtime/eval/ast/if_statement.h>
 #include <runtime/eval/ast/expression.h>
+#include <runtime/eval/ast/lval_expression.h>
+#include <runtime/eval/ast/assignment_op_expression.h>
+#include <runtime/eval/ast/assignment_ref_expression.h>
 #include <runtime/eval/runtime/variable_environment.h>
 
 namespace HPHP {
@@ -36,6 +39,12 @@ bool IfBranch::proc(VariableEnvironment &env) const {
 }
 
 Variant IfBranch::evalCond(VariableEnvironment &env) const {
+  if (RuntimeOption::EnableHipHopErrors &&
+      (dynamic_cast<const AssignmentOpExpression*>(m_cond.get()) ||
+       dynamic_cast<const AssignmentRefExpression*>(m_cond.get()))) {
+    raise_notice("Is 'if (... = ...)' a typo of 'if (... == ...)'? "
+                 "If not, use 'if ((... = ...))' to suppress this message.");
+  }
   return m_cond->eval(env);
 }
 

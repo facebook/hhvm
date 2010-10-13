@@ -92,6 +92,7 @@ flood error logs.
     WarnTooManyArguments = false
     ThrowMissingArguments = false
     ThrowInvalidArguments = false
+    EnableHipHopErrors = true
     NoticeFrequency = 1    # 1 out of these many notices to log
     WarningFrequency = 1   # 1 out of these many warnings to log
     AssertActive = false

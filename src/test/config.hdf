@@ -5,7 +5,7 @@ Log {
 }
 
 ErrorHandling {
-  FatalOnWeirdForEach = false
+  EnableHipHopErrors = false
 }
 
 Server {

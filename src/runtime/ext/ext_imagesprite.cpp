@@ -1004,7 +1004,7 @@ String c_ImageSprite::t_output(CStrRef output_file /* = null_string*/,
 
     for(; iter != end; iter++) {
       ImageSprite::Image *img = iter->second;
-      if (img == NULL) {
+      if (img == NULL || img->m_image == NULL) {
         continue;
       } else if (!img->m_error) {
         gdImageCopy(

@@ -217,7 +217,12 @@ Variant f_fgets(CObjRef handle, int64 length /* = 1024 */) {
     return false;
   }
   CHECK_HANDLE(handle, f);
-  return f->readLine(length);
+  String r(f->readLine(length));
+  if (!r.isNull()) {
+    return r;
+  } else {
+    return false;
+  }
 }
 
 Variant f_fgetss(CObjRef handle, int64 length /* = 0 */,

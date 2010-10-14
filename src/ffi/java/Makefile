@@ -13,7 +13,7 @@ AUTO_SOURCES = 1
 
 include $(PROJECT_ROOT)/src/rules.mk
 
-EXTERNAL += $(LIB_DIR)/libhphp_runtime.so
+EXTERNAL += $(LIB_DIR)/libhphp_runtime_gd.so
 
 TARGETS = $(SHARED_LIB)
 

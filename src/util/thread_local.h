@@ -23,6 +23,12 @@
 
 namespace HPHP {
 
+#ifdef TLS_GLOBAL_DYNAMIC
+#define TLS_MODEL "global-dynamic"
+#else
+#define TLS_MODEL "initial-exec"
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // Only gcc >= 4.3.0 supports the '__thread' keyword for thread locals
 
@@ -243,7 +249,7 @@ private:
   pthread_key_t m_key;
 
   static T *& getSingleton() {
-    static __attribute__ ((tls_model ("initial-exec"))) __thread
+    static __attribute__ ((tls_model (TLS_MODEL))) __thread
       T * s_singleton = NULL;
     return s_singleton;
   }
@@ -311,24 +317,24 @@ struct ThreadLocalProxy {
  */
 
 #define DECLARE_THREAD_LOCAL(T, f) \
-  __attribute__((tls_model ("initial-exec"))) __thread \
+  __attribute__((tls_model (TLS_MODEL))) __thread \
   ThreadLocal<T> f
 #define IMPLEMENT_THREAD_LOCAL(T, f) \
-  __attribute__((tls_model ("initial-exec"))) __thread \
+  __attribute__((tls_model (TLS_MODEL))) __thread \
   ThreadLocal<T> f = { { NULL, NULL, NULL } }
 
 #define DECLARE_THREAD_LOCAL_CREATE(T, f) \
-  __attribute__((tls_model ("initial-exec"))) __thread \
+  __attribute__((tls_model (TLS_MODEL))) __thread \
   ThreadLocalCreate<T> f
 #define IMPLEMENT_THREAD_LOCAL_CREATE(T, f) \
-  __attribute__((tls_model ("initial-exec"))) __thread \
+  __attribute__((tls_model (TLS_MODEL))) __thread \
   ThreadLocalCreate<T> f = { { NULL, NULL, NULL } }
 
 #define DECLARE_THREAD_LOCAL_PROXY(T, N, f) \
-  __attribute__((tls_model ("initial-exec"))) __thread \
+  __attribute__((tls_model (TLS_MODEL))) __thread \
   ThreadLocalProxy<T, N> f
 #define IMPLEMENT_THREAD_LOCAL_PROXY(T, N, f) \
-  __attribute__((tls_model ("initial-exec"))) __thread \
+  __attribute__((tls_model (TLS_MODEL))) __thread \
   ThreadLocalProxy<T, N> f = { NULL }
 
 #else /* USE_GCC_FAST_TLS */

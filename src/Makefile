@@ -46,3 +46,9 @@ hphp: compiler
 hphpi: hphp
 test-setup: compiler-setup
 test: compiler
+
+INTERMEDIATE_DIRS += $(PROJECT_ROOT)/output_gd
+
+shared-lib-gd:
+	$(MAKE) OUTPUT_ROOT=output_gd OUTDIR_BY_TYPE= TLS_GD=1 DIRS_INCLUDED= $(ABS_PROJECT_ROOT)/output_gd/libhphp_runtime_gd.so
+	cp $(PROJECT_ROOT)/output_gd/libhphp_runtime_gd.so $(PROJECT_ROOT)/bin

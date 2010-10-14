@@ -135,6 +135,8 @@ STATIC_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).a
 SHARED_LIB = $(LIB_DIR)/lib$(PROJECT_NAME).so
 APP_TARGET = $(OUT_TOP)$(PROJECT_NAME)
 
+SHARED_LIB_GD = $(LIB_DIR)/lib$(PROJECT_NAME)_gd.so
+
 MONO_TARGETS = $(filter-out $(PROJECT_NAME), $(patsubst %.cpp, %, $(wildcard *.cpp)))
 
 # external shared libraries
@@ -381,6 +383,10 @@ endif
 
 # facebook specific stuff
 CPPFLAGS += -DHAVE_PHPT
+
+ifdef TLS_GD
+CPPFLAGS += -DTLS_GLOBAL_DYNAMIC
+endif
 
 ###############################################################################
 # Linking
@@ -732,8 +738,8 @@ objects: $(OBJECTS) quiet
 
 ifdef SHOW_LINK
 
-$(SHARED_LIB): $(OBJECTS)
-	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+$(SHARED_LIB) $(SHARED_LIB_GD): $(OBJECTS)
+	$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
 			$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)
@@ -744,9 +750,9 @@ $(MONO_TARGETS): %:%.o $(DEP_LIBS)
 
 else
 
-$(SHARED_LIB): $(OBJECTS)
+$(SHARED_LIB) $(SHARED_LIB_GD): $(OBJECTS)
 	@echo 'Linking $@ ...'
-	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,lib$(PROJECT_NAME).so \
+	$(V)$(P_CXX) -shared -fPIC $(DEBUG_SYMBOL) -Wall -Werror -Wno-invalid-offsetof -Wl,-soname,$(notdir $@) \
 		$(SO_LDFLAGS) -o $@ $(OBJECTS) $(EXTERNAL)
 
 $(STATIC_LIB): $(OBJECTS)

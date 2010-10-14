@@ -253,6 +253,7 @@ bool RuntimeOption::EnableApc = true;
 bool RuntimeOption::EnableConstLoad = false;
 bool RuntimeOption::ApcUseSharedMemory = false;
 int RuntimeOption::ApcSharedMemorySize = 1024; // 1GB
+bool RuntimeOption::ApcUseGnuMap = false;
 std::string RuntimeOption::ApcPrimeLibrary;
 int RuntimeOption::ApcLoadThread = 1;
 std::set<std::string> RuntimeOption::ApcCompletionKeys;
@@ -645,6 +646,7 @@ void RuntimeOption::Load(Hdf &config) {
     EnableApc = apc["EnableApc"].getBool(true);
     EnableConstLoad = apc["EnableConstLoad"].getBool(false);
     ApcUseSharedMemory = apc["UseSharedMemory"].getBool();
+    ApcUseGnuMap = apc["ApcUseGnuMap"].getBool();
     ApcSharedMemorySize = apc["SharedMemorySize"].getInt32(1024 /* 1GB */);
     ApcPrimeLibrary = apc["PrimeLibrary"].getString();
     ApcLoadThread = apc["LoadThread"].getInt16(2);

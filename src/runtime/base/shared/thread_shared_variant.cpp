@@ -95,10 +95,19 @@ ThreadSharedVariant::ThreadSharedVariant(CVarRef source, bool serialized,
           if (val->shouldCache()) setShouldCache();
           m_data.vec->vals[i] = val;
         }
-      } else {
-        m_data.map = new ImmutableMap(size);
+      } else if (RuntimeOption::ApcUseGnuMap) {
+        // Configured to use old Gnu Map
+        m_data.gnuMap = new MapData(size);
         uint i = 0;
         for (ArrayIter it(arr); !it.end(); it.next(), i++) {
+          ThreadSharedVariant* key = createAnother(it.first(), false);
+          ThreadSharedVariant* val = createAnother(it.second(), false, true);
+          if (val->shouldCache()) setShouldCache();
+          m_data.gnuMap->set(i, key, val);
+        }
+      } else {
+        m_data.map = new ImmutableMap(size);
+        for (ArrayIter it(arr); !it.end(); it.next()) {
           ThreadSharedVariant* key = createAnother(it.first(), false);
           ThreadSharedVariant* val = createAnother(it.second(), false, true);
           if (val->shouldCache()) setShouldCache();
@@ -212,8 +221,13 @@ ThreadSharedVariant::~ThreadSharedVariant() {
       }
 
       ASSERT(getOwner());
-      if (getIsVector()) delete m_data.vec;
-      else delete m_data.map;
+      if (getIsVector()) {
+        delete m_data.vec;
+      } else if (RuntimeOption::ApcUseGnuMap) {
+        delete m_data.gnuMap;
+      } else {
+        delete m_data.map;
+      }
     }
     break;
   default:
@@ -236,6 +250,7 @@ size_t ThreadSharedVariant::stringLength() const {
 size_t ThreadSharedVariant::arrSize() const {
   ASSERT(is(KindOfArray));
   if (getIsVector()) return m_data.vec->size;
+  if (RuntimeOption::ApcUseGnuMap) return m_data.gnuMap->size;
   return m_data.map->size();
 }
 
@@ -251,12 +266,22 @@ int ThreadSharedVariant::getIndex(CVarRef key) {
       if (num < 0 || (size_t) num >= m_data.vec->size) return -1;
       return num;
     }
+    if (RuntimeOption::ApcUseGnuMap) {
+      Int64ToIntMap::const_iterator it = m_data.gnuMap->intMap->find(num);
+      if (it == m_data.gnuMap->intMap->end()) return -1;
+      return it->second;
+    }
     return m_data.map->indexOf(num);
   }
   case KindOfStaticString:
   case KindOfString: {
     if (getIsVector()) return -1;
     StringData *sd = key.getStringData();
+    if (RuntimeOption::ApcUseGnuMap) {
+      StringDataToIntMap::const_iterator it = m_data.gnuMap->strMap->find(sd);
+      if (it == m_data.gnuMap->strMap->end()) return -1;
+      return it->second;
+    }
     return m_data.map->indexOf(sd);
   }
   default:
@@ -270,6 +295,7 @@ SharedVariant* ThreadSharedVariant::get(CVarRef key) {
   int idx = getIndex(key);
   if (idx != -1) {
     if (getIsVector()) return m_data.vec->vals[idx];
+    if (RuntimeOption::ApcUseGnuMap) return m_data.gnuMap->vals[idx];
     return m_data.map->getValIndex(idx);
   }
   return NULL;
@@ -291,8 +317,12 @@ void ThreadSharedVariant::loadElems(ArrayData *&elems,
     if (getIsVector()) {
       ai.add((int64)i, sharedMap.getValue(i), true);
     } else {
-      ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
-             true);
+      if (RuntimeOption::ApcUseGnuMap) {
+        ai.add(m_data.gnuMap->keys[i]->toLocal(), sharedMap.getValue(i), true);
+      } else {
+        ai.add(m_data.map->getKeyIndex(i)->toLocal(), sharedMap.getValue(i),
+               true);
+      }
     }
   }
   elems = ai.create();
@@ -351,6 +381,11 @@ void ThreadSharedVariant::getStats(SharedVariantStats *stats) {
         v->getStats(&childStats);
         stats->addChildStats(&childStats);
       }
+    } else if (RuntimeOption::ApcUseGnuMap) {
+      // There is no way to calculate this accurately, and this should be only
+      // used if ImmutableMap is seriously broken, when profiling is less
+      // important. Just not do basic thing here:
+      stats->dataTotalSize = sizeof(MapData);
     } else {
       ImmutableMap *map = m_data.map;
       stats->dataTotalSize = sizeof(ThreadSharedVariant) + map->getStructSize();

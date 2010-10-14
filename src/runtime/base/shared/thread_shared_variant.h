@@ -30,6 +30,10 @@ namespace HPHP {
 
 class ThreadSharedVariant;
 
+typedef hphp_hash_map<int64, int, int64_hash> Int64ToIntMap;
+typedef hphp_hash_map<StringData *, int, string_data_hash, string_data_same>
+        StringDataToIntMap;
+
 ///////////////////////////////////////////////////////////////////////////////
 
 class ThreadSharedVariant : public SharedVariant {
@@ -128,12 +132,49 @@ private:
     }
   };
 
+  class MapData {
+  public:
+    size_t size;
+    Int64ToIntMap *intMap;
+    StringDataToIntMap *strMap;
+    ThreadSharedVariant **keys;
+    ThreadSharedVariant **vals;
+
+    MapData(size_t s) : size(s), intMap(NULL), strMap(NULL) {
+      keys = new ThreadSharedVariant *[s];
+      vals = new ThreadSharedVariant *[s];
+    }
+    ~MapData() {
+      for (size_t i = 0; i < size; i++) {
+        keys[i]->decRef();
+        vals[i]->decRef();
+      }
+      if (intMap) delete intMap;
+      if (strMap) delete strMap;
+      delete [] keys;
+      delete [] vals;
+    }
+    void set(int p, ThreadSharedVariant *key, ThreadSharedVariant *val) {
+      keys[p] = key;
+      vals[p] = val;
+      if (key->is(KindOfInt64)) {
+        if (!intMap) intMap = new Int64ToIntMap(size);
+        (*intMap)[key->m_data.num] = p;
+      } else {
+        ASSERT(key->is(KindOfString));
+        if (!strMap) strMap = new StringDataToIntMap(size);
+        (*strMap)[key->m_data.str] = p;
+      }
+    }
+  };
+
   union {
     int64 num;
     double dbl;
     StringData *str;
     ImmutableMap* map;
     VectorData* vec;
+    MapData *gnuMap;
   } m_data;
 
   bool getIsVector() const { return (bool)(m_flags & IsVector);}

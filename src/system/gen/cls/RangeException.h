@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 243 */
+/* SRC: classes/exception.php line 244 */
 class c_RangeException : public c_RuntimeException {
   public:
 

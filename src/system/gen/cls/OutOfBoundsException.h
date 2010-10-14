@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 227 */
+/* SRC: classes/exception.php line 228 */
 class c_OutOfBoundsException : public c_RuntimeException {
   public:
 

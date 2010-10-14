@@ -23,7 +23,7 @@
 namespace HPHP {
 ///////////////////////////////////////////////////////////////////////////////
 
-/* SRC: classes/exception.php line 252 */
+/* SRC: classes/exception.php line 253 */
 class c_UnderflowException : public c_RuntimeException {
   public:
 

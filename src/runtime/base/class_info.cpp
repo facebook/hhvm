@@ -664,9 +664,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
       staticVariable->name = *p++;
       staticVariable->valueLen = (int64)(*p++);
       staticVariable->valueText = *p++;
-      istringstream in(std::string(staticVariable->valueText,
-                                   staticVariable->valueLen));
-      VariableUnserializer vu(in, VariableUnserializer::Serialize);
+      VariableUnserializer vu(staticVariable->valueText,
+                              staticVariable->valueLen,
+                              VariableUnserializer::Serialize);
       try {
         Variant v = vu.unserialize();
         v.setStatic();
@@ -702,8 +702,9 @@ ClassInfoUnique::ClassInfoUnique(const char **&p) {
     constant->valueText = *p++;
 
     if (constant->valueText) {
-      istringstream in(std::string(constant->valueText, constant->valueLen));
-      VariableUnserializer vu(in, VariableUnserializer::Serialize);
+      VariableUnserializer vu(constant->valueText,
+                              constant->valueLen,
+                              VariableUnserializer::Serialize);
       try {
         Variant v = vu.unserialize();
         v.setStatic();

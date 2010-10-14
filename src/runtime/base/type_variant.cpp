@@ -2896,13 +2896,13 @@ void Variant::serialize(VariableSerializer *serializer,
   }
 }
 
-void Variant::unserialize(VariableUnserializer *unserializer) {
-  std::istream &in = unserializer->in();
+void Variant::unserialize(VariableUnserializer *uns) {
   char type, sep;
-  in >> type >> sep;
+  type = uns->readChar();
+  sep = uns->readChar();
 
   if (type != 'R') {
-    unserializer->add(this);
+    uns->add(this);
   }
 
   if (type == 'N') {
@@ -2917,9 +2917,8 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
   switch (type) {
   case 'r':
     {
-      int64 id;
-      in >> id;
-      Variant *v = unserializer->get(id);
+      int64 id = uns->readInt();
+      Variant *v = uns->get(id);
       if (v == NULL) {
         throw Exception("Id %ld out of range", id);
       }
@@ -2928,42 +2927,41 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
     break;
   case 'R':
     {
-      int64 id;
-      in >> id;
-      Variant *v = unserializer->get(id);
+      int64 id = uns->readInt();
+      Variant *v = uns->get(id);
       if (v == NULL) {
         throw Exception("Id %ld out of range", id);
       }
       operator=(ref(*v));
     }
     break;
-  case 'b': { int64 v;  in >> v; operator=((bool)v); } break;
-  case 'i': { int64 v;  in >> v; operator=(v);       } break;
+  case 'b': { int64 v = uns->readInt(); operator=((bool)v); } break;
+  case 'i': { int64 v = uns->readInt(); operator=(v);       } break;
   case 'd':
     {
       double v;
-      char ch = in.peek();
+      char ch = uns->peek();
       bool negative = false;
       char buf[4];
       if (ch == '-') {
         negative = true;
-        in >> ch;
-        ch = in.peek();
+        ch = uns->readChar();
+        ch = uns->peek();
       }
       if (ch == 'I') {
-        in.read(buf, 3); buf[3] = '\0';
+        uns->read(buf, 3); buf[3] = '\0';
         if (strcmp(buf, "INF")) {
           throw Exception("Expected 'INF' but got '%s'", buf);
         }
         v = atof("inf");
       } else if (ch == 'N') {
-        in.read(buf, 3); buf[3] = '\0';
+        uns->read(buf, 3); buf[3] = '\0';
         if (strcmp(buf, "NAN")) {
           throw Exception("Expected 'NAN' but got '%s'", buf);
         }
         v = atof("nan");
       } else {
-        in >> v;
+        v = uns->readDouble();
       }
       operator=(negative ? -v : v);
     }
@@ -2971,17 +2969,17 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
   case 's':
     {
       String v;
-      v.unserialize(in);
+      v.unserialize(uns);
       operator=(v);
     }
     break;
   case 'S':
-    if (unserializer->getType() == VariableUnserializer::APCSerialize) {
+    if (uns->getType() == VariableUnserializer::APCSerialize) {
       union {
         char buf[8];
         StringData *sd;
       } u;
-      in.read(u.buf, 8);
+      uns->read(u.buf, 8);
       operator=(u.sd);
     } else {
       throw Exception("Unknown type '%c'", type);
@@ -2990,18 +2988,18 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
   case 'a':
     {
       Array v = Array::Create();
-      v.unserialize(unserializer);
+      v.unserialize(uns);
       operator=(v);
       return; // array has '}' terminating
     }
     break;
   case 'A':
-    if (unserializer->getType() == VariableUnserializer::APCSerialize) {
+    if (uns->getType() == VariableUnserializer::APCSerialize) {
       union {
         char buf[8];
         ArrayData *ad;
       } u;
-      in.read(u.buf, 8);
+      uns->read(u.buf, 8);
       operator=(u.ad);
     } else {
       throw Exception("Unknown type '%c'", type);
@@ -3010,9 +3008,9 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
   case 'o':
     {
       String clsName;
-      clsName.unserialize(in);
+      clsName.unserialize(uns);
 
-      in >> sep;
+      sep = uns->readChar();
       if (sep != ':') {
         throw Exception("Expected ':' but got '%c'", sep);
       }
@@ -3026,7 +3024,7 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
       operator=(obj);
 
       Array v = Array::Create();
-      v.unserialize(unserializer);
+      v.unserialize(uns);
       obj->o_setArray(v);
 
       obj->t___wakeup();
@@ -3036,9 +3034,9 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
   case 'O':
     {
       String clsName;
-      clsName.unserialize(in);
+      clsName.unserialize(uns);
 
-      in >> sep;
+      sep = uns->readChar();
       if (sep != ':') {
         throw Exception("Expected ':' but got '%c'", sep);
       }
@@ -3051,19 +3049,18 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
         obj->o_set("__PHP_Incomplete_Class_Name", clsName);
       }
       operator=(obj);
-      int64 size;
-      char sep;
-      in >> size >> sep;
+      int64 size = uns->readInt();
+      char sep = uns->readChar();
       if (sep != ':') {
         throw Exception("Expected ':' but got '%c'", sep);
       }
-      in >> sep;
+      sep = uns->readChar();
       if (sep != '{') {
         throw Exception("Expected '{' but got '%c'", sep);
       }
       if (size > 0) {
         for (int64 i = 0; i < size; i++) {
-          String key = unserializer->unserializeKey().toString();
+          String key = uns->unserializeKey().toString();
           int subLen = 0;
           if (key.charAt(0) == '\00') {
             if (key.charAt(1) == '*') {
@@ -3082,10 +3079,10 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
              obj->o_lval(key.substr(subLen), tmp,
                          String(key.data() + 1, subLen - 2, AttachLiteral)))
             : obj->o_lval(key, tmp);
-          value.unserialize(unserializer);
+          value.unserialize(uns);
         }
       }
-      in >> sep;
+      sep = uns->readChar();
       if (sep != '}') {
         throw Exception("Expected '}' but got '%c'", sep);
       }
@@ -3097,14 +3094,14 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
   case 'C':
     {
       String clsName;
-      clsName.unserialize(in);
+      clsName.unserialize(uns);
 
-      in >> sep;
+      sep = uns->readChar();
       if (sep != ':') {
         throw Exception("Expected ':' but got '%c'", sep);
       }
       String serialized;
-      serialized.unserialize(in, '{', '}');
+      serialized.unserialize(uns, '{', '}');
 
       Object obj;
       try {
@@ -3114,7 +3111,7 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
         }
         obj->o_invoke("unserialize", CREATE_VECTOR1(serialized), -1);
       } catch (ClassNotFoundException &e) {
-        if (!unserializer->allowUnknownSerializableClass()) {
+        if (!uns->allowUnknownSerializableClass()) {
           throw;
         }
         obj = create_object("__PHP_Incomplete_Class", Array::Create(), false);
@@ -3128,7 +3125,7 @@ void Variant::unserialize(VariableUnserializer *unserializer) {
   default:
     throw Exception("Unknown type '%c'", type);
   }
-  in >> sep;
+  sep = uns->readChar();
   if (sep != ';') {
     throw Exception("Expected ';' but got '%c'", sep);
   }

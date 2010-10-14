@@ -192,8 +192,8 @@ void ThriftBuffer::throwInvalidStringSize(int size) {
 ///////////////////////////////////////////////////////////////////////////////
 
 static Variant unserialize_with_no_notice(CStrRef str) {
-  istringstream in(std::string(str.data(), str.size()));
-  VariableUnserializer vu(in, VariableUnserializer::Serialize, true);
+  VariableUnserializer vu(str.data(), str.data() + str.size(),
+      VariableUnserializer::Serialize, true);
   Variant v;
   try {
     v = vu.unserialize();

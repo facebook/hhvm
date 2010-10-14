@@ -957,9 +957,9 @@ Variant apc_unserialize(CStrRef str) {
   return unserialize_ex(str, VariableUnserializer::APCSerialize);
 }
 
-void reserialize(istream &in, StringBuffer &buf) {
-  char type, sep;
-  in >> type >> sep;
+void reserialize(VariableUnserializer *uns, StringBuffer &buf) {
+  char type = uns->readChar();
+  char sep = uns->readChar();
 
   if (type == 'N') {
     buf.append(type);
@@ -976,9 +976,9 @@ void reserialize(istream &in, StringBuffer &buf) {
     {
       buf.append(type);
       buf.append(sep);
-      while (in.peek() != ';') {
+      while (uns->peek() != ';') {
         char ch;
-        in >> ch;
+        ch = uns->readChar();
         buf.append(ch);
       }
     }
@@ -990,14 +990,14 @@ void reserialize(istream &in, StringBuffer &buf) {
       buf.append(type);
       buf.append(sep);
       char pointer[8];
-      in.read(pointer, 8);
+      uns->read(pointer, 8);
       buf.append(pointer, 8);
     }
     break;
   case 's':
     {
       String v;
-      v.unserialize(in);
+      v.unserialize(uns);
       ASSERT(!v.isNull());
       if (v->isStatic()) {
         union {
@@ -1015,25 +1015,24 @@ void reserialize(istream &in, StringBuffer &buf) {
         buf.append(v.data(), v.size());
         buf.append("\";");
       }
-      in >> sep; // ';'
+      sep = uns->readChar();
       return;
     }
     break;
   case 'a':
     {
       buf.append("a:");
-      int64 size;
-      char sep2;
-      in >> size >> sep2;
+      int64 size = uns->readInt();
+      char sep2 = uns->readChar();
       buf.append(size);
       buf.append(sep2);
-      in >> sep2; // '{'
+      sep2 = uns->readChar();
       buf.append(sep2);
       for (int64 i = 0; i < size; i++) {
-        reserialize(in, buf); // key
-        reserialize(in, buf); // value
+        reserialize(uns, buf); // key
+        reserialize(uns, buf); // value
       }
-      in >> sep2; // '}'
+      sep2 = uns->readChar(); // '}'
       buf.append(sep2);
       return;
     }
@@ -1045,24 +1044,25 @@ void reserialize(istream &in, StringBuffer &buf) {
       buf.append(sep);
 
       String clsName;
-      clsName.unserialize(in);
+      clsName.unserialize(uns);
       buf.append(clsName.size());
       buf.append(":\"");
       buf.append(clsName.data(), clsName.size());
       buf.append("\":");
 
-      int64 size;
-      char sep2;
-      in >> sep2 >> size >> sep2;
+      uns->readChar();
+      int64 size = uns->readInt();
+      char sep2 = uns->readChar();
+
       buf.append(size);
       buf.append(sep2);
-      in >> sep2; // '{'
+      sep2 = uns->readChar(); // '{'
       buf.append(sep2);
       for (int64 i = 0; i < size; i++) {
-        reserialize(in, buf); // property name
-        reserialize(in, buf); // property value
+        reserialize(uns, buf); // property name
+        reserialize(uns, buf); // property value
       }
-      in >> sep2; // '}'
+      sep2 = uns->readChar(); // '}'
       buf.append(sep2);
       return;
     }
@@ -1073,15 +1073,15 @@ void reserialize(istream &in, StringBuffer &buf) {
       buf.append(sep);
 
       String clsName;
-      clsName.unserialize(in);
+      clsName.unserialize(uns);
       buf.append(clsName.size());
       buf.append(":\"");
       buf.append(clsName.data(), clsName.size());
       buf.append("\":");
 
-      in >> sep; // ':'
+      sep = uns->readChar(); // ':'
       String serialized;
-      serialized.unserialize(in, '{', '}');
+      serialized.unserialize(uns, '{', '}');
       buf.append(serialized.size());
       buf.append(":{");
       buf.append(serialized.data(), serialized.size());
@@ -1093,16 +1093,17 @@ void reserialize(istream &in, StringBuffer &buf) {
     throw Exception("Unknown type '%c'", type);
   }
 
-  in >> sep; // the last ';'
+  sep = uns->readChar(); // the last ';'
   buf.append(sep);
 }
 
 String apc_reserialize(CStrRef str) {
   if (str.empty()) return str;
 
-  istringstream in(std::string(str.data(), str.size()));
+  VariableUnserializer uns(str.data(), str.size(),
+                           VariableUnserializer::APCSerialize);
   StringBuffer buf;
-  reserialize(in, buf);
+  reserialize(&uns, buf);
 
   return buf.detach();
 }

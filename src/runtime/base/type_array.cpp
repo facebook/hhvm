@@ -791,15 +791,13 @@ void Array::serialize(VariableSerializer *serializer) const {
   }
 }
 
-void Array::unserialize(VariableUnserializer *unserializer) {
-  std::istream &in = unserializer->in();
-  int64 size;
-  char sep;
-  in >> size >> sep;
+void Array::unserialize(VariableUnserializer *uns) {
+  int64 size = uns->readInt();
+  char sep = uns->readChar();
   if (sep != ':') {
     throw Exception("Expected ':' but got '%c'", sep);
   }
-  in >> sep;
+  sep = uns->readChar();
   if (sep != '{') {
     throw Exception("Expected '{' but got '%c'", sep);
   }
@@ -811,15 +809,15 @@ void Array::unserialize(VariableUnserializer *unserializer) {
     // the middle, which breaks references.
     operator=(ArrayInit(size).create());
     for (int64 i = 0; i < size; i++) {
-      Variant key(unserializer->unserializeKey());
+      Variant key(uns->unserializeKey());
       Variant &value =
         key.isString() ? addLval(key.toString(), true)
                        : addLval(key);
-      value.unserialize(unserializer);
+      value.unserialize(uns);
     }
   }
 
-  in >> sep;
+  sep = uns->readChar();
   if (sep != '}') {
     throw Exception("Expected '}' but got '%c'", sep);
   }

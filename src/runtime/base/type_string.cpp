@@ -567,31 +567,29 @@ void String::serialize(VariableSerializer *serializer) const {
   }
 }
 
-void String::unserialize(std::istream &in,
+void String::unserialize(VariableUnserializer *uns,
                          char delimiter0 /* = '"' */,
                          char delimiter1 /* = '"' */) {
-  int size;
-  in >> size;
+  int size = uns->readInt();
   if (size >= SERIALIZE_MAX_SIZE) {
     throw Exception("Size of serialized string (%d) exceeds max", size);
   }
 
-  char ch;
-  in >> ch;
+  char ch = uns->readChar();
   if (ch != ':') {
     throw Exception("Expected ':' but got '%c'", ch);
   }
-  in >> ch;
+  ch = uns->readChar();
   if (ch != delimiter0) {
     throw Exception("Expected '%c' but got '%c'", delimiter0, ch);
   }
 
   char *buf = (char*)malloc(size + 1);
-  in.read(buf, size);
+  uns->read(buf, size);
   buf[size] = '\0';
   SmartPtr<StringData>::operator=(NEW(StringData)(buf, size, AttachString));
 
-  in >> ch;
+  ch = uns->readChar();
   if (ch != delimiter1) {
     throw Exception("Expected '%c' but got '%c'", delimiter1, ch);
   }

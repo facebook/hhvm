@@ -277,7 +277,7 @@ public:
    * Input/Output
    */
   void serialize(VariableSerializer *serializer) const;
-  void unserialize(std::istream &in, char delimiter0 = '"',
+  void unserialize(VariableUnserializer *uns, char delimiter0 = '"',
                    char delimiter1 = '"');
 
   /**

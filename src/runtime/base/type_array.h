@@ -490,7 +490,7 @@ class Array : public SmartPtr<ArrayData> {
    * Input/Output
    */
   void serialize(VariableSerializer *serializer) const;
-  void unserialize(VariableUnserializer *in);
+  void unserialize(VariableUnserializer *uns);
 
   /**
    * Marshaling/Unmarshaling between request thread and fiber thread.

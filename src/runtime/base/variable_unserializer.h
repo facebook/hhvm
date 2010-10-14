@@ -33,31 +33,20 @@ public:
   };
 
 public:
-  VariableUnserializer(std::istream &in, Type type,
+  VariableUnserializer(const char *str, size_t len, Type type,
                        bool allowUnknownSerializableClass = false)
-      : m_type(type), m_in(in), m_key(false),
+      : m_type(type), m_buf(str), m_end(str + len), m_key(false),
+        m_unknownSerializable(allowUnknownSerializableClass) {}
+  VariableUnserializer(const char *str, const char *end, Type type,
+                       bool allowUnknownSerializableClass = false)
+      : m_type(type), m_buf(str), m_end(end), m_key(false),
         m_unknownSerializable(allowUnknownSerializableClass) {}
 
   Type getType() const { return m_type;}
   bool allowUnknownSerializableClass() const { return m_unknownSerializable;}
 
-  Variant unserialize() {
-    Variant v;
-    v.unserialize(this);
-    return v;
-  }
-
-  Variant unserializeKey() {
-    m_key = true;
-    Variant v;
-    v.unserialize(this);
-    m_key = false;
-    return v;
-  }
-
-  std::istream &in() const {
-    return m_in;
-  }
+  Variant unserialize();
+  Variant unserializeKey();
   void add(Variant* v) {
     if (!m_key) {
       m_refs.push_back(v);
@@ -67,13 +56,32 @@ public:
     if (id <= 0  || id > (int)m_refs.size()) return NULL;
     return m_refs[id-1];
   }
+  int64 readInt();
+  double readDouble();
+  char readChar() {
+    check();
+    return *(m_buf++);
+  }
+  void read(char *buf, uint n);
+  char peek() {
+    check();
+    return *m_buf;
+  }
+  const char *head() { return m_buf; }
 
  private:
   Type m_type;
-  std::istream &m_in;
+  const char *m_buf;
+  const char *m_end;
   std::vector<Variant*> m_refs;
   bool m_key;
   bool m_unknownSerializable;
+
+  void check() {
+    if (m_buf >= m_end) {
+      throw Exception("Unexpected end of buffer during unserialization");
+    }
+  }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

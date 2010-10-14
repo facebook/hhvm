@@ -443,8 +443,7 @@ Variant unserialize_ex(CStrRef str, VariableUnserializer::Type type) {
     return false;
   }
 
-  istringstream in(std::string(str.data(), str.size()));
-  VariableUnserializer vu(in, type);
+  VariableUnserializer vu(str.data(), str.size(), type);
   Variant v;
   try {
     v = vu.unserialize();
